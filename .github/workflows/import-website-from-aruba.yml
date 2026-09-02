@@ -41,6 +41,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import os
+          import socket
           import ssl
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
@@ -61,11 +62,19 @@ jobs:
               "pre-match",
           }
 
+          ipv4_addresses = [
+              item[4][0]
+              for item in socket.getaddrinfo(host, 21, socket.AF_INET, socket.SOCK_STREAM)
+          ]
+          if not ipv4_addresses:
+              raise SystemExit("Nessun indirizzo IPv4 disponibile per il server Aruba")
+          ftp_address = ipv4_addresses[0]
+
           context = ssl.create_default_context()
           context.check_hostname = False
 
           ftp = FTP_TLS(context=context)
-          ftp.connect(host, 21, timeout=45)
+          ftp.connect(ftp_address, 21, timeout=45)
           ftp.login(username, password)
           ftp.prot_p()
           ftp.cwd(remote_root)
