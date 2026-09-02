@@ -18,111 +18,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate required secrets
-        env:
-          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
-          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
-          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
-          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+      - name: Download current public website over HTTPS
         shell: bash
         run: |
           set -euo pipefail
-          for name in ARUBA_FTP_HOST ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
-            test -n "${!name:-}"
-          done
+          snapshot="$(mktemp -d)"
+          wget \
+            --mirror \
+            --page-requisites \
+            --no-host-directories \
+            --no-parent \
+            --domains www.italianmastersclub.it \
+            --reject-regex='/((nexus|live-match|live-test-3d|pre-match)(/|$))' \
+            --directory-prefix="$snapshot" \
+            --user-agent='IMC-Website-Backup/1.0' \
+            https://www.italianmastersclub.it/
 
-      - name: Download current public website
-        env:
-          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
-          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
-          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
-          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+          test -s "$snapshot/index.html"
+          cp -a "$snapshot"/. .
+          echo "Sito pubblico acquisito correttamente tramite HTTPS"
+
+      - name: Validate imported website
         shell: bash
         run: |
-          python3 - <<'PY'
-          import os
-          import socket
-          import ssl
-          from ftplib import FTP_TLS, error_perm
-          from pathlib import Path
-
-          host = os.environ["ARUBA_FTP_HOST"].removeprefix("ftp://").removeprefix("ftps://").rstrip("/")
-          username = os.environ["ARUBA_FTP_USERNAME"]
-          password = os.environ["ARUBA_FTP_PASSWORD"]
-          remote_root = os.environ["ARUBA_WEBSITE_REMOTE_DIR"].strip() or "/"
-
-          excluded_top_level = {
-              ".",
-              "..",
-              ".git",
-              ".github",
-              "nexus",
-              "live-match",
-              "live-test-3d",
-              "pre-match",
-          }
-
-          ipv4_addresses = [
-              item[4][0]
-              for item in socket.getaddrinfo(host, 21, socket.AF_INET, socket.SOCK_STREAM)
-          ]
-          if not ipv4_addresses:
-              raise SystemExit("Nessun indirizzo IPv4 disponibile per il server Aruba")
-          ftp_address = ipv4_addresses[0]
-
-          context = ssl.create_default_context()
-          context.check_hostname = False
-
-          ftp = FTP_TLS(context=context)
-          ftp.connect(ftp_address, 21, timeout=45)
-          ftp.login(username, password)
-          ftp.prot_p()
-          ftp.cwd(remote_root)
-
-          repository_root = Path.cwd().resolve()
-          downloaded = []
-
-          def safe_local(relative_parts):
-              target = repository_root.joinpath(*relative_parts).resolve()
-              if target != repository_root and repository_root not in target.parents:
-                  raise RuntimeError("Percorso remoto non sicuro")
-              return target
-
-          def list_names():
-              names = []
-              for raw in ftp.nlst():
-                  name = raw.rstrip("/").split("/")[-1]
-                  if name and name not in {".", ".."}:
-                      names.append(name)
-              return sorted(set(names))
-
-          def download_directory(relative_parts):
-              start = ftp.pwd()
-              for name in list_names():
-                  if not relative_parts and name in excluded_top_level:
-                      continue
-
-                  local_path = safe_local(relative_parts + [name])
-                  try:
-                      ftp.cwd(name)
-                  except error_perm:
-                      local_path.parent.mkdir(parents=True, exist_ok=True)
-                      with local_path.open("wb") as handle:
-                          ftp.retrbinary(f"RETR {name}", handle.write)
-                      downloaded.append("/".join(relative_parts + [name]))
-                  else:
-                      local_path.mkdir(parents=True, exist_ok=True)
-                      download_directory(relative_parts + [name])
-                      ftp.cwd(start)
-
-          download_directory([])
-          ftp.quit()
-
-          if "index.html" not in downloaded:
-              raise SystemExit("Import interrotto: index.html non trovato nella radice Aruba")
-
-          print(f"File del sito importati: {len(downloaded)}")
-          PY
+          set -euo pipefail
+          test -s index.html
+          grep -Fq 'ITALIAN MASTERS CLUB' index.html
+          test ! -d nexus
+          test ! -d live-match
+          test ! -d live-test-3d
+          test ! -d pre-match
 
       - name: Commit imported website
         shell: bash
