@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#061227">
+  <meta name="description" content="Italian Masters Club, la community italiana dedicata a Soccer Manager. Game Worlds, competizioni, statistiche e IMC Nexus.">
+  <title>Italian Masters Club | Official Website</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site-assets/css/imc-site.css?v=1.1">
+</head>
+<body>
+  <header class="site-header" id="top">
+    <div class="site-header-inner">
+    <a class="brand" href="#top" aria-label="Italian Masters Club home">
+      <img src="site-assets/images/imc-logo.png" alt="IMC">
+      <span><strong>ITALIAN MASTERS CLUB</strong><small>OFFICIAL WEBSITE</small></span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Navigazione principale">
+      <a href="#worlds">Game Worlds</a>
+      <a href="#nexus">Nexus</a>
+      <a href="#competitions">Competitions</a>
+      <a href="#managers">Managers</a>
+      <a href="#community">Community</a>
+      <a class="nav-nexus" href="/nexus/">Enter Nexus</a>
+    </nav>
+
+    <button class="menu-button" type="button" aria-label="Apri menu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+    </div>
+  </header>
+
+  <aside class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <div class="mobile-menu-head">
+      <img src="site-assets/images/imc-logo.png" alt="">
+      <strong>IMC</strong>
+      <button class="menu-close" aria-label="Chiudi menu">×</button>
+    </div>
+    <nav>
+      <a href="#worlds">Game Worlds</a>
+      <a href="#nexus">IMC Nexus</a>
+      <a href="#competitions">Competitions</a>
+      <a href="#managers">IMC Managers</a>
+      <a href="#community">Community</a>
+      <a class="mobile-nexus" href="/nexus/">Enter Nexus →</a>
+    </nav>
+  </aside>
+  <div class="menu-backdrop" hidden></div>
+
+  <main>
+    <section class="hero">
+      <div class="hero-orbit hero-orbit-one"></div>
+      <div class="hero-orbit hero-orbit-two"></div>
+      <div class="hero-grid"></div>
+
+      <div class="hero-content reveal">
+        <div class="hero-mark">
+          <img src="site-assets/images/imc-logo.png" alt="Italian Masters Club">
+        </div>
+        <p class="eyebrow">A NEW ITALIAN FORCE.</p>
+        <h1>A GLOBAL<br><span>AMBITION.</span></h1>
+        <p class="hero-copy">The official home of Italian Masters Club.<br>Competizione, identità e storia condivisa nell’universo di Soccer Manager.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#worlds">Discover IMC <span>→</span></a>
+          <a class="button button-ghost" href="/nexus/">Enter Nexus <span>→</span></a>
+        </div>
+
+        <div class="hero-stats" aria-label="Numeri Italian Masters Club">
+          <div><strong id="managerCount">—</strong><span>Manager IMC</span></div>
+          <div><strong id="worldCount">—</strong><span>Game Worlds</span></div>
+          <div><strong>1</strong><span>Community</span></div>
+        </div>
+        <p class="live-note" id="liveStatus">Live data powered by IMC Nexus</p>
+      </div>
+    </section>
+
+    <section class="section worlds-section" id="worlds">
+      <div class="section-heading reveal">
+        <p class="eyebrow blue">THE IMC UNIVERSE</p>
+        <h2>9 mondi.<br>Una sola community.</h2>
+        <p>Ogni Game World ha una propria identità, stagione e storia. Nexus li collega mantenendoli indipendenti.</p>
+      </div>
+
+      <div class="world-grid">
+        <article class="world-card reveal" data-world="GW001">
+          <img src="site-assets/images/game-worlds/gw001.webp" alt="GW001 Road To History" loading="lazy">
+          <div class="world-card-body"><div><span>GW001</span><h3>Road To History</h3></div><p>Single League · 4 Divisioni</p><small>Soccer Manager ID · 468172</small><a href="/nexus/">Explore in Nexus →</a></div>
+        </article>
+
+        <article class="world-card reveal" data-world="GW002">
+          <img src="site-assets/images/game-worlds/gw002.webp" alt="GW002 Gold 558" loading="lazy">
+          <div class="world-card-body"><div><span>GW002</span><h3>Gold 558</h3></div><p>Multi League</p><small>Soccer Manager ID · 467635</small><a href="/nexus/">Explore in Nexus →</a></div>
+        </article>
+
+        <article class="world-card reveal" data-world="GW003">
+          <img src="site-assets/images/game-worlds/gw003.webp" alt="GW003 Gold 557" loading="lazy">
+          <div class="world-card-body"><div><span>GW003</span><h3>Gold 557</h3></div><p>Multi League</p><small>Soccer Manager ID · 467488</small><a href="/nexus/">Explore in Nexus →</a></div>
+        </article>
+
+        <article class="world-card reveal" data-world="GW004">
+          <img src="site-assets/images/game-worlds/gw004.webp" alt="GW004 World League" loading="lazy">
+          <div class="world-card-body"><div><span>GW004</span><h3>World League</h3></div><p>Single League · 4 Divisioni</p><small>Soccer Manager ID · 29871</small><a href="/nexus/">Explore in Nexus →</a></div>
+        </article>
+
+        <article class="world-card reveal" data-world="GW005">
+          <img src="site-assets/images/game-worlds/gw005.webp" alt="GW005 Hall Of Famers" loading="lazy">
+          <div class="world-card-body"><div><span>GW005</span><h3>Hall Of Famers</h3></div><p>Single League</p><small>Soccer Manager ID · 468194</small><a href="/nexus/">Explore in Nexus →</a></div>
+        </article>
+
+        <article class="world-card reveal" data-world="GW006">
+          <img src="site-assets/images/game-worlds/gw006.webp" alt="GW006 Master League World" loading="lazy">
+          <div class="world-card-body"><div><span>GW006</span><h3>Master League World</h3></div><p>Single League</p><small>Soccer Manager ID · 468156</small><a href="/nexus/">Explore in Nexus →</a></div>
+        </article>
+
+        <article class="world-card reveal" data-world="GW007">
+          <img src="site-assets/images/game-worlds/gw007.webp" alt="GW007 Masters Of The World" loading="lazy">
+          <div class="world-card-body"><div><span>GW007</span><h3>Masters Of The World</h3></div><p>Single League</p><small>Soccer Manager ID · 467744</small><a href="/nexus/">Explore in Nexus →</a></div>
+        </article>
+
+        <article class="world-card reveal" data-world="GW008">
+          <img src="site-assets/images/game-worlds/gw008.webp" alt="GW008 Gold 1" loading="lazy">
+          <div class="world-card-body"><div><span>GW008</span><h3>Gold 1</h3></div><p>Multi League</p><small>Soccer Manager ID · 668</small><a href="/nexus/">Explore in Nexus →</a></div>
+        </article>
+
+        <article class="world-card reveal" data-world="GW009">
+          <img src="site-assets/images/game-worlds/gw009.webp" alt="GW009 Kick Off" loading="lazy">
+          <div class="world-card-body"><div><span>GW009</span><h3>Kick Off</h3></div><p>Single League · 3 Divisioni</p><small>Soccer Manager ID · in definizione</small><a href="/nexus/">Explore in Nexus →</a></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section nexus-section" id="nexus">
+      <div class="nexus-panel reveal">
+        <div class="nexus-copy">
+          <p class="eyebrow electric">THE DIGITAL HEART OF IMC</p>
+          <h2>IMC<br>NEXUS.</h2>
+          <p>Un’unica piattaforma per risultati, classifiche, statistiche, H2H, Trophy Room, manager e storia dei Game World.</p>
+          <ul class="feature-list">
+            <li>Results & Schedule</li><li>Standings & Stats</li><li>Head To Head</li><li>Trophy Room</li>
+          </ul>
+          <a class="button button-light" href="/nexus/">Open Nexus <span>→</span></a>
+        </div>
+        <div class="nexus-visual" aria-hidden="true">
+          <img src="site-assets/images/imc-logo.png" alt="">
+          <div class="nexus-ring ring-one"></div><div class="nexus-ring ring-two"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section competitions-section" id="competitions">
+      <div class="section-heading reveal">
+        <p class="eyebrow blue">IMC COMPETITIONS</p>
+        <h2>Trofei che costruiscono una storia.</h2>
+        <p>Competizioni domestiche e internazionali attraversano i Game World e alimentano la Trophy Room di Nexus.</p>
+      </div>
+
+      <div class="competition-grid">
+        <article class="competition-card champions reveal"><img src="site-assets/images/competitions/imc-champions.png" alt="IMC Champions" loading="lazy"><div><span>INTERNATIONAL</span><h3>IMC Champions</h3><p>Il palcoscenico internazionale più prestigioso dell’universo IMC.</p></div></article>
+        <article class="competition-card shield reveal"><img src="site-assets/images/competitions/imc-shield.png" alt="IMC Shield" loading="lazy"><div><span>INTERNATIONAL</span><h3>IMC Shield</h3><p>Una seconda strada verso la gloria internazionale.</p></div></article>
+        <article class="competition-card worldcup reveal"><img src="site-assets/images/competitions/world-cup.png" alt="World Cup" loading="lazy"><div><span>NATIONAL TEAMS</span><h3>World Cup</h3><p>Le nazionali, i manager IMC e il titolo mondiale.</p></div></article>
+        <article class="competition-card national reveal"><img src="site-assets/images/competitions/national-cup.png" alt="National Cup" loading="lazy"><div><span>DOMESTIC</span><h3>National Cup</h3><p>Knockout puro. Una partita, un verdetto.</p></div></article>
+      </div>
+    </section>
+
+
+    <section class="section managers-section" id="managers">
+      <div class="section-heading">
+        <p class="eyebrow blue">IMC MANAGERS</p>
+        <h2>Le persone
+          <br>dietro i Game World.</h2>
+        <p>Il roster ufficiale Italian Masters Club, letto direttamente dal Manager Registry di Nexus.</p>
+      </div>
+
+      <div class="manager-section-meta">
+        <strong id="managerRosterCount">—</strong>
+        <span>manager registrati</span>
+      </div>
+
+      <div class="manager-grid" id="managerGrid" aria-live="polite">
+        <div class="manager-loading">Caricamento Manager Registry…</div>
+      </div>
+    </section>
+
+    <section class="section community-section" id="community">
+      <div class="community-panel reveal">
+        <div>
+          <p class="eyebrow gold">THIS IS IMC.</p>
+          <h2>Competizione.<br>Rivalità.<br>Community.</h2>
+        </div>
+        <div class="community-copy">
+          <p>Italian Masters Club riunisce manager, Game World e competizioni in un ecosistema condiviso costruito attorno a Soccer Manager.</p>
+          <p>Ogni stagione aggiunge risultati, storie, record e rivalità. Nexus conserva tutto.</p>
+          <a class="text-link" href="/nexus/">Discover the IMC universe →</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand"><img src="site-assets/images/imc-logo.png" alt="IMC"><div><strong>ITALIAN MASTERS CLUB</strong><small>OFFICIAL WEBSITE · BUILD 1.1</small></div></div>
+    <div class="footer-links"><a href="#worlds">Game Worlds</a><a href="/nexus/">Nexus</a><a href="#competitions">Competitions</a><a href="#managers">Managers</a><a href="#top">Back to top ↑</a></div>
+    <p>© 2026 Italian Masters Club. Community indipendente dedicata a Soccer Manager.</p>
+  </footer>
+
+  <script src="site-assets/js/imc-site.js?v=1.1"></script>
+</body>
+</html>
