@@ -1,6 +1,9 @@
 name: Deploy IMC public website to Aruba
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -29,6 +32,7 @@ jobs:
           grep -Fq 'site-assets/css/imc-site.css?v=2.0' index.html
           grep -Fq 'site-assets/js/imc-site.js?v=2.0' index.html
           grep -Fq 'href="/nexus/"' index.html
+          grep -Fq 'G-9HP6T5ZMLE' index.html
           node --check site-assets/js/imc-site.js
           test ! -d nexus
           test ! -d live-match
@@ -144,6 +148,7 @@ jobs:
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/?verify=$token" -o /tmp/imc-index.html
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/site-assets/css/imc-site.css?verify=$token" -o /tmp/imc-site.css
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/site-assets/js/imc-site.js?verify=$token" -o /tmp/imc-site.js
-          grep -Fq 'ITALIAN MASTERS CLUB' /tmp/imc-index.html
+          grep -Fq 'BUILD 2.0' /tmp/imc-index.html
+          grep -Fq 'G-9HP6T5ZMLE' /tmp/imc-index.html
           test -s /tmp/imc-site.css
           node --check /tmp/imc-site.js
