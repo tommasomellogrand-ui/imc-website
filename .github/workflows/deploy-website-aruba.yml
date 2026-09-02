@@ -1,0 +1,149 @@
+name: Deploy IMC public website to Aruba
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: imc-public-website-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate website package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s site-assets/css/imc-site.css
+          test -s site-assets/js/imc-site.js
+          test -s site-assets/images/imc-logo.png
+          grep -Fq 'site-assets/css/imc-site.css?v=1.1' index.html
+          grep -Fq 'site-assets/js/imc-site.js?v=1.1' index.html
+          grep -Fq 'href="/nexus/"' index.html
+          node --check site-assets/js/imc-site.js
+          test ! -d nexus
+          test ! -d live-match
+          test ! -d live-test-3d
+          test ! -d pre-match
+
+      - name: Validate Aruba secrets
+        env:
+          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in ARUBA_FTP_HOST ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
+            test -n "${!name:-}"
+          done
+
+      - name: Upload public website to Aruba
+        env:
+          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import io
+          import os
+          import socket
+          import ssl
+          import time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+
+          host = os.environ["ARUBA_FTP_HOST"].removeprefix("ftp://").removeprefix("ftps://").rstrip("/")
+          username = os.environ["ARUBA_FTP_USERNAME"]
+          password = os.environ["ARUBA_FTP_PASSWORD"]
+          remote_root = os.environ["ARUBA_WEBSITE_REMOTE_DIR"].strip() or "/"
+
+          addresses = []
+          for item in socket.getaddrinfo(host, 21, socket.AF_INET, socket.SOCK_STREAM):
+              address = item[4][0]
+              if address not in addresses:
+                  addresses.append(address)
+          if not addresses:
+              raise SystemExit("Nessun indirizzo IPv4 disponibile per Aruba")
+
+          context = ssl.create_default_context()
+          context.check_hostname = False
+
+          ftp = None
+          last_error = None
+          for attempt in range(3):
+              for address in addresses:
+                  candidate = FTP_TLS(context=context)
+                  try:
+                      candidate.connect(address, 21, timeout=45)
+                      candidate.login(username, password)
+                      candidate.prot_p()
+                      ftp = candidate
+                      break
+                  except Exception as error:
+                      last_error = error
+                      try:
+                          candidate.close()
+                      except Exception:
+                          pass
+              if ftp is not None:
+                  break
+              time.sleep(5)
+
+          if ftp is None:
+              raise SystemExit(f"Connessione FTPS Aruba non riuscita: {type(last_error).__name__}")
+
+          def ensure_directory(remote_path):
+              ftp.cwd("/")
+              for part in [value for value in remote_path.split("/") if value]:
+                  try:
+                      ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part)
+                      ftp.cwd(part)
+
+          files = [Path("index.html")]
+          files.extend(sorted(path for path in Path("site-assets").rglob("*") if path.is_file()))
+
+          for local in files:
+              relative = local.as_posix()
+              parent = Path(relative).parent.as_posix()
+              destination = remote_root if parent == "." else f"{remote_root.rstrip('/')}/{parent}"
+              ensure_directory(destination)
+
+              data = local.read_bytes()
+              with local.open("rb") as handle:
+                  ftp.storbinary(f"STOR {local.name}", handle)
+
+              verification = io.BytesIO()
+              ftp.retrbinary(f"RETR {local.name}", verification.write)
+              if verification.getvalue() != data:
+                  raise SystemExit(f"Verifica upload fallita: {relative}")
+
+          ftp.quit()
+          print(f"File pubblicati e verificati: {len(files)}")
+          PY
+
+      - name: Verify public website
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="${GITHUB_SHA}-$(date +%s)"
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/?verify=$token" -o /tmp/imc-index.html
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/site-assets/css/imc-site.css?verify=$token" -o /tmp/imc-site.css
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/site-assets/js/imc-site.js?verify=$token" -o /tmp/imc-site.js
+          grep -Fq 'ITALIAN MASTERS CLUB' /tmp/imc-index.html
+          test -s /tmp/imc-site.css
+          node --check /tmp/imc-site.js
