@@ -26,8 +26,8 @@ jobs:
           test -s site-assets/css/imc-site.css
           test -s site-assets/js/imc-site.js
           test -s site-assets/images/imc-logo.png
-          grep -Fq 'site-assets/css/imc-site.css?v=1.1' index.html
-          grep -Fq 'site-assets/js/imc-site.js?v=1.1' index.html
+          grep -Fq 'site-assets/css/imc-site.css?v=2.0' index.html
+          grep -Fq 'site-assets/js/imc-site.js?v=2.0' index.html
           grep -Fq 'href="/nexus/"' index.html
           node --check site-assets/js/imc-site.js
           test ! -d nexus
