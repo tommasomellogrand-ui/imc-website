@@ -10,6 +10,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-assets/css/imc-site.css?v=2.0">
+  <script>
+    window.dataLayer=window.dataLayer||[];
+    function gtag(){dataLayer.push(arguments)}
+    gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});
+    gtag('js',new Date());
+    gtag('config','G-9HP6T5ZMLE',{anonymize_ip:true});
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9HP6T5ZMLE"></script>
 </head>
 <body>
   <header class="topbar">
@@ -116,6 +124,10 @@
     </section>
   </main>
   <footer><img src="site-assets/images/imc-logo.png" alt="IMC"><strong>ITALIAN MASTERS CLUB</strong><span>THE WORLD IS OUR PLAYGROUND.</span><small>© 2026 ITALIAN MASTERS CLUB · BUILD 2.0</small></footer>
+  <aside class="consent" id="consent" aria-labelledby="consentTitle" hidden>
+    <div><strong id="consentTitle">ANALYTICS IMC</strong><p>Utilizziamo Google Analytics per capire quante persone visitano il sito e quali contenuti guardano. Nessun dato di accesso a Nexus viene raccolto.</p></div>
+    <div class="consent-actions"><button type="button" data-consent="denied">RIFIUTA</button><button type="button" class="accept" data-consent="granted">ACCETTA</button></div>
+  </aside>
   <script src="site-assets/js/imc-site.js?v=2.0"></script>
 </body>
 </html>
