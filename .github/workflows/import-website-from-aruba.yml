@@ -1,0 +1,130 @@
+name: Import public website from Aruba
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: imc-website-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        env:
+          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in ARUBA_FTP_HOST ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
+            test -n "${!name:-}"
+          done
+
+      - name: Download current public website
+        env:
+          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+
+          host = os.environ["ARUBA_FTP_HOST"].removeprefix("ftp://").removeprefix("ftps://").rstrip("/")
+          username = os.environ["ARUBA_FTP_USERNAME"]
+          password = os.environ["ARUBA_FTP_PASSWORD"]
+          remote_root = os.environ["ARUBA_WEBSITE_REMOTE_DIR"].strip() or "/"
+
+          excluded_top_level = {
+              ".",
+              "..",
+              ".git",
+              ".github",
+              "nexus",
+              "live-match",
+              "live-test-3d",
+              "pre-match",
+          }
+
+          context = ssl.create_default_context()
+          context.check_hostname = False
+
+          ftp = FTP_TLS(context=context)
+          ftp.connect(host, 21, timeout=45)
+          ftp.login(username, password)
+          ftp.prot_p()
+          ftp.cwd(remote_root)
+
+          repository_root = Path.cwd().resolve()
+          downloaded = []
+
+          def safe_local(relative_parts):
+              target = repository_root.joinpath(*relative_parts).resolve()
+              if target != repository_root and repository_root not in target.parents:
+                  raise RuntimeError("Percorso remoto non sicuro")
+              return target
+
+          def list_names():
+              names = []
+              for raw in ftp.nlst():
+                  name = raw.rstrip("/").split("/")[-1]
+                  if name and name not in {".", ".."}:
+                      names.append(name)
+              return sorted(set(names))
+
+          def download_directory(relative_parts):
+              start = ftp.pwd()
+              for name in list_names():
+                  if not relative_parts and name in excluded_top_level:
+                      continue
+
+                  local_path = safe_local(relative_parts + [name])
+                  try:
+                      ftp.cwd(name)
+                  except error_perm:
+                      local_path.parent.mkdir(parents=True, exist_ok=True)
+                      with local_path.open("wb") as handle:
+                          ftp.retrbinary(f"RETR {name}", handle.write)
+                      downloaded.append("/".join(relative_parts + [name]))
+                  else:
+                      local_path.mkdir(parents=True, exist_ok=True)
+                      download_directory(relative_parts + [name])
+                      ftp.cwd(start)
+
+          download_directory([])
+          ftp.quit()
+
+          if "index.html" not in downloaded:
+              raise SystemExit("Import interrotto: index.html non trovato nella radice Aruba")
+
+          print(f"File del sito importati: {len(downloaded)}")
+          PY
+
+      - name: Commit imported website
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nessuna differenza da importare"
+            exit 0
+          fi
+          git commit -m "Import current public website from Aruba"
+          git push
