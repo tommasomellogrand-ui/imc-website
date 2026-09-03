@@ -10,6 +10,7 @@ function smm_ingestion_auth():void{
     if(session_status()!==PHP_SESSION_ACTIVE)session_start();if(!empty($_SESSION['sm_master_auth']))return;
     $token=trim((string)($_SERVER['HTTP_X_IMC_TOKEN']??''));$header=trim((string)($_SERVER['HTTP_AUTHORIZATION']??''));if(function_exists('getallheaders')){$h=getallheaders();if($token==='')$token=trim((string)($h['X-IMC-Token']??$h['x-imc-token']??''));if($header==='')$header=trim((string)($h['Authorization']??$h['authorization']??''));}
     if($token===''&&preg_match('/^Bearer\s+(.+)$/i',$header,$m))$token=trim($m[1]);
+    if($token===''){$authPayload=json_decode((string)file_get_contents('php://input'),true);if(is_array($authPayload))$token=trim((string)($authPayload['token']??''));}
     if($token===''||!hash_equals((string)smm_config()['admin_token'],$token)){http_response_code(401);throw new RuntimeException('Unauthorized.');}
 }
 function smm_ingestion_payload():array{
