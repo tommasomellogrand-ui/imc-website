@@ -1,0 +1,166 @@
+name: SM Master Database Bootstrap
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/sm-master-aruba.yml'
+      - 'ops/sm-master/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: imc-sm-master-database
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    env:
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
+      ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+      ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+      ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in MYSQL_HOST MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD ARUBA_FTP_HOST ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
+            test -n "${!name:-}" || { echo "Missing required secret: $name"; exit 1; }
+          done
+
+      - name: Validate importer package
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in ops/sm-master/admin/core.php ops/sm-master/admin/import-sm.php ops/sm-master/admin/import-sw.php ops/sm-master/admin/canonical.php ops/sm-master/admin/api.php ops/sm-master/admin/index.php; do
+            php -l "$f"
+          done
+          test -s ops/sm-master/schema.sql
+
+      - name: Generate private runtime configuration
+        id: runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(python3 - <<'PY'
+          import secrets
+          print(secrets.token_urlsafe(36))
+          PY
+          )"
+          echo "ADMIN_TOKEN=$token" >> "$GITHUB_ENV"
+          mkdir -p /tmp/__imc_private_sm_master
+          python3 - <<'PY'
+          import base64, os
+          def b64(v):
+              return base64.b64encode(v.encode()).decode()
+          cfg = f'''<?php
+          declare(strict_types=1);
+          return [
+            'db' => [
+              'host' => base64_decode('{b64(os.environ["MYSQL_HOST"])}'),
+              'database' => base64_decode('{b64(os.environ["MYSQL_DATABASE"])}'),
+              'user' => base64_decode('{b64(os.environ["MYSQL_USERNAME"])}'),
+              'password' => base64_decode('{b64(os.environ["MYSQL_PASSWORD"])}'),
+            ],
+            'admin_token' => base64_decode('{b64(os.environ["ADMIN_TOKEN"])}'),
+          ];
+          '''
+          open('/tmp/__imc_private_sm_master/config.php','w',encoding='utf-8').write(cfg)
+          open('/tmp/__imc_private_sm_master/.htaccess','w',encoding='utf-8').write('Options -Indexes\nRequire all denied\n')
+          PY
+          echo "ADMIN_URL=https://www.italianmastersclub.it/__imc-sm-master/admin/?token=$token" >> "$GITHUB_ENV"
+
+      - name: Upload SM Master package to Aruba
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import io, os, socket, ssl, time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+
+          host = os.environ['ARUBA_FTP_HOST'].removeprefix('ftp://').removeprefix('ftps://').rstrip('/')
+          username = os.environ['ARUBA_FTP_USERNAME']
+          password = os.environ['ARUBA_FTP_PASSWORD']
+          remote_root = os.environ['ARUBA_WEBSITE_REMOTE_DIR'].strip() or '/'
+          ctx = ssl.create_default_context(); ctx.check_hostname = False
+          addresses=[]
+          for item in socket.getaddrinfo(host,21,socket.AF_INET,socket.SOCK_STREAM):
+              ip=item[4][0]
+              if ip not in addresses: addresses.append(ip)
+          ftp=None; last=None
+          for attempt in range(3):
+              for ip in addresses:
+                  c=FTP_TLS(context=ctx)
+                  try:
+                      c.connect(ip,21,timeout=45); c.login(username,password); c.prot_p(); ftp=c; break
+                  except Exception as e:
+                      last=e
+                      try:c.close()
+                      except Exception:pass
+              if ftp: break
+              time.sleep(5)
+          if not ftp: raise SystemExit(f'FTPS connection failed: {type(last).__name__}')
+
+          def ensure(path):
+              ftp.cwd('/')
+              for part in [p for p in path.split('/') if p]:
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
+
+          uploads=[]
+          base=Path('ops/sm-master')
+          for p in base.rglob('*'):
+              if p.is_file() and p.name != 'README.md':
+                  rel=p.relative_to(base).as_posix()
+                  uploads.append((p, f"{remote_root.rstrip('/')}/__imc-sm-master/{rel}"))
+          priv=Path('/tmp/__imc_private_sm_master')
+          for p in priv.rglob('*'):
+              if p.is_file():
+                  rel=p.relative_to(priv).as_posix()
+                  uploads.append((p, f"{remote_root.rstrip('/')}/__imc_private_sm_master/{rel}"))
+
+          for local, remote in uploads:
+              parent, name = remote.rsplit('/',1)
+              ensure(parent)
+              data=local.read_bytes()
+              with local.open('rb') as fh: ftp.storbinary('STOR '+name,fh)
+              verify=io.BytesIO(); ftp.retrbinary('RETR '+name,verify.write)
+              if verify.getvalue()!=data: raise SystemExit('Upload verification failed: '+remote)
+          ftp.quit()
+          print(f'Uploaded and verified {len(uploads)} SM Master files.')
+          PY
+
+      - name: Create or verify MySQL schema from Aruba hosting
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsS --max-time 90 -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/__imc-sm-master/admin/api.php?action=install&token=$ADMIN_TOKEN")"
+          python3 - <<'PY' "$response"
+          import json,sys
+          data=json.loads(sys.argv[1])
+          if not data.get('ok'): raise SystemExit('INSTALL_FAIL|'+json.dumps(data,ensure_ascii=False))
+          install=data.get('install',{})
+          print(f"SM_MASTER_SCHEMA_OK|mysql={install.get('version')}|tables={install.get('tables')}")
+          print('SM_MASTER_COUNTS|'+json.dumps(data.get('counts',{}),separators=(',',':')))
+          PY
+
+      - name: Publish secure importer URL
+        shell: bash
+        run: |
+          echo "SM_MASTER_IMPORTER_READY"
+          echo "$ADMIN_URL"
+          echo "Upload the baseline XML and JSON from this private importer page."
