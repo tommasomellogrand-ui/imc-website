@@ -61,6 +61,7 @@ jobs:
           PY
           )"
           echo "ADMIN_TOKEN=$token" >> "$GITHUB_ENV"
+          export ADMIN_TOKEN="$token"
           mkdir -p /tmp/__imc_private_sm_master
           python3 - <<'PY'
           import base64, os
