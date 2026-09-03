@@ -1,0 +1,127 @@
+name: GW008 S1 GOLD Historical Migration Foundation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/gw008-s1-gold-foundation.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gw008-s1-gold-historical-migration
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
+      ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+      ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+      ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+    steps:
+      - name: Validate secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in MYSQL_HOST MYSQL_USERNAME MYSQL_PASSWORD ARUBA_FTP_HOST ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do test -n "${!name:-}"; done
+
+      - name: Build one-time migration endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(openssl rand -hex 32)"
+          file="__imc_gw008_s1_$(openssl rand -hex 12).php"
+          echo "::add-mask::$token"
+          echo "MIGRATION_TOKEN=$token" >> "$GITHUB_ENV"
+          echo "MIGRATION_FILE=$file" >> "$GITHUB_ENV"
+          python3 - <<'PY'
+          import json, os
+          vals={}
+          with open(os.environ['GITHUB_ENV'],encoding='utf-8') as fh:
+              for line in fh:
+                  if '=' in line:
+                      k,v=line.rstrip('\n').split('=',1); vals[k]=v
+          sql="""START TRANSACTION;
+          INSERT INTO gw_game_worlds (game_world_id,active_manager_count,controlled_clubs,controlled_percentage,created_at,creator,current_soccer_manager_season,database_scope,game_world_name,game_world_type,legacy_game_world_code_raw,owner,reference_class,sm_game_world_id,total_clubs,updated_at) VALUES ('GW008',340,340,89.4737,NOW(),'Soccer Manager',48,1,'Campionato Gold 1','multi_league','GW008','Soccer Manager','GOLD',668,380,NOW()) ON DUPLICATE KEY UPDATE active_manager_count=VALUES(active_manager_count),controlled_clubs=VALUES(controlled_clubs),controlled_percentage=VALUES(controlled_percentage),creator=VALUES(creator),current_soccer_manager_season=VALUES(current_soccer_manager_season),game_world_name=VALUES(game_world_name),game_world_type=VALUES(game_world_type),owner=VALUES(owner),reference_class=VALUES(reference_class),sm_game_world_id=VALUES(sm_game_world_id),total_clubs=VALUES(total_clubs),updated_at=NOW();
+          INSERT INTO gw_seasons (gw_season_row_id,created_at,end_date,game_world_id,imc_season,season_identity_fingerprint,season_label,sm_game_world_id,sm_season_id,soccer_manager_season,start_date) VALUES (8000000001,NOW(),'2026-08-29','GW008',1,SHA2('GW008|1|48|2026-03-30|2026-08-29',256),'GW008 · IMC Season 1 · Soccer Manager Season 48',668,NULL,48,'2026-03-30') ON DUPLICATE KEY UPDATE end_date=VALUES(end_date),season_label=VALUES(season_label),sm_game_world_id=VALUES(sm_game_world_id),sm_season_id=NULL,soccer_manager_season=VALUES(soccer_manager_season),start_date=VALUES(start_date);
+          """
+          countries=[(39,'Americano/a','America'),(40,'Est Europa','Est Europa'),(41,'Europa Centrale','Europa Centrale'),(42,'Francia','Francia'),(43,'Germania','Germania'),(44,'Inghilterra','Inghilterra'),(45,'Italia','Italia'),(46,'Mediterraneo','Mediterraneo'),(47,'Olanda & Belgio','Benelux'),(48,'Scandinavia','Scandinavia'),(49,'Scozia','Scozia'),(50,'Spagna','Spagna')]
+          divisions=[(51,45,1),(52,45,2),(53,44,1),(54,44,2),(55,44,3),(56,44,4),(57,50,1),(58,50,2),(59,49,1),(60,42,1),(61,42,2),(62,43,1),(63,43,2),(64,47,1),(65,40,1),(66,39,1),(67,46,1),(68,41,1),(69,48,1)]
+          def q(s): return "'"+s.replace("'","''")+"'"
+          for cid,code,name in countries:
+              sql+=f"INSERT INTO gw_countries (gw_country_id,capture_id,country_code,country_name,created_at,game_world_id,sm_game_world_id) VALUES ({8001000000+cid},NULL,{q(code)},{q(name)},NOW(),'GW008',668) ON DUPLICATE KEY UPDATE country_code=VALUES(country_code),country_name=VALUES(country_name),sm_game_world_id=VALUES(sm_game_world_id);\n"
+          for did,cid,level in divisions:
+              sql+=f"INSERT INTO gw_divisions (gw_division_id,created_at,display_order,division_identity_fingerprint,division_label,division_value,game_world_id,gw_country_id,gw_season_row_id,imc_season,sm_game_world_id,sm_season_id,soccer_manager_season) VALUES ({8002000000+did},NOW(),{level},SHA2('GW008|{cid}|{did}',256),'Division {level}',{level},'GW008',{8001000000+cid},8000000001,1,668,NULL,48) ON DUPLICATE KEY UPDATE display_order=VALUES(display_order),division_label=VALUES(division_label),division_value=VALUES(division_value),gw_country_id=VALUES(gw_country_id),gw_season_row_id=VALUES(gw_season_row_id),sm_season_id=NULL;\n"
+          sql+="COMMIT;"
+          php=f'''<?php
+          header('Content-Type: application/json; charset=utf-8'); header('Cache-Control: no-store');
+          if (!isset($_GET['token']) || !hash_equals({json.dumps(vals['MIGRATION_TOKEN'])}, $_GET['token'])) {{ http_response_code(403); echo json_encode(['ok'=>false]); exit; }}
+          mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+          $db=new mysqli({json.dumps(os.environ['MYSQL_HOST'])},{json.dumps(os.environ['MYSQL_USERNAME'])},{json.dumps(os.environ['MYSQL_PASSWORD'])},'Sql1956795_2'); $db->set_charset('utf8mb4');
+          try {{ $db->multi_query({json.dumps(sql)}); do {{ if ($r=$db->store_result()) $r->free(); }} while ($db->more_results() && $db->next_result());
+          $checks=[]; foreach (['gw_game_worlds','gw_seasons','gw_countries','gw_divisions'] as $t) {{ $r=$db->query("SELECT COUNT(*) c FROM `$t` WHERE game_world_id='GW008'"); $checks[$t]=(int)$r->fetch_assoc()['c']; }}
+          $r=$db->query("SELECT COUNT(*) c FROM gw_seasons WHERE game_world_id='GW008' AND imc_season=1 AND soccer_manager_season=48 AND sm_season_id IS NULL AND start_date='2026-03-30' AND end_date='2026-08-29'");
+          $identity=(int)$r->fetch_assoc()['c']; $ok=$checks['gw_game_worlds']===1 && $checks['gw_seasons']===1 && $checks['gw_countries']===12 && $checks['gw_divisions']===19 && $identity===1;
+          echo json_encode(['ok'=>$ok,'database'=>$db->query('SELECT DATABASE() db')->fetch_assoc()['db'],'counts'=>$checks,'certified_identity_rows'=>$identity]); }} catch (Throwable $e) {{ try {{$db->rollback();}} catch(Throwable $x) {{}} http_response_code(500); echo json_encode(['ok'=>false,'error'=>$e->getMessage()]); }} finally {{$db->close();}} ?>'''
+          open(vals['MIGRATION_FILE'],'w',encoding='utf-8').write(php)
+          PY
+
+      - name: Upload and execute on Aruba
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,socket,ssl
+          from ftplib import FTP_TLS,error_perm
+          host=os.environ['ARUBA_FTP_HOST'].removeprefix('ftp://').removeprefix('ftps://').rstrip('/'); ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=None
+          for item in socket.getaddrinfo(host,21,socket.AF_INET,socket.SOCK_STREAM):
+              try:
+                  c=FTP_TLS(context=ctx); c.connect(item[4][0],21,timeout=45); c.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); c.prot_p(); ftp=c; break
+              except Exception:
+                  try:c.close()
+                  except Exception:pass
+          if ftp is None: raise SystemExit('FTPS connection failed')
+          ftp.cwd('/')
+          for part in [p for p in os.environ['ARUBA_WEBSITE_REMOTE_DIR'].split('/') if p]:
+              try:ftp.cwd(part)
+              except error_perm:ftp.mkd(part);ftp.cwd(part)
+          with open(os.environ['MIGRATION_FILE'],'rb') as fh: ftp.storbinary('STOR '+os.environ['MIGRATION_FILE'],fh)
+          ftp.quit()
+          PY
+          response="$(curl -fsS --max-time 120 -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/$MIGRATION_FILE?token=$MIGRATION_TOKEN")"
+          python3 - <<'PY' "$response"
+          import json,sys
+          d=json.loads(sys.argv[1]); print('GW008_S1_GOLD_FOUNDATION|'+json.dumps(d,separators=(',',':')))
+          if not d.get('ok'): raise SystemExit(1)
+          PY
+
+      - name: Remove one-time endpoint
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          python3 - <<'PY'
+          import os,socket,ssl
+          from ftplib import FTP_TLS
+          if not os.environ.get('MIGRATION_FILE'): raise SystemExit(0)
+          host=os.environ['ARUBA_FTP_HOST'].removeprefix('ftp://').removeprefix('ftps://').rstrip('/'); ctx=ssl.create_default_context();ctx.check_hostname=False
+          for item in socket.getaddrinfo(host,21,socket.AF_INET,socket.SOCK_STREAM):
+              c=FTP_TLS(context=ctx)
+              try:
+                  c.connect(item[4][0],21,timeout=30);c.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);c.prot_p();c.cwd('/')
+                  for part in [p for p in os.environ['ARUBA_WEBSITE_REMOTE_DIR'].split('/') if p]:c.cwd(part)
+                  try:c.delete(os.environ['MIGRATION_FILE'])
+                  except Exception:pass
+                  c.quit();break
+              except Exception:
+                  try:c.close()
+                  except Exception:pass
+          PY
+          rm -f "${MIGRATION_FILE:-}"
