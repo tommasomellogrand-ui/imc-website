@@ -25,6 +25,9 @@ jobs:
       ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
       ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Validate secrets
         shell: bash
         run: |
