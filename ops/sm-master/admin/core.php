@@ -23,6 +23,34 @@ function smm_db(): mysqli {
     return $db;
 }
 
+function smm_storage_registry(): array {
+    return [
+        'core' => ['database' => 'Sql1956795_1', 'family' => 'core', 'game_worlds' => []],
+        'gold' => ['database' => 'Sql1956795_2', 'family' => 'multi_league', 'game_worlds' => ['GW002', 'GW003', 'GW007', 'GW008']],
+        'custom' => ['database' => 'Sql1956795_3', 'family' => 'single_league', 'game_worlds' => ['GW001', 'GW004', 'GW005', 'GW006', 'GW009']],
+    ];
+}
+
+function smm_storage_for_game_world(string $gameWorldId): string {
+    foreach (smm_storage_registry() as $storage => $definition) {
+        if (in_array($gameWorldId, $definition['game_worlds'], true)) return $storage;
+    }
+    throw new InvalidArgumentException('Game World is not assigned to a storage family.');
+}
+
+function smm_storage_db(string $storage): mysqli {
+    static $connections = [];
+    $registry = smm_storage_registry();
+    if (!isset($registry[$storage])) throw new InvalidArgumentException('Unknown storage family.');
+    if (isset($connections[$storage]) && $connections[$storage] instanceof mysqli) return $connections[$storage];
+    $c = smm_config()['db'];
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    $db = new mysqli($c['host'], $c['user'], $c['password'], $registry[$storage]['database']);
+    $db->set_charset('utf8mb4');
+    $connections[$storage] = $db;
+    return $db;
+}
+
 function smm_require_auth(): void {
     if (session_status() !== PHP_SESSION_ACTIVE) session_start();
     if (!empty($_SESSION['sm_master_auth'])) return;
