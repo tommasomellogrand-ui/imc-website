@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#160d08">
+  <meta name="description" content="Proposta mobile per Road To History — GW001">
+  <title>Road To History — GW001 Concept</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="icon-button" aria-label="Torna indietro">←</button>
+    <div class="top-title"><b>ROAD TO HISTORY</b><span>GAME WORLD 001</span></div>
+    <button class="icon-button" aria-label="Apri menu">☰</button>
+  </header>
+
+  <main>
+    <section class="world-intro">
+      <div class="world-art" aria-hidden="true">
+        <img src="https://www.italianmastersclub.it/site-assets/images/game-worlds/gw001.webp" alt="">
+      </div>
+      <div class="world-copy">
+        <p class="kicker">SEASON 8 · MATCHDAY 31</p>
+        <h1>ROAD TO<br><em>HISTORY</em></h1>
+        <p class="world-id">GAME WORLD ID <strong>468172</strong></p>
+      </div>
+      <span class="concept-badge">UI CONCEPT</span>
+    </section>
+
+    <nav class="competition-tabs" aria-label="Competizioni">
+      <button class="tab active" data-competition="Division 1">DIVISION 1</button>
+      <button class="tab" data-competition="Division 2">DIVISION 2</button>
+      <button class="tab" data-competition="Division 3">DIVISION 3</button>
+      <button class="tab" data-competition="Division 4">DIVISION 4</button>
+      <button class="tab" data-competition="RTH Cup">RTH CUP</button>
+      <button class="tab" data-competition="Champions">CHAMPIONS</button>
+      <button class="tab" data-competition="Shield">SHIELD</button>
+    </nav>
+
+    <section class="competition-head">
+      <div><span>COMPETITION</span><h2 id="competition-title">DIVISION 1</h2></div>
+      <button class="season-button">S8⌄</button>
+    </section>
+
+    <section class="panel next-panel">
+      <div class="section-label"><span>NEXT UP</span><time>DOM · 21:00</time></div>
+      <div class="fixture-feature">
+        <div class="team">
+          <span class="crest crest-blue">HB</span>
+          <strong>HERTHA<br>BERLIN</strong>
+          <small>T. MELLO</small>
+        </div>
+        <div class="versus"><span>MATCHDAY 32</span><b>VS</b><small>TRA 2 GIORNI</small></div>
+        <div class="team">
+          <span class="crest crest-gold">BVB</span>
+          <strong>BORUSSIA<br>DORTMUND</strong>
+          <small>COMPUTER</small>
+        </div>
+      </div>
+      <button class="full-schedule">VEDI TUTTE LE 10 PARTITE <span>→</span></button>
+    </section>
+
+    <section class="section-block">
+      <div class="section-heading"><div><span>01</span><h2>ULTIMI RISULTATI</h2></div><button>VEDI TUTTI</button></div>
+      <div class="results-list">
+        <article class="result-card">
+          <div class="result-meta"><span>FT · MATCHDAY 31</span><time>31 AGO</time></div>
+          <div class="score-row"><span><i class="mini-crest blue">HB</i>HERTHA BERLIN</span><b>3</b></div>
+          <div class="score-row"><span><i class="mini-crest red">AJ</i>AJAX</span><b>1</b></div>
+          <div class="manager-row"><span>T. MELLO</span><span>COMPUTER</span></div>
+          <button class="report-button">MATCH REPORT <span>→</span></button>
+        </article>
+        <article class="result-card cpu-card">
+          <div class="result-meta"><span>FT · MATCHDAY 31</span><time>31 AGO</time></div>
+          <div class="score-row"><span><i class="mini-crest black">INT</i>INTER</span><b>0</b></div>
+          <div class="score-row"><span><i class="mini-crest gold">RM</i>REAL MADRID</span><b>0</b></div>
+          <div class="manager-row"><span>COMPUTER</span><span>COMPUTER</span></div>
+          <button class="report-button">MATCH REPORT <span>→</span></button>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-block stories">
+      <div class="section-heading"><div><span>02</span><h2>DAL MONDO</h2></div><button>ARCHIVIO</button></div>
+      <article class="lead-story">
+        <div class="story-image"><span>THE ROAD CHRONICLE</span></div>
+        <div class="story-copy"><p>DIVISION 1 · 31 AGO</p><h3>Hertha alza il ritmo. La corsa alla storia entra nel vivo.</h3><span>Leggi la storia →</span></div>
+      </article>
+    </section>
+
+    <p class="demo-note">PROPOSTA GRAFICA · DATI DIMOSTRATIVI</p>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Navigazione pagina">
+    <button class="active"><span>⌂</span>OVERVIEW</button>
+    <button><span>▦</span>MATCHES</button>
+    <button><span>◫</span>STORIES</button>
+  </nav>
+  <script src="app.js"></script>
+</body>
+</html>
