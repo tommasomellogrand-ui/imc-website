@@ -5,7 +5,7 @@ const SMM_GOLD_SCHEMA_DATABASE = 'Sql1956795_2';
 const SMM_GOLD_SCHEMA_SHA256 = '5749bf4ec7be35f00c247210b966e67a265737c252d6cf11f0292b7ae6991785';
 
 function smm_gold_schema_path(): string {
-    return dirname(__DIR__) . '/GOLD_DATABASE_FINAL_DDL_CHECKPOINT_06(1).sql';
+    return __DIR__ . '/GOLD_DATABASE_FINAL_DDL_CHECKPOINT_06(1).sql';
 }
 
 function smm_gold_schema_source(): string {
