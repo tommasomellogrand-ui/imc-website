@@ -6,6 +6,7 @@ require __DIR__.'/import-sw.php';
 require __DIR__.'/canonical.php';
 require __DIR__.'/imc-managers.php';
 require __DIR__.'/ingestion.php';
+require __DIR__.'/gold-schema.php';
 set_time_limit(0);
 ini_set('memory_limit','256M');
 try {
