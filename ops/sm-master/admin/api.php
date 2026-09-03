@@ -7,12 +7,15 @@ require __DIR__.'/canonical.php';
 require __DIR__.'/imc-managers.php';
 require __DIR__.'/ingestion.php';
 require __DIR__.'/gold-schema.php';
+require __DIR__.'/gw008-s1-migration.php';
 set_time_limit(0);
 ini_set('memory_limit','256M');
 try {
     if (($_SERVER['REQUEST_METHOD']??'')==='POST' && str_starts_with(strtolower((string)($_SERVER['CONTENT_TYPE']??'')),'application/json')) smm_handle_ingestion();
     smm_require_auth();
     $action=(string)($_REQUEST['action']??'status');
+    if($action==='migrate_gw008_s1_foundation')smm_migrate_gw008_s1_foundation();
+    if($action==='gw008_s1_foundation_status')smm_gw008_s1_foundation_status();
     if($action==='install')smm_json(['ok'=>true,'install'=>smm_install_schema(),'counts'=>smm_counts()]);
     if($action==='status')smm_json(['ok'=>true,'db_version'=>smm_db()->server_info,'counts'=>smm_counts()]);
     if($action==='seed_imc_managers')smm_json(['ok'=>true,'imc_managers'=>smm_seed_imc_managers()]);
