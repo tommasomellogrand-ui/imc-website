@@ -1,0 +1,107 @@
+name: GW001 Aruba Migration Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/gw001-aruba-migration.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://toanuzojdkfjgucztpze.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: sb_publishable_DYmVU7yEavK_ddsdNMUjcg_a7HesB-l
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install clients
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq default-mysql-client curl
+
+      - name: Validate MySQL secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in MYSQL_HOST MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD; do
+            if [ -z "${!name:-}" ]; then
+              echo "Missing required secret: $name"
+              exit 1
+            fi
+          done
+
+      - name: Probe Aruba MySQL
+        shell: bash
+        env:
+          MYSQL_PWD: ${{ secrets.MYSQL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          echo "Testing Aruba MySQL connection..."
+          mysql \
+            --connect-timeout=20 \
+            --protocol=TCP \
+            -h "$MYSQL_HOST" \
+            -u "$MYSQL_USERNAME" \
+            "$MYSQL_DATABASE" \
+            -Nse "SELECT CONCAT('MYSQL_OK|', VERSION(), '|tables=', COUNT(*)) FROM information_schema.tables WHERE table_schema = DATABASE();"
+
+      - name: Probe GW001 reads from Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          tables=(
+            gw001_competition_player_stats
+            gw001_gw_competitions
+            gw001_gw_national_teams
+            gw001_gw_teams
+            gw001_gw_teams_active
+            gw001_gw_teams_imc_managed
+            gw001_gw_transfers
+            gw001_imc_seasons
+            gw001_manager_scan_events
+            gw001_manager_scan_snapshots
+            gw001_match_reports
+            gw001_player_codex
+            gw001_results
+            gw001_schedule
+            gw001_trophy_room
+          )
+
+          failures=0
+          for table in "${tables[@]}"; do
+            headers="$(mktemp)"
+            code="$(curl -sS -o /dev/null -D "$headers" -w '%{http_code}' \
+              -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+              -H 'Prefer: count=exact' \
+              -H 'Range: 0-0' \
+              "$SUPABASE_URL/rest/v1/$table?select=*")"
+            range="$(awk 'BEGIN{IGNORECASE=1} /^content-range:/ {gsub("\r",""); print $2}' "$headers" | tail -1)"
+            rm -f "$headers"
+            if [ "$code" = "200" ] || [ "$code" = "206" ]; then
+              echo "SUPABASE_OK|$table|http=$code|range=${range:-unknown}"
+            else
+              echo "SUPABASE_FAIL|$table|http=$code"
+              failures=$((failures+1))
+            fi
+          done
+
+          if [ "$failures" -ne 0 ]; then
+            echo "Supabase probe failures: $failures"
+            exit 2
+          fi
+
+      - name: Probe complete
+        run: echo 'GW001 migration connectivity probe completed successfully.'
