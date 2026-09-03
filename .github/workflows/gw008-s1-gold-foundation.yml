@@ -76,6 +76,8 @@ jobs:
           PY
 
       - name: Upload and execute on Aruba
+        id: execute
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -132,11 +134,26 @@ jobs:
           rm -f "${MIGRATION_FILE:-}"
 
       - name: Persist verified checkpoint
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p ops/migrations/checkpoints
+          if [ ! -s ops/migrations/checkpoints/GW008_S1_GOLD_FOUNDATION_RESULT.json ]; then
+            python3 - <<'PY'
+          import json,os
+          with open('ops/migrations/checkpoints/GW008_S1_GOLD_FOUNDATION_RESULT.json','w',encoding='utf-8') as f:
+              json.dump({'ok':False,'workflow_outcome':os.environ.get('EXECUTE_OUTCOME','unknown')},f,separators=(',',':'))
+          PY
+          fi
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add ops/migrations/checkpoints/GW008_S1_GOLD_FOUNDATION_RESULT.json
           git commit -m "Record verified GW008 S1 GOLD foundation" || exit 0
           git push
+        env:
+          EXECUTE_OUTCOME: ${{ steps.execute.outcome }}
+
+      - name: Fail workflow when migration failed
+        if: steps.execute.outcome != 'success'
+        run: exit 1
