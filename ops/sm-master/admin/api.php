@@ -5,19 +5,20 @@ require __DIR__.'/import-sm.php';
 require __DIR__.'/import-sw.php';
 require __DIR__.'/canonical.php';
 require __DIR__.'/imc-managers.php';
+require __DIR__.'/ingestion.php';
 set_time_limit(0);
 ini_set('memory_limit','256M');
 try {
+    if (($_SERVER['REQUEST_METHOD']??'')==='POST' && str_starts_with(strtolower((string)($_SERVER['CONTENT_TYPE']??'')),'application/json')) smm_handle_ingestion();
     smm_require_auth();
     $action=(string)($_REQUEST['action']??'status');
-    if($action==='install'){smm_json(['ok'=>true,'install'=>smm_install_schema(),'counts'=>smm_counts()]);}
-    if($action==='status'){smm_json(['ok'=>true,'db_version'=>smm_db()->server_info,'counts'=>smm_counts()]);}
-    if($action==='seed_imc_managers'){smm_json(['ok'=>true,'imc_managers'=>smm_seed_imc_managers()]);}
+    if($action==='install')smm_json(['ok'=>true,'install'=>smm_install_schema(),'counts'=>smm_counts()]);
+    if($action==='status')smm_json(['ok'=>true,'db_version'=>smm_db()->server_info,'counts'=>smm_counts()]);
+    if($action==='seed_imc_managers')smm_json(['ok'=>true,'imc_managers'=>smm_seed_imc_managers()]);
     if($action==='upload_init'){
-        $kind=(string)($_POST['kind']??''); if(!in_array($kind,['soccer_manager','soccerwiki'],true))throw new RuntimeException('Invalid source kind.');
-        $id=bin2hex(random_bytes(16)); $dir=smm_data_dir().'/.incoming';if(!is_dir($dir))mkdir($dir,0700,true);
-        file_put_contents("$dir/$id.meta.json",json_encode(['kind'=>$kind,'filename'=>(string)($_POST['filename']??'source'),'next'=>0,'size'=>(int)($_POST['size']??0)]));
-        smm_json(['ok'=>true,'upload_id'=>$id]);
+        $kind=(string)($_POST['kind']??'');if(!in_array($kind,['soccer_manager','soccerwiki'],true))throw new RuntimeException('Invalid source kind.');
+        $id=bin2hex(random_bytes(16));$dir=smm_data_dir().'/.incoming';if(!is_dir($dir))mkdir($dir,0700,true);
+        file_put_contents("$dir/$id.meta.json",json_encode(['kind'=>$kind,'filename'=>(string)($_POST['filename']??'source'),'next'=>0,'size'=>(int)($_POST['size']??0)]));smm_json(['ok'=>true,'upload_id'=>$id]);
     }
     if($action==='upload_chunk'){
         $id=preg_replace('/[^a-f0-9]/','',(string)($_POST['upload_id']??''));$index=(int)($_POST['index']??-1);$dir=smm_data_dir().'/.incoming';$metaPath="$dir/$id.meta.json";
@@ -31,6 +32,6 @@ try {
         $id=preg_replace('/[^a-f0-9]/','',(string)($_POST['upload_id']??''));$date=(string)($_POST['snapshot_date']??'');if(!preg_match('/^\d{4}-\d{2}-\d{2}$/',$date))throw new RuntimeException('Invalid snapshot date.');$metaPath=smm_data_dir()."/.incoming/$id.meta.json";if(!is_file($metaPath))throw new RuntimeException('Upload metadata not found.');$meta=json_decode(file_get_contents($metaPath),true,512,JSON_THROW_ON_ERROR);$path=(string)($meta['path']??'');if(!is_file($path))throw new RuntimeException('Uploaded source file not found.');
         $result=$meta['kind']==='soccer_manager'?smm_import_sm_xml($path,$date,$meta['filename']):smm_import_sw_json($path,$date,$meta['filename']);@unlink($metaPath);smm_json(['ok'=>true,'result'=>$result]);
     }
-    if($action==='rebuild'){smm_json(['ok'=>true,'counts'=>smm_rebuild_canonical()]);}
+    if($action==='rebuild')smm_json(['ok'=>true,'counts'=>smm_rebuild_canonical()]);
     throw new RuntimeException('Unknown action.');
-} catch(Throwable $e){smm_json(['ok'=>false,'error'=>$e->getMessage()],500);}
+}catch(Throwable $e){$status=http_response_code();if($status<400)$status=$e instanceof InvalidArgumentException?422:500;smm_json(['ok'=>false,'action'=>null,'inserted'=>0,'updated'=>0,'skipped'=>0,'errors'=>[['error'=>$e->getMessage()]]],$status);}
