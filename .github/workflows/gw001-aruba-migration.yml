@@ -21,6 +21,10 @@ jobs:
       MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
       MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
       MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
+      ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+      ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+      ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,31 +36,35 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq default-mysql-client curl
 
-      - name: Validate MySQL secrets
+      - name: Validate required secrets
         shell: bash
         run: |
           set -euo pipefail
-          for name in MYSQL_HOST MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD; do
+          for name in MYSQL_HOST MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD ARUBA_FTP_HOST ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
             if [ -z "${!name:-}" ]; then
               echo "Missing required secret: $name"
               exit 1
             fi
           done
 
-      - name: Probe Aruba MySQL
+      - name: Probe direct MySQL from GitHub runner
         shell: bash
         env:
           MYSQL_PWD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
-          set -euo pipefail
-          echo "Testing Aruba MySQL connection..."
-          mysql \
-            --connect-timeout=20 \
+          set +e
+          timeout 25 mysql \
+            --connect-timeout=15 \
             --protocol=TCP \
             -h "$MYSQL_HOST" \
             -u "$MYSQL_USERNAME" \
             "$MYSQL_DATABASE" \
-            -Nse "SELECT CONCAT('MYSQL_OK|', VERSION(), '|tables=', COUNT(*)) FROM information_schema.tables WHERE table_schema = DATABASE();"
+            -Nse "SELECT CONCAT('DIRECT_MYSQL_OK|', VERSION(), '|tables=', COUNT(*)) FROM information_schema.tables WHERE table_schema = DATABASE();"
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "DIRECT_MYSQL_UNAVAILABLE|expected_if_aruba_blocks_external_3306"
+          fi
+          exit 0
 
       - name: Probe GW001 reads from Supabase
         shell: bash
@@ -102,6 +110,128 @@ jobs:
             echo "Supabase probe failures: $failures"
             exit 2
           fi
+
+      - name: Create protected Aruba-hosted MySQL probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(python3 - <<'PY'
+          import secrets
+          print(secrets.token_urlsafe(32))
+          PY
+          )"
+          file="__imc_mysql_probe_$(python3 - <<'PY'
+          import secrets
+          print(secrets.token_hex(12))
+          PY
+          ).php"
+          echo "::add-mask::$token"
+          echo "PROBE_TOKEN=$token" >> "$GITHUB_ENV"
+          echo "PROBE_FILE=$file" >> "$GITHUB_ENV"
+
+          python3 - <<'PY'
+          import json, os
+          token = os.environ.get('PROBE_TOKEN')
+          # GITHUB_ENV is only visible to later steps, so read the file values directly.
+          vals = {}
+          with open(os.environ['GITHUB_ENV'], encoding='utf-8') as fh:
+              for line in fh:
+                  if '=' in line:
+                      k, v = line.rstrip('\n').split('=', 1)
+                      vals[k] = v
+          token = vals['PROBE_TOKEN']
+          file = vals['PROBE_FILE']
+          host = os.environ['MYSQL_HOST']
+          db = os.environ['MYSQL_DATABASE']
+          user = os.environ['MYSQL_USERNAME']
+          password = os.environ['MYSQL_PASSWORD']
+          php = f'''<?php
+          header('Content-Type: application/json; charset=utf-8');
+          if (!isset($_GET['token']) || !hash_equals({json.dumps(token)}, $_GET['token'])) {{ http_response_code(403); echo json_encode(['ok'=>false]); exit; }}
+          mysqli_report(MYSQLI_REPORT_OFF);
+          $db = @new mysqli({json.dumps(host)}, {json.dumps(user)}, {json.dumps(password)}, {json.dumps(db)});
+          if ($db->connect_errno) {{ http_response_code(500); echo json_encode(['ok'=>false,'stage'=>'connect','errno'=>$db->connect_errno]); exit; }}
+          $version = $db->server_info;
+          $res = $db->query("SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema = DATABASE()");
+          $row = $res ? $res->fetch_assoc() : ['c'=>null];
+          echo json_encode(['ok'=>true,'version'=>$version,'tables'=>(int)$row['c']]);
+          $db->close();
+          ?>'''
+          with open(file, 'w', encoding='utf-8') as fh:
+              fh.write(php)
+          PY
+
+      - name: Upload temporary probe to Aruba
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, socket, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          host = os.environ['ARUBA_FTP_HOST'].removeprefix('ftp://').removeprefix('ftps://').rstrip('/')
+          username = os.environ['ARUBA_FTP_USERNAME']
+          password = os.environ['ARUBA_FTP_PASSWORD']
+          remote_root = os.environ['ARUBA_WEBSITE_REMOTE_DIR'].strip() or '/'
+          addresses=[]
+          for item in socket.getaddrinfo(host,21,socket.AF_INET,socket.SOCK_STREAM):
+              if item[4][0] not in addresses: addresses.append(item[4][0])
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=None
+          for address in addresses:
+              try:
+                  c=FTP_TLS(context=ctx); c.connect(address,21,timeout=45); c.login(username,password); c.prot_p(); ftp=c; break
+              except Exception:
+                  try: c.close()
+                  except Exception: pass
+          if ftp is None: raise SystemExit('FTPS connection failed')
+          ftp.cwd('/')
+          for part in [p for p in remote_root.split('/') if p]:
+              try: ftp.cwd(part)
+              except error_perm: ftp.mkd(part); ftp.cwd(part)
+          with open(os.environ['PROBE_FILE'],'rb') as fh:
+              ftp.storbinary('STOR '+os.environ['PROBE_FILE'],fh)
+          ftp.quit()
+          PY
+
+      - name: Probe MySQL from Aruba hosting
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsS --max-time 30 "https://www.italianmastersclub.it/$PROBE_FILE?token=$PROBE_TOKEN")"
+          python3 - <<'PY' "$response"
+          import json, sys
+          data=json.loads(sys.argv[1])
+          if not data.get('ok'):
+              raise SystemExit('ARUBA_HOSTED_MYSQL_FAIL|'+json.dumps(data,separators=(',',':')))
+          print(f"ARUBA_HOSTED_MYSQL_OK|version={data.get('version')}|tables={data.get('tables')}")
+          PY
+
+      - name: Delete temporary Aruba probe
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [ -z "${PROBE_FILE:-}" ]; then exit 0; fi
+          python3 - <<'PY'
+          import os, socket, ssl
+          from ftplib import FTP_TLS
+          host=os.environ['ARUBA_FTP_HOST'].removeprefix('ftp://').removeprefix('ftps://').rstrip('/')
+          username=os.environ['ARUBA_FTP_USERNAME']; password=os.environ['ARUBA_FTP_PASSWORD']; remote_root=os.environ['ARUBA_WEBSITE_REMOTE_DIR'].strip() or '/'
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          for item in socket.getaddrinfo(host,21,socket.AF_INET,socket.SOCK_STREAM):
+              c=FTP_TLS(context=ctx)
+              try:
+                  c.connect(item[4][0],21,timeout=30); c.login(username,password); c.prot_p(); c.cwd('/')
+                  for part in [p for p in remote_root.split('/') if p]: c.cwd(part)
+                  try: c.delete(os.environ['PROBE_FILE'])
+                  except Exception: pass
+                  c.quit(); break
+              except Exception:
+                  try: c.close()
+                  except Exception: pass
+          PY
+          rm -f "${PROBE_FILE:-}"
 
       - name: Probe complete
         run: echo 'GW001 migration connectivity probe completed successfully.'
