@@ -7,7 +7,7 @@ on:
     paths: ['.github/workflows/gw008-s1-gold-foundation.yml']
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: gw008-s1-gold-historical-migration
@@ -96,6 +96,8 @@ jobs:
           ftp.quit()
           PY
           response="$(curl -fsS --max-time 120 -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/$MIGRATION_FILE?token=$MIGRATION_TOKEN")"
+          mkdir -p ops/migrations/checkpoints
+          printf '%s' "$response" > ops/migrations/checkpoints/GW008_S1_GOLD_FOUNDATION_RESULT.json
           python3 - <<'PY' "$response"
           import json,sys
           d=json.loads(sys.argv[1]); print('GW008_S1_GOLD_FOUNDATION|'+json.dumps(d,separators=(',',':')))
@@ -125,3 +127,13 @@ jobs:
                   except Exception:pass
           PY
           rm -f "${MIGRATION_FILE:-}"
+
+      - name: Persist verified checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add ops/migrations/checkpoints/GW008_S1_GOLD_FOUNDATION_RESULT.json
+          git commit -m "Record verified GW008 S1 GOLD foundation" || exit 0
+          git push
