@@ -8,8 +8,9 @@ function smm_ingestion_auth():void{
     $https=strtolower((string)($_SERVER['HTTPS']??''));$forwarded=strtolower(trim(explode(',',(string)($_SERVER['HTTP_X_FORWARDED_PROTO']??''))[0]));
     if($https!=='on'&&$https!=='1'&&$forwarded!=='https')throw new RuntimeException('HTTPS required.');
     if(session_status()!==PHP_SESSION_ACTIVE)session_start();if(!empty($_SESSION['sm_master_auth']))return;
-    $header=trim((string)($_SERVER['HTTP_AUTHORIZATION']??''));if($header===''&&function_exists('getallheaders')){$h=getallheaders();$header=trim((string)($h['Authorization']??$h['authorization']??''));}
-    if(!preg_match('/^Bearer\s+(.+)$/i',$header,$m)||!hash_equals((string)smm_config()['admin_token'],trim($m[1]))){http_response_code(401);throw new RuntimeException('Unauthorized.');}
+    $token=trim((string)($_SERVER['HTTP_X_IMC_TOKEN']??''));$header=trim((string)($_SERVER['HTTP_AUTHORIZATION']??''));if(function_exists('getallheaders')){$h=getallheaders();if($token==='')$token=trim((string)($h['X-IMC-Token']??$h['x-imc-token']??''));if($header==='')$header=trim((string)($h['Authorization']??$h['authorization']??''));}
+    if($token===''&&preg_match('/^Bearer\s+(.+)$/i',$header,$m))$token=trim($m[1]);
+    if($token===''||!hash_equals((string)smm_config()['admin_token'],$token)){http_response_code(401);throw new RuntimeException('Unauthorized.');}
 }
 function smm_ingestion_payload():array{
     if(($_SERVER['REQUEST_METHOD']??'')!=='POST'){http_response_code(405);header('Allow: POST');throw new RuntimeException('POST required.');}
