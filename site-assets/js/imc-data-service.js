@@ -74,11 +74,19 @@
     return request(`${worldPath(gameWorldId)}/managers`);
   }
 
+  async function getClubs(gameWorldId) {
+    return request(`${worldPath(gameWorldId)}/clubs`);
+  }
+
+  async function getNations(gameWorldId) {
+    return request(`${worldPath(gameWorldId)}/nations`);
+  }
+
   async function getMatch(gameWorldId, fixtureId) {
     const value = String(fixtureId || '');
     if (!/^\d+$/.test(value)) throw new Error('Fixture ID non valido.');
     return request(`${worldPath(gameWorldId)}/matches/${encodeURIComponent(value)}`);
   }
 
-  global.IMCDataService = Object.freeze({ getWorld, getMatches, getAllMatches, getCompetitions, getManagers, getMatch });
+  global.IMCDataService = Object.freeze({ getWorld, getMatches, getAllMatches, getCompetitions, getManagers, getClubs, getNations, getMatch });
 })(window);
