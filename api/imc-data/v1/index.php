@@ -540,7 +540,7 @@ function api_match_row(array $row): array {
 function api_match_select(): string {
     return "SELECT f.fixture_id,f.game_world_id,f.imc_season,f.date,f.time,f.status,f.home_name,f.away_name,".
         "f.home_world_club_id,f.away_world_club_id,f.competition_id,f.competition_name fixture_competition_name,f.round_label,".
-        "c.competition_id source_competition_id,c.competition_name stored_competition_name,c.competition_type,c.competition_master_id,c.competition_group,c.master_competition_id,c.division_value,src.report_type fixture_source,".
+        "c.competition_id source_competition_id,c.competition_name stored_competition_name,c.competition_type,c.competition_master_id,c.competition_group,c.master_competition_id,c.division_value,c.country_code,src.report_type fixture_source,".
         "fr.fixture_result_id,fr.home_score,fr.away_score,fr.aggregate_home,fr.aggregate_away,fr.penalty_home,fr.penalty_away,fr.winner_side,fr.result_status,".
         "EXISTS(SELECT 1 FROM gw_match_reports mr WHERE mr.game_world_id=f.game_world_id AND mr.fixture_id=f.fixture_id) has_match_report ".
         "FROM gw_fixtures f ".
