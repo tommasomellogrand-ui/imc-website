@@ -206,9 +206,14 @@ function api_world(string $world): never {
     );
     if (!$localSeason) api_error('Stagione non disponibile per il Game World.', 404, 'SEASON_NOT_FOUND');
 
-    $competitionCount = api_count(
+    $technicalCompetitionCount = api_count(
         $db,
         'SELECT COUNT(DISTINCT competition_id) total FROM gw_fixtures WHERE game_world_id=? AND imc_season=? AND competition_id IS NOT NULL',
+        [$world, $season]
+    );
+    $competitionCount = api_count(
+        $db,
+        "SELECT COUNT(DISTINCT CONCAT(c.competition_master_id,':',COALESCE(c.division_value,'ALL'))) total FROM gw_fixtures f JOIN gw_competitions c ON c.gw_competition_row_id=f.competition_id WHERE f.game_world_id=? AND f.imc_season=? AND c.competition_master_id IS NOT NULL",
         [$world, $season]
     );
     $fixtureCount = api_count(
@@ -234,9 +239,79 @@ function api_world(string $world): never {
             'summary' => [
                 'fixture_count' => $fixtureCount,
                 'competition_count' => $competitionCount,
+                'technical_competition_row_count' => $technicalCompetitionCount,
             ],
             'datasets' => api_dataset_counts($db, $world, $season),
         ],
+        'generated_at' => gmdate('c'),
+    ]);
+}
+
+
+function api_competitions(string $world): never {
+    $core = api_core_context($world);
+    $season = api_season($_GET['season'] ?? null, (int)($core['imc_season'] ?? 1));
+    $group = strtolower(trim((string)($_GET['group'] ?? '')));
+    if ($group !== '' && !in_array($group, ['domestic', 'international', 'nations'], true)) {
+        api_error('Parametro group non valido.', 422, 'INVALID_COMPETITION_GROUP');
+    }
+
+    $db = api_database(IMC_DATA_API_DATABASE);
+    $sql = "SELECT c.competition_master_id,m.competition_code,m.display_name,m.competition_group,m.competition_family,m.hierarchy_path,".
+        "c.competition_type,c.division_value,MIN(f.date) start_date,MAX(f.date) end_date,".
+        "GROUP_CONCAT(DISTINCT c.gw_competition_row_id ORDER BY c.gw_competition_row_id) local_row_ids,".
+        "COUNT(DISTINCT f.fixture_id) fixture_count,".
+        "COUNT(DISTINCT fr.fixture_id) result_count,".
+        "COUNT(DISTINCT CASE WHEN f.status='scheduled' THEN f.fixture_id END) schedule_count,".
+        "COUNT(DISTINCT mr.fixture_id) report_count ".
+        "FROM gw_competitions c ".
+        "JOIN Sql1956795_1.imc_competition_master m ON m.competition_master_id=c.competition_master_id ".
+        "JOIN gw_fixtures f ON f.game_world_id=c.game_world_id AND f.competition_id=c.gw_competition_row_id ".
+        "LEFT JOIN gw_fixture_results fr ON fr.game_world_id=f.game_world_id AND fr.fixture_id=f.fixture_id ".
+        "LEFT JOIN gw_match_reports mr ON mr.game_world_id=f.game_world_id AND mr.fixture_id=f.fixture_id ".
+        "WHERE c.game_world_id=? AND f.imc_season=? ".
+        ($group !== '' ? "AND LOWER(m.competition_group)=? " : "").
+        "GROUP BY c.competition_master_id,m.competition_code,m.display_name,m.competition_group,m.competition_family,m.hierarchy_path,c.competition_type,c.division_value ".
+        "ORDER BY FIELD(m.competition_group,'DOMESTIC','INTERNATIONAL','NATIONS'),m.competition_master_id,c.division_value";
+
+    $params = $group !== '' ? [$world, $season, $group] : [$world, $season];
+    $rows = api_all($db, $sql, $params);
+    $data = array_map(static function (array $row) use ($season): array {
+        $division = api_nullable_int($row['division_value']);
+        $masterId = (int)$row['competition_master_id'];
+        return [
+            'competition_key' => $masterId.':GLOBAL:'.($division ?? 'ALL'),
+            'competition_master_id' => $masterId,
+            'competition_code' => $row['competition_code'],
+            'name' => $row['display_name'].($row['competition_code'] === 'LEAGUE' && $division !== null ? ' Division '.$division : ''),
+            'competition_group' => strtolower((string)$row['competition_group']),
+            'competition_family' => strtolower((string)$row['competition_family']),
+            'type' => $row['competition_type'],
+            'division_value' => $division,
+            'imc_season' => $season,
+            'hierarchy_path' => $row['hierarchy_path'],
+            'local_competition_row_ids' => array_map('intval', array_filter(explode(',', (string)$row['local_row_ids']))),
+            'counts' => [
+                'fixtures' => (int)$row['fixture_count'],
+                'results' => (int)$row['result_count'],
+                'schedule' => (int)$row['schedule_count'],
+                'reports' => (int)$row['report_count'],
+            ],
+            'dates' => ['start' => $row['start_date'], 'end' => $row['end_date']],
+            'availability' => [
+                'overview' => true,
+                'matches' => true,
+                'standings' => $row['competition_code'] === 'LEAGUE',
+                'structure' => false,
+            ],
+        ];
+    }, $rows);
+
+    api_response([
+        'ok' => true,
+        'data' => $data,
+        'pagination' => ['total' => count($data), 'limit' => count($data), 'offset' => 0, 'returned' => count($data)],
+        'context' => ['game_world_id' => $world, 'imc_season' => $season, 'source' => 'COMPETITION_MASTER'],
         'generated_at' => gmdate('c'),
     ]);
 }
@@ -474,6 +549,9 @@ try {
 
     if (count($segments) === 2 && $segments[0] === 'worlds') {
         api_world(api_world_id($segments[1]));
+    }
+    if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'competitions') {
+        api_competitions(api_world_id($segments[1]));
     }
     if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'matches') {
         api_matches(api_world_id($segments[1]));
