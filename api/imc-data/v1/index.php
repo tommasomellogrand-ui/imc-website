@@ -59,6 +59,75 @@ function api_database(string $database): mysqli {
     return $connection;
 }
 
+
+function api_public_asset_url(mixed $value): ?string {
+    if ($value === null || trim((string)$value) === '') return null;
+    return preg_replace('/^http:/i', 'https:', trim((string)$value));
+}
+
+function api_core_club_index(string $world, array $worldClubIds): array {
+    $ids = array_values(array_unique(array_filter(array_map(
+        static fn(mixed $id): int => (int)$id,
+        $worldClubIds
+    ), static fn(int $id): bool => $id > 0)));
+    if ($ids === []) return [];
+    $core = api_database('Sql1956795_1');
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $rows = api_all(
+        $core,
+        "SELECT m.club_gw_id,m.club_id,c.name,c.short_name,c.image_url FROM clubs_game_world_id m JOIN clubs c ON c.club_id=m.club_id WHERE m.game_world_id=? AND m.club_gw_id IN ($placeholders)",
+        array_merge([$world], $ids)
+    );
+    $index = [];
+    foreach ($rows as $row) {
+        $index[(string)$row['club_gw_id']] = [
+            'club_id' => (int)$row['club_id'],
+            'name' => $row['name'],
+            'short_name' => $row['short_name'],
+            'image_url' => api_public_asset_url($row['image_url']),
+        ];
+    }
+    return $index;
+}
+
+function api_enrich_match_clubs(string $world, array $rows): array {
+    $ids = [];
+    foreach ($rows as $row) {
+        $ids[] = $row['home_world_club_id'] ?? null;
+        $ids[] = $row['away_world_club_id'] ?? null;
+    }
+    $index = api_core_club_index($world, $ids);
+    foreach ($rows as &$row) {
+        $home = $index[(string)($row['home_world_club_id'] ?? '')] ?? null;
+        $away = $index[(string)($row['away_world_club_id'] ?? '')] ?? null;
+        $row['home_club_id'] = $home['club_id'] ?? null;
+        $row['home_image_url'] = $home['image_url'] ?? null;
+        $row['away_club_id'] = $away['club_id'] ?? null;
+        $row['away_image_url'] = $away['image_url'] ?? null;
+    }
+    unset($row);
+    return $rows;
+}
+
+function api_enrich_transfer_clubs(string $world, array $rows): array {
+    $ids = [];
+    foreach ($rows as $row) {
+        $ids[] = $row['from_world_club_id'] ?? null;
+        $ids[] = $row['to_world_club_id'] ?? null;
+    }
+    $index = api_core_club_index($world, $ids);
+    foreach ($rows as &$row) {
+        $from = $index[(string)($row['from_world_club_id'] ?? '')] ?? null;
+        $to = $index[(string)($row['to_world_club_id'] ?? '')] ?? null;
+        $row['from_club_id'] = $from['club_id'] ?? null;
+        $row['from_image_url'] = $from['image_url'] ?? null;
+        $row['to_club_id'] = $to['club_id'] ?? null;
+        $row['to_image_url'] = $to['image_url'] ?? null;
+    }
+    unset($row);
+    return $rows;
+}
+
 function api_world_id(mixed $value): string {
     $world = strtoupper(trim((string)$value));
     if (!preg_match('/^GW00[1-9]$/', $world)) {
@@ -365,7 +434,7 @@ function api_clubs(string $world): never {
         'club_gw_id' => (int)$row['club_gw_id'],
         'name' => $row['name'],
         'short_name' => $row['short_name'],
-        'image_url' => $row['image_url'],
+        'image_url' => api_public_asset_url($row['image_url']),
     ], $rows);
     api_response([
         'ok' => true,
@@ -502,10 +571,14 @@ function api_match_row(array $row): array {
         'home' => [
             'name' => $row['home_name'],
             'world_club_id' => api_nullable_int($row['home_world_club_id']),
+            'club_id' => api_nullable_int($row['home_club_id'] ?? null),
+            'image_url' => api_public_asset_url($row['home_image_url'] ?? null),
         ],
         'away' => [
             'name' => $row['away_name'],
             'world_club_id' => api_nullable_int($row['away_world_club_id']),
+            'club_id' => api_nullable_int($row['away_club_id'] ?? null),
+            'image_url' => api_public_asset_url($row['away_image_url'] ?? null),
         ],
         'competition' => [
             'world_competition_row_id' => api_nullable_int($row['competition_id']),
@@ -566,6 +639,7 @@ function api_matches(string $world): never {
         'WHERE f.game_world_id=? AND f.imc_season=? '.
         'ORDER BY f.date IS NULL,f.date,f.time IS NULL,f.time,f.fixture_id LIMIT ? OFFSET ?';
     $rows = api_all($db, $sql, [$world, $season, $limit, $offset]);
+    $rows = api_enrich_match_clubs($world, $rows);
 
     api_response([
         'ok' => true,
@@ -593,6 +667,7 @@ function api_match_detail(string $world, int $fixtureId): never {
         [$world, $fixtureId]
     );
     if (!$row) api_error('Fixture non trovata.', 404, 'FIXTURE_NOT_FOUND');
+    $row = api_enrich_match_clubs($world, [$row])[0];
 
     $match = api_match_row($row);
     $report = api_one(
@@ -729,11 +804,15 @@ function api_transfer_row(array $row): array {
         'player_id' => api_nullable_int($row['player_id']),
         'from_club' => [
             'world_club_id' => api_nullable_int($row['from_world_club_id']),
+            'club_id' => api_nullable_int($row['from_club_id'] ?? null),
             'name' => $row['from_club_name'],
+            'image_url' => api_public_asset_url($row['from_image_url'] ?? null),
         ],
         'to_club' => [
             'world_club_id' => api_nullable_int($row['to_world_club_id']),
+            'club_id' => api_nullable_int($row['to_club_id'] ?? null),
             'name' => $row['to_club_name'],
+            'image_url' => api_public_asset_url($row['to_image_url'] ?? null),
         ],
         'direction' => $row['direction'],
         'cost' => [
@@ -758,6 +837,7 @@ function api_transfers(string $world): never {
         'SELECT transfer_row_id,transfer_id,game_world_id,sm_game_world_id,imc_season,soccer_manager_season,sm_season_id,record_rank,date,player_id,from_world_club_id,from_club_name,to_world_club_id,to_club_name,direction,cost_numeric,cost_raw,currency,player_value_at_event,status,created_at FROM gw_transfers WHERE game_world_id=? ORDER BY transfer_row_id DESC LIMIT ? OFFSET ?',
         [$world, $limit, $offset]
     );
+    $rows = api_enrich_transfer_clubs($world, $rows);
     api_response([
         'ok' => true,
         'data' => array_map('api_transfer_row', $rows),
@@ -780,6 +860,7 @@ function api_transfer_detail(string $world, int $transferRowId): never {
         [$world, $transferRowId]
     );
     if (!$row) api_error('Trasferimento non trovato.', 404, 'TRANSFER_NOT_FOUND');
+    $row = api_enrich_transfer_clubs($world, [$row])[0];
     api_response([
         'ok' => true,
         'data' => api_transfer_row($row),
