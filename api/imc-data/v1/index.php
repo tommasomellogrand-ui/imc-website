@@ -446,9 +446,57 @@ function api_managers(string $world): never {
         strcasecmp((string)$left['manager']['full_name'], (string)$right['manager']['full_name'])
     );
 
+    $local = api_database(api_world_database($world));
+    $externalRows = api_all(
+        $local,
+        "SELECT u.sm_manager_id,u.sm_username,u.image_src,u.last_online,u.manager_image_src,u.manager_reputation,u.manager_unknown_flag,".
+        "a.manager_assignment_id,a.entity_type,a.world_club_id,a.imc_season,a.soccer_manager_season,a.sm_season_id,a.valid_from,a.valid_to,a.is_current,".
+        "w.world_club_row_id,w.club_id,w.master_club_id,w.club_name,w.club_country_code,w.club_division,w.club_logo_src,w.current_club_flag,w.managed_flag ".
+        "FROM gw_sm_user_assignments a ".
+        "JOIN (SELECT sm_manager_id,MAX(sm_user_row_id) AS sm_user_row_id FROM gw_sm_users GROUP BY sm_manager_id) latest ON latest.sm_manager_id=a.sm_manager_id ".
+        "JOIN gw_sm_users u ON u.sm_user_row_id=latest.sm_user_row_id ".
+        "LEFT JOIN gw_world_clubs w ON w.game_world_id=a.game_world_id AND w.world_club_id=a.world_club_id ".
+        "WHERE a.game_world_id=? AND a.is_current=1 ORDER BY u.sm_username,u.sm_manager_id",
+        [$world]
+    );
+    $externalData = array_map(static fn(array $row): array => [
+        'manager' => [
+            'sm_manager_id' => api_nullable_int($row['sm_manager_id']),
+            'sm_username' => $row['sm_username'],
+            'image_src' => $row['manager_image_src'] ?: $row['image_src'],
+            'last_online' => $row['last_online'],
+            'reputation' => api_nullable_int($row['manager_reputation']),
+            'unknown' => (bool)$row['manager_unknown_flag'],
+        ],
+        'assignment' => [
+            'manager_assignment_id' => api_nullable_int($row['manager_assignment_id']),
+            'entity_type' => $row['entity_type'],
+            'world_club_id' => api_nullable_int($row['world_club_id']),
+            'imc_season' => api_nullable_int($row['imc_season']),
+            'soccer_manager_season' => api_nullable_int($row['soccer_manager_season']),
+            'sm_season_id' => api_nullable_int($row['sm_season_id']),
+            'valid_from' => $row['valid_from'],
+            'valid_to' => $row['valid_to'],
+            'active' => (bool)$row['is_current'],
+        ],
+        'club' => $row['world_club_id'] === null ? null : [
+            'world_club_row_id' => api_nullable_int($row['world_club_row_id']),
+            'world_club_id' => api_nullable_int($row['world_club_id']),
+            'club_id' => api_nullable_int($row['club_id']),
+            'master_club_id' => api_nullable_int($row['master_club_id']),
+            'name' => $row['club_name'],
+            'country_code' => $row['club_country_code'],
+            'division' => $row['club_division'],
+            'logo_src' => $row['club_logo_src'],
+            'current' => $row['current_club_flag'] === null ? null : (bool)$row['current_club_flag'],
+            'managed' => $row['managed_flag'] === null ? null : (bool)$row['managed_flag'],
+        ],
+    ], $externalRows);
+
     api_response([
         'ok' => true,
         'data' => $data,
+        'external_data' => $externalData,
         'pagination' => ['total' => count($data), 'limit' => count($data), 'offset' => 0, 'returned' => count($data)],
         'context' => [
             'game_world_id' => $world,
@@ -456,6 +504,8 @@ function api_managers(string $world): never {
             'assignment_types' => ['club', 'national_team'],
             'assignment_source' => $snapshot['source'] ?? 'SUPABASE_ASSIGNMENTS_CERTIFIED',
             'manager_identity_source' => 'MYSQL_CORE_IMC',
+            'external_manager_source' => 'MYSQL_LOCAL.gw_sm_users+gw_sm_user_assignments+gw_world_clubs',
+            'external_total' => count($externalData),
             'snapshot_generated_at' => $snapshot['generated_at'] ?? null,
         ],
         'generated_at' => gmdate('c'),
@@ -472,14 +522,37 @@ function api_clubs(string $world): never {
         "WHERE m.game_world_id=? ORDER BY c.name,m.club_id",
         [$world]
     );
-    $data = array_map(static fn(array $row): array => [
+    $local = api_database(api_world_database($world));
+    $localRows = api_all(
+        $local,
+        'SELECT world_club_row_id,world_club_id,club_id,master_club_id,club_name,club_country_code,club_division,club_balance,club_friends_count,current_club_flag,managed_flag FROM gw_world_clubs WHERE game_world_id=?',
+        [$world]
+    );
+    $localIndex = [];
+    foreach ($localRows as $localRow) $localIndex[(string)$localRow['world_club_id']] = $localRow;
+    $data = array_map(static function(array $row) use ($localIndex): array {
+      $localRow = $localIndex[(string)$row['club_gw_id']] ?? [];
+      return [
         'club_id' => (int)$row['club_id'],
         'game_world_id' => $row['game_world_id'],
         'club_gw_id' => (int)$row['club_gw_id'],
         'name' => $row['name'],
         'short_name' => $row['short_name'],
         'image_url' => '/nexus/assets/clubs/'.(int)$row['club_id'].'.png',
-    ], $rows);
+        'local' => [
+            'world_club_row_id' => api_nullable_int($localRow['world_club_row_id'] ?? null),
+            'world_club_id' => api_nullable_int($localRow['world_club_id'] ?? $row['club_gw_id']),
+            'master_club_id' => api_nullable_int($localRow['master_club_id'] ?? null),
+            'club_name' => $localRow['club_name'] ?? null,
+            'country_code' => $localRow['club_country_code'] ?? null,
+            'division' => $localRow['club_division'] ?? null,
+            'balance' => isset($localRow['club_balance']) ? (float)$localRow['club_balance'] : null,
+            'friends_count' => api_nullable_int($localRow['club_friends_count'] ?? null),
+            'current' => isset($localRow['current_club_flag']) ? (bool)$localRow['current_club_flag'] : null,
+            'managed' => isset($localRow['managed_flag']) ? (bool)$localRow['managed_flag'] : null,
+        ],
+      ];
+    }, $rows);
     api_response([
         'ok' => true,
         'data' => $data,
