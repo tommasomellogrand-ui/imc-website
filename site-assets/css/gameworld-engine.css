@@ -166,9 +166,6 @@ main { width: min(100%, 520px); min-height: calc(100svh - 152px); margin: auto; 
 .competition-hub-art svg { width: 100%; height: 100%; stroke-width: 1.8; filter: drop-shadow(0 9px 7px rgba(50,25,15,.09)); }
 .competition-hub-card > b { position: absolute; z-index: 3; right: 18px; bottom: 17px; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid rgba(80,50,30,.15); border-radius: 50%; background: rgba(255,255,255,.9); font-size: 29px; line-height: 1; box-shadow: 0 6px 15px rgba(63,31,20,.08); }
 .competition-category-list { margin-top: 10px; }
-.competition-category-tabs { margin-top: 10px; padding: 5px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 4px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.86); box-shadow: var(--shadow); }
-.competition-category-tabs a { min-height: 48px; display: grid; place-items: center; border-radius: 14px; color: var(--muted); font-size: 8px; font-weight: 950; letter-spacing: .15px; }
-.competition-category-tabs a.active { color: #fff; background: linear-gradient(180deg,var(--copper),var(--copper-dark)); box-shadow: 0 7px 15px rgba(var(--copper-rgb),.2); }
 .competition-country-tabs { margin: 10px -1px 0; padding: 0 1px 4px; display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; }
 .competition-country-tabs::-webkit-scrollbar { display: none; }
 .competition-country-tabs a { min-width: 58px; min-height: 44px; padding: 0 16px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(#fff,#faf4ef); color: var(--copper-dark); font-size: 8px; font-weight: 950; }
