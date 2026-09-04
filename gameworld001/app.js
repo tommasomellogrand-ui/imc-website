@@ -3,7 +3,7 @@
 
   const ROOT = '/gameworld001/';
   const WORLD_ID = 'GW001';
-  const state = { world: null, matches: null, matchesPromise: null };
+  const state = { world: null, matches: null, matchesPromise: null, competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
   const MATCH_CACHE_KEY = 'imc:GW001:season1:matches:v1';
 
   const staticSections = {
@@ -11,7 +11,9 @@
     'team-hub': { title: 'TEAM HUB', sub: 'Club · Nazionali', icon: 'teams', intro: 'Squadre, rose e percorsi nel mondo.', status: 'Schede club non ancora disponibili nella Public Read API.' },
     managers: { title: 'MANAGERS', sub: 'IMC · External', icon: 'manager', intro: 'I manager presenti in Road To History.', status: 'Dataset manager non ancora collegato.' },
     codex: { title: 'CODEX', sub: 'Archivio del GW', icon: 'codex', intro: 'Giocatori, record e memoria storica del mondo.', status: 'Player Codex non disponibile per GW001.' },
-    transfers: { title: 'TRANSFERS', sub: 'Mercato del GW', icon: 'transfers', intro: 'Movimenti di mercato e dettagli delle operazioni.', status: 'Importazione in corso · Coming soon.' }
+    transfers: { title: 'TRANSFERS', sub: 'Mercato del GW', icon: 'transfers', intro: 'Movimenti di mercato e dettagli delle operazioni.', status: 'Importazione in corso · Coming soon.' },
+    'trophy-room': { title: 'TROPHY ROOM', sub: 'Trofei del GW', icon: 'competitions', intro: 'Albo d’oro e trofei di Road To History.', status: 'Dataset Trophy Room non ancora collegato.' },
+    'news-feed': { title: 'NEWS FEED', sub: 'News del GW', icon: 'journal', intro: 'Notizie e aggiornamenti di Road To History.', status: 'Feed non ancora collegato.' }
   };
 
   const app = document.querySelector('#app');
@@ -177,13 +179,12 @@
 
   function home() {
     const datasets = state.world.datasets;
-    return `<div class="page-stack">${worldHero()}${metricStrip()}<section class="hub-grid">
+    return `<div class="page-stack">${worldHero()}${metricStrip()}<section class="hub-grid hub-grid-gw002">
       ${hubCard('competitions', 'COMPETITIONS', `${state.world.summary.competition_count} competizioni`, 'competitions', 'hub-competitions', 'MYSQL LIVE')}
-      ${hubCard('results', 'RESULTS', `${datasets.results.fixture_count} risultati`, 'results', 'hub-results', 'RESULTS')}
-      ${hubCard('calendar', 'CALENDAR', `${datasets.schedule.fixture_count} fixture`, 'calendar', 'hub-calendar', 'SCHEDULE')}
-      ${hubCard('road-chronicle', 'THE ROAD CHRONICLE', 'Road To History Official Journal', 'journal', 'hub-chronicle')}
-      ${hubCard('team-hub', 'TEAM HUB', 'Club · Nazionali', 'teams', 'hub-team')}
       ${hubCard('managers', 'MANAGERS', 'IMC · External', 'manager', 'hub-managers')}
+      ${hubCard('team-hub', 'TEAM HUB', 'Club · Nazionali', 'teams', 'hub-team')}
+      ${hubCard('trophy-room', 'TROPHY ROOM', 'Trofei del GW', 'competitions', 'hub-trophy')}
+      ${hubCard('news-feed', 'NEWS FEED', 'News del GW', 'journal', 'hub-news')}
       ${hubCard('codex', 'CODEX', datasets.player_codex.available ? 'Dataset disponibile' : 'Non disponibile', 'codex', 'hub-codex')}
       ${hubCard('transfers', 'TRANSFERS', 'Coming soon', 'transfers', 'hub-transfers')}
     </section></div>`;
@@ -298,6 +299,64 @@
     return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }
 
+  function competitionDetailTabs() {
+    const tabs = [['overview', 'OVERVIEW'], ['competition', 'COMPETITION'], ['matches', 'MATCHES'], ['stats', 'STATS'], ['history', 'HISTORY']];
+    return `<nav class="competition-detail-tabs">${tabs.map(([key, label]) => `<button type="button" data-competition-tab="${key}" class="${state.competitionTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>`;
+  }
+
+  function compactMatches(rows) {
+    return rows.length ? `<div class="match-list compact-match-list">${dateGroups(rows).map(([date, matches]) => `<section class="matchday-group"><header><div><small>MATCH DAY</small><h2>${esc(formatDate(date, true))}</h2></div><span>${matches.length} MATCH</span></header><div>${matches.map(matchCard).join('')}</div></section>`).join('')}</div>` : '<div class="empty-state"><strong>NESSUN MATCH</strong><span>Questa vista verrà popolata quando il dataset sarà disponibile.</span></div>';
+  }
+
+  function competitionOverview(group) {
+    const played = group.results;
+    const total = group.matches.length;
+    const percentage = total ? Math.round((played / total) * 100) : 0;
+    const ordered = [...group.matches].sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+    const last = [...ordered].reverse().find(match => match.result);
+    const next = ordered.find(match => !match.result);
+    return `<section class="competition-status"><div><span>COMPETITION STATUS</span><strong>${played}<i>/</i>${total}</strong><small>MATCHES PLAYED</small></div><div class="competition-status-bar"><b style="width:${percentage}%"></b></div><em>${percentage}%</em></section>
+      <div class="competition-overview-grid">${last ? `<article><span>LAST MATCH</span>${matchCard(last)}</article>` : ''}${next ? `<article><span>NEXT MATCH</span>${matchCard(next)}</article>` : ''}</div>`;
+  }
+
+  function competitionStructure(group) {
+    const type = competitionType(group.competition);
+    const isLeague = type === 'league';
+    const isHybrid = ['smfacup', 'smfashield', 'interqualifier'].includes(type);
+    const tabs = isLeague ? [['table', 'TABLE']] : isHybrid ? [['groups', 'GROUP STAGE'], ['knockout', 'KNOCKOUT']] : [['knockout', 'KNOCKOUT']];
+    if (!tabs.some(([key]) => key === state.competitionSubTab)) state.competitionSubTab = tabs[0][0];
+    const rounds = new Map();
+    group.matches.forEach(match => {
+      const round = match.competition?.round_label || 'MATCHES';
+      if (!rounds.has(round)) rounds.set(round, []);
+      rounds.get(round).push(match);
+    });
+    const body = isLeague ? '<div class="empty-state"><strong>TABLE</strong><span>Struttura pronta. La classifica verrà collegata al relativo dataset.</span></div>' : `<div class="competition-rounds">${[...rounds.entries()].map(([round, rows]) => `<section><h3>${esc(round)}</h3>${compactMatches(rows)}</section>`).join('')}</div>`;
+    return `<nav class="competition-subtabs">${tabs.map(([key, label]) => `<button type="button" data-competition-subtab="${key}" class="${state.competitionSubTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>${body}`;
+  }
+
+  function competitionMatches(group) {
+    const tabs = [['results', 'RESULTS'], ['schedule', 'SCHEDULE'], ['reports', 'REPORTS']];
+    const rows = state.matchesSubTab === 'results' ? group.matches.filter(match => match.result) : state.matchesSubTab === 'schedule' ? group.matches.filter(match => !match.result) : group.matches.filter(match => match.availability?.match_report);
+    return `<nav class="competition-subtabs">${tabs.map(([key, label]) => `<button type="button" data-matches-subtab="${key}" class="${state.matchesSubTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>${compactMatches(rows)}`;
+  }
+
+  function competitionStats() {
+    const tabs = [['goals', 'GOALS'], ['assists', 'ASSISTS'], ['rating', 'RATING'], ['mom', 'MOM'], ['cards', 'CARDS']];
+    return `<nav class="competition-subtabs competition-stat-tabs">${tabs.map(([key, label]) => `<button type="button" data-stats-subtab="${key}" class="${state.statsSubTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav><div class="empty-state"><strong>${esc(state.statsSubTab.toUpperCase())}</strong><span>Tab Nexus replicata. Il dataset statistiche giocatori verrà collegato separatamente.</span></div>`;
+  }
+
+  function competitionDetailPage(groupKey) {
+    const group = competitionGroups().find(item => item.key === groupKey);
+    if (!group) return errorPage('Competizione non trovata.');
+    let body = competitionOverview(group);
+    if (state.competitionTab === 'competition') body = competitionStructure(group);
+    else if (state.competitionTab === 'matches') body = competitionMatches(group);
+    else if (state.competitionTab === 'stats') body = competitionStats();
+    else if (state.competitionTab === 'history') body = '<div class="empty-state"><strong>HISTORY</strong><span>Albo d’oro e vincitori verranno collegati al dataset storico.</span></div>';
+    return `<section class="section-page competition-detail-page">${pageHead(competitionName(group.competition), `${group.matches.length} fixture · Season ${seasonNumber()}`, 'competitions', `${ROOT}competitions/${competitionCategory(group.competition)}/`)}${competitionDetailTabs()}<main class="competition-detail-body">${body}</main></section>`;
+  }
+
   function matchListPage(kind, groupKey = null) {
     let rows = state.matches;
     let title = 'MATCHES';
@@ -331,7 +390,8 @@
 
   function staticSection(key) {
     const section = staticSections[key] || staticSections.codex;
-    return `<section class="section-page">${pageHead(section.title, section.sub, section.icon)}<div class="static-intro"><span>${icon(section.icon)}</span><p>${esc(section.intro)}</p></div><div class="empty-state"><strong>${key === 'transfers' ? 'COMING SOON' : 'NON ANCORA DISPONIBILE'}</strong><span>${esc(section.status)}</span></div></section>`;
+    const tabs = key === 'team-hub' ? ['CLUB', 'NATIONS'] : key === 'managers' ? ['IMC', 'EXTERNAL'] : key === 'transfers' ? ['ALL TRANSFERS', 'ENTRATE', 'USCITE'] : key === 'codex' ? ['PLAYERS', 'TEAMS', 'RECORDS'] : [];
+    return `<section class="section-page">${pageHead(section.title, section.sub, section.icon)}${tabs.length ? `<nav class="competition-subtabs section-placeholder-tabs">${tabs.map((tab, index) => `<button type="button" class="${index === 0 ? 'active' : ''}">${tab}</button>`).join('')}</nav>` : ''}<div class="static-intro"><span>${icon(section.icon)}</span><p>${esc(section.intro)}</p></div><div class="empty-state"><strong>${key === 'transfers' ? 'COMING SOON' : 'STRUTTURA PRONTA'}</strong><span>${esc(section.status)}</span></div></section>`;
   }
 
   function statValue(value) {
@@ -433,6 +493,30 @@
     drawer.querySelectorAll('a').forEach(link => link.addEventListener('click', close));
 
     document.addEventListener('click', event => {
+      const competitionTab = event.target.closest?.('[data-competition-tab]');
+      if (competitionTab) {
+        state.competitionTab = competitionTab.dataset.competitionTab;
+        renderRoute();
+        return;
+      }
+      const competitionSubTab = event.target.closest?.('[data-competition-subtab]');
+      if (competitionSubTab) {
+        state.competitionSubTab = competitionSubTab.dataset.competitionSubtab;
+        renderRoute();
+        return;
+      }
+      const matchesSubTab = event.target.closest?.('[data-matches-subtab]');
+      if (matchesSubTab) {
+        state.matchesSubTab = matchesSubTab.dataset.matchesSubtab;
+        renderRoute();
+        return;
+      }
+      const statsSubTab = event.target.closest?.('[data-stats-subtab]');
+      if (statsSubTab) {
+        state.statsSubTab = statsSubTab.dataset.statsSubtab;
+        renderRoute();
+        return;
+      }
       const link = event.target.closest?.('a[href]');
       if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const url = new URL(link.href, location.href);
@@ -479,7 +563,7 @@
       await loadMatches();
 
       if (route === 'competitions' && ['domestic', 'international', 'nations'].includes(parts[1])) app.innerHTML = competitionCategoryPage(parts[1]);
-      else if (route === 'competitions' && parts[1]) app.innerHTML = matchListPage('competition', decodeURIComponent(parts[1]));
+      else if (route === 'competitions' && parts[1]) app.innerHTML = competitionDetailPage(decodeURIComponent(parts[1]));
       else if (route === 'competitions') app.innerHTML = competitions();
       else if (route === 'calendar') app.innerHTML = matchListPage('calendar');
       else if (route === 'results') app.innerHTML = matchListPage('results');
