@@ -253,6 +253,53 @@ function api_world(string $world): never {
 }
 
 
+function api_managers(string $world): never {
+    $core = api_database('Sql1956795_1');
+    $rows = api_all(
+        $core,
+        "SELECT a.assignment_id,a.game_world_id,a.manager_id,m.full_name,m.sm_manager_id,m.sm_username,".
+        "a.team_id,c.name club_name,c.short_name club_short_name,c.image_url club_image_url,".
+        "a.assignment_type,a.start_date,a.end_date,a.season_id ".
+        "FROM gw_manager_assignments a ".
+        "JOIN imc_managers m ON m.manager_id=a.manager_id ".
+        "LEFT JOIN clubs c ON c.club_id=a.team_id ".
+        "WHERE a.game_world_id=? AND a.assignment_type='club' AND a.end_date IS NULL ".
+        "ORDER BY m.full_name,a.assignment_id",
+        [$world]
+    );
+    $data = array_map(static fn(array $row): array => [
+        'assignment_id' => (int)$row['assignment_id'],
+        'game_world_id' => $row['game_world_id'],
+        'manager' => [
+            'manager_id' => $row['manager_id'],
+            'full_name' => $row['full_name'],
+            'sm_manager_id' => api_nullable_int($row['sm_manager_id']),
+            'sm_username' => $row['sm_username'],
+        ],
+        'club' => [
+            'club_id' => api_nullable_int($row['team_id']),
+            'name' => $row['club_name'],
+            'short_name' => $row['club_short_name'],
+            'image_url' => $row['club_image_url'],
+        ],
+        'assignment' => [
+            'type' => $row['assignment_type'],
+            'start_date' => $row['start_date'],
+            'end_date' => $row['end_date'],
+            'season_id' => api_nullable_int($row['season_id']),
+            'active' => $row['end_date'] === null,
+        ],
+    ], $rows);
+    api_response([
+        'ok' => true,
+        'data' => $data,
+        'pagination' => ['total' => count($data), 'limit' => count($data), 'offset' => 0, 'returned' => count($data)],
+        'context' => ['game_world_id' => $world, 'assignment_type' => 'club', 'active_only' => true, 'source' => 'CORE_IMC'],
+        'generated_at' => gmdate('c'),
+    ]);
+}
+
+
 function api_competitions(string $world): never {
     $core = api_core_context($world);
     $season = api_season($_GET['season'] ?? null, (int)($core['imc_season'] ?? 1));
@@ -560,6 +607,9 @@ try {
     }
     if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'competitions') {
         api_competitions(api_world_id($segments[1]));
+    }
+    if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'managers') {
+        api_managers(api_world_id($segments[1]));
     }
     if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'matches') {
         api_matches(api_world_id($segments[1]));
