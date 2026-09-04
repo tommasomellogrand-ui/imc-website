@@ -42,6 +42,8 @@ jobs:
           done
 
       - name: Extract authoritative GOLD and SINGLE-LEAGUE DDL (read-only)
+        id: schema_extract
+        continue-on-error: true
         shell: bash
         env:
           MYSQL_PWD: ${{ secrets.MYSQL_PASSWORD }}
@@ -107,6 +109,28 @@ jobs:
 
           echo "GOLD_SCHEMA_REAL|tables=$gold_tables|columns=$gold_columns|sha256=$gold_hash"
           echo "SINGLE_LEAGUE_SCHEMA_REAL|tables=$single_tables|columns=$single_columns|sha256=$single_hash"
+
+      - name: Record schema extraction failure
+        if: steps.schema_extract.outcome == 'failure'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ops/sm-master/schemas
+          cat > ops/sm-master/schemas/SCHEMA_EXTRACTION_STATUS.json <<'JSON'
+          {
+            "ok": false,
+            "phase": "read_only_schema_extraction",
+            "databases": ["Sql1956795_2", "Sql1956795_3"],
+            "message": "GitHub Actions could not complete the read-only schema extraction. Inspect the workflow job log."
+          }
+          JSON
+          git config user.name "IMC Schema Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add ops/sm-master/schemas/SCHEMA_EXTRACTION_STATUS.json
+          git commit -m "chore(db): record schema extraction failure" || true
+          git pull --rebase origin main
+          git push origin main
+          exit 1
 
       - name: Validate importer package
         shell: bash
