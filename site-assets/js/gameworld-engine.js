@@ -5,7 +5,7 @@
   const ROOT = document.body.dataset.worldRoot || `/${WORLD_ID.toLowerCase().replace('gw', 'gameworld')}/`;
   if (!/^GW00[1-9]$/.test(WORLD_ID)) throw new Error('Configurazione Game World non valida.');
   const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, managersPromise: null, clubs: null, clubsPromise: null, nations: null, nationsPromise: null, teamHubTab: 'clubs', competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
-  const MATCH_CACHE_KEY = `imc:${WORLD_ID}:matches:v2`;
+  const MATCH_CACHE_KEY = `imc:${WORLD_ID}:matches:v3`;
 
   const staticSections = {
     'road-chronicle': { title: 'WORLD CHRONICLE', sub: 'Official Game World Journal', icon: 'journal', intro: 'Il giornale ufficiale del Game World.', status: 'Feed non ancora alimentato dalla Public Read API.' },
@@ -264,14 +264,22 @@
     if (!Array.isArray(state.competitions)) return [];
     const matches = Array.isArray(state.matches) ? state.matches : [];
     return state.competitions.map(item => {
+      const localCompetitionIds = new Set(
+        (Array.isArray(item.local_competition_row_ids) ? item.local_competition_row_ids : [])
+          .map(Number)
+          .filter(Number.isFinite)
+      );
       const rows = matches.filter(match => {
         const competition = match.competition || {};
+        const localId = Number(competition.world_competition_row_id);
+        if (Number.isFinite(localId) && localCompetitionIds.has(localId)) return true;
         return Number(competition.competition_master_id) === Number(item.competition_master_id)
           && String(competition.division_value || 'ALL') === String(item.division_value || 'ALL')
           && String(competition.country_code || 'GLOBAL') === String(item.country_code || 'GLOBAL');
       });
       return {
         key: item.competition_key,
+        localCompetitionIds: [...localCompetitionIds],
         competition: {
           name: item.name,
           type: item.type,
@@ -379,10 +387,51 @@
       <div class="competition-overview-grid">${last ? `<article><span>LAST MATCH</span>${matchCard(last)}</article>` : ''}${next ? `<article><span>NEXT MATCH</span>${matchCard(next)}</article>` : ''}</div>`;
   }
 
+  function leagueStandings(matches) {
+    const table = new Map();
+    const ensureTeam = team => {
+      const name = String(team?.name || '').trim();
+      if (!name) return null;
+      const key = team?.world_club_id != null ? `id:${team.world_club_id}` : `name:${name.toLowerCase()}`;
+      if (!table.has(key)) table.set(key, { name, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, points: 0 });
+      return table.get(key);
+    };
+    matches.filter(match => match.result).forEach(match => {
+      const home = ensureTeam(match.home);
+      const away = ensureTeam(match.away);
+      if (!home || !away) return;
+      const homeScore = Number(match.result.home_score);
+      const awayScore = Number(match.result.away_score);
+      if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) return;
+      home.played += 1; away.played += 1;
+      home.gf += homeScore; home.ga += awayScore;
+      away.gf += awayScore; away.ga += homeScore;
+      if (homeScore > awayScore) {
+        home.won += 1; home.points += 3; away.lost += 1;
+      } else if (awayScore > homeScore) {
+        away.won += 1; away.points += 3; home.lost += 1;
+      } else {
+        home.drawn += 1; away.drawn += 1; home.points += 1; away.points += 1;
+      }
+    });
+    return [...table.values()]
+      .map(team => ({ ...team, gd: team.gf - team.ga }))
+      .sort((a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name, 'it'));
+  }
+
+  function leagueTable(matches) {
+    const rows = leagueStandings(matches);
+    if (!rows.length) return '<div class="empty-state"><strong>CLASSIFICA NON DISPONIBILE</strong><span>Non risultano risultati validi per questa competizione.</span></div>';
+    return `<div class="league-table-wrap"><table class="league-table">
+      <thead><tr><th>#</th><th>TEAM</th><th>PG</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>DR</th><th>PT</th></tr></thead>
+      <tbody>${rows.map((team, index) => `<tr><td><strong>${index + 1}</strong></td><td>${esc(team.name)}</td><td>${team.played}</td><td>${team.won}</td><td>${team.drawn}</td><td>${team.lost}</td><td>${team.gf}</td><td>${team.ga}</td><td>${team.gd > 0 ? '+' : ''}${team.gd}</td><td><strong>${team.points}</strong></td></tr>`).join('')}</tbody>
+    </table></div>`;
+  }
+
   function competitionStructure(group) {
-    const type = competitionType(group.competition);
-    const isLeague = type === 'league';
-    const isHybrid = ['smfacup', 'smfashield', 'interqualifier'].includes(type);
+    const code = String(group.competition?.competition_code || '').toUpperCase();
+    const isLeague = code === 'LEAGUE' || competitionType(group.competition) === 'league';
+    const isHybrid = ['SMFA_CHAMPIONS', 'SMFA_SHIELD', 'INTERNATIONAL_QUALIFIER', 'WORLD_CUP'].includes(code);
     const tabs = isLeague ? [['table', 'TABLE']] : isHybrid ? [['groups', 'GROUP STAGE'], ['knockout', 'KNOCKOUT']] : [['knockout', 'KNOCKOUT']];
     if (!tabs.some(([key]) => key === state.competitionSubTab)) state.competitionSubTab = tabs[0][0];
     const rounds = new Map();
@@ -391,7 +440,18 @@
       if (!rounds.has(round)) rounds.set(round, []);
       rounds.get(round).push(match);
     });
-    const body = isLeague ? '<div class="empty-state"><strong>TABLE</strong><span>Struttura pronta. La classifica verrà collegata al relativo dataset.</span></div>' : `<div class="competition-rounds">${[...rounds.entries()].map(([round, rows]) => `<section><h3>${esc(round)}</h3>${compactMatches(rows)}</section>`).join('')}</div>`;
+    let body;
+    if (isLeague) body = leagueTable(group.matches);
+    else {
+      const filteredRounds = [...rounds.entries()].filter(([round]) => {
+        const value = String(round).toLowerCase();
+        return state.competitionSubTab === 'groups' ? value.includes('group') || value.includes('girone') : !(value.includes('group') || value.includes('girone'));
+      });
+      const visibleRounds = filteredRounds.length ? filteredRounds : [...rounds.entries()];
+      body = visibleRounds.length
+        ? `<div class="competition-rounds">${visibleRounds.map(([round, rows]) => `<section><h3>${esc(round)}</h3>${compactMatches(rows)}</section>`).join('')}</div>`
+        : '<div class="empty-state"><strong>STRUTTURA NON DISPONIBILE</strong><span>Non risultano turni associati a questa competizione.</span></div>';
+    }
     return `<nav class="competition-subtabs">${tabs.map(([key, label]) => `<button type="button" data-competition-subtab="${key}" class="${state.competitionSubTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>${body}`;
   }
 
