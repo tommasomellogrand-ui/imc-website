@@ -1,0 +1,6 @@
+RewriteEngine On
+RewriteBase /gameworld005/
+
+# Serve real frontend assets directly; route every page URL through the GW005 shell.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.html [L]
