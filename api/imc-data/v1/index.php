@@ -456,7 +456,7 @@ function api_managers(string $world): never {
         "JOIN (SELECT sm_manager_id,MAX(sm_user_row_id) AS sm_user_row_id FROM gw_sm_users GROUP BY sm_manager_id) latest ON latest.sm_manager_id=a.sm_manager_id ".
         "JOIN gw_sm_users u ON u.sm_user_row_id=latest.sm_user_row_id ".
         "LEFT JOIN gw_world_clubs w ON w.game_world_id=a.game_world_id AND w.world_club_id=a.world_club_id ".
-        "WHERE a.game_world_id=? AND a.is_current=1 ORDER BY u.sm_username,u.sm_manager_id",
+        "WHERE a.game_world_id=? AND a.is_current=1 AND a.entity_type='CLUB' AND u.manager_unknown_flag=1 ORDER BY u.sm_username,u.sm_manager_id",
         [$world]
     );
     $externalData = array_map(static fn(array $row): array => [
