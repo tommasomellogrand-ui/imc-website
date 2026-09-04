@@ -1,0 +1,6 @@
+{
+  "ok": false,
+  "phase": "read_only_schema_extraction",
+  "databases": ["Sql1956795_2", "Sql1956795_3"],
+  "message": "GitHub Actions could not complete the read-only schema extraction. Inspect the workflow job log."
+}
