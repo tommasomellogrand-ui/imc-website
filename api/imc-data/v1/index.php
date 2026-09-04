@@ -90,6 +90,36 @@ function api_core_club_index(string $world, array $worldClubIds): array {
     return $index;
 }
 
+function api_club_name_key(mixed $value): string {
+    return mb_strtolower(trim(html_entity_decode((string)$value, ENT_QUOTES | ENT_HTML5, 'UTF-8')), 'UTF-8');
+}
+
+function api_core_club_name_index(string $world, array $clubNames): array {
+    $names = array_values(array_unique(array_filter(array_map(
+        static fn(mixed $name): string => trim(html_entity_decode((string)$name, ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+        $clubNames
+    ), static fn(string $name): bool => $name !== '')));
+    if ($names === []) return [];
+    $core = api_database('Sql1956795_1');
+    $placeholders = implode(',', array_fill(0, count($names), '?'));
+    $rows = api_all(
+        $core,
+        "SELECT m.club_gw_id,m.club_id,c.name,c.short_name FROM clubs_game_world_id m JOIN clubs c ON c.club_id=m.club_id WHERE m.game_world_id=? AND c.name IN ($placeholders)",
+        array_merge([$world], $names)
+    );
+    $index = [];
+    foreach ($rows as $row) {
+        $index[api_club_name_key($row['name'])] = [
+            'world_club_id' => (int)$row['club_gw_id'],
+            'club_id' => (int)$row['club_id'],
+            'name' => $row['name'],
+            'short_name' => $row['short_name'],
+            'image_url' => '/nexus/assets/clubs/'.(int)$row['club_id'].'.png',
+        ];
+    }
+    return $index;
+}
+
 function api_enrich_match_clubs(string $world, array $rows): array {
     $ids = [];
     foreach ($rows as $row) {
@@ -97,9 +127,23 @@ function api_enrich_match_clubs(string $world, array $rows): array {
         $ids[] = $row['away_world_club_id'] ?? null;
     }
     $index = api_core_club_index($world, $ids);
+    $nameIndex = api_core_club_name_index($world, array_merge(
+        array_column($rows, 'home_name'),
+        array_column($rows, 'away_name')
+    ));
     foreach ($rows as &$row) {
-        $home = $index[(string)($row['home_world_club_id'] ?? '')] ?? null;
-        $away = $index[(string)($row['away_world_club_id'] ?? '')] ?? null;
+        $home = $index[(string)($row['home_world_club_id'] ?? '')]
+            ?? $nameIndex[api_club_name_key($row['home_name'] ?? '')]
+            ?? null;
+        $away = $index[(string)($row['away_world_club_id'] ?? '')]
+            ?? $nameIndex[api_club_name_key($row['away_name'] ?? '')]
+            ?? null;
+        if (($row['home_world_club_id'] ?? null) === null && $home !== null) {
+            $row['home_world_club_id'] = $home['world_club_id'] ?? null;
+        }
+        if (($row['away_world_club_id'] ?? null) === null && $away !== null) {
+            $row['away_world_club_id'] = $away['world_club_id'] ?? null;
+        }
         $row['home_club_id'] = $home['club_id'] ?? null;
         $row['home_image_url'] = $home['image_url'] ?? null;
         $row['away_club_id'] = $away['club_id'] ?? null;
