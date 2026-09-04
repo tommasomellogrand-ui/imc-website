@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 /*
  * IMC Public Read API v1
- * Phase 1 scope: GW001 · Road To History only.
+ * Shared read-only data layer for GW001–GW009.
  *
  * This endpoint is deliberately separate from ingestion and audit handlers.
  * It performs SELECT queries only and never returns RAW captures or HTML.
@@ -12,9 +12,6 @@ declare(strict_types=1);
 require_once dirname(__DIR__, 3).'/__imc-sm-master/admin/core.php';
 
 const IMC_DATA_API_BASE = '/api/imc-data/v1';
-const IMC_DATA_API_WORLD = 'GW001';
-const IMC_DATA_API_DATABASE = 'Sql1956795_3';
-const IMC_DATA_API_FAMILY = 'single_league';
 const IMC_DATA_API_DEFAULT_LIMIT = 100;
 const IMC_DATA_API_MAX_LIMIT = 500;
 
@@ -45,7 +42,7 @@ function api_database(string $database): mysqli {
         return $connections[$database];
     }
 
-    if (!in_array($database, ['Sql1956795_1', 'Sql1956795_3'], true)) {
+    if (!in_array($database, ['Sql1956795_1', 'Sql1956795_2', 'Sql1956795_3'], true)) {
         throw new RuntimeException('Database route is not allowed.');
     }
 
@@ -64,10 +61,18 @@ function api_database(string $database): mysqli {
 
 function api_world_id(mixed $value): string {
     $world = strtoupper(trim((string)$value));
-    if ($world !== IMC_DATA_API_WORLD) {
-        api_error('Game World non disponibile in questa versione API.', 404, 'WORLD_NOT_AVAILABLE');
+    if (!preg_match('/^GW00[1-9]$/', $world)) {
+        api_error('Game World non disponibile.', 404, 'WORLD_NOT_AVAILABLE');
     }
     return $world;
+}
+
+function api_world_database(string $world): string {
+    return in_array($world, ['GW002', 'GW003', 'GW007', 'GW008'], true) ? 'Sql1956795_2' : 'Sql1956795_3';
+}
+
+function api_world_family(string $world): string {
+    return in_array($world, ['GW002', 'GW003', 'GW007', 'GW008'], true) ? 'multi_league' : 'single_league';
 }
 
 function api_season(mixed $value, int $fallback): int {
@@ -198,7 +203,7 @@ function api_dataset_counts(mysqli $db, string $world, int $season): array {
 function api_world(string $world): never {
     $core = api_core_context($world);
     $season = api_season($_GET['season'] ?? null, (int)($core['imc_season'] ?? 1));
-    $db = api_database(IMC_DATA_API_DATABASE);
+    $db = api_database(api_world_database($world));
     $localSeason = api_one(
         $db,
         'SELECT imc_season,soccer_manager_season,sm_game_world_id,sm_season_id,start_date,end_date FROM gw_seasons WHERE game_world_id=? AND imc_season=? ORDER BY gw_season_row_id DESC LIMIT 1',
@@ -227,7 +232,7 @@ function api_world(string $world): never {
         'data' => [
             'game_world_id' => $world,
             'name' => $core['imc_name'],
-            'storage_family' => IMC_DATA_API_FAMILY,
+            'storage_family' => api_world_family($world),
             'sm_game_world_id' => api_nullable_int($core['sm_game_world_id'] ?? $localSeason['sm_game_world_id']),
             'season' => [
                 'imc_season' => $season,
@@ -256,9 +261,9 @@ function api_competitions(string $world): never {
         api_error('Parametro group non valido.', 422, 'INVALID_COMPETITION_GROUP');
     }
 
-    $db = api_database(IMC_DATA_API_DATABASE);
+    $db = api_database(api_world_database($world));
     $sql = "SELECT c.competition_master_id,m.competition_code,m.display_name,m.competition_group,m.competition_family,m.hierarchy_path,".
-        "c.competition_type,c.division_value,MIN(f.date) start_date,MAX(f.date) end_date,".
+        "c.competition_type,c.division_value,c.country_code,MIN(f.date) start_date,MAX(f.date) end_date,".
         "GROUP_CONCAT(DISTINCT c.gw_competition_row_id ORDER BY c.gw_competition_row_id) local_row_ids,".
         "COUNT(DISTINCT f.fixture_id) fixture_count,".
         "COUNT(DISTINCT fr.fixture_id) result_count,".
@@ -271,16 +276,17 @@ function api_competitions(string $world): never {
         "LEFT JOIN gw_match_reports mr ON mr.game_world_id=f.game_world_id AND mr.fixture_id=f.fixture_id ".
         "WHERE c.game_world_id=? AND f.imc_season=? ".
         ($group !== '' ? "AND LOWER(m.competition_group)=? " : "").
-        "GROUP BY c.competition_master_id,m.competition_code,m.display_name,m.competition_group,m.competition_family,m.hierarchy_path,c.competition_type,c.division_value ".
-        "ORDER BY FIELD(m.competition_group,'DOMESTIC','INTERNATIONAL','NATIONS'),m.competition_master_id,c.division_value";
+        "GROUP BY c.competition_master_id,m.competition_code,m.display_name,m.competition_group,m.competition_family,m.hierarchy_path,c.competition_type,c.division_value,c.country_code ".
+        "ORDER BY FIELD(m.competition_group,'DOMESTIC','INTERNATIONAL','NATIONS'),c.country_code,m.competition_master_id,c.division_value";
 
     $params = $group !== '' ? [$world, $season, $group] : [$world, $season];
     $rows = api_all($db, $sql, $params);
     $data = array_map(static function (array $row) use ($season): array {
         $division = api_nullable_int($row['division_value']);
         $masterId = (int)$row['competition_master_id'];
+        $countryCode = trim((string)($row['country_code'] ?? '')) ?: null;
         return [
-            'competition_key' => $masterId.':GLOBAL:'.($division ?? 'ALL'),
+            'competition_key' => $masterId.':'.($countryCode ?? 'GLOBAL').':'.($division ?? 'ALL'),
             'competition_master_id' => $masterId,
             'competition_code' => $row['competition_code'],
             'name' => $row['display_name'].($row['competition_code'] === 'LEAGUE' && $division !== null ? ' Division '.$division : ''),
@@ -288,6 +294,7 @@ function api_competitions(string $world): never {
             'competition_family' => strtolower((string)$row['competition_family']),
             'type' => $row['competition_type'],
             'division_value' => $division,
+            'country_code' => $countryCode,
             'imc_season' => $season,
             'hierarchy_path' => $row['hierarchy_path'],
             'local_competition_row_ids' => array_map('intval', array_filter(explode(',', (string)$row['local_row_ids']))),
@@ -341,6 +348,7 @@ function api_match_row(array $row): array {
             'competition_group' => $row['competition_group'],
             'competition_code' => $row['master_competition_id'],
             'division_value' => $row['division_value'],
+            'country_code' => $row['country_code'],
             'round_label' => $row['round_label'],
         ],
         'result' => $row['fixture_result_id'] === null ? null : [
@@ -379,7 +387,7 @@ function api_matches(string $world): never {
     $limit = api_positive_int($_GET['limit'] ?? null, IMC_DATA_API_DEFAULT_LIMIT, IMC_DATA_API_MAX_LIMIT);
     if ($limit < 1) api_error('limit deve essere maggiore di zero.', 422, 'INVALID_LIMIT');
     $offset = api_positive_int($_GET['offset'] ?? null, 0, 1000000);
-    $db = api_database(IMC_DATA_API_DATABASE);
+    $db = api_database(api_world_database($world));
 
     $total = api_count(
         $db,
@@ -403,14 +411,14 @@ function api_matches(string $world): never {
         'context' => [
             'game_world_id' => $world,
             'imc_season' => $season,
-            'storage_family' => IMC_DATA_API_FAMILY,
+            'storage_family' => api_world_family($world),
         ],
         'generated_at' => gmdate('c'),
     ]);
 }
 
 function api_match_detail(string $world, int $fixtureId): never {
-    $db = api_database(IMC_DATA_API_DATABASE);
+    $db = api_database(api_world_database($world));
     $row = api_one(
         $db,
         api_match_select().'WHERE f.game_world_id=? AND f.fixture_id=? LIMIT 1',
