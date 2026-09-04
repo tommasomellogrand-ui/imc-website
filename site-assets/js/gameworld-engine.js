@@ -4,7 +4,7 @@
   const WORLD_ID = String(document.body.dataset.world || '').toUpperCase();
   const ROOT = document.body.dataset.worldRoot || `/${WORLD_ID.toLowerCase().replace('gw', 'gameworld')}/`;
   if (!/^GW00[1-9]$/.test(WORLD_ID)) throw new Error('Configurazione Game World non valida.');
-  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
+  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, managersPromise: null, competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
   const MATCH_CACHE_KEY = `imc:${WORLD_ID}:matches:v2`;
 
   const staticSections = {
@@ -86,6 +86,19 @@
         .finally(() => { state.competitionsPromise = null; });
     }
     return state.competitionsPromise;
+  }
+
+  function loadManagers() {
+    if (state.managers) return Promise.resolve(state.managers);
+    if (!state.managersPromise) {
+      state.managersPromise = IMCDataService.getManagers(WORLD_ID)
+        .then(payload => {
+          state.managers = Array.isArray(payload.data) ? payload.data : [];
+          return state.managers;
+        })
+        .finally(() => { state.managersPromise = null; });
+    }
+    return state.managersPromise;
   }
 
   function formatDate(value, long = false) {
@@ -409,6 +422,31 @@
     return `<section class="section-page">${pageHead(title, sub, iconName, back)}${viewTabs(active)}<div class="list-summary"><strong>${esc(rows.length)}</strong><span>${kind === 'calendar' ? 'UPCOMING FIXTURES' : 'MATCHES'}</span></div><div class="match-list">${content}</div></section>`;
   }
 
+  function managerInitials(name) {
+    return String(name || 'IMC').trim().split(/\s+/).slice(0, 2).map(part => part.charAt(0)).join('').toUpperCase();
+  }
+
+  function managerCard(item) {
+    const manager = item.manager || {};
+    const club = item.club || {};
+    const assignment = item.assignment || {};
+    return `<article class="manager-card">
+      <div class="manager-avatar">${esc(managerInitials(manager.full_name))}</div>
+      <div class="manager-copy"><small>${esc(manager.manager_id || 'IMC MANAGER')}</small><h2>${esc(manager.full_name || 'Manager non disponibile')}</h2><p>${esc(club.name || 'Club non disponibile')}</p></div>
+      <div class="manager-meta"><span>IMC</span><small>DAL ${esc(formatDate(assignment.start_date))}</small></div>
+    </article>`;
+  }
+
+  function managersPage() {
+    const rows = Array.isArray(state.managers) ? state.managers : [];
+    const content = rows.length ? `<div class="manager-list">${rows.map(managerCard).join('')}</div>` : '<div class="empty-state"><strong>NESSUN MANAGER IMC</strong><span>Non risultano assegnazioni club attive per questo Game World.</span></div>';
+    return `<section class="section-page managers-page">${pageHead('MANAGERS', `${rows.length} manager IMC assegnati`, 'manager')}
+      <nav class="competition-subtabs section-placeholder-tabs"><button type="button" class="active">IMC</button><button type="button" disabled>EXTERNAL</button></nav>
+      <section class="manager-summary"><div><small>ACTIVE ASSIGNMENTS</small><strong>${esc(rows.length)}</strong><span>IMC MANAGERS</span></div><span>${icon('manager')}</span></section>
+      ${content}
+    </section>`;
+  }
+
   function staticSection(key) {
     const section = staticSections[key] || staticSections.codex;
     const tabs = key === 'team-hub' ? ['CLUB', 'NATIONS'] : key === 'managers' ? ['IMC', 'EXTERNAL'] : key === 'transfers' ? ['ALL TRANSFERS', 'ENTRATE', 'USCITE'] : key === 'codex' ? ['PLAYERS', 'TEAMS', 'RECORDS'] : [];
@@ -559,6 +597,12 @@
 
       if (route === 'home') {
         app.innerHTML = home();
+        return;
+      }
+      if (route === 'managers') {
+        app.innerHTML = routeLoading('MANAGERS', 'Caricamento manager IMC', 'manager');
+        await loadManagers();
+        app.innerHTML = managersPage();
         return;
       }
       if (staticSections[route]) {
