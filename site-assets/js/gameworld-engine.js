@@ -4,7 +4,7 @@
   const WORLD_ID = String(document.body.dataset.world || '').toUpperCase();
   const ROOT = document.body.dataset.worldRoot || `/${WORLD_ID.toLowerCase().replace('gw', 'gameworld')}/`;
   if (!/^GW00[1-9]$/.test(WORLD_ID)) throw new Error('Configurazione Game World non valida.');
-  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, managersPromise: null, clubs: null, clubsPromise: null, nations: null, nationsPromise: null, transfers: null, transfersPromise: null, teamHubTab: 'clubs', managerTab: 'imc', competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
+  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, externalManagers: null, managersPromise: null, clubs: null, clubsPromise: null, nations: null, nationsPromise: null, transfers: null, transfersPromise: null, teamHubTab: 'clubs', managerTab: 'imc', detailTab: 'overview', competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
   const MATCH_CACHE_KEY = `imc:${WORLD_ID}:matches:v3`;
 
   const staticSections = {
@@ -94,6 +94,7 @@
       state.managersPromise = IMCDataService.getManagers(WORLD_ID)
         .then(payload => {
           state.managers = Array.isArray(payload.data) ? payload.data : [];
+          state.externalManagers = Array.isArray(payload.external_data) ? payload.external_data : [];
           return state.managers;
         })
         .finally(() => { state.managersPromise = null; });
@@ -558,10 +559,13 @@
     const image = item.image_url
       ? `<img src="${esc(item.image_url)}" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span hidden>${esc(teamInitials(name))}</span>`
       : `<span>${esc(teamInitials(name))}</span>`;
-    return `<article class="team-hub-card" data-team-type="${isNation ? 'national' : 'club'}" data-team-id="${esc(isNation ? item.nation_id : item.club_id)}" data-team-world-id="${esc(isNation ? item.nation_gw_id : item.club_gw_id)}">
+    const detailType = isNation ? 'nations' : 'clubs';
+    const detailId = isNation ? item.nation_gw_id : item.club_gw_id;
+    return `<a class="team-hub-card" href="${ROOT}team-hub/${detailType}/${encodeURIComponent(detailId)}/" data-team-type="${isNation ? 'national' : 'club'}" data-team-id="${esc(isNation ? item.nation_id : item.club_id)}" data-team-world-id="${esc(detailId)}">
       <div class="team-hub-logo ${isNation ? 'team-hub-flag' : ''}">${image}</div>
       <strong>${esc(name)}</strong>
-    </article>`;
+      <span class="card-open">›</span>
+    </a>`;
   }
 
   function teamHubPage() {
@@ -585,28 +589,73 @@
     return String(name || 'IMC').trim().split(/\s+/).slice(0, 2).map(part => part.charAt(0)).join('').toUpperCase();
   }
 
-  function managerCard(item) {
+  function managerCard(item, type = 'imc') {
     const manager = item.manager || {};
-    const name = manager.full_name || 'Manager non disponibile';
-    return `<article class="manager-card manager-card-imc" data-manager-id="${esc(manager.manager_id || '')}" data-sm-manager-id="${esc(manager.sm_manager_id || '')}">
+    const external = type === 'external';
+    const name = manager.full_name || manager.sm_username || 'Manager non disponibile';
+    const id = external ? manager.sm_manager_id : manager.manager_id;
+    return `<a class="manager-card ${external ? 'manager-card-external' : 'manager-card-imc'}" href="${ROOT}managers/${type}/${encodeURIComponent(id || '')}/" data-manager-id="${esc(manager.manager_id || '')}" data-sm-manager-id="${esc(manager.sm_manager_id || '')}">
       <strong>${esc(name)}</strong>
-      <small>${esc(manager.manager_id || 'IMC MANAGER')}</small>
-    </article>`;
+      <small>${esc(external ? `SM #${manager.sm_manager_id || '—'} · ${item.club?.name || 'Club non disponibile'}` : (manager.manager_id || 'IMC MANAGER'))}</small>
+      <span class="card-open">›</span>
+    </a>`;
   }
 
   function managersPage() {
     const rows = Array.isArray(state.managers) ? state.managers : [];
+    const externalRows = Array.isArray(state.externalManagers) ? state.externalManagers : [];
     const externalMode = state.managerTab === 'external';
     const content = externalMode
-      ? '<div class="manager-list"><div class="manager-empty">Struttura EXTERNAL pronta. I dati verranno collegati quando sarà definita la fonte.</div></div>'
+      ? (externalRows.length ? `<div class="manager-list">${externalRows.map(item => managerCard(item, 'external')).join('')}</div>` : '<div class="manager-list"><div class="manager-empty">Nessun manager External disponibile.</div></div>')
       : (rows.length ? `<div class="manager-list">${rows.map(managerCard).join('')}</div>` : '<div class="manager-list"><div class="manager-empty">Nessun manager IMC disponibile.</div></div>');
-    return `<section class="section-page managers-page">${pageHead('MANAGERS', `${rows.length} manager IMC assegnati`, 'manager')}
+    return `<section class="section-page managers-page">${pageHead('MANAGERS', `${rows.length} IMC · ${externalRows.length} External`, 'manager')}
       <nav class="competition-subtabs section-placeholder-tabs managers-tabs">
         <button type="button" data-manager-tab="imc" class="${!externalMode ? 'active' : ''}">IMC</button>
         <button type="button" data-manager-tab="external" class="${externalMode ? 'active' : ''}">EXTERNAL</button>
       </nav>
       ${content}
     </section>`;
+  }
+
+  function valueRow(label, value) {
+    return `<div><span>${esc(label)}</span><strong>${esc(value == null || value === '' ? '—' : value)}</strong></div>`;
+  }
+
+  function detailTabs(items) {
+    return `<nav class="competition-subtabs entity-detail-tabs">${items.map(([key,label]) => `<button type="button" data-detail-tab="${key}" class="${state.detailTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>`;
+  }
+
+  function managerDetailPage(item, type) {
+    if (!item) return `<section class="section-page">${pageHead('MANAGER', 'Profilo non disponibile', 'manager', `${ROOT}managers/`)}<div class="empty-state"><strong>MANAGER NON TROVATO</strong></div></section>`;
+    const manager = item.manager || {};
+    const assignment = item.assignment || item.assignments?.[0] || {};
+    const club = item.club || item.national_team || {};
+    const name = manager.full_name || manager.sm_username || 'Manager';
+    let fields;
+    if (state.detailTab === 'assignment') fields = [
+      ['Squadra', club.name], ['Tipo incarico', assignment.entity_type || assignment.type], ['World Club ID', assignment.world_club_id || club.sm_world_club_id], ['Inizio incarico', assignment.valid_from || assignment.start_date], ['Fine incarico', assignment.valid_to || assignment.end_date], ['Incarico attivo', assignment.active ? 'Sì' : 'No']
+    ];
+    else if (state.detailTab === 'profile') fields = [
+      ['Manager ID IMC', manager.manager_id], ['SM Manager ID', manager.sm_manager_id], ['Username SM', manager.sm_username], ['Ultimo accesso', manager.last_online], ['Reputazione', manager.reputation], ['Immagine profilo', manager.image_src]
+    ];
+    else fields = [
+      ['Nome', name], ['Tipo manager', type === 'external' ? 'External' : 'IMC'], ['Game World', WORLD_ID], ['Squadra attuale', club.name], ['Stagione IMC', assignment.imc_season || assignment.season_id], ['Stato', assignment.active ? 'Attivo' : 'Non attivo']
+    ];
+    return `<section class="section-page entity-detail-page">${pageHead(name, `${type === 'external' ? 'EXTERNAL' : 'IMC'} MANAGER · ${WORLD_ID}`, 'manager', `${ROOT}managers/`)}${detailTabs([['overview','OVERVIEW'],['assignment','ASSIGNMENT'],['profile','PROFILE']])}<div class="entity-detail-fields">${fields.map(row => valueRow(...row)).join('')}</div></section>`;
+  }
+
+  function clubDetailPage(club) {
+    if (!club) return `<section class="section-page">${pageHead('CLUB', 'Scheda non disponibile', 'teams', `${ROOT}team-hub/`)}<div class="empty-state"><strong>CLUB NON TROVATO</strong></div></section>`;
+    const local = club.local || {};
+    let fields;
+    if (state.detailTab === 'identity') fields = [
+      ['Club ID', club.club_id], ['Club GW ID', club.club_gw_id], ['World Club ID', local.world_club_id], ['Master Club ID', local.master_club_id], ['Game World', club.game_world_id]
+    ];
+    else if (state.detailTab === 'status') fields = [
+      ['Paese', local.country_code], ['Divisione', local.division], ['Club attivo', local.current == null ? null : (local.current ? 'Sì' : 'No')], ['Managed', local.managed == null ? null : (local.managed ? 'Sì' : 'No')], ['Balance', local.balance], ['Friends', local.friends_count]
+    ];
+    else fields = [['Nome', club.name], ['Nome breve', club.short_name], ['Game World', WORLD_ID], ['Divisione', local.division], ['Paese', local.country_code]];
+    return `<section class="section-page entity-detail-page">${pageHead(club.name || 'CLUB', `${WORLD_ID} · TEAM HUB`, 'teams', `${ROOT}team-hub/`)}<div class="entity-detail-logo">${club.image_url ? `<img src="${esc(club.image_url)}" alt="">` : esc(teamInitials(club.name))}</div>${detailTabs([['overview','OVERVIEW'],['identity','IDENTITY'],['status','STATUS']])}<div class="entity-detail-fields">${fields.map(row => valueRow(...row)).join('')}</div></section>`;
   }
 
 
@@ -782,6 +831,12 @@
         renderRoute();
         return;
       }
+      const detailTab = event.target.closest?.('[data-detail-tab]');
+      if (detailTab) {
+        state.detailTab = detailTab.dataset.detailTab;
+        renderRoute();
+        return;
+      }
       const competitionTab = event.target.closest?.('[data-competition-tab]');
       if (competitionTab) {
         state.competitionTab = competitionTab.dataset.competitionTab;
@@ -831,13 +886,24 @@
       if (route === 'team-hub') {
         app.innerHTML = routeLoading('TEAM HUB', 'Caricamento club e nazionali', 'teams');
         await Promise.all([loadClubs(), loadNations()]);
-        app.innerHTML = teamHubPage();
+        if (parts[1] === 'clubs' && parts[2]) {
+          const club = state.clubs.find(item => String(item.club_gw_id) === String(parts[2]));
+          app.innerHTML = clubDetailPage(club);
+        } else {
+          app.innerHTML = teamHubPage();
+        }
         return;
       }
       if (route === 'managers') {
         app.innerHTML = routeLoading('MANAGERS', 'Caricamento manager IMC', 'manager');
         await loadManagers();
-        app.innerHTML = managersPage();
+        if (parts[1] && parts[2]) {
+          const rows = parts[1] === 'external' ? state.externalManagers : state.managers;
+          const item = rows.find(row => String(parts[1] === 'external' ? row.manager?.sm_manager_id : row.manager?.manager_id) === String(parts[2]));
+          app.innerHTML = managerDetailPage(item, parts[1]);
+        } else {
+          app.innerHTML = managersPage();
+        }
         return;
       }
       if (route === 'transfers') {
