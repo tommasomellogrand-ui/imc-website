@@ -470,3 +470,120 @@ main { width: min(100%, 520px); min-height: calc(100svh - 152px); margin: auto; 
     min-width: 150px;
   }
 }
+
+
+/* Nexus GW002 structure parity · Team Hub + Managers */
+.team-hub-tabs,
+.managers-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.team-hub-tabs button,
+.managers-tabs button {
+  width: 100%;
+}
+.team-hub-list,
+.manager-list {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.team-hub-card,
+.manager-card {
+  appearance: none;
+  min-width: 0;
+  min-height: 116px;
+  padding: 11px 6px 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fff, var(--surface-soft));
+  box-shadow: 0 8px 17px rgba(8, 43, 99, .06), inset 0 1px 0 #fff;
+  color: var(--ink);
+  text-align: center;
+}
+.team-hub-logo {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.team-hub-logo img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.team-hub-flag {
+  width: 62px;
+  height: 46px;
+}
+.team-hub-card > strong,
+.manager-card > strong {
+  width: 100%;
+  min-height: 24px;
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 7.2px;
+  line-height: 1.18;
+  font-weight: 950;
+  letter-spacing: -.08px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.manager-card > small {
+  display: block;
+  color: var(--muted);
+  font-size: 6.4px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .35px;
+}
+.manager-empty {
+  grid-column: 1 / -1;
+  padding: 18px;
+  border: 1px dashed var(--line);
+  border-radius: 15px;
+  background: linear-gradient(#fff, var(--surface-soft));
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.5;
+  font-weight: 800;
+  text-align: center;
+}
+@media (max-width: 390px) {
+  .team-hub-list,
+  .manager-list {
+    gap: 6px;
+  }
+  .team-hub-card,
+  .manager-card {
+    min-height: 108px;
+    padding: 9px 5px 8px;
+    border-radius: 14px;
+  }
+  .team-hub-logo {
+    width: 52px;
+    height: 52px;
+  }
+  .team-hub-flag {
+    width: 56px;
+    height: 42px;
+  }
+  .team-hub-card > strong,
+  .manager-card > strong {
+    font-size: 6.6px;
+  }
+}
