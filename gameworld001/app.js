@@ -102,37 +102,30 @@
   }
 
   function logicalCompetitionName(competition) {
-    const type = competitionType(competition);
+    const code = String(competition?.competition_code || '').toUpperCase();
+    const canonicalLabels = {
+      LEAGUE: competition?.division_value ? `League Division ${competition.division_value}` : 'League',
+      NATIONAL_CUP: 'National Cup',
+      LEAGUE_CUP: 'League Cup',
+      CHARITY_SHIELD: 'Charity Shield',
+      SMFA_CHAMPIONS: 'SMFA Champions',
+      SMFA_SHIELD: 'SMFA Shield',
+      SMFA_SUPER_CUP: 'SMFA Super Cup',
+      INTERNATIONAL_QUALIFIER: 'International Qualifier',
+      WORLD_CUP: 'World Cup'
+    };
+    if (canonicalLabels[code]) return canonicalLabels[code];
     const original = competitionName(competition);
-    if (type === 'league') return original;
-    if (!competition?.name) {
-      const labels = {
-        interqualifier: 'International Qualifiers',
-        leaguecup: 'Road To History Cup',
-        smfacup: 'SMFA Champions Cup',
-        smfashield: 'SMFA Shield'
-      };
-      return labels[type] || original;
-    }
-    const round = String(competition.round_label || '').trim();
+    const round = String(competition?.round_label || '').trim();
     if (round && original.toLowerCase().endsWith(round.toLowerCase())) {
       return original.slice(0, -round.length).trim().replace(/[·|—-]+$/, '').trim();
     }
-    return original
-      .replace(/\s+(?:turno|round)\s+\d+$/i, '')
-      .replace(/\s+girone\s+[a-z0-9]+$/i, '')
-      .replace(/\s+(?:ottavi|quarti|semifinali?|finale)$/i, '')
-      .trim();
+    return original;
   }
 
   function competitionCategory(competition) {
     const storedGroup = String(competition?.competition_group || '').toLowerCase();
-    if (['domestic', 'international', 'nations'].includes(storedGroup)) return storedGroup;
-    const value = `${competition?.type || ''} ${competition?.name || ''}`.toLowerCase().replace(/[^a-z0-9]+/g, '');
-    if (value.includes('interqualifier') || value.includes('worldcup') || value.includes('qualifier')) return 'nations';
-    if (value.includes('smfacup') || value.includes('smfashield') || value.includes('supercup') || value.includes('champions')) return 'international';
-    if (value.includes('friendly')) return 'friendly';
-    return 'domestic';
+    return ['domestic', 'international', 'nations'].includes(storedGroup) ? storedGroup : 'unclassified';
   }
 
   function matchHref(match) {
@@ -208,9 +201,10 @@
 
   function competitionKey(match) {
     const competition = match.competition || {};
-    const type = competitionType(competition);
-    const identity = logicalCompetitionName(competition).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    return `${type}:${identity}`;
+    const master = competition.competition_master_id || competition.competition_code || 'unclassified';
+    const country = competition.country_code || 'GLOBAL';
+    const division = competition.division_value || 'ALL';
+    return `${master}:${country}:${division}`;
   }
 
   function competitionGroups() {
