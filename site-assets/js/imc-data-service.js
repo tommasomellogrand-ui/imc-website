@@ -82,11 +82,38 @@
     return request(`${worldPath(gameWorldId)}/nations`);
   }
 
+
+  async function getTransfers(gameWorldId, options = {}) {
+    const params = new URLSearchParams();
+    if (options.limit != null) params.set('limit', String(options.limit));
+    if (options.offset != null) params.set('offset', String(options.offset));
+    const query = params.toString();
+    return request(`${worldPath(gameWorldId)}/transfers${query ? `?${query}` : ''}`);
+  }
+
+  async function getAllTransfers(gameWorldId) {
+    const limit = 500;
+    const first = await getTransfers(gameWorldId, { limit, offset: 0 });
+    const rows = [...first.data];
+    const total = Number(first.pagination?.total || rows.length);
+    for (let offset = rows.length; offset < total; offset += limit) {
+      const page = await getTransfers(gameWorldId, { limit, offset });
+      rows.push(...page.data);
+    }
+    return { ...first, data: rows, pagination: { ...first.pagination, total, offset: 0, returned: rows.length } };
+  }
+
+  async function getTransfer(gameWorldId, transferRowId) {
+    const value = String(transferRowId || '');
+    if (!/^\d+$/.test(value)) throw new Error('Numero trasferimento non valido.');
+    return request(`${worldPath(gameWorldId)}/transfers/${encodeURIComponent(value)}`);
+  }
+
   async function getMatch(gameWorldId, fixtureId) {
     const value = String(fixtureId || '');
     if (!/^\d+$/.test(value)) throw new Error('Fixture ID non valido.');
     return request(`${worldPath(gameWorldId)}/matches/${encodeURIComponent(value)}`);
   }
 
-  global.IMCDataService = Object.freeze({ getWorld, getMatches, getAllMatches, getCompetitions, getManagers, getClubs, getNations, getMatch });
+  global.IMCDataService = Object.freeze({ getWorld, getMatches, getAllMatches, getCompetitions, getManagers, getClubs, getNations, getTransfers, getAllTransfers, getTransfer, getMatch });
 })(window);
