@@ -99,7 +99,33 @@
     return String(competition?.type || 'other').toLowerCase();
   }
 
+  function logicalCompetitionName(competition) {
+    const type = competitionType(competition);
+    const original = competitionName(competition);
+    if (type === 'league') return original;
+    if (!competition?.name) {
+      const labels = {
+        interqualifier: 'International Qualifiers',
+        leaguecup: 'Road To History Cup',
+        smfacup: 'SMFA Champions Cup',
+        smfashield: 'SMFA Shield'
+      };
+      return labels[type] || original;
+    }
+    const round = String(competition.round_label || '').trim();
+    if (round && original.toLowerCase().endsWith(round.toLowerCase())) {
+      return original.slice(0, -round.length).trim().replace(/[·|—-]+$/, '').trim();
+    }
+    return original
+      .replace(/\s+(?:turno|round)\s+\d+$/i, '')
+      .replace(/\s+girone\s+[a-z0-9]+$/i, '')
+      .replace(/\s+(?:ottavi|quarti|semifinali?|finale)$/i, '')
+      .trim();
+  }
+
   function competitionCategory(competition) {
+    const storedGroup = String(competition?.competition_group || '').toLowerCase();
+    if (['domestic', 'international', 'nations'].includes(storedGroup)) return storedGroup;
     const value = `${competition?.type || ''} ${competition?.name || ''}`.toLowerCase().replace(/[^a-z0-9]+/g, '');
     if (value.includes('interqualifier') || value.includes('worldcup') || value.includes('qualifier')) return 'nations';
     if (value.includes('smfacup') || value.includes('smfashield') || value.includes('supercup') || value.includes('champions')) return 'international';
@@ -180,14 +206,21 @@
   }
 
   function competitionKey(match) {
-    return String(match.competition?.world_competition_row_id ?? `type:${competitionName(match.competition)}`);
+    const competition = match.competition || {};
+    const type = competitionType(competition);
+    const identity = logicalCompetitionName(competition).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return `${type}:${identity}`;
   }
 
   function competitionGroups() {
     const groups = new Map();
     state.matches.forEach(match => {
       const key = competitionKey(match);
-      if (!groups.has(key)) groups.set(key, { key, competition: match.competition, matches: [], results: 0, scheduled: 0, reports: 0 });
+      if (!groups.has(key)) groups.set(key, {
+        key,
+        competition: { ...match.competition, name: logicalCompetitionName(match.competition) },
+        matches: [], results: 0, scheduled: 0, reports: 0
+      });
       const group = groups.get(key);
       group.matches.push(match);
       if (match.result) group.results += 1;
