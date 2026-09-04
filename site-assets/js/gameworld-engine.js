@@ -503,7 +503,7 @@
     const group = competitionGroups().find(item => item.key === groupKey);
     if (!group) return errorPage('Competizione non trovata.');
     const code = String(group.competition?.competition_code || '').toUpperCase();
-    const isLeague = code === 'LEAGUE' || competitionType(group.competition) === 'league';
+    const usesLeagueNavigation = code === 'LEAGUE' || code === 'INTERNATIONAL_QUALIFIER' || competitionType(group.competition) === 'league';
     competitionDetailTabs(group);
     let body = competitionOverview(group);
     if (usesLeagueNavigation) {
