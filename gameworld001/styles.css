@@ -302,6 +302,35 @@ main { width: min(100%, 520px); min-height: calc(100svh - 152px); margin: auto; 
 .nx-bottom-nav a span { font-size: 16px; line-height: 1; }
 .nx-bottom-nav a.active { color: var(--copper-dark); background: #f8ebe6; }
 
+.hub-grid-gw002 { grid-template-rows: 142px 126px 106px 88px; }
+.hub-grid-gw002 .hub-competitions { grid-column: 1 / -1; grid-row: 1; }
+.hub-grid-gw002 .hub-managers { grid-column: 1; grid-row: 2; }
+.hub-grid-gw002 .hub-team { grid-column: 2; grid-row: 2; }
+.hub-grid-gw002 .hub-trophy { grid-column: 1; grid-row: 3; }
+.hub-grid-gw002 .hub-news { grid-column: 2; grid-row: 3; }
+.hub-grid-gw002 .hub-codex { grid-column: 1; grid-row: 4; }
+.hub-grid-gw002 .hub-transfers { grid-column: 2; grid-row: 4; }
+.competition-detail-tabs { position: sticky; top: calc(126px + env(safe-area-inset-top)); z-index: 17; margin: 10px 0; padding: 6px; display: flex; gap: 4px; overflow-x: auto; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,253,250,.97); box-shadow: 0 7px 16px rgba(63,31,20,.055); scrollbar-width: none; }
+.competition-detail-tabs::-webkit-scrollbar, .competition-subtabs::-webkit-scrollbar { display: none; }
+.competition-detail-tabs button, .competition-subtabs button { min-height: 36px; padding: 0 13px; flex: 0 0 auto; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font-size: 7px; font-weight: 950; letter-spacing: .25px; }
+.competition-detail-tabs button.active, .competition-subtabs button.active { color: #fff; background: linear-gradient(180deg,var(--copper),var(--copper-dark)); }
+.competition-detail-body { display: block; }
+.competition-subtabs { margin: 10px 0; padding: 6px; display: flex; gap: 5px; overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: #fff; scrollbar-width: none; }
+.competition-status { position: relative; margin-top: 10px; padding: 18px; border-radius: 19px; color: #fff; background: linear-gradient(135deg,var(--ink),#5a3327); box-shadow: 0 12px 25px rgba(43,22,15,.18); }
+.competition-status span, .competition-status small { display: block; color: rgba(255,255,255,.62); font-size: 6px; font-weight: 900; letter-spacing: .6px; }
+.competition-status strong { display: block; margin: 10px 0 4px; font-size: 28px; font-weight: 950; }
+.competition-status strong i { color: var(--gold); font-style: normal; }
+.competition-status-bar { height: 4px; margin-top: 13px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.16); }
+.competition-status-bar b { display: block; height: 100%; background: linear-gradient(90deg,var(--gold),#fff0bf); }
+.competition-status em { position: absolute; right: 18px; bottom: 15px; color: var(--gold); font-size: 8px; font-style: normal; font-weight: 950; }
+.competition-overview-grid { display: grid; gap: 10px; margin-top: 10px; }
+.competition-overview-grid > article { padding: 10px; border: 1px solid var(--line); border-radius: 17px; background: #fff; }
+.competition-overview-grid > article > span { display: block; margin: 2px 3px 8px; color: var(--gold); font-size: 6px; font-weight: 950; letter-spacing: .6px; }
+.competition-rounds { display: grid; gap: 12px; }
+.competition-rounds > section > h3 { margin: 0 0 7px; padding: 10px 12px; border-radius: 12px; color: #fff; background: var(--ink); font-size: 9px; letter-spacing: .5px; }
+.compact-match-list { margin-top: 0; }
+.section-placeholder-tabs { margin-top: 10px; }
+
 @media (max-width: 390px) {
   .nx-topbar { grid-template-columns: 68px minmax(0, 1fr) 68px; }
   .nx-brand strong { font-size: 17px; }
@@ -312,6 +341,7 @@ main { width: min(100%, 520px); min-height: calc(100svh - 152px); margin: auto; 
   .world-season strong { font-size: 9px; }
   .world-season span { font-size: 5.7px; }
   .hub-grid { grid-template-rows: 117px 117px 94px 82px 82px; gap: 7px; }
+  .hub-grid-gw002 { grid-template-rows: 132px 120px 101px 84px; }
   .hub-competitions .hub-art { width: 92px; height: 92px; }
   .hub-copy h2 { font-size: 12px; }
   .hub-copy p { font-size: 6.5px; }
