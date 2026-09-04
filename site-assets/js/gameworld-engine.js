@@ -359,13 +359,21 @@
     </section>`;
   }
 
+
+  function clubLogo(team, className = '') {
+    const name = team?.name || 'Club';
+    return team?.image_url
+      ? `<span class="club-logo ${esc(className)}"><img src="${esc(team.image_url)}" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><b hidden>${esc(teamInitials(name))}</b></span>`
+      : `<span class="club-logo ${esc(className)}"><b>${esc(teamInitials(name))}</b></span>`;
+  }
+
   function matchCard(match) {
     return `<a class="match-card" href="${matchHref(match)}">
       <div class="match-top"><span>${esc(matchState(match))}</span><small>${esc(competitionName(match.competition))}</small>${match.availability?.match_report ? '<b>MATCH REPORT</b>' : ''}</div>
       <div class="match-main">
-        <div class="team-cell home"><span>${esc((match.home?.name || '?').slice(0, 1))}</span><strong>${esc(match.home?.name || '—')}</strong></div>
+        <div class="team-cell home">${clubLogo(match.home)}<strong>${esc(match.home?.name || '—')}</strong></div>
         ${scoreMarkup(match)}
-        <div class="team-cell away"><span>${esc((match.away?.name || '?').slice(0, 1))}</span><strong>${esc(match.away?.name || '—')}</strong></div>
+        <div class="team-cell away">${clubLogo(match.away)}<strong>${esc(match.away?.name || '—')}</strong></div>
       </div>
       <div class="match-bottom"><time>${esc(formatDate(match.date, true))}${match.time ? ` · ${esc(match.time)}` : ''}</time><span>VIEW MATCH ›</span></div>
     </a>`;
@@ -407,7 +415,7 @@
       const name = String(team?.name || '').trim();
       if (!name) return null;
       const key = team?.world_club_id != null ? `id:${team.world_club_id}` : `name:${name.toLowerCase()}`;
-      if (!table.has(key)) table.set(key, { name, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, points: 0 });
+      if (!table.has(key)) table.set(key, { name, image_url: team?.image_url || null, club_id: team?.club_id || null, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, points: 0 });
       return table.get(key);
     };
     matches.filter(match => match.result).forEach(match => {
@@ -438,7 +446,7 @@
     if (!rows.length) return '<div class="empty-state"><strong>CLASSIFICA NON DISPONIBILE</strong><span>Non risultano risultati validi per questa competizione.</span></div>';
     return `<div class="league-table-wrap"><table class="league-table">
       <thead><tr><th>#</th><th>TEAM</th><th>PG</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>DR</th><th>PT</th></tr></thead>
-      <tbody>${rows.map((team, index) => `<tr><td><strong>${index + 1}</strong></td><td>${esc(team.name)}</td><td>${team.played}</td><td>${team.won}</td><td>${team.drawn}</td><td>${team.lost}</td><td>${team.gf}</td><td>${team.ga}</td><td>${team.gd > 0 ? '+' : ''}${team.gd}</td><td><strong>${team.points}</strong></td></tr>`).join('')}</tbody>
+      <tbody>${rows.map((team, index) => `<tr><td><strong>${index + 1}</strong></td><td><span class="standing-team">${clubLogo(team)}<b>${esc(team.name)}</b></span></td><td>${team.played}</td><td>${team.won}</td><td>${team.drawn}</td><td>${team.lost}</td><td>${team.gf}</td><td>${team.ga}</td><td>${team.gd > 0 ? '+' : ''}${team.gd}</td><td><strong>${team.points}</strong></td></tr>`).join('')}</tbody>
     </table></div>`;
   }
 
@@ -596,7 +604,7 @@
     return `<a class="transfer-card" href="${ROOT}transfers/${encodeURIComponent(transfer.transfer_row_id)}/">
       <header><span>TRANSFER #${esc(transfer.transfer_number)}</span><strong>${esc(transfer.status || '—')}</strong></header>
       <div class="transfer-player"><small>PLAYER ID</small><strong>#${esc(transfer.player_id || '—')}</strong></div>
-      <div class="transfer-route"><div><small>FROM</small><strong>${esc(from)}</strong></div><i>→</i><div><small>TO</small><strong>${esc(to)}</strong></div></div>
+      <div class="transfer-route"><div>${clubLogo(transfer.from_club, 'transfer-club-logo')}<small>FROM</small><strong>${esc(from)}</strong></div><i>→</i><div>${clubLogo(transfer.to_club, 'transfer-club-logo')}<small>TO</small><strong>${esc(to)}</strong></div></div>
       <footer><span>${esc(transfer.date ? formatDate(transfer.date) : 'DATA NON DISPONIBILE')}</span><strong>${esc(transferMoney(transfer))}</strong></footer>
     </a>`;
   }
@@ -634,7 +642,7 @@
     ];
     return `<section class="section-page transfer-detail-page">${pageHead(`TRANSFER #${transfer.transfer_number}`, 'Dettaglio completo dell’operazione', 'transfers', `${ROOT}transfers/`)}
       <article class="transfer-detail-hero"><div><small>PLAYER ID</small><strong>#${esc(transfer.player_id || '—')}</strong></div><span>${esc(transferMoney(transfer))}</span></article>
-      <section class="transfer-detail-route"><div><small>FROM</small><strong>${esc(transfer.from_club?.name || 'Non disponibile')}</strong></div><i>→</i><div><small>TO</small><strong>${esc(transfer.to_club?.name || 'Non disponibile')}</strong></div></section>
+      <section class="transfer-detail-route"><div>${clubLogo(transfer.from_club, 'transfer-detail-logo')}<small>FROM</small><strong>${esc(transfer.from_club?.name || 'Non disponibile')}</strong></div><i>→</i><div>${clubLogo(transfer.to_club, 'transfer-detail-logo')}<small>TO</small><strong>${esc(transfer.to_club?.name || 'Non disponibile')}</strong></div></section>
       <div class="transfer-detail-fields">${fields.map(([label, value]) => `<div><span>${esc(label)}</span><strong>${statValue(value)}</strong></div>`).join('')}</div>
     </section>`;
   }
@@ -653,7 +661,7 @@
     return `<section class="section-page match-detail-page">${pageHead('MATCH DETAIL', competitionName(match.competition), 'results', `${ROOT}results/`)}
       <article class="detail-score">
         <div class="detail-meta"><span>${esc(matchState(match))}</span><time>${esc(formatDate(match.date, true))}${match.time ? ` · ${esc(match.time)}` : ''}</time></div>
-        <div class="detail-teams"><div><span>${esc((match.home?.name || '?').slice(0, 1))}</span><strong>${esc(match.home?.name || '—')}</strong></div>${scoreMarkup(match)}<div><span>${esc((match.away?.name || '?').slice(0, 1))}</span><strong>${esc(match.away?.name || '—')}</strong></div></div>
+        <div class="detail-teams"><div>${clubLogo(match.home, 'detail-club-logo')}<strong>${esc(match.home?.name || '—')}</strong></div>${scoreMarkup(match)}<div>${clubLogo(match.away, 'detail-club-logo')}<strong>${esc(match.away?.name || '—')}</strong></div></div>
         <small>FIXTURE ID ${esc(match.fixture_id)}</small>
       </article>
       <nav class="report-tabs"><a href="#statistics">STATS</a><a href="#lineups">LINEUPS</a><a href="#events">EVENTS</a><a href="#commentary">COMMENTARY</a><a href="#tactics">TACTICS</a></nav>
