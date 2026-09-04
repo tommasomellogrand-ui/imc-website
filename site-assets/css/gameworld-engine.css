@@ -383,3 +383,26 @@ main { width: min(100%, 520px); min-height: calc(100svh - 152px); margin: auto; 
   html { scroll-behavior: auto; }
   .loading-screen span, .loading-inline span { animation: none; }
 }
+
+
+/* Team Hub · shared clubs and nations directory */
+.team-hub-tabs button { display:flex; align-items:center; justify-content:center; gap:7px; }
+.team-hub-tabs button span { min-width:20px; height:16px; padding:0 5px; display:grid; place-items:center; border-radius:8px; background:rgba(var(--copper-rgb),.09); font-size:6px; font-weight:950; }
+.team-hub-tabs button.active span { background:rgba(255,255,255,.18); color:#fff; }
+.team-hub-summary { min-height:105px; margin-top:10px; padding:18px; position:relative; display:grid; align-content:center; overflow:hidden; border-radius:19px; color:#fff; background:linear-gradient(135deg,var(--ink),#5a3327); box-shadow:0 12px 25px rgba(43,22,15,.18); }
+.team-hub-summary small { color:var(--gold); font-size:6px; font-weight:950; letter-spacing:.7px; }
+.team-hub-summary strong { margin-top:7px; font-size:31px; line-height:1; font-weight:950; }
+.team-hub-summary > span { width:68px; height:68px; position:absolute; right:16px; top:18px; color:var(--gold); opacity:.82; }
+.team-hub-summary svg { width:100%; height:100%; }
+.team-hub-list { margin-top:10px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.team-hub-card { min-width:0; min-height:112px; padding:11px; display:grid; grid-template-columns:40px minmax(0,1fr); grid-template-rows:1fr auto; gap:8px 9px; border:1px solid var(--line); border-radius:17px; background:radial-gradient(circle at 100% 0,rgba(var(--copper-rgb),.08),transparent 40%),linear-gradient(145deg,#fff,#fcf6f2); box-shadow:0 8px 18px rgba(63,31,20,.055),inset 0 1px #fff; }
+.team-hub-logo { width:40px; height:40px; display:grid; place-items:center; overflow:hidden; border:1px solid rgba(var(--copper-rgb),.18); border-radius:12px; background:#fff; color:var(--copper); font-size:10px; font-weight:950; }
+.team-hub-logo img { width:100%; height:100%; object-fit:contain; }
+.team-hub-copy { min-width:0; align-self:center; }
+.team-hub-copy small { color:var(--gold); font-size:5.2px; font-weight:950; letter-spacing:.5px; }
+.team-hub-copy h2 { margin:4px 0 0; overflow:hidden; font-size:9px; line-height:1.12; font-weight:950; text-overflow:ellipsis; white-space:nowrap; }
+.team-hub-copy p { margin:5px 0 0; overflow:hidden; color:var(--muted); font-size:5.7px; font-weight:750; text-overflow:ellipsis; white-space:nowrap; }
+.team-hub-id { grid-column:1/-1; padding-top:7px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--line); }
+.team-hub-id span { color:var(--muted); font-size:5.2px; font-weight:850; letter-spacing:.4px; }
+.team-hub-id strong { color:var(--copper-dark); font-size:7px; font-weight:950; }
+@media (min-width:700px) { .team-hub-list { grid-template-columns:repeat(3,minmax(0,1fr)); } }
