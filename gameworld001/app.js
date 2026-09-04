@@ -3,7 +3,7 @@
 
   const ROOT = '/gameworld001/';
   const WORLD_ID = 'GW001';
-  const state = { world: null, matches: null, matchesPromise: null, competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
+  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
   const MATCH_CACHE_KEY = 'imc:GW001:season1:matches:v1';
 
   const staticSections = {
@@ -72,6 +72,19 @@
         .finally(() => { state.matchesPromise = null; });
     }
     return state.matchesPromise;
+  }
+
+  function loadCompetitions() {
+    if (state.competitions) return Promise.resolve(state.competitions);
+    if (!state.competitionsPromise) {
+      state.competitionsPromise = IMCDataService.getCompetitions(WORLD_ID, seasonNumber())
+        .then(payload => {
+          state.competitions = Array.isArray(payload.data) ? payload.data : [];
+          return state.competitions;
+        })
+        .finally(() => { state.competitionsPromise = null; });
+    }
+    return state.competitionsPromise;
   }
 
   function formatDate(value, long = false) {
@@ -208,21 +221,31 @@
   }
 
   function competitionGroups() {
-    const groups = new Map();
-    state.matches.forEach(match => {
-      const key = competitionKey(match);
-      if (!groups.has(key)) groups.set(key, {
-        key,
-        competition: { ...match.competition, name: logicalCompetitionName(match.competition) },
-        matches: [], results: 0, scheduled: 0, reports: 0
+    if (!Array.isArray(state.competitions)) return [];
+    const matches = Array.isArray(state.matches) ? state.matches : [];
+    return state.competitions.map(item => {
+      const rows = matches.filter(match => {
+        const competition = match.competition || {};
+        return Number(competition.competition_master_id) === Number(item.competition_master_id)
+          && String(competition.division_value || 'ALL') === String(item.division_value || 'ALL');
       });
-      const group = groups.get(key);
-      group.matches.push(match);
-      if (match.result) group.results += 1;
-      if (match.availability?.schedule) group.scheduled += 1;
-      if (match.availability?.match_report) group.reports += 1;
+      return {
+        key: item.competition_key,
+        competition: {
+          name: item.name,
+          type: item.type,
+          competition_master_id: item.competition_master_id,
+          competition_code: item.competition_code,
+          competition_group: item.competition_group,
+          division_value: item.division_value,
+          hierarchy_path: item.hierarchy_path
+        },
+        matches: rows,
+        results: Number(item.counts?.results || 0),
+        scheduled: Number(item.counts?.schedule || 0),
+        reports: Number(item.counts?.reports || 0)
+      };
     });
-    return [...groups.values()].sort((a, b) => competitionName(a.competition).localeCompare(competitionName(b.competition), 'it', { numeric: true }));
   }
 
   function competitionCard(group) {
@@ -554,7 +577,8 @@
         results: ['RESULTS', 'Preparazione dei risultati', 'results']
       };
       if (loadingTitles[route]) app.innerHTML = routeLoading(...loadingTitles[route]);
-      await loadMatches();
+      if (route === 'competitions') await Promise.all([loadMatches(), loadCompetitions()]);
+      else await loadMatches();
 
       if (route === 'competitions' && ['domestic', 'international', 'nations'].includes(parts[1])) app.innerHTML = competitionCategoryPage(parts[1]);
       else if (route === 'competitions' && parts[1]) app.innerHTML = competitionDetailPage(decodeURIComponent(parts[1]));
