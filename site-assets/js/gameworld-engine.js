@@ -4,7 +4,7 @@
   const WORLD_ID = String(document.body.dataset.world || '').toUpperCase();
   const ROOT = document.body.dataset.worldRoot || `/${WORLD_ID.toLowerCase().replace('gw', 'gameworld')}/`;
   if (!/^GW00[1-9]$/.test(WORLD_ID)) throw new Error('Configurazione Game World non valida.');
-  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, managersPromise: null, clubs: null, clubsPromise: null, nations: null, nationsPromise: null, teamHubTab: 'clubs', competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
+  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, managersPromise: null, clubs: null, clubsPromise: null, nations: null, nationsPromise: null, teamHubTab: 'clubs', managerTab: 'imc', competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
   const MATCH_CACHE_KEY = `imc:${WORLD_ID}:matches:v3`;
 
   const staticSections = {
@@ -515,15 +515,12 @@
   function teamHubCard(item, type) {
     const isNation = type === 'nations';
     const name = item.name || (isNation ? `Nation ${item.nation_id}` : `Club ${item.club_id}`);
-    const globalId = isNation ? item.nation_id : item.club_id;
-    const worldId = isNation ? item.nation_gw_id : item.club_gw_id;
     const image = item.image_url
       ? `<img src="${esc(item.image_url)}" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span hidden>${esc(teamInitials(name))}</span>`
       : `<span>${esc(teamInitials(name))}</span>`;
-    return `<article class="team-hub-card">
-      <div class="team-hub-logo">${image}</div>
-      <div class="team-hub-copy"><small>${isNation ? 'NATIONAL TEAM' : 'CLUB'}</small><h2>${esc(name)}</h2><p>${esc(WORLD_ID)} · ${isNation ? 'NATION' : 'CLUB'} GW ID ${esc(worldId)}</p></div>
-      <div class="team-hub-id"><span>${isNation ? 'NATION ID' : 'CLUB ID'}</span><strong>${esc(globalId)}</strong></div>
+    return `<article class="team-hub-card" data-team-type="${isNation ? 'national' : 'club'}" data-team-id="${esc(isNation ? item.nation_id : item.club_id)}" data-team-world-id="${esc(isNation ? item.nation_gw_id : item.club_gw_id)}">
+      <div class="team-hub-logo ${isNation ? 'team-hub-flag' : ''}">${image}</div>
+      <strong>${esc(name)}</strong>
     </article>`;
   }
 
@@ -550,21 +547,24 @@
 
   function managerCard(item) {
     const manager = item.manager || {};
-    const club = item.club || {};
-    const assignment = item.assignment || {};
-    return `<article class="manager-card">
-      <div class="manager-avatar">${esc(managerInitials(manager.full_name))}</div>
-      <div class="manager-copy"><small>${esc(manager.manager_id || 'IMC MANAGER')}</small><h2>${esc(manager.full_name || 'Manager non disponibile')}</h2><p>${esc(club.name || 'Club non disponibile')}</p></div>
-      <div class="manager-meta"><span>IMC</span><small>DAL ${esc(formatDate(assignment.start_date))}</small></div>
+    const name = manager.full_name || 'Manager non disponibile';
+    return `<article class="manager-card manager-card-imc" data-manager-id="${esc(manager.manager_id || '')}" data-sm-manager-id="${esc(manager.sm_manager_id || '')}">
+      <strong>${esc(name)}</strong>
+      <small>${esc(manager.manager_id || 'IMC MANAGER')}</small>
     </article>`;
   }
 
   function managersPage() {
     const rows = Array.isArray(state.managers) ? state.managers : [];
-    const content = rows.length ? `<div class="manager-list">${rows.map(managerCard).join('')}</div>` : '<div class="empty-state"><strong>NESSUN MANAGER IMC</strong><span>Non risultano assegnazioni club attive per questo Game World.</span></div>';
+    const externalMode = state.managerTab === 'external';
+    const content = externalMode
+      ? '<div class="manager-list"><div class="manager-empty">Struttura EXTERNAL pronta. I dati verranno collegati quando sarà definita la fonte.</div></div>'
+      : (rows.length ? `<div class="manager-list">${rows.map(managerCard).join('')}</div>` : '<div class="manager-list"><div class="manager-empty">Nessun manager IMC disponibile.</div></div>');
     return `<section class="section-page managers-page">${pageHead('MANAGERS', `${rows.length} manager IMC assegnati`, 'manager')}
-      <nav class="competition-subtabs section-placeholder-tabs"><button type="button" class="active">IMC</button><button type="button" disabled>EXTERNAL</button></nav>
-      <section class="manager-summary"><div><small>ACTIVE ASSIGNMENTS</small><strong>${esc(rows.length)}</strong><span>IMC MANAGERS</span></div><span>${icon('manager')}</span></section>
+      <nav class="competition-subtabs section-placeholder-tabs managers-tabs">
+        <button type="button" data-manager-tab="imc" class="${!externalMode ? 'active' : ''}">IMC</button>
+        <button type="button" data-manager-tab="external" class="${externalMode ? 'active' : ''}">EXTERNAL</button>
+      </nav>
       ${content}
     </section>`;
   }
@@ -680,7 +680,13 @@
         renderRoute();
         return;
       }
-            const competitionTab = event.target.closest?.('[data-competition-tab]');
+      const managerTab = event.target.closest?.('[data-manager-tab]');
+      if (managerTab) {
+        state.managerTab = managerTab.dataset.managerTab;
+        renderRoute();
+        return;
+      }
+      const competitionTab = event.target.closest?.('[data-competition-tab]');
       if (competitionTab) {
         state.competitionTab = competitionTab.dataset.competitionTab;
         renderRoute();
