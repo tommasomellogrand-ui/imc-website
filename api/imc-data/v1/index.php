@@ -254,51 +254,100 @@ function api_world(string $world): never {
 
 
 function api_managers(string $world): never {
+    $snapshotPath = __DIR__.'/manager-assignments.json';
+    $snapshotRaw = is_file($snapshotPath) ? file_get_contents($snapshotPath) : false;
+    $snapshot = $snapshotRaw === false ? null : json_decode($snapshotRaw, true);
+    if (!is_array($snapshot) || !isset($snapshot['assignments']) || !is_array($snapshot['assignments'])) {
+        api_error('Assegnazioni manager temporaneamente non disponibili.', 503, 'MANAGER_ASSIGNMENTS_UNAVAILABLE');
+    }
+
+    $worldAssignments = array_values(array_filter(
+        $snapshot['assignments'],
+        static fn(mixed $row): bool =>
+            is_array($row)
+            && ($row['game_world_id'] ?? null) === $world
+            && ($row['end_date'] ?? null) === null
+    ));
+
     $core = api_database('Sql1956795_1');
-    $rows = api_all(
+    $managerRows = api_all(
         $core,
-        "SELECT a.assignment_id,a.game_world_id,a.manager_id,m.full_name,m.sm_manager_id,m.sm_username,".
-        "a.team_id,c.name club_name,c.short_name club_short_name,c.image_url club_image_url,".
-        "a.assignment_type,a.start_date,a.end_date,a.season_id ".
-        "FROM gw_manager_assignments a ".
-        "JOIN imc_managers m ON m.manager_id=a.manager_id ".
-        "LEFT JOIN clubs c ON c.club_id=a.team_id ".
-        "WHERE a.game_world_id=? AND a.assignment_type='club' AND a.end_date IS NULL ".
-        "ORDER BY m.full_name,a.assignment_id",
-        [$world]
+        'SELECT manager_id,full_name,sm_manager_id,sm_username FROM imc_managers ORDER BY full_name,manager_id'
     );
-    $data = array_map(static fn(array $row): array => [
-        'assignment_id' => (int)$row['assignment_id'],
-        'game_world_id' => $row['game_world_id'],
-        'manager' => [
-            'manager_id' => $row['manager_id'],
-            'full_name' => $row['full_name'],
-            'sm_manager_id' => api_nullable_int($row['sm_manager_id']),
-            'sm_username' => $row['sm_username'],
-        ],
-        'club' => [
-            'club_id' => api_nullable_int($row['team_id']),
-            'name' => $row['club_name'],
-            'short_name' => $row['club_short_name'],
-            'image_url' => $row['club_image_url'],
-        ],
-        'assignment' => [
-            'type' => $row['assignment_type'],
-            'start_date' => $row['start_date'],
-            'end_date' => $row['end_date'],
-            'season_id' => api_nullable_int($row['season_id']),
-            'active' => $row['end_date'] === null,
-        ],
-    ], $rows);
+    $managerIndex = [];
+    foreach ($managerRows as $managerRow) {
+        $managerIndex[(string)$managerRow['manager_id']] = $managerRow;
+    }
+
+    $grouped = [];
+    foreach ($worldAssignments as $assignmentRow) {
+        $managerId = (string)($assignmentRow['manager_id'] ?? '');
+        if ($managerId === '' || !isset($managerIndex[$managerId])) continue;
+        if (!isset($grouped[$managerId])) {
+            $managerRow = $managerIndex[$managerId];
+            $grouped[$managerId] = [
+                'manager' => [
+                    'manager_id' => $managerId,
+                    'full_name' => $managerRow['full_name'],
+                    'sm_manager_id' => api_nullable_int($managerRow['sm_manager_id']),
+                    'sm_username' => $managerRow['sm_username'],
+                ],
+                'club' => null,
+                'national_team' => null,
+                'assignments' => [],
+            ];
+        }
+
+        $assignment = [
+            'assignment_id' => api_nullable_int($assignmentRow['assignment_id'] ?? null),
+            'type' => $assignmentRow['assignment_type'] ?? null,
+            'start_date' => $assignmentRow['start_date'] ?? null,
+            'end_date' => $assignmentRow['end_date'] ?? null,
+            'season_id' => api_nullable_int($assignmentRow['season_id'] ?? null),
+            'active' => ($assignmentRow['end_date'] ?? null) === null,
+        ];
+        $grouped[$managerId]['assignments'][] = $assignment;
+
+        if (($assignmentRow['assignment_type'] ?? null) === 'club') {
+            $grouped[$managerId]['club'] = [
+                'team_id' => api_nullable_int($assignmentRow['team_id'] ?? null),
+                'name' => $assignmentRow['team_name'] ?? null,
+                'full_name' => $assignmentRow['team_full_name'] ?? null,
+                'sm_club_id' => api_nullable_int($assignmentRow['sm_club_id'] ?? null),
+                'sm_world_club_id' => api_nullable_int($assignmentRow['sm_world_club_id'] ?? null),
+            ];
+            $grouped[$managerId]['assignment'] = $assignment;
+        } elseif (($assignmentRow['assignment_type'] ?? null) === 'national_team') {
+            $grouped[$managerId]['national_team'] = [
+                'nation_id' => api_nullable_int($assignmentRow['nation_id'] ?? null),
+                'name' => $assignmentRow['nation_name'] ?? null,
+            ];
+            if (!isset($grouped[$managerId]['assignment'])) {
+                $grouped[$managerId]['assignment'] = $assignment;
+            }
+        }
+    }
+
+    $data = array_values($grouped);
+    usort($data, static fn(array $left, array $right): int =>
+        strcasecmp((string)$left['manager']['full_name'], (string)$right['manager']['full_name'])
+    );
+
     api_response([
         'ok' => true,
         'data' => $data,
         'pagination' => ['total' => count($data), 'limit' => count($data), 'offset' => 0, 'returned' => count($data)],
-        'context' => ['game_world_id' => $world, 'assignment_type' => 'club', 'active_only' => true, 'source' => 'CORE_IMC'],
+        'context' => [
+            'game_world_id' => $world,
+            'active_only' => true,
+            'assignment_types' => ['club', 'national_team'],
+            'assignment_source' => $snapshot['source'] ?? 'SUPABASE_ASSIGNMENTS_CERTIFIED',
+            'manager_identity_source' => 'MYSQL_CORE_IMC',
+            'snapshot_generated_at' => $snapshot['generated_at'] ?? null,
+        ],
         'generated_at' => gmdate('c'),
     ]);
 }
-
 
 function api_competitions(string $world): never {
     $core = api_core_context($world);
