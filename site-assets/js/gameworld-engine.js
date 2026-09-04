@@ -4,7 +4,7 @@
   const WORLD_ID = String(document.body.dataset.world || '').toUpperCase();
   const ROOT = document.body.dataset.worldRoot || `/${WORLD_ID.toLowerCase().replace('gw', 'gameworld')}/`;
   if (!/^GW00[1-9]$/.test(WORLD_ID)) throw new Error('Configurazione Game World non valida.');
-  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, managersPromise: null, clubs: null, clubsPromise: null, nations: null, nationsPromise: null, teamHubTab: 'clubs', managerTab: 'imc', competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
+  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, managersPromise: null, clubs: null, clubsPromise: null, nations: null, nationsPromise: null, transfers: null, transfersPromise: null, teamHubTab: 'clubs', managerTab: 'imc', competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
   const MATCH_CACHE_KEY = `imc:${WORLD_ID}:matches:v3`;
 
   const staticSections = {
@@ -12,7 +12,7 @@
     'team-hub': { title: 'TEAM HUB', sub: 'Club · Nazionali', icon: 'teams', intro: 'Squadre, rose e percorsi nel mondo.', status: 'Schede club non ancora disponibili nella Public Read API.' },
     managers: { title: 'MANAGERS', sub: 'IMC · External', icon: 'manager', intro: 'I manager presenti nel Game World.', status: 'Dataset manager non ancora collegato.' },
     codex: { title: 'CODEX', sub: 'Archivio del GW', icon: 'codex', intro: 'Giocatori, record e memoria storica del mondo.', status: 'Player Codex non disponibile per GW001.' },
-    transfers: { title: 'TRANSFERS', sub: 'Mercato del GW', icon: 'transfers', intro: 'Movimenti di mercato e dettagli delle operazioni.', status: 'Importazione in corso · Coming soon.' },
+    transfers: { title: 'TRANSFERS', sub: 'Mercato del GW', icon: 'transfers', intro: 'Movimenti di mercato e dettagli delle operazioni.', status: 'Dataset non disponibile per questo Game World.' },
     'trophy-room': { title: 'TROPHY ROOM', sub: 'Trofei del GW', icon: 'competitions', intro: 'Albo d’oro e trofei del Game World.', status: 'Dataset Trophy Room non ancora collegato.' },
     'news-feed': { title: 'NEWS FEED', sub: 'News del GW', icon: 'journal', intro: 'Notizie e aggiornamenti del Game World.', status: 'Feed non ancora collegato.' }
   };
@@ -127,6 +127,20 @@
     return state.nationsPromise;
   }
 
+
+  function loadTransfers() {
+    if (state.transfers) return Promise.resolve(state.transfers);
+    if (!state.transfersPromise) {
+      state.transfersPromise = IMCDataService.getAllTransfers(WORLD_ID)
+        .then(payload => {
+          state.transfers = Array.isArray(payload.data) ? payload.data : [];
+          return state.transfers;
+        })
+        .finally(() => { state.transfersPromise = null; });
+    }
+    return state.transfersPromise;
+  }
+
   function formatDate(value, long = false) {
     if (!value) return 'DATA NON DISPONIBILE';
     const date = new Date(`${value}T12:00:00`);
@@ -232,7 +246,7 @@
       ${hubCard('trophy-room', 'TROPHY ROOM', 'Trofei del GW', 'competitions', 'hub-trophy')}
       ${hubCard('news-feed', 'NEWS FEED', 'News del GW', 'journal', 'hub-news')}
       ${hubCard('codex', 'CODEX', datasets.player_codex.available ? 'Dataset disponibile' : 'Non disponibile', 'codex', 'hub-codex')}
-      ${hubCard('transfers', 'TRANSFERS', 'Coming soon', 'transfers', 'hub-transfers')}
+      ${hubCard('transfers', 'TRANSFERS', datasets.transfers?.available ? `${datasets.transfers.record_count} operazioni` : 'Non disponibile', 'transfers', 'hub-transfers')}
     </section></div>`;
   }
 
@@ -569,9 +583,65 @@
     </section>`;
   }
 
+
+  function transferMoney(transfer) {
+    if (transfer?.cost?.raw) return transfer.cost.raw;
+    if (transfer?.cost?.numeric != null) return new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 }).format(transfer.cost.numeric);
+    return '—';
+  }
+
+  function transferCard(transfer) {
+    const from = transfer.from_club?.name || 'Svincolato / non disponibile';
+    const to = transfer.to_club?.name || 'Non disponibile';
+    return `<a class="transfer-card" href="${ROOT}transfers/${encodeURIComponent(transfer.transfer_row_id)}/">
+      <header><span>TRANSFER #${esc(transfer.transfer_number)}</span><strong>${esc(transfer.status || '—')}</strong></header>
+      <div class="transfer-player"><small>PLAYER ID</small><strong>#${esc(transfer.player_id || '—')}</strong></div>
+      <div class="transfer-route"><div><small>FROM</small><strong>${esc(from)}</strong></div><i>→</i><div><small>TO</small><strong>${esc(to)}</strong></div></div>
+      <footer><span>${esc(transfer.date ? formatDate(transfer.date) : 'DATA NON DISPONIBILE')}</span><strong>${esc(transferMoney(transfer))}</strong></footer>
+    </a>`;
+  }
+
+  function transfersPage() {
+    const rows = Array.isArray(state.transfers) ? state.transfers : [];
+    return `<section class="section-page transfers-page">${pageHead('TRANSFERS', `${rows.length} operazioni · ordine decrescente`, 'transfers')}
+      <section class="transfers-summary"><small>MYSQL · GW TRANSFERS</small><strong>${esc(rows.length)}</strong><span>OPERAZIONI</span></section>
+      ${rows.length ? `<div class="transfer-list">${rows.map(transferCard).join('')}</div>` : '<div class="empty-state"><strong>NESSUN TRASFERIMENTO</strong><span>Il dataset non contiene operazioni per questo Game World.</span></div>'}
+    </section>`;
+  }
+
+  function transferDetailPage(transfer) {
+    const fields = [
+      ['Numero trasferimento', transfer.transfer_number],
+      ['Transfer ID sorgente', transfer.transfer_id],
+      ['Player ID', transfer.player_id],
+      ['Da club', transfer.from_club?.name],
+      ['Da world club ID', transfer.from_club?.world_club_id],
+      ['A club', transfer.to_club?.name],
+      ['A world club ID', transfer.to_club?.world_club_id],
+      ['Direzione', transfer.direction],
+      ['Costo', transfer.cost?.raw],
+      ['Costo numerico', transfer.cost?.numeric],
+      ['Valuta', transfer.cost?.currency],
+      ['Valore giocatore', transfer.player_value_at_event],
+      ['Stato', transfer.status],
+      ['Data', transfer.date],
+      ['IMC Season', transfer.imc_season],
+      ['Soccer Manager Season', transfer.soccer_manager_season],
+      ['SM Season ID', transfer.sm_season_id],
+      ['SM Game World ID', transfer.sm_game_world_id],
+      ['Record rank', transfer.record_rank],
+      ['Importato il', transfer.created_at]
+    ];
+    return `<section class="section-page transfer-detail-page">${pageHead(`TRANSFER #${transfer.transfer_number}`, 'Dettaglio completo dell’operazione', 'transfers', `${ROOT}transfers/`)}
+      <article class="transfer-detail-hero"><div><small>PLAYER ID</small><strong>#${esc(transfer.player_id || '—')}</strong></div><span>${esc(transferMoney(transfer))}</span></article>
+      <section class="transfer-detail-route"><div><small>FROM</small><strong>${esc(transfer.from_club?.name || 'Non disponibile')}</strong></div><i>→</i><div><small>TO</small><strong>${esc(transfer.to_club?.name || 'Non disponibile')}</strong></div></section>
+      <div class="transfer-detail-fields">${fields.map(([label, value]) => `<div><span>${esc(label)}</span><strong>${statValue(value)}</strong></div>`).join('')}</div>
+    </section>`;
+  }
+
   function staticSection(key) {
     const section = staticSections[key] || staticSections.codex;
-    const tabs = key === 'team-hub' ? ['CLUB', 'NATIONS'] : key === 'managers' ? ['IMC', 'EXTERNAL'] : key === 'transfers' ? ['ALL TRANSFERS', 'ENTRATE', 'USCITE'] : key === 'codex' ? ['PLAYERS', 'TEAMS', 'RECORDS'] : [];
+    const tabs = key === 'team-hub' ? ['CLUB', 'NATIONS'] : key === 'managers' ? ['IMC', 'EXTERNAL'] : key === 'codex' ? ['PLAYERS', 'TEAMS', 'RECORDS'] : [];
     return `<section class="section-page">${pageHead(section.title, section.sub, section.icon)}${tabs.length ? `<nav class="competition-subtabs section-placeholder-tabs">${tabs.map((tab, index) => `<button type="button" class="${index === 0 ? 'active' : ''}">${tab}</button>`).join('')}</nav>` : ''}<div class="static-intro"><span>${icon(section.icon)}</span><p>${esc(section.intro)}</p></div><div class="empty-state"><strong>${key === 'transfers' ? 'COMING SOON' : 'STRUTTURA PRONTA'}</strong><span>${esc(section.status)}</span></div></section>`;
   }
 
@@ -743,6 +813,18 @@
         app.innerHTML = routeLoading('MANAGERS', 'Caricamento manager IMC', 'manager');
         await loadManagers();
         app.innerHTML = managersPage();
+        return;
+      }
+      if (route === 'transfers') {
+        if (parts[1]) {
+          app.innerHTML = routeLoading('TRANSFER DETAIL', 'Apertura del trasferimento', 'transfers');
+          const payload = await IMCDataService.getTransfer(WORLD_ID, parts[1]);
+          app.innerHTML = transferDetailPage(payload.data);
+        } else {
+          app.innerHTML = routeLoading('TRANSFERS', 'Caricamento trasferimenti MySQL', 'transfers');
+          await loadTransfers();
+          app.innerHTML = transfersPage();
+        }
         return;
       }
       if (staticSections[route]) {
