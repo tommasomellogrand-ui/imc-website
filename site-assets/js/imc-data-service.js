@@ -82,7 +82,6 @@
     return request(`${worldPath(gameWorldId)}/nations`);
   }
 
-
   async function getTransfers(gameWorldId, options = {}) {
     const params = new URLSearchParams();
     if (options.limit != null) params.set('limit', String(options.limit));
@@ -116,4 +115,10 @@
   }
 
   global.IMCDataService = Object.freeze({ getWorld, getMatches, getAllMatches, getCompetitions, getManagers, getClubs, getNations, getTransfers, getAllTransfers, getTransfer, getMatch });
+
+  if (/\/team-hub(?:\/|$)/.test(location.pathname)) {
+    const script = document.createElement('script');
+    script.src = '/site-assets/js/team-hub-detail.js?v=1';
+    document.head.appendChild(script);
+  }
 })(window);
