@@ -713,6 +713,80 @@ function api_match_detail(string $world, int $fixtureId): never {
     ]);
 }
 
+
+function api_transfer_row(array $row): array {
+    return [
+        'transfer_number' => (int)$row['transfer_row_id'],
+        'transfer_row_id' => (int)$row['transfer_row_id'],
+        'transfer_id' => $row['transfer_id'],
+        'game_world_id' => $row['game_world_id'],
+        'sm_game_world_id' => api_nullable_int($row['sm_game_world_id']),
+        'imc_season' => api_nullable_int($row['imc_season']),
+        'soccer_manager_season' => api_nullable_int($row['soccer_manager_season']),
+        'sm_season_id' => api_nullable_int($row['sm_season_id']),
+        'record_rank' => api_nullable_int($row['record_rank']),
+        'date' => $row['date'],
+        'player_id' => api_nullable_int($row['player_id']),
+        'from_club' => [
+            'world_club_id' => api_nullable_int($row['from_world_club_id']),
+            'name' => $row['from_club_name'],
+        ],
+        'to_club' => [
+            'world_club_id' => api_nullable_int($row['to_world_club_id']),
+            'name' => $row['to_club_name'],
+        ],
+        'direction' => $row['direction'],
+        'cost' => [
+            'numeric' => api_nullable_float($row['cost_numeric']),
+            'raw' => $row['cost_raw'],
+            'currency' => $row['currency'],
+        ],
+        'player_value_at_event' => api_nullable_float($row['player_value_at_event']),
+        'status' => $row['status'],
+        'created_at' => $row['created_at'],
+    ];
+}
+
+function api_transfers(string $world): never {
+    $db = api_database(api_world_database($world));
+    $limit = api_positive_int($_GET['limit'] ?? null, 100, IMC_DATA_API_MAX_LIMIT);
+    $limit = max(1, $limit);
+    $offset = api_positive_int($_GET['offset'] ?? null, 0, PHP_INT_MAX);
+    $total = api_count($db, 'SELECT COUNT(*) total FROM gw_transfers WHERE game_world_id=?', [$world]);
+    $rows = api_all(
+        $db,
+        'SELECT transfer_row_id,transfer_id,game_world_id,sm_game_world_id,imc_season,soccer_manager_season,sm_season_id,record_rank,date,player_id,from_world_club_id,from_club_name,to_world_club_id,to_club_name,direction,cost_numeric,cost_raw,currency,player_value_at_event,status,created_at FROM gw_transfers WHERE game_world_id=? ORDER BY transfer_row_id DESC LIMIT ? OFFSET ?',
+        [$world, $limit, $offset]
+    );
+    api_response([
+        'ok' => true,
+        'data' => array_map('api_transfer_row', $rows),
+        'pagination' => [
+            'total' => $total,
+            'limit' => $limit,
+            'offset' => $offset,
+            'returned' => count($rows),
+            'order' => 'transfer_row_id_desc',
+        ],
+        'generated_at' => gmdate('c'),
+    ]);
+}
+
+function api_transfer_detail(string $world, int $transferRowId): never {
+    $db = api_database(api_world_database($world));
+    $row = api_one(
+        $db,
+        'SELECT transfer_row_id,transfer_id,game_world_id,sm_game_world_id,imc_season,soccer_manager_season,sm_season_id,record_rank,date,player_id,from_world_club_id,from_club_name,to_world_club_id,to_club_name,direction,cost_numeric,cost_raw,currency,player_value_at_event,status,created_at FROM gw_transfers WHERE game_world_id=? AND transfer_row_id=? LIMIT 1',
+        [$world, $transferRowId]
+    );
+    if (!$row) api_error('Trasferimento non trovato.', 404, 'TRANSFER_NOT_FOUND');
+    api_response([
+        'ok' => true,
+        'data' => api_transfer_row($row),
+        'generated_at' => gmdate('c'),
+    ]);
+}
+
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
         header('Allow: GET');
@@ -737,6 +811,12 @@ try {
     }
     if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'nations') {
         api_nations(api_world_id($segments[1]));
+    }
+    if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'transfers') {
+        api_transfers(api_world_id($segments[1]));
+    }
+    if (count($segments) === 4 && $segments[0] === 'worlds' && $segments[2] === 'transfers') {
+        api_transfer_detail(api_world_id($segments[1]), api_fixture_id($segments[3]));
     }
     if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'matches') {
         api_matches(api_world_id($segments[1]));
