@@ -315,12 +315,20 @@
 
   function competitionCard(group) {
     const type = competitionType(group.competition);
-    const progress = group.total ? Math.round((group.results / group.total) * 100) : 0;
+    const competition = group.competition || {};
+    const code = String(competition.competition_code || competition.type || '').toUpperCase();
+    const isLeague = code === 'LEAGUE' || type === 'league';
+    const division = competition.division_value;
+    const country = String(competition.country_code || '').toUpperCase();
+    const name = competitionName(competition);
+    const title = country && country !== 'GLOBAL' && !name.toUpperCase().startsWith(`${country} `) ? `${country} ${name}` : name;
+    const mark = isLeague && division ? `<strong>${esc(division)}</strong><i></i>` : icon('competitions');
+    const status = group.scheduled > 0 ? (group.results > 0 ? 'IN CORSO' : 'NOT STARTED') : (group.results > 0 ? 'COMPLETED' : 'NOT AVAILABLE');
     return `<a class="competition-card" data-competition-type="${esc(type)}" href="${ROOT}competitions/${encodeURIComponent(group.key)}/">
-      <div class="competition-mark">${icon('competitions')}</div>
-      <div class="competition-copy"><small>${esc(type.toUpperCase())}</small><h2>${esc(competitionName(group.competition))}</h2><span>${esc(group.total ?? group.matches.length)} FIXTURE</span></div>
-      <dl><div><dt>RESULTS</dt><dd>${esc(group.results)}</dd></div><div><dt>UPCOMING</dt><dd>${esc(group.scheduled)}</dd></div><div><dt>REPORTS</dt><dd>${esc(group.reports)}</dd></div></dl>
-      <div class="competition-progress"><i style="width:${esc(progress)}%"></i></div><b>›</b>
+      <div class="competition-mark">${mark}</div>
+      <div class="competition-copy"><h2>${esc(title)}</h2><small>${esc(type.toUpperCase())}${group.total ? ` · ${esc(group.total)} MATCHES` : ''}</small><span>${esc(status)}</span></div>
+      <b class="competition-arrow">›</b>
+      <dl><div><dt>RESULTS</dt><dd>${esc(group.results)}</dd></div><div><dt>SCHEDULE</dt><dd>${esc(group.scheduled)}</dd></div><div><dt>REPORTS</dt><dd>${esc(group.reports)}</dd></div></dl>
     </a>`;
   }
 
@@ -354,8 +362,17 @@
   function competitionCategoryPage(category) {
     const labels = { domestic: 'DOMESTIC', international: 'INTERNATIONAL', nations: 'NATIONS' };
     const groups = competitionGroups().filter(group => competitionCategory(group.competition) === category);
-    return `<section class="section-page">${pageHead(labels[category], `${groups.length} competizioni · Season ${seasonNumber()}`, 'competitions', `${ROOT}competitions/`)}
-      <div class="competition-list competition-category-list">${groups.map(competitionCard).join('') || '<div class="empty-state"><strong>NESSUNA COMPETIZIONE</strong><span>Il database non contiene competizioni per questa categoria.</span></div>'}</div>
+    const countries = [...new Set(groups.map(group => String(group.competition?.country_code || '').toUpperCase()).filter(value => value && value !== 'GLOBAL'))].sort();
+    const requestedCountry = String(new URLSearchParams(location.search).get('country') || '').toUpperCase();
+    const selectedCountry = countries.includes(requestedCountry) ? requestedCountry : countries[0] || '';
+    const visibleGroups = selectedCountry ? groups.filter(group => String(group.competition?.country_code || '').toUpperCase() === selectedCountry) : groups;
+    const tabs = Object.entries(labels).map(([key, label]) => `<a class="${key === category ? 'active' : ''}" href="${ROOT}competitions/${key}/">${label}</a>`).join('');
+    const countryTabs = countries.length > 1 ? `<nav class="competition-country-tabs" aria-label="Paesi">${countries.map(countryCode => `<a class="${countryCode === selectedCountry ? 'active' : ''}" href="${ROOT}competitions/${category}/?country=${encodeURIComponent(countryCode)}">${esc(countryCode)}</a>`).join('')}</nav>` : '';
+    return `<section class="section-page">${pageHead('COMPETITIONS', `${WORLD_ID} · ${worldName().toUpperCase()}`, 'competitions', `${ROOT}competitions/`)}
+      <nav class="competition-category-tabs" aria-label="Categorie competizioni">${tabs}</nav>
+      ${countryTabs}
+      <header class="competition-list-heading"><h2>${labels[category]}</h2><strong>${esc(visibleGroups.length)}</strong></header>
+      <div class="competition-list competition-category-list">${visibleGroups.map(competitionCard).join('') || '<div class="empty-state"><strong>NESSUNA COMPETIZIONE</strong><span>Il database non contiene competizioni per questa categoria.</span></div>'}</div>
     </section>`;
   }
 
@@ -397,7 +414,6 @@
   function compactMatches(rows) {
     return rows.length ? `<div class="match-list compact-match-list">${dateGroups(rows).map(([date, matches]) => `<section class="matchday-group"><header><div><small>MATCH DAY</small><h2>${esc(formatDate(date, true))}</h2></div><span>${matches.length} MATCH</span></header><div>${matches.map(matchCard).join('')}</div></section>`).join('')}</div>` : '<div class="empty-state"><strong>NESSUN MATCH</strong><span>Questa vista verrà popolata quando il dataset sarà disponibile.</span></div>';
   }
-
   function competitionOverview(group) {
     const played = group.results;
     const total = group.matches.length;
@@ -797,7 +813,6 @@
       history.pushState({}, '', `${url.pathname}${url.search}${url.hash}`);
       renderRoute();
     });
-
   }
 
   async function renderRoute() {
