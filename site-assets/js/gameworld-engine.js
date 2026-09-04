@@ -356,10 +356,8 @@
     const requestedCountry = String(new URLSearchParams(location.search).get('country') || '').toUpperCase();
     const selectedCountry = countries.includes(requestedCountry) ? requestedCountry : countries[0] || '';
     const visibleGroups = selectedCountry ? groups.filter(group => String(group.competition?.country_code || '').toUpperCase() === selectedCountry) : groups;
-    const tabs = Object.entries(labels).map(([key, label]) => `<a class="${key === category ? 'active' : ''}" href="${ROOT}competitions/${key}/">${label}</a>`).join('');
     const countryTabs = countries.length > 1 ? `<nav class="competition-country-tabs" aria-label="Paesi">${countries.map(countryCode => `<a class="${countryCode === selectedCountry ? 'active' : ''}" href="${ROOT}competitions/${category}/?country=${encodeURIComponent(countryCode)}">${esc(countryCode)}</a>`).join('')}</nav>` : '';
     return `<section class="section-page">${pageHead('COMPETITIONS', `${WORLD_ID} · ${worldName().toUpperCase()}`, 'competitions', `${ROOT}competitions/`)}
-      <nav class="competition-category-tabs" aria-label="Categorie competizioni">${tabs}</nav>
       ${countryTabs}
       <header class="competition-list-heading"><h2>${labels[category]}</h2><strong>${esc(visibleGroups.length)}</strong></header>
       <div class="competition-list competition-category-list">${visibleGroups.map(competitionCard).join('') || '<div class="empty-state"><strong>NESSUNA COMPETIZIONE</strong><span>Il database non contiene competizioni per questa categoria.</span></div>'}</div>
