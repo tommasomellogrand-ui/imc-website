@@ -434,7 +434,7 @@ function api_clubs(string $world): never {
         'club_gw_id' => (int)$row['club_gw_id'],
         'name' => $row['name'],
         'short_name' => $row['short_name'],
-        'image_url' => api_public_asset_url($row['image_url']),
+        'image_url' => '/nexus/assets/clubs/'.(int)$row['club_id'].'.png',
     ], $rows);
     api_response([
         'ok' => true,
