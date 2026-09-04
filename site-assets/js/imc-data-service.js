@@ -60,11 +60,21 @@
     };
   }
 
+  async function getCompetitions(gameWorldId, season, options = {}) {
+    const params = new URLSearchParams({ season: String(season) });
+    if (options.group) {
+      const group = String(options.group).toLowerCase();
+      if (!['domestic', 'international', 'nations'].includes(group)) throw new Error('Competition Group non valido.');
+      params.set('group', group);
+    }
+    return request(`${worldPath(gameWorldId)}/competitions?${params}`);
+  }
+
   async function getMatch(gameWorldId, fixtureId) {
     const value = String(fixtureId || '');
     if (!/^\d+$/.test(value)) throw new Error('Fixture ID non valido.');
     return request(`${worldPath(gameWorldId)}/matches/${encodeURIComponent(value)}`);
   }
 
-  global.IMCDataService = Object.freeze({ getWorld, getMatches, getAllMatches, getMatch });
+  global.IMCDataService = Object.freeze({ getWorld, getMatches, getAllMatches, getCompetitions, getMatch });
 })(window);
