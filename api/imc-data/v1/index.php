@@ -349,6 +349,78 @@ function api_managers(string $world): never {
     ]);
 }
 
+function api_clubs(string $world): never {
+    $core = api_database('Sql1956795_1');
+    $rows = api_all(
+        $core,
+        "SELECT m.club_id,m.game_world_id,m.club_gw_id,c.name,c.short_name,c.image_url ".
+        "FROM clubs_game_world_id m ".
+        "JOIN clubs c ON c.club_id=m.club_id ".
+        "WHERE m.game_world_id=? ORDER BY c.name,m.club_id",
+        [$world]
+    );
+    $data = array_map(static fn(array $row): array => [
+        'club_id' => (int)$row['club_id'],
+        'game_world_id' => $row['game_world_id'],
+        'club_gw_id' => (int)$row['club_gw_id'],
+        'name' => $row['name'],
+        'short_name' => $row['short_name'],
+        'image_url' => $row['image_url'],
+    ], $rows);
+    api_response([
+        'ok' => true,
+        'data' => $data,
+        'pagination' => ['total' => count($data), 'limit' => count($data), 'offset' => 0, 'returned' => count($data)],
+        'context' => ['game_world_id' => $world, 'source' => 'MYSQL_CORE.clubs_game_world_id'],
+        'generated_at' => gmdate('c'),
+    ]);
+}
+
+function api_nations(string $world): never {
+    $core = api_database('Sql1956795_1');
+    $rows = api_all(
+        $core,
+        'SELECT nation_id,game_world_id,nation_gw_id FROM nations_game_world_id WHERE game_world_id=? ORDER BY nation_id',
+        [$world]
+    );
+
+    $identityPath = __DIR__.'/nation-identities.json';
+    $identityRaw = is_file($identityPath) ? file_get_contents($identityPath) : false;
+    $identityPayload = $identityRaw === false ? null : json_decode($identityRaw, true);
+    $identityIndex = [];
+    foreach (($identityPayload['nations'] ?? []) as $identity) {
+        if (!is_array($identity) || !isset($identity['nation_id'])) continue;
+        $identityIndex[(string)$identity['nation_id']] = $identity;
+    }
+
+    $data = array_map(static function (array $row) use ($identityIndex): array {
+        $nationId = (int)$row['nation_id'];
+        $identity = $identityIndex[(string)$nationId] ?? [];
+        return [
+            'nation_id' => $nationId,
+            'game_world_id' => $row['game_world_id'],
+            'nation_gw_id' => (int)$row['nation_gw_id'],
+            'name' => $identity['name'] ?? null,
+            'image_url' => $identity['image_path'] ?? null,
+        ];
+    }, $rows);
+
+    usort($data, static fn(array $left, array $right): int =>
+        strcasecmp((string)($left['name'] ?? ''), (string)($right['name'] ?? ''))
+    );
+    api_response([
+        'ok' => true,
+        'data' => $data,
+        'pagination' => ['total' => count($data), 'limit' => count($data), 'offset' => 0, 'returned' => count($data)],
+        'context' => [
+            'game_world_id' => $world,
+            'mapping_source' => 'MYSQL_CORE.nations_game_world_id',
+            'identity_source' => $identityPayload['source'] ?? 'SUPABASE_IMC_NATIONAL_TEAMS',
+        ],
+        'generated_at' => gmdate('c'),
+    ]);
+}
+
 function api_competitions(string $world): never {
     $core = api_core_context($world);
     $season = api_season($_GET['season'] ?? null, (int)($core['imc_season'] ?? 1));
@@ -659,6 +731,12 @@ try {
     }
     if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'managers') {
         api_managers(api_world_id($segments[1]));
+    }
+    if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'clubs') {
+        api_clubs(api_world_id($segments[1]));
+    }
+    if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'nations') {
+        api_nations(api_world_id($segments[1]));
     }
     if (count($segments) === 3 && $segments[0] === 'worlds' && $segments[2] === 'matches') {
         api_matches(api_world_id($segments[1]));
