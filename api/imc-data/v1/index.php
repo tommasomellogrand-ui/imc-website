@@ -84,7 +84,7 @@ function api_core_club_index(string $world, array $worldClubIds): array {
             'club_id' => (int)$row['club_id'],
             'name' => $row['name'],
             'short_name' => $row['short_name'],
-            'image_url' => api_public_asset_url($row['image_url']),
+            'image_url' => '/nexus/assets/clubs/'.(int)$row['club_id'].'.png',
         ];
     }
     return $index;
