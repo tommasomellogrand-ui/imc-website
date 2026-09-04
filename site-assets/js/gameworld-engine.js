@@ -4,7 +4,7 @@
   const WORLD_ID = String(document.body.dataset.world || '').toUpperCase();
   const ROOT = document.body.dataset.worldRoot || `/${WORLD_ID.toLowerCase().replace('gw', 'gameworld')}/`;
   if (!/^GW00[1-9]$/.test(WORLD_ID)) throw new Error('Configurazione Game World non valida.');
-  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, managersPromise: null, competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
+  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, managers: null, managersPromise: null, clubs: null, clubsPromise: null, nations: null, nationsPromise: null, teamHubTab: 'clubs', competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
   const MATCH_CACHE_KEY = `imc:${WORLD_ID}:matches:v2`;
 
   const staticSections = {
@@ -99,6 +99,32 @@
         .finally(() => { state.managersPromise = null; });
     }
     return state.managersPromise;
+  }
+
+  function loadClubs() {
+    if (state.clubs) return Promise.resolve(state.clubs);
+    if (!state.clubsPromise) {
+      state.clubsPromise = IMCDataService.getClubs(WORLD_ID)
+        .then(payload => {
+          state.clubs = Array.isArray(payload.data) ? payload.data : [];
+          return state.clubs;
+        })
+        .finally(() => { state.clubsPromise = null; });
+    }
+    return state.clubsPromise;
+  }
+
+  function loadNations() {
+    if (state.nations) return Promise.resolve(state.nations);
+    if (!state.nationsPromise) {
+      state.nationsPromise = IMCDataService.getNations(WORLD_ID)
+        .then(payload => {
+          state.nations = Array.isArray(payload.data) ? payload.data : [];
+          return state.nations;
+        })
+        .finally(() => { state.nationsPromise = null; });
+    }
+    return state.nationsPromise;
   }
 
   function formatDate(value, long = false) {
@@ -422,6 +448,42 @@
     return `<section class="section-page">${pageHead(title, sub, iconName, back)}${viewTabs(active)}<div class="list-summary"><strong>${esc(rows.length)}</strong><span>${kind === 'calendar' ? 'UPCOMING FIXTURES' : 'MATCHES'}</span></div><div class="match-list">${content}</div></section>`;
   }
 
+  function teamInitials(name) {
+    return String(name || 'IMC').trim().split(/\s+/).slice(0, 2).map(part => part.charAt(0)).join('').toUpperCase();
+  }
+
+  function teamHubCard(item, type) {
+    const isNation = type === 'nations';
+    const name = item.name || (isNation ? `Nation ${item.nation_id}` : `Club ${item.club_id}`);
+    const globalId = isNation ? item.nation_id : item.club_id;
+    const worldId = isNation ? item.nation_gw_id : item.club_gw_id;
+    const image = item.image_url
+      ? `<img src="${esc(item.image_url)}" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span hidden>${esc(teamInitials(name))}</span>`
+      : `<span>${esc(teamInitials(name))}</span>`;
+    return `<article class="team-hub-card">
+      <div class="team-hub-logo">${image}</div>
+      <div class="team-hub-copy"><small>${isNation ? 'NATIONAL TEAM' : 'CLUB'}</small><h2>${esc(name)}</h2><p>${esc(WORLD_ID)} · ${isNation ? 'NATION' : 'CLUB'} GW ID ${esc(worldId)}</p></div>
+      <div class="team-hub-id"><span>${isNation ? 'NATION ID' : 'CLUB ID'}</span><strong>${esc(globalId)}</strong></div>
+    </article>`;
+  }
+
+  function teamHubPage() {
+    const active = state.teamHubTab;
+    const rows = active === 'nations' ? (state.nations || []) : (state.clubs || []);
+    const label = active === 'nations' ? 'NAZIONALI' : 'CLUB';
+    const content = rows.length
+      ? `<div class="team-hub-list">${rows.map(item => teamHubCard(item, active)).join('')}</div>`
+      : `<div class="empty-state"><strong>NESSUN ${label}</strong><span>Non risultano associazioni per questo Game World.</span></div>`;
+    return `<section class="section-page team-hub-page">${pageHead('TEAM HUB', `${state.clubs?.length || 0} club · ${state.nations?.length || 0} nazionali`, 'teams')}
+      <nav class="competition-subtabs team-hub-tabs">
+        <button type="button" class="${active === 'clubs' ? 'active' : ''}" data-team-hub-tab="clubs">CLUB <span>${esc(state.clubs?.length || 0)}</span></button>
+        <button type="button" class="${active === 'nations' ? 'active' : ''}" data-team-hub-tab="nations">NATIONS <span>${esc(state.nations?.length || 0)}</span></button>
+      </nav>
+      <section class="team-hub-summary"><small>${esc(WORLD_ID)} · ACTIVE ${esc(label)}</small><strong>${esc(rows.length)}</strong><span>${icon('teams')}</span></section>
+      ${content}
+    </section>`;
+  }
+
   function managerInitials(name) {
     return String(name || 'IMC').trim().split(/\s+/).slice(0, 2).map(part => part.charAt(0)).join('').toUpperCase();
   }
@@ -552,7 +614,13 @@
     drawer.querySelectorAll('a').forEach(link => link.addEventListener('click', close));
 
     document.addEventListener('click', event => {
-      const competitionTab = event.target.closest?.('[data-competition-tab]');
+      const teamHubTab = event.target.closest?.('[data-team-hub-tab]');
+      if (teamHubTab) {
+        state.teamHubTab = teamHubTab.dataset.teamHubTab;
+        renderRoute();
+        return;
+      }
+            const competitionTab = event.target.closest?.('[data-competition-tab]');
       if (competitionTab) {
         state.competitionTab = competitionTab.dataset.competitionTab;
         renderRoute();
@@ -597,6 +665,12 @@
 
       if (route === 'home') {
         app.innerHTML = home();
+        return;
+      }
+      if (route === 'team-hub') {
+        app.innerHTML = routeLoading('TEAM HUB', 'Caricamento club e nazionali', 'teams');
+        await Promise.all([loadClubs(), loadNations()]);
+        app.innerHTML = teamHubPage();
         return;
       }
       if (route === 'managers') {
