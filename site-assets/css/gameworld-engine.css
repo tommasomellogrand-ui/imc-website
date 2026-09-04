@@ -331,6 +331,26 @@ main { width: min(100%, 520px); min-height: calc(100svh - 152px); margin: auto; 
 .compact-match-list { margin-top: 0; }
 .section-placeholder-tabs { margin-top: 10px; }
 
+
+.manager-summary { min-height: 112px; margin-top: 10px; padding: 18px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; border-radius: 19px; color: #fff; background: linear-gradient(135deg,var(--ink),#5a3327); box-shadow: 0 12px 25px rgba(43,22,15,.18); }
+.manager-summary div { display: grid; }
+.manager-summary small { color: var(--gold); font-size: 6px; font-weight: 950; letter-spacing: .7px; }
+.manager-summary strong { margin-top: 7px; font-size: 30px; line-height: 1; font-weight: 950; }
+.manager-summary div > span { margin-top: 5px; color: rgba(255,255,255,.65); font-size: 7px; font-weight: 900; letter-spacing: .5px; }
+.manager-summary > span { width: 70px; height: 70px; display: grid; place-items: center; color: var(--gold); opacity: .9; }
+.manager-summary svg { width: 62px; height: 62px; stroke-width: 2; }
+.manager-list { margin-top: 10px; display: grid; gap: 8px; }
+.manager-card { min-height: 84px; padding: 12px; display: grid; grid-template-columns: 52px minmax(0,1fr) auto; align-items: center; gap: 11px; border: 1px solid var(--line); border-radius: 17px; background: radial-gradient(circle at 95% 0,rgba(var(--copper-rgb),.08),transparent 35%),linear-gradient(145deg,#fff,#fcf6f2); box-shadow: 0 8px 18px rgba(63,31,20,.055),inset 0 1px #fff; }
+.manager-avatar { width: 50px; height: 50px; display: grid; place-items: center; border: 1px solid rgba(var(--copper-rgb),.2); border-radius: 15px; color: #fff; background: linear-gradient(145deg,var(--copper),var(--copper-dark)); font-size: 14px; font-weight: 950; box-shadow: 0 7px 14px rgba(var(--copper-rgb),.18); }
+.manager-copy { min-width: 0; }
+.manager-copy small { color: var(--gold); font-size: 5.7px; font-weight: 950; letter-spacing: .55px; }
+.manager-copy h2 { margin: 4px 0 0; overflow: hidden; font-size: 12px; line-height: 1.1; font-weight: 950; text-overflow: ellipsis; white-space: nowrap; }
+.manager-copy p { margin: 6px 0 0; overflow: hidden; color: var(--muted); font-size: 8px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.manager-meta { display: grid; justify-items: end; gap: 7px; text-align: right; }
+.manager-meta > span { min-height: 20px; padding: 0 7px; display: grid; place-items: center; border-radius: 6px; color: #fff; background: var(--copper); font-size: 6px; font-weight: 950; letter-spacing: .5px; }
+.manager-meta small { max-width: 70px; color: var(--muted); font-size: 5.3px; line-height: 1.25; font-weight: 800; }
+.section-placeholder-tabs button:disabled { opacity: .45; }
+
 @media (max-width: 390px) {
   .nx-topbar { grid-template-columns: 68px minmax(0, 1fr) 68px; }
   .nx-brand strong { font-size: 17px; }
