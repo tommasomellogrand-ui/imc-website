@@ -1,0 +1,22 @@
+{
+  "migration_id": "20260904_competition_group_expected_matches_v1",
+  "targets": [
+    "gold",
+    "custom"
+  ],
+  "databases": [
+    "Sql1956795_2",
+    "Sql1956795_3"
+  ],
+  "allow_destructive": false,
+  "statements": [
+    "ALTER TABLE `gw_competitions` ADD COLUMN `competition_group` ENUM('DOMESTIC','INTERNATIONAL','NATIONS') NULL AFTER `competition_name`",
+    "CREATE TABLE IF NOT EXISTS `gw_expected_matches` (\n  `expected_match_id` bigint unsigned NOT NULL AUTO_INCREMENT,\n  `game_world_id` varchar(16) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,\n  `gw_season_row_id` bigint unsigned DEFAULT NULL,\n  `gw_competition_row_id` bigint unsigned DEFAULT NULL,\n  `competition_id` bigint unsigned DEFAULT NULL,\n  `date` date DEFAULT NULL,\n  `time` time DEFAULT NULL,\n  `home_world_club_id` bigint unsigned DEFAULT NULL,\n  `away_world_club_id` bigint unsigned DEFAULT NULL,\n  `home_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `away_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `status` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `source` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,\n  `source_reference` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),\n  `updated_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),\n  PRIMARY KEY (`expected_match_id`),\n  UNIQUE KEY `uq_gw_expected_matches_logical` (`game_world_id`,`gw_season_row_id`,`gw_competition_row_id`,`date`,`time`,`home_name`,`away_name`),\n  KEY `ix_gw_expected_matches_competition_id` (`competition_id`),\n  KEY `ix_gw_expected_matches_home_club` (`game_world_id`,`home_world_club_id`),\n  KEY `ix_gw_expected_matches_away_club` (`game_world_id`,`away_world_club_id`),\n  CONSTRAINT `fk_gw_expected_matches_game_world` FOREIGN KEY (`game_world_id`) REFERENCES `gw_game_worlds` (`game_world_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `fk_gw_expected_matches_season` FOREIGN KEY (`gw_season_row_id`) REFERENCES `gw_seasons` (`gw_season_row_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `fk_gw_expected_matches_competition` FOREIGN KEY (`gw_competition_row_id`) REFERENCES `gw_competitions` (`gw_competition_row_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `fk_gw_expected_matches_home_club` FOREIGN KEY (`game_world_id`,`home_world_club_id`) REFERENCES `gw_world_clubs` (`game_world_id`,`world_club_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `fk_gw_expected_matches_away_club` FOREIGN KEY (`game_world_id`,`away_world_club_id`) REFERENCES `gw_world_clubs` (`game_world_id`,`world_club_id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+    "UPDATE `gw_competitions` SET `competition_group` = CASE `competition_name` WHEN 'League' THEN 'DOMESTIC' WHEN 'League Cup' THEN 'DOMESTIC' WHEN 'League Shield' THEN 'DOMESTIC' WHEN 'Charity Shield' THEN 'DOMESTIC' WHEN 'Playoff' THEN 'DOMESTIC' WHEN 'SMFA Champions' THEN 'INTERNATIONAL' WHEN 'SMFA Shield' THEN 'INTERNATIONAL' WHEN 'SMFA Super Cup' THEN 'INTERNATIONAL' WHEN 'World Cup Qualifying' THEN 'NATIONS' WHEN 'World Cup' THEN 'NATIONS' ELSE NULL END"
+  ],
+  "verification": {
+    "counts": "SELECT COALESCE(competition_group,'NULL') AS competition_group, COUNT(*) AS total FROM gw_competitions GROUP BY competition_group ORDER BY competition_group",
+    "schema": "SELECT table_name,column_name,column_type,is_nullable,column_key,extra FROM information_schema.columns WHERE table_schema=DATABASE() AND ((table_name='gw_competitions' AND column_name='competition_group') OR table_name='gw_expected_matches') ORDER BY table_name,ordinal_position",
+    "constraints": "SELECT constraint_name,constraint_type FROM information_schema.table_constraints WHERE table_schema=DATABASE() AND table_name='gw_expected_matches' ORDER BY constraint_type,constraint_name"
+  }
+}
