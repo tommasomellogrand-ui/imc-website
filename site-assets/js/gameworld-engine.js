@@ -220,16 +220,6 @@
     </section>`;
   }
 
-  function metricStrip() {
-    const datasets = state.world.datasets;
-    return `<section class="metric-strip" aria-label="Riepilogo dati">
-      <div><strong>${esc(state.world.summary.fixture_count)}</strong><span>FIXTURE</span></div>
-      <div><strong>${esc(state.world.summary.competition_count)}</strong><span>COMPETITIONS</span></div>
-      <div><strong>${esc(datasets.results.fixture_count)}</strong><span>RESULTS</span></div>
-      <div><strong>${esc(datasets.match_reports.fixture_count)}</strong><span>REPORTS</span></div>
-    </section>`;
-  }
-
   function hubCard(key, title, sub, iconName, className, badge = '') {
     return `<a class="hub-card ${className}" href="${ROOT}${key}/">
       <div class="hub-copy">${badge ? `<small>${esc(badge)}</small>` : ''}<h2>${esc(title)}</h2><p>${esc(sub)}</p></div>
@@ -239,7 +229,7 @@
 
   function home() {
     const datasets = state.world.datasets;
-    return `<div class="page-stack">${worldHero()}${metricStrip()}<section class="hub-grid hub-grid-gw002">
+    return `<div class="page-stack">${worldHero()}<section class="hub-grid hub-grid-gw002">
       ${hubCard('competitions', 'COMPETITIONS', `${state.world.summary.competition_count} competizioni`, 'competitions', 'hub-competitions', 'MYSQL LIVE')}
       ${hubCard('managers', 'MANAGERS', 'IMC · External', 'manager', 'hub-managers')}
       ${hubCard('team-hub', 'TEAM HUB', 'Club · Nazionali', 'teams', 'hub-team')}
@@ -406,8 +396,13 @@
     return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }
 
-  function competitionDetailTabs() {
-    const tabs = [['overview', 'OVERVIEW'], ['competition', 'COMPETITION'], ['matches', 'MATCHES'], ['stats', 'STATS'], ['history', 'HISTORY']];
+  function competitionDetailTabs(group) {
+    const code = String(group?.competition?.competition_code || '').toUpperCase();
+    const usesLeagueNavigation = code === 'LEAGUE' || code === 'INTERNATIONAL_QUALIFIER' || competitionType(group?.competition) === 'league';
+    const tabs = usesLeagueNavigation
+      ? [['overview', 'OVERVIEW'], ['results', 'RESULTS'], ['table', 'TABLE'], ['schedule', 'SCHEDULE']]
+      : [['overview', 'OVERVIEW'], ['competition', 'COMPETITION'], ['matches', 'MATCHES'], ['stats', 'STATS'], ['history', 'HISTORY']];
+    if (!tabs.some(([key]) => key === state.competitionTab)) state.competitionTab = 'overview';
     return `<nav class="competition-detail-tabs">${tabs.map(([key, label]) => `<button type="button" data-competition-tab="${key}" class="${state.competitionTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>`;
   }
 
@@ -468,7 +463,7 @@
 
   function competitionStructure(group) {
     const code = String(group.competition?.competition_code || '').toUpperCase();
-    const isLeague = code === 'LEAGUE' || competitionType(group.competition) === 'league';
+    const usesLeagueNavigation = code === 'LEAGUE' || code === 'INTERNATIONAL_QUALIFIER' || competitionType(group.competition) === 'league';
     const isHybrid = ['SMFA_CHAMPIONS', 'SMFA_SHIELD', 'INTERNATIONAL_QUALIFIER', 'WORLD_CUP'].includes(code);
     const tabs = isLeague ? [['table', 'TABLE']] : isHybrid ? [['groups', 'GROUP STAGE'], ['knockout', 'KNOCKOUT']] : [['knockout', 'KNOCKOUT']];
     if (!tabs.some(([key]) => key === state.competitionSubTab)) state.competitionSubTab = tabs[0][0];
@@ -507,12 +502,21 @@
   function competitionDetailPage(groupKey) {
     const group = competitionGroups().find(item => item.key === groupKey);
     if (!group) return errorPage('Competizione non trovata.');
+    const code = String(group.competition?.competition_code || '').toUpperCase();
+    const isLeague = code === 'LEAGUE' || competitionType(group.competition) === 'league';
+    competitionDetailTabs(group);
     let body = competitionOverview(group);
-    if (state.competitionTab === 'competition') body = competitionStructure(group);
-    else if (state.competitionTab === 'matches') body = competitionMatches(group);
-    else if (state.competitionTab === 'stats') body = competitionStats();
-    else if (state.competitionTab === 'history') body = '<div class="empty-state"><strong>HISTORY</strong><span>Albo d’oro e vincitori verranno collegati al dataset storico.</span></div>';
-    return `<section class="section-page competition-detail-page">${pageHead(competitionName(group.competition), `${group.matches.length} fixture · Season ${seasonNumber()}`, 'competitions', `${ROOT}competitions/${competitionCategory(group.competition)}/`)}${competitionDetailTabs()}<main class="competition-detail-body">${body}</main></section>`;
+    if (usesLeagueNavigation) {
+      if (state.competitionTab === 'results') body = compactMatches(group.matches.filter(match => match.result));
+      else if (state.competitionTab === 'table') body = leagueTable(group.matches);
+      else if (state.competitionTab === 'schedule') body = compactMatches(group.matches.filter(match => !match.result));
+    } else {
+      if (state.competitionTab === 'competition') body = competitionStructure(group);
+      else if (state.competitionTab === 'matches') body = competitionMatches(group);
+      else if (state.competitionTab === 'stats') body = competitionStats();
+      else if (state.competitionTab === 'history') body = '<div class="empty-state"><strong>HISTORY</strong><span>Albo d’oro e vincitori verranno collegati al dataset storico.</span></div>';
+    }
+    return `<section class="section-page competition-detail-page">${pageHead(competitionName(group.competition), `${group.matches.length} fixture · Season ${seasonNumber()}`, 'competitions', `${ROOT}competitions/${competitionCategory(group.competition)}/`)}${competitionDetailTabs(group)}<main class="competition-detail-body">${body}</main></section>`;
   }
 
   function matchListPage(kind, groupKey = null) {
