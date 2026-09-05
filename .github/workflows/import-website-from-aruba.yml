@@ -18,213 +18,84 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate Aruba secrets
-        env:
-          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
-          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
-          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
-          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+      - name: Diagnose Publication Bridge over HTTPS
         shell: bash
         run: |
           set -euo pipefail
-          for name in ARUBA_FTP_HOST ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
-            test -n "${!name:-}"
-          done
-          echo "Aruba secrets presenti"
+          BASE="https://www.italianmastersclub.it/bridge"
+          BRIDGE="$BASE/publication-bridge.php"
+          README="$BASE/README-INSTALL.txt"
 
-      - name: Diagnose Aruba FTP connectivity
-        env:
-          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import os, socket
+          echo "=== HTTPS CHECK ==="
+          curl -fsSIL --max-time 20 "https://www.italianmastersclub.it/" | head -n 8
 
-          raw = os.environ['ARUBA_FTP_HOST'].strip()
-          host = raw.removeprefix('ftp://').removeprefix('ftps://').split('/')[0].split(':')[0]
-          print(f'Host configurato: {host}')
-
-          try:
-              infos = socket.getaddrinfo(host, 21, type=socket.SOCK_STREAM)
-          except Exception as exc:
-              raise SystemExit(f'DNS_FAIL {type(exc).__name__}: {exc}')
-
-          ips=[]
-          for info in infos:
-              ip=info[4][0]
-              if ip not in ips:
-                  ips.append(ip)
-          print('DNS_OK ' + ', '.join(ips))
-
-          ok=False
-          errors=[]
-          for ip in ips:
-              try:
-                  with socket.create_connection((ip,21), timeout=12):
-                      print(f'TCP21_OK {ip}')
-                      ok=True
-                      break
-              except Exception as exc:
-                  errors.append(f'{ip}: {type(exc).__name__}: {exc}')
-                  print(f'TCP21_FAIL {errors[-1]}')
-
-          if not ok:
-              raise SystemExit('TCP21_UNREACHABLE | ' + ' | '.join(errors))
-          PY
-
-      - name: Download complete website from Aruba via FTPS
-        env:
-          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
-          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
-          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
-          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import os
-          import shutil
-          import socket
-          import ssl
-          import time
-          from ftplib import FTP_TLS, error_perm
-          from pathlib import Path
-
-          raw_host = os.environ['ARUBA_FTP_HOST'].strip()
-          host = raw_host.removeprefix('ftp://').removeprefix('ftps://').split('/')[0].split(':')[0]
-          username = os.environ['ARUBA_FTP_USERNAME']
-          password = os.environ['ARUBA_FTP_PASSWORD']
-          remote_root = os.environ['ARUBA_WEBSITE_REMOTE_DIR'].strip() or '/'
-
-          snapshot = Path('/tmp/aruba-site')
-          if snapshot.exists():
-              shutil.rmtree(snapshot)
-          snapshot.mkdir(parents=True)
-
-          ctx = ssl.create_default_context()
-          ctx.check_hostname = False
-          ctx.verify_mode = ssl.CERT_NONE
-
-          ftp = None
-          last_error = None
-          for attempt in range(1, 4):
-              client = FTP_TLS(context=ctx, timeout=30)
-              try:
-                  print(f'FTPS_CONNECT attempt={attempt} host={host}:21')
-                  client.connect(host, 21, timeout=30)
-                  print('FTPS_TCP_CONNECTED')
-                  client.login(username, password)
-                  print('FTPS_LOGIN_OK')
-                  client.prot_p()
-                  client.set_pasv(True)
-                  print('FTPS_DATA_PROTECTION_OK passive=on')
-                  ftp = client
-                  break
-              except Exception as exc:
-                  last_error = exc
-                  print(f'FTPS_ATTEMPT_FAIL attempt={attempt} type={type(exc).__name__} message={exc}')
-                  try:
-                      client.close()
-                  except Exception:
-                      pass
-                  time.sleep(5)
-
-          if ftp is None:
-              raise SystemExit(f'FTPS_CONNECT_FAIL {type(last_error).__name__}: {last_error}')
-
-          stats = {'files': 0, 'bytes': 0}
-
-          def list_entries(remote_dir):
-              current = ftp.pwd()
-              ftp.cwd(remote_dir)
-              try:
-                  try:
-                      entries = [(name, facts.get('type', '')) for name, facts in ftp.mlsd()]
-                  except Exception as exc:
-                      print(f'MLSD_FALLBACK dir={remote_dir} reason={type(exc).__name__}')
-                      entries = []
-                      for name in ftp.nlst():
-                          if name in ('.', '..'):
-                              continue
-                          here = ftp.pwd()
-                          is_dir = False
-                          try:
-                              ftp.cwd(name)
-                              is_dir = True
-                          except error_perm:
-                              is_dir = False
-                          finally:
-                              ftp.cwd(here)
-                          entries.append((name, 'dir' if is_dir else 'file'))
-                  return entries
-              finally:
-                  ftp.cwd(current)
-
-          def download_tree(remote_dir, local_dir):
-              local_dir.mkdir(parents=True, exist_ok=True)
-              for name, kind in list_entries(remote_dir):
-                  if name in ('.', '..'):
-                      continue
-                  remote_path = remote_dir.rstrip('/') + '/' + name if remote_dir != '/' else '/' + name
-                  local_path = local_dir / name
-                  if kind == 'dir':
-                      print(f'DIR {remote_path}')
-                      download_tree(remote_path, local_path)
-                  elif kind in ('file', ''):
-                      local_path.parent.mkdir(parents=True, exist_ok=True)
-                      with local_path.open('wb') as fh:
-                          ftp.retrbinary(f'RETR {remote_path}', fh.write)
-                      size = local_path.stat().st_size
-                      stats['files'] += 1
-                      stats['bytes'] += size
-                      print(f'DOWNLOAD {remote_path} ({size} bytes)')
-                  else:
-                      print(f'SKIP {remote_path} type={kind}')
-
-          try:
-              print(f'REMOTE_ROOT {remote_root}')
-              download_tree(remote_root, snapshot)
-          finally:
-              try:
-                  ftp.quit()
-              except Exception:
-                  try:
-                      ftp.close()
-                  except Exception:
-                      pass
-
-          if stats['files'] == 0:
-              raise SystemExit('Nessun file scaricato da Aruba')
-
-          print(f"FTPS_IMPORT_OK files={stats['files']} bytes={stats['bytes']}")
-          PY
-
-      - name: Copy Aruba snapshot into repository
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -d /tmp/aruba-site
-          cp -a /tmp/aruba-site/. ./
-          echo "Snapshot Aruba copiato nel repository senza rimuovere i file tecnici GitHub"
-
-      - name: Validate imported website
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -s index.html
-          echo "Import FTPS validato"
-
-      - name: Commit imported website
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "Nessuna differenza da importare"
-            exit 0
+          echo
+          echo "=== README-INSTALL.txt ==="
+          code=$(curl -sS -L --max-time 20 -o /tmp/readme.txt -w '%{http_code}' "$README" || true)
+          echo "HTTP $code"
+          if [ -s /tmp/readme.txt ]; then
+            sed -n '1,220p' /tmp/readme.txt
           fi
-          git commit -m "Import complete website from Aruba via FTPS"
-          git push
+
+          echo
+          echo "=== BRIDGE GET ==="
+          code=$(curl -sS -L --max-time 20 -o /tmp/bridge-get.txt -w '%{http_code}' "$BRIDGE" || true)
+          echo "HTTP $code"
+          sed -n '1,120p' /tmp/bridge-get.txt 2>/dev/null || true
+
+          echo
+          echo "=== BRIDGE OPTIONS ==="
+          code=$(curl -sS -L -X OPTIONS --max-time 20 -o /tmp/bridge-options.txt -w '%{http_code}' "$BRIDGE" || true)
+          echo "HTTP $code"
+          sed -n '1,120p' /tmp/bridge-options.txt 2>/dev/null || true
+
+          echo
+          echo "=== BRIDGE POST EMPTY JSON ==="
+          code=$(curl -sS -L -X POST \
+            -H 'Content-Type: application/json' \
+            --data '{}' \
+            --max-time 20 \
+            -o /tmp/bridge-post-empty.txt \
+            -w '%{http_code}' \
+            "$BRIDGE" || true)
+          echo "HTTP $code"
+          sed -n '1,160p' /tmp/bridge-post-empty.txt 2>/dev/null || true
+
+          echo
+          echo "=== BRIDGE COMMON LIST PROBES ==="
+          python3 - <<'PY'
+          import json, urllib.request, urllib.error
+
+          url='https://www.italianmastersclub.it/bridge/publication-bridge.php'
+          probes=[
+              {'action':'list','path':'/'},
+              {'action':'list','dir':'/'},
+              {'action':'ls','path':'/'},
+              {'op':'list','path':'/'},
+              {'command':'list','path':'/'},
+          ]
+
+          for payload in probes:
+              data=json.dumps(payload).encode()
+              req=urllib.request.Request(url,data=data,headers={'Content-Type':'application/json'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=20) as r:
+                      body=r.read(12000).decode('utf-8','replace')
+                      print('PROBE',payload,'HTTP',r.status)
+                      print(body[:4000])
+              except urllib.error.HTTPError as e:
+                  body=e.read(12000).decode('utf-8','replace')
+                  print('PROBE',payload,'HTTP',e.code)
+                  print(body[:4000])
+              except Exception as e:
+                  print('PROBE',payload,'ERROR',type(e).__name__,str(e))
+          PY
+
+          echo
+          echo "Publication Bridge diagnostics completed"
+
+      - name: Stop before import until bridge contract is identified
+        shell: bash
+        run: |
+          echo "Import not executed in this run: bridge request contract must be identified from the diagnostics above."
+          exit 1
