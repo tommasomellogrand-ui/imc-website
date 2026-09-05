@@ -1,0 +1,94 @@
+name: Remove asta-mercato from Aruba and GitHub
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/remove-asta-mercato-now.yml
+
+permissions:
+  contents: write
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Remove asta-mercato from Aruba through Publication Bridge
+        env:
+          BRIDGE_TOKEN: ${{ secrets.IMC_PUBLICATION_BRIDGE_TOKEN || secrets.PUBLICATION_BRIDGE_TOKEN || secrets.BRIDGE_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${BRIDGE_TOKEN:-}" || { echo "BRIDGE_TOKEN_SECRET_MISSING"; exit 2; }
+
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error
+
+          url = 'https://www.italianmastersclub.it/bridge/publication-bridge.php'
+          token = os.environ['BRIDGE_TOKEN']
+
+          def call(payload):
+              data = json.dumps(payload).encode('utf-8')
+              req = urllib.request.Request(
+                  url,
+                  data=data,
+                  headers={
+                      'Content-Type': 'application/json',
+                      'X-IMC-Bridge-Token': token,
+                  },
+                  method='POST',
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      body = r.read().decode('utf-8', 'replace')
+                      status = r.status
+              except urllib.error.HTTPError as e:
+                  body = e.read().decode('utf-8', 'replace')
+                  status = e.code
+              try:
+                  parsed = json.loads(body)
+              except Exception:
+                  raise SystemExit(f'BRIDGE_NON_JSON HTTP {status}: {body[:500]}')
+              print('HTTP', status, parsed)
+              return status, parsed
+
+          status, parsed = call({'action': 'rmdir', 'path': 'asta-mercato', 'recursive': True})
+          if status >= 400 or not parsed.get('ok'):
+              raise SystemExit(f"ARUBA_RMDIR_FAILED: {parsed.get('error')}")
+
+          status, parsed = call({'action': 'exists', 'path': 'asta-mercato'})
+          if status >= 400 or not parsed.get('ok'):
+              raise SystemExit('ARUBA_EXISTS_CHECK_FAILED')
+          if parsed.get('exists'):
+              raise SystemExit('ARUBA_FOLDER_STILL_EXISTS')
+
+          print('ARUBA_ASTA_MERCATO_REMOVED')
+          PY
+
+      - name: Remove asta-mercato from GitHub repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d asta-mercato ]; then
+            git rm -r asta-mercato
+          else
+            echo "asta-mercato already absent from checkout"
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --cached --quiet; then
+            echo "No repository deletion to commit"
+            exit 0
+          fi
+
+          git commit -m "Remove asta-mercato from Aruba and repository [asta-mercato cleanup]"
+          git push origin main
+
+      - name: Done
+        run: echo "asta-mercato removed from Aruba and GitHub"
