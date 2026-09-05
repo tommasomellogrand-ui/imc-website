@@ -36,9 +36,11 @@ jobs:
           import pathlib
           import shutil
           import urllib.error
+          import urllib.parse
           import urllib.request
 
-          URL = 'https://www.italianmastersclub.it/bridge/publication-bridge.php'
+          BRIDGE_URL = 'https://www.italianmastersclub.it/bridge/publication-bridge.php'
+          PUBLIC_BASE = 'https://www.italianmastersclub.it/'
           TOKEN = os.environ['BRIDGE_TOKEN']
           SNAPSHOT = pathlib.Path('/tmp/aruba-site')
 
@@ -50,10 +52,19 @@ jobs:
               'bridge/publication-config.php',
           }
 
-          def request(payload):
+          stats = {
+              'files': 0,
+              'dirs': 0,
+              'bytes': 0,
+              'excluded': 0,
+              'https_fallback': 0,
+              'unreadable': 0,
+          }
+
+          def bridge_request(payload):
               data = json.dumps(payload).encode('utf-8')
               req = urllib.request.Request(
-                  URL,
+                  BRIDGE_URL,
                   data=data,
                   headers={
                       'Content-Type': 'application/json',
@@ -63,28 +74,29 @@ jobs:
               )
               try:
                   with urllib.request.urlopen(req, timeout=60) as r:
-                      return r.status, dict(r.headers.items()), r.read()
+                      return r.status, r.headers, r.read()
               except urllib.error.HTTPError as e:
-                  return e.code, dict(e.headers.items()), e.read()
+                  return e.code, e.headers, e.read()
 
-          def api(payload):
-              status, headers, raw = request(payload)
+          def api_json(payload):
+              status, headers, raw = bridge_request(payload)
               text = raw.decode('utf-8', 'replace')
               try:
-                  parsed = json.loads(text)
-              except Exception:
-                  raise RuntimeError(f'BRIDGE_NON_JSON HTTP {status}: {text[:500]}')
-
-              if status >= 400 or not parsed.get('ok', False):
+                  obj = json.loads(text)
+              except Exception as exc:
                   raise RuntimeError(
-                      f"BRIDGE_ERROR HTTP {status} action={payload.get('action')} path={payload.get('path','')} error={parsed.get('error')}"
+                      f'BRIDGE_NON_JSON HTTP {status} action={payload.get("action")} '
+                      f'path={payload.get("path","")} body={text[:300]!r}'
+                  ) from exc
+              if status >= 400 or not obj.get('ok', False):
+                  raise RuntimeError(
+                      f'BRIDGE_ERROR HTTP {status} action={payload.get("action")} '
+                      f'path={payload.get("path","")} error={obj.get("error")}'
                   )
-              return parsed
+              return obj
 
-          health = api({'action': 'health'})
+          health = api_json({'action': 'health'})
           print('BRIDGE_OK', health.get('version'), 'root=', health.get('root'))
-
-          stats = {'files': 0, 'dirs': 0, 'bytes': 0, 'excluded': 0}
 
           def norm_path(parent, name):
               parent = parent.strip('/')
@@ -94,8 +106,9 @@ jobs:
               encoding = str(obj.get('encoding') or '').lower()
 
               for key in ('content_base64', 'base64', 'data_base64'):
-                  if isinstance(obj.get(key), str):
-                      return base64.b64decode(obj[key], validate=False)
+                  value = obj.get(key)
+                  if isinstance(value, str):
+                      return base64.b64decode(value, validate=False)
 
               content = obj.get('content')
               if isinstance(content, str):
@@ -109,54 +122,80 @@ jobs:
                       return base64.b64decode(data, validate=False)
                   return data.encode('utf-8')
 
-              raise RuntimeError(f'READ_RESPONSE_UNSUPPORTED path={path} keys={sorted(obj.keys())}')
+              return None
+
+          def try_bridge_read(path, encoding=None):
+              payload = {'action': 'read', 'path': path}
+              if encoding:
+                  payload['encoding'] = encoding
+
+              status, headers, raw = bridge_request(payload)
+              if status >= 400:
+                  print('READ_BRIDGE_HTTP_FAIL', path, status, payload)
+                  return None
+
+              if not raw:
+                  print('READ_EMPTY', path, 'payload=', payload)
+                  return None
+
+              ctype = (headers.get('Content-Type') or '').lower()
+              stripped = raw.lstrip()
+              looks_json = 'json' in ctype or stripped.startswith(b'{') or stripped.startswith(b'[')
+
+              if looks_json:
+                  try:
+                      obj = json.loads(raw.decode('utf-8', 'replace'))
+                  except Exception:
+                      obj = None
+                  if isinstance(obj, dict):
+                      if obj.get('ok') is False:
+                          print('READ_BRIDGE_ERROR', path, obj.get('error'))
+                          return None
+                      decoded = decode_json_read(obj, path)
+                      if decoded is not None:
+                          return decoded
+
+              # Some bridge read implementations return the file bytes directly.
+              return raw
+
+          def try_public_https(path):
+              quoted = '/'.join(urllib.parse.quote(part) for part in path.split('/'))
+              url = urllib.parse.urljoin(PUBLIC_BASE, quoted)
+              req = urllib.request.Request(url, headers={'User-Agent': 'IMC-GitHub-Importer/1.0'})
+              try:
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      raw = r.read()
+                      if r.status < 400 and raw:
+                          stats['https_fallback'] += 1
+                          print('HTTPS_FALLBACK_OK', path, len(raw))
+                          return raw
+              except Exception as exc:
+                  print('HTTPS_FALLBACK_FAIL', path, type(exc).__name__, str(exc)[:180])
+              return None
 
           def read_file(path):
-              # The bridge may return JSON metadata/content or the file body directly.
-              for payload in (
-                  {'action': 'read', 'path': path, 'encoding': 'base64'},
-                  {'action': 'read', 'path': path},
-              ):
-                  status, headers, raw = request(payload)
-                  ctype = (headers.get('Content-Type') or headers.get('content-type') or '').lower()
+              # First try bridge base64, then normal bridge read, then public HTTPS.
+              for encoding in ('base64', None):
+                  blob = try_bridge_read(path, encoding)
+                  if blob is not None:
+                      return blob
 
-                  if status >= 400:
-                      text = raw.decode('utf-8', 'replace')
-                      try:
-                          parsed = json.loads(text)
-                          err = parsed.get('error')
-                      except Exception:
-                          err = text[:300]
-                      print('READ_FAIL', path, 'HTTP', status, err)
-                      continue
+              blob = try_public_https(path)
+              if blob is not None:
+                  return blob
 
-                  # Try JSON first when it actually looks like JSON.
-                  stripped = raw.lstrip()
-                  if 'json' in ctype or stripped.startswith(b'{') or stripped.startswith(b'['):
-                      try:
-                          parsed = json.loads(raw.decode('utf-8'))
-                          if isinstance(parsed, dict):
-                              if parsed.get('ok', True) is False:
-                                  print('READ_FAIL', path, parsed.get('error'))
-                                  continue
-                              return decode_json_read(parsed, path)
-                      except Exception:
-                          # Valid file contents can themselves start with { or [.
-                          pass
-
-                  # HTTP 200 with non-JSON body means the bridge returned the file directly.
-                  if raw:
-                      return raw
-
-                  print('READ_EMPTY', path, 'payload=', payload)
-
-              raise RuntimeError(f'READ_FAILED path={path}')
+              stats['unreadable'] += 1
+              print('UNREADABLE_FILE', path)
+              return None
 
           def walk(remote_dir=''):
-              listing = api({'action': 'list', 'path': '/' + remote_dir.strip('/') if remote_dir else '/'})
+              list_path = '/' + remote_dir.strip('/') if remote_dir else '/'
+              listing = api_json({'action': 'list', 'path': list_path})
               items = listing.get('items')
               if not isinstance(items, list):
-                  raise RuntimeError(f'LIST_RESPONSE_UNSUPPORTED path={remote_dir} keys={sorted(listing.keys())}')
+                  raise RuntimeError(
+                      f'LIST_RESPONSE_UNSUPPORTED path={remote_dir} keys={sorted(listing.keys())}'
+                  )
 
               for item in items:
                   name = item.get('name')
@@ -172,6 +211,7 @@ jobs:
                       continue
 
                   target = SNAPSHOT / rel
+
                   if kind == 'directory':
                       target.mkdir(parents=True, exist_ok=True)
                       stats['dirs'] += 1
@@ -179,6 +219,8 @@ jobs:
                       walk(rel)
                   elif kind == 'file':
                       blob = read_file(rel)
+                      if blob is None:
+                          continue
                       target.parent.mkdir(parents=True, exist_ok=True)
                       target.write_bytes(blob)
                       stats['files'] += 1
@@ -197,7 +239,9 @@ jobs:
               f"files={stats['files']}",
               f"dirs={stats['dirs']}",
               f"bytes={stats['bytes']}",
-              f"excluded={stats['excluded']}"
+              f"excluded={stats['excluded']}",
+              f"https_fallback={stats['https_fallback']}",
+              f"unreadable={stats['unreadable']}"
           )
           PY
 
