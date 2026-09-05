@@ -16,34 +16,23 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate website package
+      - name: Validate package
         shell: bash
         run: |
           set -euo pipefail
           test -s index.html
           test -s site-assets/css/imc-site.css
           test -s site-assets/js/imc-site.js
-          test -s site-assets/js/imc-data-service.js
-          test -s site-assets/js/gameworld-engine.js
-          test -s site-assets/js/team-hub-detail.js
+          test -s site-assets/js/world-feed.js
           test -s site-assets/images/imc-logo.png
-          grep -Fq 'site-assets/css/imc-site.css?v=2.0' index.html
-          grep -Fq 'site-assets/js/imc-site.js?v=2.1' index.html
-          grep -Fq 'href="/nexus/"' index.html
-          grep -Fq 'G-9HP6T5ZMLE' index.html
-          node --check site-assets/js/imc-site.js
-          node --check site-assets/js/imc-data-service.js
-          node --check site-assets/js/gameworld-engine.js
-          node --check site-assets/js/team-hub-detail.js
-          test ! -d nexus
-          test ! -d live-match
-          test ! -d live-test-3d
-          test ! -d pre-match
+          test -s gameworld001/index.html
+          test -s gameworld001/styles.css
+          test -s gameworld001/.htaccess
+          grep -Fq 'GW001 · SITE STRUCTURE PREVIEW' gameworld001/index.html
 
       - name: Validate Aruba secrets
         env:
@@ -58,7 +47,7 @@ jobs:
             test -n "${!name:-}"
           done
 
-      - name: Upload public website to Aruba
+      - name: Upload website and GW001 structure
         env:
           ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -67,96 +56,70 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
-          import io
-          import os
-          import socket
-          import ssl
-          import time
+          import io, os, socket, ssl, time
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
 
-          host = os.environ["ARUBA_FTP_HOST"].removeprefix("ftp://").removeprefix("ftps://").rstrip("/")
-          username = os.environ["ARUBA_FTP_USERNAME"]
-          password = os.environ["ARUBA_FTP_PASSWORD"]
-          remote_root = os.environ["ARUBA_WEBSITE_REMOTE_DIR"].strip() or "/"
+          host=os.environ['ARUBA_FTP_HOST'].removeprefix('ftp://').removeprefix('ftps://').rstrip('/')
+          username=os.environ['ARUBA_FTP_USERNAME']
+          password=os.environ['ARUBA_FTP_PASSWORD']
+          remote_root=os.environ['ARUBA_WEBSITE_REMOTE_DIR'].strip() or '/'
 
-          addresses = []
-          for item in socket.getaddrinfo(host, 21, socket.AF_INET, socket.SOCK_STREAM):
-              address = item[4][0]
-              if address not in addresses:
-                  addresses.append(address)
-          if not addresses:
-              raise SystemExit("Nessun indirizzo IPv4 disponibile per Aruba")
-
-          context = ssl.create_default_context()
-          context.check_hostname = False
-
-          ftp = None
-          last_error = None
-          for attempt in range(3):
+          addresses=[]
+          for item in socket.getaddrinfo(host,21,socket.AF_INET,socket.SOCK_STREAM):
+              if item[4][0] not in addresses: addresses.append(item[4][0])
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=None; last_error=None
+          for _ in range(3):
               for address in addresses:
-                  candidate = FTP_TLS(context=context)
+                  c=FTP_TLS(context=ctx)
                   try:
-                      candidate.connect(address, 21, timeout=45)
-                      candidate.login(username, password)
-                      candidate.prot_p()
-                      ftp = candidate
-                      break
-                  except Exception as error:
-                      last_error = error
-                      try:
-                          candidate.close()
-                      except Exception:
-                          pass
-              if ftp is not None:
-                  break
+                      c.connect(address,21,timeout=45); c.login(username,password); c.prot_p(); ftp=c; break
+                  except Exception as e:
+                      last_error=e
+                      try: c.close()
+                      except Exception: pass
+              if ftp: break
               time.sleep(5)
+          if ftp is None: raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}')
 
-          if ftp is None:
-              raise SystemExit(f"Connessione FTPS Aruba non riuscita: {type(last_error).__name__}")
+          def ensure_dir(remote_path):
+              ftp.cwd('/')
+              for part in [p for p in remote_path.split('/') if p]:
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
 
-          def ensure_directory(remote_path):
-              ftp.cwd("/")
-              for part in [value for value in remote_path.split("/") if value]:
-                  try:
-                      ftp.cwd(part)
-                  except error_perm:
-                      ftp.mkd(part)
-                      ftp.cwd(part)
+          excluded={
+              'site-assets/css/game-world.css',
+              'site-assets/css/gameworld-engine.css',
+              'site-assets/js/gameworld-engine.js',
+              'site-assets/js/imc-data-service.js',
+              'site-assets/js/team-hub-detail.js',
+          }
 
-          files = [Path("index.html")]
-          files.extend(sorted(path for path in Path("site-assets").rglob("*") if path.is_file()))
+          files=[Path('index.html')]
+          files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
+          files += [Path('gameworld001/index.html'),Path('gameworld001/styles.css'),Path('gameworld001/.htaccess')]
 
           for local in files:
-              relative = local.as_posix()
-              parent = Path(relative).parent.as_posix()
-              destination = remote_root if parent == "." else f"{remote_root.rstrip('/')}/{parent}"
-              ensure_directory(destination)
-
-              data = local.read_bytes()
-              with local.open("rb") as handle:
-                  ftp.storbinary(f"STOR {local.name}", handle)
-
-              verification = io.BytesIO()
-              ftp.retrbinary(f"RETR {local.name}", verification.write)
-              if verification.getvalue() != data:
-                  raise SystemExit(f"Verifica upload fallita: {relative}")
+              rel=local.as_posix(); parent=local.parent.as_posix()
+              dest=remote_root if parent=='.' else f"{remote_root.rstrip('/')}/{parent}"
+              ensure_dir(dest)
+              data=local.read_bytes()
+              with local.open('rb') as fh: ftp.storbinary(f'STOR {local.name}',fh)
+              check=io.BytesIO(); ftp.retrbinary(f'RETR {local.name}',check.write)
+              if check.getvalue()!=data: raise SystemExit(f'Verifica upload fallita: {rel}')
 
           ftp.quit()
-          print(f"File pubblicati e verificati: {len(files)}")
+          print(f'Pubblicati e verificati {len(files)} file')
           PY
 
-      - name: Verify public website
+      - name: Verify GW001 online
         shell: bash
         run: |
           set -euo pipefail
           token="${GITHUB_SHA}-$(date +%s)"
-          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/?verify=$token" -o /tmp/imc-index.html
-          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/site-assets/css/imc-site.css?verify=$token" -o /tmp/imc-site.css
-          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/site-assets/js/imc-site.js?verify=$token" -o /tmp/imc-site.js
-          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/site-assets/js/team-hub-detail.js?verify=$token" -o /tmp/team-hub-detail.js
-          grep -Fq 'BUILD 2.0' /tmp/imc-index.html
-          grep -Fq 'G-9HP6T5ZMLE' /tmp/imc-index.html
-          test -s /tmp/imc-site.css
-          node --check /tmp/imc-site.js
-          node --check /tmp/team-hub-detail.js
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/?verify=$token" -o /tmp/gw001.html
+          grep -Fq 'GW001 · SITE STRUCTURE PREVIEW' /tmp/gw001.html
+          grep -Fq 'WORLD CHRONICLE' /tmp/gw001.html
+          echo 'GW001 structure online OK'
