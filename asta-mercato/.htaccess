@@ -1,6 +1,0 @@
-Options -Indexes
-DirectoryIndex index.php
-
-<FilesMatch "^(config\.php|auctions\.json)$">
-  Require all denied
-</FilesMatch>
