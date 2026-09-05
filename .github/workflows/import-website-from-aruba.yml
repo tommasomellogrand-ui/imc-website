@@ -18,84 +18,66 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Diagnose Publication Bridge over HTTPS
+      - name: Authenticated Publication Bridge diagnostics
+        env:
+          BRIDGE_TOKEN: ${{ secrets.IMC_PUBLICATION_BRIDGE_TOKEN || secrets.PUBLICATION_BRIDGE_TOKEN || secrets.BRIDGE_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          BASE="https://www.italianmastersclub.it/bridge"
-          BRIDGE="$BASE/publication-bridge.php"
-          README="$BASE/README-INSTALL.txt"
+          test -n "${BRIDGE_TOKEN:-}" || {
+            echo "BRIDGE_TOKEN_SECRET_MISSING"
+            exit 2
+          }
 
-          echo "=== HTTPS CHECK ==="
-          curl -fsSIL --max-time 20 "https://www.italianmastersclub.it/" | head -n 8
-
-          echo
-          echo "=== README-INSTALL.txt ==="
-          code=$(curl -sS -L --max-time 20 -o /tmp/readme.txt -w '%{http_code}' "$README" || true)
-          echo "HTTP $code"
-          if [ -s /tmp/readme.txt ]; then
-            sed -n '1,220p' /tmp/readme.txt
-          fi
-
-          echo
-          echo "=== BRIDGE GET ==="
-          code=$(curl -sS -L --max-time 20 -o /tmp/bridge-get.txt -w '%{http_code}' "$BRIDGE" || true)
-          echo "HTTP $code"
-          sed -n '1,120p' /tmp/bridge-get.txt 2>/dev/null || true
-
-          echo
-          echo "=== BRIDGE OPTIONS ==="
-          code=$(curl -sS -L -X OPTIONS --max-time 20 -o /tmp/bridge-options.txt -w '%{http_code}' "$BRIDGE" || true)
-          echo "HTTP $code"
-          sed -n '1,120p' /tmp/bridge-options.txt 2>/dev/null || true
-
-          echo
-          echo "=== BRIDGE POST EMPTY JSON ==="
-          code=$(curl -sS -L -X POST \
-            -H 'Content-Type: application/json' \
-            --data '{}' \
-            --max-time 20 \
-            -o /tmp/bridge-post-empty.txt \
-            -w '%{http_code}' \
-            "$BRIDGE" || true)
-          echo "HTTP $code"
-          sed -n '1,160p' /tmp/bridge-post-empty.txt 2>/dev/null || true
-
-          echo
-          echo "=== BRIDGE COMMON LIST PROBES ==="
           python3 - <<'PY'
-          import json, urllib.request, urllib.error
+          import json, os, urllib.request, urllib.error
 
           url='https://www.italianmastersclub.it/bridge/publication-bridge.php'
-          probes=[
-              {'action':'list','path':'/'},
-              {'action':'list','dir':'/'},
-              {'action':'ls','path':'/'},
-              {'op':'list','path':'/'},
-              {'command':'list','path':'/'},
-          ]
+          token=os.environ['BRIDGE_TOKEN']
 
-          for payload in probes:
-              data=json.dumps(payload).encode()
-              req=urllib.request.Request(url,data=data,headers={'Content-Type':'application/json'},method='POST')
+          def call(payload):
+              data=json.dumps(payload).encode('utf-8')
+              headers={
+                  'Content-Type':'application/json',
+                  'X-IMC-Bridge-Token':token,
+              }
+              req=urllib.request.Request(url,data=data,headers=headers,method='POST')
               try:
-                  with urllib.request.urlopen(req,timeout=20) as r:
-                      body=r.read(12000).decode('utf-8','replace')
-                      print('PROBE',payload,'HTTP',r.status)
-                      print(body[:4000])
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      body=r.read(200000).decode('utf-8','replace')
+                      print('HTTP',r.status,'PAYLOAD',payload)
+                      print(body)
+                      return r.status, body
               except urllib.error.HTTPError as e:
-                  body=e.read(12000).decode('utf-8','replace')
-                  print('PROBE',payload,'HTTP',e.code)
-                  print(body[:4000])
-              except Exception as e:
-                  print('PROBE',payload,'ERROR',type(e).__name__,str(e))
+                  body=e.read(200000).decode('utf-8','replace')
+                  print('HTTP',e.code,'PAYLOAD',payload)
+                  print(body)
+                  return e.code, body
+
+          status, body = call({'action':'health'})
+          if status == 401:
+              raise SystemExit('BRIDGE_AUTH_FAILED')
+          if status >= 400:
+              raise SystemExit(f'BRIDGE_HEALTH_FAILED_HTTP_{status}')
+
+          status, body = call({'action':'list','path':'/'})
+          if status == 401:
+              raise SystemExit('BRIDGE_AUTH_FAILED')
+          if status >= 400:
+              raise SystemExit(f'BRIDGE_LIST_FAILED_HTTP_{status}')
+
+          try:
+              parsed=json.loads(body)
+          except Exception as exc:
+              raise SystemExit(f'BRIDGE_LIST_NOT_JSON: {exc}')
+
+          print('BRIDGE_AUTH_OK')
+          print('BRIDGE_ROOT_LIST_OK')
+          print('ROOT_RESPONSE_KEYS', sorted(parsed.keys()) if isinstance(parsed,dict) else type(parsed).__name__)
           PY
 
-          echo
-          echo "Publication Bridge diagnostics completed"
-
-      - name: Stop before import until bridge contract is identified
+      - name: Contract identified
         shell: bash
         run: |
-          echo "Import not executed in this run: bridge request contract must be identified from the diagnostics above."
-          exit 1
+          echo "Authenticated bridge check completed successfully."
+          echo "Next revision can use the confirmed list/read schema for the full import."
