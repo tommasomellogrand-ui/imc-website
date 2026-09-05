@@ -92,8 +92,7 @@ jobs:
           if ftp is None:
               raise SystemExit(f'Connessione FTPS Aruba fallita: {type(last_error).__name__}')
 
-          downloaded_files = 0
-          downloaded_bytes = 0
+          stats = {'files': 0, 'bytes': 0}
 
           def list_entries(remote_dir):
               current = ftp.pwd()
@@ -121,7 +120,6 @@ jobs:
                   ftp.cwd(current)
 
           def download_tree(remote_dir, local_dir):
-              nonlocal downloaded_files, downloaded_bytes
               local_dir.mkdir(parents=True, exist_ok=True)
               for name, kind in list_entries(remote_dir):
                   if name in ('.', '..'):
@@ -135,8 +133,8 @@ jobs:
                       with local_path.open('wb') as fh:
                           ftp.retrbinary(f'RETR {remote_path}', fh.write)
                       size = local_path.stat().st_size
-                      downloaded_files += 1
-                      downloaded_bytes += size
+                      stats['files'] += 1
+                      stats['bytes'] += size
                       print(f'DOWNLOAD {remote_path} ({size} bytes)')
                   else:
                       print(f'SKIP {remote_path} type={kind}')
@@ -144,10 +142,10 @@ jobs:
           download_tree(remote_root, snapshot)
           ftp.quit()
 
-          if downloaded_files == 0:
+          if stats['files'] == 0:
               raise SystemExit('Nessun file scaricato da Aruba')
 
-          print(f'FTPS import completato: {downloaded_files} file, {downloaded_bytes} bytes')
+          print(f"FTPS import completato: {stats['files']} file, {stats['bytes']} bytes")
           PY
 
       - name: Copy Aruba snapshot into repository
