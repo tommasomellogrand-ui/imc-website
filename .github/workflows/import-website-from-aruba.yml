@@ -46,12 +46,11 @@ jobs:
               shutil.rmtree(SNAPSHOT)
           SNAPSHOT.mkdir(parents=True)
 
-          # Deliberately do not commit authentication material into Git history.
           EXCLUDED = {
               'bridge/publication-config.php',
           }
 
-          def api(payload):
+          def request(payload):
               data = json.dumps(payload).encode('utf-8')
               req = urllib.request.Request(
                   URL,
@@ -64,12 +63,12 @@ jobs:
               )
               try:
                   with urllib.request.urlopen(req, timeout=60) as r:
-                      raw = r.read()
-                      status = r.status
+                      return r.status, dict(r.headers.items()), r.read()
               except urllib.error.HTTPError as e:
-                  raw = e.read()
-                  status = e.code
+                  return e.code, dict(e.headers.items()), e.read()
 
+          def api(payload):
+              status, headers, raw = request(payload)
               text = raw.decode('utf-8', 'replace')
               try:
                   parsed = json.loads(text)
@@ -91,8 +90,7 @@ jobs:
               parent = parent.strip('/')
               return f'{parent}/{name}' if parent else name
 
-          def decode_read_response(obj, path):
-              # Bridge implementations may expose one of these equivalent shapes.
+          def decode_json_read(obj, path):
               encoding = str(obj.get('encoding') or '').lower()
 
               for key in ('content_base64', 'base64', 'data_base64'):
@@ -114,17 +112,45 @@ jobs:
               raise RuntimeError(f'READ_RESPONSE_UNSUPPORTED path={path} keys={sorted(obj.keys())}')
 
           def read_file(path):
-              # Ask for base64 first so binary files can be imported safely.
-              first_error = None
+              # The bridge may return JSON metadata/content or the file body directly.
               for payload in (
                   {'action': 'read', 'path': path, 'encoding': 'base64'},
                   {'action': 'read', 'path': path},
               ):
-                  try:
-                      return decode_read_response(api(payload), path)
-                  except Exception as exc:
-                      first_error = first_error or exc
-              raise first_error
+                  status, headers, raw = request(payload)
+                  ctype = (headers.get('Content-Type') or headers.get('content-type') or '').lower()
+
+                  if status >= 400:
+                      text = raw.decode('utf-8', 'replace')
+                      try:
+                          parsed = json.loads(text)
+                          err = parsed.get('error')
+                      except Exception:
+                          err = text[:300]
+                      print('READ_FAIL', path, 'HTTP', status, err)
+                      continue
+
+                  # Try JSON first when it actually looks like JSON.
+                  stripped = raw.lstrip()
+                  if 'json' in ctype or stripped.startswith(b'{') or stripped.startswith(b'['):
+                      try:
+                          parsed = json.loads(raw.decode('utf-8'))
+                          if isinstance(parsed, dict):
+                              if parsed.get('ok', True) is False:
+                                  print('READ_FAIL', path, parsed.get('error'))
+                                  continue
+                              return decode_json_read(parsed, path)
+                      except Exception:
+                          # Valid file contents can themselves start with { or [.
+                          pass
+
+                  # HTTP 200 with non-JSON body means the bridge returned the file directly.
+                  if raw:
+                      return raw
+
+                  print('READ_EMPTY', path, 'payload=', payload)
+
+              raise RuntimeError(f'READ_FAILED path={path}')
 
           def walk(remote_dir=''):
               listing = api({'action': 'list', 'path': '/' + remote_dir.strip('/') if remote_dir else '/'})
