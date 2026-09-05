@@ -1,0 +1,1 @@
+(function(){"use strict";if(window.IMC_H2H)return;let s={container:null};async function mount(o){if(!o||!o.container)throw Error("H2H: parametri mancanti");s.container=o.container;s.container.innerHTML="<div class='nx-empty'>H2H · contenuto da definire.</div>"}function unmount(){if(s.container)s.container.innerHTML="";s.container=null}window.IMC_H2H={mount,unmount};})();

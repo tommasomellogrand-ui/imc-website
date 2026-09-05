@@ -1,610 +1,1336 @@
-(function () {
+(() => {
   'use strict';
 
-  const ROOT = '/gameworld001/';
-  const WORLD_ID = 'GW001';
-  const state = { world: null, matches: null, matchesPromise: null, competitions: null, competitionsPromise: null, competitionTab: 'overview', competitionSubTab: 'table', matchesSubTab: 'results', statsSubTab: 'goals' };
-  const MATCH_CACHE_KEY = 'imc:GW001:season1:matches:v1';
+  const APP = document.getElementById('app');
+  const GAME_WORLD_ID = 'GW001';
+  const WORLD_NAME = 'ROAD TO HISTORY';
+  const GATEWAY_URL = 'https://www.italianmastersclub.it/api/imc-gateway/';
 
-  const staticSections = {
-    'road-chronicle': { title: 'THE ROAD CHRONICLE', sub: 'Road To History Official Journal', icon: 'journal', intro: 'Il giornale ufficiale di Road To History.', status: 'Feed non ancora alimentato dalla Public Read API.' },
-    'team-hub': { title: 'TEAM HUB', sub: 'Club · Nazionali', icon: 'teams', intro: 'Squadre, rose e percorsi nel mondo.', status: 'Schede club non ancora disponibili nella Public Read API.' },
-    managers: { title: 'MANAGERS', sub: 'IMC · External', icon: 'manager', intro: 'I manager presenti in Road To History.', status: 'Dataset manager non ancora collegato.' },
-    codex: { title: 'CODEX', sub: 'Archivio del GW', icon: 'codex', intro: 'Giocatori, record e memoria storica del mondo.', status: 'Player Codex non disponibile per GW001.' },
-    transfers: { title: 'TRANSFERS', sub: 'Mercato del GW', icon: 'transfers', intro: 'Movimenti di mercato e dettagli delle operazioni.', status: 'Importazione in corso · Coming soon.' },
-    'trophy-room': { title: 'TROPHY ROOM', sub: 'Trofei del GW', icon: 'competitions', intro: 'Albo d’oro e trofei di Road To History.', status: 'Dataset Trophy Room non ancora collegato.' },
-    'news-feed': { title: 'NEWS FEED', sub: 'News del GW', icon: 'journal', intro: 'Notizie e aggiornamenti di Road To History.', status: 'Feed non ancora collegato.' }
+  const NAV = [
+    ['/overview','Overview'],
+    ['/competitions','Competitions'],
+    ['/calendar','Calendar'],
+    ['/results','Results'],
+    ['/team-hub','Team Hub'],
+    ['/managers','Managers'],
+    ['/codex','Codex'],
+    ['/transfers','Transfers'],
+    ['/trophy-room','Trophy Room'],
+    ['/news-feed','News Feed'],
+    ['/world-chronicle','World Chronicle']
+  ];
+
+  const state = {
+    renderToken: 0,
+    discovery: null,
+    discoveryError: null,
+    repositories: new Map(),
+    status: new Map(),
+    cache: new Map()
   };
 
-  const app = document.querySelector('#app');
-  const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+  const gateway = {
+    async request(params = {}) {
+      const url = new URL(GATEWAY_URL);
+      url.searchParams.set('game_world_id', GAME_WORLD_ID);
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          url.searchParams.set(key, String(value));
+        }
+      });
 
-  function icon(name) {
-    const paths = {
-      competitions: '<path d="M17 20h30v8c0 13-6 21-15 26-9-5-15-13-15-26v-8Z"/><path d="M17 25h-7c0 11 4 17 12 19M47 25h7c0 11-4 17-12 19M28 53h8v7H22h20"/>',
-      calendar: '<rect x="12" y="15" width="40" height="38" rx="7"/><path d="M21 10v10M43 10v10M12 27h40M21 35h5M32 35h5M43 35h1M21 44h5M32 44h5"/>',
-      results: '<rect x="13" y="12" width="38" height="42" rx="7"/><path d="M22 24h20M22 33h20M22 42h13"/><circle cx="19" cy="24" r="1"/>',
-      journal: '<path d="M14 14h30a6 6 0 0 1 6 6v34H20a6 6 0 0 1-6-6V14Z"/><path d="M22 14v40M29 24h13M29 32h13M29 40h9"/>',
-      teams: '<path d="M32 10 51 18v14c0 12-8 20-19 25-11-5-19-13-19-25V18l19-8Z"/><circle cx="25" cy="30" r="5"/><circle cx="39" cy="30" r="5"/><path d="M18 43c2-5 6-7 12-7M46 43c-2-5-6-7-12-7"/>',
-      manager: '<circle cx="32" cy="23" r="10"/><path d="M14 54c2-13 8-19 18-19s16 6 18 19"/>',
-      codex: '<path d="M13 16h16c4 0 7 3 7 7v33c0-4-3-7-7-7H13V16ZM51 16H35M51 16v33H35"/><path d="M20 25h9M20 33h9"/>',
-      transfers: '<path d="M12 22h36M40 14l8 8-8 8M52 43H16M24 35l-8 8 8 8"/>'
-    };
-    return `<svg viewBox="0 0 64 64" aria-hidden="true">${paths[name] || paths.results}</svg>`;
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        cache: 'no-store'
+      });
+
+      let payload;
+      try {
+        payload = await response.json();
+      } catch (error) {
+        throw new Error(`Gateway response non JSON (${response.status})`);
+      }
+
+      if (!response.ok || !payload || payload.ok !== true) {
+        const code = payload?.error || `HTTP_${response.status}`;
+        throw new Error(code);
+      }
+      return payload;
+    },
+
+    async discover(force = false) {
+      if (state.discovery && !force) return state.discovery;
+      try {
+        const payload = await this.request({ action: 'repositories' });
+        const repos = Array.isArray(payload.repositories) ? payload.repositories : [];
+        state.discovery = payload;
+        state.discoveryError = null;
+        state.repositories = new Map(repos.map(item => [item.repository, item]));
+        repos.forEach(item => {
+          if (!state.status.has(item.repository)) {
+            state.status.set(item.repository, { state: 'available', total: null, error: null });
+          }
+        });
+        return payload;
+      } catch (error) {
+        state.discoveryError = error;
+        state.discovery = null;
+        state.repositories = new Map();
+        throw error;
+      }
+    },
+
+    has(repository) {
+      return state.repositories.has(repository);
+    },
+
+    cacheKey(repository, options = {}) {
+      return JSON.stringify([repository, options]);
+    },
+
+    async read(repository, options = {}) {
+      if (!state.discovery && !state.discoveryError) {
+        await this.discover();
+      }
+      if (!this.has(repository)) {
+        state.status.set(repository, { state: 'unavailable', total: null, error: null });
+        return { state: 'unavailable', data: [], total: 0, repository };
+      }
+
+      const key = this.cacheKey(repository, options);
+      if (options.cache !== false && state.cache.has(key)) return state.cache.get(key);
+
+      const params = {
+        repository,
+        action: 'read',
+        limit: options.limit ?? 100,
+        offset: options.offset ?? 0,
+        order_by: options.orderBy,
+        order_dir: options.orderDir
+      };
+      Object.entries(options.filters || {}).forEach(([column, value]) => {
+        params[`filter_${column}`] = value;
+      });
+
+      try {
+        const payload = await this.request(params);
+        const rows = Array.isArray(payload.data) ? payload.data : [];
+        const total = Number(payload.pagination?.total ?? rows.length ?? 0);
+        const result = {
+          state: total > 0 ? 'populated' : 'empty',
+          data: rows,
+          total,
+          returned: Number(payload.pagination?.returned ?? rows.length),
+          repository,
+          payload
+        };
+        state.status.set(repository, { state: result.state, total, error: null });
+        if (options.cache !== false) state.cache.set(key, result);
+        return result;
+      } catch (error) {
+        const result = { state: 'error', data: [], total: null, repository, error };
+        state.status.set(repository, { state: 'error', total: null, error: error.message });
+        return result;
+      }
+    },
+
+    async total(repository, filters = {}) {
+      return this.read(repository, { limit: 1, filters });
+    },
+
+    async readAll(repository, options = {}) {
+      const pageSize = Math.max(1, Math.min(1000, Number(options.pageSize || 1000)));
+      const maxRows = Math.max(pageSize, Number(options.maxRows || 10000));
+      let offset = 0;
+      let total = null;
+      const data = [];
+
+      while (data.length < maxRows) {
+        const page = await this.read(repository, {
+          ...options,
+          limit: pageSize,
+          offset,
+          cache: false
+        });
+
+        if (page.state === 'error' || page.state === 'unavailable') {
+          return {
+            state: page.state,
+            data,
+            total: page.total,
+            returned: data.length,
+            repository,
+            error: page.error
+          };
+        }
+
+        if (total === null) total = Number(page.total || 0);
+        data.push(...(page.data || []));
+
+        const returned = Number(page.returned || page.data?.length || 0);
+        offset += returned;
+
+        if (!returned || offset >= total || returned < pageSize) break;
+      }
+
+      return {
+        state: data.length ? 'populated' : 'empty',
+        data: data.slice(0, maxRows),
+        total: total ?? data.length,
+        returned: Math.min(data.length, maxRows),
+        repository
+      };
+    }
+  };
+
+  function e(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
 
-  function routeParts() {
-    return location.pathname.replace(ROOT, '').split('/').filter(Boolean);
+  function number(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? new Intl.NumberFormat('it-IT').format(n) : '—';
   }
 
-  function readMatchCache() {
+  function valueOrDash(value) {
+    return value === null || value === undefined || value === '' ? '—' : e(value);
+  }
+
+  function routeUrl(path) {
+    return `#${path}`;
+  }
+
+  function currentPath() {
+    const raw = location.hash.replace(/^#/, '') || '/overview';
+    return raw.startsWith('/') ? raw : `/${raw}`;
+  }
+
+  function splitPath() {
+    return currentPath().split('/').filter(Boolean);
+  }
+
+  function isActive(current, base) {
+    if (base === '/overview') return current === '/' || current === '/overview';
+    return current === base || current.startsWith(`${base}/`);
+  }
+
+  function shell(content, activePath = currentPath()) {
+    APP.innerHTML = `
+      <header class="topbar">
+        <div class="brand-mark">IMC</div>
+        <a class="brand" href="${routeUrl('/overview')}">
+          <h1>${WORLD_NAME}</h1>
+          <div class="brand-sub">GAME WORLD</div>
+        </a>
+        <a class="menu-btn" href="${routeUrl('/overview')}" aria-label="Overview">
+          <div class="hamb"><span></span><span></span><span></span></div>
+        </a>
+      </header>
+
+      <nav class="global-nav" aria-label="Navigazione principale">
+        ${NAV.map(([path,label]) => `
+          <a class="nav-pill ${isActive(activePath,path) ? 'active' : ''}" href="${routeUrl(path)}">${label}</a>
+        `).join('')}
+      </nav>
+
+      <main class="view">${content}</main>
+      <footer>ITALIAN MASTERS CLUB · THE WORLD IS OUR PLAYGROUND</footer>
+    `;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function sectionHead(eyebrow, title, back = '/overview') {
+    return `
+      <div class="section-head">
+        <div><small>${e(eyebrow)}</small><h2>${e(title)}</h2></div>
+        <a class="back-btn" href="${routeUrl(back)}" aria-label="Indietro"></a>
+      </div>`;
+  }
+
+  function loading(title = 'Caricamento dati') {
+    return `<div class="data-state loading-state"><span class="spinner"></span><strong>${e(title)}</strong><small>Universal Gateway · ${GAME_WORLD_ID}</small></div>`;
+  }
+
+  function unavailable(message = 'DATI NON ANCORA DISPONIBILI', detail = '') {
+    return `<div class="data-state empty-state"><strong>${e(message)}</strong>${detail ? `<small>${e(detail)}</small>` : ''}</div>`;
+  }
+
+  function gatewayError(error) {
+    return `<div class="data-state error-state"><strong>DATI TEMPORANEAMENTE NON DISPONIBILI</strong><small>${e(error?.message || 'Errore di lettura dal Universal Gateway')}</small></div>`;
+  }
+
+  function renderLoadingView(title, back = '/overview') {
+    shell(`${sectionHead(GAME_WORLD_ID, title, back)}${loading()}`);
+  }
+
+  function metric(label, value, note = '') {
+    return `<div class="metric-card"><strong>${e(value)}</strong><span>${e(label)}</span>${note ? `<small>${e(note)}</small>` : ''}</div>`;
+  }
+
+  function matchCard(row, source = 'results') {
+    const id = row.sm_fixture_id;
+    if (!id) return '';
+    const score = source === 'results' || row.home_score !== undefined
+      ? `<div class="match-score"><strong>${valueOrDash(row.home_score)}</strong><span>–</span><strong>${valueOrDash(row.away_score)}</strong></div>`
+      : `<div class="match-time">${valueOrDash(row.match_time)}</div>`;
+    return `
+      <a class="match-card" href="${routeUrl(`/match/${encodeURIComponent(id)}`)}">
+        <div class="match-meta"><span>${valueOrDash(row.match_date)}</span><span>${valueOrDash(row.competition_key || row.competition_group)}</span></div>
+        <div class="match-main">
+          <span class="team-name">${valueOrDash(row.home_name)}</span>
+          ${score}
+          <span class="team-name right">${valueOrDash(row.away_name)}</span>
+        </div>
+      </a>`;
+  }
+
+  function playerCard(player, roster = null, stats = null) {
+    const id = player.sm_player_id;
+    if (!id) return '';
+    const name = player.full_name || player.player_name || `Player ${id}`;
+    const image = player.image_url
+      ? `<img src="${e(player.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
+      : `<div class="avatar-fallback">${e(name).charAt(0)}</div>`;
+    return `
+      <a class="player-card" href="${routeUrl(`/player/${encodeURIComponent(id)}`)}">
+        <div class="player-image">${image}</div>
+        <div class="player-copy">
+          <small>${valueOrDash(player.position)} · ${valueOrDash(player.nationality)}</small>
+          <strong>${e(name)}</strong>
+          <span>${valueOrDash(roster?.club_name || player.current_club)}</span>
+        </div>
+        <div class="rating-badge">${valueOrDash(player.rating)}</div>
+        ${stats ? `<div class="mini-stats"><span>${number(stats.appearances)} APP</span><span>${number(stats.goals)} G</span><span>${number(stats.assists)} A</span></div>` : ''}
+      </a>`;
+  }
+
+  async function renderOverview(token) {
+    shell(`
+      <section class="world-card">
+        <div class="world-id"><strong>${GAME_WORLD_ID}</strong><span>GAME WORLD</span></div>
+        <div class="world-name">${WORLD_NAME}</div>
+        <div class="season-box"><strong>IMC DATA</strong><span>Universal Gateway</span></div>
+      </section>
+      ${loading('Lettura stato Game World')}
+    `, '/overview');
+
     try {
-      const cached = JSON.parse(sessionStorage.getItem(MATCH_CACHE_KEY));
-      if (!cached || !Array.isArray(cached.rows) || Date.now() - cached.savedAt > 5 * 60 * 1000) return null;
-      return cached.rows;
+      await gateway.discover();
+      const [results, schedule, players, reports] = await Promise.all([
+        gateway.total('results', { result_dataset: 'MATCH_DATA' }),
+        gateway.total('schedule'),
+        gateway.total('player_codex'),
+        gateway.total('match_report')
+      ]);
+      if (token !== state.renderToken) return;
+
+      const content = `
+        <section class="world-card">
+          <div class="world-id"><strong>${GAME_WORLD_ID}</strong><span>GAME WORLD</span></div>
+          <div class="world-name">${WORLD_NAME}</div>
+          <div class="season-box"><strong>LIVE DATA</strong><span>${number(state.repositories.size)} repository</span></div>
+        </section>
+
+        <section class="overview-metrics">
+          ${metric('Risultati match', results.state === 'error' ? '—' : number(results.total), 'MATCH_DATA')}
+          ${metric('Fixture future', schedule.state === 'error' ? '—' : number(schedule.total))}
+          ${metric('Player Codex', players.state === 'error' ? '—' : number(players.total))}
+          ${metric('Match report', reports.state === 'error' ? '—' : number(reports.total))}
+        </section>
+
+        <section class="overview-grid">
+          <a class="home-card competitions-card" href="${routeUrl('/competitions')}"><h3>Competitions</h3><p>Dati reali da match e fixture</p><div class="icon">🏆</div></a>
+          <a class="home-card managers-card" href="${routeUrl('/managers')}"><h3>Managers</h3><p>ID reali disponibili</p><div class="icon">◯</div></a>
+          <a class="home-card teamhub-card" href="${routeUrl('/team-hub')}"><h3>Team Hub</h3><p>Club e roster reali</p><div class="icon">⬡</div></a>
+          <a class="home-card trophy-card" href="${routeUrl('/trophy-room')}"><h3>Trophy Room</h3><p>${state.status.get('trophy_room')?.state === 'empty' ? 'Dati non disponibili' : 'Trofei del GW'}</p><div class="icon">🏆</div></a>
+          <a class="home-card news-card" href="${routeUrl('/news-feed')}"><h3>News Feed</h3><p>Repository Gateway</p><div class="icon">▤</div></a>
+          <a class="home-card codex-card" href="${routeUrl('/codex/players')}"><h3>Codex</h3><p>${players.state === 'populated' ? `${number(players.total)} giocatori` : 'Players'}</p><div class="icon">▥</div></a>
+          <a class="home-card transfers-card" href="${routeUrl('/transfers')}"><h3>Transfers</h3><p>Mercato del GW</p><div class="icon">⇄</div></a>
+          <a class="home-card calendar-card" href="${routeUrl('/calendar')}"><h3>Calendar</h3><p>${schedule.state === 'populated' ? `${number(schedule.total)} fixture` : 'Calendario'}</p><div class="icon">▦</div></a>
+          <a class="home-card results-card" href="${routeUrl('/results')}"><h3>Results</h3><p>${results.state === 'populated' ? `${number(results.total)} match` : 'Risultati'}</p><div class="icon">✓</div></a>
+          <a class="home-card chronicle-card" href="${routeUrl('/world-chronicle')}"><h3>World Chronicle</h3><p>Sorgente non ancora certificata</p><div class="icon">⌁</div></a>
+        </section>`;
+      shell(content, '/overview');
+    } catch (error) {
+      if (token !== state.renderToken) return;
+      shell(`${sectionHead(GAME_WORLD_ID, 'Overview', '/overview')}${gatewayError(error)}`, '/overview');
+    }
+  }
+
+  async function renderCalendar(token) {
+    renderLoadingView('Calendar');
+    const result = await gateway.read('schedule', { limit: 500, orderBy: 'match_date', orderDir: 'ASC' });
+    if (token !== state.renderToken) return;
+    const body = result.state === 'error' ? gatewayError(result.error)
+      : result.state === 'empty' ? unavailable('DATI NON ANCORA DISPONIBILI', 'Il repository schedule è presente ma non contiene fixture.')
+      : `<div class="match-list">${result.data.map(row => matchCard(row, 'schedule')).join('')}</div>`;
+    shell(`${sectionHead(GAME_WORLD_ID, 'Calendar', '/overview')}<div class="view-summary"><strong>${number(result.total)}</strong><span>fixture disponibili</span></div>${body}`, '/calendar');
+  }
+
+  async function renderResults(token) {
+    renderLoadingView('Results');
+    const result = await gateway.read('results', {
+      limit: 500,
+      orderBy: 'match_date',
+      orderDir: 'DESC',
+      filters: { result_dataset: 'MATCH_DATA' }
+    });
+    if (token !== state.renderToken) return;
+    const body = result.state === 'error' ? gatewayError(result.error)
+      : result.state === 'empty' ? unavailable('DATI NON ANCORA DISPONIBILI', 'Nessun record MATCH_DATA disponibile.')
+      : `<div class="match-list">${result.data.map(row => matchCard(row, 'results')).join('')}</div>`;
+    shell(`${sectionHead(GAME_WORLD_ID, 'Results', '/overview')}<div class="view-summary"><strong>${number(result.total)}</strong><span>match MATCH_DATA</span></div>${body}`, '/results');
+  }
+
+  async function composeMatch(fixtureId) {
+    const filters = { sm_fixture_id: fixtureId };
+    const specs = [
+      ['schedule', { limit: 5, filters }],
+      ['results', { limit: 50, filters }],
+      ['match_report', { limit: 5, filters }],
+      ['match_report_commentary', { limit: 500, filters, orderBy: 'event_sequence', orderDir: 'ASC' }],
+      ['match_report_events', { limit: 300, filters, orderBy: 'event_sequence', orderDir: 'ASC' }],
+      ['match_report_players', { limit: 100, filters }],
+      ['match_report_tactics', { limit: 50, filters }],
+      ['match_report_team_stats', { limit: 5, filters }]
+    ];
+    const entries = await Promise.all(specs.map(async ([repo, opts]) => [repo, await gateway.read(repo, { ...opts, cache: false })]));
+    return Object.fromEntries(entries);
+  }
+
+  function firstReal(rows, predicate = null) {
+    if (!Array.isArray(rows)) return null;
+    return predicate ? rows.find(predicate) || null : rows[0] || null;
+  }
+
+  function matchHero(data, fixtureId) {
+    const report = firstReal(data.match_report?.data);
+    const schedule = firstReal(data.schedule?.data);
+    const result = firstReal(data.results?.data, row => row.result_dataset === 'MATCH_DATA') || firstReal(data.results?.data);
+    const base = report || result || schedule;
+    if (!base) return unavailable('MATCH NON DISPONIBILE', `Nessun dataset trovato per sm_fixture_id ${fixtureId}.`);
+    const home = base.home_name || schedule?.home_name || result?.home_name || '—';
+    const away = base.away_name || schedule?.away_name || result?.away_name || '—';
+    const homeScore = report?.home_score ?? result?.home_score;
+    const awayScore = report?.away_score ?? result?.away_score;
+    const hasScore = homeScore !== undefined && homeScore !== null && awayScore !== undefined && awayScore !== null;
+    return `
+      <section class="match-detail-hero">
+        <small>${valueOrDash(base.competition_key || base.competition_group)} · ${valueOrDash(base.match_date || schedule?.match_date)}</small>
+        <div class="match-detail-score">
+          <strong>${e(home)}</strong>
+          <div>${hasScore ? `<b>${e(homeScore)} – ${e(awayScore)}</b>` : `<span>${valueOrDash(schedule?.match_time)}</span>`}</div>
+          <strong>${e(away)}</strong>
+        </div>
+        <div class="match-detail-meta">
+          ${report?.stadium_name ? `<span>${e(report.stadium_name)}</span>` : ''}
+          ${report?.attendance ? `<span>${number(report.attendance)} spettatori</span>` : ''}
+          <span>Fixture ${e(fixtureId)}</span>
+        </div>
+      </section>`;
+  }
+
+  function renderMatchSections(data) {
+    const sections = [];
+    const stats = firstReal(data.match_report_team_stats?.data);
+    if (stats) {
+      sections.push(`
+        <section class="detail-section"><h3>Team Stats</h3>
+          <div class="stats-table">
+            ${statRow('Possesso', stats.home_possession, stats.away_possession, '%')}
+            ${statRow('Tiri', stats.home_total_shots, stats.away_total_shots)}
+            ${statRow('In porta', stats.home_shots_on_target, stats.away_shots_on_target)}
+            ${statRow('Corner', stats.home_corners, stats.away_corners)}
+            ${statRow('Gialli', stats.home_yellow_cards, stats.away_yellow_cards)}
+            ${statRow('Rossi', stats.home_red_cards, stats.away_red_cards)}
+          </div>
+        </section>`);
+    }
+
+    const events = data.match_report_events?.data || [];
+    if (events.length) {
+      sections.push(`<section class="detail-section"><h3>Events</h3><div class="timeline">${events.map(ev => `
+        <div class="timeline-row"><b>${valueOrDash(ev.minute)}</b><span>${valueOrDash(ev.event_type)}</span><p>${valueOrDash(ev.event_text || ev.primary_player_name)}</p></div>`).join('')}</div></section>`);
+    }
+
+    const commentary = data.match_report_commentary?.data || [];
+    if (commentary.length) {
+      sections.push(`<section class="detail-section"><h3>Commentary</h3><div class="timeline commentary">${commentary.map(ev => `
+        <div class="timeline-row"><b>${valueOrDash(ev.minute)}</b><p>${valueOrDash(ev.commentary_text)}</p></div>`).join('')}</div></section>`);
+    }
+
+    const players = data.match_report_players?.data || [];
+    if (players.length) {
+      sections.push(`<section class="detail-section"><h3>Players</h3><div class="player-match-grid">${players.map(p => `
+        <a class="match-player" href="${p.sm_player_id ? routeUrl(`/player/${encodeURIComponent(p.sm_player_id)}`) : '#'}">
+          <strong>${valueOrDash(p.player_name)}</strong><span>${valueOrDash(p.team_side)} · ${valueOrDash(p.squad_slot)}</span>
+          <b>${valueOrDash(p.rating)}</b>
+        </a>`).join('')}</div></section>`);
+    }
+
+    const tactics = data.match_report_tactics?.data || [];
+    if (tactics.length) {
+      sections.push(`<section class="detail-section"><h3>Tactics</h3><div class="tactics-grid">${tactics.map(t => `
+        <div class="tactic-card"><small>${valueOrDash(t.team_side)} · ${valueOrDash(t.snapshot_minute)}</small><strong>${valueOrDash(t.formation)}</strong><span>${valueOrDash(t.mentality)} · ${valueOrDash(t.passing_style)}</span></div>`).join('')}</div></section>`);
+    }
+
+    return sections.join('') || unavailable('DATI DI DETTAGLIO NON ANCORA DISPONIBILI');
+  }
+
+  function statRow(label, home, away, suffix = '') {
+    return `<div class="stat-row"><strong>${valueOrDash(home)}${home !== null && home !== undefined && home !== '' ? suffix : ''}</strong><span>${e(label)}</span><strong>${valueOrDash(away)}${away !== null && away !== undefined && away !== '' ? suffix : ''}</strong></div>`;
+  }
+
+  async function renderMatchDetail(token, fixtureId) {
+    renderLoadingView('Match Detail', '/results');
+    const data = await composeMatch(fixtureId);
+    if (token !== state.renderToken) return;
+    const anyError = Object.values(data).every(item => item.state === 'error');
+    const body = anyError ? gatewayError(new Error('Impossibile leggere i dataset del match')) : `${matchHero(data, fixtureId)}${renderMatchSections(data)}`;
+    shell(`${sectionHead(`Fixture ${fixtureId}`, 'Match Detail', '/results')}${body}`, '/results');
+  }
+
+  async function renderCodexPlayers(token) {
+    renderLoadingView('Codex · Players', '/overview');
+    const [players, roster, stats] = await Promise.all([
+      gateway.read('player_codex', { limit: 200, orderBy: 'player_name', orderDir: 'ASC' }),
+      gateway.read('player_codex_roster', { limit: 200 }),
+      gateway.read('player_codex_stats', { limit: 200 })
+    ]);
+    if (token !== state.renderToken) return;
+    if (players.state === 'error') {
+      shell(`${sectionHead('GW001 · Codex', 'Players', '/overview')}${gatewayError(players.error)}`, '/codex');
+      return;
+    }
+    if (players.state === 'empty') {
+      shell(`${sectionHead('GW001 · Codex', 'Players', '/overview')}${unavailable()}`, '/codex');
+      return;
+    }
+    const rosterMap = new Map((roster.data || []).filter(r => r.sm_player_id).map(r => [String(r.sm_player_id), r]));
+    const statsMap = new Map((stats.data || []).filter(r => r.sm_player_id).map(r => [String(r.sm_player_id), r]));
+    const cards = players.data.map(p => playerCard(p, rosterMap.get(String(p.sm_player_id)), statsMap.get(String(p.sm_player_id)))).join('');
+    const content = `${sectionHead('GW001 · Codex', 'Players', '/overview')}${codexTabs('players')}<div class="view-summary"><strong>${number(players.total)}</strong><span>giocatori reali</span></div><div class="player-grid">${cards}</div>`;
+    shell(content, '/codex');
+  }
+
+  function codexTabs(active) {
+    return `<div class="tabs three"><a class="tab ${active==='players'?'active':''}" href="${routeUrl('/codex/players')}">Players</a><a class="tab ${active==='teams'?'active':''}" href="${routeUrl('/codex/teams')}">Teams</a><a class="tab ${active==='records'?'active':''}" href="${routeUrl('/codex/records')}">Records</a></div>`;
+  }
+
+  async function composePlayer(playerId) {
+    const filters = { sm_player_id: playerId };
+    const specs = [
+      ['player_codex', { limit: 5, filters }],
+      ['player_codex_roster', { limit: 20, filters }],
+      ['player_codex_stats', { limit: 10, filters }],
+      ['player_codex_rating_history', { limit: 300, filters, orderBy: 'event_sequence', orderDir: 'ASC' }],
+      ['player_codex_injury_history', { limit: 300, filters, orderBy: 'event_sequence', orderDir: 'ASC' }],
+      ['player_codex_transfer_history', { limit: 300, filters, orderBy: 'event_sequence', orderDir: 'ASC' }],
+      ['player_codex_snapshots', { limit: 50, filters }],
+      ['match_report_players', { limit: 300, filters }]
+    ];
+    const entries = await Promise.all(specs.map(async ([repo, opts]) => [repo, await gateway.read(repo, { ...opts, cache: false })]));
+    const [eventsPrimary, eventsSecondary] = await Promise.all([
+      gateway.read('match_report_events', { limit: 300, filters: { primary_sm_player_id: playerId }, cache: false }),
+      gateway.read('match_report_events', { limit: 300, filters: { secondary_sm_player_id: playerId }, cache: false })
+    ]);
+    const out = Object.fromEntries(entries);
+    out.match_report_events = {
+      state: eventsPrimary.state === 'error' && eventsSecondary.state === 'error' ? 'error' : 'populated',
+      data: [...(eventsPrimary.data || []), ...(eventsSecondary.data || [])]
+    };
+    return out;
+  }
+
+  async function renderPlayerDetail(token, playerId) {
+    renderLoadingView('Player Detail', '/codex/players');
+    const data = await composePlayer(playerId);
+    if (token !== state.renderToken) return;
+    const player = firstReal(data.player_codex?.data);
+    if (!player) {
+      const error = data.player_codex?.state === 'error' ? gatewayError(data.player_codex.error) : unavailable('GIOCATORE NON DISPONIBILE', `Nessun player_codex per sm_player_id ${playerId}.`);
+      shell(`${sectionHead('GW001 · Codex', 'Player Detail', '/codex/players')}${error}`, '/codex');
+      return;
+    }
+    const roster = firstReal(data.player_codex_roster?.data);
+    const stats = firstReal(data.player_codex_stats?.data);
+    const name = player.full_name || player.player_name || `Player ${playerId}`;
+    const image = player.image_url ? `<img src="${e(player.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '';
+    const profile = `
+      <section class="player-detail-hero">
+        <div class="player-detail-image">${image || `<div class="avatar-fallback large">${e(name).charAt(0)}</div>`}</div>
+        <div><small>SM PLAYER ID ${e(playerId)}</small><h3>${e(name)}</h3><p>${valueOrDash(player.position)} · ${valueOrDash(player.nationality)}</p><strong>${valueOrDash(player.rating)}</strong></div>
+      </section>
+      <section class="fact-grid">
+        ${fact('Club', roster?.club_name || player.current_club)}${fact('Età', player.age)}${fact('Piede', player.foot)}${fact('Valore', player.market_value)}${fact('Ingaggio', player.salary)}${fact('Contratto', player.contract_seasons)}
+      </section>`;
+
+    const sections = [];
+    if (stats) sections.push(`<section class="detail-section"><h3>Stats</h3><div class="record-grid">${metric('Presenze', number(stats.appearances))}${metric('Gol', number(stats.goals))}${metric('Assist', number(stats.assists))}${metric('Media', valueOrDash(stats.average_performance))}</div></section>`);
+    const ratings = data.player_codex_rating_history?.data || [];
+    if (ratings.length) sections.push(`<section class="detail-section"><h3>Rating History</h3><div class="history-list">${ratings.map(r => `<div><span>${valueOrDash(r.rating_date)}</span><strong>${valueOrDash(r.old_rating)} → ${valueOrDash(r.new_rating)}</strong></div>`).join('')}</div></section>`);
+    const injuries = data.player_codex_injury_history?.data || [];
+    if (injuries.length) sections.push(`<section class="detail-section"><h3>Injury History</h3><div class="history-list">${injuries.map(r => `<div><span>#${valueOrDash(r.event_sequence)}</span><strong>${valueOrDash(r.history_text)}</strong></div>`).join('')}</div></section>`);
+    const transfers = data.player_codex_transfer_history?.data || [];
+    if (transfers.length) sections.push(`<section class="detail-section"><h3>Transfer History</h3><div class="history-list">${transfers.map(r => `<div><span>#${valueOrDash(r.event_sequence)}</span><strong>${valueOrDash(r.history_text)}</strong></div>`).join('')}</div></section>`);
+    const matchRows = data.match_report_players?.data || [];
+    if (matchRows.length) sections.push(`<section class="detail-section"><h3>Match Reports</h3><div class="history-list">${matchRows.slice(0,30).map(r => `<a href="${routeUrl(`/match/${encodeURIComponent(r.sm_fixture_id)}`)}"><span>Fixture ${valueOrDash(r.sm_fixture_id)}</span><strong>${valueOrDash(r.rating)} · ${number(r.goals)} G · ${number(r.assists)} A</strong></a>`).join('')}</div></section>`);
+
+    shell(`${sectionHead('GW001 · Codex', 'Player Detail', '/codex/players')}${profile}${sections.join('')}`, '/codex');
+  }
+
+  function fact(label, val) {
+    return `<div class="fact"><span>${e(label)}</span><strong>${valueOrDash(val)}</strong></div>`;
+  }
+
+  async function renderRecords(token) {
+    renderLoadingView('Codex · Records', '/codex/players');
+    const [stats, matchPlayers, teamStats] = await Promise.all([
+      gateway.read('player_codex_stats', { limit: 200 }),
+      gateway.read('match_report_players', { limit: 25, orderBy: 'goals', orderDir: 'DESC', cache: false }),
+      gateway.read('match_report_team_stats', { limit: 300, cache: false })
+    ]);
+    if (token !== state.renderToken) return;
+    if (stats.state === 'error') {
+      shell(`${sectionHead('GW001 · Codex', 'Records', '/codex/players')}${codexTabs('records')}${gatewayError(stats.error)}`, '/codex');
+      return;
+    }
+    const leaders = [...(stats.data || [])].sort((a,b) => Number(b.goals||0)-Number(a.goals||0)).slice(0,10);
+    const content = `${sectionHead('GW001 · Codex', 'Records', '/codex/players')}${codexTabs('records')}
+      <section class="detail-section"><h3>Player Leaders</h3><div class="leader-list">${leaders.map((r,i) => `<div><b>${i+1}</b><span>SM ${valueOrDash(r.sm_player_id)}</span><strong>${number(r.goals)} gol · ${number(r.assists)} assist</strong></div>`).join('')}</div></section>
+      ${matchPlayers.data?.length ? `<section class="detail-section"><h3>Match Report · Top Goals</h3><div class="leader-list">${matchPlayers.data.slice(0,10).map((r,i) => `<a href="${r.sm_player_id ? routeUrl(`/player/${encodeURIComponent(r.sm_player_id)}`) : '#'}"><b>${i+1}</b><span>${valueOrDash(r.player_name)}</span><strong>${number(r.goals)} gol</strong></a>`).join('')}</div></section>` : ''}
+      <div class="view-summary"><strong>${number(teamStats.total || 0)}</strong><span>team stat report disponibili</span></div>`;
+    shell(content, '/codex');
+  }
+
+  function competitionGroupConfig() {
+    return [
+      { value: 'DOMESTIC', label: 'Domestic', slug: 'domestic', icon: '🏆' },
+      { value: 'INTERNATIONAL', label: 'International', slug: 'international', icon: '🏆' },
+      { value: 'NATIONS', label: 'Nations', slug: 'nations', icon: '⚑' }
+    ];
+  }
+
+  function cleanCompetitionValue(value) {
+    if (value === null || value === undefined) return '';
+    return String(value).trim();
+  }
+
+  function competitionRouteToken(identity) {
+    return encodeURIComponent(JSON.stringify(identity));
+  }
+
+  function parseCompetitionRouteToken(token) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(token));
+      if (!parsed || typeof parsed !== 'object') return null;
+
+      const group = cleanCompetitionValue(parsed.group).toUpperCase();
+      if (!['DOMESTIC', 'INTERNATIONAL', 'NATIONS'].includes(group)) return null;
+
+      const competitionKey = cleanCompetitionValue(parsed.competition_key);
+      const smAction = cleanCompetitionValue(parsed.sm_action);
+      const smDivision = cleanCompetitionValue(parsed.sm_division);
+
+      if (!competitionKey && !smAction) return null;
+
+      return {
+        group,
+        competition_key: competitionKey || null,
+        sm_action: smAction || null,
+        sm_division: smDivision || null
+      };
     } catch (_) {
       return null;
     }
   }
 
-  function writeMatchCache(rows) {
-    try {
-      sessionStorage.setItem(MATCH_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), rows }));
-    } catch (_) {
-      // La cache e solo un'ottimizzazione: i dati restano quelli della Public Read API.
+  function competitionIdentityId(identity) {
+    if (identity.competition_key) {
+      return `key:${identity.group}:${identity.competition_key}`;
     }
+    return `fields:${identity.group}:${identity.sm_action || ''}:${identity.sm_division || ''}`;
   }
 
-  function loadMatches() {
-    if (state.matches) return Promise.resolve(state.matches);
-    const cached = readMatchCache();
-    if (cached) {
-      state.matches = cached;
-      return Promise.resolve(cached);
+  function competitionIdentityFromRow(row, splitByDivision) {
+    const group = cleanCompetitionValue(row.competition_group).toUpperCase();
+    if (!['DOMESTIC', 'INTERNATIONAL', 'NATIONS'].includes(group)) return null;
+
+    const competitionKey = cleanCompetitionValue(row.competition_key);
+    if (competitionKey) {
+      return {
+        group,
+        competition_key: competitionKey,
+        sm_action: cleanCompetitionValue(row.sm_action) || null,
+        sm_division: cleanCompetitionValue(row.sm_division) || null
+      };
     }
-    if (!state.matchesPromise) {
-      state.matchesPromise = IMCDataService.getAllMatches(WORLD_ID, seasonNumber())
-        .then(payload => {
-          state.matches = payload.data;
-          writeMatchCache(state.matches);
-          return state.matches;
-        })
-        .finally(() => { state.matchesPromise = null; });
-    }
-    return state.matchesPromise;
-  }
 
-  function loadCompetitions() {
-    if (state.competitions) return Promise.resolve(state.competitions);
-    if (!state.competitionsPromise) {
-      state.competitionsPromise = IMCDataService.getCompetitions(WORLD_ID, seasonNumber())
-        .then(payload => {
-          state.competitions = Array.isArray(payload.data) ? payload.data : [];
-          return state.competitions;
-        })
-        .finally(() => { state.competitionsPromise = null; });
-    }
-    return state.competitionsPromise;
-  }
+    const smAction = cleanCompetitionValue(row.sm_action);
+    if (!smAction) return null;
 
-  function formatDate(value, long = false) {
-    if (!value) return 'DATA NON DISPONIBILE';
-    const date = new Date(`${value}T12:00:00`);
-    if (Number.isNaN(date.getTime())) return String(value);
-    return new Intl.DateTimeFormat('it-IT', long
-      ? { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }
-      : { day: '2-digit', month: 'short', year: 'numeric' }).format(date).toUpperCase();
-  }
+    const division = splitByDivision.get(`${group}:${smAction}`) === true
+      ? cleanCompetitionValue(row.sm_division)
+      : '';
 
-  function worldName() {
-    return state.world?.name || WORLD_ID;
-  }
-
-  function seasonNumber() {
-    return Number(state.world?.season?.imc_season || 1);
-  }
-
-  function competitionName(competition) {
-    if (competition?.name) return competition.name;
-    if (competition?.type && competition?.division_value) return `${competition.type} ${competition.division_value}`;
-    return competition?.type || 'Competizione non disponibile';
-  }
-
-  function competitionType(competition) {
-    return String(competition?.type || 'other').toLowerCase();
-  }
-
-  function logicalCompetitionName(competition) {
-    const code = String(competition?.competition_code || '').toUpperCase();
-    const canonicalLabels = {
-      LEAGUE: competition?.division_value ? `League Division ${competition.division_value}` : 'League',
-      NATIONAL_CUP: 'National Cup',
-      LEAGUE_CUP: 'League Cup',
-      CHARITY_SHIELD: 'Charity Shield',
-      SMFA_CHAMPIONS: 'SMFA Champions',
-      SMFA_SHIELD: 'SMFA Shield',
-      SMFA_SUPER_CUP: 'SMFA Super Cup',
-      INTERNATIONAL_QUALIFIER: 'International Qualifier',
-      WORLD_CUP: 'World Cup'
+    return {
+      group,
+      competition_key: null,
+      sm_action: smAction,
+      sm_division: division || null
     };
-    if (canonicalLabels[code]) return canonicalLabels[code];
-    const original = competitionName(competition);
-    const round = String(competition?.round_label || '').trim();
-    if (round && original.toLowerCase().endsWith(round.toLowerCase())) {
-      return original.slice(0, -round.length).trim().replace(/[·|—-]+$/, '').trim();
+  }
+
+  function buildCompetitionIndex(group, datasets) {
+    const rows = [
+      ...(datasets.results || []),
+      ...(datasets.schedule || []),
+      ...(datasets.reports || [])
+    ].filter(row => cleanCompetitionValue(row.competition_group).toUpperCase() === group);
+
+    const divisionsByAction = new Map();
+    for (const row of rows) {
+      if (cleanCompetitionValue(row.competition_key)) continue;
+      const action = cleanCompetitionValue(row.sm_action);
+      const division = cleanCompetitionValue(row.sm_division);
+      if (!action || !division) continue;
+
+      const key = `${group}:${action}`;
+      if (!divisionsByAction.has(key)) divisionsByAction.set(key, new Set());
+      divisionsByAction.get(key).add(division);
     }
-    return original;
+
+    const splitByDivision = new Map();
+    divisionsByAction.forEach((set, key) => splitByDivision.set(key, set.size > 1));
+
+    const competitions = new Map();
+
+    function ingest(sourceName, sourceRows) {
+      for (const row of sourceRows || []) {
+        if (cleanCompetitionValue(row.competition_group).toUpperCase() !== group) continue;
+
+        const identity = competitionIdentityFromRow(row, splitByDivision);
+        if (!identity) continue;
+
+        const id = competitionIdentityId(identity);
+        if (!competitions.has(id)) {
+          competitions.set(id, {
+            id,
+            identity,
+            competition_key: identity.competition_key,
+            competition_group: group,
+            sm_action: identity.sm_action,
+            sm_division: identity.sm_division,
+            countries: new Set(),
+            stages: new Set(),
+            rounds: new Set(),
+            latest_result_date: null,
+            next_schedule_date: null,
+            counts: { results: 0, schedule: 0, reports: 0 }
+          });
+        }
+
+        const item = competitions.get(id);
+        item.counts[sourceName] += 1;
+
+        const country = cleanCompetitionValue(row.sm_country);
+        const stage = cleanCompetitionValue(row.competition_stage);
+        const round = cleanCompetitionValue(row.competition_round);
+
+        if (country) item.countries.add(country);
+        if (stage) item.stages.add(stage);
+        if (round) item.rounds.add(round);
+
+        const matchDate = cleanCompetitionValue(row.match_date);
+        if (matchDate && sourceName === 'results') {
+          if (!item.latest_result_date || matchDate > item.latest_result_date) item.latest_result_date = matchDate;
+        }
+        if (matchDate && sourceName === 'schedule') {
+          if (!item.next_schedule_date || matchDate < item.next_schedule_date) item.next_schedule_date = matchDate;
+        }
+      }
+    }
+
+    ingest('results', datasets.results);
+    ingest('schedule', datasets.schedule);
+    ingest('reports', datasets.reports);
+
+    return [...competitions.values()].sort((a, b) => {
+      const actionA = a.competition_key || a.sm_action || '';
+      const actionB = b.competition_key || b.sm_action || '';
+      const byAction = actionA.localeCompare(actionB);
+      if (byAction) return byAction;
+
+      const da = Number(a.sm_division);
+      const db = Number(b.sm_division);
+      if (Number.isFinite(da) && Number.isFinite(db)) return da - db;
+      return String(a.sm_division || '').localeCompare(String(b.sm_division || ''));
+    });
   }
 
-  function competitionCategory(competition) {
-    const storedGroup = String(competition?.competition_group || '').toLowerCase();
-    return ['domestic', 'international', 'nations'].includes(storedGroup) ? storedGroup : 'unclassified';
+  const COMPETITION_LABELS = Object.freeze({
+    league: 'League',
+    leaguecup: 'League Cup',
+    leagueshield: 'League Shield',
+    charityshield: 'Charity Shield',
+    playoff: 'Playoff',
+    smfacup: 'SMFA Champions',
+    smfashield: 'SMFA Shield',
+    smfasupercup: 'SMFA Super Cup',
+    interqualifier: 'World Cup Qualifier',
+    worldcup: 'World Cup'
+  });
+
+  function competitionDisplayName(item) {
+    if (item.competition_key) return item.competition_key;
+    const action = cleanCompetitionValue(item.sm_action).toLowerCase();
+    const base = COMPETITION_LABELS[action] || item.sm_action || 'Competition';
+    if (action === 'league' && item.sm_division) return `${base} Div ${item.sm_division}`;
+    return base;
   }
 
-  function matchHref(match) {
-    return `${ROOT}matches/${encodeURIComponent(match.fixture_id)}/`;
+  function competitionTypeLabel(item) {
+    const action = cleanCompetitionValue(item.sm_action).toLowerCase();
+    return (COMPETITION_LABELS[action] || item.sm_action || item.competition_group || '').toUpperCase();
   }
 
-  function matchState(match) {
-    if (match.result) return 'FINAL';
-    if (match.availability?.schedule) return 'UPCOMING';
-    return String(match.status || 'MATCH').toUpperCase();
+  function competitionIcon(item) {
+    const action = cleanCompetitionValue(item.sm_action).toLowerCase();
+    if (item.competition_group === 'NATIONS') {
+      return `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16"/><path d="M8 24h32M24 8c6 6 8 11 8 16s-2 10-8 16M24 8c-6 6-8 11-8 16s2 10 8 16"/></svg>`;
+    }
+    if (action === 'league') {
+      return `<span class="competition-rank-icon">${e(item.sm_division || '1')}</span>`;
+    }
+    if (action.includes('shield')) {
+      return `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 39 11v11c0 10-6 17-15 21C15 39 9 32 9 22V11L24 5Z"/><path d="m24 14 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/></svg>`;
+    }
+    return `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 7h16v7c0 9-4 16-8 16s-8-7-8-16V7Z"/><path d="M16 11H9v4c0 7 4 11 10 12M32 11h7v4c0 7-4 11-10 12M24 30v7M17 40h14"/></svg>`;
   }
 
-  function scoreMarkup(match, compact = false) {
-    if (!match.result) return `<span class="match-vs">${match.time ? esc(match.time) : 'VS'}</span>`;
-    return `<strong class="match-score${compact ? ' compact' : ''}"><span>${esc(match.result.home_score)}</span><i>—</i><span>${esc(match.result.away_score)}</span></strong>`;
+  function formatCompetitionDate(value) {
+    if (!value) return '—';
+    const d = new Date(`${value}T12:00:00`);
+    if (Number.isNaN(d.getTime())) return e(value);
+    const months = ['GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC'];
+    return `${String(d.getDate()).padStart(2,'0')} ${months[d.getMonth()]}`;
   }
 
-  function worldHero() {
-    const world = state.world;
-    const season = world.season;
-    return `<section class="world-hero">
-      <div class="world-badge"><strong>${esc(world.game_world_id)}</strong><span>GAME WORLD</span></div>
-      <div class="world-name"><small>THE IMC EXPERIENCE</small><h1>${esc(world.name)}</h1></div>
-      <div class="world-season"><strong>SEASON ${esc(season.imc_season)}</strong><span>${esc(formatDate(season.start_date))}</span><i></i><span>${esc(formatDate(season.end_date))}</span></div>
-    </section>`;
+  function competitionStageText(item) {
+    const rounds = [...item.rounds].filter(Boolean);
+    if (rounds.length) return rounds[rounds.length - 1];
+    const stages = [...item.stages].filter(Boolean);
+    if (stages.length) return stages[stages.length - 1];
+    if (item.sm_division) return `Division ${item.sm_division}`;
+    return '—';
   }
 
-  function metricStrip() {
-    const datasets = state.world.datasets;
-    return `<section class="metric-strip" aria-label="Riepilogo dati">
-      <div><strong>${esc(state.world.summary.fixture_count)}</strong><span>FIXTURE</span></div>
-      <div><strong>${esc(state.world.summary.competition_count)}</strong><span>COMPETITIONS</span></div>
-      <div><strong>${esc(datasets.results.fixture_count)}</strong><span>RESULTS</span></div>
-      <div><strong>${esc(datasets.match_reports.fixture_count)}</strong><span>REPORTS</span></div>
-    </section>`;
-  }
-
-  function hubCard(key, title, sub, iconName, className, badge = '') {
-    return `<a class="hub-card ${className}" href="${ROOT}${key}/">
-      <div class="hub-copy">${badge ? `<small>${esc(badge)}</small>` : ''}<h2>${esc(title)}</h2><p>${esc(sub)}</p></div>
-      <div class="hub-art">${icon(iconName)}</div><span class="hub-arrow">›</span>
-    </a>`;
-  }
-
-  function home() {
-    const datasets = state.world.datasets;
-    return `<div class="page-stack">${worldHero()}${metricStrip()}<section class="hub-grid hub-grid-gw002">
-      ${hubCard('competitions', 'COMPETITIONS', `${state.world.summary.competition_count} competizioni`, 'competitions', 'hub-competitions', 'MYSQL LIVE')}
-      ${hubCard('managers', 'MANAGERS', 'IMC · External', 'manager', 'hub-managers')}
-      ${hubCard('team-hub', 'TEAM HUB', 'Club · Nazionali', 'teams', 'hub-team')}
-      ${hubCard('trophy-room', 'TROPHY ROOM', 'Trofei del GW', 'competitions', 'hub-trophy')}
-      ${hubCard('news-feed', 'NEWS FEED', 'News del GW', 'journal', 'hub-news')}
-      ${hubCard('codex', 'CODEX', datasets.player_codex.available ? 'Dataset disponibile' : 'Non disponibile', 'codex', 'hub-codex')}
-      ${hubCard('transfers', 'TRANSFERS', 'Coming soon', 'transfers', 'hub-transfers')}
-    </section></div>`;
-  }
-
-  function pageHead(title, sub, iconName, back = ROOT) {
-    return `<header class="page-head">
-      <a class="page-back" href="${back}" aria-label="Indietro">‹</a>
-      <div><small>${esc(WORLD_ID)} · ${esc(worldName()).toUpperCase()}</small><h1>${esc(title)}</h1><p>${esc(sub)}</p></div>
-      <span class="page-icon">${icon(iconName)}</span>
-    </header>`;
-  }
-
-  function viewTabs(active) {
-    return `<nav class="view-tabs" aria-label="Viste match">
-      <a class="${active === 'competitions' ? 'active' : ''}" href="${ROOT}competitions/">COMPETITIONS</a>
-      <a class="${active === 'calendar' ? 'active' : ''}" href="${ROOT}calendar/">CALENDAR</a>
-      <a class="${active === 'results' ? 'active' : ''}" href="${ROOT}results/">RESULTS</a>
+  function competitionTabs(activeSlug) {
+    return `<nav class="competition-tabs" aria-label="Competition groups">
+      ${competitionGroupConfig().map(config => `
+        <a class="competition-tab ${config.slug === activeSlug ? 'active' : ''} ${config.slug}" href="${routeUrl(`/competitions/${config.slug}`)}">
+          ${e(config.label)}
+        </a>`).join('')}
     </nav>`;
   }
 
-  function competitionKey(match) {
-    const competition = match.competition || {};
-    const master = competition.competition_master_id || competition.competition_code || 'unclassified';
-    const country = competition.country_code || 'GLOBAL';
-    const division = competition.division_value || 'ALL';
-    return `${master}:${country}:${division}`;
+  function competitionItem(item) {
+    const resultsCount = Number(item.counts.results || 0);
+    const scheduleCount = Number(item.counts.schedule || 0);
+    const stageText = competitionStageText(item);
+    const nextDate = formatCompetitionDate(item.next_schedule_date);
+    const name = competitionDisplayName(item);
+
+    return `
+      <a class="competition-reference-card ${String(item.competition_group || '').toLowerCase()}" href="${routeUrl(`/competition/${competitionRouteToken(item.identity)}`)}">
+        <div class="competition-reference-top">
+          <div class="competition-reference-icon">${competitionIcon(item)}</div>
+          <div class="competition-reference-copy">
+            <strong>${e(name)}</strong>
+            <span>${e(competitionTypeLabel(item))}</span>
+            <em>${e(stageText)}</em>
+          </div>
+          <div class="competition-reference-arrow">›</div>
+        </div>
+        <div class="competition-reference-stats">
+          <div><span>RESULTS</span><strong>${number(resultsCount)}</strong></div>
+          <div><span>ROUND</span><strong>${e(stageText)}</strong></div>
+          <div><span>NEXT</span><strong>${scheduleCount ? nextDate : '—'}</strong></div>
+        </div>
+      </a>`;
   }
 
-  function competitionGroups() {
-    if (!Array.isArray(state.competitions)) return [];
-    const matches = Array.isArray(state.matches) ? state.matches : [];
-    return state.competitions.map(item => {
-      const rows = matches.filter(match => {
-        const competition = match.competition || {};
-        return Number(competition.competition_master_id) === Number(item.competition_master_id)
-          && String(competition.division_value || 'ALL') === String(item.division_value || 'ALL');
-      });
-      return {
-        key: item.competition_key,
-        competition: {
-          name: item.name,
-          type: item.type,
-          competition_master_id: item.competition_master_id,
-          competition_code: item.competition_code,
-          competition_group: item.competition_group,
-          division_value: item.division_value,
-          hierarchy_path: item.hierarchy_path
+  async function readCompetitionGroupData(group) {
+    const [results, schedule, reports] = await Promise.all([
+      gateway.readAll('results', {
+        filters: {
+          competition_group: group,
+          result_dataset: 'MATCH_DATA'
         },
-        matches: rows,
-        results: Number(item.counts?.results || 0),
-        scheduled: Number(item.counts?.schedule || 0),
-        reports: Number(item.counts?.reports || 0)
-      };
-    });
+        orderBy: 'match_date',
+        orderDir: 'DESC',
+        pageSize: 1000,
+        maxRows: 10000
+      }),
+      gateway.readAll('schedule', {
+        filters: { competition_group: group },
+        orderBy: 'match_date',
+        orderDir: 'ASC',
+        pageSize: 1000,
+        maxRows: 5000
+      }),
+      gateway.readAll('match_report', {
+        filters: { competition_group: group },
+        pageSize: 1000,
+        maxRows: 5000
+      })
+    ]);
+
+    return { results, schedule, reports };
   }
 
-  function competitionCard(group) {
-    const type = competitionType(group.competition);
-    const progress = group.matches.length ? Math.round((group.results / group.matches.length) * 100) : 0;
-    return `<a class="competition-card" data-competition-type="${esc(type)}" href="${ROOT}competitions/${encodeURIComponent(group.key)}/">
-      <div class="competition-mark">${icon('competitions')}</div>
-      <div class="competition-copy"><small>${esc(type.toUpperCase())}</small><h2>${esc(competitionName(group.competition))}</h2><span>${esc(group.matches.length)} FIXTURE</span></div>
-      <dl><div><dt>RESULTS</dt><dd>${esc(group.results)}</dd></div><div><dt>UPCOMING</dt><dd>${esc(group.scheduled)}</dd></div><div><dt>REPORTS</dt><dd>${esc(group.reports)}</dd></div></dl>
-      <div class="competition-progress"><i style="width:${esc(progress)}%"></i></div><b>›</b>
-    </a>`;
+  function competitionDataError(data) {
+    const sources = [data.results, data.schedule, data.reports];
+    return sources.every(item => item.state === 'error')
+      ? (data.results.error || data.schedule.error || data.reports.error)
+      : null;
   }
 
-  function categoryIcon(category) {
-    if (category === 'international') return '<circle cx="32" cy="32" r="20"/><path d="M12 32h40M32 12c8 8 11 14 11 20s-3 12-11 20M32 12c-8 8-11 14-11 20s3 12 11 20M17 20c9 6 21 6 30 0M17 44c9-6 21-6 30 0"/>';
-    if (category === 'nations') return '<path d="M18 10v45M20 14c12-8 20 5 33-2v25c-13 7-21-6-33 2Z"/><path d="M18 55h18"/>';
-    return icon('competitions');
-  }
+  async function renderCompetitions(token, category = null) {
+    renderLoadingView(category ? `Competitions · ${category}` : 'Competitions');
 
-  function competitionHubCard(category, title, description, count) {
-    return `<a class="competition-hub-card competition-hub-${category}" href="${ROOT}competitions/${category}/">
-      <div class="competition-hub-icon">${categoryIcon(category)}</div>
-      <div class="competition-hub-copy"><h2>${esc(title)}</h2><p>${esc(description)}</p><strong>${esc(count)}</strong><span>COMPETITIONS</span></div>
-      <div class="competition-hub-art">${categoryIcon(category)}</div><b>›</b>
-    </a>`;
-  }
+    if (!category) {
+      const configs = competitionGroupConfig();
 
-  function competitions() {
-    const groups = competitionGroups();
-    const count = category => groups.filter(group => competitionCategory(group.competition) === category).length;
-    return `<section class="section-page competition-hub-page">
-      <section class="competition-world-strip"><div><strong>${esc(WORLD_ID)}</strong><span>${esc(worldName()).toUpperCase()}</span></div><div><b>SEASON ${esc(seasonNumber())}</b><small>${esc(formatDate(state.world.season.start_date))} — ${esc(formatDate(state.world.season.end_date))}</small></div></section>
-      <div class="competition-hub-list">
-        ${competitionHubCard('domestic', 'DOMESTIC', 'Leagues, National Cup, League Cup', count('domestic'))}
-        ${competitionHubCard('international', 'INTERNATIONAL', 'SMFA Champions, SMFA Shield, Super Cup', count('international'))}
-        ${competitionHubCard('nations', 'NATIONS', 'World Cup, Qualifiers, National Teams', count('nations'))}
-      </div>
-    </section>`;
-  }
+      const summaries = await Promise.all(configs.map(async config => {
+        const [results, schedule, reports] = await Promise.all([
+          gateway.total('results', {
+            competition_group: config.value,
+            result_dataset: 'MATCH_DATA'
+          }),
+          gateway.total('schedule', { competition_group: config.value }),
+          gateway.total('match_report', { competition_group: config.value })
+        ]);
 
-  function competitionCategoryPage(category) {
-    const labels = { domestic: 'DOMESTIC', international: 'INTERNATIONAL', nations: 'NATIONS' };
-    const groups = competitionGroups().filter(group => competitionCategory(group.competition) === category);
-    return `<section class="section-page">${pageHead(labels[category], `${groups.length} competizioni · Season ${seasonNumber()}`, 'competitions', `${ROOT}competitions/`)}
-      <div class="competition-list competition-category-list">${groups.map(competitionCard).join('') || '<div class="empty-state"><strong>NESSUNA COMPETIZIONE</strong><span>Il database non contiene competizioni per questa categoria.</span></div>'}</div>
-    </section>`;
-  }
+        return { config, results, schedule, reports };
+      }));
 
-  function matchCard(match) {
-    return `<a class="match-card" href="${matchHref(match)}">
-      <div class="match-top"><span>${esc(matchState(match))}</span><small>${esc(competitionName(match.competition))}</small>${match.availability?.match_report ? '<b>MATCH REPORT</b>' : ''}</div>
-      <div class="match-main">
-        <div class="team-cell home"><span>${esc((match.home?.name || '?').slice(0, 1))}</span><strong>${esc(match.home?.name || '—')}</strong></div>
-        ${scoreMarkup(match)}
-        <div class="team-cell away"><span>${esc((match.away?.name || '?').slice(0, 1))}</span><strong>${esc(match.away?.name || '—')}</strong></div>
-      </div>
-      <div class="match-bottom"><time>${esc(formatDate(match.date, true))}${match.time ? ` · ${esc(match.time)}` : ''}</time><span>VIEW MATCH ›</span></div>
-    </a>`;
-  }
+      if (token !== state.renderToken) return;
 
-  function dateGroups(rows) {
-    const groups = new Map();
-    rows.forEach(match => {
-      const key = match.date || 'unknown';
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(match);
-    });
-    return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }
+      const sections = summaries.map(({ config, results, schedule, reports }) => {
+        const hardError = [results, schedule, reports].every(item => item.state === 'error');
 
-  function competitionDetailTabs() {
-    const tabs = [['overview', 'OVERVIEW'], ['competition', 'COMPETITION'], ['matches', 'MATCHES'], ['stats', 'STATS'], ['history', 'HISTORY']];
-    return `<nav class="competition-detail-tabs">${tabs.map(([key, label]) => `<button type="button" data-competition-tab="${key}" class="${state.competitionTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>`;
-  }
+        if (hardError) {
+          return `
+            <section class="competition-group-panel ${config.slug}">
+              <div class="competition-group-head">
+                <div><small>${e(config.value)}</small><h3>${e(config.label)}</h3></div>
+                <div class="competition-group-icon">${config.icon}</div>
+              </div>
+              ${gatewayError(results.error || schedule.error || reports.error)}
+            </section>`;
+        }
 
-  function compactMatches(rows) {
-    return rows.length ? `<div class="match-list compact-match-list">${dateGroups(rows).map(([date, matches]) => `<section class="matchday-group"><header><div><small>MATCH DAY</small><h2>${esc(formatDate(date, true))}</h2></div><span>${matches.length} MATCH</span></header><div>${matches.map(matchCard).join('')}</div></section>`).join('')}</div>` : '<div class="empty-state"><strong>NESSUN MATCH</strong><span>Questa vista verrà popolata quando il dataset sarà disponibile.</span></div>';
-  }
+        const available = [];
+        if (results.total) available.push(`${number(results.total)} results`);
+        if (schedule.total) available.push(`${number(schedule.total)} schedule`);
+        if (reports.total) available.push(`${number(reports.total)} report`);
 
-  function competitionOverview(group) {
-    const played = group.results;
-    const total = group.matches.length;
-    const percentage = total ? Math.round((played / total) * 100) : 0;
-    const ordered = [...group.matches].sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
-    const last = [...ordered].reverse().find(match => match.result);
-    const next = ordered.find(match => !match.result);
-    return `<section class="competition-status"><div><span>COMPETITION STATUS</span><strong>${played}<i>/</i>${total}</strong><small>MATCHES PLAYED</small></div><div class="competition-status-bar"><b style="width:${percentage}%"></b></div><em>${percentage}%</em></section>
-      <div class="competition-overview-grid">${last ? `<article><span>LAST MATCH</span>${matchCard(last)}</article>` : ''}${next ? `<article><span>NEXT MATCH</span>${matchCard(next)}</article>` : ''}</div>`;
-  }
+        const content = available.length
+          ? `<div class="competition-items">
+               <div class="competition-item">
+                 <div>
+                   <strong>Dati reali disponibili</strong>
+                   <div class="competition-item-meta">${available.map(value => `<span>${e(value)}</span>`).join('')}</div>
+                 </div>
+               </div>
+             </div>`
+          : unavailable('DATI NON ANCORA DISPONIBILI');
 
-  function competitionStructure(group) {
-    const type = competitionType(group.competition);
-    const isLeague = type === 'league';
-    const isHybrid = ['smfacup', 'smfashield', 'interqualifier'].includes(type);
-    const tabs = isLeague ? [['table', 'TABLE']] : isHybrid ? [['groups', 'GROUP STAGE'], ['knockout', 'KNOCKOUT']] : [['knockout', 'KNOCKOUT']];
-    if (!tabs.some(([key]) => key === state.competitionSubTab)) state.competitionSubTab = tabs[0][0];
-    const rounds = new Map();
-    group.matches.forEach(match => {
-      const round = match.competition?.round_label || 'MATCHES';
-      if (!rounds.has(round)) rounds.set(round, []);
-      rounds.get(round).push(match);
-    });
-    const body = isLeague ? '<div class="empty-state"><strong>TABLE</strong><span>Struttura pronta. La classifica verrà collegata al relativo dataset.</span></div>' : `<div class="competition-rounds">${[...rounds.entries()].map(([round, rows]) => `<section><h3>${esc(round)}</h3>${compactMatches(rows)}</section>`).join('')}</div>`;
-    return `<nav class="competition-subtabs">${tabs.map(([key, label]) => `<button type="button" data-competition-subtab="${key}" class="${state.competitionSubTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>${body}`;
-  }
+        return `
+          <section class="competition-group-panel ${config.slug}">
+            <div class="competition-group-head">
+              <div>
+                <small>${e(config.value)}</small>
+                <h3>${e(config.label)}</h3>
+              </div>
+              <div class="competition-group-icon">${config.icon}</div>
+            </div>
+            ${content}
+            <a class="competition-group-open" href="${routeUrl(`/competitions/${config.slug}`)}">
+              Apri ${e(config.label)}
+            </a>
+          </section>`;
+      }).join('');
 
-  function competitionMatches(group) {
-    const tabs = [['results', 'RESULTS'], ['schedule', 'SCHEDULE'], ['reports', 'REPORTS']];
-    const rows = state.matchesSubTab === 'results' ? group.matches.filter(match => match.result) : state.matchesSubTab === 'schedule' ? group.matches.filter(match => !match.result) : group.matches.filter(match => match.availability?.match_report);
-    return `<nav class="competition-subtabs">${tabs.map(([key, label]) => `<button type="button" data-matches-subtab="${key}" class="${state.matchesSubTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>${compactMatches(rows)}`;
-  }
-
-  function competitionStats() {
-    const tabs = [['goals', 'GOALS'], ['assists', 'ASSISTS'], ['rating', 'RATING'], ['mom', 'MOM'], ['cards', 'CARDS']];
-    return `<nav class="competition-subtabs competition-stat-tabs">${tabs.map(([key, label]) => `<button type="button" data-stats-subtab="${key}" class="${state.statsSubTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav><div class="empty-state"><strong>${esc(state.statsSubTab.toUpperCase())}</strong><span>Tab Nexus replicata. Il dataset statistiche giocatori verrà collegato separatamente.</span></div>`;
-  }
-
-  function competitionDetailPage(groupKey) {
-    const group = competitionGroups().find(item => item.key === groupKey);
-    if (!group) return errorPage('Competizione non trovata.');
-    let body = competitionOverview(group);
-    if (state.competitionTab === 'competition') body = competitionStructure(group);
-    else if (state.competitionTab === 'matches') body = competitionMatches(group);
-    else if (state.competitionTab === 'stats') body = competitionStats();
-    else if (state.competitionTab === 'history') body = '<div class="empty-state"><strong>HISTORY</strong><span>Albo d’oro e vincitori verranno collegati al dataset storico.</span></div>';
-    return `<section class="section-page competition-detail-page">${pageHead(competitionName(group.competition), `${group.matches.length} fixture · Season ${seasonNumber()}`, 'competitions', `${ROOT}competitions/${competitionCategory(group.competition)}/`)}${competitionDetailTabs()}<main class="competition-detail-body">${body}</main></section>`;
-  }
-
-  function matchListPage(kind, groupKey = null) {
-    let rows = state.matches;
-    let title = 'MATCHES';
-    let sub = `Fixture reali · Season ${seasonNumber()}`;
-    let iconName = 'results';
-    let back = ROOT;
-    let active = 'results';
-
-    if (groupKey != null) {
-      rows = rows.filter(match => competitionKey(match) === groupKey);
-      title = competitionName(rows[0]?.competition);
-      sub = `${rows.length} fixture · Season ${seasonNumber()}`;
-      back = `${ROOT}competitions/${competitionCategory(rows[0]?.competition)}/`;
-      active = 'competitions';
-    } else if (kind === 'calendar') {
-      rows = rows.filter(match => match.availability?.schedule);
-      title = 'CALENDAR';
-      sub = `${rows.length} fixture programmate`;
-      iconName = 'calendar';
-      active = 'calendar';
-    } else if (kind === 'results') {
-      rows = rows.filter(match => match.result);
-      title = 'RESULTS';
-      sub = `${rows.length} risultati ufficiali`;
-    }
-
-    const groups = dateGroups(rows);
-    const content = groups.length ? groups.map(([date, matches]) => `<section class="matchday-group"><header><div><small>MATCH DAY</small><h2>${esc(formatDate(date, true))}</h2></div><span>${esc(matches.length)} MATCH</span></header><div>${matches.map(matchCard).join('')}</div></section>`).join('') : '<div class="empty-state"><strong>NESSUN MATCH DISPONIBILE</strong><span>Il database non contiene fixture per questa vista.</span></div>';
-    return `<section class="section-page">${pageHead(title, sub, iconName, back)}${viewTabs(active)}<div class="list-summary"><strong>${esc(rows.length)}</strong><span>${kind === 'calendar' ? 'UPCOMING FIXTURES' : 'MATCHES'}</span></div><div class="match-list">${content}</div></section>`;
-  }
-
-  function staticSection(key) {
-    const section = staticSections[key] || staticSections.codex;
-    const tabs = key === 'team-hub' ? ['CLUB', 'NATIONS'] : key === 'managers' ? ['IMC', 'EXTERNAL'] : key === 'transfers' ? ['ALL TRANSFERS', 'ENTRATE', 'USCITE'] : key === 'codex' ? ['PLAYERS', 'TEAMS', 'RECORDS'] : [];
-    return `<section class="section-page">${pageHead(section.title, section.sub, section.icon)}${tabs.length ? `<nav class="competition-subtabs section-placeholder-tabs">${tabs.map((tab, index) => `<button type="button" class="${index === 0 ? 'active' : ''}">${tab}</button>`).join('')}</nav>` : ''}<div class="static-intro"><span>${icon(section.icon)}</span><p>${esc(section.intro)}</p></div><div class="empty-state"><strong>${key === 'transfers' ? 'COMING SOON' : 'STRUTTURA PRONTA'}</strong><span>${esc(section.status)}</span></div></section>`;
-  }
-
-  function statValue(value) {
-    return value == null || value === '' ? '—' : esc(value);
-  }
-
-  function matchDetailShell(match) {
-    return `<section class="section-page match-detail-page">${pageHead('MATCH DETAIL', competitionName(match.competition), 'results', `${ROOT}results/`)}
-      <article class="detail-score">
-        <div class="detail-meta"><span>${esc(matchState(match))}</span><time>${esc(formatDate(match.date, true))}${match.time ? ` · ${esc(match.time)}` : ''}</time></div>
-        <div class="detail-teams"><div><span>${esc((match.home?.name || '?').slice(0, 1))}</span><strong>${esc(match.home?.name || '—')}</strong></div>${scoreMarkup(match)}<div><span>${esc((match.away?.name || '?').slice(0, 1))}</span><strong>${esc(match.away?.name || '—')}</strong></div></div>
-        <small>FIXTURE ID ${esc(match.fixture_id)}</small>
-      </article>
-      <nav class="report-tabs"><a href="#statistics">STATS</a><a href="#lineups">LINEUPS</a><a href="#events">EVENTS</a><a href="#commentary">COMMENTARY</a><a href="#tactics">TACTICS</a></nav>
-      <div id="report"><div class="loading-inline"><span></span>CARICAMENTO MATCH REPORT</div></div>
-    </section>`;
-  }
-
-  function statsTable(report) {
-    const home = report.team_stats?.home || {};
-    const away = report.team_stats?.away || {};
-    const rows = [['Possesso', 'possession'], ['Tiri', 'shots'], ['Tiri in porta', 'shots_on_target'], ['Corner', 'corners'], ['Falli', 'fouls'], ['Fuorigioco', 'offside']];
-    return `<section class="report-block" id="statistics"><header><small>MATCH DATA</small><h2>STATISTICHE</h2></header><div class="stats-table">${rows.map(([label, key]) => {
-      const homeValue = home[key];
-      const awayValue = away[key];
-      const total = Number(homeValue || 0) + Number(awayValue || 0);
-      const homeWidth = total ? Math.round((Number(homeValue || 0) / total) * 100) : 50;
-      return `<div><div><strong>${statValue(homeValue)}</strong><span>${esc(label)}</span><strong>${statValue(awayValue)}</strong></div><i><b style="width:${homeWidth}%"></b></i></div>`;
-    }).join('')}</div></section>`;
-  }
-
-  function lineupSide(side, lineup) {
-    const players = lineup?.players || [];
-    return `<article class="lineup-side"><header><div><small>STARTING XI</small><strong>${esc(side)}</strong></div><span>${esc(lineup?.formation || '—')}</span></header><div>${players.map(player => `<div class="player-row"><span>${esc(player.slot_order)}</span><strong>${esc(player.player_name || `Player ${player.player_id}`)}</strong><small>${player.is_substitute ? 'SUB' : statValue(player.rating)}</small></div>`).join('')}</div></article>`;
-  }
-
-  function lineupsBlock(match, report) {
-    return `<section class="report-block" id="lineups"><header><small>TEAM SHEETS</small><h2>LINEUPS</h2></header><div class="lineups">${lineupSide(match.home?.name, report.lineups?.home)}${lineupSide(match.away?.name, report.lineups?.away)}</div></section>`;
-  }
-
-  function eventsBlock(report) {
-    const events = report.events || [];
-    return `<section class="report-block" id="events"><header><small>MATCH TIMELINE</small><h2>EVENTI</h2></header>${events.length ? `<div class="timeline">${events.map(event => `<article><time>${statValue(event.minute)}'</time><i></i><div><strong>${esc(String(event.event_type || 'EVENT').toUpperCase())}</strong><span>${event.player_id ? `PLAYER ${esc(event.player_id)}` : 'MATCH EVENT'}</span></div></article>`).join('')}</div>` : '<p class="block-empty">Nessun evento disponibile.</p>'}</section>`;
-  }
-
-  function commentaryBlock(report) {
-    const commentary = report.commentary || [];
-    return `<section class="report-block" id="commentary"><header><small>LIVE STORY</small><h2>COMMENTARY</h2></header>${commentary.length ? `<div class="commentary">${commentary.map(item => `<article><time>${statValue(item.minute)}'</time><p>${esc(item.text)}</p></article>`).join('')}</div>` : '<p class="block-empty">Cronaca non disponibile.</p>'}</section>`;
-  }
-
-  function tacticsBlock(report) {
-    const tactics = report.tactics || [];
-    return `<section class="report-block" id="tactics"><header><small>TACTICAL FLOW</small><h2>TATTICHE</h2></header>${tactics.length ? `<div class="tactics">${tactics.map(item => `<article><span>${esc(item.side || 'TEAM')}</span><strong>${esc(item.formation || '—')}</strong><time>DAL ${statValue(item.minute_from)}'</time></article>`).join('')}</div>` : '<p class="block-empty">Tattiche non disponibili.</p>'}</section>`;
-  }
-
-  function renderReport(payload) {
-    const target = document.querySelector('#report');
-    if (!target) return;
-    const match = payload.match;
-    const report = payload.match_report;
-    if (!report?.available) {
-      target.innerHTML = '<div class="empty-state"><strong>MATCH REPORT NON DISPONIBILE</strong><span>Per questa fixture sono visualizzati soltanto i dati esistenti.</span></div>';
+      shell(
+        `${sectionHead(GAME_WORLD_ID,'Competitions','/overview')}
+         <section class="competition-discovery">${sections}</section>`,
+        '/competitions'
+      );
       return;
     }
-    target.innerHTML = `${statsTable(report)}${lineupsBlock(match, report)}${eventsBlock(report)}${commentaryBlock(report)}${tacticsBlock(report)}`;
-  }
 
-  function errorPage(message) {
-    return `<section class="section-page"><a class="page-back standalone" href="${ROOT}">‹</a><div class="error-state"><strong>DATI NON DISPONIBILI</strong><span>${esc(message)}</span><button type="button" data-retry>RIPROVA</button></div></section>`;
-  }
+    const config = competitionGroupConfig().find(item => item.slug === category);
+    if (!config) {
+      shell(
+        `${sectionHead('GW001 · Competitions','Competitions','/competitions')}
+         ${unavailable('SEZIONE NON DISPONIBILE')}`,
+        '/competitions'
+      );
+      return;
+    }
 
-  function routeLoading(title, sub, iconName = 'results') {
-    return `<section class="section-page">${pageHead(title, sub, iconName)}<div class="loading-panel"><div class="loading-inline"><span></span>CARICAMENTO DATI MYSQL</div><small>La pagina resta attiva mentre prepariamo i dati.</small></div></section>`;
-  }
+    const data = await readCompetitionGroupData(config.value);
+    if (token !== state.renderToken) return;
 
-  function setActiveNav(route) {
-    const active = route === 'calendar' ? 'calendar' : route === 'competitions' ? 'competitions' : route === 'results' || route === 'matches' ? 'results' : 'home';
-    document.querySelectorAll('[data-nav]').forEach(link => link.classList.toggle('active', link.dataset.nav === active));
-  }
+    const hardError = competitionDataError(data);
+    if (hardError) {
+      shell(
+        `${sectionHead('GW001 · Competitions',config.label,'/competitions')}
+         ${gatewayError(hardError)}`,
+        '/competitions'
+      );
+      return;
+    }
 
-  function bindChrome() {
-    const toggle = document.querySelector('[data-menu-toggle]');
-    const drawer = document.querySelector('[data-menu-drawer]');
-    const scrim = document.querySelector('[data-menu-scrim]');
-    const close = () => {
-      drawer.hidden = true;
-      scrim.hidden = true;
-      toggle.setAttribute('aria-expanded', 'false');
-      document.body.classList.remove('menu-open');
-    };
-    toggle.addEventListener('click', () => {
-      const open = drawer.hidden;
-      drawer.hidden = !open;
-      scrim.hidden = !open;
-      toggle.setAttribute('aria-expanded', String(open));
-      document.body.classList.toggle('menu-open', open);
-    });
-    scrim.addEventListener('click', close);
-    drawer.querySelectorAll('a').forEach(link => link.addEventListener('click', close));
-
-    document.addEventListener('click', event => {
-      const competitionTab = event.target.closest?.('[data-competition-tab]');
-      if (competitionTab) {
-        state.competitionTab = competitionTab.dataset.competitionTab;
-        renderRoute();
-        return;
-      }
-      const competitionSubTab = event.target.closest?.('[data-competition-subtab]');
-      if (competitionSubTab) {
-        state.competitionSubTab = competitionSubTab.dataset.competitionSubtab;
-        renderRoute();
-        return;
-      }
-      const matchesSubTab = event.target.closest?.('[data-matches-subtab]');
-      if (matchesSubTab) {
-        state.matchesSubTab = matchesSubTab.dataset.matchesSubtab;
-        renderRoute();
-        return;
-      }
-      const statsSubTab = event.target.closest?.('[data-stats-subtab]');
-      if (statsSubTab) {
-        state.statsSubTab = statsSubTab.dataset.statsSubtab;
-        renderRoute();
-        return;
-      }
-      const link = event.target.closest?.('a[href]');
-      if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      const url = new URL(link.href, location.href);
-      if (url.origin !== location.origin || !url.pathname.startsWith(ROOT)) return;
-      event.preventDefault();
-      close();
-      history.pushState({}, '', `${url.pathname}${url.search}${url.hash}`);
-      renderRoute();
+    const competitions = buildCompetitionIndex(config.value, {
+      results: data.results.data || [],
+      schedule: data.schedule.data || [],
+      reports: data.reports.data || []
     });
 
+    const body = competitions.length
+      ? `<div class="competition-reference-list">${competitions.map(competitionItem).join('')}</div>`
+      : unavailable(
+          'DATI NON ANCORA DISPONIBILI',
+          `Nessuna competizione reale identificabile nei record con competition_group=${config.value}.`
+        );
+
+    shell(
+      `${sectionHead('GW001 · Competitions','Competitions','/competitions')}
+       ${competitionTabs(config.slug)}
+       <div class="competition-reference-heading">
+         <h3>${e(config.label)}</h3>
+         <strong>${number(competitions.length)}</strong>
+       </div>
+       ${body}`,
+      '/competitions'
+    );
+  }
+
+  function competitionDetailFilters(identity, repository) {
+    const filters = { competition_group: identity.group };
+
+    if (repository === 'results') {
+      filters.result_dataset = 'MATCH_DATA';
+    }
+
+    if (identity.competition_key) {
+      filters.competition_key = identity.competition_key;
+    } else {
+      filters.sm_action = identity.sm_action;
+      if (identity.sm_division) filters.sm_division = identity.sm_division;
+    }
+
+    return filters;
+  }
+
+  async function renderCompetitionDetail(token, routeToken) {
+    const identity = parseCompetitionRouteToken(routeToken);
+
+    if (!identity) {
+      shell(
+        `${sectionHead('GW001 · Competition','Competition Detail','/competitions')}
+         ${unavailable('COMPETITION NON DISPONIBILE','Identificativo della competizione non valido.')}`,
+        '/competitions'
+      );
+      return;
+    }
+
+    renderLoadingView('Competition Detail', `/competitions/${identity.group.toLowerCase()}`);
+
+    const [results, schedule, reports] = await Promise.all([
+      gateway.readAll('results', {
+        filters: competitionDetailFilters(identity, 'results'),
+        orderBy: 'match_date',
+        orderDir: 'DESC',
+        pageSize: 1000,
+        maxRows: 10000
+      }),
+      gateway.readAll('schedule', {
+        filters: competitionDetailFilters(identity, 'schedule'),
+        orderBy: 'match_date',
+        orderDir: 'ASC',
+        pageSize: 1000,
+        maxRows: 5000
+      }),
+      gateway.readAll('match_report', {
+        filters: competitionDetailFilters(identity, 'match_report'),
+        pageSize: 1000,
+        maxRows: 5000
+      })
+    ]);
+
+    if (token !== state.renderToken) return;
+
+    const hardError = [results, schedule, reports].every(item => item.state === 'error');
+    if (hardError) {
+      shell(
+        `${sectionHead('GW001 · Competition','Competition Detail',`/competitions/${identity.group.toLowerCase()}`)}
+         ${gatewayError(results.error || schedule.error || reports.error)}`,
+        '/competitions'
+      );
+      return;
+    }
+
+    const allEvidence = [
+      ...(results.data || []),
+      ...(schedule.data || []),
+      ...(reports.data || [])
+    ];
+
+    if (!allEvidence.length) {
+      shell(
+        `${sectionHead('GW001 · Competition','Competition Detail',`/competitions/${identity.group.toLowerCase()}`)}
+         ${unavailable('COMPETITION NON DISPONIBILE','Nessun record reale trovato per la competizione selezionata.')}`,
+        '/competitions'
+      );
+      return;
+    }
+
+    const base = allEvidence[0];
+    const title = identity.competition_key || identity.sm_action || 'Competition Detail';
+
+    const values = (field) => [...new Set(
+      allEvidence.map(row => cleanCompetitionValue(row[field])).filter(Boolean)
+    )];
+
+    const facts = [
+      ['Group', identity.group],
+      ['Competition Key', identity.competition_key],
+      ['sm_action', identity.sm_action],
+      ['sm_division', identity.sm_division],
+      ['Country', values('sm_country').join(' · ')],
+      ['Stage', values('competition_stage').join(' · ')],
+      ['Round', values('competition_round').join(' · ')]
+    ].filter(([, value]) => value !== null && value !== undefined && value !== '');
+
+    const identitySection = `
+      <section class="detail-section">
+        <h3>Competition</h3>
+        <div class="fact-grid">
+          ${facts.map(([label,value]) => fact(label,value)).join('')}
+        </div>
+      </section>`;
+
+    const resultsSection = results.data?.length
+      ? `<section class="detail-section">
+           <h3>Results</h3>
+           <div class="view-summary">
+             <strong>${number(results.data.length)}</strong>
+             <span>risultati reali</span>
+           </div>
+           <div class="match-list">
+             ${results.data.map(row => matchCard(row,'results')).join('')}
+           </div>
+         </section>`
+      : '';
+
+    const scheduleSection = schedule.data?.length
+      ? `<section class="detail-section">
+           <h3>Schedule</h3>
+           <div class="view-summary">
+             <strong>${number(schedule.data.length)}</strong>
+             <span>fixture reali</span>
+           </div>
+           <div class="match-list">
+             ${schedule.data.map(row => matchCard(row,'schedule')).join('')}
+           </div>
+         </section>`
+      : '';
+
+    const reportSection = reports.data?.length
+      ? `<section class="detail-section">
+           <h3>Match Reports</h3>
+           <div class="view-summary">
+             <strong>${number(reports.data.length)}</strong>
+             <span>report collegati</span>
+           </div>
+           <div class="match-list">
+             ${reports.data.map(row => matchCard(row,'results')).join('')}
+           </div>
+         </section>`
+      : '';
+
+    shell(
+      `${sectionHead('GW001 · Competition',title,`/competitions/${identity.group.toLowerCase()}`)}
+       ${identitySection}
+       ${resultsSection}
+       ${scheduleSection}
+       ${reportSection}`,
+      '/competitions'
+    );
+  }
+
+  async function renderTeamHub(token, tab = 'clubs') {
+    renderLoadingView('Team Hub');
+    if (tab === 'nations') {
+      const nations = await gateway.read('nations', { limit: 200 });
+      if (token !== state.renderToken) return;
+      shell(`${sectionHead(GAME_WORLD_ID,'Team Hub','/overview')}${teamTabs('nations')}${nations.state === 'error' ? gatewayError(nations.error) : unavailable('DATI NON ANCORA DISPONIBILI','Il repository nations non contiene record reali utilizzabili.')}`, '/team-hub');
+      return;
+    }
+
+    const roster = await gateway.read('player_codex_roster', { limit: 500 });
+    if (token !== state.renderToken) return;
+    if (roster.state === 'error') {
+      shell(`${sectionHead(GAME_WORLD_ID,'Team Hub','/overview')}${teamTabs('clubs')}${gatewayError(roster.error)}`, '/team-hub');
+      return;
+    }
+    const clubs = new Map();
+    for (const row of roster.data) {
+      const sm = row.sm_club_id ? `sm:${row.sm_club_id}` : null;
+      const world = row.world_club_id ? `world:${row.world_club_id}` : null;
+      const key = world || sm;
+      if (!key) continue;
+      if (!clubs.has(key)) clubs.set(key, { key, name: row.club_name, sm_club_id: row.sm_club_id, world_club_id: row.world_club_id, players: 0 });
+      clubs.get(key).players += 1;
+    }
+    const body = clubs.size ? `<div class="club-grid">${[...clubs.values()].map(c => `<a class="club-card" href="${routeUrl(`/club/${encodeURIComponent(c.key)}`)}"><small>${c.world_club_id ? `WORLD ${e(c.world_club_id)}` : `SM ${e(c.sm_club_id)}`}</small><strong>${valueOrDash(c.name)}</strong><span>${number(c.players)} players nel roster</span></a>`).join('')}</div>` : unavailable();
+    shell(`${sectionHead(GAME_WORLD_ID,'Team Hub','/overview')}${teamTabs('clubs')}${body}`, '/team-hub');
+  }
+
+  function teamTabs(active) {
+    return `<div class="tabs two"><a class="tab ${active==='clubs'?'active':''}" href="${routeUrl('/team-hub/clubs')}">Clubs</a><a class="tab ${active==='nations'?'active':''}" href="${routeUrl('/team-hub/nations')}">Nations</a></div>`;
+  }
+
+  async function renderClubDetail(token, key) {
+    const [namespace, id] = decodeURIComponent(key).split(':');
+    renderLoadingView('Club Detail', '/team-hub/clubs');
+    const rosterFilter = namespace === 'world' ? { world_club_id: id } : { sm_club_id: id };
+    const roster = await gateway.read('player_codex_roster', { limit: 200, filters: rosterFilter, cache: false });
+    if (token !== state.renderToken) return;
+    const first = firstReal(roster.data);
+    const body = roster.data.length ? `<section class="detail-section"><h3>${valueOrDash(first?.club_name)}</h3><div class="player-grid compact">${roster.data.map(r => `<a class="player-card compact" href="${routeUrl(`/player/${encodeURIComponent(r.sm_player_id)}`)}"><div class="player-copy"><strong>SM ${e(r.sm_player_id)}</strong><span>${valueOrDash(r.squad_status)}</span></div></a>`).join('')}</div></section>` : unavailable('CLUB NON DISPONIBILE');
+    shell(`${sectionHead('GW001 · Team Hub','Club Detail','/team-hub/clubs')}${body}`, '/team-hub');
+  }
+
+  async function renderManagers(token, tab = 'imc') {
+    renderLoadingView('Managers');
+    const master = await gateway.read('managers', { limit: 100 });
+    if (token !== state.renderToken) return;
+    const tabs = `<div class="tabs two"><a class="tab ${tab==='imc'?'active':''}" href="${routeUrl('/managers/imc')}">IMC</a><a class="tab ${tab==='external'?'active':''}" href="${routeUrl('/managers/external')}">External</a></div>`;
+    let body;
+    if (master.state === 'error') body = gatewayError(master.error);
+    else if (master.state === 'empty') body = unavailable('DATI NON ANCORA DISPONIBILI','Il repository managers è vuoto e i dataset secondari non contengono un campo certificato per distinguere IMC da External.');
+    else body = unavailable('CLASSIFICAZIONE NON DISPONIBILE','Il mapping IMC / External richiede un attributo certificato del repository managers.');
+    shell(`${sectionHead(GAME_WORLD_ID,'Managers','/overview')}${tabs}${body}`, '/managers');
+  }
+
+  async function renderCodexTeams(token) {
+    renderLoadingView('Codex · Teams');
+    const roster = await gateway.read('player_codex_roster', { limit: 500 });
+    if (token !== state.renderToken) return;
+    const groups = new Map();
+    for (const row of roster.data) {
+      const key = row.world_club_id ? `world:${row.world_club_id}` : row.sm_club_id ? `sm:${row.sm_club_id}` : null;
+      if (!key) continue;
+      if (!groups.has(key)) groups.set(key, { key, name: row.club_name, count: 0 });
+      groups.get(key).count++;
+    }
+    const body = groups.size ? `<div class="club-grid">${[...groups.values()].map(c => `<a class="club-card" href="${routeUrl(`/club/${encodeURIComponent(c.key)}`)}"><strong>${valueOrDash(c.name)}</strong><span>${number(c.count)} players</span></a>`).join('')}</div>` : unavailable();
+    shell(`${sectionHead('GW001 · Codex','Teams','/codex/players')}${codexTabs('teams')}${body}`, '/codex');
+  }
+
+  async function renderTransfers(token) {
+    renderLoadingView('Transfers');
+    const result = await gateway.read('transfers', { limit: 200, orderBy: 'imc_transfer_number', orderDir: 'DESC' });
+    if (token !== state.renderToken) return;
+    let body;
+    if (result.state === 'error') body = gatewayError(result.error);
+    else if (result.state === 'empty') body = unavailable('DATI NON ANCORA DISPONIBILI','Il repository transfers esiste ma oggi contiene 0 record.');
+    else body = `<div class="transfer-list">${result.data.map(r => `<a class="transfer-card" href="${routeUrl(`/transfer/${encodeURIComponent(r.imc_transfer_number)}`)}"><strong>${valueOrDash(r.player_name)}</strong><span>${valueOrDash(r.club_from)} → ${valueOrDash(r.club_to)}</span><b>${valueOrDash(r.amount_text)}</b></a>`).join('')}</div>`;
+    shell(`${sectionHead(GAME_WORLD_ID,'Transfers','/overview')}${body}`, '/transfers');
+  }
+
+  async function renderTransferDetail(token, transferNumber) {
+    renderLoadingView('Transfer Detail', '/transfers');
+    const result = await gateway.read('transfers', { limit: 10, filters: { imc_transfer_number: transferNumber }, cache: false });
+    if (token !== state.renderToken) return;
+    const row = firstReal(result.data);
+    const body = row ? `<section class="detail-section"><h3>${valueOrDash(row.player_name)}</h3><div class="fact-grid">${fact('Da',row.club_from)}${fact('A',row.club_to)}${fact('Importo',row.amount_text)}${fact('Player ID',row.player_id)}</div></section>` : unavailable('TRANSFER NON DISPONIBILE');
+    shell(`${sectionHead('GW001 · Transfers','Transfer Detail','/transfers')}${body}`, '/transfers');
+  }
+
+  async function renderRepositoryEmptyView(token, repository, title) {
+    renderLoadingView(title);
+    const result = await gateway.read(repository, { limit: 100 });
+    if (token !== state.renderToken) return;
+    const body = result.state === 'error' ? gatewayError(result.error)
+      : result.state === 'empty' ? unavailable('DATI NON ANCORA DISPONIBILI', `Il repository ${repository} è presente ma non contiene record reali.`)
+      : `<div class="data-state"><strong>${number(result.total)} record disponibili</strong></div>`;
+    shell(`${sectionHead(GAME_WORLD_ID,title,'/overview')}${body}`, `/${repository.replaceAll('_','-')}`);
+  }
+
+  function renderWorldChronicle() {
+    shell(`${sectionHead(GAME_WORLD_ID,'World Chronicle','/overview')}${unavailable('DATI NON ANCORA DISPONIBILI','Non esiste ancora un repository certificato per World Chronicle.')}`, '/world-chronicle');
   }
 
   async function renderRoute() {
-    try {
-      const parts = routeParts();
-      const route = parts[0] || 'home';
-      setActiveNav(route);
-      window.scrollTo({ top: 0, behavior: 'instant' });
+    const token = ++state.renderToken;
+    const parts = splitPath();
+    const path = currentPath();
 
-      if (route === 'home') {
-        app.innerHTML = home();
-        loadMatches().catch(() => {});
+    if (!state.discovery && !state.discoveryError) {
+      shell(loading('Discovery Universal Gateway'), path);
+      try { await gateway.discover(); } catch (error) {
+        if (token !== state.renderToken) return;
+        shell(gatewayError(error), path);
         return;
       }
-      if (staticSections[route]) {
-        app.innerHTML = staticSection(route);
-        return;
-      }
-      if (route === 'matches' && parts[1]) {
-        app.innerHTML = routeLoading('MATCH DETAIL', 'Apertura della fixture', 'results');
-        const detailPayload = await IMCDataService.getMatch(WORLD_ID, parts[1]);
-        const match = detailPayload.data.match;
-        app.innerHTML = matchDetailShell(match);
-        renderReport(detailPayload.data);
-        return;
-      }
-
-      const loadingTitles = {
-        competitions: ['COMPETITIONS', 'Preparazione delle competizioni', 'competitions'],
-        calendar: ['CALENDAR', 'Preparazione del calendario', 'calendar'],
-        results: ['RESULTS', 'Preparazione dei risultati', 'results']
-      };
-      if (loadingTitles[route]) app.innerHTML = routeLoading(...loadingTitles[route]);
-      if (route === 'competitions') await Promise.all([loadMatches(), loadCompetitions()]);
-      else await loadMatches();
-
-      if (route === 'competitions' && ['domestic', 'international', 'nations'].includes(parts[1])) app.innerHTML = competitionCategoryPage(parts[1]);
-      else if (route === 'competitions' && parts[1]) app.innerHTML = competitionDetailPage(decodeURIComponent(parts[1]));
-      else if (route === 'competitions') app.innerHTML = competitions();
-      else if (route === 'calendar') app.innerHTML = matchListPage('calendar');
-      else if (route === 'results') app.innerHTML = matchListPage('results');
-      else app.innerHTML = errorPage('Pagina non trovata.');
-    } catch (error) {
-      app.innerHTML = errorPage(error instanceof Error ? error.message : 'Errore imprevisto.');
-      document.querySelector('[data-retry]')?.addEventListener('click', () => location.reload());
+      if (token !== state.renderToken) return;
     }
+
+    if (parts.length === 0 || parts[0] === 'overview') return renderOverview(token);
+    if (parts[0] === 'calendar') return renderCalendar(token);
+    if (parts[0] === 'results') return renderResults(token);
+    if (parts[0] === 'match' && parts[1]) return renderMatchDetail(token, decodeURIComponent(parts[1]));
+
+    if (parts[0] === 'competitions' && !parts[1]) return renderCompetitions(token);
+    if (parts[0] === 'competitions' && ['domestic','international','nations'].includes(parts[1])) return renderCompetitions(token, parts[1]);
+    if (parts[0] === 'competition' && parts[1]) return renderCompetitionDetail(token, parts.slice(1).join('/'));
+
+    if (parts[0] === 'team-hub') return renderTeamHub(token, parts[1] === 'nations' ? 'nations' : 'clubs');
+    if (parts[0] === 'club' && parts[1]) return renderClubDetail(token, decodeURIComponent(parts.slice(1).join('/')));
+    if (parts[0] === 'nation' && parts[1]) return renderRepositoryEmptyView(token, 'nations', 'Nation Detail');
+
+    if (parts[0] === 'managers') return renderManagers(token, parts[1] === 'external' ? 'external' : 'imc');
+    if (parts[0] === 'manager' && parts[1]) return renderManagers(token, 'imc');
+
+    if (parts[0] === 'codex' && (!parts[1] || parts[1] === 'players')) return renderCodexPlayers(token);
+    if (parts[0] === 'codex' && parts[1] === 'teams') return renderCodexTeams(token);
+    if (parts[0] === 'codex' && parts[1] === 'records') return renderRecords(token);
+    if (parts[0] === 'player' && parts[1]) return renderPlayerDetail(token, decodeURIComponent(parts[1]));
+
+    if (parts[0] === 'transfers' && !parts[1]) return renderTransfers(token);
+    if (parts[0] === 'transfer' && parts[1]) return renderTransferDetail(token, decodeURIComponent(parts[1]));
+
+    if (parts[0] === 'trophy-room') return renderRepositoryEmptyView(token, 'trophy_room', 'Trophy Room');
+    if (parts[0] === 'news-feed') return renderRepositoryEmptyView(token, 'news_feed', 'News Feed');
+    if (parts[0] === 'news' && parts[1]) return renderRepositoryEmptyView(token, 'news_feed', 'News Detail');
+    if (parts[0] === 'world-chronicle') return renderWorldChronicle();
+
+    shell(`${sectionHead(GAME_WORLD_ID,'Not Found','/overview')}${unavailable('VISTA NON DISPONIBILE')}`, '/overview');
   }
 
-  async function start() {
-    try {
-      const worldPayload = await IMCDataService.getWorld(WORLD_ID, 1);
-      state.world = worldPayload.data;
-      document.title = `${WORLD_ID} · ${state.world.name} | Italian Masters Club`;
-      await renderRoute();
-    } catch (error) {
-      app.innerHTML = errorPage(error instanceof Error ? error.message : 'Errore imprevisto.');
-      document.querySelector('[data-retry]')?.addEventListener('click', () => location.reload());
-    }
-  }
-
-  bindChrome();
+  window.addEventListener('hashchange', renderRoute);
   window.addEventListener('popstate', renderRoute);
-  start();
+  renderRoute();
 })();

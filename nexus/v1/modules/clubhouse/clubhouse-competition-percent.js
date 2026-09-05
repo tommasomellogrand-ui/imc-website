@@ -1,0 +1,18 @@
+(function(){
+"use strict";
+if(window.IMC_CLUBHOUSE_COMPETITION_PERCENT)return;
+const VERSION="1.0.0";
+let state={container:null,client:null,managerId:"",assignments:[],cache:new Map(),observer:null,timer:null};
+const c=v=>String(v==null?"":v).trim();
+function rpc(action,args){return state.client.rpc("imc_nexus_gateway",{p_action:action,p_args:args}).then(r=>{if(r.error)throw r.error;return r.data||{}})}
+function currentWorld(){return c(state.container&&state.container.querySelector("[data-ch-world-current]")&&state.container.querySelector("[data-ch-world-current]").textContent).toUpperCase()}
+function clubWorldId(worldId){const rows=state.assignments.filter(a=>c(a.game_world_id).toUpperCase()===worldId&&c(a.assignment_type).toLowerCase()==="club");if(!rows.length)return"";const now=new Date().toISOString().slice(0,10),active=rows.filter(a=>(!c(a.start_date)||c(a.start_date)<=now)&&(!c(a.end_date)||c(a.end_date)>=now)),pool=active.length?active:rows;pool.sort((a,b)=>c(b.start_date).localeCompare(c(a.start_date)));return c(pool[0]&&pool[0].sm_world_club_id)}
+function setPercent(value){const el=state.container&&state.container.querySelector(".ch-season-inner strong");if(!el)return;const text=`${Number(value)||0}%`;if(el.textContent!==text)el.textContent=text}
+async function officialPercent(worldId){if(state.cache.has(worldId))return state.cache.get(worldId);const clubId=clubWorldId(worldId);if(!clubId)return null;const [rr,ss,mf]=await Promise.all([rpc("results",{gameWorld:worldId,clubWorldId:clubId}),rpc("schedule",{gameWorld:worldId,clubWorldId:clubId}),rpc("competition_manifest",{gameWorld:worldId})]);const keys=new Set([...(rr.rows||[]),...(ss.rows||[])].map(x=>c(x&&x.competition_key)).filter(Boolean));const rows=Array.isArray(mf.rows)?mf.rows:[];const league=rows.find(x=>c(x.smAction).toLowerCase()==="league"&&keys.has(c(x.competition_key)))||null;if(!league)return null;const value=Number(league.matchesPlayedPercent)||0;state.cache.set(worldId,value);return value}
+async function refresh(){const worldId=currentWorld();if(!/^GW\d{3}$/.test(worldId))return;try{const value=await officialPercent(worldId);if(currentWorld()===worldId&&value!=null)setPercent(value)}catch(e){console.error("Clubhouse competition percent failed",worldId,e)}}
+function scheduleRefresh(){clearTimeout(state.timer);state.timer=setTimeout(refresh,25)}
+async function attach(o){state.container=o&&o.container||null;state.client=o&&o.client||null;state.managerId=c(o&&o.managerId);state.assignments=[];state.cache=new Map();if(state.observer)state.observer.disconnect();state.observer=null;if(!state.container||!state.client||!state.managerId)return;try{const ch=await rpc("club_house",{managerId:state.managerId});state.assignments=Array.isArray(ch.assignments)?ch.assignments:[]}catch(e){console.error("Clubhouse assignment percent source failed",e)}state.observer=new MutationObserver(scheduleRefresh);state.observer.observe(state.container,{subtree:true,childList:true,characterData:true});scheduleRefresh()}
+function bind(){const mod=window.IMC_CLUBHOUSE;if(!mod||mod.__competitionPercentWrapped)return;const mount=mod.mount,unmount=mod.unmount;mod.mount=async function(o){const r=await mount.call(mod,o);attach(o);return r};mod.unmount=function(){clearTimeout(state.timer);if(state.observer)state.observer.disconnect();state={container:null,client:null,managerId:"",assignments:[],cache:new Map(),observer:null,timer:null};return unmount.call(mod)};mod.__competitionPercentWrapped=true}
+bind();
+window.IMC_CLUBHOUSE_COMPETITION_PERCENT={version:VERSION,refresh};
+})();

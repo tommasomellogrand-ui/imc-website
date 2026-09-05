@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#050813">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>IMC Live Scoring · Matchday 8 Complete · Logos</title>
+  <style>
+    :root{
+      --accent:#8B5CF6;--accent2:#D8B4FE;--bg:#050813;--text:#f7f9ff;
+      --muted:#99a7bd;--safe-top:max(14px,env(safe-area-inset-top));
+      --safe-bottom:max(12px,env(safe-area-inset-bottom));
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;min-height:100%;background:#000;color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+    body{overflow-x:hidden}
+    button{font:inherit}
+    img{display:block}
+    #app{position:relative;min-height:100dvh;overflow:hidden;background:#050813}
+    .stadium{position:fixed;inset:-4%;z-index:0;background:
+      radial-gradient(circle at 50% 16%,color-mix(in srgb,var(--accent) 31%,transparent),transparent 32%),
+      linear-gradient(180deg,rgba(2,5,14,.08),rgba(1,4,10,.84) 62%,#010309),
+      linear-gradient(180deg,#0d1730 0 39%,#071b14 39% 100%);
+      transition:background .45s ease;transform:scale(1.05);animation:drift 18s ease-in-out infinite alternate}
+    @keyframes drift{to{transform:scale(1.11) translateY(-1.4%)}}
+    .stadium:before{content:"";position:absolute;left:-10%;right:-10%;top:18%;height:36%;border-radius:50% 50% 16% 16%;border:32px solid rgba(255,255,255,.035);box-shadow:inset 0 0 0 14px color-mix(in srgb,var(--accent) 12%,transparent);transform:perspective(800px) rotateX(63deg)}
+    .stadium:after{content:"";position:absolute;left:10%;right:10%;bottom:-7%;height:42%;background:
+      linear-gradient(90deg,transparent 49.6%,rgba(255,255,255,.14) 49.8% 50.2%,transparent 50.4%),
+      radial-gradient(ellipse at center,transparent 0 23%,rgba(255,255,255,.12) 23.5% 24.2%,transparent 24.7%),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.017) 0 50px,transparent 50px 100px),
+      linear-gradient(180deg,#173b2a,#061d13);clip-path:polygon(18% 0,82% 0,100% 100%,0 100%);opacity:.74}
+    .content{position:relative;z-index:2;min-height:100dvh;padding:var(--safe-top) 13px var(--safe-bottom)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .brand{display:flex;align-items:center;gap:9px;min-width:0}
+    .brand img{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 8px 20px rgba(0,0,0,.48))}
+    .brand strong{display:block;font-size:12px;letter-spacing:.07em}
+    .brand span{display:block;margin-top:2px;color:var(--accent2);font-size:8px;font-weight:900;letter-spacing:.11em}
+    .livebox{display:flex;align-items:center;gap:7px;padding:9px 10px;border-radius:14px;background:rgba(3,7,15,.76);border:1px solid rgba(255,255,255,.11);backdrop-filter:blur(11px);font-size:11px;font-weight:950;font-variant-numeric:tabular-nums}
+    .dot{width:8px;height:8px;border-radius:50%;background:#ff354d;box-shadow:0 0 13px #ff354d;animation:blink 1s infinite}
+    @keyframes blink{50%{opacity:.25}}
+    .hero{padding:17px 2px 10px}
+    .hero h1{margin:0;font-size:clamp(29px,8.8vw,46px);line-height:.94;letter-spacing:-.055em}
+    .hero p{margin:8px 0 0;color:#c9d3e5;font-size:10px;font-weight:850;letter-spacing:.12em}
+    .tabs-wrap{position:sticky;top:0;z-index:7;padding:7px 0 9px;background:linear-gradient(180deg,rgba(5,8,19,.98),rgba(5,8,19,.76),transparent);backdrop-filter:blur(8px)}
+    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+    .tab{border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(8,14,27,.78);color:#c6cfde;padding:10px 5px 9px;text-align:center;font-size:9px;font-weight:950;letter-spacing:.06em}
+    .tab span{display:block;margin-top:3px;font-size:7px;color:#8190a8}
+    .tab.active{background:color-mix(in srgb,var(--accent) 22%,rgba(8,14,27,.94));border-color:color-mix(in srgb,var(--accent) 70%,white 12%);color:#fff;box-shadow:0 0 23px color-mix(in srgb,var(--accent) 20%,transparent)}
+    .tab.active span{color:var(--accent2)}
+    .tab:disabled{opacity:.42}
+    .division-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:8px 2px 11px}
+    .division-head h2{margin:0;font-size:22px;letter-spacing:-.04em}
+    .division-head p{margin:4px 0 0;color:var(--muted);font-size:8px;font-weight:850;letter-spacing:.1em}
+    .controls{display:flex;gap:7px}
+    .action-btn{border:1px solid color-mix(in srgb,var(--accent) 48%,white 10%);border-radius:13px;background:color-mix(in srgb,var(--accent) 18%,rgba(4,8,17,.82));color:var(--accent2);padding:9px 10px;font-size:8px;font-weight:950}
+    .action-btn.primary{background:var(--accent);color:#07101b;border-color:transparent}
+    .action-btn:disabled{opacity:.45}
+    .matches{display:flex;flex-direction:column;gap:8px;padding-bottom:12px}
+    .match-card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 70px minmax(0,1fr);align-items:center;min-height:87px;padding:11px;border-radius:19px;background:linear-gradient(135deg,rgba(15,24,43,.93),rgba(5,10,21,.89));border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(13px);box-shadow:0 9px 26px rgba(0,0,0,.23);transition:.35s}
+    .match-card.flash{animation:cardFlash 1.3s ease}
+    @keyframes cardFlash{20%{transform:scale(1.025);border-color:var(--accent2);box-shadow:0 0 32px color-mix(in srgb,var(--accent) 46%,transparent)}}
+    .team{display:flex;align-items:center;gap:8px;min-width:0}
+    .team.away{flex-direction:row-reverse;text-align:right}
+    .team-meta{min-width:0}
+    .club{font-size:11.5px;font-weight:950;line-height:1.08;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .manager{margin-top:6px;color:#aeb9cb;font-size:8px;line-height:1.25;font-weight:760}
+    .manager b{display:block;margin-top:2px;color:var(--accent2);font-size:7px;letter-spacing:.05em}
+    .club-logo{width:30px;height:30px;object-fit:contain;flex:0 0 30px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
+    .club-logo.sm{width:20px;height:20px;flex-basis:20px}
+    .club-logo.lg{width:44px;height:44px;flex-basis:44px}
+    .score{text-align:center;font-variant-numeric:tabular-nums}
+    .scoreline{font-size:25px;font-weight:1000;letter-spacing:-.04em}
+    .score-num{display:inline-block;min-width:15px}
+    .score-num.flip{animation:flip .58s cubic-bezier(.2,.8,.25,1)}
+    @keyframes flip{0%{transform:rotateX(0)}45%{transform:rotateX(92deg);opacity:.2}55%{transform:rotateX(-92deg);opacity:.2}100%{transform:rotateX(0);opacity:1}}
+    .dash{padding:0 4px;color:#8997ad}
+    .status{display:block;margin-top:4px;color:var(--accent2);font-size:8px;font-weight:950;letter-spacing:.08em}
+    .last-event{position:absolute;left:11px;right:11px;bottom:5px;text-align:center;color:#9dabbe;font-size:7px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .footnote{padding:10px 12px;border-radius:14px;background:rgba(3,7,15,.70);border:1px solid rgba(255,255,255,.08);color:#cad4e4;font-size:8px;line-height:1.5;text-align:center}
+    .overlay{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:var(--safe-top) 18px var(--safe-bottom);text-align:center;background:
+      radial-gradient(circle at 50% 32%,color-mix(in srgb,var(--accent) 32%,transparent),rgba(1,3,9,.95) 66%);backdrop-filter:blur(8px)}
+    .overlay.show{display:flex;animation:fadeIn .2s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .event-burst{position:absolute;width:150vw;height:150vw;border:2px solid color-mix(in srgb,var(--accent2) 28%,transparent);border-radius:50%;animation:burst 2.2s ease-out both}
+    @keyframes burst{from{transform:scale(.08);opacity:1}to{transform:scale(1);opacity:0}}
+    .event-content{position:relative;z-index:2;width:100%;max-width:390px}
+    .event-type{color:var(--accent2);font-size:11px;font-weight:1000;letter-spacing:.25em}
+    .event-title{margin-top:7px;font-size:clamp(50px,17vw,83px);font-weight:1000;font-style:italic;line-height:.78;letter-spacing:-.08em;text-shadow:0 0 34px color-mix(in srgb,var(--accent) 60%,transparent);animation:goalIn .48s cubic-bezier(.15,.9,.25,1.2)}
+    @keyframes goalIn{from{opacity:0;transform:translateY(24px) scale(.72)}to{opacity:1;transform:none}}
+    .event-scorer{margin-top:15px;font-size:clamp(29px,9vw,46px);font-weight:1000;line-height:.92;letter-spacing:-.05em}
+    .event-minute{margin-top:7px;color:var(--accent2);font-size:19px;font-weight:1000}
+    .event-matchline{margin-top:18px;display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:12px 14px;border-radius:18px;background:rgba(4,8,17,.73);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(12px)}
+    .event-team{display:flex;align-items:center;gap:6px;min-width:0}
+    .event-team.away{flex-direction:row-reverse;justify-content:flex-end}
+    .event-team-name{font-size:10px;font-weight:900;line-height:1.1}
+    .event-score{font-size:16px;font-weight:1000}
+    .break-title{font-size:clamp(55px,18vw,90px);font-weight:1000;line-height:.78;letter-spacing:-.07em}
+    .mini-results{width:100%;max-width:410px;margin-top:24px;display:flex;flex-direction:column;gap:7px}
+    .mini-row{display:grid;grid-template-columns:1fr auto 1fr;gap:9px;align-items:center;padding:9px 11px;border-radius:13px;background:rgba(4,8,17,.74);border:1px solid rgba(255,255,255,.09);font-size:10px;font-weight:850}
+    .mini-team{display:flex;align-items:center;gap:6px;min-width:0}
+    .mini-team.away{flex-direction:row-reverse;justify-content:flex-end}
+    .mini-team span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mini-row b{font-size:12px}
+    .final-panel{width:100%;max-width:410px;max-height:88dvh;overflow:auto;padding:19px 14px;border-radius:24px;background:linear-gradient(180deg,rgba(15,24,43,.94),rgba(4,8,17,.97));border:1px solid rgba(255,255,255,.14);box-shadow:0 28px 80px rgba(0,0,0,.52)}
+    .final-panel .imc{width:68px;margin:0 auto}
+    .final-panel h2{margin:8px 0 2px;font-size:33px;letter-spacing:-.05em}
+    .final-panel>p{margin:0 0 15px;color:var(--accent2);font-size:10px;font-weight:950;letter-spacing:.12em}
+    .final-card{padding:12px;border-radius:15px;background:rgba(5,10,21,.72);border:1px solid rgba(255,255,255,.08);margin-bottom:8px}
+    .final-match{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;font-size:10px;font-weight:900}
+    .final-side{display:flex;align-items:center;gap:6px;min-width:0}
+    .final-side.away{flex-direction:row-reverse;justify-content:flex-end}
+    .final-side span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .final-score{font-size:21px}
+    .final-goals{margin-top:7px;color:#9eacc0;font-size:8px;line-height:1.45}
+    .close-final{margin-top:8px;border:0;border-radius:14px;background:var(--accent);color:#07101b;padding:11px 16px;font-weight:1000;font-size:10px}
+    @media(min-width:700px){#app{max-width:430px;margin:0 auto;box-shadow:0 0 90px #000}}
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="stadium"></div>
+  <main class="content">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/imc-logo.png" alt="Logo IMC">
+        <div><strong>IMC LIVE SCORING</strong><span>GW001 · ROAD TO HISTORY</span></div>
+      </div>
+      <div class="livebox"><span class="dot"></span><span id="minuteBox">REPLAY</span></div>
+    </header>
+
+    <section class="hero">
+      <h1>MATCHDAY 8<br>REPLAY CENTER</h1>
+      <p>6 AUGUST 2026 · 60 GOALS · 4 DIVISIONS</p>
+    </section>
+
+    <div class="tabs-wrap">
+      <nav id="tabs" class="tabs" aria-label="Divisioni"></nav>
+    </div>
+
+    <section class="division-head">
+      <div>
+        <h2 id="divisionTitle"></h2>
+        <p id="divisionStats"></p>
+      </div>
+      <div class="controls">
+        <button id="pauseBtn" class="action-btn" hidden>Ⅱ PAUSA</button>
+        <button id="startBtn" class="action-btn primary">▶ AVVIA</button>
+      </div>
+    </section>
+
+    <section id="matches" class="matches"></section>
+
+    <div class="footnote">
+      Loghi inclusi nelle card live e nei riepiloghi finali. Ogni divisione ha un replay indipendente.
+    </div>
+  </main>
+
+  <div id="eventOverlay" class="overlay" aria-live="assertive">
+    <div class="event-burst"></div>
+    <div class="event-content">
+      <div id="eventType" class="event-type">GOAL</div>
+      <div id="eventTitle" class="event-title">GOAL!</div>
+      <div id="eventScorer" class="event-scorer"></div>
+      <div id="eventMinute" class="event-minute"></div>
+      <div id="eventMatchline" class="event-matchline"></div>
+    </div>
+  </div>
+
+  <div id="breakOverlay" class="overlay">
+    <div>
+      <div id="breakTitle" class="break-title">HALF<br>TIME</div>
+      <div id="miniResults" class="mini-results"></div>
+    </div>
+  </div>
+
+  <div id="finalOverlay" class="overlay">
+    <div class="final-panel">
+      <img class="imc" src="assets/imc-logo.png" alt="">
+      <h2>FULL TIME</h2>
+      <p id="finalDivision"></p>
+      <div id="finalResults"></div>
+      <button id="closeFinal" class="close-final">TORNA AL LIVE CENTER</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const divisions=[{"id":1,"name":"PLATINUM","accent":"#8B5CF6","accent2":"#D8B4FE","matches":[{"home":["AS Reggina 1914","MNG016","Saverio Cordiano","reggina.png"],"away":["AEK Athens","MNG026","Clemente Liggi","aek-atene.png"],"final":[1,2],"goals":[{"minute":1,"side":"away","scorer":"ITO"},{"minute":12,"side":"home","scorer":"SCAMACCA"},{"minute":75,"side":"away","scorer":"GUSTO"}]},{"home":["Dynamo Dresden","MNG003","Matteo Sartori","dinamo-dresda.png"],"away":["Palermo FC","MNG029","Al Zubeidi","palermo.png"],"final":[1,0],"goals":[{"minute":40,"side":"home","scorer":"BRUNO GUIMARÃES"}]},{"home":["Parma Calcio 1913","MNG030","Lauro Crasti","parma.png"],"away":["Académica de Coimbra","MNG042","Nick Keyen","academica-coimbra.png"],"final":[0,3],"goals":[{"minute":7,"side":"away","scorer":"RONALDO"},{"minute":56,"side":"away","scorer":"NÚÑEZ"},{"minute":87,"side":"away","scorer":"ARAÚJO"}]},{"home":["Torino","MNG012","Federico Bonzi","torino.png"],"away":["FK Partizan","MNG021","Tommaso Prisco","partizan-belgrado.png"],"final":[3,0],"goals":[{"minute":22,"side":"home","scorer":"MURILLO"},{"minute":41,"side":"home","scorer":"MARTÍNEZ"},{"minute":56,"side":"home","scorer":"MURILLO"}]},{"home":["TSV 1860 München","MNG015","Marco Fioretti","monaco-1860.png"],"away":["Atalanta BC","MNG035","Matteo Giovi","atalanta.png"],"final":[0,3],"goals":[{"minute":1,"side":"away","scorer":"KANE","penalty":true},{"minute":24,"side":"away","scorer":"KANE","penalty":true},{"minute":53,"side":"away","scorer":"KANE"}]}]},{"id":2,"name":"GOLD","accent":"#D4AF37","accent2":"#FFE7A3","matches":[{"home":["Genoa CFC","MNG013","Giovanni Cabrioli","genoa.png"],"away":["Boca Juniors","MNG009","Luca Nudo","boca-juniors.png"],"final":[1,3],"goals":[{"minute":15,"side":"away","scorer":"HAVERTZ"},{"minute":18,"side":"away","scorer":"DAVID"},{"minute":31,"side":"home","scorer":"KHALAILI"},{"minute":35,"side":"away","scorer":"OYARZABAL"}]},{"home":["Palmeiras","MNG027","Danilo FC 1908","palmeiras.png"],"away":["Feyenoord","MNG017","Ringhio Gattuso","feyenoord.png"],"final":[2,1],"goals":[{"minute":8,"side":"home","scorer":"AGHEHOWA"},{"minute":30,"side":"home","scorer":"DONCZEW"},{"minute":75,"side":"away","scorer":"PAVLOVIC"}]},{"home":["Eintracht Frankfurt","MNG025","Nicolae Sasarman","eintracht-francoforte.png"],"away":["Sunderland","MNG031","Lorenzo Errico","sunderland.png"],"final":[0,0],"goals":[]},{"home":["Fenerbahçe SK","MNG007","Vincenzo Martorano","fenerbache.png"],"away":["Bologna FC","MNG028","Fabio Ferrini","bologna.png"],"final":[1,1],"goals":[{"minute":44,"side":"home","scorer":"GUIRASSY"},{"minute":50,"side":"away","scorer":"KADIOĞLU"}]},{"home":["1. FC Kaiserslautern","MNG032","Vardan Minasyan","kaiserslautern.png"],"away":["Sampdoria","MNG010","Mattia Bertonati","sampdoria.png"],"final":[1,1],"goals":[{"minute":70,"side":"away","scorer":"BATURINA"},{"minute":73,"side":"home","scorer":"BISSECK"}]}]},{"id":3,"name":"SILVER","accent":"#BFC7D5","accent2":"#F1F5F9","matches":[{"home":["SSC Napoli","MNG041","Rosario Giamundo","napoli.png"],"away":["Guangzhou FC","MNG002","Max Palace","guangzhou.png"],"final":[1,1],"goals":[{"minute":39,"side":"away","scorer":"ÓSKARSSON"},{"minute":81,"side":"home","scorer":"GHILARDI"}]},{"home":["Celtic","MNG005","Sir Simone","celtic.png"],"away":["São Paulo FC","MNG039","Attilio Bonnici","san-paolo.png"],"final":[1,0],"goals":[{"minute":38,"side":"home","scorer":"GYÖKERES","penalty":true}]},{"home":["Tottenham Hotspur","MNG023","Max Zanoni","tottenham.png"],"away":["Valencia CF","MNG014","Giovanni Iodice","valencia.png"],"final":[3,2],"goals":[{"minute":2,"side":"home","scorer":"RASPADORI"},{"minute":36,"side":"away","scorer":"MOREIRA"},{"minute":38,"side":"home","scorer":"ZACCAGNI"},{"minute":57,"side":"away","scorer":"SALAH"},{"minute":79,"side":"home","scorer":"OLIVERA"}]},{"home":["Atlético Madrid","MNG019","Davide Rapisarda","atletico-madrid.png"],"away":["Olympique Marseille","MNG040","Mathieu Pioche","olympique-marsiglia.png"],"final":[3,4],"goals":[{"minute":5,"side":"away","scorer":"LUKAKU"},{"minute":30,"side":"away","scorer":"LUKAKU"},{"minute":33,"side":"home","scorer":"DE ARRASCAETA"},{"minute":34,"side":"away","scorer":"SARR"},{"minute":50,"side":"home","scorer":"BOWEN"},{"minute":88,"side":"away","scorer":"LUKAKU"},{"minute":89,"side":"home","scorer":"ZUBIMENDI"}]},{"home":["FC Schalke 04","MNG043","Francesco Rossi","schalke-04.png"],"away":["Shakhtar Donetsk","MNG038","Armando De Giulio","shakhtar-donetsk.png"],"final":[1,5],"goals":[{"minute":8,"side":"away","scorer":"BARDGHJI"},{"minute":30,"side":"away","scorer":"DJIMSITI"},{"minute":31,"side":"home","scorer":"DIARRA"},{"minute":33,"side":"away","scorer":"BARDGHJI"},{"minute":49,"side":"away","scorer":"RODRI"},{"minute":68,"side":"away","scorer":"BARDGHJI"}]}]},{"id":4,"name":"BRONZE","accent":"#B87333","accent2":"#F2C18D","matches":[{"home":["Legia Warszawa","MNG004","Luciano Catalano","legia-varsavia.png"],"away":["SS Lazio","MNG011","Alessandro Berardi","lazio.png"],"final":[0,2],"goals":[{"minute":30,"side":"away","scorer":"SAVINHO"},{"minute":66,"side":"away","scorer":"RICE"}]},{"home":["AS Roma","MNG006","Pep Buitre","roma.png"],"away":["Club América","MNG036","Emanuele Delli Calici","club-america.png"],"final":[2,1],"goals":[{"minute":9,"side":"home","scorer":"UZUN"},{"minute":58,"side":"away","scorer":"HERRERA"},{"minute":62,"side":"home","scorer":"LACROIX"}]},{"home":["Campobasso Calcio","MNG033","Simone Campanella","campobasso.png"],"away":["Hertha BSC","MNG001","Tommaso Mello","hertha-berlino.png"],"final":[2,3],"goals":[{"minute":28,"side":"away","scorer":"THAUVIN"},{"minute":50,"side":"away","scorer":"THAUVIN"},{"minute":67,"side":"home","scorer":"SALAH-EDDINE"},{"minute":72,"side":"away","scorer":"ALMADA"},{"minute":81,"side":"home","scorer":"KNAUFF"}]},{"home":["Dynamo Kyiv","MNG022","Oleksandr Medvid","dinamo-kiev.png"],"away":["Borussia Dortmund","MNG008","Giorgio Grugni","borussia-dortmund.png"],"final":[1,0],"goals":[{"minute":4,"side":"home","scorer":"SILVA"}]},{"home":["CR Flamengo","MNG034","Igor Zanotto","flamengo.png"],"away":["River Plate","MNG037","Marco Catalozzo","river-plate.png"],"final":[3,1],"goals":[{"minute":13,"side":"home","scorer":"KRSTOVIĆ"},{"minute":30,"side":"home","scorer":"KRSTOVIĆ"},{"minute":55,"side":"home","scorer":"KRSTOVIĆ"},{"minute":58,"side":"away","scorer":"BALOGUN"}]}]}];
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+let activeId=Number((location.hash.match(/division-(\d)/)||[])[1]||1);
+let states={};
+let running=false,paused=false,pauseStarted=0,totalPaused=0,rafId=0;
+let activeTimeline=[],nextEvent=0,halfShown=false,startTime=0,msPerMinute=0,eventLock=false;
+const PLAY_SECONDS=145;
+const EVENT_MS=3200;
+const HALF_MS=4800;
+
+function division(){return divisions.find(d=>d.id===activeId)||divisions[0]}
+function makeState(d){return d.matches.map(()=>({h:0,a:0,last:"",scorerCounts:{}}))}
+function state(){if(!states[activeId])states[activeId]=makeState(division());return states[activeId]}
+function logo(src,cls="club-logo"){return `<img class="${cls}" src="assets/clubs/${src}" alt="">`}
+
+function renderTabs(){
+  $("tabs").innerHTML=divisions.map(d=>`<button class="tab ${d.id===activeId?"active":""}" data-id="${d.id}" ${running?"disabled":""}>D${d.id}<span>${d.name}</span></button>`).join("");
+  document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setDivision(Number(b.dataset.id))));
+}
+
+function renderDivision(){
+  const d=division(),s=state();
+  document.documentElement.style.setProperty("--accent",d.accent);
+  document.documentElement.style.setProperty("--accent2",d.accent2);
+  $("divisionTitle").textContent=`Division ${d.id} · ${d.name}`;
+  const goals=d.matches.reduce((n,m)=>n+m.goals.length,0);
+  $("divisionStats").textContent=`5 MATCHES · ${goals} GOALS · COMPLETE`;
+  $("matches").innerHTML=d.matches.map((m,i)=>`
+    <article class="match-card" id="match-${i}">
+      <div class="team home">
+        ${logo(m.home[3])}
+        <div class="team-meta">
+          <div class="club">${m.home[0]}</div>
+          <div class="manager">${m.home[2]}<b>${m.home[1]}</b></div>
+        </div>
+      </div>
+      <div class="score">
+        <div class="scoreline"><span id="h-${i}" class="score-num">${s[i].h}</span><span class="dash">–</span><span id="a-${i}" class="score-num">${s[i].a}</span></div>
+        <span id="status-${i}" class="status">${running?"LIVE":"READY"}</span>
+      </div>
+      <div class="team away">
+        ${logo(m.away[3])}
+        <div class="team-meta">
+          <div class="club">${m.away[0]}</div>
+          <div class="manager">${m.away[2]}<b>${m.away[1]}</b></div>
+        </div>
+      </div>
+      <div id="last-${i}" class="last-event">${s[i].last||""}</div>
+    </article>`).join("");
+  renderTabs();
+  $("startBtn").textContent=completed(d,s)?"↻ RIPRODUCI":"▶ AVVIA";
+}
+
+function completed(d,s){return d.matches.every((m,i)=>s[i].h===m.final[0]&&s[i].a===m.final[1])}
+function setDivision(id){if(running)return;activeId=id;location.hash=`division-${id}`;renderDivision();$("minuteBox").textContent="REPLAY"}
+function timelineFor(d){const items=[];d.matches.forEach((m,mi)=>m.goals.forEach((g,gi)=>items.push({...g,match:mi,order:gi})));return items.sort((a,b)=>a.minute-b.minute||a.match-b.match||a.order-b.order)}
+function resetActive(){states[activeId]=makeState(division());renderDivision()}
+
+function renderMini(){
+  const d=division(),s=state();
+  $("miniResults").innerHTML=d.matches.map((m,i)=>`<div class="mini-row">
+      <div class="mini-team">${logo(m.home[3],"club-logo sm")}<span>${m.home[0]}</span></div>
+      <b>${s[i].h}–${s[i].a}</b>
+      <div class="mini-team away">${logo(m.away[3],"club-logo sm")}<span>${m.away[0]}</span></div>
+    </div>`).join("");
+}
+
+function eventKind(g,bh,ba,ah,aa,count){
+  if(count===3)return["HAT-TRICK","HAT-TRICK!"];
+  if(g.penalty)return["PENALTY GOAL","GOAL!"];
+  const before=g.side==="home"?bh-ba:ba-bh;
+  const after=g.side==="home"?ah-aa:aa-ah;
+  if(g.minute>=80)return["LATE GOAL","GOAL!"];
+  if(before<0&&after===0)return["EQUALISER","GOAL!"];
+  if(before===0&&after>0)return["GO-AHEAD GOAL","GOAL!"];
+  return["GOAL","GOAL!"];
+}
+
+async function playEvent(g){
+  eventLock=true;
+  const d=division(),s=state(),m=d.matches[g.match],st=s[g.match];
+  const bh=st.h,ba=st.a;
+  if(g.side==="home")st.h++;else st.a++;
+  const key=g.scorer.toUpperCase();
+  st.scorerCounts[key]=(st.scorerCounts[key]||0)+1;
+  const count=st.scorerCounts[key];
+  const [type,title]=eventKind(g,bh,ba,st.h,st.a,count);
+
+  $("eventType").textContent=type;
+  $("eventTitle").textContent=title;
+  $("eventScorer").textContent=g.scorer;
+  $("eventMinute").textContent=`${g.minute}'${g.penalty?" · RIG.":""}`;
+  $("eventMatchline").innerHTML=`
+    <div class="event-team">${logo(m.home[3],"club-logo sm")}<div class="event-team-name">${m.home[0]}</div></div>
+    <div class="event-score">${st.h}–${st.a}</div>
+    <div class="event-team away">${logo(m.away[3],"club-logo sm")}<div class="event-team-name">${m.away[0]}</div></div>`;
+
+  $("eventOverlay").classList.add("show");
+
+  const scoreId=g.side==="home"?`h-${g.match}`:`a-${g.match}`;
+  const scoreEl=$(scoreId);
+  scoreEl.textContent=g.side==="home"?st.h:st.a;
+  scoreEl.classList.remove("flip");void scoreEl.offsetWidth;scoreEl.classList.add("flip");
+  $(`match-${g.match}`).classList.remove("flash");void $(`match-${g.match}`).offsetWidth;$(`match-${g.match}`).classList.add("flash");
+  st.last=`⚽ ${g.scorer} ${g.minute}'${g.penalty?" (rig.)":""}`;
+  $(`last-${g.match}`).textContent=st.last;
+
+  await sleep(EVENT_MS);
+  $("eventOverlay").classList.remove("show");
+  eventLock=false;
+}
+
+async function showHalf(){
+  eventLock=true;
+  $("breakTitle").innerHTML="HALF<br>TIME";
+  renderMini();
+  $("breakOverlay").classList.add("show");
+  await sleep(HALF_MS);
+  $("breakOverlay").classList.remove("show");
+  eventLock=false;
+}
+
+function finalGoalText(m){
+  if(!m.goals.length)return"Nessun gol";
+  return m.goals.map(g=>`${g.scorer} ${g.minute}'${g.penalty?" (rig.)":""}`).join(" · ");
+}
+
+async function finish(){
+  running=false;paused=false;cancelAnimationFrame(rafId);
+  const d=division(),s=state();
+  d.matches.forEach((m,i)=>{s[i].h=m.final[0];s[i].a=m.final[1]});
+  renderDivision();
+  d.matches.forEach((m,i)=>$(`status-${i}`).textContent="FT");
+  $("minuteBox").textContent="FT";
+  $("pauseBtn").hidden=true;
+  $("finalDivision").textContent=`DIVISION ${d.id} · ${d.name} · MATCHDAY 8`;
+  $("finalResults").innerHTML=d.matches.map((m,i)=>`
+    <div class="final-card">
+      <div class="final-match">
+        <div class="final-side">${logo(m.home[3],"club-logo sm")}<span>${m.home[0]}</span></div>
+        <b class="final-score">${m.final[0]}–${m.final[1]}</b>
+        <div class="final-side away">${logo(m.away[3],"club-logo sm")}<span>${m.away[0]}</span></div>
+      </div>
+      <div class="final-goals">${finalGoalText(m)}</div>
+    </div>`).join("");
+  $("finalOverlay").classList.add("show");
+}
+
+async function loop(now){
+  if(!running)return;
+  if(paused||eventLock){rafId=requestAnimationFrame(loop);return}
+  const elapsed=now-startTime-totalPaused;
+  const minute=Math.min(90,Math.floor(elapsed/msPerMinute));
+  $("minuteBox").textContent=`${minute}'`;
+
+  if(!halfShown&&minute>=45){
+    halfShown=true;
+    const begin=performance.now();
+    await showHalf();
+    totalPaused+=performance.now()-begin;
+    rafId=requestAnimationFrame(loop);
+    return;
+  }
+
+  if(nextEvent<activeTimeline.length&&activeTimeline[nextEvent].minute<=minute){
+    const g=activeTimeline[nextEvent++];
+    const begin=performance.now();
+    await playEvent(g);
+    totalPaused+=performance.now()-begin;
+    rafId=requestAnimationFrame(loop);
+    return;
+  }
+
+  if(minute>=90){await finish();return}
+  rafId=requestAnimationFrame(loop);
+}
+
+async function startReplay(){
+  if(running)return;
+  resetActive();
+  running=true;paused=false;totalPaused=0;pauseStarted=0;nextEvent=0;halfShown=false;eventLock=false;
+  activeTimeline=timelineFor(division());
+  msPerMinute=(145*1000)/90;
+  renderDivision();
+  document.querySelectorAll(".status").forEach(x=>x.textContent="LIVE");
+  $("startBtn").disabled=true;
+  $("pauseBtn").hidden=false;
+  $("pauseBtn").textContent="Ⅱ PAUSA";
+  $("minuteBox").textContent="0'";
+  startTime=performance.now();
+  rafId=requestAnimationFrame(loop);
+}
+
+$("startBtn").addEventListener("click",startReplay);
+$("pauseBtn").addEventListener("click",()=>{
+  if(!running||eventLock)return;
+  if(!paused){paused=true;pauseStarted=performance.now();$("pauseBtn").textContent="▶ RIPRENDI";}
+  else{totalPaused+=performance.now()-pauseStarted;paused=false;$("pauseBtn").textContent="Ⅱ PAUSA";}
+});
+$("closeFinal").addEventListener("click",()=>{
+  $("finalOverlay").classList.remove("show");
+  $("startBtn").disabled=false;
+});
+window.addEventListener("hashchange",()=>{
+  if(running)return;
+  const id=Number((location.hash.match(/division-(\d)/)||[])[1]||1);
+  if(id!==activeId){activeId=id;renderDivision()}
+});
+
+renderDivision();
+</script>
+</body>
+</html>

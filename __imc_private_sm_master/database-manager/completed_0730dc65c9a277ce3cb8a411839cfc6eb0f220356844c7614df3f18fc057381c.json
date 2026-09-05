@@ -1,0 +1,1 @@
+{"action":"execute_migration","target":"custom","database":"Sql1956795_3","migration_id":"20260904_competition_group_expected_matches_v1","plan_sha256":"48860f2a63dbf37e25017487800f2c2d599291fd52c130671b3ba5eb8a596bc7","status":"success","statement_count":3,"duration_ms":415,"before":{"tables":53,"columns":0},"after":{"tables":54,"columns":0}}

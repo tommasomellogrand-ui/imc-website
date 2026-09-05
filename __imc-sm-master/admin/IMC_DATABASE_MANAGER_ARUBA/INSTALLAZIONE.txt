@@ -1,0 +1,72 @@
+IMC | DATABASE MANAGER v1.1 MCP
+INSTALLAZIONE UNICA SU ARUBA
+
+STATO
+- Il pacchetto non contiene credenziali.
+- Riutilizza core.php e il config.php privato già presenti su Aruba.
+- L'installazione non esegue SQL e non modifica alcun database.
+
+PERCORSO ARUBA
+Cartella esistente:
+  /www.italianmastersclub.it/__imc-sm-master/admin/
+
+OPERAZIONE
+SOSTITUISCI la cartella della versione 1.0 con:
+  database-manager
+
+Risultato finale:
+  /www.italianmastersclub.it/__imc-sm-master/admin/database-manager/index.php
+  /www.italianmastersclub.it/__imc-sm-master/admin/database-manager/.htaccess
+
+Non sostituire core.php, api.php, ingestion.php o altri file esistenti.
+
+URL TECNICO
+  https://www.italianmastersclub.it/__imc-sm-master/admin/database-manager/
+
+AUTENTICAZIONE
+Accetta lo stesso admin_token già configurato per SM Master oppure la chiave privata
+dedicata al connettore MCP, esclusivamente negli header:
+  Authorization: Bearer <TOKEN>
+oppure:
+  X-IMC-Token: <TOKEN>
+
+Non inserire il token nell'URL.
+
+PRIMO TEST DOPO IL CARICAMENTO
+POST JSON:
+  {"action":"health"}
+
+Il test health apre connessioni e legge SELECT DATABASE()/versione MySQL.
+Non crea tabelle, non modifica dati e non esegue migration.
+
+AZIONI DISPONIBILI
+- health: verifica connessioni CORE/GOLD/SINGLE-LEAGUE.
+- schema: legge struttura e, opzionalmente, SHOW CREATE TABLE.
+- query: esegue esclusivamente SELECT/SHOW/DESCRIBE/EXPLAIN.
+- plan_migration: valida SQL e produce un token di conferma valido 15 minuti.
+- execute_migration: esegue solo il piano identico precedentemente confermato.
+- history: restituisce lo storico audit protetto.
+- MCP: espone gli stessi controlli come strumenti nativi del plugin ChatGPT.
+
+ROUTING AUTORITATIVO
+- core   -> Sql1956795_1
+- gold   -> Sql1956795_2
+- custom -> Sql1956795_3
+
+SICUREZZA
+- HTTPS obbligatorio.
+- Token amministrativo obbligatorio.
+- Nessuna credenziale nel codice o nei log.
+- Database fuori registry bloccati.
+- Query cross-database bloccate.
+- GRANT/utenti/password/file system MySQL/plugin server bloccati.
+- DROP DATABASE e TRUNCATE bloccati.
+- Operazioni distruttive richiedono allow_destructive=true.
+- Ogni migration richiede piano firmato e scade dopo 15 minuti.
+- Una migration conclusa non può essere ripetuta con lo stesso ID/target.
+- Audit JSONL scritto fuori dalla directory pubblica.
+
+NOTA MYSQL
+Molte istruzioni DDL MySQL eseguono commit implicito. Il Database Manager registra
+ogni statement e il punto esatto di eventuale fallimento, ma non dichiara rollback
+automatici impossibili da garantire per ALTER/CREATE.

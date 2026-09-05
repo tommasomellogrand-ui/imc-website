@@ -1,0 +1,1 @@
+{"action":"execute_migration","target":"custom","database":"Sql1956795_3","migration_id":"create_gw_operational_shells_custom_20260905","plan_sha256":"63be9a861158e86c5f4c029e314ac6b8826432231332b194f1d51bea93ddd7d8","status":"success","statement_count":20,"duration_ms":434,"before":{"tables":60,"columns":0},"after":{"tables":80,"columns":0}}

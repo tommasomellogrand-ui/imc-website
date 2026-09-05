@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fbfaf8">
+  <title>GW001 · Road To History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/gameworld001/styles.css?v=7">
+</head>
+<body>
+  <header class="nx-topbar">
+    <a class="nx-home" href="/" aria-label="Torna a Italian Masters Club">
+      <span><img src="/site-assets/images/imc-logo.png" alt="IMC"></span>
+      <small>ITALIAN MASTERS CLUB</small>
+    </a>
+    <a class="nx-brand" href="/gameworld001/" aria-label="Home Road To History">
+      <strong>ROAD TO HISTORY</strong>
+      <span><i></i> GAME WORLD <i></i></span>
+    </a>
+    <button class="nx-menu" type="button" data-menu-toggle aria-label="Apri menu" aria-expanded="false">
+      <i></i><i></i><i></i>
+    </button>
+  </header>
+
+  <aside class="nx-drawer" data-menu-drawer hidden>
+    <div class="nx-drawer-head"><span>GW001</span><strong>ROAD TO HISTORY</strong></div>
+    <nav aria-label="Menu Road To History">
+      <a href="/gameworld001/">OVERVIEW</a>
+      <a href="/gameworld001/competitions/">COMPETITIONS</a>
+      <a href="/gameworld001/calendar/">CALENDAR</a>
+      <a href="/gameworld001/results/">RESULTS</a>
+      <a href="/gameworld001/trophy-room/">TROPHY ROOM</a>
+      <a href="/gameworld001/news-feed/">NEWS FEED</a>
+      <a href="/gameworld001/road-chronicle/">THE ROAD CHRONICLE</a>
+      <a href="/gameworld001/team-hub/">TEAM HUB</a>
+      <a href="/gameworld001/managers/">MANAGERS</a>
+      <a href="/gameworld001/codex/">CODEX</a>
+      <a href="/gameworld001/transfers/">TRANSFERS</a>
+    </nav>
+  </aside>
+  <div class="nx-scrim" data-menu-scrim hidden></div>
+
+  <main id="app" aria-live="polite"><div class="loading-screen"><span></span><strong>ROAD TO HISTORY</strong><small>CARICAMENTO DATI MYSQL</small></div></main>
+
+  <nav class="nx-bottom-nav" aria-label="Navigazione Game World">
+    <a href="/gameworld001/" data-nav="home"><span>⌂</span>OVERVIEW</a>
+    <a href="/gameworld001/competitions/" data-nav="competitions"><span>♜</span>COMPETITIONS</a>
+    <a href="/gameworld001/calendar/" data-nav="calendar"><span>◷</span>CALENDAR</a>
+    <a href="/gameworld001/results/" data-nav="results"><span>▤</span>RESULTS</a>
+  </nav>
+  <script src="/site-assets/js/imc-data-service.js?v=2"></script>
+  <script src="/gameworld001/app.js?v=9"></script>
+</body>
+</html>

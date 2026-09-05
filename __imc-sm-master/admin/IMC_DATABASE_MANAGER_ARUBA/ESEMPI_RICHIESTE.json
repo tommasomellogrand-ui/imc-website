@@ -1,0 +1,39 @@
+{
+  "health": {
+    "action": "health"
+  },
+  "schema_gold": {
+    "action": "schema",
+    "target": "gold",
+    "include_ddl": true
+  },
+  "query_read_only": {
+    "action": "query",
+    "target": "custom",
+    "sql": "SELECT COUNT(*) AS total FROM information_schema.tables WHERE table_schema = DATABASE()",
+    "limit": 10
+  },
+  "plan_example": {
+    "action": "plan_migration",
+    "target": "custom",
+    "migration_id": "example_add_expected_match_001",
+    "allow_destructive": false,
+    "statements": [
+      "ALTER TABLE `example_table` ADD COLUMN `expected_match` TINYINT(1) NULL"
+    ]
+  },
+  "execute_example": {
+    "action": "execute_migration",
+    "target": "custom",
+    "migration_id": "example_add_expected_match_001",
+    "allow_destructive": false,
+    "statements": [
+      "ALTER TABLE `example_table` ADD COLUMN `expected_match` TINYINT(1) NULL"
+    ],
+    "confirmation_token": "COPIA_ESATTAMENTE_DA_plan_migration"
+  },
+  "history": {
+    "action": "history",
+    "limit": 50
+  }
+}

@@ -1,0 +1,56 @@
+.ch-home-tabs{margin-top:12px;padding:10px;border:1px solid #dbe4ee;border-radius:20px;background:linear-gradient(180deg,#fff,#f8fbfe);box-shadow:0 8px 22px rgba(8,43,99,.06),inset 0 1px 0 #fff}
+.ch-home-tabbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:4px;border:1px solid #e1e8f0;border-radius:14px;background:#f2f6fa}
+.ch-home-tabbar button{height:34px;border:0;border-radius:10px;background:transparent;color:#66768c;font-size:8px;font-weight:900;letter-spacing:1px}
+.ch-home-tabbar button[aria-selected="true"]{background:#082b63;color:#fff;box-shadow:0 4px 10px rgba(8,43,99,.18)}
+.ch-home-tab-panel{padding-top:10px}
+.ch-home-season-tabs{display:flex;gap:6px;overflow-x:auto;padding:0 1px 9px;scrollbar-width:none}
+.ch-home-season-tabs::-webkit-scrollbar{display:none}
+.ch-home-season-tabs button{flex:0 0 auto;height:27px;padding:0 10px;border:1px solid #dce5ef;border-radius:999px;background:#fff;color:#60718a;font-size:7px;font-weight:900;letter-spacing:.65px}
+.ch-home-season-tabs button.is-active{border-color:#d7ad48;background:#fff8e7;color:#8a6417}
+.ch-home-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ch-home-overview-grid article{min-height:72px;padding:10px 5px;border:1px solid #dfe7f0;border-radius:14px;background:linear-gradient(180deg,#fff,#f7faff);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ch-home-overview-grid article span{font-size:6.5px;font-weight:900;letter-spacing:.75px;color:#66768c}
+.ch-home-overview-grid article strong{margin-top:8px;font-size:22px;line-height:1;font-weight:950;color:#082b63}
+.ch-home-overview-state{grid-column:1/-1;padding:24px 10px;text-align:center;color:#66768c;font-size:9px;font-weight:800}
+.ch-home-tab-panel[data-ch-home-panel="schedule"] .ch-next10{margin-top:0;border:0;border-radius:14px;box-shadow:none;background:transparent;padding:4px}
+@media(max-width:390px){.ch-home-tabs{padding:9px}.ch-home-overview-grid{gap:5px}.ch-home-overview-grid article{min-height:68px}.ch-home-overview-grid article strong{font-size:20px}}
+.ch-home-competitions-grid{display:grid;gap:7px}
+.ch-home-competition-card{padding:11px;border:1px solid #dfe7f0;border-radius:15px;background:linear-gradient(180deg,#fff,#f7faff)}
+.ch-home-competition-card header{display:flex;align-items:center;gap:9px;padding-bottom:9px;border-bottom:1px solid #e5ebf2}
+.ch-home-competition-card header span{flex:0 0 auto;padding:5px 7px;border-radius:999px;background:#082b63;color:#fff;font-size:6.5px;font-weight:900;letter-spacing:.7px}
+.ch-home-competition-card header strong{min-width:0;font-size:10px;line-height:1.2;font-weight:900;color:#082b63}
+.ch-home-competition-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding-top:9px}
+.ch-home-competition-stats div{min-width:0;text-align:center}
+.ch-home-competition-stats span{display:block;font-size:6px;font-weight:900;color:#728096}
+.ch-home-competition-stats strong{display:block;margin-top:4px;font-size:13px;line-height:1;font-weight:950;color:#0b2b68}
+.ch-home-h2h-list{display:grid;gap:8px}
+.ch-home-h2h-card{padding:11px;border:1px solid #dfe7f0;border-radius:16px;background:linear-gradient(180deg,#fff,#f7faff)}
+.ch-home-h2h-manager{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid #e3eaf2}
+.ch-home-h2h-manager div{min-width:0}
+.ch-home-h2h-manager span{display:block;font-size:6px;font-weight:900;letter-spacing:1px;color:#9a772b}
+.ch-home-h2h-manager strong{display:block;margin-top:4px;font-size:12px;line-height:1.15;font-weight:950;color:#082b63}
+.ch-home-h2h-manager>b{flex:0 0 auto;padding:5px 7px;border-radius:999px;background:#082b63;color:#fff;font-size:6.5px;font-weight:900;letter-spacing:.7px}
+.ch-home-h2h-overall,.ch-home-h2h-competition-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.ch-home-h2h-overall{padding:10px 0}
+.ch-home-h2h-overall div,.ch-home-h2h-competition-stats div{text-align:center}
+.ch-home-h2h-overall span,.ch-home-h2h-competition-stats span{display:block;font-size:6px;font-weight:900;color:#758399}
+.ch-home-h2h-overall strong{display:block;margin-top:4px;font-size:15px;line-height:1;font-weight:950;color:#0b2b68}
+.ch-home-h2h-competitions{display:grid;gap:5px}
+.ch-home-h2h-competition{padding:8px;border:1px solid #e5ebf2;border-radius:11px;background:#fff}
+.ch-home-h2h-competition header{display:flex;align-items:center;gap:7px}
+.ch-home-h2h-competition header span{flex:0 0 auto;padding:4px 6px;border-radius:999px;background:#eef3f8;color:#52647c;font-size:5.8px;font-weight:900}
+.ch-home-h2h-competition header strong{min-width:0;font-size:7.5px;line-height:1.15;font-weight:900;color:#203b67}
+.ch-home-h2h-competition-stats{margin-top:7px}
+.ch-home-h2h-competition-stats strong{display:block;margin-top:3px;font-size:10px;line-height:1;font-weight:900;color:#0b2b68}
+@media(max-width:390px){.ch-home-tabbar button{font-size:7px;letter-spacing:.65px}}
+.ch-home-performance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.ch-home-performance-card{min-width:0;padding:10px;border:1px solid #dfe7f0;border-radius:15px;background:linear-gradient(180deg,#fff,#f7faff)}
+.ch-home-performance-card header{display:flex;align-items:center;justify-content:space-between;gap:6px;padding-bottom:8px;border-bottom:1px solid #e5ebf2}
+.ch-home-performance-card header span{font-size:7px;font-weight:900;letter-spacing:.55px;color:#082b63}
+.ch-home-performance-card header b{font-size:5.5px;font-weight:900;letter-spacing:.65px;color:#9a772b}
+.ch-home-performance-card>div{display:grid;grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);align-items:center;padding-top:10px}
+.ch-home-performance-card section{text-align:center}
+.ch-home-performance-card section small{display:block;font-size:5.8px;font-weight:900;letter-spacing:.6px;color:#758399}
+.ch-home-performance-card section strong{display:block;margin-top:5px;font-size:16px;line-height:1;font-weight:950;color:#0b2b68}
+.ch-home-performance-card>div>i{text-align:center;font-size:6px;font-style:normal;font-weight:900;color:#b7c1ce}
+@media(max-width:390px){.ch-home-tabbar button{font-size:6.2px;letter-spacing:.3px}.ch-home-performance-grid{gap:5px}.ch-home-performance-card{padding:9px 7px}.ch-home-performance-card section strong{font-size:14px}}

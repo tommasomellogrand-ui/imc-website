@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="IMC Wheel">
+  <title>IMC Wheel</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/imc-logo.png">
+  <link rel="apple-touch-icon" href="assets/imc-logo.png">
+  <link rel="stylesheet" href="style.css?v=260">
+</head>
+<body>
+<div id="liveBanner" class="live-banner hidden"><span class="live-dot"></span> LIVE · GW009 DIVISION DRAW</div>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/imc-logo.png" alt="IMC" class="brand-logo">
+      <div><h1>IMC Wheel</h1><p>BUILD 2.6.0</p></div>
+    </div>
+    <div class="top-actions">
+      <button id="archiveBtn" class="icon-btn" aria-label="Archivio sorteggi">▶</button>
+      <button id="settingsBtn" class="icon-btn" aria-label="Impostazioni">⚙️</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-card">
+      <div>
+        <span class="eyebrow">GW009 · KICK OFF</span>
+        <h2>Division Draw</h2>
+        <p>Assegna 30 squadre a tre divisioni da 10. Modalità automatica, salvataggio cloud e collegamento live per gli spettatori.</p>
+      </div>
+      <div class="hero-stats">
+        <div><strong id="remainingCount">30</strong><span>Rimanenti</span></div>
+        <div><strong id="assignedCount">0</strong><span>Assegnate</span></div>
+      </div>
+    </section>
+
+    <section class="draw-grid">
+      <article class="wheel-card">
+        <div class="section-heading"><div><span class="eyebrow">RUOTA A</span><h3>Squadre</h3></div><span class="counter" id="teamCounter">30</span></div>
+        <div class="wheel-wrap"><div class="pointer"></div><canvas id="teamWheel" width="700" height="700"></canvas><div class="wheel-center"><img src="assets/imc-logo.png" alt="IMC"></div></div>
+        <div id="teamSelected" class="selected-label">Pronta</div>
+      </article>
+
+      <article class="wheel-card">
+        <div class="section-heading"><div><span class="eyebrow">RUOTA B</span><h3>Divisioni</h3></div><span class="counter">3</span></div>
+        <div class="wheel-wrap"><div class="pointer"></div><canvas id="divisionWheel" width="700" height="700"></canvas><div class="wheel-center"><img src="assets/imc-logo.png" alt="IMC"></div></div>
+        <div id="divisionSelected" class="selected-label">Pronta</div>
+      </article>
+    </section>
+
+    <section class="official-progress" aria-label="Avanzamento sorteggio">
+      <div class="official-progress-head"><strong id="officialProgressText">0 / 30</strong><span id="officialProgressLabel">Sorteggio non iniziato</span></div>
+      <div class="official-progress-track"><div id="officialProgressBar"></div></div>
+    </section>
+
+    <section class="ceremony-panel">
+      <div class="mode-controls">
+        <label><span>Modalità</span><select id="drawMode"><option value="auto" selected>Auto Ceremony</option><option value="manual">Manuale</option></select></label>
+        <label><span>Velocità</span><select id="ceremonySpeed"><option value="ceremony">Cerimonia</option><option value="standard" selected>Standard</option><option value="fast">Rapida</option></select></label>
+      </div>
+      <div class="action-panel">
+        <button id="spinBtn" class="primary-btn" disabled>CREA PRIMA L’EVENTO LIVE</button>
+        <button id="pauseAutoBtn" class="secondary-btn hidden">Pausa</button>
+        <button id="stopAutoBtn" class="danger-btn hidden">Interrompi</button>
+        <button id="undoBtn" class="secondary-btn" disabled>Annulla ultimo</button>
+      </div>
+      <div class="live-share event-setup">
+        <div class="event-setup-copy">
+          <span class="eyebrow">PRIMA DEL SORTEGGIO</span>
+          <strong id="eventSetupTitle">Crea l’evento LIVE</strong>
+          <small id="eventSetupStatus">Genera il link pubblico, condividilo e poi avvia la cerimonia.</small>
+        </div>
+        <button id="createLiveLinkBtn" class="primary-btn">CREA EVENTO LIVE</button>
+        <input id="liveLinkInput" type="text" readonly placeholder="Il link pubblico comparirà qui prima dell’avvio">
+        <button id="copyLiveLinkBtn" class="secondary-btn" disabled>Copia link</button>
+      </div>
+    </section>
+
+    <section id="resultCard" class="result-card hidden" aria-live="polite">
+      <span class="eyebrow">ULTIMA ASSEGNAZIONE CONFERMATA</span>
+      <div class="result-row"><strong id="resultTeam">—</strong><span>→</span><strong id="resultDivision">—</strong></div>
+    </section>
+
+    <section class="live-history-card">
+      <div class="section-heading"><div><span class="eyebrow">STORICO LIVE</span><h3>Ultime assegnazioni</h3></div><span class="counter" id="historyCounter">0</span></div>
+      <div id="liveHistory" class="live-history"><div class="empty-state">Nessuna assegnazione confermata.</div></div>
+    </section>
+
+    <section class="division-board">
+      <div class="section-heading board-title">
+        <div><span class="eyebrow">COMPOSIZIONE</span><h3>Divisioni</h3></div>
+        <div class="inline-actions"><button id="cloudSaveBtn" class="text-btn">Salva nel cloud</button><button id="saveSessionBtn" class="text-btn">Salva locale</button><button id="exportBtn" class="text-btn">Esporta CSV</button></div>
+      </div>
+      <div id="divisionColumns" class="division-columns"></div>
+    </section>
+  </main>
+</div>
+
+<dialog id="resultDialog">
+  <div class="dialog-card result-dialog-card">
+    <span class="eyebrow">RISULTATO UFFICIALE</span>
+    <div class="draw-number" id="modalDrawNumber">ASSEGNAZIONE #001</div>
+    <img src="assets/imc-logo.png" alt="IMC" class="modal-logo">
+    <h3 id="modalTeam">—</h3>
+    <div class="modal-arrow">↓</div>
+    <h4 id="modalDivision">—</h4>
+    <p id="modalProgress">0/30 squadre assegnate</p>
+    <div id="syncChecklist" class="sync-checklist hidden" aria-live="polite">
+      <div data-step="local">○ Salvataggio locale</div>
+      <div data-step="cloud">○ Salvataggio cloud</div>
+      <div data-step="replay">○ Replay aggiornato</div>
+      <div data-step="nexus">○ Nexus aggiornato</div>
+    </div>
+    <div id="manualDialogActions" class="dialog-actions centered result-actions">
+      <button id="confirmDrawBtn" class="primary-btn">Conferma assegnazione</button>
+      <button id="cancelDrawBtn" class="danger-btn">Annulla estrazione</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="settingsDialog">
+  <div class="dialog-card">
+    <div class="dialog-head"><div><span class="eyebrow">IMPOSTAZIONI</span><h3>Gestione sorteggio</h3></div><button class="icon-btn close-dialog" data-dialog="settingsDialog" aria-label="Chiudi">✕</button></div>
+    <label for="teamsInput">Squadre, una per riga</label>
+    <textarea id="teamsInput" rows="14"></textarea>
+    <div class="dialog-actions">
+      <button id="saveTeamsBtn" class="primary-btn">Salva elenco</button>
+      <button id="resetBtn" class="danger-btn">Reset completo</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="archiveDialog">
+  <div class="dialog-card archive-card">
+    <div class="dialog-head"><div><span class="eyebrow">ARCHIVIO</span><h3>Sorteggi salvati</h3></div><button class="icon-btn close-dialog" data-dialog="archiveDialog" aria-label="Chiudi">✕</button></div>
+    <div class="archive-toolbar">
+      <button id="refreshCloudBtn" class="primary-btn">Aggiorna archivio cloud</button>
+      <label class="file-btn">Importa JSON<input id="importJsonInput" type="file" accept="application/json,.json" hidden></label>
+      <button id="exportCurrentJsonBtn" class="secondary-btn">Esporta sessione corrente</button>
+    </div>
+    <div id="cloudStatus" class="cloud-status">Cloud Nexus: connessione in attesa</div>
+    <h4 class="archive-section-title">Cloud Nexus</h4>
+    <div id="cloudArchiveList" class="archive-list"></div>
+    <h4 class="archive-section-title">Questo dispositivo</h4>
+    <div id="archiveList" class="archive-list"></div>
+  </div>
+</dialog>
+
+<dialog id="replayDialog">
+  <div class="dialog-card replay-card">
+    <div class="dialog-head"><div><span class="eyebrow">REPLAY</span><h3 id="replayTitle">Sorteggio</h3></div><button id="closeReplayBtn" class="icon-btn" aria-label="Chiudi">✕</button></div>
+    <div class="replay-stage">
+      <div class="replay-progress"><span id="replayStep">0 / 0</span><div class="progress-track"><div id="replayProgressBar"></div></div></div>
+      <div class="replay-wheels">
+        <div class="replay-wheel-box"><span>Squadre</span><div class="replay-wheel-wrap"><div class="pointer"></div><canvas id="replayTeamWheel" width="500" height="500"></canvas><div class="replay-wheel-center"><img src="assets/imc-logo.png" alt="IMC"></div></div></div>
+        <div class="replay-wheel-box"><span>Divisioni</span><div class="replay-wheel-wrap"><div class="pointer"></div><canvas id="replayDivisionWheel" width="500" height="500"></canvas><div class="replay-wheel-center"><img src="assets/imc-logo.png" alt="IMC"></div></div></div>
+      </div>
+      <div id="replayStatus" class="replay-status">Pronto alla riproduzione</div>
+      <div class="replay-result"><span id="replayTeam">Pronto</span><b>→</b><span id="replayDivision">—</span></div>
+      <div id="replayBoard" class="division-columns compact"></div>
+    </div>
+    <div class="replay-controls">
+      <button id="replayPrevBtn" class="secondary-btn">◀</button>
+      <button id="replayPlayBtn" class="primary-btn">Riproduci</button>
+      <button id="replayNextBtn" class="secondary-btn">▶</button>
+      <select id="replaySpeed" aria-label="Velocità replay"><option value="1800">0,5×</option><option value="900" selected>1×</option><option value="450">2×</option></select>
+    </div>
+  </div>
+</dialog>
+
+<script src="app.js?v=260"></script>
+</body>
+</html>

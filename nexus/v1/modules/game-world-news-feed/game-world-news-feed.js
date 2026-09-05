@@ -1,0 +1,15 @@
+(function(){
+"use strict";
+if(window.IMC_GAME_WORLD_NEWS_FEED)return;
+const VERSION="1.0.0";
+let state={container:null,client:null,worldId:"",worldName:""};
+const clean=v=>String(v==null?"":v).trim();
+const esc=v=>clean(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function dateLabel(value){const source=clean(value);if(!source)return"—";const date=new Date(source+"T12:00:00");return Number.isNaN(date.getTime())?source:date.toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase()}
+function title(row){const custom=clean(row.feed_headline||row.headline);if(custom)return custom;const home=clean(row.home_team)||"—",away=clean(row.away_team)||"—",homeScore=clean(row.home_score),awayScore=clean(row.away_score);return homeScore!==""&&awayScore!==""?`${home} ${homeScore}-${awayScore} ${away}`:`${home} vs ${away}`}
+function card(row){const image=clean(row.feed_image_url),competition=clean(row.source_competition_name||row.competition_name)||"COMPETITION",round=clean(row.sm_round_label||row.phase_type),body=clean(row.feed_body||row.body),media=image?`<img src="${esc(image)}" alt="" loading="lazy">`:`<div class="gwnf-placeholder"><span>${esc(clean(row.home_team).slice(0,1))}</span><i>VS</i><span>${esc(clean(row.away_team).slice(0,1))}</span></div>`;return `<article class="gwnf-card">${media}<div class="gwnf-card-copy"><div class="gwnf-meta"><span>${esc(competition)}</span><small>${esc(dateLabel(row.match_date))}</small></div><h3>${esc(title(row))}</h3>${round?`<b>${esc(round)}</b>`:""}${body?`<p>${esc(body)}</p>`:""}</div></article>`}
+async function load(){const list=state.container&&state.container.querySelector("[data-gwnf-list]");if(!list)return;list.innerHTML='<div class="gwnf-state">Caricamento news…</div>';try{const response=await state.client.rpc("imc_nexus_gateway",{p_action:"club_house_feed",p_args:{}});if(response.error)throw response.error;const rows=(Array.isArray(response.data&&response.data.rows)?response.data.rows:[]).filter(row=>clean(row.game_world_id).toUpperCase()===state.worldId.toUpperCase());list.innerHTML=rows.length?rows.map(card).join(""):'<div class="gwnf-state">Nessuna news disponibile per questo Game World.</div>'}catch(error){list.innerHTML=`<div class="gwnf-state">${esc(error.message||"News Feed non disponibile")}</div>`}}
+async function mount(options){if(!options||!options.container||!options.client)throw new Error("News Feed: parametri mancanti");state={container:options.container,client:options.client,worldId:clean(options.worldId),worldName:clean(options.worldName)};state.container.innerHTML=`<section class="gwnf-page"><header class="gwnf-head"><span>${esc(state.worldId)}</span><h2>NEWS FEED</h2><small>${esc(state.worldName)}</small></header><div class="gwnf-list" data-gwnf-list></div></section>`;await load()}
+function unmount(){state.container=null;state.client=null;state.worldId="";state.worldName=""}
+window.IMC_GAME_WORLD_NEWS_FEED={version:VERSION,mount,unmount};
+})();

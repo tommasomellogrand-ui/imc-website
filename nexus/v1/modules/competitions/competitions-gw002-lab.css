@@ -1,0 +1,27 @@
+.cp-menu.cp-gw002-lab{gap:12px}
+.cp-gw002-lab .cp-lab-grid{grid-template-columns:1fr;gap:11px}
+.cp-gw002-lab .cp-lab-card{min-height:0;padding:15px 14px 13px;display:grid;grid-template-columns:58px minmax(0,1fr) 36px;grid-template-rows:auto auto;align-items:center;column-gap:13px;row-gap:13px;border-radius:19px;cursor:pointer}
+.cp-gw002-lab .cp-lab-card:after{width:104px;height:104px;right:-34px;top:-42px}
+.cp-gw002-lab .cp-lab-card .cp-menu-emblem,.cp-gw002-lab .cp-lab-card .cp-menu-art{grid-column:1;grid-row:1;width:58px;height:58px;margin:0;border-radius:16px;align-self:start}
+.cp-gw002-lab .cp-lab-card .cp-menu-emblem strong{font-size:23px}
+.cp-gw002-lab .cp-lab-card .cp-menu-emblem small{font-size:7px;margin-top:3px}
+.cp-gw002-lab .cp-lab-card .cp-menu-art svg{width:53px;height:53px}
+.cp-gw002-lab .cp-lab-card .cp-menu-art-flag svg{width:50px;height:50px}
+.cp-gw002-lab .cp-lab-copy{display:contents}
+.cp-gw002-lab .cp-lab-copy header{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;min-width:0;align-self:stretch}
+.cp-gw002-lab .cp-lab-copy header>div{min-width:0;width:100%}
+.cp-gw002-lab .cp-lab-copy h3{margin:0;font-size:17px;line-height:1.08;font-weight:950;letter-spacing:-.45px;white-space:normal;overflow:visible;text-overflow:clip;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cp-gw002-lab .cp-lab-copy p{margin:6px 0 0;font-size:8.5px;line-height:1.15;font-weight:850;letter-spacing:.3px;color:#6c7b91}
+.cp-gw002-lab .cp-lab-status{flex:0 0 auto;max-width:100%;padding:5px 9px;border:1px solid rgba(23,98,173,.17);border-radius:999px;background:rgba(245,249,254,.94);color:#1762ad;font-size:7.2px;line-height:1;font-weight:950;letter-spacing:.35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-gw002-lab .cp-lab-metrics{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:.9fr 1.35fr .9fr;gap:0;margin:0;padding:12px 0 1px;border-top:1px solid rgba(112,145,184,.18)}
+.cp-gw002-lab .cp-lab-metrics>div{min-width:0;padding:0 12px;border-right:1px solid rgba(112,145,184,.16)}
+.cp-gw002-lab .cp-lab-metrics>div:first-child{padding-left:1px}
+.cp-gw002-lab .cp-lab-metrics>div:last-child{padding-right:1px;border-right:0}
+.cp-gw002-lab .cp-lab-metrics span{display:block;font-size:7px;line-height:1;font-weight:900;letter-spacing:.42px;color:#77869b}
+.cp-gw002-lab .cp-lab-metrics strong{display:block;margin-top:6px;min-width:0;font-size:11px;line-height:1.18;font-weight:950;color:#082b63;white-space:normal;overflow:visible;text-overflow:clip}
+.cp-gw002-lab .cp-lab-metrics>div:nth-child(2) strong{color:#b48729}
+.cp-gw002-lab .cp-lab-card>.cp-preview-arrow{grid-column:3;grid-row:1;position:relative;z-index:2;width:34px;height:34px;align-self:center;font-size:25px}
+.cp-gw002-lab .cp-tile-icon{grid-column:1;grid-row:1;width:58px;height:58px;align-self:start;display:grid;place-items:center;border:1px solid rgba(120,145,176,.26);border-radius:16px;background:linear-gradient(145deg,#fff 0%,#f7f9fc 62%,#edf2f7 100%);box-shadow:0 7px 16px rgba(8,43,99,.09),inset 0 1px 0 #fff;position:relative;z-index:2;overflow:hidden}
+.cp-gw002-lab .cp-tile-icon:after{content:'';position:absolute;left:9px;right:9px;bottom:6px;height:1px;background:linear-gradient(90deg,transparent,rgba(215,173,72,.55),transparent)}
+.cp-gw002-lab .cp-tile-icon svg{width:48px;height:48px;display:block;filter:drop-shadow(0 2px 2px rgba(8,43,99,.08))}
+@media(max-width:520px){.cp-gw002-lab .cp-lab-grid{gap:12px}.cp-gw002-lab .cp-lab-card{grid-template-columns:60px minmax(0,1fr) 36px;column-gap:13px;row-gap:14px;padding:16px 14px 14px}.cp-gw002-lab .cp-lab-card .cp-menu-emblem,.cp-gw002-lab .cp-lab-card .cp-menu-art,.cp-gw002-lab .cp-tile-icon{width:60px;height:60px}.cp-gw002-lab .cp-tile-icon svg{width:50px;height:50px}.cp-gw002-lab .cp-lab-copy h3{font-size:18px}.cp-gw002-lab .cp-lab-copy p{font-size:9px}.cp-gw002-lab .cp-lab-status{font-size:7.7px;padding:5px 9px}.cp-gw002-lab .cp-lab-metrics{padding-top:13px}.cp-gw002-lab .cp-lab-metrics span{font-size:7.4px}.cp-gw002-lab .cp-lab-metrics strong{font-size:11.5px}}

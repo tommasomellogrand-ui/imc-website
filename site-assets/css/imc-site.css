@@ -23,3 +23,4 @@
 @media(max-width:520px){.worlds-rail{grid-template-columns:1fr;margin-right:0;gap:12px}.worlds .world-card{height:190px;padding:24px}.worlds .world-card h3{font-size:23px}}
 
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.logo-stage,.data-sphere{animation:none}}
+

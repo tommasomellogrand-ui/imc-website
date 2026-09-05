@@ -1,0 +1,312 @@
+<!doctype html><html lang="it"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IMC Road To History · Matchday 10 Results</title>
+<style>
+*{box-sizing:border-box}html{background:#05070c}body{margin:0;background:#05070c;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif}
+.wrap{max-width:560px;margin:auto;min-height:100vh;padding:20px 13px 50px}
+.head{text-align:center;padding:18px 0 15px}.brand{font-size:10px;letter-spacing:.16em;color:#d7b45d;font-weight:900}
+.livebadge{display:inline-flex;align-items:center;gap:6px;margin-top:10px;border:1px solid #ff384f55;color:#ff7180;background:#ff384f0f;border-radius:20px;padding:6px 10px;font-size:9px;font-weight:900}
+.dot{width:7px;height:7px;background:#ff344a;border-radius:50%;animation:pulse 1.5s infinite}@keyframes pulse{70%{box-shadow:0 0 0 7px transparent}0%{box-shadow:0 0 0 0 #ff344a88}}
+h1{font-size:42px;line-height:.9;margin:13px 0 8px;letter-spacing:-.06em}.sub{font-size:10px;color:#7c8799}
+.demo{font-size:9px;color:#d7aa51;margin-top:8px;font-weight:800}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;position:sticky;top:0;z-index:10;padding:8px 0;background:#05070ce8;backdrop-filter:blur(12px)}
+.tab{border:1px solid #20283a;background:#0b1019;color:#7d8799;border-radius:10px;padding:11px 2px;font-size:9px;font-weight:900}.tab.on{color:#fff;border-color:var(--a);box-shadow:inset 0 -2px var(--a)}
+.center{border:1px solid #20283a;background:linear-gradient(145deg,#101622,#070a10);border-radius:20px;overflow:hidden;margin-top:10px}
+.controlbar{display:grid;grid-template-columns:1fr 90px 1fr;align-items:center;padding:13px 14px;border-bottom:1px solid #ffffff0d}
+.phase{font-size:9px;color:#8b96a8;font-weight:900}.clock{text-align:center;font-size:28px;font-weight:950;letter-spacing:-.05em;color:#fff}.goals{text-align:right;font-size:9px;color:#8b96a8;font-weight:900}
+.buttons{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 12px;border-bottom:1px solid #ffffff0d}
+.btn{border:1px solid #263043;background:#0a0e16;color:#cbd3df;border-radius:11px;padding:10px 5px;font-size:9px;font-weight:900}.btn.primary{border-color:var(--a);color:#fff}
+.game{padding:14px;border-bottom:1px solid #ffffff0c}.game:last-child{border-bottom:0}
+.score{display:grid;grid-template-columns:1fr 58px 1fr;align-items:center;gap:8px}.team{font-size:13px;font-weight:850}.team.away{text-align:right}.num{text-align:center;font-size:26px;font-weight:950}
+.events{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;min-height:24px}.event{font-size:9px;border:1px solid #ffffff10;background:#ffffff08;border-radius:13px;padding:5px 7px;color:#b8c0cd}.event b{color:var(--a)}.waiting{font-size:9px;color:#596477;padding-top:5px}
+.section{margin-top:18px}.section h2{font-size:16px;margin:0 0 9px}.table{border:1px solid #20283a;border-radius:16px;overflow:hidden;background:#080c13}
+.row{display:grid;grid-template-columns:27px 1fr 45px 36px;align-items:center;padding:9px 11px;border-bottom:1px solid #ffffff0b;font-size:11px}.row:last-child{border:0}.pos{color:#768195}.club{font-weight:780}.pts{text-align:right;font-weight:950}.chg{text-align:right;font-size:9px}.up{color:#50d890}.down{color:#ff6877}.same{color:#657083}
+.overlay{position:fixed;inset:0;z-index:30;background:#03050af2;display:none;align-items:center;justify-content:center;text-align:center;padding:25px}.overlay.show{display:flex}.ovbox{max-width:480px}.ovsmall{font-size:11px;letter-spacing:.18em;color:var(--a);font-weight:900}.ovbig{font-size:64px;line-height:.86;font-weight:950;letter-spacing:-.07em;margin:15px 0}.ovtext{font-size:18px;font-weight:850}.ovmatch{margin-top:8px;font-size:11px;color:#8d98aa}
+.legend{font-size:9px;color:#667184;line-height:1.5;margin-top:11px}
+
+.clublogo{width:30px;height:30px;object-fit:contain;flex:0 0 30px}
+.homeTeam,.awayTeam{display:flex;align-items:center;gap:7px;min-width:0}
+.awayTeam{justify-content:flex-end}
+.homeTeam span,.awayTeam span{min-width:0}
+@media(max-width:390px){.clublogo{width:26px;height:26px;flex-basis:26px}.homeTeam,.awayTeam{gap:5px}}
+
+/* --- MD10 GOLD 3D DEMO --- */
+.overlay{perspective:1200px;overflow:hidden}
+.ovbox{
+  transform-style:preserve-3d;
+  animation:goalPunch .78s cubic-bezier(.16,.86,.18,1) both;
+}
+.overlay.goal3d:before,
+.overlay.goal3d:after{
+  content:"";position:absolute;left:50%;top:50%;width:130vmax;height:4px;
+  background:linear-gradient(90deg,transparent,var(--a),#fff,var(--a),transparent);
+  transform-origin:center;
+  opacity:.72;filter:blur(.2px)
+}
+.overlay.goal3d:before{transform:translate(-50%,-50%) rotate(25deg) scaleX(.1);animation:crackA .55s ease-out both}
+.overlay.goal3d:after{transform:translate(-50%,-50%) rotate(-31deg) scaleX(.1);animation:crackB .55s ease-out both}
+.overlay.goal3d .ovbig{
+  text-shadow:0 3px 0 #111,0 8px 18px #000,0 0 38px var(--a);
+  transform:translateZ(110px) rotateX(-8deg);
+}
+.overlay.goal3d .ovtext{transform:translateZ(70px)}
+.overlay.goal3d .ovmatch{transform:translateZ(45px)}
+.overlay.goal3d .ovlogo3d{
+  width:82px;height:82px;object-fit:contain;margin:0 auto 8px;
+  filter:drop-shadow(0 10px 22px #000);
+  transform:translateZ(150px) rotateY(-8deg);
+}
+@keyframes goalPunch{
+  0%{opacity:0;transform:scale(.22) translateZ(-500px) rotateX(18deg)}
+  58%{opacity:1;transform:scale(1.12) translateZ(80px) rotateX(-4deg)}
+  100%{opacity:1;transform:scale(1) translateZ(0)}
+}
+@keyframes crackA{0%{opacity:0;transform:translate(-50%,-50%) rotate(25deg) scaleX(.05)}45%{opacity:1}100%{opacity:.15;transform:translate(-50%,-50%) rotate(25deg) scaleX(1)}}
+@keyframes crackB{0%{opacity:0;transform:translate(-50%,-50%) rotate(-31deg) scaleX(.05)}45%{opacity:1}100%{opacity:.12;transform:translate(-50%,-50%) rotate(-31deg) scaleX(1)}}
+.tableAlert3d{
+  position:fixed;left:12px;right:12px;bottom:-220px;z-index:40;
+  background:linear-gradient(155deg,#151c2b,#070a11);
+  border:1px solid var(--a);border-radius:22px;padding:18px 18px 20px;text-align:center;
+  box-shadow:0 -18px 70px #000b, inset 0 1px #ffffff12;
+  transform:perspective(700px) rotateX(18deg);
+  animation:panelRise 2.05s cubic-bezier(.2,.85,.2,1) both;
+}
+.tableAlert3d .small{font-size:9px;font-weight:900;letter-spacing:.15em;color:var(--a)}
+.tableAlert3d .big{font-size:32px;line-height:.92;font-weight:950;letter-spacing:-.04em;margin:8px 0}
+.tableAlert3d .sub{font-size:12px;color:#c4ccd8}
+@keyframes panelRise{
+  0%{bottom:-220px;opacity:0;transform:perspective(700px) rotateX(28deg) scale(.92)}
+  22%{bottom:max(16px,env(safe-area-inset-bottom));opacity:1;transform:perspective(700px) rotateX(0) scale(1)}
+  78%{bottom:max(16px,env(safe-area-inset-bottom));opacity:1}
+  100%{bottom:-220px;opacity:0}
+}
+.shake{animation:microShake .34s linear}
+@keyframes microShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}}
+
+
+/* ===== IMC PREMIUM GOAL POPUP · STABLE ===== */
+.overlay.goal3d{
+  background:rgba(2,5,10,.94)!important;
+  perspective:800px!important;
+}
+.overlay.goal3d:before,.overlay.goal3d:after{display:none!important}
+.premiumGlow{
+  position:absolute;left:50%;top:50%;width:72vw;height:72vw;max-width:390px;max-height:390px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle,var(--a) 0,rgba(215,180,93,.16) 26%,transparent 68%);
+  opacity:0;animation:premiumGlow 6.4s ease-out both
+}
+.premiumClub{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.82);
+  opacity:0;animation:premiumClub 6.4s ease-out both
+}
+.premiumClub img{width:min(64vw,300px);height:min(64vw,300px);object-fit:contain;opacity:.16}
+.premiumPanel{
+  width:min(88vw,430px);
+  padding:24px 18px 27px;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.18);
+  background:linear-gradient(155deg,rgba(19,27,42,.98),rgba(6,10,17,.99));
+  box-shadow:0 28px 80px #000c,0 0 0 1px rgba(215,180,93,.08) inset,0 0 45px color-mix(in srgb,var(--a) 20%,transparent);
+  transform-style:preserve-3d;
+  animation:premiumPanel 6.4s cubic-bezier(.16,.86,.18,1) both!important
+}
+.premiumPanel:before{
+  content:"";position:absolute;left:10%;right:10%;top:0;height:2px;
+  background:linear-gradient(90deg,transparent,#d7b45d,var(--a),#d7b45d,transparent)
+}
+.premiumPanel .ovlogo3d{width:76px;height:76px;margin-bottom:8px;filter:drop-shadow(0 8px 18px #000)}
+.premiumPanel .ovsmall{color:#d7b45d!important;font-size:10px;letter-spacing:.18em}
+.premiumPanel .ovbig{
+  font-size:clamp(70px,22vw,112px)!important;
+  line-height:.82!important;letter-spacing:-.08em!important;
+  margin:13px 0 16px!important;
+  color:#fff;
+  text-shadow:0 4px 0 #1a1d24,0 10px 26px #000,0 0 28px var(--a);
+  transform:translateZ(70px)
+}
+.premiumPanel .ovtext{font-size:23px!important;font-weight:950;transform:translateZ(45px)}
+.premiumPanel .ovmatch{
+  margin-top:12px!important;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);
+  font-size:13px!important;color:#dce2ea!important;font-weight:850
+}
+.imcStamp{margin-top:13px;font-size:8px;color:#7d8799;font-weight:900;letter-spacing:.16em}
+.entryFlash{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.8),rgba(215,180,93,.28) 8%,transparent 30%);
+  opacity:0;animation:entryFlash 6.4s ease-out both
+}
+@keyframes entryFlash{0%{opacity:0}5%{opacity:.9}13%{opacity:.08}22%,100%{opacity:0}}
+@keyframes premiumGlow{0%,6%{opacity:0;transform:translate(-50%,-50%) scale(.55)}22%,76%{opacity:.85;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.08)}}
+@keyframes premiumClub{0%,12%{opacity:0;transform:translate(-50%,-50%) scale(.7) rotate(-7deg)}30%,78%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-4deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+@keyframes premiumPanel{
+  0%{opacity:0;transform:translateY(35px) scale(.78) rotateX(12deg)}
+  18%{opacity:1;transform:translateY(-5px) scale(1.035) rotateX(-2deg)}
+  30%,82%{opacity:1;transform:translateY(0) scale(1) rotateX(0)}
+  100%{opacity:0;transform:translateY(-18px) scale(.96) rotateX(-4deg)}
+}
+
+/* ===== SAME POPUP · LIVE TABLE PHASE ===== */
+.popupPhase{transition:opacity .18s ease,transform .18s ease}
+.popupPhase.fade{opacity:0;transform:translateY(8px) scale(.98)}
+.tablePhase{display:none}
+.tablePhase.show{display:block;animation:tablePhaseIn .35s cubic-bezier(.2,.8,.2,1) both}
+.tablePhase .tableKicker{font-size:9px;font-weight:950;letter-spacing:.18em;color:#d7b45d;margin-bottom:13px}
+.tablePhase .tableHeadline{font-size:clamp(25px,8vw,42px);line-height:.92;font-weight:950;letter-spacing:-.045em;color:#fff}
+.tablePhase .tableClub{font-size:clamp(27px,9vw,48px);line-height:.9;font-weight:950;color:var(--a);margin:13px 0}
+.tablePhase .tableMove{font-size:24px;font-weight:950}
+.tablePhase .tableMove .arrow{color:#55dc96}
+.tablePhase .tableNote{font-size:10px;color:#8e98a9;margin-top:11px}
+@keyframes tablePhaseIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+</style></head><body><main class="wrap">
+<div class="head"><div class="brand">IMC LIVE SCORING · GW001 ROAD TO HISTORY</div><div class="livebadge"><i class="dot"></i> MATCHDAY 10 · RESULTS</div><h1>MATCHDAY 10<br>LIVE CENTER</h1><div class="sub">13 AGOSTO 2026 · KICK-OFF 22:00 · 4 DIVISIONI · 20 PARTITE</div><div class="demo">RISULTATI UFFICIALI · MATCHDAY 10 · TUTTE LE PARTITE PARTONO DA 0–0</div></div>
+<div id="tabs" class="tabs"></div><div id="app"></div></main><div id="overlay" class="overlay"></div>
+<script>
+
+const LOGOS={"AS Reggina 1914": "reggina.png", "AEK Athens": "aek-atene.png", "Palermo FC": "palermo.png", "Atalanta BC": "atalanta.png", "Parma Calcio 1913": "parma.png", "Torino": "torino.png", "Dynamo Dresden": "dinamo-dresda.png", "Académica de Coimbra": "academica-coimbra.png", "TSV 1860 München": "monaco-1860.png", "FK Partizan": "partizan-belgrado.png", "Sampdoria": "sampdoria.png", "Fenerbahçe SK": "fenerbahce.png", "Feyenoord": "feyenoord.png", "Bologna FC": "bologna.png", "Boca Juniors": "boca-juniors.png", "1. FC Kaiserslautern": "kaiserslautern.png", "Sunderland": "sunderland.png", "Eintracht Frankfurt": "eintracht-francoforte.png", "Palmeiras": "palmeiras.png", "Genoa CFC": "genoa.png", "Valencia CF": "valencia.png", "Shakhtar Donetsk": "shakhtar-donetsk.png", "SSC Napoli": "napoli.png", "Atlético Madrid": "atletico-madrid.png", "FC Schalke 04": "schalke-04.png", "Celtic": "celtic.png", "Guangzhou FC": "guangzhou.png", "Tottenham Hotspur": "tottenham-hotspur.png", "São Paulo FC": "sao-paulo.png", "Olympique Marseille": "marseille.png", "Legia Warszawa": "legia-varsavia.png", "Borussia Dortmund": "borussia-dortmund.png", "SS Lazio": "lazio.png", "AS Roma": "roma.png", "Hertha BSC": "hertha-berlino.png", "Dynamo Kyiv": "dynamo-kyiv.png", "CR Flamengo": "flamengo.png", "River Plate": "river-plate.png", "Campobasso Calcio": "campobasso.png", "Club América": "club-america.png"};
+function logoHTML(name){
+  const f=LOGOS[name];
+  return f ? `<img class="clublogo" src="assets/clubs/${f}" alt="">` : '';
+}
+
+const DATA={"PLATINUM":{"accent":"#9c7cff","table":[["Atalanta BC",19],["AEK Athens",17],["Dynamo Dresden",17],["AS Reggina 1914",15],["TSV 1860 München",13],["Torino",12],["Académica de Coimbra",10],["Palermo FC",9],["Parma Calcio 1913",7],["FK Partizan",5]],"games":[["Torino","AS Reggina 1914",[["12","Torino","Lukeba"],["41","AS Reggina 1914","Frattesi"],["43","Torino","Egan-Riley"],["55","Torino","Güler"]]],["Parma Calcio 1913","TSV 1860 München",[["20","TSV 1860 München","Kovačić"],["83","TSV 1860 München","Torres"]]],["Dynamo Dresden","Atalanta BC",[["43","Dynamo Dresden","Simeone"]]],["AEK Athens","FK Partizan",[["13","AEK Athens","Tzolis"],["17","FK Partizan","Di María"],["32","AEK Athens","Anton"]]],["Palermo FC","Académica de Coimbra",[["55","Palermo FC","Saelemaekers"]]]]},"GOLD":{"accent":"#d5aa4f","table":[["Fenerbahçe SK",21],["Sampdoria",20],["Bologna FC",16],["Eintracht Frankfurt",13],["Boca Juniors",12],["Genoa CFC",10],["Feyenoord",8],["1. FC Kaiserslautern",8],["Sunderland",7],["Palmeiras",5]],"games":[["Fenerbahçe SK","Genoa CFC",[["18","Genoa CFC","Perišić"],["28","Fenerbahçe SK","Malen"],["49","Genoa CFC","Vlahović"],["60","Fenerbahçe SK","Mancini"],["68","Fenerbahçe SK","Ndicka"],["86","Genoa CFC","Khalaili"]]],["Eintracht Frankfurt","1. FC Kaiserslautern",[["10","1. FC Kaiserslautern","Mbaye"],["52","1. FC Kaiserslautern","Mbaye"],["69","1. FC Kaiserslautern","Estêvão"],["81","1. FC Kaiserslautern","Mbaye"]]],["Palmeiras","Sampdoria",[["54","Sampdoria","Højbjerg"],["88","Sampdoria","Júnior"]]],["Boca Juniors","Bologna FC",[["4","Bologna FC","Gavi"],["20","Bologna FC","Palmer"]]],["Feyenoord","Sunderland",[["2","Feyenoord","Pavlovic"],["21","Feyenoord","Joelinton"],["72","Sunderland","Froholdt"]]]]},"SILVER":{"accent":"#c8d0da","table":[["Valencia CF",16],["SSC Napoli",16],["Shakhtar Donetsk",14],["FC Schalke 04",14],["Celtic",13],["Atlético Madrid",12],["Tottenham Hotspur",11],["Olympique Marseille",10],["Guangzhou FC",8],["São Paulo FC",8]],"games":[["Atlético Madrid","SSC Napoli",[["21","Atlético Madrid","Bowen"],["27","SSC Napoli","Fofana"],["39","Atlético Madrid","Bowen"],["78","Atlético Madrid","Koke"],["88","SSC Napoli","Dalot (rig.)"]]],["Tottenham Hotspur","FC Schalke 04",[["25","Tottenham Hotspur","Guerra"],["51","Tottenham Hotspur","Raspadori"],["63","Tottenham Hotspur","Gatti"],["67","FC Schalke 04","Bischof"]]],["Celtic","Shakhtar Donetsk",[["36","Celtic","Musiala"],["59","Celtic","Barcola"],["69","Shakhtar Donetsk","Rodri"],["72","Celtic","Ødegaard"],["85","Celtic","Ødegaard"],["86","Shakhtar Donetsk","Hernández"]]],["Guangzhou FC","Olympique Marseille",[["1","Olympique Marseille","Diatta"],["10","Guangzhou FC","Wharton"],["30","Olympique Marseille","Lukaku"]]],["São Paulo FC","Valencia CF",[["52","Valencia CF","Salah"],["73","Valencia CF","Salah"]]]]},"BRONZE":{"accent":"#bd7445","table":[["Borussia Dortmund",22],["AS Roma",18],["SS Lazio",18],["Legia Warszawa",17],["Dynamo Kyiv",16],["Hertha BSC",13],["CR Flamengo",7],["Campobasso Calcio",6],["River Plate",6],["Club América",2]],"games":[["Dynamo Kyiv","Legia Warszawa",[["86","Legia Warszawa","Aubameyang"]]],["Campobasso Calcio","CR Flamengo",[["59","Campobasso Calcio","Chaïbi"],["72","Campobasso Calcio","Díaz"],["80","Campobasso Calcio","Baumgartner"],["88","CR Flamengo","Rodrygo"]]],["AS Roma","River Plate",[["68","AS Roma","Endrick (rig.)"],["85","River Plate","Szoboszlai"]]],["SS Lazio","Borussia Dortmund",[["22","Borussia Dortmund","Gnabry"],["55","SS Lazio","Çalhanoğlu"],["56","Borussia Dortmund","Gnabry"],["84","SS Lazio","Savinho"]]],["Club América","Hertha BSC",[["49","Hertha BSC","Almada"],["51","Club América","Panichelli"],["69","Hertha BSC","Gravenberch"]]]]}};let div="PLATINUM";let goalQueue=[];let popupBusy=false;
+const state={}; Object.keys(DATA).forEach(d=>state[d]={minute:0,running:false,timer:null,shown:new Set(),finished:false});
+function basePositions(d){let o={};DATA[d].table.forEach((r,i)=>o[r[0]]=i+1);return o}
+function scoresAt(d,min){return DATA[d].games.map(g=>{let h=0,a=0;g[2].forEach(e=>{if(+e[0]<=min){if(e[1]===g[0])h++;else a++}});return[h,a]})}
+function liveTable(d,min){let pts={};DATA[d].table.forEach(r=>pts[r[0]]=r[1]);if(min===0)return DATA[d].table.map(r=>[r[0],r[1]]);let sc=scoresAt(d,min),order={};DATA[d].table.forEach((r,i)=>order[r[0]]=i);DATA[d].games.forEach((g,i)=>{let[h,a]=sc[i];if(h>a)pts[g[0]]+=3;else if(a>h)pts[g[1]]+=3;else{pts[g[0]]++;pts[g[1]]++}});return Object.entries(pts).sort((a,b)=>b[1]-a[1]||order[a[0]]-order[b[0]])}
+function phase(min){if(min===0)return"PRE MATCH";if(min<45)return"PRIMO TEMPO";if(min===45)return"HALF TIME";if(min<90)return"SECONDO TEMPO";return"FULL TIME"}
+function latestFeed(d,min){let all=[];DATA[d].games.forEach(g=>g[2].forEach(e=>{if(+e[0]<=min)all.push([+e[0],e[2],e[1]])}));all.sort((a,b)=>b[0]-a[0]);return all.length?all.slice(0,3).map(e=>`<div class="row" style="grid-template-columns:38px 1fr"><span class="pos">${e[0]}'</span><span class="club">GOL · ${e[1]} · ${e[2]}</span></div>`).join(''):`<div class="row" style="display:block">In attesa del primo evento.</div>`}
+function render(){let D=DATA[div],S=state[div],a=D.accent,sc=scoresAt(div,S.minute),goals=sc.reduce((n,x)=>n+x[0]+x[1],0),base=basePositions(div),lt=liveTable(div,S.minute);document.documentElement.style.setProperty("--a",a);
+document.getElementById("tabs").innerHTML=Object.keys(DATA).map(k=>`<button class="tab ${k===div?'on':''}" onclick="setDiv('${k}')">${k}</button>`).join("");
+document.getElementById("app").innerHTML=`<section class="center"><div class="controlbar"><span class="phase">${phase(S.minute)}</span><span class="clock">${S.minute}'</span><span class="goals">${goals} GOL</span></div><div class="buttons"><button class="btn primary" onclick="toggle()">${S.running?'Ⅱ PAUSA':'▶ AVVIA'}</button><button class="btn" onclick="step()">+1 MINUTO</button><button class="btn" onclick="resetDiv()">↺ RESET</button></div>
+${D.games.map((g,i)=>{let[h,a]=sc[i],ev=g[2].filter(e=>+e[0]<=S.minute);return`<div class="game"><div class="score"><div class="team homeTeam">${logoHTML(g[0])}<span>${g[0]}</span></div><div class="num">${h}–${a}</div><div class="team away awayTeam"><span>${g[1]}</span>${logoHTML(g[1])}</div></div><div class="events">${ev.length?ev.map(e=>`<span class="event"><b>${e[0]}'</b> ${e[2]}</span>`).join(""):`<span class="waiting">${S.minute===0?'IN ATTESA DEL CALCIO D’INIZIO':'NESSUN GOL FINORA'}</span>`}</div></div>`}).join("")}</section>
+<section class="section"><h2>ULTIMI EVENTI</h2><div class="table" id="feed">${latestFeed(div,S.minute)}</div></section>
+<section class="section"><h2>${S.minute>=90?'CLASSIFICA AGGIORNATA':'CLASSIFICA LIVE'}</h2><div class="table">${lt.map((r,i)=>{let old=base[r[0]],now=i+1,cls=now<old?'up':now>old?'down':'same',sym=now<old?'▲':now>old?'▼':'•';return`<div class="row"><span class="pos">${now}</span><span class="club">${r[0]}</span><span class="pts">${r[1]} PT</span><span class="chg ${cls}">${sym}</span></div>`}).join("")}</div><div class="legend">La classifica viene ricalcolata minuto per minuto sui risultati correnti. Risultati, marcatori e minuti ufficiali del Matchday 10.</div></section>`}
+function step(){
+  let S=state[div];
+  if(popupBusy || goalQueue.length) return;
+  if(S.minute>=90)return;
+  S.minute++;
+  const hadGoals=collectGoalEvents();
+  render();
+  if(hadGoals){
+    pauseTickerForPopup();
+    processGoalQueue();
+    return;
+  }
+  if(S.minute===45)showSpecial("HALF","TIME","Intervallo");
+  if(S.minute===90){
+    S.running=false;
+    clearInterval(S.timer);
+    showSpecial("FULL","TIME","Finale");
+    setTimeout(showRecap,1250)
+  }
+}
+function toggle(){
+  let S=state[div];
+  if(S.running){
+    S.running=false;
+    if(S.timer){clearInterval(S.timer);S.timer=null;}
+    render();
+    return;
+  }
+  if(S.minute>=90){resetDiv();S=state[div]}
+  S.running=true;
+  if(!popupBusy && !goalQueue.length){
+    S.timer=setInterval(step,1000);
+  }
+  render();
+}
+function resetDiv(){let S=state[div];if(S.timer)clearInterval(S.timer);goalQueue=[];popupBusy=false;state[div]={minute:0,running:false,timer:null,shown:new Set(),finished:false};hideOverlay();render()}
+function setDiv(d){let cur=state[div];if(cur&&cur.timer){clearInterval(cur.timer);cur.timer=null;cur.running=false;}goalQueue=[];popupBusy=false;div=d;render()}
+function collectGoalEvents(){
+  let S=state[div],D=DATA[div],found=false;
+  let before=liveTable(div,Math.max(0,S.minute-1));
+  D.games.forEach((g,i)=>g[2].forEach((e,j)=>{
+    let key=i+"-"+j;
+    if(+e[0]===S.minute&&!S.shown.has(key)){
+      S.shown.add(key);
+      found=true;
+      let sc=scoresAt(div,S.minute)[i];
+      let after=liveTable(div,S.minute);
+      let oldPos=before.findIndex(r=>r[0]===e[1])+1;
+      let newPos=after.findIndex(r=>r[0]===e[1])+1;
+      goalQueue.push({min:e[0],player:e[2],h:g[0],a:g[1],sc,team:e[1],oldPos,newPos});
+    }
+  }));
+  return found;
+}
+function pauseTickerForPopup(){
+  let S=state[div];
+  if(S.timer){ clearInterval(S.timer); S.timer=null; }
+}
+function resumeTickerAfterPopups(){
+  let S=state[div];
+  popupBusy=false;
+  if(S.running && S.minute<90 && !S.timer){
+    S.timer=setInterval(step,1000);
+  }
+  if(S.minute===45)showSpecial("HALF","TIME","Intervallo");
+  if(S.minute===90){
+    S.running=false;
+    if(S.timer){clearInterval(S.timer);S.timer=null;}
+    showSpecial("FULL","TIME","Finale");
+    setTimeout(showRecap,1250);
+  }
+}
+function processGoalQueue(){
+  if(popupBusy)return;
+  if(!goalQueue.length){
+    resumeTickerAfterPopups();
+    return;
+  }
+  popupBusy=true;
+  const g=goalQueue.shift();
+  showGoal(g.min,g.player,g.h,g.a,g.sc,g.team,g.oldPos,g.newPos,()=>{
+    popupBusy=false;
+    processGoalQueue();
+  });
+}
+function showGoal(min,player,h,a,sc,team,oldPos,newPos,onDone){
+  let o=document.getElementById("overlay");
+  let logo=(typeof LOGOS!=="undefined"&&LOGOS[team])?`<img class="ovlogo3d" src="assets/clubs/${LOGOS[team]}" alt="">`:"";
+  o.className="overlay show goal3d";
+  o.innerHTML=`<div class="entryFlash"></div><div class="premiumGlow"></div><div class="premiumClub">${logo}</div><div class="ovbox premiumPanel">
+<div id="goalPhase" class="popupPhase">${logo}<div class="ovsmall">${min}' · GOL</div><div class="ovbig">GOAL</div><div class="ovtext">${player}</div><div class="ovmatch">${h} ${sc[0]}–${sc[1]} ${a}</div><div class="imcStamp">IMC · ROAD TO HISTORY</div></div>
+<div id="tablePhase" class="tablePhase"></div>
+</div>`;
+  document.querySelector(".center")?.classList.add("shake");
+  setTimeout(()=>document.querySelector(".center")?.classList.remove("shake"),360);
+  const changed=oldPos>0&&newPos>0&&oldPos!==newPos;
+  if(changed){
+    setTimeout(()=>{
+      const gp=document.getElementById("goalPhase"),tp=document.getElementById("tablePhase");
+      if(!gp||!tp)return;
+      gp.classList.add("fade");
+      setTimeout(()=>{
+        gp.style.display="none";
+        const headline=newPos===1?"⚡ NUOVA CAPOLISTA":(newPos<oldPos?"▲ SALE IN CLASSIFICA":"▼ SCENDE IN CLASSIFICA");
+        tp.innerHTML=`<div class="tableKicker">CLASSIFICA LIVE</div><div class="tableHeadline">${headline}</div><div class="tableClub">${team}</div><div class="tableMove"><span>${oldPos}°</span> → <span class="arrow">${newPos}°</span></div><div class="tableNote">EFFETTO DEL GOL SULLA CLASSIFICA</div><div class="imcStamp">IMC · ROAD TO HISTORY</div>`;
+        tp.classList.add("show");
+      },180);
+    },2750);
+  }
+  setTimeout(()=>{
+    hideOverlay();
+    if(typeof onDone==="function")onDone();
+  },6400);
+}
+function showSpecial(a,b,t){let o=document.getElementById("overlay");o.innerHTML=`<div class="ovbox"><div class="ovsmall">${t}</div><div class="ovbig">${a}<br>${b}</div></div>`;o.classList.add("show");setTimeout(hideOverlay,1100)}
+function showRecap(){let D=DATA[div],sc=scoresAt(div,90),tot=sc.reduce((n,x)=>n+x[0]+x[1],0),o=document.getElementById('overlay');o.innerHTML=`<div class="ovbox"><div class="ovsmall">${div} · FINALE</div><div class="ovbig">5 PARTITE<br>${tot} GOL</div><div class="ovtext">${D.games.map((g,i)=>`${g[0]} ${sc[i][0]}–${sc[i][1]} ${g[1]}`).join('<br>')}</div></div>`;o.classList.add('show');setTimeout(hideOverlay,3200)}
+
+function showTableAlert(team,oldPos,newPos){
+  if(oldPos===newPos)return;
+  let box=document.getElementById("tableAlert");
+  let headline = newPos===1 ? "⚡ NUOVA CAPOLISTA" : (newPos<oldPos ? "▲ SALE IN CLASSIFICA" : "▼ SCENDE IN CLASSIFICA");
+  box.innerHTML=`<div class="tableAlert3d"><div class="small">CLASSIFICA LIVE</div><div class="big">${headline}<br>${team}</div><div class="sub">${oldPos}° → ${newPos}° posto</div></div>`;
+  setTimeout(()=>{box.innerHTML=""},2100);
+}
+function hideOverlay(){document.getElementById("overlay").classList.remove("show")}
+render();
+</script><div id="tableAlert"></div></body></html>

@@ -1,0 +1,1 @@
+{"action":"execute_migration","target":"gold","database":"Sql1956795_2","migration_id":"create_gw_competition_trophy_shells_gold_20260905","plan_sha256":"e1d85dae0e9e8a6ab51c240b02c9e518208c830f4af27699c8e983a8eb807682","status":"success","statement_count":8,"duration_ms":326,"before":{"tables":88,"columns":0},"after":{"tables":96,"columns":0}}

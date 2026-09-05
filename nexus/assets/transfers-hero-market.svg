@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-label="Football transfer market desk">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06172f"/>
+      <stop offset="0.55" stop-color="#0b315f"/>
+      <stop offset="1" stop-color="#08733f"/>
+    </linearGradient>
+    <linearGradient id="desk" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#162536"/>
+      <stop offset="1" stop-color="#09131f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="72%" cy="35%" r="48%">
+      <stop offset="0" stop-color="#57d77b" stop-opacity=".36"/>
+      <stop offset="1" stop-color="#57d77b" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".28"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="420" fill="url(#bg)"/>
+  <rect width="1200" height="420" fill="url(#glow)"/>
+
+  <g opacity=".16" fill="none" stroke="#cfe5f5" stroke-width="2">
+    <path d="M95 95c75-42 143-47 196-19 38 20 48 55 87 62 54 10 102-40 151-24 43 14 53 65 97 75 46 11 83-35 130-30 53 6 66 71 121 74 36 2 65-25 94-45 38-26 86-45 151-20"/>
+    <path d="M111 161c58-31 111-39 157-25m652 20c42-19 94-17 151 9"/>
+    <circle cx="288" cy="80" r="6" fill="#dfefff" stroke="none"/>
+    <circle cx="606" cy="190" r="6" fill="#dfefff" stroke="none"/>
+    <circle cx="939" cy="149" r="6" fill="#dfefff" stroke="none"/>
+  </g>
+
+  <g transform="translate(84 76)" opacity=".95">
+    <rect x="0" y="0" width="340" height="176" rx="22" fill="#0a1830" stroke="#36597d"/>
+    <rect x="16" y="15" width="308" height="134" rx="13" fill="#dfe9f1"/>
+    <rect x="33" y="32" width="119" height="9" rx="4.5" fill="#173555" opacity=".88"/>
+    <rect x="33" y="52" width="212" height="6" rx="3" fill="#94a7ba"/>
+    <rect x="33" y="69" width="184" height="6" rx="3" fill="#94a7ba"/>
+    <rect x="33" y="97" width="58" height="32" rx="7" fill="#0c8c49"/>
+    <path d="M108 114h80" stroke="#0c8c49" stroke-width="7" stroke-linecap="round"/>
+    <path d="M178 104l16 10-16 10" fill="none" stroke="#0c8c49" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="269" cy="97" r="27" fill="#0d2747"/>
+    <path d="M256 97l8 8 18-20" fill="none" stroke="#5de18b" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M145 176h50l20 34h-90z" fill="#07121f"/>
+  </g>
+
+  <g transform="translate(545 58)" filter="url(#shadow)">
+    <path d="M0 0h230l40 42-29 200H-9L-40 42z" fill="#f0f3f5"/>
+    <path d="M74 0c8 28 25 43 41 43S148 28 156 0" fill="#0a2a54"/>
+    <path d="M89 0c3 17 12 27 26 27 14 0 23-10 26-27" fill="#e8ecef"/>
+    <path d="M34 84h165" stroke="#d7dde3" stroke-width="2"/>
+    <text x="115" y="116" text-anchor="middle" fill="#0a2a54" font-family="Arial,sans-serif" font-size="28" font-weight="800">TRANSFER</text>
+    <text x="115" y="146" text-anchor="middle" fill="#0c8c49" font-family="Arial,sans-serif" font-size="18" font-weight="800" letter-spacing="3">WINDOW</text>
+    <path d="M74 181h82" stroke="#b9c4cf" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(835 66)" filter="url(#shadow)">
+    <rect x="0" y="0" width="265" height="188" rx="18" fill="#f8fafb"/>
+    <rect x="20" y="23" width="139" height="14" rx="7" fill="#132a44"/>
+    <rect x="20" y="51" width="214" height="8" rx="4" fill="#bdc8d1"/>
+    <rect x="20" y="72" width="191" height="8" rx="4" fill="#bdc8d1"/>
+    <rect x="20" y="93" width="202" height="8" rx="4" fill="#bdc8d1"/>
+    <text x="20" y="134" fill="#0c8c49" font-family="Arial,sans-serif" font-size="18" font-weight="800">CONTRACT</text>
+    <path d="M23 160c39-34 58 24 96-8 28-24 50-5 77 8" fill="none" stroke="#1b2f48" stroke-width="4" stroke-linecap="round"/>
+    <g transform="translate(197 118) rotate(-18)">
+      <rect x="0" y="0" width="16" height="82" rx="8" fill="#d5a62e"/>
+      <path d="M8 82l-7 14h14z" fill="#e7d2a0"/>
+    </g>
+  </g>
+
+  <rect y="294" width="1200" height="126" fill="url(#desk)"/>
+  <path d="M0 294h1200" stroke="#325269" stroke-width="3" opacity=".7"/>
+
+  <g transform="translate(250 318)">
+    <circle cx="0" cy="0" r="58" fill="#e9edf0" filter="url(#shadow)"/>
+    <path d="M0-23l22 16-8 26h-28l-8-26z" fill="#13283e"/>
+    <path d="M0-58v35M55-18L22-7M34 47L14 19M-34 47l20-28M-55-18l33 11" stroke="#13283e" stroke-width="5" fill="none"/>
+  </g>
+
+  <g transform="translate(710 320)" filter="url(#shadow)">
+    <rect x="0" y="0" width="218" height="68" rx="16" fill="#0b1621" stroke="#28465c"/>
+    <circle cx="35" cy="34" r="18" fill="#0c8c49"/>
+    <path d="M27 34l6 6 11-13" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="68" y="30" fill="#b7c5d3" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="2">DEAL STATUS</text>
+    <text x="68" y="49" fill="#fff" font-family="Arial,sans-serif" font-size="18" font-weight="800">COMPLETED</text>
+  </g>
+</svg>

@@ -1,0 +1,37 @@
+/* APPROVED MOCKUP GEOMETRY — upper Control Center only */
+.gw-command{height:306px!important;padding:0!important;border-radius:18px!important;overflow:visible!important;background:rgba(255,255,255,.34)!important;box-shadow:inset 0 0 0 1px rgba(112,145,184,.10)!important}
+.gw-command:before,.gw-command:after{display:none!important}
+.gw-command-top,.gw-command-bottom{display:block!important;position:absolute!important;inset:0!important;margin:0!important}
+.gw-role-panel,.gw-match-panel{position:absolute!important;box-sizing:border-box!important;border-radius:14px!important;background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(245,249,254,.74))!important;border:1px solid rgba(113,145,184,.22)!important;box-shadow:0 5px 12px rgba(8,43,99,.06),inset 0 0 0 1px rgba(255,255,255,.88)!important;overflow:hidden!important}
+.gw-role-panel:before,.gw-match-panel:before{display:none!important}
+.gw-command-top>.gw-role-panel:first-child{left:0!important;top:0!important;width:31%!important;height:116px!important;min-height:0!important}
+.gw-command-top>.gw-role-panel:last-child{right:0!important;top:0!important;width:31%!important;height:116px!important;min-height:0!important}
+.gw-world-title{position:absolute!important;left:31%!important;right:31%!important;top:0!important;height:86px!important;padding:11px 3px 0!important;display:flex!important;align-items:center!important;justify-content:flex-start!important}
+.gw-world-title:after{display:none!important}
+.gw-world-title strong{font-size:25px!important;line-height:1!important;letter-spacing:-1px!important}
+.gw-world-title span{font-size:8px!important;margin-top:5px!important;max-width:132px!important}
+.gw-role-panel{padding:10px 6px 7px!important}
+.gw-role-panel span{font-size:6.5px!important}
+.gw-role-panel img{width:47px!important;height:47px!important;margin:8px auto 5px!important}
+.gw-role-panel strong{font-size:9px!important}
+.gw-role-panel small{font-size:5.5px!important;margin-top:3px!important}
+.gw-command-bottom>.gw-match-panel:first-child{left:0!important;top:126px!important;width:34%!important;height:154px!important;min-height:0!important;padding:11px 9px!important}
+.gw-command-bottom>.gw-match-panel:last-child{right:0!important;top:126px!important;width:34%!important;height:154px!important;min-height:0!important;padding:11px 9px!important}
+.gw-season{position:absolute!important;left:50%!important;top:76px!important;transform:translateX(-50%)!important;width:168px!important;height:168px!important;min-height:0!important;z-index:8!important;display:grid!important;place-items:center!important}
+.gw-season:before,.gw-season:after{display:none!important}
+.gw-season-orbit{width:154px!important;height:154px!important;padding:10px!important;border-radius:50%!important;background:conic-gradient(from -90deg,#1762ad 0 var(--progress),#d7ad48 var(--progress) calc(var(--progress) + 20deg),#dfe8f2 calc(var(--progress) + 20deg) 360deg)!important;box-shadow:0 0 0 1px rgba(43,112,204,.16),0 0 0 7px rgba(255,255,255,.74),0 0 0 9px rgba(69,132,218,.10),0 10px 22px rgba(8,43,99,.09)!important}
+.gw-season-orbit:before{content:''!important;display:block!important;position:absolute!important;inset:6px!important;border-radius:50%!important;border:1px solid rgba(42,111,204,.20)!important}
+.gw-season-orbit:after{display:none!important}
+.gw-season-orbit>div{background:radial-gradient(circle,rgba(255,255,255,.99),rgba(242,247,253,.96))!important;box-shadow:inset 0 0 20px rgba(54,116,200,.10)!important}
+.gw-season-orbit span,.gw-season-orbit small{font-size:6px!important}
+.gw-season-orbit strong{font-size:28px!important;margin:4px 0 2px!important}
+.gw-match-panel>span{font-size:7px!important}
+.gw-match-panel>small{font-size:6px!important;margin-top:4px!important;text-align:center!important}
+.gw-versus{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr)!important;gap:2px!important;margin-top:11px!important}
+.gw-versus img{width:35px!important;height:35px!important;margin:0 auto 4px!important}
+.gw-versus b{font-size:6.5px!important}
+.gw-versus>strong{font-size:14px!important}
+.gw-match-panel time{font-size:5.5px!important;margin-top:7px!important}
+.gw-match-panel.empty{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:flex-start!important}
+.gw-match-panel.empty strong{font-size:8px!important;line-height:1.2!important;margin-top:8px!important;text-align:left!important}
+@media(max-width:390px){.gw-command{height:294px!important}.gw-command-top>.gw-role-panel:first-child,.gw-command-top>.gw-role-panel:last-child{height:111px!important}.gw-command-bottom>.gw-match-panel:first-child,.gw-command-bottom>.gw-match-panel:last-child{top:121px!important;height:148px!important}.gw-season{top:73px!important;width:160px!important;height:160px!important}.gw-season-orbit{width:146px!important;height:146px!important}.gw-role-panel img{width:44px!important;height:44px!important}.gw-world-title strong{font-size:23px!important}}

@@ -1,0 +1,96 @@
+/* IMC Nexus · Build 56 · iPhone typography
+   Scope: typography only. Font family remains Inter. */
+
+@media (max-width:480px){
+  html{-webkit-text-size-adjust:100%}
+  body,button,input,select,textarea{
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important;
+  }
+  input,select,textarea{font-size:16px!important}
+
+  .nx-logo-button{font-size:18px!important}
+  .nx-logo-button small{font-size:11px!important;line-height:1.2!important}
+  .nx-context-manager strong,.nx-context-world strong{font-size:16px!important}
+  .nx-context-manager span{font-size:12px!important;line-height:1.3!important}
+  .nx-world-nav button{font-size:12px!important;line-height:1.15!important}
+  .nx-bottom button span{font-size:11px!important;line-height:1.15!important}
+  .nx-page-title h1{font-size:28px!important;line-height:1.05!important}
+  .nx-page-title p{font-size:14px!important;line-height:1.4!important}
+  .nx-filter-tabs button,.world-tab{font-size:13px!important;line-height:1.15!important}
+  .row-sub,.comp-card span{font-size:13px!important;line-height:1.35!important}
+  .badge{font-size:11px!important}
+  .nx-entity-tile strong{font-size:15px!important;line-height:1.2!important}
+  .nx-entity-tile small{font-size:12px!important;line-height:1.3!important}
+  .nx-stat-card span{font-size:11px!important;line-height:1.15!important}
+  .nx-competition-stat-head span,.nx-manager-career-title span,.nx-record-card span,.nx-timeline-item span{font-size:12px!important;line-height:1.35!important}
+  .nx-entity-match-meta{font-size:12px!important;line-height:1.3!important}
+  .nx-admin-badge{font-size:11px!important}
+
+  /* Team Hub GW008 */
+  body .imc-team-hub-gw008,
+  body .imc-team-hub-gw008 button{
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important;
+  }
+  body .imc-team-hub-gw008 .th8-hero-copy span{font-size:10px!important;line-height:1.1!important}
+  body .imc-team-hub-gw008 .th8-hero-copy strong{font-size:24px!important;line-height:1!important}
+  body .imc-team-hub-gw008 .th8-hero-copy small{font-size:11px!important;line-height:1.2!important}
+  body .imc-team-hub-gw008 .th8-tab{font-size:12px!important;line-height:1.1!important}
+  body .imc-team-hub-gw008 .th8-summary strong{font-size:20px!important;line-height:1!important}
+  body .imc-team-hub-gw008 .th8-summary span{font-size:10px!important;line-height:1.15!important}
+  body .imc-team-hub-gw008 .th8-card strong{font-size:14px!important;line-height:1.2!important}
+  body .imc-team-hub-gw008 .th8-card small{font-size:11px!important;line-height:1.3!important}
+  body .imc-team-hub-gw008 .th8-managed{font-size:10px!important;line-height:1.1!important}
+  body .imc-team-hub-gw008 .th8-back{font-size:12px!important;line-height:1.15!important}
+  body .imc-team-hub-gw008 .th8-detail h2{font-size:24px!important;line-height:1.05!important}
+  body .imc-team-hub-gw008 .th8-detail p{font-size:12px!important;line-height:1.35!important}
+  body .imc-team-hub-gw008 .th8-field span{font-size:10px!important;line-height:1.15!important}
+  body .imc-team-hub-gw008 .th8-field strong{font-size:12px!important;line-height:1.3!important}
+  body .imc-team-hub-gw008 .th8-manager span{font-size:10px!important;line-height:1.15!important}
+  body .imc-team-hub-gw008 .th8-manager strong{font-size:14px!important;line-height:1.2!important}
+  body .imc-team-hub-gw008 .th8-manager small{font-size:11px!important;line-height:1.3!important}
+  body .imc-team-hub-gw008 .th8-season>h3{font-size:16px!important;line-height:1.15!important}
+  body .imc-team-hub-gw008 .th8-note{font-size:11px!important;line-height:1.35!important}
+  body .imc-team-hub-gw008 .th8-comp-head strong{font-size:12px!important;line-height:1.25!important}
+  body .imc-team-hub-gw008 .th8-comp-head span{font-size:10px!important;line-height:1.15!important}
+  body .imc-team-hub-gw008 .th8-stat strong{font-size:13px!important;line-height:1!important}
+  body .imc-team-hub-gw008 .th8-stat span{font-size:9px!important;line-height:1.1!important}
+  body .imc-team-hub-gw008 .th8-subhead{font-size:10px!important;line-height:1.15!important}
+  body .imc-team-hub-gw008 .th8-date{font-size:10px!important;line-height:1.2!important}
+  body .imc-team-hub-gw008 .th8-main strong{font-size:12px!important;line-height:1.2!important}
+  body .imc-team-hub-gw008 .th8-main span{font-size:10px!important;line-height:1.25!important}
+  body .imc-team-hub-gw008 .th8-score{font-size:14px!important;line-height:1.1!important}
+  body .imc-team-hub-gw008 .th8-report{font-size:10px!important;line-height:1.1!important}
+  body .imc-team-hub-gw008 .th8-empty,
+  body .imc-team-hub-gw008 .th8-loading,
+  body .imc-team-hub-gw008 .th8-error{font-size:12px!important;line-height:1.35!important}
+
+  /* Competitions: existing iPhone module uses very compact text; these values keep the same layout but restore readability. */
+  body .imc-competitions-all-worlds[data-imc-competitions-world],
+  body .imc-competitions-all-worlds[data-imc-competitions-world] button,
+  body .imc-comp-detail[data-imc-competitions-world],
+  body .imc-comp-detail[data-imc-competitions-world] button{
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important;
+  }
+  body .imc-competitions-all-worlds[data-imc-competitions-world] .imc-comp-filter{font-size:12px!important;line-height:1.1!important}
+  body .imc-competitions-all-worlds[data-imc-competitions-world] .imc-comp-section-head strong{font-size:18px!important;line-height:1.15!important}
+  body .imc-competitions-all-worlds[data-imc-competitions-world] .imc-comp-section-head span{font-size:12px!important;line-height:1.25!important}
+  body .imc-competitions-all-worlds[data-imc-competitions-world] .imc-comp-copy strong{font-size:13px!important;line-height:1.2!important}
+  body .imc-competitions-all-worlds[data-imc-competitions-world] .imc-comp-copy small{font-size:11px!important;line-height:1.3!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-comp-back{font-size:14px!important;line-height:1.15!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-comp-detail-head h1{font-size:28px!important;line-height:1.04!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-comp-detail-head p{font-size:12px!important;line-height:1.35!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-comp-tabs button{font-size:12px!important;line-height:1.1!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-matchday-head strong{font-size:14px!important;line-height:1.15!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-matchday-head span{font-size:11px!important;line-height:1.25!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-team-name{font-size:12px!important;line-height:1.2!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-score{font-size:17px!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-score small{font-size:10px!important;line-height:1.1!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-time{font-size:12px!important;line-height:1.15!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-standings-head{font-size:10px!important;line-height:1.1!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-standing-row{font-size:11px!important;line-height:1.15!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-standing-pos{font-size:12px!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-standing-team strong{font-size:11px!important;line-height:1.15!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-standing-pts{font-size:12px!important}
+  body .imc-comp-detail[data-imc-competitions-world] .imc-comp-loading,
+  body .imc-comp-detail[data-imc-competitions-world] .imc-comp-error{font-size:12px!important;line-height:1.35!important}
+}

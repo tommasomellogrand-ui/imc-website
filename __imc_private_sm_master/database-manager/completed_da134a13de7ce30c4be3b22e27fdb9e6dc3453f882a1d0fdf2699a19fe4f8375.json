@@ -1,0 +1,1 @@
+{"action":"execute_migration","target":"gold","database":"Sql1956795_2","migration_id":"create_gw_news_feed_shells_gold_20260905","plan_sha256":"379fa4e9b436fc45750fde16e31c02e4207d40b539a2793796aff94072f1a57e","status":"success","statement_count":4,"duration_ms":268,"before":{"tables":96,"columns":0},"after":{"tables":100,"columns":0}}

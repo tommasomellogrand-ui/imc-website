@@ -1,0 +1,18 @@
+.ch-home-welcome{display:grid;grid-template-columns:minmax(0,1fr) 148px;align-items:stretch;gap:10px;margin:10px 0;padding:12px;border:1px solid #d9e3ee;border-radius:18px;background:linear-gradient(135deg,#fff 0%,#f7faff 68%,#edf5ff 100%);box-shadow:0 8px 20px rgba(8,43,99,.06),inset 0 1px 0 #fff}
+.ch-home-welcome-copy{min-width:0;padding:7px 6px}
+.ch-home-welcome-copy span{display:block;font-size:7px;line-height:1;font-weight:900;letter-spacing:1.8px;color:#b08324}
+.ch-home-welcome-copy h2{margin:7px 0 0;font-size:18px;line-height:1.08;font-weight:900;letter-spacing:-.45px;color:#082b63}.ch-home-welcome-copy h2 span{font:inherit;color:inherit}
+.ch-home-welcome-copy p{margin:6px 0 0;font-size:9px;line-height:1.35;font-weight:650;color:#60718a}
+.ch-home-clubhouse-link{display:grid;grid-template-columns:74px minmax(0,1fr);align-items:center;gap:10px;min-width:0;padding:8px;border:1px solid #cbdced;border-radius:14px;background:linear-gradient(145deg,#0b356f,#1762ad);color:#fff;text-align:left;box-shadow:0 7px 16px rgba(8,43,99,.16)}
+.ch-clubhouse-badge{position:relative;display:grid;grid-template-rows:34px 1fr;place-items:center;width:74px;height:74px;padding:7px 5px 6px;border:1px solid rgba(255,255,255,.38);border-radius:12px;background:linear-gradient(145deg,#fff,#eaf1f8);box-shadow:0 5px 12px rgba(0,18,48,.18),inset 0 1px 0 #fff}
+.ch-clubhouse-badge:after{content:'';position:absolute;inset:4px;border:1px solid rgba(8,43,99,.12);border-radius:9px}
+.ch-clubhouse-badge img{position:relative;z-index:1;width:27px;height:31px;object-fit:contain}
+.ch-clubhouse-badge strong{position:relative;z-index:1;font-size:8px;line-height:.92;font-weight:950;letter-spacing:.7px;text-align:center;color:#082b63}
+.ch-clubhouse-entry{display:flex;min-width:0;flex-direction:column;align-items:flex-start;justify-content:center}
+.ch-clubhouse-entry small{font-size:6.5px;line-height:1;font-weight:800;letter-spacing:1.2px;color:#d7e6f7}
+.ch-clubhouse-entry b{margin-top:7px;font-size:10px;line-height:1;font-weight:950;color:#fff}
+.ch-clubhouse-entry i{margin-top:8px;font-size:15px;line-height:1;font-style:normal;color:#d7ad48}
+.ch-home-clubhouse-link:active{transform:translateY(1px)}
+.ch-feed-back{display:inline-flex;align-items:center;justify-content:center;min-height:32px;margin-bottom:13px;padding:0 12px;border:1px solid #d4e0ec;border-radius:10px;background:#fff;color:#082b63;font-size:8px;font-weight:900;letter-spacing:.8px}
+.clubhouse.ch-clubhouse-feed-view .ch-feed-panel{margin-top:10px}
+@media(max-width:390px){.ch-home-welcome{grid-template-columns:minmax(0,1fr) 132px;padding:10px;gap:8px}.ch-home-welcome-copy{padding:6px 4px}.ch-home-welcome-copy h2{font-size:16px}.ch-home-welcome-copy p{font-size:8px}.ch-home-clubhouse-link{grid-template-columns:66px minmax(0,1fr);padding:7px;gap:8px}.ch-clubhouse-badge{width:66px;height:66px;grid-template-rows:30px 1fr}.ch-clubhouse-badge img{width:24px;height:28px}.ch-clubhouse-badge strong{font-size:7px}.ch-clubhouse-entry b{font-size:9px}}

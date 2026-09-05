@@ -1,0 +1,33 @@
+.ch-mock-world-fused{height:310px!important}
+.ch-top-fused{height:140px!important}
+.ch-top-fused:before{content:none!important}
+.ch-world-heading{height:54px!important;margin-top:14px!important;padding:8px 0 0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.ch-world-heading:after{content:none!important}
+.ch-world-heading:before{content:''!important;position:absolute!important;left:-12%!important;right:-12%!important;top:18px!important;height:2px!important;background:linear-gradient(90deg,#2d75d0 0%,rgba(45,117,208,0) 100%) left center/31% 2px no-repeat,linear-gradient(270deg,#d7ad48 0%,rgba(215,173,72,0) 100%) right center/31% 2px no-repeat!important;pointer-events:none!important}
+.ch-world-heading strong{font-size:16px!important}
+.ch-world-heading span{margin-top:7px!important;font-size:7.8px!important}
+.ch-season-core{top:104px!important;width:118px!important;height:118px!important;background:conic-gradient(from -38deg,#eff3f8 0 12%,#1b5eb4 12% 29%,#edf2f7 29% 52%,#d6dee9 52% 61%,#d7ad48 61% 67%,#e9eef5 67% 79%,#1762ad 79% 98%,#eef2f7 98% 100%)!important;box-shadow:0 0 0 3px rgba(255,255,255,.99),0 0 0 5px #dce5ef,0 0 0 8px rgba(248,251,254,.95),0 8px 16px rgba(8,43,99,.07),0 0 10px rgba(49,126,226,.08),inset 0 0 12px rgba(51,114,195,.03)!important}
+.ch-season-core:before{inset:16px!important}
+.ch-season-core:after{content:none!important}
+.ch-season-ticks{inset:-10px!important}
+.ch-season-ticks:before,.ch-season-ticks:after{width:6px!important;height:6px!important;margin-top:-3px!important}
+.ch-season-inner:after{content:none!important}
+.ch-season-inner span,.ch-season-inner small{font-size:6.4px!important}
+.ch-season-inner strong{font-size:26px!important;margin:7px 0 6px!important}
+.ch-lower-pair{height:118px!important;border-top:0!important}
+.ch-lower-pair:before{content:none!important}
+.ch-lower-pair:after{top:18%!important}
+.ch-lower-pair .ch-mock-card{height:118px!important;padding-top:12px!important;padding-bottom:9px!important}
+.ch-lower-pair .ch-mock-last{padding-right:40px!important}
+.ch-lower-pair .ch-mock-next{padding-left:40px!important}
+.ch-fixture-row,.ch-result-row{margin-top:11px!important}
+.ch-fixture-row img,.ch-result-row img{width:33px!important;height:33px!important}
+.ch-fixture-row>strong,.ch-result-row>strong{font-size:14.5px!important}
+.ch-match-foot,.ch-result-foot{bottom:8px!important}
+.ch-form-bars i.win{height:35px!important;background:linear-gradient(#65d99a,#11a95c)!important}
+.ch-form-bars i.draw{height:18px!important;background:linear-gradient(#cbd3df,#8796ae)!important}
+.ch-form-bars i.loss{height:0!important;background:linear-gradient(#f07b84,#d62035)!important}
+.ch-form-labels b{color:#13a95c!important}
+.ch-form-labels b.draw-t{color:#7b8aa0!important}
+.ch-form-labels b.loss-t{color:#d62035!important}
+@media(max-width:390px){.ch-mock-world-fused{height:300px!important}.ch-top-fused{height:136px!important}.ch-world-heading{height:52px!important;margin-top:13px!important}.ch-world-heading:before{top:17px!important}.ch-season-core{top:101px!important;width:114px!important;height:114px!important}.ch-season-core:before{inset:15px!important}.ch-season-inner strong{font-size:25px!important}.ch-lower-pair{height:114px!important}.ch-lower-pair .ch-mock-card{height:114px!important}.ch-lower-pair .ch-mock-last{padding-right:37px!important}.ch-lower-pair .ch-mock-next{padding-left:37px!important}.ch-fixture-row img,.ch-result-row img{width:31px!important;height:31px!important}.ch-fixture-row>strong,.ch-result-row>strong{font-size:14px!important}}

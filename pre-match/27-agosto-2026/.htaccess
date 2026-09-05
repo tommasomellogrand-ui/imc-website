@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteCond %{QUERY_STRING} !(^|&)raw=1(&|$)
+RewriteRule ^data\.js$ data-loader.js [L]
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|css|svg)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>

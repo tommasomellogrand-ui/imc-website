@@ -1,0 +1,1 @@
+{"action":"execute_migration","target":"custom","database":"Sql1956795_3","migration_id":"gw001_match_report_competition_group_backfill_atomic_20260905","plan_sha256":"f9b4084ad6b71258ff37f692abd37863d041551019f38915c373f404cef10fe8","status":"success","statement_count":1,"duration_ms":423,"before":{"tables":165,"columns":0},"after":{"tables":165,"columns":0}}

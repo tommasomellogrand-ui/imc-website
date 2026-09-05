@@ -1,0 +1,32 @@
+DirectoryIndex index.html
+
+Options -MultiViews
+
+RewriteEngine On
+
+# Club logos: one canonical source for every Game World.
+# The filename is read from sm_clubs_master.image_filename and always starts
+# with the SoccerWiki sm_club_id (PNG/JPG variants are both supported).
+RewriteRule ^assets/clubs/([0-9][^/]*\.(png|jpg|jpeg|webp))$ https://cdn.soccerwiki.org/images/logos/clubs/$1 [R=302,L,NE,NC]
+
+# Disable every legacy/local club image so Nexus automatically advances
+# to the canonical master filename loaded from sm_clubs_master.
+RewriteRule ^assets/clubs/.*\.(png|jpg|jpeg|webp)$ - [R=404,L,NC]
+
+# Runtime redeploy marker: no functional effect.
+
+<IfModule mod_headers.c>
+  <FilesMatch "^index\.html$">
+    Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header always set Pragma "no-cache"
+    Header always set Expires "0"
+  </FilesMatch>
+
+  # All runtime JS/CSS must be revalidated. This avoids Safari/iPhone
+  # keeping an older Nexus module after a production patch.
+  <FilesMatch "\.(js|css)$">
+    Header always set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    Header always set Pragma "no-cache"
+    Header always set Expires "0"
+  </FilesMatch>
+</IfModule>

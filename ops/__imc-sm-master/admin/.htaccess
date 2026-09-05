@@ -1,0 +1,5 @@
+Options -Indexes
+<FilesMatch "^(core|import-sm|import-sw|canonical)\.php$">
+  Require all denied
+</FilesMatch>
+

@@ -1,0 +1,103 @@
+:root{
+  --nx-deep-blue:#0A1F44;
+  --nx-electric-blue:#1565FF;
+  --nx-domestic:#1565FF;
+  --nx-domestic-soft:rgba(21,101,255,.12);
+  --nx-international:#F0AA17;
+  --nx-international-soft:rgba(240,170,23,.13);
+  --nx-nations:#0B8FA8;
+  --nx-nations-soft:rgba(11,143,168,.13);
+}
+
+/* Nexus global light identity */
+body,.nx-shell{background:linear-gradient(180deg,#ffffff 0%,#f7f9fc 54%,#eef3f8 100%)!important;color:var(--nx-deep-blue)!important}
+.nx-top,.nx-context,.nx-context-world,.nx-world-nav,.bottom-nav,.topbar{background:rgba(255,255,255,.86)!important;backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%)}
+
+/* Shared glass language */
+.nx-competition-card,
+.nx-competition-detail-card,
+.nx-league-cover,
+.nx-competition-cover,
+.nx-cup-round-card,
+.nx-premium-standings,
+.nx-league-matchday-card,
+.comp-card{
+  --nx-tone:var(--nx-domestic);
+  --nx-tone-soft:var(--nx-domestic-soft);
+  position:relative;
+  overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--nx-tone) 22%,#dfe7f1)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(244,248,253,.60))!important;
+  box-shadow:0 18px 44px rgba(10,31,68,.08),inset 0 1px 0 rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(18px) saturate(135%);
+  -webkit-backdrop-filter:blur(18px) saturate(135%);
+}
+
+.nx-competition-card:before,
+.nx-competition-detail-card:before,
+.nx-league-cover:before,
+.nx-competition-cover:before,
+.nx-cup-round-card:before,
+.nx-premium-standings:before,
+.nx-league-matchday-card:before,
+.comp-card:before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  background:
+    radial-gradient(circle at 100% 0%,color-mix(in srgb,var(--nx-tone) 14%,transparent),transparent 35%),
+    linear-gradient(120deg,transparent 0%,rgba(255,255,255,.44) 42%,transparent 70%)!important;
+  opacity:1!important;
+}
+
+.nx-tone-domestic{--nx-tone:var(--nx-domestic);--nx-tone-soft:var(--nx-domestic-soft)}
+.nx-tone-international{--nx-tone:var(--nx-international);--nx-tone-soft:var(--nx-international-soft)}
+.nx-tone-nations{--nx-tone:var(--nx-nations);--nx-tone-soft:var(--nx-nations-soft)}
+
+.nx-tone-domestic,
+.nx-tone-international,
+.nx-tone-nations{
+  box-shadow:0 18px 44px rgba(10,31,68,.08),0 0 0 1px color-mix(in srgb,var(--nx-tone) 7%,transparent),inset 0 1px 0 rgba(255,255,255,.96)!important;
+}
+
+.nx-tone-domestic h1,.nx-tone-domestic h2,.nx-tone-domestic h3,.nx-tone-domestic strong,
+.nx-tone-international h1,.nx-tone-international h2,.nx-tone-international h3,.nx-tone-international strong,
+.nx-tone-nations h1,.nx-tone-nations h2,.nx-tone-nations h3,.nx-tone-nations strong{
+  color:var(--nx-deep-blue)!important;
+}
+
+.nx-tone-domestic small,.nx-tone-domestic em,.nx-tone-domestic .badge,
+.nx-tone-international small,.nx-tone-international em,.nx-tone-international .badge,
+.nx-tone-nations small,.nx-tone-nations em,.nx-tone-nations .badge{
+  color:var(--nx-tone)!important;
+}
+
+.nx-tone-domestic .nx-trophy-image,
+.nx-tone-international .nx-trophy-image,
+.nx-tone-nations .nx-trophy-image{
+  filter:drop-shadow(0 8px 18px color-mix(in srgb,var(--nx-tone) 28%,transparent))!important;
+}
+
+/* Filter pills: same app, different accent */
+.nx-tone-pill-domestic.active,.nx-tone-pill-domestic.is-active{background:var(--nx-domestic)!important;color:#fff!important;border-color:var(--nx-domestic)!important;box-shadow:0 8px 20px rgba(21,101,255,.24)!important}
+.nx-tone-pill-international.active,.nx-tone-pill-international.is-active{background:var(--nx-international)!important;color:#fff!important;border-color:var(--nx-international)!important;box-shadow:0 8px 20px rgba(240,170,23,.24)!important}
+.nx-tone-pill-nations.active,.nx-tone-pill-nations.is-active{background:var(--nx-nations)!important;color:#fff!important;border-color:var(--nx-nations)!important;box-shadow:0 8px 20px rgba(11,143,168,.24)!important}
+
+/* Deep Blue is structural, especially on white */
+.nx-logo-button,.brand-inline,.nx-context-manager strong,.nx-context-world strong,.nx-world-nav button,.section-title h2,.row-title,.match-team,.nx-page-title h1,.nx-competitions-title h1{color:var(--nx-deep-blue)!important}
+
+/* Competition navigation gets light glass cards */
+.nx-world-nav button,.world-tab,.nx-competition-filter button{
+  border-color:rgba(10,31,68,.10)!important;
+  background:rgba(255,255,255,.68)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+@media(max-width:620px){
+  .nx-competition-card,.nx-competition-detail-card,.nx-league-cover,.nx-competition-cover,.nx-cup-round-card,.nx-premium-standings,.nx-league-matchday-card,.comp-card{
+    border-radius:22px!important;
+  }
+}

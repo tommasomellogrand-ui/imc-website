@@ -1,0 +1,1 @@
+{"action":"execute_migration","target":"gold","database":"Sql1956795_2","migration_id":"20260904_competition_group_expected_matches_v1","plan_sha256":"1450287e36d5eca751bfcfd231553604f9689c842de6a7611c8bd271a3954fe4","status":"success","statement_count":3,"duration_ms":392,"before":{"tables":55,"columns":0},"after":{"tables":56,"columns":0}}

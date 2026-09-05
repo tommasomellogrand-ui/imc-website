@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IMC · Matchday 9 Hub</title>
+<style>
+:root{--accent:#9c7cff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#03050a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif}
+body{overflow:hidden}
+#app{height:100dvh;min-height:100%;position:relative}
+.background{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,5,10,.18),rgba(3,5,10,.72) 48%,#03050a 100%),radial-gradient(circle at 50% 25%,color-mix(in srgb,var(--accent) 24%,#101727),transparent 46%),linear-gradient(150deg,#233049,#080c13 64%,#03050a)}
+.background:after{content:"";position:absolute;left:-15%;right:-15%;top:38%;height:26%;border-top:2px solid rgba(255,255,255,.1);border-radius:50%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 12px);transform:perspective(320px) rotateX(58deg)}
+.header{position:absolute;z-index:4;top:max(12px,env(safe-area-inset-top));left:14px;right:14px}
+.brand{display:flex;justify-content:space-between;font-size:9px;font-weight:900;letter-spacing:.12em;color:#d6b25b}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:11px}
+.tab{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(7,11,18,.86);color:#7f899b;border-radius:9px;padding:9px 2px;font-size:9px;font-weight:900}
+.tab.active{color:#fff;border-color:var(--accent);box-shadow:inset 0 -2px var(--accent)}
+.progress{height:3px;background:rgba(255,255,255,.1);border-radius:3px;margin-top:8px;overflow:hidden}
+.progress span{display:block;height:100%;background:var(--accent);transition:width .25s linear}
+.stage{position:absolute;z-index:2;inset:0;padding:110px 24px 94px;display:flex;align-items:center;justify-content:center;text-align:center}
+.card{width:100%;max-width:480px}
+.kicker{font-size:10px;font-weight:900;letter-spacing:.17em;color:var(--accent);margin-bottom:18px}
+.team{font-size:clamp(30px,9vw,46px);font-weight:900;line-height:.93;letter-spacing:-.055em}
+.rank{font-size:12px;color:#c4ccd8;margin-top:7px;font-weight:700}
+.vs{font-size:10px;color:#8993a5;font-weight:900;letter-spacing:.2em;margin:16px}
+.stadium{font-size:10px;color:#aab2bf;margin-top:18px;letter-spacing:.08em}
+.matchclaim{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.12em;margin-top:14px}
+.managers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.manager{background:rgba(7,11,18,.86);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:24px 8px}
+.mclub{font-size:9px;font-weight:900;color:var(--accent);margin-bottom:11px}
+.mname{font-size:clamp(18px,5vw,25px);font-weight:900;line-height:1.05}
+.mstat{font-size:10px;color:#aab3c1;margin-top:9px;font-weight:800}
+.managerStory{margin:18px auto 0;max-width:430px;font-size:14px;line-height:1.45;color:#d9dee7}
+.storyTitle{font-size:clamp(38px,11vw,62px);font-weight:900;line-height:.86;letter-spacing:-.065em;margin-bottom:22px}
+.story{font-size:clamp(16px,4.5vw,20px);line-height:1.46;color:#e0e5ec}
+.stakes{font-size:11px;color:var(--accent);font-weight:900;margin-top:18px}
+.footer{position:absolute;z-index:4;bottom:max(14px,env(safe-area-inset-bottom));left:14px;right:14px;display:flex;gap:7px}
+button.control{height:50px;border:1px solid rgba(255,255,255,.14);background:rgba(7,11,18,.9);color:#fff;border-radius:14px;font-weight:900}
+#play{width:62px;font-size:18px}
+#status{flex:1;text-align:left;padding:8px 12px}
+#status b{display:block;font-size:11px}
+#status small{display:block;color:#7f899b;margin-top:2px}
+#restart{padding:0 12px;font-size:9px}
+.hint{position:absolute;z-index:4;bottom:max(72px,calc(env(safe-area-inset-bottom) + 58px));left:0;right:0;text-align:center;color:#667184;font-size:9px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const DATA = {"PLATINUM": {"accent": "#9c7cff", "matches": [["Palermo FC", "Al Zubeidi", 8, 9, "AEK Athens", "Clemente Liggi", 3, 14, "LA CACCIA", "AEK resta agganciata alla zona alta. Palermo cerca il risultato capace di rilanciare la propria corsa.", "Stadio Renzo Barbera"], ["Académica de Coimbra", "Nick Keyen", 6, 10, "Dynamo Dresden", "Matteo Sartori", 4, 14, "ACCORCIARE LE DISTANZE", "Quattro punti separano le due squadre. Dresden vuole restare nel gruppo di testa, Académica può accorciare.", "Estádio Cidade de Coimbra"], ["FK Partizan", "Tommaso Prisco", 10, 4, "Parma Calcio 1913", "Lauro Crasti", 9, 6, "SCONTRO SALVEZZA", "Ultima contro penultima, divise da appena due punti. Qui i tre punti pesano il doppio.", "Partizan Stadium"], ["Atalanta BC", "Matteo Giovi", 1, 19, "Torino", "Federico Bonzi", 7, 9, "DIFENDERE LA VETTA", "Atalanta parte con quattro punti di vantaggio. Torino cerca il colpo della serata contro la capolista.", "New Balance Arena"], ["TSV 1860 München", "Marco Fioretti", 5, 10, "AS Reggina 1914", "Saverio Cordiano", 2, 15, "L'INSEGUIMENTO", "Reggina è la prima inseguitrice dell'Atalanta. Il 1860 può accorciare e riaprire la propria corsa.", "Grünwalder Stadion"]]}, "GOLD": {"accent": "#d5aa4f", "matches": [["Feyenoord", "Ringhio Gattuso", 7, 8, "Boca Juniors", "Luca Nudo", 5, 9, "UN PUNTO DI DISTANZA", "Un solo punto separa Feyenoord e Boca. Uno scontro diretto che può cambiare la metà classifica.", "De Kuip"], ["Sunderland", "Lorenzo Errico", 9, 6, "Palmeiras", "Danilo FC 1908", 10, 4, "SCONTRO SALVEZZA", "Nona contro decima. Sunderland può allungare, Palmeiras può riaprire tutto.", "Stadium of Light"], ["Bologna FC", "Fabio Ferrini", 3, 13, "Eintracht Frankfurt", "Nicolae Sasarman", 4, 13, "PARI PUNTI", "Terza contro quarta, entrambe a 13. Novanta minuti per rompere un equilibrio perfetto.", "Stadio Renato Dall'Ara"], ["Sampdoria", "Mattia Bertonati", 2, 19, "Fenerbahçe SK", "Vincenzo Martorano", 1, 20, "PER LA VETTA", "Prima contro seconda, un solo punto. Sampdoria può sorpassare, Fenerbahçe può allungare.", "Stadio Luigi Ferraris"], ["1. FC Kaiserslautern", "Vardan Minasyan", 6, 8, "Genoa CFC", "Giovanni Cabrioli", 8, 7, "UN PUNTO DI DISTANZA", "Otto contro sette punti. Chi vince prende respiro e sale verso il centro classifica.", "Fritz-Walter-Stadion"]]}, "SILVER": {"accent": "#c8d0da", "matches": [["São Paulo FC", "Attilio Bonnici", 10, 5, "Guangzhou FC", "Max Palace", 8, 8, "LA RISALITA", "São Paulo cerca ossigeno dal fondo. Guangzhou può trasformare tre punti di margine in un distacco più pesante.", "MorumBIS"], ["Valencia CF", "Giovanni Iodice", 1, 16, "Celtic", "Sir Simone", 6, 10, "CAPOLISTA SOTTO PRESSIONE", "Valencia difende la vetta con due punti sulle inseguitrici. Celtic cerca il salto verso la metà alta.", "Mestalla"], ["Olympique Marseille", "Mathieu Pioche", 9, 7, "Tottenham Hotspur", "Max Zanoni", 5, 11, "LA SCALATA", "Marseille deve risalire. Tottenham può avvicinarsi ancora al gruppo di testa.", "Orange Vélodrome"], ["Shakhtar Donetsk", "Armando De Giulio", 2, 14, "Atlético Madrid", "Davide Rapisarda", 7, 9, "L'INSEGUIMENTO", "Shakhtar è a due punti dalla vetta. Atlético può fermare una delle grandi inseguitrici.", "Stadio di casa Shakhtar"], ["FC Schalke 04", "Francesco Rossi", 3, 14, "SSC Napoli", "Rosario Giamundo", 4, 13, "SCONTRO ALTA CLASSIFICA", "Terza contro quarta, separate da un solo punto. Una delle sfide più pesanti della giornata.", "VELTINS-Arena"]]}, "BRONZE": {"accent": "#bd7445", "matches": [["Club América", "Emanuele Delli Calici", 10, 2, "SS Lazio", "Alessandro Berardi", 3, 15, "AGLI OPPOSTI", "Lazio è a quattro punti dalla vetta. Club América cerca la svolta dal fondo.", "Estadio Ciudad de los Deportes"], ["Hertha BSC", "Tommaso Mello", 6, 13, "AS Roma", "Pep Buitre", 2, 15, "DUE PUNTI", "Solo due punti separano Hertha e Roma. Una vittoria può ridisegnare tutta la zona alta.", "Olympiastadion Berlin"], ["Borussia Dortmund", "Giorgio Grugni", 1, 19, "Campobasso Calcio", "Simone Campanella", 8, 6, "DIFENDERE IL TRONO", "Dortmund guida con quattro punti di vantaggio. Campobasso cerca il colpo più difficile.", "SIGNAL IDUNA PARK"], ["River Plate", "Marco Catalozzo", 9, 6, "Dynamo Kyiv", "Oleksandr Medvid", 5, 13, "SETTE PUNTI DI DISTANZA", "River cerca punti per risalire. Dynamo può avvicinarsi ancora al gruppo di testa.", "Mâs Monumental"], ["CR Flamengo", "Igor Zanotto", 7, 7, "Legia Warszawa", "Luciano Catalano", 4, 14, "GLI INSEGUITORI", "Legia è dentro la corsa alta. Flamengo ha bisogno di una vittoria per cambiare passo.", "Maracanã"]]}};
+let division = "PLATINUM";
+let matchIndex = 0;
+let phase = 0;
+let running = false;
+let timer = null;
+const durations = [3300,7000,15000];
+
+function currentMatch(){
+  return DATA[division].matches[matchIndex];
+}
+function managerSentence(hm,hp,hpt,am,ap,apt){
+  const gap = Math.abs(hpt-apt);
+  if(gap===0) return "Due manager perfettamente appaiati nei punti: stasera uno dei due può spezzare l'equilibrio.";
+  if(gap<=2) return "Solo "+gap+" "+(gap===1?"punto separa":"punti separano")+" i due manager: il risultato può cambiare subito le gerarchie.";
+  const leader = hpt>apt ? hm : am;
+  return leader+" parte avanti in classifica, ma questa sfida può accorciare o allargare il divario.";
+}
+function matchClaim(hp,hpt,ap,apt){
+  if(hp===1 || ap===1) return "C'È LA CAPOLISTA";
+  if(Math.abs(hpt-apt)<=2) return "SCONTRO DIRETTO";
+  if(hp<=4 && ap<=4) return "SFIDA D'ALTA CLASSIFICA";
+  return "GIORNATA 9";
+}
+function render(){
+  const D=DATA[division], a=D.accent, m=currentMatch();
+  const [h,hm,hp,hpt,aw,am,ap,apt,title,story,stadium]=m;
+  document.documentElement.style.setProperty("--accent",a);
+  let body="";
+  if(phase===0){
+    body=`<div class="card"><div class="kicker">LA PARTITA · ${matchIndex+1}/5</div><div class="team">${h}</div><div class="rank">${hp}° · ${hpt} PT</div><div class="vs">VS · 20:00</div><div class="team">${aw}</div><div class="rank">${ap}° · ${apt} PT</div><div class="matchclaim">${matchClaim(hp,hpt,ap,apt)}</div><div class="stadium">${stadium}</div></div>`;
+  } else if(phase===1){
+    body=`<div class="card"><div class="kicker">I MANAGER · TESTA A TESTA</div><div class="managers"><div class="manager"><div class="mclub">${h}</div><div class="mname">${hm}</div><div class="mstat">${hp}° · ${hpt} PT</div></div><div class="manager"><div class="mclub">${aw}</div><div class="mname">${am}</div><div class="mstat">${ap}° · ${apt} PT</div></div></div><div class="managerStory">${managerSentence(hm,hp,hpt,am,ap,apt)}</div><div class="stadium">${stadium}</div></div>`;
+  } else {
+    body=`<div class="card"><div class="kicker">LA STORIA · COSA C'È IN PALIO</div><div class="storyTitle">${title}</div><div class="story">${story}</div><div class="stakes">${h}: ${hpt+3} PT con una vittoria · ${aw}: ${apt+3} PT con una vittoria</div></div>`;
+  }
+  const progress=((matchIndex*3+phase)/15)*100;
+  document.getElementById("app").innerHTML=`
+    <div class="background"></div>
+    <div class="header">
+      <div class="brand"><span>IMC · ROAD TO HISTORY</span><span>GIORNATA 9</span></div>
+      <div class="tabs">
+        ${Object.keys(DATA).map(k=>`<button class="tab ${k===division?"active":""}" data-div="${k}">${k}</button>`).join("")}
+      </div>
+      <div class="progress"><span style="width:${progress}%"></span></div>
+    </div>
+    <div class="stage">${body}</div>
+    <div class="hint">SHOW AUTOMATICO · 5 PARTITE · CIRCA 2 MINUTI</div>
+    <div class="footer">
+      <button class="control" id="play">${running?"Ⅱ":"▶"}</button>
+      <button class="control" id="status"><b>${h} · ${aw}</b><small>Partita ${matchIndex+1}/5 · ${["LA PARTITA","I MANAGER","LA STORIA"][phase]}</small></button>
+      <button class="control" id="restart">RIPARTI</button>
+    </div>`;
+  document.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click",()=>setDivision(btn.dataset.div));
+  });
+  document.getElementById("play").addEventListener("click",toggle);
+  document.getElementById("restart").addEventListener("click",restart);
+}
+function schedule(){
+  if(!running) return;
+  clearTimeout(timer);
+  timer=setTimeout(next,durations[phase]);
+}
+function next(){
+  if(phase<2){ phase++; }
+  else if(matchIndex<4){ phase=0; matchIndex++; }
+  else { running=false; clearTimeout(timer); timer=null; render(); return; }
+  render();
+  schedule();
+}
+function toggle(){
+  if(running){
+    running=false;
+    clearTimeout(timer);
+    timer=null;
+    render();
+  }else{
+    running=true;
+    render();
+    schedule();
+  }
+}
+function restart(){
+  clearTimeout(timer);
+  matchIndex=0; phase=0; running=true;
+  render(); schedule();
+}
+function setDivision(d){
+  clearTimeout(timer);
+  division=d; matchIndex=0; phase=0; running=false; timer=null;
+  render();
+}
+render();
+</script>
+</body>
+</html>

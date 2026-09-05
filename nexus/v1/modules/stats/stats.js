@@ -1,0 +1,1 @@
+(function(){"use strict";if(window.IMC_STATS)return;let s={container:null};async function mount(o){if(!o||!o.container)throw Error("Stats: parametri mancanti");s.container=o.container;s.container.innerHTML="<div class='nx-empty'>STATS · contenuto da definire.</div>"}function unmount(){if(s.container)s.container.innerHTML="";s.container=null}window.IMC_STATS={mount,unmount};})();

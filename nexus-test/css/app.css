@@ -1,0 +1,4211 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+
+:root{
+  --navy:#071a36;
+  --navy-2:#0e2e5c;
+  --blue:#1762ad;
+  --blue-soft:#eaf3fc;
+  --bg:#f3f6fa;
+  --surface:#ffffff;
+  --line:#dce3ec;
+  --text:#102033;
+  --muted:#6b7787;
+  --success:#067647;
+  --danger:#b42318;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+
+#boot{min-height:100svh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0,rgba(23,98,173,.18),transparent 38%),linear-gradient(180deg,#eef3f9,#fff)}
+.boot-card{text-align:center}
+.boot-card img{width:150px;filter:drop-shadow(0 18px 28px rgba(7,26,54,.2))}
+.boot-card h1{font-size:38px;margin:8px 0;color:var(--navy);letter-spacing:-1.5px}
+.boot-card p{color:var(--muted)}
+.fatal{padding:30px}
+
+.login-screen{min-height:100svh;display:flex;flex-direction:column;padding:max(28px,env(safe-area-inset-top)) 22px max(22px,env(safe-area-inset-bottom));background:radial-gradient(circle at 50% -10%,rgba(23,98,173,.2),transparent 36%),linear-gradient(180deg,#eef3f9,#fff)}
+.login-brand{text-align:center;padding-top:clamp(10px,5vh,48px)}
+.login-brand img{width:min(46vw,190px);filter:drop-shadow(0 15px 24px rgba(7,26,54,.18))}
+.login-brand h1{margin:6px 0 0;font-size:42px;letter-spacing:-1.8px;color:var(--navy)}
+.login-brand p{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;color:var(--muted)}
+.login-card{width:min(100%,460px);margin:32px auto 0;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:26px;padding:22px;box-shadow:0 22px 60px rgba(7,26,54,.12)}
+.field{margin-bottom:15px}
+.field label{display:block;margin:0 0 8px 3px;font-size:13px;font-weight:900;color:var(--navy)}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:16px;background:#fbfcfe;padding:15px 16px;outline:none}
+.field textarea{min-height:185px;resize:vertical;line-height:1.45}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(23,98,173,.1);background:#fff}
+.primary,.secondary{width:100%;border-radius:17px;padding:15px;font-weight:900}
+.primary{border:0;background:linear-gradient(135deg,var(--navy),var(--blue));color:white;box-shadow:0 12px 24px rgba(7,26,54,.2)}
+.secondary{border:1px solid var(--line);background:white;color:var(--blue);margin-top:10px}
+.status{min-height:20px;text-align:center;margin-top:12px;font-size:13px;color:var(--muted)}
+.status.success{color:var(--success)}
+.status.error{color:var(--danger)}
+.setup-note{font-size:12px;line-height:1.5;color:var(--muted);margin:13px 2px 0}
+
+.app-shell{min-height:100svh;padding-bottom:88px}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:max(13px,env(safe-area-inset-top)) 18px 13px;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.brand-inline{display:flex;align-items:center;gap:10px;font-weight:900;color:var(--navy)}
+.brand-inline img{width:39px;height:39px;object-fit:contain}
+.icon-btn{border:0;background:#edf2f8;border-radius:13px;width:42px;height:42px;color:var(--navy);font-size:18px}
+.page{padding:20px 18px 30px;max-width:780px;margin:auto}
+.hero{display:grid;grid-template-columns:92px 1fr;gap:16px;align-items:center;padding:20px;border-radius:25px;color:white;background:linear-gradient(135deg,var(--navy),var(--blue));box-shadow:0 20px 48px rgba(7,26,54,.22)}
+.hero img{width:92px;height:92px;border-radius:23px;object-fit:cover;border:3px solid rgba(255,255,255,.75)}
+.hero h1{font-size:25px;margin:0 0 6px}.hero p{margin:3px 0;color:#dbe9f8}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.stat{background:white;border:1px solid var(--line);border-radius:20px;padding:17px;box-shadow:0 8px 22px rgba(7,26,54,.06)}
+.stat strong{display:block;font-size:25px;color:var(--navy)}
+.stat span{font-size:13px;color:var(--muted)}
+.section{margin-top:24px}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.section-title h2{font-size:19px;margin:0;color:var(--navy)}
+.card{background:white;border:1px solid var(--line);border-radius:22px;padding:17px;box-shadow:0 8px 22px rgba(7,26,54,.06)}
+.list{display:grid;gap:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #edf0f4}
+.row:last-child{border-bottom:0}
+.row-title{font-weight:850}
+.row-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.badge{padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900;background:var(--blue-soft);color:var(--blue)}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 10px max(8px,env(safe-area-inset-bottom));background:rgba(255,255,255,.97);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+.nav-btn{border:0;background:transparent;color:var(--muted);padding:7px 2px;border-radius:12px;font-size:11px;font-weight:800}
+.nav-btn b{display:block;font-size:20px;margin-bottom:3px}
+.nav-btn.active{color:var(--blue);background:#eef5fc}
+.search{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:white;margin-bottom:14px}
+.manager-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f4}
+.manager-row:last-child{border-bottom:0}
+.avatar{width:45px;height:45px;border-radius:14px;background:linear-gradient(135deg,var(--navy),var(--blue));display:grid;place-items:center;color:white;font-weight:900}
+.actions{display:flex;gap:10px}
+.actions button{flex:1}
+.preview-box{background:#09182e;color:#d8e8fb;border-radius:17px;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;overflow:auto;max-height:280px}
+.warning{background:#fff8e7;color:#8a4b00;border:1px solid #f3d39a;border-radius:16px;padding:13px;font-size:13px;line-height:1.45;margin-bottom:15px}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
+
+.world-hero{padding:22px;border-radius:25px;background:linear-gradient(135deg,#071a36,#1762ad);color:#fff;box-shadow:0 20px 48px rgba(7,26,54,.22)}
+.world-hero small{font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#cfe2f7}
+.world-hero h1{margin:7px 0 5px;font-size:29px}
+.world-hero p{margin:0;color:#dceafb}
+.world-tabs{display:flex;gap:8px;overflow:auto;padding:14px 0 2px;scrollbar-width:none}
+.world-tabs::-webkit-scrollbar{display:none}
+.world-tab{white-space:nowrap;border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:999px;padding:10px 14px;font-size:12px;font-weight:900}
+.world-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.comp-group{display:grid;gap:10px}
+.comp-card{border:1px solid var(--line);border-radius:18px;padding:15px;background:#fff}
+.comp-card strong{display:block;color:var(--navy)}
+.comp-card span{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+.back-link{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:var(--blue);font-weight:900;padding:0 0 13px}
+.kpi-line{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.kpi-pill{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:8px 11px;border-radius:999px;font-size:12px;font-weight:850}
+
+.match-line{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  padding:15px 0;
+  border-bottom:1px solid #edf0f4;
+}
+.match-line:last-child{border-bottom:0}
+.match-team{
+  min-width:0;
+  font-weight:850;
+  color:var(--navy);
+  line-height:1.2;
+}
+.match-home{text-align:right}
+.match-away{text-align:left}
+.match-score{
+  min-width:58px;
+  text-align:center;
+  padding:7px 10px;
+  border-radius:999px;
+  background:var(--blue-soft);
+  color:var(--blue);
+  font-weight:900;
+  white-space:nowrap;
+}
+@media(max-width:430px){
+  .match-line{gap:7px}
+  .match-team{font-size:14px}
+  .match-score{min-width:52px;padding:6px 8px}
+}
+
+
+/* ============================================================
+   IMC NEXUS v2.0 UI
+   ============================================================ */
+
+.nx-shell{
+  min-height:100vh;
+  background:#f4f6fa;
+  color:#0b1a35;
+  padding-bottom:98px;
+}
+.nx-top{
+  position:sticky;
+  top:0;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 22px;
+  background:#fff;
+  border-bottom:1px solid #e6e9ef;
+}
+.nx-logo-button{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border:0;
+  background:transparent;
+  color:#0b1a35;
+  font-size:20px;
+}
+.nx-logo-button img{width:34px;height:34px}
+.nx-round-btn{
+  width:48px;
+  height:48px;
+  border:0;
+  border-radius:16px;
+  background:#f2f5fa;
+  color:#0b1a35;
+  font-size:24px;
+}
+.nx-context{
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  background:#fff;
+  border-bottom:1px solid #e6e9ef;
+}
+.nx-context-manager,
+.nx-context-world{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:22px;
+}
+.nx-context-manager{
+  border-right:1px solid #e6e9ef;
+}
+.nx-context-manager img{width:44px;height:44px}
+.nx-context-manager strong,
+.nx-context-world strong{display:block;font-size:18px}
+.nx-context-manager span{display:block;color:#7b8494;font-size:13px;margin-top:4px}
+.nx-context-world{
+  border:0;
+  background:#fff;
+  justify-content:space-between;
+  color:#0b1a35;
+}
+.nx-world-nav{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  background:#fff;
+  margin:16px 18px 0;
+  border-bottom:1px solid #dfe3ea;
+}
+.nx-world-nav button{
+  border:0;
+  background:#fff;
+  padding:14px 4px;
+  color:#697386;
+  font-size:11px;
+  font-weight:800;
+  border-bottom:3px solid transparent;
+}
+.nx-world-nav button b{display:block;font-size:20px;margin-bottom:6px}
+.nx-world-nav button.active{
+  color:#2460ed;
+  border-bottom-color:#2460ed;
+}
+.nx-main{padding:16px 18px 24px}
+.nx-card{
+  background:#fff;
+  border:1px solid #dfe3ea;
+  border-radius:24px;
+  padding:20px;
+  box-shadow:0 8px 22px rgba(20,39,78,.05);
+}
+.nx-page-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.nx-page-title h1{font-size:30px;margin:0}
+.nx-page-title p{margin:4px 0 0;color:#7b8494}
+.nx-title-tools{display:flex;gap:10px}
+.nx-title-tools button{
+  width:46px;height:46px;border:1px solid #dfe3ea;background:#fff;border-radius:14px;font-size:20px
+}
+.nx-filter-tabs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:20px 0;
+}
+.nx-filter-tabs button{
+  border:1px solid #dfe3ea;
+  background:#fff;
+  padding:14px 8px;
+  border-radius:14px;
+  color:#27344d;
+  font-weight:800;
+}
+.nx-filter-tabs button.active{
+  background:#0c1c3a;
+  color:#fff;
+  border-color:#0c1c3a;
+}
+.nx-summary-line{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+  padding:16px 0;
+  border-top:1px solid #edf0f4;
+  border-bottom:1px solid #edf0f4;
+  color:#4a5568;
+}
+.nx-competition-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:20px;
+}
+.nx-comp-tile{
+  min-height:160px;
+  border:1px solid #dfe3ea;
+  background:#fff;
+  border-radius:18px;
+  padding:16px 10px;
+  color:#0b1a35;
+}
+.nx-comp-tile strong{display:block;margin-top:10px;font-size:15px}
+.nx-trophy-icon{
+  width:74px;
+  height:74px;
+  margin:0 auto;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(145deg,#e9edf5,#fff);
+  font-size:38px;
+  color:#7a6a4a;
+}
+.nx-trophy-icon.large{
+  width:88px;height:88px;margin:0;font-size:48px;
+}
+.nx-back-link{
+  border:0;
+  background:transparent;
+  color:#2460ed;
+  font-weight:800;
+  padding:0 0 18px;
+}
+.nx-competition-head{
+  display:flex;
+  align-items:center;
+  gap:22px;
+}
+.nx-competition-head h1{font-size:30px;margin:0}
+.nx-competition-head p{margin:6px 0 0;color:#7b8494}
+.nx-detail-tabs{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:4px;
+  margin-top:22px;
+  border-bottom:1px solid #dfe3ea;
+}
+.nx-detail-tabs button{
+  border:0;background:#fff;color:#697386;padding:12px 4px;border-bottom:3px solid transparent;font-size:20px
+}
+.nx-detail-tabs button span{display:block;font-size:10px;margin-top:6px;font-weight:800}
+.nx-detail-tabs button.active{color:#2460ed;border-bottom-color:#2460ed}
+.nx-detail-content{margin-top:18px}
+.nx-loading{padding:20px;color:#7b8494}
+.nx-hero-card{
+  background:linear-gradient(135deg,#10264d,#34558f);
+  color:#fff;
+  border-radius:24px;
+  padding:28px;
+}
+.nx-hero-card small{letter-spacing:.16em}
+.nx-hero-card h1{font-size:32px;margin:12px 0}
+.nx-hero-card p{color:#d9e2f3}
+.nx-chips{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.nx-chips span{padding:10px 14px;border:1px solid #dfe3ea;border-radius:999px}
+.nx-world-summary{
+  width:100%;
+  border:1px solid #dfe3ea;
+  background:#fff;
+  border-radius:18px;
+  padding:18px;
+  display:flex;
+  justify-content:space-between;
+  text-align:left;
+}
+.nx-world-summary small{display:block;color:#2460ed}
+.nx-world-summary strong{display:block;font-size:18px;margin-top:4px}
+.nx-world-summary > span{font-weight:900;color:#2460ed}
+.nx-bottom{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:30;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  align-items:end;
+  background:#fff;
+  border-top:1px solid #dfe3ea;
+  padding:10px 6px max(10px,env(safe-area-inset-bottom));
+}
+.nx-bottom button{
+  border:0;background:#fff;color:#697386;font-size:18px
+}
+.nx-bottom button span{display:block;font-size:10px;margin-top:5px;font-weight:800}
+.nx-home-orb{
+  width:68px!important;
+  height:68px;
+  border-radius:50%!important;
+  background:#17345f!important;
+  color:#fff!important;
+  margin:-34px auto 0;
+  border:5px solid #fff!important;
+  box-shadow:0 8px 18px rgba(23,52,95,.28);
+}
+.nx-drawer{
+  position:fixed;
+  z-index:50;
+  inset:0 auto 0 0;
+  width:min(90vw,430px);
+  background:#fff;
+  transform:translateX(-102%);
+  transition:.25s ease;
+  overflow:auto;
+}
+.nx-drawer.open{transform:translateX(0)}
+.nx-overlay{
+  position:fixed;
+  z-index:40;
+  inset:0;
+  background:rgba(0,0,0,.35);
+}
+.nx-drawer-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px;
+}
+.nx-profile-switch{
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  border-top:1px solid #e6e9ef;
+  border-bottom:1px solid #e6e9ef;
+}
+.nx-manager-box,.nx-world-box{
+  display:flex;align-items:center;gap:12px;padding:20px
+}
+.nx-manager-box{border-right:1px solid #e6e9ef}
+.nx-manager-box img{width:42px}
+.nx-manager-box span{display:block;color:#7b8494;font-size:12px;margin-top:4px}
+.nx-world-list{padding:8px 0}
+.nx-world-item{
+  width:100%;
+  display:grid;
+  grid-template-columns:90px 1fr auto;
+  align-items:center;
+  text-align:left;
+  border:0;
+  background:#fff;
+  padding:16px 22px;
+  border-bottom:1px solid #edf0f4;
+  color:#0b1a35;
+}
+.nx-world-item span{color:#2460ed}
+.nx-world-item small{color:#7b8494}
+
+@media(max-width:430px){
+  .nx-context{grid-template-columns:1.15fr .85fr}
+  .nx-context-manager,.nx-context-world{padding:16px}
+  .nx-context-manager strong,.nx-context-world strong{font-size:16px}
+  .nx-main{padding:14px}
+  .nx-card{padding:16px}
+  .nx-competition-grid{gap:8px}
+  .nx-comp-tile{min-height:138px;padding:12px 6px}
+  .nx-trophy-icon{width:62px;height:62px;font-size:32px}
+  .nx-filter-tabs button{font-size:12px}
+}
+
+.nx-empty-state{margin-top:18px}
+.nx-empty-box{
+  margin-top:20px;
+  padding:24px;
+  border:1px dashed #cfd6e3;
+  border-radius:18px;
+  background:#fafbfe;
+  text-align:center;
+}
+.nx-empty-box strong{
+  display:block;
+  color:#0b1a35;
+  font-size:18px;
+}
+.nx-empty-box span{
+  display:block;
+  color:#7b8494;
+  margin-top:8px;
+  line-height:1.5;
+}
+.nx-assignment-list{
+  display:grid;
+  gap:12px;
+  margin-top:20px;
+}
+.nx-assignment-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:16px;
+  border:1px solid #dfe3ea;
+  border-radius:16px;
+}
+.nx-assignment-row small{
+  display:block;
+  color:#2460ed;
+  font-weight:800;
+}
+.nx-assignment-row strong{
+  display:block;
+  margin-top:4px;
+}
+.nx-assignment-row span{
+  display:block;
+  color:#7b8494;
+  margin-top:4px;
+}
+
+.nx-top-actions{display:flex;gap:8px}.nx-logo-button small{display:block;font-size:10px;letter-spacing:.13em;color:#b54708;margin-top:2px;text-align:left}.nx-app-menu{position:fixed;z-index:70;top:78px;right:16px;width:250px;background:#fff;border:1px solid #dfe3ea;border-radius:18px;padding:8px;box-shadow:0 22px 55px rgba(7,26,54,.2)}.nx-app-menu button{width:100%;display:flex;gap:12px;align-items:center;border:0;background:#fff;padding:14px;border-radius:12px;text-align:left;color:#0b1a35;font-weight:800}.nx-app-menu button:active{background:#eef4ff}.nx-app-menu .nx-admin-entry{color:#b54708;background:#fff8ed}.nx-menu-divider{height:1px;background:#e8ebf0;margin:6px}.nx-admin-shell{max-width:820px;margin:auto}.nx-admin-head{background:linear-gradient(135deg,#111d35,#263f6b);color:#fff;border-radius:24px;padding:26px;margin-bottom:18px}.nx-admin-head.compact{padding-bottom:22px}.nx-admin-head small{letter-spacing:.16em;color:#b9c9e4}.nx-admin-head h1{font-size:32px;margin:10px 0 6px}.nx-admin-head p{margin:0;color:#d7e0ef}.nx-admin-head .nx-back-link{color:#fff}.nx-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.nx-admin-card{min-height:145px;border:1px solid #dfe3ea;background:#fff;border-radius:20px;padding:20px;text-align:left;color:#0b1a35}.nx-admin-card b{display:block;font-size:30px}.nx-admin-card strong{display:block;font-size:18px;margin-top:14px}.nx-admin-card span{display:block;color:#7b8494;margin-top:6px}.nx-admin-card.primary-card{background:#eef4ff;border-color:#b9cdf7;color:#174ea6}@media(max-width:430px){.nx-admin-grid{grid-template-columns:1fr}.nx-app-menu{top:70px;right:10px;width:230px}}
+
+.nx-admin-badge{
+  display:inline-block;
+  margin-top:7px;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#0c1c3a;
+  color:#fff;
+  font-size:10px;
+  font-style:normal;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.nx-admin-direct{
+  background:#0c1c3a !important;
+  color:#fff !important;
+}
+.nx-logo-button small{
+  display:block;
+  margin-top:3px;
+  font-size:9px;
+  color:#7b8494;
+  letter-spacing:.08em;
+}
+
+.field-help{
+  margin-top:8px;
+  color:#6f7a8e;
+  font-size:12px;
+  font-weight:700;
+}
+#importMode optgroup{font-weight:900}
+
+.nx-trophy-icon{
+  overflow:hidden;
+}
+.nx-trophy-icon img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+.nx-trophy-icon.large{
+  background:transparent;
+  border-radius:0;
+  overflow:visible;
+}
+.nx-trophy-icon.large img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.nx-comp-tile .nx-trophy-icon{
+  background:linear-gradient(145deg,#f1f3f8,#fff);
+  padding:5px;
+  box-sizing:border-box;
+}
+
+.nx-entity-search{
+  margin:18px 0;
+}
+.nx-entity-search input{
+  width:100%;
+  border:1px solid #dfe3ea;
+  border-radius:15px;
+  padding:14px 16px;
+  background:#f8faff;
+  color:#0b1a35;
+  font-size:16px;
+}
+.nx-entity-list{
+  display:grid;
+  gap:9px;
+}
+.nx-entity-row{
+  width:100%;
+  display:grid;
+  grid-template-columns:44px 1fr auto;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  border:1px solid #e1e5ec;
+  border-radius:16px;
+  background:#fff;
+  color:#0b1a35;
+  text-align:left;
+}
+.nx-entity-row strong{
+  font-size:16px;
+}
+.nx-entity-avatar{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:13px;
+  background:#eef3ff;
+  color:#2460ed;
+  font-size:20px;
+}
+.nx-entity-profile-head{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-bottom:22px;
+}
+.nx-entity-profile-icon{
+  width:76px;
+  height:76px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:22px;
+  background:#0c1c3a;
+  color:#fff;
+  font-size:34px;
+}
+.nx-entity-profile-head h1{
+  margin:0;
+  font-size:30px;
+}
+.nx-entity-profile-head p{
+  margin:5px 0 0;
+  color:#7b8494;
+}
+.nx-stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:9px;
+}
+.nx-stat-card{
+  padding:13px 8px;
+  border:1px solid #e1e5ec;
+  border-radius:15px;
+  background:#fafbfe;
+  text-align:center;
+}
+.nx-stat-card span{
+  display:block;
+  color:#7b8494;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+.nx-stat-card strong{
+  display:block;
+  margin-top:5px;
+  font-size:20px;
+}
+.nx-profile-section{
+  margin-top:26px;
+}
+.nx-profile-section h2{
+  margin:0 0 13px;
+  font-size:20px;
+}
+.nx-competition-stat{
+  margin-bottom:11px;
+  padding:15px;
+  border:1px solid #e1e5ec;
+  border-radius:17px;
+}
+.nx-competition-stat-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.nx-competition-stat-head strong,
+.nx-competition-stat-head span{
+  display:block;
+}
+.nx-competition-stat-head span{
+  margin-top:3px;
+  color:#7b8494;
+  font-size:12px;
+}
+.nx-mini-trophy{
+  width:48px;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.nx-mini-trophy img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.nx-stat-line{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 12px;
+  margin-top:13px;
+  padding-top:12px;
+  border-top:1px solid #edf0f4;
+  color:#4e5a70;
+  font-size:13px;
+}
+.nx-entity-match-list{
+  display:grid;
+  gap:10px;
+}
+.nx-entity-match{
+  padding:13px;
+  border:1px solid #e1e5ec;
+  border-radius:17px;
+}
+.nx-entity-match-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:7px;
+  font-size:12px;
+}
+.nx-entity-match-meta span{
+  color:#7b8494;
+}
+@media(max-width:430px){
+  .nx-stat-grid{
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+  }
+  .nx-stat-card{
+    padding:10px 4px;
+  }
+  .nx-stat-card strong{
+    font-size:17px;
+  }
+}
+
+.nx-manager-row small{display:block;margin-top:4px;color:#7b8494}.nx-manager-profile-head{display:flex;align-items:center;gap:18px;margin-bottom:22px}.nx-manager-photo{width:82px;height:82px;border-radius:24px;background:#0c1c3a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:34px}.nx-manager-profile-head h1{margin:0;font-size:30px}.nx-manager-profile-head p{margin:5px 0 0;color:#7b8494}.nx-assignment-panels{display:grid;grid-template-columns:1fr 1fr;gap:12px}.nx-current-assignment{padding:16px;border:1px solid #e1e5ec;border-radius:17px;background:#fafbfe}.nx-current-assignment small,.nx-current-assignment strong,.nx-current-assignment span{display:block}.nx-current-assignment small{color:#7b8494;font-weight:800}.nx-current-assignment strong{margin-top:6px;font-size:18px}.nx-current-assignment span{margin-top:5px;color:#4e5a70}.nx-manager-career-block{margin-bottom:16px;padding:15px;border:1px solid #e1e5ec;border-radius:18px}.nx-manager-career-title strong,.nx-manager-career-title span{display:block}.nx-manager-career-title span{margin-top:4px;color:#7b8494;font-size:12px}.nx-h2h-list{display:grid;gap:10px;margin-top:14px}.nx-h2h-row{padding:14px;border:1px solid #e1e5ec;border-radius:16px}.nx-h2h-row strong,.nx-h2h-row span{display:block}.nx-h2h-row>div:first-child span{margin-top:4px;color:#7b8494;font-size:12px}.nx-record-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.nx-record-card{padding:16px;border:1px solid #e1e5ec;border-radius:16px;background:#fafbfe}.nx-record-card span,.nx-record-card strong{display:block}.nx-record-card span{color:#7b8494;font-size:12px}.nx-record-card strong{margin-top:6px;font-size:20px}.nx-career-timeline{position:relative;padding-left:22px}.nx-career-timeline:before{content:"";position:absolute;left:7px;top:5px;bottom:5px;width:2px;background:#dfe5f0}.nx-timeline-item{position:relative;margin-bottom:18px}.nx-timeline-dot{position:absolute;left:-21px;top:5px;width:12px;height:12px;border-radius:50%;background:#2460ed}.nx-timeline-item small,.nx-timeline-item strong,.nx-timeline-item span{display:block}.nx-timeline-item small{color:#2460ed;font-weight:800}.nx-timeline-item strong{margin-top:3px}.nx-timeline-item span{margin-top:4px;color:#7b8494;font-size:12px}@media(max-width:430px){.nx-assignment-panels{grid-template-columns:1fr}.nx-record-grid{grid-template-columns:1fr 1fr}}
+
+.nx-global-filter-note{
+  margin:18px 0;
+  padding:12px 14px;
+  border-radius:14px;
+  background:#f3f6fc;
+  color:#556176;
+  font-size:13px;
+}
+.nx-schedule-day{
+  margin-top:22px;
+}
+.nx-schedule-day-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:11px;
+  padding-bottom:9px;
+  border-bottom:1px solid #e8ecf2;
+}
+.nx-schedule-day-head h2{
+  margin:0;
+  font-size:19px;
+}
+.nx-schedule-day-head span{
+  color:#7b8494;
+  font-size:12px;
+}
+.nx-h2h-summary-grid{
+  grid-template-columns:repeat(5,1fr);
+}
+.nx-h2h-details{
+  border:1px solid #e1e5ec;
+  border-radius:17px;
+  overflow:hidden;
+  background:#fff;
+}
+.nx-h2h-details summary{
+  cursor:pointer;
+  list-style:none;
+  border:0;
+  border-radius:0;
+}
+.nx-h2h-details summary::-webkit-details-marker{
+  display:none;
+}
+.nx-h2h-match-history{
+  display:grid;
+  gap:9px;
+  padding:0 13px 13px;
+  border-top:1px solid #edf0f4;
+}
+.nx-h2h-match-history .nx-entity-match:first-child{
+  margin-top:13px;
+}
+@media(max-width:430px){
+  .nx-h2h-summary-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+
+/* BUILD 6.5.3 - UNIFIED BOX LAYOUT */
+.nx-entity-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-top:20px;
+}
+
+.nx-entity-tile{
+  width:100%;
+  min-width:0;
+  min-height:160px;
+  border:1px solid #dfe3ea;
+  background:#fff;
+  border-radius:18px;
+  padding:16px 10px;
+  color:#0b1a35;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:center;
+  overflow:hidden;
+}
+
+.nx-entity-tile-icon{
+  width:74px;
+  height:74px;
+  flex:0 0 74px;
+  margin:0 auto;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(145deg,#e9edf5,#fff);
+  color:#526176;
+  font-size:34px;
+}
+
+.nx-entity-tile strong{
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  margin-top:10px;
+  font-size:15px;
+  line-height:1.18;
+  text-align:center;
+  overflow-wrap:anywhere;
+}
+
+.nx-entity-tile small{
+  display:block;
+  width:100%;
+  margin-top:5px;
+  color:#7b8494;
+  font-size:10px;
+  line-height:1.2;
+  text-align:center;
+}
+
+.nx-manager-tile-sub{
+  display:-webkit-box !important;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.nx-manager-tile-icon{
+  font-size:28px;
+}
+
+@media(max-width:430px){
+  .nx-entity-grid{
+    gap:8px;
+  }
+
+  .nx-entity-tile{
+    min-height:160px;
+    padding:14px 7px;
+  }
+
+  .nx-entity-tile-icon{
+    width:68px;
+    height:68px;
+    flex-basis:68px;
+  }
+
+  .nx-entity-tile strong{
+    font-size:14px;
+  }
+}
+
+
+/* BUILD 6.5.4 - FLAGS & CLUB LOGOS */
+.nx-entity-image-wrap{
+  position:relative;
+  overflow:hidden;
+}
+
+.nx-entity-image{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  padding:7px;
+}
+
+.nx-entity-image-fallback{
+  display:none;
+  width:100%;
+  height:100%;
+  align-items:center;
+  justify-content:center;
+  color:#526176;
+  font-size:34px;
+}
+
+.nx-entity-tile[data-entity-id] .nx-entity-image-wrap{
+  background:linear-gradient(145deg,#f1f4fa,#fff);
+}
+
+
+/* BUILD 6.5.5 - NATIONAL TEAMS GLOBAL FIX */
+.nx-entity-profile-icon .nx-entity-tile-icon{
+  width:100%;
+  height:100%;
+  margin:0;
+  border-radius:20px;
+}
+
+.nx-entity-profile-icon .nx-entity-image{
+  padding:10px;
+}
+
+.nx-entity-profile-fallback{
+  display:flex;
+  width:100%;
+  height:100%;
+  align-items:center;
+  justify-content:center;
+}
+
+.nx-inline-flag{
+  width:24px;
+  height:16px;
+  flex:0 0 24px;
+  object-fit:cover;
+  border-radius:3px;
+  box-shadow:0 0 0 1px rgba(11,26,53,.12);
+}
+
+.match-team{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.match-home{
+  justify-content:flex-end;
+}
+
+.match-away{
+  justify-content:flex-start;
+}
+
+
+/* BUILD 6.5.7 - GROUP STAGE LAYOUT & STANDINGS */
+.nx-matchday-block{
+  margin-bottom:30px;
+}
+
+.nx-matchday-heading{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:14px;
+  padding-bottom:12px;
+  border-bottom:2px solid #e7ebf2;
+}
+
+.nx-matchday-heading small{
+  display:block;
+  margin-bottom:4px;
+  color:#3568ed;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.nx-matchday-heading h2{
+  margin:0;
+  color:#0b1a35;
+  font-size:24px;
+}
+
+.nx-matchday-heading > strong{
+  color:#657086;
+  font-size:14px;
+}
+
+.nx-matchday-groups{
+  display:grid;
+  gap:16px;
+}
+
+.nx-group-block h3,
+.nx-group-standing h2{
+  margin:0 0 8px;
+  color:#0b1a35;
+  font-size:17px;
+}
+
+.nx-group-block .card{
+  margin:0;
+}
+
+.nx-group-standing{
+  margin-bottom:24px;
+}
+
+.nx-standing-wrap{
+  overflow-x:auto;
+  border:1px solid #dfe3ea;
+  border-radius:17px;
+  background:#fff;
+}
+
+.nx-standing-table{
+  width:100%;
+  min-width:620px;
+  border-collapse:collapse;
+}
+
+.nx-standing-table th{
+  padding:10px 8px;
+  color:#7b8494;
+  font-size:11px;
+  text-align:center;
+}
+
+.nx-standing-table th:nth-child(2),
+.nx-standing-table td:nth-child(2){
+  text-align:left;
+}
+
+.nx-standing-table td{
+  padding:12px 8px;
+  border-top:1px solid #edf0f4;
+  color:#0b1a35;
+  font-size:13px;
+  text-align:center;
+}
+
+.nx-detail-tabs:has([data-comp-tab="standings"]){
+  grid-template-columns:repeat(4,1fr);
+}
+
+@media(max-width:430px){
+  .nx-matchday-heading h2{
+    font-size:21px;
+  }
+
+  .nx-detail-tabs:has([data-comp-tab="standings"]) button{
+    font-size:11px;
+  }
+}
+
+
+/* BUILD 6.5.8 - NULL SCORES & MOBILE STANDINGS FIX */
+.nx-standing-head,
+.nx-standing-main{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) 32px 44px 38px;
+  gap:8px;
+  align-items:center;
+}
+
+.nx-standing-head{
+  padding:0 12px 8px;
+  color:#7b8494;
+  font-size:10px;
+  font-weight:800;
+}
+
+.nx-standing-list{
+  display:grid;
+  gap:8px;
+}
+
+.nx-standing-row{
+  border:1px solid #dfe3ea;
+  border-radius:16px;
+  background:#fff;
+  padding:11px 12px;
+}
+
+.nx-standing-main{
+  color:#0b1a35;
+  font-size:13px;
+}
+
+.nx-standing-pos{
+  font-weight:900;
+}
+
+.nx-standing-team{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.nx-standing-detail{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 12px;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid #edf0f4;
+  color:#6f7888;
+  font-size:10px;
+}
+
+.nx-standing-wrap,
+.nx-standing-table{
+  display:none !important;
+}
+
+@media(max-width:430px){
+  .nx-standing-head,
+  .nx-standing-main{
+    grid-template-columns:24px minmax(0,1fr) 28px 40px 34px;
+    gap:6px;
+  }
+
+  .nx-standing-row{
+    padding:10px;
+  }
+
+  .nx-standing-main{
+    font-size:12px;
+  }
+}
+
+
+/* BUILD 6.5.9 - SINGLE BOX STANDINGS */
+.nx-standing-head,
+.nx-standing-list,
+.nx-standing-row,
+.nx-standing-main,
+.nx-standing-detail{
+  display:none !important;
+}
+
+.nx-standing-box{
+  overflow-x:auto;
+  border:1px solid #dfe3ea;
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 6px 18px rgba(11,26,53,.04);
+}
+
+.nx-standing-table-head,
+.nx-standing-table-row{
+  display:grid;
+  grid-template-columns:28px minmax(130px,1fr) repeat(8,36px);
+  align-items:center;
+  min-width:560px;
+}
+
+.nx-standing-table-head{
+  padding:10px 12px;
+  background:#f7f9fc;
+  color:#7b8494;
+  font-size:10px;
+  font-weight:900;
+  text-align:center;
+}
+
+.nx-standing-table-head span:nth-child(2){
+  text-align:left;
+}
+
+.nx-standing-table-row{
+  position:relative;
+  padding:12px;
+  border-top:1px solid #edf0f4;
+  color:#0b1a35;
+  font-size:12px;
+  text-align:center;
+}
+
+.nx-standing-table-row:first-child{
+  border-top:0;
+}
+
+.nx-standing-table-row.qualified::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:5px;
+  background:#24b45a;
+}
+
+.nx-standing-table-row .nx-standing-team{
+  min-width:0;
+  padding-left:6px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:left;
+}
+
+.nx-standing-table-row strong:last-child{
+  font-size:13px;
+}
+
+@media(max-width:430px){
+  .nx-standing-table-head,
+  .nx-standing-table-row{
+    grid-template-columns:24px minmax(120px,1fr) repeat(8,34px);
+    min-width:540px;
+  }
+
+  .nx-standing-table-head{
+    padding:9px 10px;
+  }
+
+  .nx-standing-table-row{
+    padding:11px 10px;
+    font-size:11px;
+  }
+}
+
+/* Match links: team/nation and assigned manager */
+.match-team{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:3px;
+}
+.nx-match-entity-link,
+.nx-match-manager-link{
+  appearance:none;
+  border:0;
+  background:transparent;
+  padding:0;
+  margin:0;
+  font:inherit;
+  cursor:pointer;
+}
+.nx-match-entity-link{
+  color:inherit;
+  font-weight:inherit;
+  line-height:1.12;
+}
+.nx-match-manager-link{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:750;
+  line-height:1.2;
+}
+.match-home .nx-match-entity-link,
+.match-home .nx-match-manager-link{text-align:right;}
+.match-away .nx-match-entity-link,
+.match-away .nx-match-manager-link{text-align:left;}
+.nx-match-entity-link:active,
+.nx-match-manager-link:active{opacity:.55;}
+.match-home{align-items:flex-end;}
+.match-away{align-items:flex-start;}
+
+/* Admin Manager Registry 7.0 */
+.nx-registry-shell{padding-bottom:48px}
+.nx-registry-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;margin:18px 0}
+.nx-registry-toolbar input,.nx-registry-editor input{width:100%;border:1px solid var(--line);border-radius:18px;background:#f8faff;color:var(--ink);font:inherit;padding:15px 16px;box-sizing:border-box}
+.nx-primary-action,.nx-secondary-action{appearance:none;border:0;border-radius:16px;padding:14px 18px;font:inherit;font-weight:850;cursor:pointer}
+.nx-primary-action{background:#173b73;color:#fff}
+.nx-secondary-action{background:#eef2f8;color:#0b1d3a}
+.nx-primary-action:disabled{opacity:.55}
+.nx-registry-list{display:grid;gap:10px}
+.nx-registry-row{appearance:none;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto 18px;align-items:center;gap:12px;text-align:left;border:1px solid var(--line);border-radius:20px;background:#fff;padding:17px 18px;color:var(--ink);cursor:pointer}
+.nx-registry-row div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.nx-registry-row strong{font-size:17px}
+.nx-registry-row span,.nx-registry-row small{color:var(--muted);font-weight:650}
+.nx-registry-row small{text-align:right;max-width:220px}
+.nx-registry-row>b{font-size:25px}
+.nx-registry-editor{border:1px solid #b9cdf4;background:#f4f7fd;border-radius:24px;padding:20px;margin:0 0 20px;display:grid;gap:16px}
+.nx-registry-editor-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.nx-registry-editor-head small{color:#315dac;font-weight:900;letter-spacing:.12em}
+.nx-registry-editor-head h2{margin:5px 0 0}
+.nx-registry-editor>label{display:grid;gap:7px;font-weight:800;color:#20314f}
+.nx-world-memberships{border:1px solid var(--line);border-radius:18px;background:#fff;padding:15px;margin:0}
+.nx-world-memberships legend{font-weight:900;padding:0 6px}
+.nx-world-memberships>p{margin:4px 0 14px;color:var(--muted);font-size:13px;line-height:1.4}
+.nx-world-memberships>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.nx-world-memberships label{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:14px;padding:11px;background:#fafcff;cursor:pointer}
+.nx-world-memberships input{width:18px;height:18px;accent-color:#245edc}
+.nx-world-memberships span{display:flex;flex-direction:column;font-size:12px;color:var(--muted)}
+.nx-world-memberships strong{font-size:14px;color:var(--ink)}
+.nx-save-manager{width:100%;margin-top:2px}
+.status.success{color:#087a43;background:#eaf8f1;border:1px solid #a9ddc2;padding:12px 14px;border-radius:14px;margin-bottom:12px}
+
+@media(max-width:620px){
+  .nx-registry-toolbar{grid-template-columns:1fr}
+  .nx-registry-row{grid-template-columns:minmax(0,1fr) 18px}
+  .nx-registry-row small{grid-column:1/-1;text-align:left;max-width:none}
+  .nx-world-memberships>div{grid-template-columns:1fr}
+  .nx-registry-editor-head{flex-direction:column}
+}
+
+/* Competition & Trophy Registry 8.0 */
+.nx-competition-registry{display:grid;gap:18px}
+.nx-competition-group{border:1px solid var(--line);border-radius:24px;background:#fff;padding:18px}
+.nx-competition-group-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.nx-competition-group-head>span{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#edf3ff;font-size:23px}
+.nx-competition-group-head small{color:#315dac;font-weight:900;letter-spacing:.11em}
+.nx-competition-group-head h2{margin:3px 0 0}
+.nx-static-row{cursor:default}
+.nx-static-row>b{color:#07834c}
+.nx-registry-editor select{width:100%;border:1px solid var(--line);border-radius:18px;background:#fff;color:var(--ink);font:inherit;padding:15px 16px;box-sizing:border-box}
+.nx-registry-editor label>span.nx-optional{font-weight:600;color:var(--muted)}
+.nx-editor-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+.nx-danger-action{appearance:none;border:0;border-radius:16px;padding:14px 18px;background:#fdebec;color:#a51f2d;font:inherit;font-weight:850;cursor:pointer}
+.nx-trophy-row small{max-width:260px}
+.nx-winner-type{margin-top:0}
+@media(max-width:620px){
+  .nx-editor-actions{grid-template-columns:1fr}
+  .nx-trophy-row small{max-width:none}
+}
+
+/* IMC Nexus 9.0.0 · Game World Setup */
+.nx-setup-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end;margin:18px 0}.nx-setup-toolbar label,.nx-wide-label{display:grid;gap:7px;font-weight:800;color:#0b2040}.nx-setup-toolbar select,.nx-wide-label select,.nx-inline-add input,.nx-form-grid select,.nx-cup-switches select{min-height:46px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;padding:0 12px;font:inherit;color:#10233f}.nx-setup-summary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}.nx-setup-summary>div{background:linear-gradient(135deg,#071a36,#123464);color:#fff;padding:16px;border-radius:16px;display:grid;gap:4px}.nx-setup-summary small,.nx-section-heading small,.nx-domestic-title small{font-size:11px;font-weight:900;letter-spacing:.12em;opacity:.75}.nx-setup-section{background:#fff;border:1px solid #dbe4ef;border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 10px 26px rgba(15,35,65,.06)}.nx-section-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.nx-section-heading h2,.nx-domestic-title h3{margin:3px 0 0}.nx-inline-add{display:grid;grid-template-columns:1fr auto;gap:10px}.nx-domestic-list{display:grid;gap:14px}.nx-domestic-card{border:1px solid #d7e0eb;border-radius:16px;padding:16px;background:#f8fafc}.nx-domestic-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.nx-form-grid.setup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.nx-form-grid.setup-grid label,.nx-division-configs label,.nx-cup-switches label{display:grid;gap:6px;font-weight:800;color:#18304f}.nx-division-configs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0}.nx-division-configs label{background:#fff;border:1px solid #dbe4ef;border-radius:12px;padding:10px}.nx-cup-switches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;border-top:1px solid #dde6f0;padding-top:14px}.nx-cup-switches label{grid-template-columns:1fr 92px;align-items:center;background:#fff;padding:10px 12px;border-radius:12px;border:1px solid #e1e8f0}.nx-global-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}.nx-global-columns>div{background:#f5f8fc;border-radius:14px;padding:14px}.nx-global-columns h3{margin-top:0}.nx-global-columns p{margin:8px 0}.nx-sticky-save{position:sticky;bottom:78px;padding:12px 0;background:linear-gradient(180deg,rgba(245,247,251,0),#f5f7fb 32%)}.nx-sticky-save button{width:100%;min-height:50px}.nx-warning-text{color:#9a3412;font-weight:700}.danger.ghost{background:transparent;color:#b42318;border:1px solid #f0b4ae}
+@media(max-width:680px){.nx-setup-toolbar,.nx-setup-summary,.nx-inline-add,.nx-form-grid.setup-grid,.nx-cup-switches,.nx-global-columns{grid-template-columns:1fr}.nx-cup-switches label{grid-template-columns:1fr 90px}.nx-sticky-save{bottom:70px}}
+
+/* IMC Nexus 10.0.1 - Game World Setup Structure */
+.nx-team-import-grid{display:grid;gap:16px}.nx-team-import-card{border:1px solid rgba(208,173,91,.35);border-radius:18px;padding:16px;background:rgba(255,255,255,.035)}.nx-team-import-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.nx-team-import-head h3{margin:2px 0 0}.nx-team-import-head>strong{font-size:1.05rem;color:#d7b668}.nx-team-import-card textarea{width:100%;min-height:210px;margin-top:8px;resize:vertical}.nx-imported-team-list,.nx-team-preview>div{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.nx-imported-team-list span,.nx-team-preview span{border:1px solid rgba(255,255,255,.13);border-radius:999px;padding:5px 9px;font-size:.78rem;background:rgba(255,255,255,.045)}.nx-team-preview{margin-top:10px}.nx-team-preview>strong{display:block;margin-bottom:6px}.nx-world-setup-summary{grid-template-columns:repeat(3,minmax(0,1fr))}@media(max-width:720px){.nx-world-setup-summary{grid-template-columns:1fr}.nx-team-import-card textarea{min-height:260px}}
+
+/* 11.0 Manager Wizard */
+.nx-registry-readonly-career{padding:16px;border:1px solid #d8dfeb;border-radius:18px;background:#f7f9fc}.nx-registry-readonly-career p{margin:8px 0 0;color:#68748a;line-height:1.55}.nx-manager-wizard-list{display:grid;gap:14px;margin:18px 0}.nx-manager-wizard-card{border:1px solid #d9e0ec;border-radius:22px;padding:16px;background:#fff}.nx-manager-participation{display:flex;align-items:center;gap:12px}.nx-manager-participation input{width:22px;height:22px}.nx-manager-participation span{display:flex;flex-direction:column}.nx-manager-participation small{color:#7a8497}.nx-manager-assignment-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.nx-manager-assignment-fields.is-disabled{opacity:.42;pointer-events:none}.nx-manager-assignment-fields label{display:flex;flex-direction:column;gap:7px;font-weight:700}.nx-manager-assignment-fields select,.nx-manager-assignment-fields input{width:100%;min-height:48px;border:1px solid #d8dfeb;border-radius:14px;padding:10px;background:#fff}@media(max-width:700px){.nx-manager-assignment-fields{grid-template-columns:1fr}}
+
+/* IMC Nexus 11.1.2 - Competition Configuration */
+.nx-section-note{margin:-4px 0 18px;color:var(--muted,#718096)}
+.nx-comp-config-columns{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.nx-comp-config-group{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:16px;background:rgba(255,255,255,.68);margin-bottom:14px}
+.nx-comp-config-group h3{margin:0 0 12px;font-size:1rem}
+.nx-comp-config-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-top:1px solid rgba(148,163,184,.18)}
+.nx-comp-config-row:first-of-type{border-top:0}
+.nx-comp-config-row>div{display:flex;flex-direction:column;gap:3px}
+.nx-comp-config-row span{font-size:.78rem;color:var(--muted,#718096)}
+.nx-comp-config-row input{max-width:165px}
+.nx-comp-config-row.is-locked{opacity:.62}
+.nx-comp-tile small{display:block;margin-top:6px;color:var(--muted,#718096);font-size:.75rem}
+@media(max-width:760px){.nx-comp-config-columns{grid-template-columns:1fr}.nx-comp-config-row{align-items:flex-start;flex-direction:column}.nx-comp-config-row input{max-width:none;width:100%}}
+
+
+/* IMC Nexus 11.1.2 - Active season auto-selection */
+.nx-readonly-field{
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:18px 20px;
+  border:1px solid #d9e0eb;
+  border-radius:18px;
+  background:#f7f9fc;
+  color:#0a1b3a;
+}
+.nx-readonly-field strong{font-size:1.12rem;}
+.nx-readonly-field span{font-size:.82rem;color:#778196;text-align:right;}
+
+
+/* IMC Nexus 14.2.2 · Trophy Room images and historical managers */
+.nx-trophy-image{width:78px;height:78px;object-fit:contain;flex:0 0 78px;filter:drop-shadow(0 8px 12px rgba(15,35,65,.18))}.nx-trophy-image.compact{width:48px;height:48px;flex-basis:48px}.nx-trophy-honour-card{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,#fff,#f6f9fd);min-height:112px}.nx-trophy-honour-copy{min-width:0;display:grid;gap:4px}.nx-trophy-honour-copy small{font-size:.72rem;font-weight:900;letter-spacing:.08em;color:#66758a;text-transform:uppercase}.nx-trophy-honour-copy h3{margin:0;color:#0a1b3a;font-size:1.16rem}.nx-trophy-honour-copy p{margin:4px 0 0;color:#66758a}.nx-trophy-honour-copy time{font-size:.75rem;color:#7a8497}.nx-trophy-manager{display:flex;align-items:center;gap:7px;margin-top:4px;font-size:.86rem;font-weight:750;color:#263a57}.nx-trophy-manager.is-none{color:#7a8497;font-weight:650}.nx-trophy-cabinet-card{display:flex!important;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:16px!important}.nx-trophy-cabinet-card .nx-trophy-image{width:88px;height:88px;flex-basis:88px}.nx-trophy-latest{display:grid;gap:2px;margin-top:4px}.nx-trophy-latest span{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#8290a4}.nx-trophy-latest b{font-size:.92rem;color:#0a1b3a}.nx-trophy-cabinet-card .nx-trophy-manager{justify-content:center;font-size:.76rem}.nx-season-timeline .nx-trophy-manager{font-size:.68rem;margin-top:2px;justify-content:center}.nx-season-timeline .nx-trophy-manager span:first-child{display:none}
+@media(max-width:620px){.nx-trophy-image{width:66px;height:66px;flex-basis:66px}.nx-trophy-honour-card{align-items:flex-start;gap:14px}.nx-trophy-cabinet-card .nx-trophy-image{width:76px;height:76px;flex-basis:76px}}
+
+
+/* BUILD 64.2.2 · Trophy Room mobile correction */
+.nx-trophy-room,
+.nx-trophy-room *{box-sizing:border-box}
+.nx-trophy-room{max-width:100%;overflow:hidden}
+.nx-trophy-room .nx-setup-section,
+.nx-trophy-room .nx-domestic-list,
+.nx-trophy-room .nx-domestic-card,
+.nx-trophy-room .nx-competition-grid,
+.nx-trophy-room .nx-comp-tile,
+.nx-trophy-room .nx-trophy-honour-copy{min-width:0;max-width:100%}
+.nx-trophy-room strong,
+.nx-trophy-room h2,
+.nx-trophy-room h3,
+.nx-trophy-room p,
+.nx-trophy-room small,
+.nx-trophy-room span{overflow-wrap:anywhere;word-break:normal}
+.nx-trophy-room .nx-table-wrap{width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nx-trophy-room .nx-table{width:100%;min-width:680px;border-collapse:collapse}
+.nx-standing-team small{display:block;margin-top:3px;color:#7a8497;font-size:.68rem;font-weight:650;white-space:normal}
+
+@media(max-width:620px){
+  .nx-trophy-room .nx-competition-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .nx-trophy-room .nx-trophy-cabinet-card{min-height:0;padding:12px 8px!important;gap:4px}
+  .nx-trophy-room .nx-trophy-cabinet-card .nx-trophy-image{width:62px;height:62px;flex-basis:62px}
+  .nx-trophy-room .nx-trophy-cabinet-card strong{margin-top:4px;font-size:.82rem;line-height:1.18}
+  .nx-trophy-room .nx-trophy-cabinet-card small{font-size:.66rem}
+  .nx-trophy-room .nx-trophy-latest b{font-size:.78rem;line-height:1.2}
+  .nx-trophy-room .nx-trophy-manager{font-size:.69rem;line-height:1.2;justify-content:center;max-width:100%}
+  .nx-trophy-room .nx-trophy-honour-card{display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px;align-items:center;min-height:0;padding:14px}
+  .nx-trophy-room .nx-trophy-honour-card .nx-trophy-image{width:58px;height:58px;flex-basis:58px}
+  .nx-trophy-room .nx-trophy-honour-copy h3{font-size:1rem;line-height:1.2}
+  .nx-trophy-room .nx-detail-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  .nx-trophy-room .nx-detail-tabs button{min-width:0;padding:10px 4px;font-size:.65rem}
+  .nx-trophy-room .nx-detail-tabs button span{font-size:.62rem;line-height:1.1}
+  .nx-trophy-room .nx-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .nx-trophy-room .nx-stat-card{min-width:0;padding:12px 6px}
+
+  /* Classifica leggibile su telefono: Pos, Squadra, G, DR, Pt. */
+  .nx-trophy-room .nx-table{min-width:0;table-layout:fixed;font-size:.76rem}
+  .nx-trophy-room .nx-table .nx-stat-extra{display:none}
+  .nx-trophy-room .nx-table th:nth-child(1),
+  .nx-trophy-room .nx-table td:nth-child(1){width:38px;text-align:center}
+  .nx-trophy-room .nx-table th:nth-child(2),
+  .nx-trophy-room .nx-table td:nth-child(2){width:auto;text-align:left}
+  .nx-trophy-room .nx-table th:nth-child(3),
+  .nx-trophy-room .nx-table td:nth-child(3){width:34px;text-align:center}
+  .nx-trophy-room .nx-table th:nth-child(9),
+  .nx-trophy-room .nx-table td:nth-child(9){width:42px;text-align:center}
+  .nx-trophy-room .nx-table th:nth-child(10),
+  .nx-trophy-room .nx-table td:nth-child(10){width:38px;text-align:center}
+  .nx-trophy-room .nx-table th,
+  .nx-trophy-room .nx-table td{padding:9px 4px}
+  .nx-standing-team strong{display:block;font-size:.75rem;line-height:1.12}
+}
+
+@media(max-width:360px){
+  .nx-trophy-room .nx-competition-grid{grid-template-columns:1fr}
+  .nx-trophy-room .nx-detail-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+
+/* Build 64.2.4 · Season dates and standings-derived statistics */
+.nx-standings-heading{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.nx-standings-heading h3{margin:0}
+.nx-standings-heading small{
+  color:#7a8497;
+  font-weight:750;
+  white-space:nowrap;
+}
+.nx-trophy-honour-copy time{
+  display:block;
+  margin-top:2px;
+  color:#64748b;
+  font-weight:700;
+}
+@media(max-width:620px){
+  .nx-standings-heading{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:2px;
+  }
+  .nx-standings-heading small{white-space:normal}
+}
+
+
+/* Build 64.3.1 · Competitions buttons exact mobile layout */
+.nx-competitions-index{
+  overflow:hidden;
+}
+.nx-competitions-title{
+  align-items:flex-start;
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+}
+.nx-competitions-title > div:first-child{
+  min-width:0;
+}
+.nx-competitions-title h1{
+  margin:0;
+}
+.nx-competitions-title-actions{
+  display:flex;
+  flex:0 0 auto;
+  gap:10px;
+}
+.nx-competitions-title-actions button{
+  width:52px;
+  height:52px;
+  padding:0;
+  border:1.5px solid #d9dee8;
+  border-radius:17px;
+  background:#fff;
+  color:#263147;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+}
+.nx-competitions-title-actions button svg{
+  width:26px;
+  height:26px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.nx-competition-category-tabs{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin:24px 0;
+  width:100%;
+}
+.nx-competition-category-tabs button{
+  min-width:0;
+  min-height:62px;
+  padding:12px 10px;
+  border:1.5px solid #d8dee8;
+  border-radius:18px;
+  background:#fff;
+  color:#4f596c;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  font:inherit;
+  font-size:15px;
+  font-weight:800;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.nx-competition-category-tabs button.active{
+  border-color:#0d2243;
+  background:#0d2243;
+  color:#fff;
+}
+.nx-competition-category-tabs button span{
+  display:grid;
+  place-items:center;
+  flex:0 0 24px;
+}
+.nx-competition-category-tabs button svg{
+  width:23px;
+  height:23px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.nx-competition-filter-panel{
+  margin:0 0 14px;
+}
+.nx-competition-search,
+.nx-competition-nation-filter{
+  width:100%;
+  min-height:56px;
+  box-sizing:border-box;
+  border:1.5px solid #d9dee8;
+  border-radius:18px;
+  background:#fff;
+}
+.nx-competition-search{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:0 16px;
+}
+.nx-competition-search svg{
+  width:21px;
+  height:21px;
+  flex:0 0 auto;
+  fill:none;
+  stroke:#263147;
+  stroke-width:1.8;
+  stroke-linecap:round;
+}
+.nx-competition-search input{
+  min-width:0;
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#17233b;
+  font:inherit;
+}
+.nx-competition-nation-filter{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:14px;
+  padding:8px 16px;
+}
+.nx-competition-nation-filter span{
+  color:#758096;
+  font-size:12px;
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.nx-competition-nation-filter select{
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#17233b;
+  font:inherit;
+  font-weight:750;
+}
+
+.nx-competition-summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:16px 4px;
+  margin-bottom:18px;
+  border-top:1px solid #edf0f5;
+  border-bottom:1px solid #edf0f5;
+  color:#4b5568;
+}
+.nx-competition-summary span{
+  min-width:0;
+}
+
+.nx-competition-filtered-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:0;
+}
+.nx-competition-filtered-grid .nx-comp-tile{
+  min-width:0;
+  min-height:116px;
+  padding:14px;
+  border:1px solid #dfe3ea;
+  border-radius:18px;
+  background:#fff;
+  color:#0b1a35;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  text-align:left;
+  overflow:hidden;
+}
+.nx-competition-filtered-grid .nx-trophy-icon{
+  flex:0 0 66px;
+  width:66px;
+  height:82px;
+  margin:0;
+  border-radius:18px;
+}
+.nx-competition-filtered-grid .nx-trophy-image{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.nx-comp-tile-copy{
+  min-width:0;
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+}
+.nx-comp-tile-copy small{
+  display:block;
+  max-width:100%;
+  margin:0;
+  color:#315dcc;
+  font-size:11px;
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.nx-comp-tile-copy strong{
+  display:block;
+  max-width:100%;
+  margin:0;
+  font-size:16px;
+  line-height:1.2;
+  overflow-wrap:normal;
+  word-break:normal;
+  white-space:normal;
+}
+.nx-comp-tile-copy span{
+  color:#7b8497;
+  font-size:12px;
+}
+
+@media(max-width:680px){
+  .nx-competitions-title{
+    gap:12px;
+  }
+  .nx-competitions-title h1{
+    font-size:31px;
+  }
+  .nx-competitions-title-actions{
+    gap:8px;
+  }
+  .nx-competitions-title-actions button{
+    width:46px;
+    height:46px;
+    border-radius:15px;
+  }
+  .nx-competitions-title-actions button svg{
+    width:23px;
+    height:23px;
+  }
+
+  .nx-competition-category-tabs{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    margin:20px 0;
+  }
+  .nx-competition-category-tabs button{
+    min-height:58px;
+    padding:10px 5px;
+    gap:5px;
+    border-radius:15px;
+    font-size:12px;
+  }
+  .nx-competition-category-tabs button span{
+    flex-basis:19px;
+  }
+  .nx-competition-category-tabs button svg{
+    width:19px;
+    height:19px;
+  }
+
+  .nx-competition-summary{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:5px;
+  }
+  .nx-competition-filtered-grid{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .nx-competition-filtered-grid .nx-comp-tile{
+    min-height:104px;
+    padding:12px 14px;
+  }
+  .nx-competition-filtered-grid .nx-trophy-icon{
+    flex-basis:58px;
+    width:58px;
+    height:72px;
+  }
+  .nx-comp-tile-copy strong{
+    font-size:17px;
+  }
+}
+
+@media(max-width:380px){
+  .nx-competition-category-tabs button{
+    font-size:11px;
+  }
+  .nx-competition-category-tabs button svg{
+    width:17px;
+    height:17px;
+  }
+}
+
+
+/* Build 64.3.2 · Exact competitions grid and detail layout */
+.nx-competition-filtered-grid{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:12px !important;
+  align-items:stretch;
+}
+.nx-competition-filtered-grid .nx-comp-tile{
+  min-width:0 !important;
+  min-height:174px !important;
+  padding:14px 8px 16px !important;
+  border:1.5px solid #dfe3ea !important;
+  border-radius:18px !important;
+  background:#fff !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:10px !important;
+  text-align:center !important;
+  overflow:hidden !important;
+}
+.nx-competition-filtered-grid .nx-comp-tile:focus,
+.nx-competition-filtered-grid .nx-comp-tile:hover{
+  border-color:#2d5da8 !important;
+}
+.nx-competition-filtered-grid .nx-trophy-icon{
+  width:82px !important;
+  height:98px !important;
+  flex:0 0 98px !important;
+  margin:0 auto !important;
+  padding:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+}
+.nx-competition-filtered-grid .nx-trophy-image{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+}
+.nx-competition-filtered-grid .nx-comp-tile-copy{
+  min-width:0 !important;
+  width:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  gap:3px !important;
+  text-align:center !important;
+}
+.nx-competition-filtered-grid .nx-comp-tile-copy small{
+  max-width:100%;
+  color:#6f7a8e;
+  font-size:10px;
+  text-align:center;
+}
+.nx-competition-filtered-grid .nx-comp-tile-copy strong{
+  display:block !important;
+  width:100% !important;
+  color:#111d35 !important;
+  font-size:16px !important;
+  line-height:1.15 !important;
+  font-weight:700 !important;
+  text-align:center !important;
+  white-space:normal !important;
+  word-break:normal !important;
+  overflow-wrap:break-word !important;
+}
+.nx-competition-filtered-grid .nx-comp-tile-copy span{
+  font-size:10px;
+  text-align:center;
+}
+
+.nx-competition-detail-card{
+  overflow:hidden;
+}
+.nx-competition-detail-card .nx-back-link{
+  padding-bottom:20px;
+  font-size:16px;
+}
+.nx-competition-detail-card .nx-competition-head{
+  display:grid;
+  grid-template-columns:150px minmax(0,1fr);
+  align-items:center;
+  gap:22px;
+  padding:8px 18px 16px;
+}
+.nx-competition-detail-card .nx-trophy-icon.large{
+  width:135px;
+  height:125px;
+  margin:0;
+  padding:0;
+  border-radius:0;
+  background:transparent;
+}
+.nx-competition-detail-card .nx-trophy-icon.large .nx-trophy-image,
+.nx-competition-detail-card .nx-trophy-icon.large img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.nx-competition-detail-card .nx-competition-head-copy{
+  min-width:0;
+}
+.nx-competition-detail-card .nx-competition-head h1{
+  margin:0;
+  color:#0d1b36;
+  font-size:36px;
+  line-height:1.08;
+  font-weight:800;
+}
+.nx-competition-detail-card .nx-competition-head p{
+  margin:14px 0 0;
+  color:#7a8497;
+  font-size:17px;
+  line-height:1.35;
+}
+.nx-competition-detail-card .nx-detail-tabs{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:0;
+  margin-top:14px;
+}
+.nx-competition-detail-card .nx-detail-tabs button{
+  min-width:0;
+  padding:14px 3px 13px;
+  font-size:23px;
+}
+.nx-competition-detail-card .nx-detail-tabs button span{
+  margin-top:7px;
+  font-size:11px;
+  line-height:1.15;
+  white-space:normal;
+}
+
+@media(max-width:680px){
+  .nx-competition-filtered-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:10px !important;
+  }
+  .nx-competition-filtered-grid .nx-comp-tile{
+    min-height:154px !important;
+    padding:10px 5px 13px !important;
+  }
+  .nx-competition-filtered-grid .nx-trophy-icon{
+    width:68px !important;
+    height:86px !important;
+    flex-basis:86px !important;
+  }
+  .nx-competition-filtered-grid .nx-comp-tile-copy strong{
+    font-size:13px !important;
+  }
+  .nx-competition-filtered-grid .nx-comp-tile-copy small,
+  .nx-competition-filtered-grid .nx-comp-tile-copy span{
+    font-size:9px !important;
+  }
+
+  .nx-competition-detail-card .nx-competition-head{
+    grid-template-columns:108px minmax(0,1fr);
+    gap:15px;
+    padding:4px 4px 14px;
+  }
+  .nx-competition-detail-card .nx-trophy-icon.large{
+    width:100px;
+    height:102px;
+  }
+  .nx-competition-detail-card .nx-competition-head h1{
+    font-size:27px;
+  }
+  .nx-competition-detail-card .nx-competition-head p{
+    margin-top:10px;
+    font-size:14px;
+  }
+  .nx-competition-detail-card .nx-detail-tabs button{
+    padding:12px 1px 11px;
+    font-size:20px;
+  }
+  .nx-competition-detail-card .nx-detail-tabs button span{
+    font-size:9px;
+  }
+}
+
+@media(max-width:380px){
+  .nx-competition-filtered-grid{gap:7px !important;}
+  .nx-competition-filtered-grid .nx-comp-tile{
+    min-height:145px !important;
+    border-radius:15px !important;
+  }
+  .nx-competition-filtered-grid .nx-trophy-icon{
+    width:60px !important;
+    height:78px !important;
+    flex-basis:78px !important;
+  }
+  .nx-competition-filtered-grid .nx-comp-tile-copy strong{
+    font-size:12px !important;
+  }
+}
+
+
+/* Build 64.4.0 · Inter typography system */
+:root{
+  --font-ui:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea{
+  font-family:var(--font-ui);
+}
+
+body{
+  font-size:15px;
+  line-height:1.42;
+  letter-spacing:-0.01em;
+}
+
+h1,h2,h3,h4,
+strong,b{
+  letter-spacing:-0.025em;
+}
+
+.brand-inline,
+.nx-brand-title,
+.nx-shell-brand,
+.nx-world-name,
+.nx-manager-name{
+  font-weight:700;
+}
+
+.boot-card h1,
+.login-brand h1{
+  font-size:34px;
+  line-height:1.06;
+  letter-spacing:-0.045em;
+  font-weight:700;
+}
+
+.hero h1,
+.nx-page-title h1,
+.nx-competitions-title h1,
+.nx-admin-head h1{
+  font-size:clamp(27px,4.4vw,40px);
+  line-height:1.05;
+  letter-spacing:-0.045em;
+  font-weight:700;
+}
+
+.nx-page-title p,
+.hero p,
+.nx-admin-head p{
+  font-size:14px;
+  line-height:1.45;
+}
+
+.section-title h2,
+.nx-section-heading h2,
+.nx-profile-section h3,
+.nx-standings-block h3{
+  font-size:18px;
+  line-height:1.2;
+  font-weight:700;
+}
+
+.nx-comp-tile-copy strong,
+.nx-domestic-card h3,
+.nx-trophy-honour-copy h3,
+.nx-standing-team strong{
+  font-size:15px;
+  line-height:1.25;
+  font-weight:700;
+}
+
+.nx-comp-tile-copy small,
+.nx-domestic-card small,
+.nx-trophy-honour-copy small,
+.nx-section-heading small,
+.nx-page-title small{
+  font-size:10px;
+  letter-spacing:.08em;
+  font-weight:700;
+}
+
+.nx-standing-team small,
+.row-sub,
+.stat span,
+.nx-comp-tile-copy span,
+.nx-competition-summary,
+.nx-world-meta,
+.nx-manager-meta{
+  font-size:12px;
+  line-height:1.35;
+}
+
+.nx-table{
+  font-size:12px;
+}
+.nx-table th{
+  font-size:10px;
+  letter-spacing:.04em;
+  font-weight:700;
+}
+.nx-table td{
+  line-height:1.25;
+}
+
+.nx-detail-tabs button,
+.nx-world-nav button,
+.bottom-nav .nav-btn,
+.nx-competition-category-tabs button{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:-0.01em;
+}
+
+.nx-detail-tabs button span,
+.nx-world-nav button span{
+  line-height:1.1;
+}
+
+.primary,
+.secondary,
+.nx-back-link,
+.nx-admin-card,
+.nx-filter-tabs button{
+  font-weight:700;
+}
+
+.badge,
+.status,
+.field label{
+  font-weight:700;
+}
+
+@media(max-width:680px){
+  body{
+    font-size:14px;
+  }
+
+  .page{
+    padding-left:14px;
+    padding-right:14px;
+  }
+
+  .hero h1,
+  .nx-page-title h1,
+  .nx-competitions-title h1,
+  .nx-admin-head h1{
+    font-size:29px;
+  }
+
+  .nx-page-title p,
+  .hero p,
+  .nx-admin-head p{
+    font-size:13px;
+  }
+
+  .section-title h2,
+  .nx-section-heading h2,
+  .nx-profile-section h3,
+  .nx-standings-block h3{
+    font-size:17px;
+  }
+
+  .nx-comp-tile-copy strong,
+  .nx-domestic-card h3,
+  .nx-trophy-honour-copy h3{
+    font-size:14px;
+  }
+
+  .nx-competition-category-tabs button{
+    font-size:11px;
+  }
+
+  .nx-detail-tabs button,
+  .nx-world-nav button,
+  .bottom-nav .nav-btn{
+    font-size:10px;
+  }
+
+  .nx-table{
+    font-size:11px;
+  }
+}
+
+@media(max-width:380px){
+  .hero h1,
+  .nx-page-title h1,
+  .nx-competitions-title h1,
+  .nx-admin-head h1{
+    font-size:27px;
+  }
+
+  .nx-competition-category-tabs button{
+    font-size:10px;
+  }
+}
+
+
+/* Build 65.0.0 · Nexus manager accounts */
+.nx-registry-toolbar{
+  grid-template-columns:minmax(220px,1fr) auto auto;
+}
+.nx-registry-row-meta{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.nx-registry-row-meta small{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.nx-account-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:26px;
+  padding:0 10px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.nx-account-badge.active{
+  background:#eaf8ef;
+  color:#137a3c;
+}
+.nx-account-badge.missing{
+  background:#fff4dc;
+  color:#956000;
+}
+.nx-account-badge.inactive{
+  background:#feeceb;
+  color:#b22d28;
+}
+.nx-manager-account-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:16px;
+  border:1px solid #dfe5ef;
+  border-radius:18px;
+  background:#f7f9fc;
+}
+.nx-manager-account-card>div{
+  display:grid;
+  gap:3px;
+}
+.nx-manager-account-card small{
+  color:#7b8598;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.nx-manager-account-card strong{
+  color:#0d1b39;
+}
+.nx-manager-account-card span{
+  color:#68748a;
+  font-size:12px;
+}
+.nx-credentials-panel{
+  margin:16px 0;
+  padding:18px;
+  border:1px solid #cfd9e8;
+  border-radius:22px;
+  background:#f7faff;
+}
+.nx-credentials-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.nx-credentials-head small{
+  color:#718096;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.nx-credentials-head h3{
+  margin:3px 0 0;
+}
+.nx-credentials-panel>p{
+  color:#68748a;
+  font-size:12px;
+}
+.nx-credentials-list{
+  display:grid;
+  gap:10px;
+  max-height:420px;
+  overflow:auto;
+}
+.nx-credential-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:14px;
+  padding:12px 14px;
+  border:1px solid #e0e6ef;
+  border-radius:15px;
+  background:#fff;
+}
+.nx-credential-row>div{
+  display:grid;
+}
+.nx-credential-row span{
+  color:#7a8599;
+  font-size:11px;
+}
+.nx-credential-row code{
+  padding:7px 9px;
+  border-radius:9px;
+  background:#0d1b39;
+  color:#fff;
+  font-size:12px;
+  user-select:all;
+}
+@media(max-width:760px){
+  .nx-registry-toolbar{
+    grid-template-columns:1fr;
+  }
+  .nx-registry-row-meta{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .nx-manager-account-card{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .nx-credential-row{
+    grid-template-columns:1fr;
+  }
+  .nx-credential-row code{
+    width:fit-content;
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+}
+
+
+/* Build 65.0.1 · Manager Registry mobile layout fix */
+.nx-registry-list{
+  display:grid;
+  gap:12px;
+  width:100%;
+}
+
+.nx-registry-row{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr) auto;
+  align-items:center;
+  gap:16px;
+  padding:16px 18px;
+  border:1px solid #dfe5ef;
+  border-radius:18px;
+  background:#fff;
+  color:#0d1b39;
+  text-align:left;
+  overflow:hidden;
+}
+
+.nx-registry-main{
+  min-width:0;
+  display:grid;
+  gap:3px;
+}
+
+.nx-registry-main strong{
+  display:block;
+  min-width:0;
+  font-size:15px;
+  line-height:1.2;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.nx-registry-main span{
+  color:#7a8598;
+  font-size:11px;
+  line-height:1.25;
+}
+
+.nx-registry-row-meta{
+  min-width:0;
+  display:grid;
+  justify-items:start;
+  gap:8px;
+}
+
+.nx-registry-row-meta small{
+  display:block;
+  max-width:100%;
+  color:#69758b;
+  font-size:11px;
+  line-height:1.35;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+
+.nx-registry-row > b{
+  align-self:center;
+  color:#95a0b3;
+  font-size:24px;
+  line-height:1;
+}
+
+@media(max-width:760px){
+  .nx-registry-row{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:
+      "main arrow"
+      "meta meta";
+    align-items:start;
+    gap:10px 12px;
+    padding:15px;
+  }
+
+  .nx-registry-main{
+    grid-area:main;
+  }
+
+  .nx-registry-row-meta{
+    grid-area:meta;
+    width:100%;
+    justify-items:stretch;
+  }
+
+  .nx-registry-row-meta small{
+    padding:10px 12px;
+    border-radius:12px;
+    background:#f7f9fc;
+  }
+
+  .nx-registry-row > b{
+    grid-area:arrow;
+    align-self:start;
+  }
+
+  .nx-account-badge{
+    justify-self:start;
+  }
+}
+
+@media(max-width:420px){
+  .nx-registry-toolbar{
+    gap:10px;
+  }
+
+  .nx-registry-row{
+    border-radius:16px;
+  }
+
+  .nx-registry-main strong{
+    font-size:14px;
+  }
+
+  .nx-registry-row-meta small{
+    font-size:10px;
+  }
+}
+
+
+/* Build 65.1.0 · Manager Registry account UX */
+.nx-career-summary{
+  width:100%;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.nx-career-summary span{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  min-height:28px;
+  padding:0 9px;
+  border-radius:999px;
+  background:#f2f5fa;
+  color:#667288;
+  font-size:10px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.nx-career-summary strong{
+  color:#14213d;
+  font-size:11px;
+}
+.nx-career-empty{
+  color:#7b8699;
+  font-size:11px;
+}
+
+.nx-account-progress{
+  margin:16px 0;
+  padding:18px;
+  border:1px solid #cfd9e8;
+  border-radius:22px;
+  background:#f7faff;
+}
+.nx-account-progress-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.nx-account-progress-head small{
+  color:#718096;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.nx-account-progress-head h3{
+  margin:4px 0 0;
+}
+.nx-account-progress-head>strong{
+  font-size:18px;
+  color:#153260;
+}
+.nx-progress-track{
+  width:100%;
+  height:12px;
+  margin:16px 0 9px;
+  border-radius:999px;
+  background:#e1e8f2;
+  overflow:hidden;
+}
+.nx-progress-track span{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#10274e,#2f65b9);
+  transition:width .25s ease;
+}
+.nx-progress-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  color:#6f7a8e;
+  font-size:11px;
+  font-weight:700;
+}
+
+@media(max-width:520px){
+  .nx-career-summary{
+    gap:6px;
+  }
+  .nx-career-summary span{
+    min-height:26px;
+    padding:0 8px;
+  }
+  .nx-progress-meta{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:3px;
+  }
+}
+
+
+/* Build 65.1.1 · GW004 Import Center duplicate competition fix */
+/* Nessuna modifica grafica. */
+
+
+/* Build 65.1.2 · Single League domestic competition resolver fix */
+
+
+/* Build 65.2.0 · Unified Single/Multi competition resolver */
+
+
+/* Build 65.3.0 · Manager password lifecycle */
+.nx-password-change-screen{
+  min-height:100dvh;
+}
+.nx-password-change-card{
+  max-width:680px;
+}
+.nx-password-change-head{
+  margin-bottom:26px;
+}
+.nx-password-change-head small{
+  display:block;
+  color:var(--blue);
+  font-weight:800;
+  letter-spacing:.14em;
+  margin-bottom:10px;
+}
+.nx-password-change-head h2{
+  margin:0 0 10px;
+  color:var(--navy);
+  font-size:clamp(28px,6vw,42px);
+}
+.nx-password-change-head p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.5;
+}
+
+
+/* Build 65.4.0 · Manager Registry live account status */
+.nx-registry-account-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin:14px 0 18px;
+}
+.nx-registry-summary-pill{
+  display:grid;
+  gap:2px;
+  min-width:0;
+  padding:13px 14px;
+  border:1px solid #dfe5ef;
+  border-radius:16px;
+  background:#fff;
+}
+.nx-registry-summary-pill strong{
+  color:#0d1b39;
+  font-size:19px;
+  line-height:1;
+}
+.nx-registry-summary-pill span{
+  color:#7a8598;
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.nx-registry-summary-pill.is-active{
+  background:#eef9f2;
+}
+.nx-registry-summary-pill.is-pending{
+  background:#fff7e5;
+}
+.nx-registry-summary-pill.is-admin{
+  background:#eef4ff;
+}
+.nx-account-badge.pending{
+  background:#fff1cc;
+  color:#8b5a00;
+}
+.nx-account-badge.admin{
+  background:#eaf3ff;
+  color:#194d9a;
+}
+.nx-account-badge.active{
+  background:#eaf8ef;
+  color:#137a3c;
+}
+.nx-account-badge.inactive{
+  background:#feeceb;
+  color:#b22d28;
+}
+.nx-account-badge.missing{
+  background:#f0f2f6;
+  color:#6c7689;
+}
+.nx-registry-refresh{
+  white-space:nowrap;
+}
+@media(max-width:700px){
+  .nx-registry-account-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+
+/* Build 65.4.1 · Clubs = trainable clubs from active-season division setup */
+
+
+/* Build 65.4.2 · Trophy image name normalization fix */
+
+
+/* Build 65.4.3 · Official league matchday resolution */
+
+
+/* Build 65.4.4 · Compact Group Stage UI */
+.nx-compact-group-stage{
+  margin-bottom:22px;
+}
+
+.nx-compact-matchday-heading{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:start;
+  gap:12px;
+  padding:12px 16px 14px;
+  border:1px solid #e0e4eb;
+  border-bottom:0;
+  border-radius:18px 18px 0 0;
+  background:#fff;
+}
+
+.nx-compact-matchday-heading strong{
+  color:#0b1a35;
+  font-size:15px;
+  font-weight:650;
+  line-height:1.25;
+}
+
+.nx-compact-matchday-heading span{
+  color:#7a8497;
+  font-size:11px;
+  font-weight:500;
+  line-height:1.35;
+  text-align:right;
+  white-space:normal;
+}
+
+.nx-compact-groups-card{
+  overflow:hidden;
+  border:1px solid #e0e4eb;
+  border-radius:0 0 18px 18px;
+  background:#fff;
+}
+
+.nx-compact-group{
+  padding:13px 16px 14px;
+  border-top:1px solid #edf0f4;
+}
+
+.nx-compact-group:first-child{
+  border-top:0;
+}
+
+.nx-compact-group h3{
+  margin:0 0 10px;
+  color:#6f788b;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.05em;
+  text-align:center;
+}
+
+.nx-compact-group-matches{
+  display:grid;
+  gap:5px;
+}
+
+.nx-compact-match-line{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+  min-height:42px;
+  padding:4px 0;
+}
+
+.nx-compact-team{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:2px;
+}
+
+.nx-compact-home{
+  align-items:flex-end;
+}
+
+.nx-compact-away{
+  align-items:flex-start;
+}
+
+.nx-compact-team-main{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  min-width:0;
+}
+
+.nx-compact-team-code,
+.nx-compact-manager{
+  appearance:none;
+  border:0;
+  background:transparent;
+  padding:0;
+  margin:0;
+  cursor:pointer;
+}
+
+.nx-compact-team-code{
+  color:#111b30;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;
+  font-weight:500;
+  line-height:1;
+}
+
+.nx-compact-manager{
+  max-width:100%;
+  overflow:hidden;
+  color:#80899a;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:10.5px;
+  font-style:italic;
+  font-weight:450;
+  line-height:1.2;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.nx-compact-home .nx-compact-manager{
+  text-align:right;
+}
+
+.nx-compact-away .nx-compact-manager{
+  text-align:left;
+}
+
+.nx-compact-team-logo{
+  width:20px;
+  height:20px;
+  flex:0 0 20px;
+  display:grid;
+  place-items:center;
+}
+
+.nx-compact-team-logo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.nx-compact-team-logo-fallback{
+  color:#7e8798;
+  font-size:12px;
+}
+
+.nx-compact-score{
+  min-width:48px;
+  box-sizing:border-box;
+  padding:6px 7px;
+  border-radius:9px;
+  background:#f1f3f7;
+  color:#0e1b35;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;
+  font-weight:650;
+  line-height:1;
+  text-align:center;
+  white-space:nowrap;
+}
+
+@media(max-width:430px){
+  .nx-compact-matchday-heading{
+    padding:11px 13px 12px;
+    gap:9px;
+  }
+
+  .nx-compact-matchday-heading strong{
+    font-size:14px;
+  }
+
+  .nx-compact-matchday-heading span{
+    max-width:145px;
+    font-size:10.5px;
+  }
+
+  .nx-compact-group{
+    padding:12px 13px 13px;
+  }
+
+  .nx-compact-match-line{
+    grid-template-columns:minmax(0,1fr) 45px minmax(0,1fr);
+    gap:6px;
+    min-height:40px;
+  }
+
+  .nx-compact-team-code{
+    font-size:14px;
+  }
+
+  .nx-compact-manager{
+    font-size:10px;
+  }
+
+  .nx-compact-team-logo{
+    width:19px;
+    height:19px;
+    flex-basis:19px;
+  }
+
+  .nx-compact-score{
+    min-width:45px;
+    padding:6px 6px;
+    font-size:14px;
+  }
+}
+
+
+/* Build 65.4.5 · Global match logos */
+.match-team{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:4px;
+}
+
+.nx-standard-match-main{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+  max-width:100%;
+}
+
+.match-home .nx-standard-match-main{
+  justify-content:flex-end;
+}
+
+.match-away .nx-standard-match-main{
+  justify-content:flex-start;
+}
+
+.nx-standard-match-logo{
+  width:24px;
+  height:24px;
+  flex:0 0 24px;
+  display:grid;
+  place-items:center;
+}
+
+.nx-standard-match-logo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.nx-standard-match-logo-fallback{
+  border-radius:8px;
+  background:#f3f5f9;
+  color:#7c8799;
+  font-size:12px;
+}
+
+.nx-standard-match-name{
+  min-width:0;
+  color:var(--navy);
+  font:inherit;
+  font-weight:inherit;
+  line-height:1.12;
+}
+
+.nx-standard-match-main .nx-match-entity-link,
+.nx-standard-match-name{
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:430px){
+  .nx-standard-match-main{
+    gap:5px;
+  }
+
+  .nx-standard-match-logo{
+    width:20px;
+    height:20px;
+    flex-basis:20px;
+  }
+
+  .nx-standard-match-logo-fallback{
+    font-size:10px;
+  }
+}
+
+
+/* Build 65.4.6 · Club House grouped by Game World */
+.nx-clubhouse-world-list{
+  display:grid;
+  gap:14px;
+}
+
+.nx-clubhouse-world-card{
+  overflow:hidden;
+  border:1px solid #dfe5ef;
+  border-radius:20px;
+  background:#fff;
+}
+
+.nx-clubhouse-world-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:14px 16px;
+  border-bottom:1px solid #e9edf3;
+  background:#f8faff;
+}
+
+.nx-clubhouse-world-head span{
+  color:#2f65b9;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+
+.nx-clubhouse-world-head strong{
+  color:#0d1b39;
+  font-size:14px;
+  font-weight:700;
+}
+
+.nx-clubhouse-world-assignments{
+  display:grid;
+}
+
+.nx-clubhouse-assignment{
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr);
+  align-items:center;
+  gap:11px;
+  min-height:68px;
+  padding:12px 16px;
+  border-top:1px solid #edf0f4;
+}
+
+.nx-clubhouse-assignment:first-child{
+  border-top:0;
+}
+
+.nx-clubhouse-assignment-logo{
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+}
+
+.nx-clubhouse-assignment-logo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.nx-clubhouse-assignment-logo-fallback{
+  border-radius:9px;
+  background:#f2f5f9;
+  color:#7a8598;
+  font-size:14px;
+}
+
+.nx-clubhouse-assignment-copy{
+  min-width:0;
+  display:grid;
+  gap:5px;
+}
+
+.nx-clubhouse-assignment-copy>strong{
+  overflow:hidden;
+  color:#0d1b39;
+  font-size:15px;
+  font-weight:650;
+  line-height:1.15;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.nx-clubhouse-assignment-meta{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+  color:#7a8598;
+  font-size:10.5px;
+  font-weight:600;
+}
+
+.nx-clubhouse-role{
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  padding:0 7px;
+  border-radius:999px;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.05em;
+}
+
+.nx-clubhouse-role.is-club{
+  background:#eef4ff;
+  color:#24569c;
+}
+
+.nx-clubhouse-role.is-nation{
+  background:#eef8f1;
+  color:#287247;
+}
+
+@media(max-width:430px){
+  .nx-clubhouse-world-list{
+    gap:12px;
+  }
+
+  .nx-clubhouse-world-card{
+    border-radius:17px;
+  }
+
+  .nx-clubhouse-world-head{
+    padding:12px 13px;
+  }
+
+  .nx-clubhouse-world-head span{
+    font-size:11px;
+  }
+
+  .nx-clubhouse-world-head strong{
+    font-size:13px;
+  }
+
+  .nx-clubhouse-assignment{
+    grid-template-columns:30px minmax(0,1fr);
+    min-height:62px;
+    gap:10px;
+    padding:11px 13px;
+  }
+
+  .nx-clubhouse-assignment-logo{
+    width:27px;
+    height:27px;
+  }
+
+  .nx-clubhouse-assignment-copy>strong{
+    font-size:14px;
+  }
+
+  .nx-clubhouse-assignment-meta{
+    font-size:10px;
+  }
+}
+
+
+/* Build 65.4.7 · Global club name display normalization */
+
+
+/* Build 65.4.8 · Global club Title Case */
+
+
+/* Build 63 · Game World club aliases are the visible club names */
+
+/* BUILD 6 · Global Club Registry */
+
+/* BUILD 6 · Automatic logo discovery */
+
+/* BUILD 6 · Local PNG first with real fallback chain */
+
+/* BUILD 6 · Fix global logo fallback handler */
+
+/* BUILD 6 · Global club names + alias-based local logos */
+
+
+/* BUILD 6 · Import Center data deletion */
+.nx-import-delete-section{margin-top:28px}
+.nx-import-delete-section .card{border:1px solid rgba(176,0,32,.18)}
+.nx-delete-confirm-actions{margin-top:14px;justify-content:flex-end}
+.nx-delete-confirm-actions .nx-danger-action{min-height:46px;padding:0 18px;font-weight:800;letter-spacing:.02em}
+
+
+/* BUILD 6 · Contextual Schedule + Club/National visual distinction */
+.nx-schedule-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:0 0 4px;
+}
+.nx-schedule-legend-item{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 10px;
+  border:1px solid #e1e5ec;
+  border-radius:999px;
+  background:#fff;
+  color:#596579;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.nx-schedule-legend-item i{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  display:block;
+}
+.nx-schedule-legend-item.club i{background:#2460ed;}
+.nx-schedule-legend-item.national i{background:#c58a16;}
+.nx-schedule-match-list{
+  gap:10px;
+}
+.nx-schedule-fixture{
+  position:relative;
+  overflow:hidden;
+  border-width:1px;
+  border-style:solid;
+  box-shadow:0 5px 16px rgba(20,34,57,.04);
+}
+.nx-schedule-fixture:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:4px;
+}
+.nx-schedule-fixture.club{
+  background:#f4f7ff;
+  border-color:#d9e3ff;
+}
+.nx-schedule-fixture.club:before{background:#2460ed;}
+.nx-schedule-fixture.national{
+  background:#fff9ed;
+  border-color:#f1dfb9;
+}
+.nx-schedule-fixture.national:before{background:#c58a16;}
+.nx-schedule-competition-line{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  width:100%;
+}
+.nx-schedule-type-badge{
+  flex:0 0 auto;
+  padding:4px 7px;
+  border-radius:999px;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.06em;
+  line-height:1;
+}
+.nx-schedule-type-badge.club{
+  color:#1748b8;
+  background:#e2eaff;
+  border:1px solid #c9d7ff;
+}
+.nx-schedule-type-badge.national{
+  color:#825807;
+  background:#fff0c9;
+  border:1px solid #edd39a;
+}
+@media(max-width:430px){
+  .nx-schedule-fixture{padding-left:15px;}
+  .nx-schedule-type-badge{font-size:8px;padding:4px 6px;}
+}
+
+/* Build 6 · Multi League nation competition boxes */
+.nx-nation-competition-stack{display:grid;gap:16px;margin-top:14px}
+.nx-nation-competition-box{border:1px solid rgba(15,23,42,.10);border-radius:20px;background:rgba(255,255,255,.72);padding:14px;box-shadow:0 8px 24px rgba(15,23,42,.05)}
+.nx-nation-competition-head{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:end;padding:2px 4px 12px;border-bottom:1px solid rgba(15,23,42,.08);margin-bottom:12px}
+.nx-nation-competition-head span{grid-column:1/-1;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;opacity:.48}
+.nx-nation-competition-head strong{font-size:18px;line-height:1.15}
+.nx-nation-competition-head small{font-size:11px;opacity:.55}
+.nx-nation-competition-box .nx-competition-grid{margin-top:0}
+@media(max-width:640px){.nx-nation-competition-box{padding:12px;border-radius:18px}.nx-nation-competition-head strong{font-size:17px}}
+
+
+/* BUILD 6 · Trophy artwork background integration
+   I file trofeo legacy includono talvolta un fondo bianco rasterizzato.
+   Multiply rende quel bianco neutro rispetto al fondo Nexus senza modificare layout/asset. */
+.nx-trophy-icon img,
+.nx-trophy-image,
+.nx-competition-detail-card .nx-trophy-icon.large img{
+  background:transparent !important;
+  mix-blend-mode:multiply;
+}
+.nx-trophy-icon,
+.nx-trophy-icon.large{
+  isolation:auto;
+  background:transparent !important;
+}
+
+/* BUILD 6 · trophy asset fixes */
+.nx-trophy-icon,
+.nx-trophy-icon.large{
+  background:transparent !important;
+}
+.nx-trophy-image{
+  background:transparent !important;
+  mix-blend-mode:normal !important;
+}
+
+/* BUILD 6 · definitive trophy cache/background fix */
+.nx-trophy-icon,
+.nx-trophy-icon.large,
+.nx-competition-detail-card .nx-trophy-icon{
+  background:transparent !important;
+}
+.nx-trophy-image,
+.nx-trophy-icon img,
+.nx-competition-detail-card .nx-trophy-icon.large img{
+  background:transparent !important;
+  mix-blend-mode:normal !important;
+}
+
+
+/* BUILD 6 · Managers count + contextual compact filter */
+.nx-manager-page-title h1{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.nx-manager-active-count{
+  font-size:.42em;
+  line-height:1;
+  font-weight:800;
+  color:#7d879b;
+  white-space:nowrap;
+}
+.nx-manager-toolbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:18px 0 22px;
+}
+.nx-manager-search-compact{
+  flex:1 1 auto;
+  margin:0 !important;
+}
+.nx-manager-search-compact input{
+  width:100%;
+}
+.nx-manager-filter-wrap{
+  position:relative;
+  flex:0 0 auto;
+}
+.nx-manager-filter-button{
+  min-height:42px;
+  max-width:132px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 11px;
+  border:1px solid #d8dfeb;
+  border-radius:13px;
+  background:#fff;
+  color:#536078;
+  font:inherit;
+  font-size:12px;
+  font-weight:850;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.nx-manager-filter-button.active{
+  border-color:#3567ed;
+  color:#2458e7;
+  background:#f4f7ff;
+}
+.nx-manager-filter-icon{
+  font-size:14px;
+  line-height:1;
+}
+.nx-manager-filter-menu{
+  position:absolute;
+  z-index:50;
+  top:calc(100% + 7px);
+  right:0;
+  min-width:150px;
+  max-height:260px;
+  overflow:auto;
+  padding:6px;
+  border:1px solid #d8dfeb;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 14px 34px rgba(15,35,65,.14);
+}
+.nx-manager-filter-menu[hidden]{
+  display:none !important;
+}
+.nx-manager-filter-menu button{
+  width:100%;
+  min-height:36px;
+  padding:7px 10px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:#536078;
+  text-align:left;
+  font:inherit;
+  font-size:12px;
+  font-weight:800;
+}
+.nx-manager-filter-menu button.active{
+  background:#eef3ff;
+  color:#2458e7;
+}
+@media(max-width:560px){
+  .nx-manager-toolbar{
+    gap:8px;
+  }
+  .nx-manager-filter-button{
+    min-height:40px;
+    max-width:112px;
+    padding:0 9px;
+    font-size:11px;
+  }
+}
+
+
+/* BUILD 6 · Managers visible filter buttons */
+.nx-manager-active-count,
+.nx-manager-toolbar,
+.nx-manager-search-compact,
+.nx-manager-filter-wrap,
+.nx-manager-filter-menu{
+  display:none !important;
+}
+
+.nx-manager-filter-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+  margin:18px 0 22px;
+}
+
+.nx-manager-filter-grid button{
+  min-width:0;
+  min-height:38px;
+  padding:7px 6px;
+  border:1px solid #d8dfeb;
+  border-radius:12px;
+  background:#fff;
+  color:#59657b;
+  font:inherit;
+  font-size:11px;
+  line-height:1.15;
+  font-weight:850;
+  text-align:center;
+  cursor:pointer;
+  white-space:normal;
+  word-break:normal;
+}
+
+.nx-manager-filter-grid button.active{
+  border-color:#3567ed;
+  background:#eef3ff;
+  color:#2458e7;
+}
+
+@media(max-width:560px){
+  .nx-manager-filter-grid{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:6px;
+  }
+  .nx-manager-filter-grid button{
+    min-height:36px;
+    padding:6px 4px;
+    border-radius:10px;
+    font-size:10px;
+  }
+}
+
+
+/* BUILD 6 · unified compact filter controls */
+
+/* Competitions: 3 equal boxes, same compact height as Managers filters */
+.nx-competition-category-tabs{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:8px !important;
+  width:100% !important;
+  margin:18px 0 !important;
+}
+
+.nx-competition-category-tabs button{
+  width:100% !important;
+  min-width:0 !important;
+  min-height:38px !important;
+  height:38px !important;
+  padding:5px 6px !important;
+  border-radius:12px !important;
+  gap:5px !important;
+  font-size:11px !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+}
+
+.nx-competition-category-tabs button span{
+  flex:0 0 15px !important;
+  width:15px !important;
+  height:15px !important;
+}
+
+.nx-competition-category-tabs button svg{
+  width:15px !important;
+  height:15px !important;
+}
+
+/* Clubs + Nazionali: IMC Managers filter uses same compact language */
+.nx-entity-toolbar{
+  align-items:center !important;
+  gap:8px !important;
+}
+
+.nx-imc-filter{
+  flex:0 0 auto !important;
+  min-height:38px !important;
+  height:38px !important;
+  padding:0 11px !important;
+  border-radius:12px !important;
+  font-size:11px !important;
+  line-height:1 !important;
+  font-weight:850 !important;
+  white-space:nowrap !important;
+}
+
+@media(max-width:560px){
+  .nx-competition-category-tabs{
+    gap:6px !important;
+  }
+
+  .nx-competition-category-tabs button{
+    min-height:36px !important;
+    height:36px !important;
+    padding:4px 3px !important;
+    border-radius:10px !important;
+    font-size:10px !important;
+    gap:3px !important;
+  }
+
+  .nx-competition-category-tabs button span,
+  .nx-competition-category-tabs button svg{
+    width:13px !important;
+    height:13px !important;
+    flex-basis:13px !important;
+  }
+
+  .nx-imc-filter{
+    min-height:36px !important;
+    height:36px !important;
+    padding:0 9px !important;
+    border-radius:10px !important;
+    font-size:10px !important;
+  }
+}
+
+
+/* BUILD 6 · Navigation redesign */
+
+/* Header D: sportivo e dinamico */
+.nx-sport-header{
+  display:flex;
+  align-items:stretch;
+  justify-content:space-between;
+  min-height:108px;
+  background:#fff;
+  border-bottom:1px solid #e4e8ef;
+  position:relative;
+  overflow:hidden;
+}
+.nx-sport-header::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:2px;
+  background:linear-gradient(90deg,#c8a24c 0 35%,transparent 35%);
+}
+.nx-sport-brand{
+  display:flex;
+  align-items:center;
+  min-width:0;
+}
+.nx-sport-logo-panel{
+  width:118px;
+  align-self:stretch;
+  border:0;
+  background:linear-gradient(150deg,#173561,#081a38 72%);
+  clip-path:polygon(0 0,100% 0,78% 100%,0 100%);
+  display:grid;
+  place-items:center;
+  padding:14px 24px 14px 12px;
+  cursor:pointer;
+}
+.nx-sport-logo-panel img{
+  width:62px;
+  height:62px;
+  object-fit:contain;
+}
+.nx-sport-title{
+  padding:0 14px 0 8px;
+  min-width:0;
+}
+.nx-sport-title strong{
+  display:block;
+  color:#071a3b;
+  font-size:30px;
+  line-height:1;
+  font-weight:850;
+  letter-spacing:-.04em;
+  white-space:nowrap;
+}
+.nx-sport-title small{
+  display:block;
+  margin-top:7px;
+  color:#818ca0;
+  font-size:13px;
+  font-weight:750;
+  letter-spacing:.05em;
+}
+.nx-sport-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 18px 0 8px;
+}
+.nx-sport-action{
+  width:54px;
+  height:54px;
+  border-radius:14px;
+  border:1px solid #dde3ec;
+  background:#fff;
+  color:#071a3b;
+  font-size:25px;
+  font-weight:800;
+  box-shadow:0 5px 12px rgba(13,34,67,.08);
+}
+.nx-sport-admin{
+  background:#0b2043;
+  color:#e4b750;
+  border-color:#0b2043;
+}
+.nx-sport-context{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(190px,.9fr);
+  min-height:92px;
+  background:#fff;
+  border-bottom:1px solid #e4e8ef;
+}
+.nx-sport-manager,
+.nx-sport-world{
+  display:flex;
+  align-items:center;
+  min-width:0;
+}
+.nx-sport-manager{
+  gap:11px;
+  padding:14px 18px;
+}
+.nx-sport-person,
+.nx-sport-globe,
+.nx-mini-person{
+  display:grid;
+  place-items:center;
+}
+.nx-sport-person{
+  width:42px;height:42px;border-radius:50%;
+  background:#0b2043;color:#fff;
+  border:2px solid #d0aa52;
+  flex:0 0 auto;
+}
+.nx-sport-person svg,
+.nx-sport-globe svg,
+.nx-mini-person svg{
+  width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+}
+.nx-sport-manager-copy{
+  min-width:0;
+}
+.nx-sport-manager-copy strong{
+  display:block;
+  color:#071a3b;
+  font-size:17px;
+  font-weight:850;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.nx-sport-manager-copy span{
+  display:block;
+  color:#7b8698;
+  font-size:13px;
+  margin-top:3px;
+}
+.nx-sport-admin-badge{
+  margin-left:auto;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#e7b94f;
+  color:#081a38;
+  font-size:11px;
+  font-style:normal;
+  font-weight:900;
+}
+.nx-sport-world{
+  border:0;
+  border-left:1px solid #e2e6ed;
+  background:#fff;
+  gap:10px;
+  padding:14px 18px;
+  color:#071a3b;
+  text-align:left;
+}
+.nx-sport-globe{
+  width:40px;height:40px;border-radius:50%;
+  background:#0b2043;color:#fff;
+  border:2px solid #d0aa52;
+  flex:0 0 auto;
+}
+.nx-sport-world strong{
+  font-size:17px;
+  line-height:1.1;
+  font-weight:850;
+}
+.nx-sport-chevron{
+  margin-left:auto;
+  color:#c79f47;
+  font-size:20px;
+}
+
+/* Drawer cleanup */
+.nx-drawer-spacer{width:44px}
+.nx-mini-person{
+  width:38px;height:38px;border-radius:50%;background:#0b2043;color:#fff;
+}
+
+/* Upper menu: 4 equal compact icon boxes */
+.nx-world-nav-b6{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:8px !important;
+  padding:12px 14px !important;
+  margin:0 !important;
+  background:#f6f8fb !important;
+  border:0 !important;
+}
+.nx-world-nav-b6 button{
+  min-width:0 !important;
+  height:76px !important;
+  padding:8px 4px !important;
+  border:1px solid #dce3ed !important;
+  border-radius:14px !important;
+  background:#fff !important;
+  color:#59657a !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:5px !important;
+  box-shadow:none !important;
+}
+.nx-world-nav-b6 button::after{display:none !important}
+.nx-world-nav-b6 button b{
+  display:grid !important;
+  place-items:center !important;
+  width:28px !important;
+  height:28px !important;
+  margin:0 !important;
+}
+.nx-world-nav-b6 button svg{
+  width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;
+}
+.nx-world-nav-b6 button span{
+  font-size:10px !important;
+  line-height:1 !important;
+  font-weight:850 !important;
+  letter-spacing:0 !important;
+}
+.nx-world-nav-b6 button.active{
+  background:#0b2043 !important;
+  color:#fff !important;
+  border-color:#0b2043 !important;
+}
+
+/* Lower menu A: minimal line */
+.nx-bottom-b6{
+  height:76px !important;
+  min-height:76px !important;
+  padding:7px 12px calc(7px + env(safe-area-inset-bottom)) !important;
+  display:grid !important;
+  grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+  align-items:center !important;
+  background:rgba(255,255,255,.98) !important;
+  border-top:1px solid #e4e8ef !important;
+  box-shadow:0 -8px 24px rgba(16,37,68,.06) !important;
+}
+.nx-bottom-b6 button{
+  min-width:0 !important;
+  height:58px !important;
+  padding:3px 2px !important;
+  border:0 !important;
+  background:transparent !important;
+  color:#667288 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:4px !important;
+}
+.nx-bottom-b6 button b{
+  display:grid !important;
+  place-items:center !important;
+  width:24px !important;
+  height:24px !important;
+  margin:0 !important;
+  font-size:0 !important;
+}
+.nx-bottom-b6 button svg{
+  width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+}
+.nx-bottom-b6 button span{
+  font-size:9px !important;
+  line-height:1 !important;
+  font-weight:850 !important;
+}
+.nx-bottom-b6 button.active{
+  color:#0b2043 !important;
+}
+.nx-bottom-b6 .nx-home-orb-b6{
+  width:64px !important;
+  height:64px !important;
+  min-height:64px !important;
+  justify-self:center !important;
+  align-self:center !important;
+  border-radius:50% !important;
+  background:#0b2043 !important;
+  color:#fff !important;
+  border:5px solid #fff !important;
+  box-shadow:0 7px 18px rgba(10,32,67,.22) !important;
+  transform:translateY(-7px) !important;
+}
+.nx-bottom-b6 .nx-home-orb-b6 b{
+  width:28px !important;
+  height:28px !important;
+}
+.nx-bottom-b6 .nx-home-orb-b6 svg{
+  width:27px;height:27px;
+}
+
+/* Stats placeholder */
+.nx-stats-coming{
+  margin-top:18px;
+  min-height:220px;
+  border:1px solid #dce3ed;
+  border-radius:22px;
+  background:linear-gradient(180deg,#fff,#f8faff);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:28px;
+  color:#667288;
+}
+.nx-stats-coming>span{
+  width:54px;height:54px;border-radius:16px;background:#0b2043;color:#fff;display:grid;place-items:center;margin-bottom:14px;
+}
+.nx-stats-coming svg{
+  width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+}
+.nx-stats-coming strong{font-size:20px;color:#071a3b}
+.nx-stats-coming p{max-width:420px;line-height:1.45}
+
+/* Remove old structures from layout if legacy CSS still targets them */
+.nx-top,.nx-context,.nx-app-menu{display:none !important}
+
+@media(max-width:560px){
+  .nx-sport-header{min-height:86px}
+  .nx-sport-logo-panel{width:86px;padding:10px 19px 10px 8px}
+  .nx-sport-logo-panel img{width:48px;height:48px}
+  .nx-sport-title{padding-left:5px}
+  .nx-sport-title strong{font-size:23px}
+  .nx-sport-title small{font-size:10px;margin-top:5px}
+  .nx-sport-actions{gap:7px;padding-right:10px}
+  .nx-sport-action{width:44px;height:44px;border-radius:12px;font-size:20px}
+  .nx-sport-context{min-height:76px;grid-template-columns:minmax(0,1fr) minmax(150px,.9fr)}
+  .nx-sport-manager{padding:10px 12px;gap:8px}
+  .nx-sport-person{width:34px;height:34px}
+  .nx-sport-person svg{width:18px;height:18px}
+  .nx-sport-manager-copy strong{font-size:14px}
+  .nx-sport-manager-copy span{font-size:11px}
+  .nx-sport-admin-badge{padding:5px 7px;font-size:9px}
+  .nx-sport-world{padding:10px 11px;gap:7px}
+  .nx-sport-globe{width:32px;height:32px}
+  .nx-sport-globe svg{width:17px;height:17px}
+  .nx-sport-world strong{font-size:13px}
+  .nx-sport-chevron{font-size:16px}
+  .nx-world-nav-b6{gap:6px !important;padding:10px 10px !important}
+  .nx-world-nav-b6 button{height:70px !important;border-radius:12px !important}
+  .nx-world-nav-b6 button svg{width:23px;height:23px}
+  .nx-world-nav-b6 button span{font-size:9px !important}
+  .nx-bottom-b6 button span{font-size:8px !important}
+}
+
+
+/* ============================================================
+   BUILD 8 · HISTORICAL STANDINGS + TROPHY ROOM
+   ============================================================ */
+
+.nx-history-season-bar{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  gap:8px;
+  margin:0 0 16px;
+}
+
+.nx-history-season-bar button{
+  min-height:42px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+  color:var(--muted);
+  font:800 11px/1.1 Inter,system-ui,sans-serif;
+  letter-spacing:.02em;
+  padding:8px 10px;
+}
+
+.nx-history-season-bar button.active{
+  border-color:#3567ef;
+  background:#eef3ff;
+  color:#2455df;
+}
+
+.nx-history-standing-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  margin:4px 0 12px;
+  padding:0 2px;
+}
+
+.nx-history-standing-head div{
+  display:grid;
+  gap:4px;
+}
+
+.nx-history-standing-head small{
+  color:#3567ef;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.nx-history-standing-head strong{
+  color:var(--navy);
+  font-size:20px;
+  line-height:1.1;
+}
+
+.nx-history-standing-head > span{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.nx-history-champion-row td{
+  background:rgba(53,103,239,.055);
+}
+
+.nx-detail-tabs.nx-detail-tabs-three{
+  grid-template-columns:repeat(3,1fr);
+}
+
+.nx-trophy-history{
+  display:grid;
+  gap:12px;
+}
+
+.nx-trophy-history-head{
+  margin-bottom:0;
+}
+
+.nx-honours-list{
+  display:grid;
+  gap:10px;
+}
+
+.nx-honour-card{
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:#fff;
+  padding:16px;
+  display:grid;
+  gap:14px;
+}
+
+.nx-honour-season{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+
+.nx-honour-season > span{
+  color:#3567ef;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.nx-honour-season small{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+}
+
+.nx-honour-winner{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.nx-honour-winner .nx-standard-match-logo{
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+}
+
+.nx-honour-winner > div{
+  min-width:0;
+  display:grid;
+  gap:3px;
+}
+
+.nx-honour-winner small{
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.nx-honour-winner strong{
+  color:var(--navy);
+  font-size:20px;
+  line-height:1.1;
+}
+
+.nx-honour-winner span{
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+
+@media (max-width:480px){
+  .nx-history-season-bar{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .nx-history-standing-head{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .nx-honour-season{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:4px;
+  }
+}
+
+
+/* Build 10 · Manager Stats / Personal Trophy Room */
+.nx-manager-stats-v10 .nx-profile-section,.nx-personal-trophy-room .nx-personal-trophy-group{margin-top:18px}
+.nx-stats-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.nx-stats-breakdown{display:grid;gap:10px}
+.nx-stats-breakdown-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border:1px solid rgba(24,58,112,.12);border-radius:16px;background:linear-gradient(180deg,#fff,#f8fbff)}
+.nx-stats-breakdown-row>div:first-child{display:flex;flex-direction:column;gap:3px;min-width:150px}
+.nx-stats-breakdown-row>div:first-child strong{font-size:14px;color:#10264a}
+.nx-stats-breakdown-row>div:first-child span{font-size:11px;color:#75839b}
+.nx-trophy-career-summary{display:flex;align-items:center;justify-content:space-between;margin:18px 0;padding:18px 20px;border-radius:20px;background:linear-gradient(135deg,#071c3c,#123b77);color:#fff;box-shadow:0 16px 35px rgba(8,35,74,.18)}
+.nx-trophy-career-summary div{display:flex;flex-direction:column}.nx-trophy-career-summary small{font-size:10px;letter-spacing:.12em;opacity:.7}.nx-trophy-career-summary strong{font-size:34px;line-height:1}.nx-trophy-career-summary span{font-size:12px;opacity:.8}
+.nx-personal-trophy-groups{display:grid;gap:18px}.nx-personal-trophy-group{padding:16px;border:1px solid rgba(24,58,112,.11);border-radius:20px;background:#fbfdff}.nx-personal-trophy-group-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px}.nx-personal-trophy-group-head small{font-size:10px;color:#61728f;text-transform:uppercase;letter-spacing:.08em}.nx-personal-trophy-group-head h2{margin:3px 0 0;font-size:18px;color:#10264a}.nx-personal-trophy-group-head>span{font-size:11px;color:#61728f}
+.nx-personal-trophy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.nx-personal-trophy-card{display:flex;align-items:center;gap:14px;padding:14px;border-radius:18px;background:#fff;border:1px solid rgba(24,58,112,.1);box-shadow:0 8px 20px rgba(10,39,82,.06)}.nx-personal-trophy-card .nx-trophy-image{width:70px;height:70px;object-fit:contain;flex:0 0 70px}.nx-personal-trophy-card>div{display:flex;flex-direction:column;gap:3px;min-width:0}.nx-personal-trophy-card small{font-size:9px;letter-spacing:.08em;color:#8490a3;text-transform:uppercase}.nx-personal-trophy-card strong{font-size:13px;color:#0c2347}.nx-personal-trophy-card span{font-size:12px;color:#43536c}.nx-personal-trophy-card time{font-size:10px;color:#8793a6}
+@media(max-width:720px){.nx-stats-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.nx-stats-breakdown-row{align-items:flex-start;flex-direction:column}.nx-stats-breakdown-row .nx-stat-line{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.nx-personal-trophy-grid{grid-template-columns:1fr}.nx-personal-trophy-card .nx-trophy-image{width:62px;height:62px;flex-basis:62px}}
+
+/* Build 11 · Entity Profiles / Team H2H */
+.nx-profile-v11 .nx-entity-profile-head small,
+.nx-profile-v11 .nx-manager-profile-head small{
+  display:block;
+  margin-bottom:4px;
+  color:#7d8aa0;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.nx-profile-tabs-v11{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin:20px 0 8px;
+  padding:6px;
+  border:1px solid rgba(18,52,98,.1);
+  border-radius:18px;
+  background:#f5f8fc;
+}
+.nx-profile-tabs-v11 button{
+  min-height:48px;
+  border:0;
+  border-radius:13px;
+  background:transparent;
+  color:#60708b;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.02em;
+  cursor:pointer;
+}
+.nx-profile-tabs-v11 button span{display:block;margin-bottom:3px;font-size:16px;line-height:1}
+.nx-profile-tabs-v11 button.active{
+  background:#fff;
+  color:#0d2d5c;
+  box-shadow:0 6px 16px rgba(15,48,94,.1);
+}
+.nx-profile-panels-v11>[data-profile-panel][hidden]{display:none!important}
+.nx-profile-panels-v11>.nx-profile-section:first-child,
+.nx-profile-panels-v11>[data-profile-panel]>.nx-profile-section:first-child{margin-top:18px}
+.nx-inline-manager-link{
+  width:max-content;
+  max-width:100%;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:#0d356f;
+  font:inherit;
+  font-weight:900;
+  text-align:left;
+  cursor:pointer;
+}
+.nx-inline-manager-link:hover{text-decoration:underline}
+.nx-h2h-match{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:9px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#f8fafc;
+}
+.nx-h2h-match span{font-size:11px;color:#687792}
+.nx-h2h-match strong{font-size:13px;color:#10264a;white-space:nowrap}
+@media(max-width:560px){
+  .nx-profile-tabs-v11{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nx-profile-tabs-v11 button{min-height:44px}
+}
+
+/* Build 14 · Admin Analytics */
+.nx-analytics-shell .nx-analytics-grid{margin-top:18px}
+.nx-analytics-actions{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.nx-analytics-actions .nx-primary-action{align-self:flex-start}
+.nx-analytics-note{font-size:13px;line-height:1.5;color:var(--muted,#6b7280)}
+@media (max-width:720px){
+  .nx-analytics-actions .nx-primary-action{width:100%}
+}
+
+
+/* ============================================================
+   BUILD 44 · PLAYER CODEX FOUNDATIONS · GW001 ROAD TO HISTORY
+   ============================================================ */
+.nx-world-nav-b6.nx-world-nav-gw001-b44{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+.nx-profile-tabs-v11.nx-profile-tabs-club-b44{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+
+.nx-codex-hero-b44,.nx-roster-hero-b44,.nx-player-detail-hero-b44{display:flex;align-items:center;gap:16px;padding:18px;border:1px solid #dfe6f0;border-radius:22px;background:linear-gradient(145deg,#fff,#f6f9fd)}
+.nx-codex-hero-b44{justify-content:space-between}
+.nx-codex-hero-b44 small,.nx-roster-hero-b44 small,.nx-player-detail-title-b44>small,.nx-player-section-head-b44 small{display:block;color:#8b98aa;font-size:10px;font-weight:900;letter-spacing:.12em}
+.nx-codex-hero-b44 h1,.nx-roster-hero-b44 h1,.nx-player-detail-title-b44 h1{margin:4px 0 3px;color:#071a3b;font-size:30px;line-height:1.05}
+.nx-codex-hero-b44 p,.nx-roster-hero-b44 p,.nx-player-detail-title-b44 p{margin:0;color:#65748a;font-size:13px;font-weight:750}
+.nx-codex-mark-b44{width:58px;height:58px;border-radius:18px;background:#0b2043;color:#fff;display:grid;place-items:center;flex:0 0 auto}
+.nx-codex-mark-b44 svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+.nx-codex-controls-b44{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,.42fr);gap:12px;margin:16px 0}
+.nx-codex-filter-b44{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:6px;border:1px solid #dfe6ef;border-radius:16px;background:#f5f8fc}
+.nx-codex-filter-b44 button{min-height:42px;border:0;border-radius:11px;background:transparent;color:#68758a;font-size:10px;font-weight:900;cursor:pointer}
+.nx-codex-filter-b44 button b{display:inline-grid;place-items:center;min-width:24px;height:20px;margin-left:4px;padding:0 5px;border-radius:10px;background:#e5ebf3;color:#34435a;font-size:9px}
+.nx-codex-filter-b44 button.is-active{background:#0b2043;color:#fff;box-shadow:0 5px 14px rgba(11,32,67,.16)}
+.nx-codex-filter-b44 button.is-active b{background:rgba(255,255,255,.16);color:#fff}
+.nx-codex-search-b44{height:56px;display:flex;align-items:center;gap:8px;padding:0 14px;border:1px solid #dfe6ef;border-radius:16px;background:#fff;color:#77869a}
+.nx-codex-search-b44 input{min-width:0;width:100%;border:0;outline:0;background:transparent;color:#10264a;font:inherit;font-size:13px;font-weight:700}
+
+.nx-player-grid-b44{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.nx-player-card-b44{min-width:0;border:1px solid #dfe6ef;border-radius:20px;background:#fff;overflow:hidden;box-shadow:0 7px 20px rgba(17,43,78,.05)}
+.nx-player-card-b44[hidden]{display:none!important}
+.nx-player-card-hit-b44{position:relative;width:100%;min-height:154px;padding:15px;display:grid;grid-template-columns:68px minmax(0,1fr) auto;grid-template-areas:"photo copy data" "photo club data";gap:8px 12px;border:0;background:transparent;text-align:left;color:inherit;cursor:pointer}
+.nx-player-photo-b44,.nx-player-photo-fallback-b44{display:grid;place-items:center;overflow:hidden;border-radius:16px;background:linear-gradient(145deg,#eef2f7,#dce4ef);color:#0b2043;font-weight:950;letter-spacing:.04em}
+.nx-player-photo-b44 img{width:100%;height:100%;object-fit:cover;display:block}
+.nx-player-photo-b44>.nx-player-photo-fallback-b44{display:none;width:100%;height:100%;border-radius:0}
+.nx-player-photo-b44.is-card,.nx-player-photo-fallback-b44.is-card{grid-area:photo;width:68px;height:82px}
+.nx-player-card-copy-b44{grid-area:copy;min-width:0;align-self:center}
+.nx-player-card-copy-b44 small{display:block;color:#8b98aa;font-size:9px;font-weight:850;letter-spacing:.05em}
+.nx-player-card-copy-b44 strong{display:block;margin:4px 0 2px;color:#10264a;font-size:16px;line-height:1.12}
+.nx-player-card-copy-b44 em{display:block;color:#69788e;font-size:11px;font-style:normal;font-weight:750}
+.nx-player-card-data-b44{grid-area:data;display:grid;gap:7px;align-content:center}
+.nx-player-card-data-b44>b{min-width:66px;padding:8px;border-radius:12px;background:#f5f8fc;color:#10264a;text-align:center;font-size:13px}
+.nx-player-card-data-b44 small{display:block;margin-top:2px;color:#8794a6;font-size:8px;font-weight:900}
+.nx-player-status-b44{display:inline-flex;align-items:center;width:max-content;max-width:100%;padding:5px 8px;border-radius:999px;font-size:8px;font-weight:950;letter-spacing:.05em}
+.nx-player-status-b44.active{background:#e9f6ef;color:#17663b}
+.nx-player-status-b44.former{background:#eef1f5;color:#657186}
+.nx-player-card-b44>.nx-player-card-hit-b44>.nx-player-status-b44{position:absolute;left:15px;bottom:13px}
+.nx-player-club-b44{grid-area:club;align-self:end;margin-left:104px;color:#52627a;font-size:10px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.nx-roster-club-logo-b44{width:76px;height:76px;display:grid;place-items:center;flex:0 0 auto}
+.nx-roster-club-logo-b44 .nx-entity-tile-icon{width:72px;height:72px}
+.nx-roster-club-logo-b44 .nx-entity-image{max-width:70px;max-height:70px}
+.nx-roster-kpis-b44{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:16px 0}
+.nx-roster-list-b44{display:grid;gap:9px}
+.nx-roster-player-b44{width:100%;min-height:98px;display:grid;grid-template-columns:64px minmax(140px,1fr) 72px minmax(300px,1.7fr) 22px;align-items:center;gap:12px;padding:12px 14px;border:1px solid #dfe6ef;border-radius:18px;background:#fff;color:inherit;text-align:left;cursor:pointer;box-shadow:0 5px 16px rgba(17,43,78,.04)}
+.nx-player-photo-b44.is-roster,.nx-player-photo-fallback-b44.is-roster{width:60px;height:72px}
+.nx-roster-player-main-b44{min-width:0}.nx-roster-player-main-b44 small{display:block;color:#8c98aa;font-size:8px;font-weight:850;letter-spacing:.04em}.nx-roster-player-main-b44 strong{display:block;margin:3px 0;color:#10264a;font-size:15px}.nx-roster-player-main-b44 em{color:#67768c;font-size:10px;font-style:normal;font-weight:750}
+.nx-roster-player-rating-b44{width:66px;padding:9px 5px;border-radius:13px;background:#0b2043;color:#fff;text-align:center}.nx-roster-player-rating-b44 strong{display:block;font-size:20px}.nx-roster-player-rating-b44 small{font-size:7px;font-weight:900;letter-spacing:.08em;opacity:.72}
+.nx-roster-player-meta-b44{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.nx-roster-player-meta-b44>b{min-width:0;padding:8px;border-radius:11px;background:#f6f8fb;color:#8a96a8;font-size:7px;font-weight:900;letter-spacing:.05em}.nx-roster-player-meta-b44>b span{display:block;margin-top:3px;color:#243653;font-size:10px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nx-roster-player-meta-b44>b.is-nt{background:#fff7df;color:#8b6611}.nx-roster-player-arrow-b44{color:#a0abb9;font-size:24px;text-align:right}
+
+.nx-player-detail-hero-b44{align-items:stretch}.nx-player-photo-b44.is-detail,.nx-player-photo-fallback-b44.is-detail{width:116px;height:140px;flex:0 0 auto;border-radius:20px}.nx-player-detail-title-b44{min-width:0;align-self:center;flex:1}.nx-player-detail-title-b44 .nx-player-status-b44{margin-top:9px}.nx-player-detail-kpis-b44{display:grid;grid-template-columns:repeat(3,minmax(72px,1fr));gap:8px;align-self:center}.nx-player-detail-kpis-b44>b{padding:12px 10px;border-radius:14px;background:#0b2043;color:#fff;text-align:center;font-size:18px}.nx-player-detail-kpis-b44 small{display:block;margin-top:3px;font-size:7px;font-weight:900;letter-spacing:.08em;opacity:.7}
+.nx-player-section-b44{margin-top:18px;padding:18px;border:1px solid #dfe6ef;border-radius:20px;background:#fff}.nx-player-section-head-b44{margin-bottom:13px}.nx-player-section-head-b44 h2{margin:3px 0 0;color:#10264a;font-size:20px}.nx-player-data-grid-b44{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.nx-player-data-grid-b44>div{padding:11px;border-radius:13px;background:#f6f8fb}.nx-player-data-grid-b44 span{display:block;color:#8895a7;font-size:9px;font-weight:850}.nx-player-data-grid-b44 strong{display:block;margin-top:4px;color:#1b2f4e;font-size:13px}
+.nx-current-club-link-b44{width:100%;display:grid;grid-template-columns:58px minmax(0,1fr) 24px;align-items:center;gap:10px;margin-bottom:11px;padding:10px 12px;border:1px solid #dfe6ef;border-radius:15px;background:#f9fbfd;text-align:left;color:#10264a;cursor:pointer}.nx-current-club-link-b44>span{width:54px;height:54px;display:grid;place-items:center}.nx-current-club-link-b44 .nx-entity-tile-icon{width:50px;height:50px}.nx-current-club-link-b44 b small{display:block;margin-bottom:2px;color:#8a96a8;font-size:8px;letter-spacing:.08em}.nx-current-club-link-b44 em{font-size:24px;font-style:normal;color:#9ca7b5}
+.nx-former-rth-b44{padding:16px;border-radius:15px;background:#f3f5f8}.nx-former-rth-b44>strong{display:block;color:#566277;font-size:14px;letter-spacing:.05em}.nx-former-rth-b44>span{display:block;margin-top:12px;color:#8a96a8;font-size:9px;font-weight:850}.nx-former-rth-b44 button{margin-top:4px;padding:0;border:0;background:transparent;color:#0d356f;font-weight:900;cursor:pointer}
+.nx-player-timeline-b44{display:grid;gap:9px}.nx-player-transfer-b44{position:relative;display:grid;grid-template-columns:90px 54px minmax(0,1fr);align-items:center;gap:10px;padding:12px 13px;border:1px solid #e2e8f0;border-radius:14px;background:#fbfcfe}.nx-player-transfer-b44 time{color:#738198;font-size:10px;font-weight:800}.nx-player-transfer-b44>span{display:grid;place-items:center;width:44px;height:26px;border-radius:999px;font-size:9px;font-weight:950}.nx-player-transfer-b44.is-in>span{background:#e9f6ef;color:#17663b}.nx-player-transfer-b44.is-out>span{background:#f8ecec;color:#8a3131}.nx-player-transfer-b44 strong{display:block;color:#18304e;font-size:12px}.nx-player-transfer-b44 small{display:block;margin-top:3px;color:#8190a4;font-size:9px;font-weight:750}.nx-player-detail-loading-b44>strong{display:block;margin:5px 0 15px;color:#10264a;font-size:20px}
+
+@media(max-width:900px){
+  .nx-codex-controls-b44{grid-template-columns:1fr}.nx-player-grid-b44{grid-template-columns:1fr}.nx-roster-kpis-b44{grid-template-columns:repeat(3,minmax(0,1fr))}.nx-roster-player-b44{grid-template-columns:60px minmax(0,1fr) 68px 22px;grid-template-areas:"photo main rating arrow" "meta meta meta meta"}.nx-roster-player-b44>.is-roster{grid-area:photo}.nx-roster-player-main-b44{grid-area:main}.nx-roster-player-rating-b44{grid-area:rating}.nx-roster-player-meta-b44{grid-area:meta}.nx-roster-player-arrow-b44{grid-area:arrow}.nx-player-detail-hero-b44{flex-wrap:wrap}.nx-player-detail-kpis-b44{width:100%}.nx-player-data-grid-b44{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .nx-world-nav-b6.nx-world-nav-gw001-b44{gap:4px!important;padding:9px 7px!important}.nx-world-nav-b6.nx-world-nav-gw001-b44 button{height:68px!important;padding:7px 2px!important}.nx-world-nav-b6.nx-world-nav-gw001-b44 button svg{width:21px;height:21px}.nx-world-nav-b6.nx-world-nav-gw001-b44 button span{font-size:8.2px!important;white-space:nowrap}
+  .nx-codex-hero-b44,.nx-roster-hero-b44,.nx-player-detail-hero-b44{padding:14px;border-radius:18px}.nx-codex-hero-b44 h1,.nx-roster-hero-b44 h1,.nx-player-detail-title-b44 h1{font-size:24px}.nx-codex-mark-b44{width:50px;height:50px;border-radius:15px}.nx-codex-filter-b44{gap:4px;padding:5px}.nx-codex-filter-b44 button{min-height:44px;padding:4px;font-size:8px}.nx-codex-filter-b44 button b{min-width:20px;height:18px;margin-left:2px}.nx-codex-search-b44{height:50px}.nx-player-card-hit-b44{grid-template-columns:58px minmax(0,1fr) 62px;padding:12px;gap:7px 9px}.nx-player-photo-b44.is-card,.nx-player-photo-fallback-b44.is-card{width:58px;height:72px}.nx-player-card-copy-b44 strong{font-size:14px}.nx-player-card-data-b44>b{min-width:58px;padding:7px 4px;font-size:11px}.nx-player-card-b44>.nx-player-card-hit-b44>.nx-player-status-b44{left:12px;bottom:11px}.nx-player-club-b44{margin-left:91px;font-size:9px}.nx-roster-hero-b44{gap:11px}.nx-roster-club-logo-b44{width:62px;height:62px}.nx-roster-kpis-b44{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.nx-roster-player-b44{grid-template-columns:52px minmax(0,1fr) 58px 16px;gap:8px;padding:10px;min-height:92px}.nx-player-photo-b44.is-roster,.nx-player-photo-fallback-b44.is-roster{width:50px;height:62px}.nx-roster-player-main-b44 strong{font-size:13px}.nx-roster-player-rating-b44{width:56px;padding:7px 3px}.nx-roster-player-rating-b44 strong{font-size:17px}.nx-roster-player-meta-b44{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.nx-roster-player-meta-b44>b{padding:7px}.nx-player-photo-b44.is-detail,.nx-player-photo-fallback-b44.is-detail{width:88px;height:108px;border-radius:17px}.nx-player-detail-title-b44{flex:1}.nx-player-detail-kpis-b44{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.nx-player-detail-kpis-b44>b{padding:9px 5px;font-size:14px}.nx-player-section-b44{padding:14px;border-radius:17px}.nx-player-data-grid-b44{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.nx-player-data-grid-b44>div{padding:9px}.nx-player-transfer-b44{grid-template-columns:76px 42px minmax(0,1fr);gap:7px;padding:10px}.nx-player-transfer-b44>span{width:38px;height:24px}
+}
+@media(max-width:350px){.nx-world-nav-b6.nx-world-nav-gw001-b44{grid-template-columns:repeat(5,64px)!important;overflow-x:auto!important}.nx-world-nav-b6.nx-world-nav-gw001-b44 button span{font-size:8px!important}}
+
+
+/* BUILD 44 · Transfers navigation update */
+.nx-sport-home{background:#0b2043;color:#fff;border-color:#0b2043;display:grid;place-items:center}
+.nx-sport-home svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nx-transfers-page-b44{padding:16px 16px 112px}
+.nx-transfers-hero-b44{display:grid;grid-template-columns:minmax(0,1fr) 64px;align-items:center;gap:14px;padding:18px;border:1px solid #dfe6ef;border-radius:22px;background:linear-gradient(145deg,#fff,#f5f8fc)}
+.nx-transfers-hero-b44 small{display:block;color:#8a96a8;font-size:9px;font-weight:900;letter-spacing:.12em}.nx-transfers-hero-b44 h1{margin:4px 0 0;color:#10264a;font-size:30px;line-height:1}.nx-transfers-hero-b44 p{margin:5px 0 0;color:#5f6f87;font-size:13px;font-weight:800}.nx-transfers-hero-b44>div>span{display:block;margin-top:7px;color:#9a7a2c;font-size:10px;font-weight:900}
+.nx-transfers-mark-b44{width:60px;height:60px;border-radius:18px;background:#0b2043;color:#fff;display:grid;place-items:center;border:2px solid #d0aa52}.nx-transfers-mark-b44 svg{width:31px;height:31px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nx-transfers-controls-b44{display:grid;grid-template-columns:minmax(260px,.75fr) minmax(260px,1.1fr) minmax(190px,.65fr);gap:10px;margin:14px 0}
+.nx-transfer-filter-b44{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:5px;border:1px solid #dfe6ef;border-radius:15px;background:#eef2f7}.nx-transfer-filter-b44 button{min-height:44px;border:0;border-radius:11px;background:transparent;color:#68758b;font-size:9px;font-weight:900}.nx-transfer-filter-b44 button.is-active{background:#0b2043;color:#fff;box-shadow:0 5px 12px rgba(11,32,67,.16)}.nx-transfer-filter-b44 button b{display:inline-grid;place-items:center;min-width:22px;height:19px;margin-left:3px;padding:0 4px;border-radius:999px;background:rgba(255,255,255,.7);color:#536178;font-size:8px}.nx-transfer-filter-b44 button.is-active b{background:rgba(255,255,255,.16);color:#fff}
+.nx-transfer-search-b44{height:56px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid #dfe6ef;border-radius:15px;background:#fff;color:#8090a6}.nx-transfer-search-b44 span{font-size:22px}.nx-transfer-search-b44 input{width:100%;border:0;outline:0;background:transparent;color:#10264a;font:inherit;font-size:12px;font-weight:800}.nx-transfer-search-b44 input::placeholder{color:#9aa5b5}
+.nx-transfer-club-filter-b44{height:56px;display:flex;flex-direction:column;justify-content:center;padding:6px 12px;border:1px solid #dfe6ef;border-radius:15px;background:#fff}.nx-transfer-club-filter-b44>span{color:#8b97aa;font-size:7px;font-weight:900;letter-spacing:.09em}.nx-transfer-club-filter-b44 select{width:100%;margin-top:2px;border:0;outline:0;background:transparent;color:#17315b;font:inherit;font-size:11px;font-weight:850}
+.nx-transfer-list-b44{display:grid;gap:10px}.nx-transfer-row-b44{overflow:hidden;border:1px solid #dfe6ef;border-radius:19px;background:#fff;box-shadow:0 7px 18px rgba(18,43,78,.035)}.nx-transfer-row-b44.is-in{border-left:4px solid #65a781}.nx-transfer-row-b44.is-out{border-left:4px solid #c57878}
+.nx-transfer-row-head-b44{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 13px;border-bottom:1px solid #edf0f4;background:#f8fafc}.nx-transfer-row-head-b44 time{color:#68758c;font-size:10px;font-weight:900}.nx-transfer-row-head-b44 span{min-width:44px;padding:5px 9px;border-radius:999px;text-align:center;font-size:9px;font-weight:950}.nx-transfer-row-b44.is-in .nx-transfer-row-head-b44 span{background:#eaf6ef;color:#25734a}.nx-transfer-row-b44.is-out .nx-transfer-row-head-b44 span{background:#f8eeee;color:#9c3f3f}
+.nx-transfer-row-body-b44{display:grid;grid-template-columns:minmax(220px,.95fr) minmax(260px,1.25fr) 150px;align-items:center;gap:12px;padding:12px}
+.nx-transfer-player-link-b44{min-width:0;display:grid;grid-template-columns:52px minmax(0,1fr) 16px;align-items:center;gap:9px;border:0;background:transparent;padding:0;text-align:left;color:#10264a;cursor:pointer}.nx-player-photo-b44.is-transfer,.nx-player-photo-fallback-b44.is-transfer{width:50px;height:62px;border-radius:13px}.nx-transfer-player-link-b44 b{min-width:0}.nx-transfer-player-link-b44 small{display:block;color:#8d99aa;font-size:7px;font-weight:900;letter-spacing:.06em}.nx-transfer-player-link-b44 strong{display:block;margin-top:3px;color:#10264a;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nx-transfer-player-link-b44 em{display:block;margin-top:3px;color:#6d7a90;font-size:9px;font-style:normal;font-weight:800}.nx-transfer-player-link-b44 i{color:#9ba6b5;font-size:19px;font-style:normal}
+.nx-transfer-route-b44{min-width:0}.nx-transfer-route-b44>strong{display:block;color:#1a2f50;font-size:13px;line-height:1.3}.nx-transfer-route-b44>button{margin-top:6px;padding:0;border:0;background:transparent;color:#2f60bd;font:inherit;font-size:9px;font-weight:900;cursor:pointer}
+.nx-transfer-meta-b44{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.nx-transfer-meta-b44>b{min-height:55px;padding:8px;border-radius:12px;background:#f6f8fb;color:#14294c;font-size:12px;display:flex;flex-direction:column;justify-content:center}.nx-transfer-meta-b44 small{display:block;margin-top:3px;color:#8c98a9;font-size:7px;font-weight:900;letter-spacing:.06em}
+.nx-roster-updated-b44{display:block;margin-top:6px;color:#9a7a2c;font-size:9px;font-weight:900}
+@media(max-width:760px){.nx-transfers-controls-b44{grid-template-columns:1fr 1fr}.nx-transfer-filter-b44{grid-column:1 / -1}.nx-transfer-row-body-b44{grid-template-columns:minmax(0,1fr) 116px}.nx-transfer-player-link-b44{grid-column:1}.nx-transfer-route-b44{grid-column:1}.nx-transfer-meta-b44{grid-column:2;grid-row:1 / span 2}}
+@media(max-width:560px){.nx-transfers-page-b44{padding:12px 12px 104px}.nx-transfers-hero-b44{grid-template-columns:minmax(0,1fr) 52px;padding:14px;border-radius:18px}.nx-transfers-hero-b44 h1{font-size:25px}.nx-transfers-mark-b44{width:50px;height:50px;border-radius:15px}.nx-transfers-mark-b44 svg{width:27px;height:27px}.nx-transfers-controls-b44{grid-template-columns:1fr;gap:7px}.nx-transfer-filter-b44{grid-column:auto}.nx-transfer-search-b44,.nx-transfer-club-filter-b44{height:50px}.nx-transfer-row-b44{border-radius:16px}.nx-transfer-row-head-b44{padding:8px 10px}.nx-transfer-row-body-b44{grid-template-columns:minmax(0,1fr) 104px;gap:8px;padding:10px}.nx-transfer-player-link-b44{grid-template-columns:48px minmax(0,1fr) 13px;gap:7px}.nx-player-photo-b44.is-transfer,.nx-player-photo-fallback-b44.is-transfer{width:46px;height:58px}.nx-transfer-player-link-b44 strong{font-size:12px}.nx-transfer-route-b44>strong{font-size:11px}.nx-transfer-meta-b44{gap:5px}.nx-transfer-meta-b44>b{min-height:50px;padding:7px;font-size:10px}.nx-roster-updated-b44{font-size:8px}.nx-sport-home svg{width:22px;height:22px}}
+@media(max-width:430px){.nx-sport-actions{gap:5px;padding-right:7px}.nx-sport-action{width:40px;height:40px;border-radius:11px;font-size:18px}.nx-sport-home svg{width:20px;height:20px}}
