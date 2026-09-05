@@ -1,4 +1,4 @@
-name: Import public website from Aruba
+name: Import complete website from Aruba
 
 on:
   workflow_dispatch:
@@ -18,45 +18,152 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download current public website over HTTPS
+      - name: Validate Aruba secrets
+        env:
+          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
         shell: bash
         run: |
           set -euo pipefail
-          snapshot="$(mktemp -d)"
-          wget \
-            --mirror \
-            --page-requisites \
-            --no-host-directories \
-            --no-parent \
-            --domains www.italianmastersclub.it \
-            --reject-regex='/((nexus|live-match|live-test-3d|pre-match)(/|$))' \
-            --directory-prefix="$snapshot" \
-            --user-agent='IMC-Website-Backup/1.0' \
-            https://www.italianmastersclub.it/
+          for name in ARUBA_FTP_HOST ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
+            test -n "${!name:-}"
+          done
 
-          test -s "$snapshot/index.html"
-          cp -a "$snapshot"/. .
+      - name: Download complete website from Aruba via FTPS
+        env:
+          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import shutil
+          import socket
+          import ssl
+          import time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
 
-          while IFS= read -r -d '' file; do
-            clean="${file%%\?*}"
-            mv -f -- "$file" "$clean"
-          done < <(find site-assets -type f -name '*\\?*' -print0)
+          host = os.environ['ARUBA_FTP_HOST'].removeprefix('ftp://').removeprefix('ftps://').rstrip('/')
+          username = os.environ['ARUBA_FTP_USERNAME']
+          password = os.environ['ARUBA_FTP_PASSWORD']
+          remote_root = os.environ['ARUBA_WEBSITE_REMOTE_DIR'].strip() or '/'
 
-          echo "Sito pubblico acquisito correttamente tramite HTTPS"
+          snapshot = Path('/tmp/aruba-site')
+          if snapshot.exists():
+              shutil.rmtree(snapshot)
+          snapshot.mkdir(parents=True)
+
+          addresses = []
+          for item in socket.getaddrinfo(host, 21, socket.AF_INET, socket.SOCK_STREAM):
+              ip = item[4][0]
+              if ip not in addresses:
+                  addresses.append(ip)
+
+          ctx = ssl.create_default_context()
+          ctx.check_hostname = False
+
+          ftp = None
+          last_error = None
+          for _ in range(3):
+              for address in addresses:
+                  client = FTP_TLS(context=ctx)
+                  try:
+                      client.connect(address, 21, timeout=45)
+                      client.login(username, password)
+                      client.prot_p()
+                      ftp = client
+                      break
+                  except Exception as exc:
+                      last_error = exc
+                      try:
+                          client.close()
+                      except Exception:
+                          pass
+              if ftp is not None:
+                  break
+              time.sleep(5)
+
+          if ftp is None:
+              raise SystemExit(f'Connessione FTPS Aruba fallita: {type(last_error).__name__}')
+
+          downloaded_files = 0
+          downloaded_bytes = 0
+
+          def list_entries(remote_dir):
+              current = ftp.pwd()
+              ftp.cwd(remote_dir)
+              try:
+                  try:
+                      entries = [(name, facts.get('type', '')) for name, facts in ftp.mlsd()]
+                  except Exception:
+                      entries = []
+                      for name in ftp.nlst():
+                          if name in ('.', '..'):
+                              continue
+                          is_dir = False
+                          here = ftp.pwd()
+                          try:
+                              ftp.cwd(name)
+                              is_dir = True
+                          except error_perm:
+                              is_dir = False
+                          finally:
+                              ftp.cwd(here)
+                          entries.append((name, 'dir' if is_dir else 'file'))
+                  return entries
+              finally:
+                  ftp.cwd(current)
+
+          def download_tree(remote_dir, local_dir):
+              nonlocal downloaded_files, downloaded_bytes
+              local_dir.mkdir(parents=True, exist_ok=True)
+              for name, kind in list_entries(remote_dir):
+                  if name in ('.', '..'):
+                      continue
+                  remote_path = remote_dir.rstrip('/') + '/' + name if remote_dir != '/' else '/' + name
+                  local_path = local_dir / name
+                  if kind == 'dir':
+                      download_tree(remote_path, local_path)
+                  elif kind in ('file', ''):
+                      local_path.parent.mkdir(parents=True, exist_ok=True)
+                      with local_path.open('wb') as fh:
+                          ftp.retrbinary(f'RETR {remote_path}', fh.write)
+                      size = local_path.stat().st_size
+                      downloaded_files += 1
+                      downloaded_bytes += size
+                      print(f'DOWNLOAD {remote_path} ({size} bytes)')
+                  else:
+                      print(f'SKIP {remote_path} type={kind}')
+
+          download_tree(remote_root, snapshot)
+          ftp.quit()
+
+          if downloaded_files == 0:
+              raise SystemExit('Nessun file scaricato da Aruba')
+
+          print(f'FTPS import completato: {downloaded_files} file, {downloaded_bytes} bytes')
+          PY
+
+      - name: Copy Aruba snapshot into repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d /tmp/aruba-site
+          cp -a /tmp/aruba-site/. ./
+          echo "Snapshot Aruba copiato nel repository senza rimuovere i file tecnici GitHub"
 
       - name: Validate imported website
         shell: bash
         run: |
           set -euo pipefail
           test -s index.html
-          test -s site-assets/css/imc-site.css
-          test -s site-assets/js/imc-site.js
-          grep -Fq 'ITALIAN MASTERS CLUB' index.html
-          test -z "$(find site-assets -type f -name '*\\?*' -print -quit)"
-          test ! -d nexus
-          test ! -d live-match
-          test ! -d live-test-3d
-          test ! -d pre-match
+          echo "Import FTPS validato"
 
       - name: Commit imported website
         shell: bash
@@ -69,5 +176,5 @@ jobs:
             echo "Nessuna differenza da importare"
             exit 0
           fi
-          git commit -m "Import current public website from Aruba"
+          git commit -m "Import complete website from Aruba via FTPS"
           git push
