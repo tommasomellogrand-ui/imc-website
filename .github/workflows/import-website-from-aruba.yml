@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Authenticated Publication Bridge diagnostics
+      - name: Import complete Aruba site through Publication Bridge
         env:
           BRIDGE_TOKEN: ${{ secrets.IMC_PUBLICATION_BRIDGE_TOKEN || secrets.PUBLICATION_BRIDGE_TOKEN || secrets.BRIDGE_TOKEN }}
         shell: bash
@@ -30,54 +30,179 @@ jobs:
           }
 
           python3 - <<'PY'
-          import json, os, urllib.request, urllib.error
+          import base64
+          import json
+          import os
+          import pathlib
+          import shutil
+          import urllib.error
+          import urllib.request
 
-          url='https://www.italianmastersclub.it/bridge/publication-bridge.php'
-          token=os.environ['BRIDGE_TOKEN']
+          URL = 'https://www.italianmastersclub.it/bridge/publication-bridge.php'
+          TOKEN = os.environ['BRIDGE_TOKEN']
+          SNAPSHOT = pathlib.Path('/tmp/aruba-site')
 
-          def call(payload):
-              data=json.dumps(payload).encode('utf-8')
-              headers={
-                  'Content-Type':'application/json',
-                  'X-IMC-Bridge-Token':token,
-              }
-              req=urllib.request.Request(url,data=data,headers=headers,method='POST')
+          if SNAPSHOT.exists():
+              shutil.rmtree(SNAPSHOT)
+          SNAPSHOT.mkdir(parents=True)
+
+          # Deliberately do not commit authentication material into Git history.
+          EXCLUDED = {
+              'bridge/publication-config.php',
+          }
+
+          def api(payload):
+              data = json.dumps(payload).encode('utf-8')
+              req = urllib.request.Request(
+                  URL,
+                  data=data,
+                  headers={
+                      'Content-Type': 'application/json',
+                      'X-IMC-Bridge-Token': TOKEN,
+                  },
+                  method='POST',
+              )
               try:
-                  with urllib.request.urlopen(req,timeout=30) as r:
-                      body=r.read(200000).decode('utf-8','replace')
-                      print('HTTP',r.status,'PAYLOAD',payload)
-                      print(body)
-                      return r.status, body
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      raw = r.read()
+                      status = r.status
               except urllib.error.HTTPError as e:
-                  body=e.read(200000).decode('utf-8','replace')
-                  print('HTTP',e.code,'PAYLOAD',payload)
-                  print(body)
-                  return e.code, body
+                  raw = e.read()
+                  status = e.code
 
-          status, body = call({'action':'health'})
-          if status == 401:
-              raise SystemExit('BRIDGE_AUTH_FAILED')
-          if status >= 400:
-              raise SystemExit(f'BRIDGE_HEALTH_FAILED_HTTP_{status}')
+              text = raw.decode('utf-8', 'replace')
+              try:
+                  parsed = json.loads(text)
+              except Exception:
+                  raise RuntimeError(f'BRIDGE_NON_JSON HTTP {status}: {text[:500]}')
 
-          status, body = call({'action':'list','path':'/'})
-          if status == 401:
-              raise SystemExit('BRIDGE_AUTH_FAILED')
-          if status >= 400:
-              raise SystemExit(f'BRIDGE_LIST_FAILED_HTTP_{status}')
+              if status >= 400 or not parsed.get('ok', False):
+                  raise RuntimeError(
+                      f"BRIDGE_ERROR HTTP {status} action={payload.get('action')} path={payload.get('path','')} error={parsed.get('error')}"
+                  )
+              return parsed
 
-          try:
-              parsed=json.loads(body)
-          except Exception as exc:
-              raise SystemExit(f'BRIDGE_LIST_NOT_JSON: {exc}')
+          health = api({'action': 'health'})
+          print('BRIDGE_OK', health.get('version'), 'root=', health.get('root'))
 
-          print('BRIDGE_AUTH_OK')
-          print('BRIDGE_ROOT_LIST_OK')
-          print('ROOT_RESPONSE_KEYS', sorted(parsed.keys()) if isinstance(parsed,dict) else type(parsed).__name__)
+          stats = {'files': 0, 'dirs': 0, 'bytes': 0, 'excluded': 0}
+
+          def norm_path(parent, name):
+              parent = parent.strip('/')
+              return f'{parent}/{name}' if parent else name
+
+          def decode_read_response(obj, path):
+              # Bridge implementations may expose one of these equivalent shapes.
+              encoding = str(obj.get('encoding') or '').lower()
+
+              for key in ('content_base64', 'base64', 'data_base64'):
+                  if isinstance(obj.get(key), str):
+                      return base64.b64decode(obj[key], validate=False)
+
+              content = obj.get('content')
+              if isinstance(content, str):
+                  if encoding in ('base64', 'b64'):
+                      return base64.b64decode(content, validate=False)
+                  return content.encode('utf-8')
+
+              data = obj.get('data')
+              if isinstance(data, str):
+                  if encoding in ('base64', 'b64'):
+                      return base64.b64decode(data, validate=False)
+                  return data.encode('utf-8')
+
+              raise RuntimeError(f'READ_RESPONSE_UNSUPPORTED path={path} keys={sorted(obj.keys())}')
+
+          def read_file(path):
+              # Ask for base64 first so binary files can be imported safely.
+              first_error = None
+              for payload in (
+                  {'action': 'read', 'path': path, 'encoding': 'base64'},
+                  {'action': 'read', 'path': path},
+              ):
+                  try:
+                      return decode_read_response(api(payload), path)
+                  except Exception as exc:
+                      first_error = first_error or exc
+              raise first_error
+
+          def walk(remote_dir=''):
+              listing = api({'action': 'list', 'path': '/' + remote_dir.strip('/') if remote_dir else '/'})
+              items = listing.get('items')
+              if not isinstance(items, list):
+                  raise RuntimeError(f'LIST_RESPONSE_UNSUPPORTED path={remote_dir} keys={sorted(listing.keys())}')
+
+              for item in items:
+                  name = item.get('name')
+                  kind = item.get('type')
+                  if not isinstance(name, str) or not name or name in ('.', '..'):
+                      continue
+
+                  rel = norm_path(remote_dir, name)
+
+                  if rel in EXCLUDED:
+                      stats['excluded'] += 1
+                      print('EXCLUDE_SECRET', rel)
+                      continue
+
+                  target = SNAPSHOT / rel
+                  if kind == 'directory':
+                      target.mkdir(parents=True, exist_ok=True)
+                      stats['dirs'] += 1
+                      print('DIR', rel)
+                      walk(rel)
+                  elif kind == 'file':
+                      blob = read_file(rel)
+                      target.parent.mkdir(parents=True, exist_ok=True)
+                      target.write_bytes(blob)
+                      stats['files'] += 1
+                      stats['bytes'] += len(blob)
+                      print('FILE', rel, len(blob))
+                  else:
+                      print('SKIP_UNKNOWN_TYPE', rel, kind)
+
+          walk('')
+
+          if stats['files'] == 0:
+              raise SystemExit('NO_FILES_IMPORTED')
+
+          print(
+              'IMPORT_SNAPSHOT_OK',
+              f"files={stats['files']}",
+              f"dirs={stats['dirs']}",
+              f"bytes={stats['bytes']}",
+              f"excluded={stats['excluded']}"
+          )
           PY
 
-      - name: Contract identified
+      - name: Copy Aruba snapshot into repository
         shell: bash
         run: |
-          echo "Authenticated bridge check completed successfully."
-          echo "Next revision can use the confirmed list/read schema for the full import."
+          set -euo pipefail
+          test -d /tmp/aruba-site
+          cp -a /tmp/aruba-site/. ./
+          echo "Aruba snapshot copied into repository"
+
+      - name: Validate imported site
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -d asta-mercato
+          echo "Validated index.html and asta-mercato"
+
+      - name: Commit imported website
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No differences to commit"
+            exit 0
+          fi
+
+          git commit -m "Import complete Aruba website via Publication Bridge"
+          git push origin main
