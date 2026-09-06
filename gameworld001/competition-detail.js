@@ -34,6 +34,32 @@
   async function loadStats(i,token){const p=APP?.querySelector('[data-panel="stats"]');if(!p)return;p.innerHTML=state('CALCOLO STATS');try{const rows=await readAll('results',i);if(token!==requestToken)return;let goals=0,home=0,away=0,draws=0;rows.forEach(r=>{const h=Number(r.home_score),a=Number(r.away_score);if(!Number.isFinite(h)||!Number.isFinite(a))return;goals+=h+a;if(h>a)home++;else if(a>h)away++;else draws++});const avg=rows.length?(goals/rows.length).toFixed(2):'—';p.innerHTML=`<div class="cd-results-heading"><span>COMPETITION STATS</span><strong>${rows.length} MATCHES</strong></div><div class="overview-metrics"><div class="metric-card"><strong>${goals}</strong><span>Goals</span></div><div class="metric-card"><strong>${avg}</strong><span>Goals / Match</span></div><div class="metric-card"><strong>${home}</strong><span>Home Wins</span></div><div class="metric-card"><strong>${away}</strong><span>Away Wins</span></div><div class="metric-card"><strong>${draws}</strong><span>Draws</span></div></div>`;}catch(e){p.innerHTML=errorMarkup('STATS TEMPORANEAMENTE NON DISPONIBILI',e)}}
   async function loadTrophy(i,token){const p=APP?.querySelector('[data-panel="trophy"]');if(!p)return;p.innerHTML=state('CARICAMENTO TROPHY ROOM');try{const rows=await readAll('trophy_room',i);if(token!==requestToken)return;if(!rows.length){p.innerHTML='<div class="cd-results-state"><strong>NESSUN TROFEO ASSOCIATO A QUESTA COMPETITION KEY</strong></div>';return}p.innerHTML=`<div class="cd-results-heading"><span>TROPHY ROOM</span><strong>${rows.length}</strong></div><div class="competition-reference-list">${rows.map(r=>`<div class="competition-reference-card"><div class="competition-reference-copy"><strong>${esc(r.club_name||r.team_name||r.winner_name||'Trophy')}</strong><span>${esc(r.imc_season||r.season||'')}</span></div></div>`).join('')}</div>`;}catch(e){p.innerHTML=errorMarkup('TROPHY ROOM NON DISPONIBILE PER COMPETITION KEY',e)}}
 
-  document.addEventListener('click',event=>{const link=event.target.closest('a[href*="#/competition/"]');if(link){const href=link.getAttribute('href')||'';const n=href.indexOf('#/competition/');if(n>=0){event.preventDefault();event.stopImmediatePropagation();openCompetition(href.slice(n));return}}const tab=event.target.closest('[data-cd-tab]');if(!tab)return;const i=parseCompetitionHash(location.hash);if(!i)return;event.preventDefault();const id=tab.dataset.cdTab;if(TABS.some(([x])=>x===id))render(i,id);},true);
-  const pending=window.__GW001_PENDING_COMPETITION_HASH__;if(pending){const i=parseCompetitionHash(pending);window.__GW001_PENDING_COMPETITION_HASH__=null;if(i){history.replaceState({gw001Competition:true},'',`${location.pathname}${location.search}${pending}`);render(i)}}
+  document.addEventListener('click',event=>{
+    const link=event.target.closest('a[href*="#/competition/"]');
+    if(link){
+      const href=link.getAttribute('href')||'';
+      const n=href.indexOf('#/competition/');
+      if(n>=0){
+        const hash=href.slice(n);
+        const identity=parseCompetitionHash(hash);
+        if(identity){
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          history.pushState({gw001Competition:true},'',`${location.pathname}${location.search}${hash}`);
+          render(identity);
+          return;
+        }
+      }
+    }
+    const tab=event.target.closest('[data-cd-tab]');
+    if(!tab)return;
+    const i=parseCompetitionHash(location.hash);
+    if(!i)return;
+    event.preventDefault();
+    const id=tab.dataset.cdTab;
+    if(TABS.some(([x])=>x===id))render(i,id);
+  },true);
+
+  const pending=window.__GW001_PENDING_COMPETITION_HASH__;
+  if(pending){const i=parseCompetitionHash(pending);window.__GW001_PENDING_COMPETITION_HASH__=null;if(i){history.replaceState({gw001Competition:true},'',`${location.pathname}${location.search}${pending}`);render(i)}}
 })();
