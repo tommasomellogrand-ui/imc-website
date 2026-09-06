@@ -33,6 +33,8 @@ jobs:
           test -s gameworld001/app.js
           test -s gameworld001/menu.js
           test -s gameworld001/menu.css
+          test -s gameworld001/competition-detail.js
+          test -s gameworld001/competition-detail.css
           test -s gameworld001/team-hub.js
           test -s gameworld001/style.css
           test -s gameworld001/.htaccess
@@ -41,6 +43,8 @@ jobs:
           grep -Fq './app.js' gameworld001/index.html
           grep -Fq './menu.js' gameworld001/index.html
           grep -Fq './menu.css' gameworld001/index.html
+          grep -Fq './competition-detail.js' gameworld001/index.html
+          grep -Fq './competition-detail.css' gameworld001/index.html
           grep -Fq './team-hub.js' gameworld001/index.html
           grep -Fq './style.css' gameworld001/index.html
 
@@ -114,6 +118,8 @@ jobs:
               Path('gameworld001/app.js'),
               Path('gameworld001/menu.js'),
               Path('gameworld001/menu.css'),
+              Path('gameworld001/competition-detail.js'),
+              Path('gameworld001/competition-detail.css'),
               Path('gameworld001/team-hub.js'),
               Path('gameworld001/style.css'),
               Path('gameworld001/.htaccess'),
@@ -142,6 +148,8 @@ jobs:
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/app.js?verify=$token" -o /tmp/gw001-app.js
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/menu.js?verify=$token" -o /tmp/gw001-menu.js
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/menu.css?verify=$token" -o /tmp/gw001-menu.css
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/competition-detail.js?verify=$token" -o /tmp/gw001-competition-detail.js
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/competition-detail.css?verify=$token" -o /tmp/gw001-competition-detail.css
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/team-hub.js?verify=$token" -o /tmp/gw001-team-hub.js
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/api/imc-gateway/team-hub.php?game_world_id=GW001&dataset=clubs&verify=$token" -o /tmp/gw001-clubs.json
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/api/imc-gateway/team-hub.php?game_world_id=GW001&dataset=nations&verify=$token" -o /tmp/gw001-nations.json
@@ -149,11 +157,15 @@ jobs:
           grep -Fq './app.js' /tmp/gw001.html
           grep -Fq './menu.js' /tmp/gw001.html
           grep -Fq './menu.css' /tmp/gw001.html
+          grep -Fq './competition-detail.js' /tmp/gw001.html
+          grep -Fq './competition-detail.css' /tmp/gw001.html
           grep -Fq './team-hub.js' /tmp/gw001.html
           grep -Fq 'Tommaso Mello' /tmp/gw001-app.js
           grep -Fq 'manager IMC attivi' /tmp/gw001-app.js
           grep -Fq "const NAV" /tmp/gw001-menu.js
           grep -Fq '.global-nav{display:none!important}' /tmp/gw001-menu.css
+          grep -Fq 'competition-detail-tabs' /tmp/gw001-competition-detail.js
+          grep -Fq '.competition-detail-tabs' /tmp/gw001-competition-detail.css
           grep -Fq 'CORE Aruba' /tmp/gw001-team-hub.js
           python3 - <<'PY'
           import json
