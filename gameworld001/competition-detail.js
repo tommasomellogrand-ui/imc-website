@@ -2,6 +2,8 @@
   'use strict';
 
   const APP = document.getElementById('app');
+  const GATEWAY = 'https://www.italianmastersclub.it/api/imc-gateway/';
+  const WORLD = 'GW001';
   const TABS = [
     ['overview', 'Overview'],
     ['results', 'Results'],
@@ -23,6 +25,8 @@
     interqualifier: 'World Cup Qualifier',
     worldcup: 'World Cup'
   });
+
+  let requestToken = 0;
 
   function esc(value) {
     return String(value ?? '')
@@ -87,8 +91,10 @@
   function render(identity, active = 'overview') {
     const view = APP?.querySelector('.view');
     if (!view || !identity) return false;
+    requestToken += 1;
     view.innerHTML = pageMarkup(identity, active);
     window.scrollTo({ top: 0, behavior: 'instant' });
+    if (active === 'results') loadResults(identity, requestToken);
     return true;
   }
 
@@ -97,6 +103,126 @@
     if (!identity) return false;
     history.pushState({ gw001Competition: true }, '', `${location.pathname}${location.search}${hash}`);
     return render(identity, 'overview');
+  }
+
+  function resultFilters(identity) {
+    const filters = {
+      competition_group: identity.group,
+      result_dataset: 'MATCH_DATA'
+    };
+    if (identity.competition_key) {
+      filters.competition_key = identity.competition_key;
+    } else {
+      if (identity.sm_action) filters.sm_action = identity.sm_action;
+      if (identity.sm_division) filters.sm_division = identity.sm_division;
+    }
+    return filters;
+  }
+
+  async function readAllResults(identity) {
+    const rows = [];
+    const pageSize = 250;
+    let offset = 0;
+    let total = null;
+
+    while (total === null || offset < total) {
+      const url = new URL(GATEWAY);
+      url.searchParams.set('game_world_id', WORLD);
+      url.searchParams.set('action', 'read');
+      url.searchParams.set('repository', 'results');
+      url.searchParams.set('limit', String(pageSize));
+      url.searchParams.set('offset', String(offset));
+      url.searchParams.set('order_by', 'match_date');
+      url.searchParams.set('order_dir', 'DESC');
+      Object.entries(resultFilters(identity)).forEach(([key, value]) => {
+        url.searchParams.set(`filter_${key}`, String(value));
+      });
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      let response;
+      try {
+        response = await fetch(url.toString(), {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      let payload;
+      try {
+        payload = await response.json();
+      } catch (_) {
+        throw new Error(`Gateway response non JSON (${response.status})`);
+      }
+      if (!response.ok || payload?.ok !== true) {
+        throw new Error(payload?.error || `HTTP_${response.status}`);
+      }
+
+      const pageRows = Array.isArray(payload.data) ? payload.data : [];
+      if (total === null) total = Number(payload.pagination?.total ?? pageRows.length);
+      rows.push(...pageRows);
+      offset += pageRows.length;
+      if (!pageRows.length || pageRows.length < pageSize) break;
+    }
+
+    return rows;
+  }
+
+  function dateText(value) {
+    if (!value) return '—';
+    const date = new Date(`${value}T12:00:00`);
+    if (Number.isNaN(date.getTime())) return esc(value);
+    return new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })
+      .format(date)
+      .toUpperCase();
+  }
+
+  function resultCard(row) {
+    const fixtureId = row.sm_fixture_id;
+    const href = fixtureId ? `#/match/${encodeURIComponent(fixtureId)}` : '#';
+    return `
+      <a class="cd-result-card" href="${href}">
+        <div class="cd-result-meta">
+          <span>${dateText(row.match_date)}</span>
+          ${row.competition_round ? `<span>${esc(row.competition_round)}</span>` : ''}
+        </div>
+        <div class="cd-result-match">
+          <strong>${esc(row.home_name || '—')}</strong>
+          <b>${esc(row.home_score ?? '—')} - ${esc(row.away_score ?? '—')}</b>
+          <strong>${esc(row.away_name || '—')}</strong>
+        </div>
+      </a>`;
+  }
+
+  async function loadResults(identity, token) {
+    const panel = APP?.querySelector('.competition-detail-panel[data-panel="results"]');
+    if (!panel) return;
+    panel.innerHTML = '<div class="cd-results-state"><span class="spinner"></span><strong>CARICAMENTO RESULTS</strong></div>';
+
+    try {
+      const rows = await readAllResults(identity);
+      if (token !== requestToken) return;
+      const currentPanel = APP?.querySelector('.competition-detail-panel[data-panel="results"]');
+      if (!currentPanel) return;
+
+      if (!rows.length) {
+        currentPanel.innerHTML = '<div class="cd-results-state"><strong>NESSUN RESULT DISPONIBILE</strong></div>';
+        return;
+      }
+
+      currentPanel.innerHTML = `
+        <div class="cd-results-heading"><span>RESULTS</span><strong>${rows.length}</strong></div>
+        <div class="cd-results-list">${rows.map(resultCard).join('')}</div>`;
+    } catch (error) {
+      if (token !== requestToken) return;
+      const currentPanel = APP?.querySelector('.competition-detail-panel[data-panel="results"]');
+      if (!currentPanel) return;
+      const message = error?.name === 'AbortError' ? 'GATEWAY TIMEOUT' : (error?.message || 'GATEWAY ERROR');
+      currentPanel.innerHTML = `<div class="cd-results-state error"><strong>RESULTS TEMPORANEAMENTE NON DISPONIBILI</strong><small>${esc(message)}</small></div>`;
+    }
   }
 
   document.addEventListener('click', event => {
