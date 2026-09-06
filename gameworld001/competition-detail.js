@@ -70,9 +70,11 @@
 
   async function read(repository, filters = {}, options = {}) {
     const data = [];
-    const pageSize = Math.min(1000, options.pageSize || 1000);
+    const pageSize = Math.max(1, Math.min(250, Number(options.pageSize || 250)));
+    const timeoutMs = Math.max(3000, Number(options.timeoutMs || 10000));
     let offset = 0;
     let total = null;
+
     for (let page = 0; page < 12; page += 1) {
       const url = new URL(GATEWAY);
       url.searchParams.set('game_world_id', WORLD);
@@ -87,9 +89,31 @@
           url.searchParams.set(`filter_${key}`, String(value));
         }
       });
-      const response = await fetch(url.toString(), { cache: 'no-store', headers: { Accept: 'application/json' } });
-      const payload = await response.json();
-      if (!response.ok || payload?.ok !== true) throw new Error(payload?.error || `HTTP_${response.status}`);
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      let response;
+      try {
+        response = await fetch(url.toString(), {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+          signal: controller.signal
+        });
+      } catch (error) {
+        if (error?.name === 'AbortError') throw new Error(`${repository}: timeout`);
+        throw error;
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      let payload;
+      try {
+        payload = await response.json();
+      } catch (_) {
+        throw new Error(`${repository}: risposta non JSON`);
+      }
+      if (!response.ok || payload?.ok !== true) throw new Error(payload?.error || `${repository}: HTTP_${response.status}`);
+
       const rows = Array.isArray(payload.data) ? payload.data : [];
       if (total === null) total = Number(payload.pagination?.total ?? rows.length);
       data.push(...rows);
@@ -97,6 +121,15 @@
       if (!rows.length || offset >= total || rows.length < pageSize) break;
     }
     return data;
+  }
+
+  async function safeRead(repository, filters = {}, options = {}) {
+    try {
+      return { ok: true, rows: await read(repository, filters, options), error: null };
+    } catch (error) {
+      console.warn(`[GW001 Competition Detail] ${repository}`, error);
+      return { ok: false, rows: [], error };
+    }
   }
 
   function numeric(value) {
@@ -260,62 +293,70 @@
 
     main.innerHTML = `${headCopy.outerHTML}${tabBar()}<div class="competition-detail-stage"><div class="cd-loading"><span></span><strong>CARICAMENTO COMPETIZIONE</strong></div></div>`;
 
-    try {
-      const [matches, schedule, reports, allResults] = await Promise.all([
-        read('results', baseFilters(identity, true), { orderBy:'match_date', orderDir:'DESC' }),
-        read('schedule', baseFilters(identity, false), { orderBy:'match_date', orderDir:'ASC' }),
-        read('match_report', baseFilters(identity, false)),
-        read('results', baseFilters(identity, false), { orderBy:'match_date', orderDir:'DESC' })
-      ]);
-      if (current !== enhanceToken || identityFromRoute() === null) return;
+    const [matchesResult, scheduleResult, reportsResult, allResultsResult] = await Promise.all([
+      safeRead('results', baseFilters(identity, true), { orderBy:'match_date', orderDir:'DESC' }),
+      safeRead('schedule', baseFilters(identity, false), { orderBy:'match_date', orderDir:'ASC' }),
+      safeRead('match_report', baseFilters(identity, false)),
+      safeRead('results', baseFilters(identity, false), { orderBy:'match_date', orderDir:'DESC' })
+    ]);
 
-      const teams = fixtureTeams(matches);
-      const table = standings(matches);
-      const players = playerLeaders(allResults.filter(row => row.result_dataset !== 'MATCH_DATA' || row.sm_player_id));
-      const lastMatch = matches[0] || null;
-      const nextMatch = schedule[0] || null;
-      const leader = String(identity.sm_action || '').toLowerCase() === 'league' ? table[0] : null;
-      const topScorer = [...players].sort((a,b) => b.goals-a.goals)[0] || null;
+    if (current !== enhanceToken || identityFromRoute() === null) return;
 
-      const metaValues = (field) => [...new Set([...matches,...schedule,...reports].map(row => row[field]).filter(v => v !== null && v !== undefined && v !== ''))];
-      const overview = `${statusPanel(teams.size, matches.length, reports.length)}
-        ${matchBox(lastMatch,'LAST MATCH')}
-        ${matchBox(nextMatch,'NEXT MATCH',true)}
-        ${leader ? `<section class="cd-card cd-leader"><small>CURRENT LEADER</small><strong>${esc(leader.name)}</strong><span>${leader.pts} PTS</span></section>` : ''}
-        ${topScorer ? `<a class="cd-card cd-leader" href="#/player/${encodeURIComponent(topScorer.id)}"><small>TOP GOALSCORER</small><strong>${esc(topScorer.name)}</strong><span>${topScorer.goals} GOALS</span></a>` : ''}`;
+    const matches = matchesResult.rows;
+    const schedule = scheduleResult.rows;
+    const reports = reportsResult.rows;
+    const allResults = allResultsResult.rows;
+    const stage = main.querySelector('.competition-detail-stage');
+    if (!stage) return;
 
-      const competition = `<section class="cd-card"><small>COMPETITION</small><div class="cd-facts">
-        <div><span>GROUP</span><strong>${esc(identity.group)}</strong></div>
-        ${identity.competition_key ? `<div><span>COMPETITION KEY</span><strong>${esc(identity.competition_key)}</strong></div>` : ''}
-        ${identity.sm_action ? `<div><span>TYPE</span><strong>${esc(LABELS[String(identity.sm_action).toLowerCase()] || identity.sm_action)}</strong></div>` : ''}
-        ${identity.sm_division ? `<div><span>DIVISION</span><strong>${esc(identity.sm_division)}</strong></div>` : ''}
-        ${metaValues('sm_country').length ? `<div><span>COUNTRY</span><strong>${esc(metaValues('sm_country').join(' · '))}</strong></div>` : ''}
-        ${metaValues('competition_stage').length ? `<div><span>STAGE</span><strong>${esc(metaValues('competition_stage').join(' · '))}</strong></div>` : ''}
-        ${metaValues('competition_round').length ? `<div><span>ROUND</span><strong>${esc(metaValues('competition_round').join(' · '))}</strong></div>` : ''}
-      </div></section>${String(identity.sm_action || '').toLowerCase()==='league' ? standingsBlock(table) : ''}`;
-
-      const matchesPanel = `<section class="cd-section-label">RESULTS <strong>${matches.length}</strong></section>${matchList(matches,false)}
-        <section class="cd-section-label">SCHEDULE <strong>${schedule.length}</strong></section>${matchList(schedule,true)}`;
-
-      const stats = `${leadersBlock(players)}${String(identity.sm_action || '').toLowerCase()==='league' ? standingsBlock(table.slice(0,10)) : ''}`;
-      const trophy = unavailable('TROPHY ROOM · DATI NON ANCORA DISPONIBILI');
-
-      const panels = { overview, competition, matches:matchesPanel, stats, trophy };
-      const stage = main.querySelector('.competition-detail-stage');
-      function show(id) {
-        main.querySelectorAll('.competition-detail-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.cdTab === id));
-        stage.innerHTML = `<div class="competition-detail-panel" data-panel="${id}">${panels[id]}</div>`;
-      }
-      main.querySelector('.competition-detail-tabs').addEventListener('click', event => {
-        const button = event.target.closest('[data-cd-tab]');
-        if (!button) return;
-        show(button.dataset.cdTab);
-      });
-      show('overview');
-    } catch (error) {
-      const stage = main.querySelector('.competition-detail-stage');
-      if (stage) stage.innerHTML = `<section class="cd-card cd-empty"><strong>DATI TEMPORANEAMENTE NON DISPONIBILI</strong><span>${esc(error.message)}</span></section>`;
+    if (!matchesResult.ok && !scheduleResult.ok && !reportsResult.ok && !allResultsResult.ok) {
+      stage.innerHTML = `<section class="cd-card cd-empty"><strong>DATI TEMPORANEAMENTE NON DISPONIBILI</strong><span>Universal Gateway non ha restituito alcun dataset della competizione.</span></section>`;
+      return;
     }
+
+    const teams = fixtureTeams(matches.length ? matches : reports);
+    const table = standings(matches);
+    const players = playerLeaders(allResults.filter(row => row.result_dataset !== 'MATCH_DATA' || row.sm_player_id));
+    const lastMatch = matches[0] || reports[0] || null;
+    const nextMatch = schedule[0] || null;
+    const leader = String(identity.sm_action || '').toLowerCase() === 'league' ? table[0] : null;
+    const topScorer = [...players].sort((a,b) => b.goals-a.goals)[0] || null;
+
+    const metaValues = (field) => [...new Set([...matches,...schedule,...reports].map(row => row[field]).filter(v => v !== null && v !== undefined && v !== ''))];
+    const overview = `${statusPanel(teams.size, matches.length, reports.length)}
+      ${matchBox(lastMatch,'LAST MATCH')}
+      ${matchBox(nextMatch,'NEXT MATCH',true)}
+      ${leader ? `<section class="cd-card cd-leader"><small>CURRENT LEADER</small><strong>${esc(leader.name)}</strong><span>${leader.pts} PTS</span></section>` : ''}
+      ${topScorer ? `<a class="cd-card cd-leader" href="#/player/${encodeURIComponent(topScorer.id)}"><small>TOP GOALSCORER</small><strong>${esc(topScorer.name)}</strong><span>${topScorer.goals} GOALS</span></a>` : ''}
+      ${!matchesResult.ok ? unavailable('RESULTS TEMPORANEAMENTE NON DISPONIBILI') : ''}`;
+
+    const competition = `<section class="cd-card"><small>COMPETITION</small><div class="cd-facts">
+      <div><span>GROUP</span><strong>${esc(identity.group)}</strong></div>
+      ${identity.competition_key ? `<div><span>COMPETITION KEY</span><strong>${esc(identity.competition_key)}</strong></div>` : ''}
+      ${identity.sm_action ? `<div><span>TYPE</span><strong>${esc(LABELS[String(identity.sm_action).toLowerCase()] || identity.sm_action)}</strong></div>` : ''}
+      ${identity.sm_division ? `<div><span>DIVISION</span><strong>${esc(identity.sm_division)}</strong></div>` : ''}
+      ${metaValues('sm_country').length ? `<div><span>COUNTRY</span><strong>${esc(metaValues('sm_country').join(' · '))}</strong></div>` : ''}
+      ${metaValues('competition_stage').length ? `<div><span>STAGE</span><strong>${esc(metaValues('competition_stage').join(' · '))}</strong></div>` : ''}
+      ${metaValues('competition_round').length ? `<div><span>ROUND</span><strong>${esc(metaValues('competition_round').join(' · '))}</strong></div>` : ''}
+    </div></section>${String(identity.sm_action || '').toLowerCase()==='league' ? standingsBlock(table) : ''}`;
+
+    const matchesPanel = `<section class="cd-section-label">RESULTS <strong>${matches.length}</strong></section>${matchesResult.ok ? matchList(matches,false) : unavailable('RESULTS TEMPORANEAMENTE NON DISPONIBILI')}
+      <section class="cd-section-label">SCHEDULE <strong>${schedule.length}</strong></section>${scheduleResult.ok ? matchList(schedule,true) : unavailable('SCHEDULE TEMPORANEAMENTE NON DISPONIBILE')}`;
+
+    const stats = `${leadersBlock(players)}${String(identity.sm_action || '').toLowerCase()==='league' ? standingsBlock(table.slice(0,10)) : ''}`;
+    const trophy = unavailable('TROPHY ROOM · DATI NON ANCORA DISPONIBILI');
+
+    const panels = { overview, competition, matches:matchesPanel, stats, trophy };
+    function show(id) {
+      main.querySelectorAll('.competition-detail-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.cdTab === id));
+      stage.innerHTML = `<div class="competition-detail-panel" data-panel="${id}">${panels[id]}</div>`;
+    }
+    main.querySelector('.competition-detail-tabs').addEventListener('click', event => {
+      const button = event.target.closest('[data-cd-tab]');
+      if (!button) return;
+      show(button.dataset.cdTab);
+    });
+    show('overview');
   }
 
   const observer = new MutationObserver(() => {
