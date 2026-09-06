@@ -39,52 +39,53 @@ jobs:
 
       - name: Validate Aruba secrets
         env:
-          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
           ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
         shell: bash
         run: |
           set -euo pipefail
-          for name in ARUBA_FTP_HOST ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
+          for name in ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
             test -n "${!name:-}"
           done
 
       - name: Upload website and GW001 structure
         env:
-          ARUBA_FTP_HOST: ${{ secrets.ARUBA_FTP_HOST }}
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
           ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
         shell: bash
         run: |
           python3 - <<'PY'
-          import io, os, socket, ssl, time
+          import io, os, ssl, time
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
 
-          host=os.environ['ARUBA_FTP_HOST'].removeprefix('ftp://').removeprefix('ftps://').rstrip('/')
+          host='ftp.italianmastersclub.it'
+          port=21
           username=os.environ['ARUBA_FTP_USERNAME']
           password=os.environ['ARUBA_FTP_PASSWORD']
           remote_root=os.environ['ARUBA_WEBSITE_REMOTE_DIR'].strip() or '/'
 
-          addresses=[]
-          for item in socket.getaddrinfo(host,21,socket.AF_INET,socket.SOCK_STREAM):
-              if item[4][0] not in addresses: addresses.append(item[4][0])
-          ctx=ssl.create_default_context(); ctx.check_hostname=False
-          ftp=None; last_error=None
+          ctx=ssl.create_default_context()
+          ftp=None
+          last_error=None
           for _ in range(3):
-              for address in addresses:
-                  c=FTP_TLS(context=ctx)
-                  try:
-                      c.connect(address,21,timeout=45); c.login(username,password); c.prot_p(); ftp=c; break
-                  except Exception as e:
-                      last_error=e
-                      try: c.close()
-                      except Exception: pass
-              if ftp: break
-              time.sleep(5)
-          if ftp is None: raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}')
+              c=FTP_TLS(context=ctx)
+              try:
+                  c.connect(host,port,timeout=60)
+                  c.login(username,password)
+                  c.prot_p()
+                  c.set_pasv(True)
+                  ftp=c
+                  break
+              except Exception as e:
+                  last_error=e
+                  try: c.close()
+                  except Exception: pass
+                  time.sleep(5)
+          if ftp is None:
+              raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}: {last_error}')
 
           def ensure_dir(remote_path):
               ftp.cwd('/')
