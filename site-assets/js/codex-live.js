@@ -3,7 +3,7 @@
   const gateway='/api/imc-gateway/';
   const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
   const clean=v=>String(v??'').trim();
-  const num=v=>{const n=Number(v);return Number.isFinite(n)?n:null;};
+  const num=v=>{const s=clean(v);if(!s)return null;const n=Number(s);return Number.isFinite(n)?n:null;};
   const worldId=()=>String(window.IMC_GAME_WORLD?.gameWorldId||'GW001').toUpperCase();
   const worldName=()=>String(window.IMC_GAME_WORLD?.worldName||'');
   const isCodex=()=>location.hash.replace(/^#/,'').split('/').filter(Boolean)[0]==='codex';
