@@ -55,28 +55,41 @@
   function render(identity, active='overview') {
     const view=APP?.querySelector('.view'); if(!view||!identity)return false;
     requestToken+=1; view.innerHTML=pageMarkup(identity,active); window.scrollTo({top:0,behavior:'instant'});
-    if(active==='results') loadResults(identity,requestToken); return true;
+    if(active==='results') loadResults(identity,requestToken);
+    if(active==='schedule') loadSchedule(identity,requestToken);
+    return true;
   }
 
   function openCompetition(hash) { const identity=parseCompetitionHash(hash); if(!identity)return false; history.pushState({gw001Competition:true},'',`${location.pathname}${location.search}${hash}`); return render(identity,'overview'); }
 
-  function resultFilters(identity) {
-    const filters={competition_group:identity.group,result_dataset:'MATCH_DATA'};
+  function competitionFilters(identity, repository) {
+    const filters={competition_group:identity.group};
+    if(repository==='results') filters.result_dataset='MATCH_DATA';
     if(identity.competition_key) filters.competition_key=identity.competition_key;
     else { if(identity.sm_action)filters.sm_action=identity.sm_action; if(identity.sm_division)filters.sm_division=identity.sm_division; }
     return filters;
   }
 
-  async function readAllResults(identity) {
+  async function readAll(repository, identity) {
     const rows=[]; const pageSize=250; let offset=0,total=null;
     while(total===null||offset<total) {
-      const url=new URL(GATEWAY); url.searchParams.set('game_world_id',WORLD); url.searchParams.set('action','read'); url.searchParams.set('repository','results'); url.searchParams.set('limit',String(pageSize)); url.searchParams.set('offset',String(offset)); url.searchParams.set('order_by','match_date'); url.searchParams.set('order_dir','ASC');
-      Object.entries(resultFilters(identity)).forEach(([key,value])=>url.searchParams.set(`filter_${key}`,String(value)));
+      const url=new URL(GATEWAY);
+      url.searchParams.set('game_world_id',WORLD);
+      url.searchParams.set('action','read');
+      url.searchParams.set('repository',repository);
+      url.searchParams.set('limit',String(pageSize));
+      url.searchParams.set('offset',String(offset));
+      url.searchParams.set('order_by','match_date');
+      url.searchParams.set('order_dir','ASC');
+      Object.entries(competitionFilters(identity,repository)).forEach(([key,value])=>url.searchParams.set(`filter_${key}`,String(value)));
       const controller=new AbortController(); const timeout=setTimeout(()=>controller.abort(),12000); let response;
       try { response=await fetch(url.toString(),{cache:'no-store',headers:{Accept:'application/json'},signal:controller.signal}); } finally { clearTimeout(timeout); }
       let payload; try { payload=await response.json(); } catch(_){ throw new Error(`Gateway response non JSON (${response.status})`); }
       if(!response.ok||payload?.ok!==true) throw new Error(payload?.error||`HTTP_${response.status}`);
-      const pageRows=Array.isArray(payload.data)?payload.data:[]; if(total===null)total=Number(payload.pagination?.total??pageRows.length); rows.push(...pageRows); offset+=pageRows.length; if(!pageRows.length||pageRows.length<pageSize)break;
+      const pageRows=Array.isArray(payload.data)?payload.data:[];
+      if(total===null) total=Number(payload.pagination?.total??pageRows.length);
+      rows.push(...pageRows); offset+=pageRows.length;
+      if(!pageRows.length||pageRows.length<pageSize) break;
     }
     return rows;
   }
@@ -86,31 +99,63 @@
     return new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'short',year:'numeric'}).format(d).toUpperCase();
   }
 
-  function matchRow(row) {
+  function resultRow(row) {
     const fixtureId=row.sm_fixture_id; const href=fixtureId?`#/match/${encodeURIComponent(fixtureId)}`:'#';
     return `<a class="cd-matchday-row" href="${href}"><strong class="cd-team home">${esc(row.home_name||'—')}</strong><b class="cd-score">${esc(row.home_score??'—')} - ${esc(row.away_score??'—')}</b><strong class="cd-team away">${esc(row.away_name||'—')}</strong><span class="cd-chevron">›</span></a>`;
   }
 
-  function groupMatchdays(rows) {
-    const groups=new Map();
-    rows.forEach(row=>{const key=String(row.match_date||''); if(!groups.has(key))groups.set(key,[]); groups.get(key).push(row);});
-    return [...groups.entries()].sort(([a],[b])=>String(a).localeCompare(String(b))).map(([date,matches],index)=>({date,matches,matchday:index+1}));
+  function scheduleRow(row) {
+    const fixtureId=row.sm_fixture_id; const href=fixtureId?`#/match/${encodeURIComponent(fixtureId)}`:'#';
+    const time=String(row.match_time||'').trim() || 'VS';
+    return `<a class="cd-matchday-row" href="${href}"><strong class="cd-team home">${esc(row.home_name||'—')}</strong><b class="cd-score cd-schedule-time">${esc(time)}</b><strong class="cd-team away">${esc(row.away_name||'—')}</strong><span class="cd-chevron">›</span></a>`;
   }
 
-  function matchdayBox(group) {
-    return `<section class="cd-matchday-box"><header class="cd-matchday-head"><strong>MATCHDAY ${group.matchday}</strong><span>${dateLabel(group.date)}</span><b>${group.matches.length} MATCHES</b></header><div class="cd-matchday-matches">${group.matches.map(matchRow).join('')}</div></section>`;
+  function groupByDate(rows, startMatchday=1) {
+    const groups=new Map();
+    rows.forEach(row=>{const key=String(row.match_date||''); if(!groups.has(key))groups.set(key,[]); groups.get(key).push(row);});
+    return [...groups.entries()].sort(([a],[b])=>String(a).localeCompare(String(b))).map(([date,matches],index)=>({date,matches,matchday:startMatchday+index}));
+  }
+
+  function matchdayBox(group, mode='results') {
+    const rowRenderer=mode==='schedule'?scheduleRow:resultRow;
+    return `<section class="cd-matchday-box"><header class="cd-matchday-head"><strong>MATCHDAY ${group.matchday}</strong><span>${dateLabel(group.date)}</span><b>${group.matches.length} MATCHES</b></header><div class="cd-matchday-matches">${group.matches.map(rowRenderer).join('')}</div></section>`;
+  }
+
+  function uniqueDateCount(rows) {
+    return new Set(rows.map(row=>String(row.match_date||'')).filter(Boolean)).size;
   }
 
   async function loadResults(identity,token) {
     const panel=APP?.querySelector('.competition-detail-panel[data-panel="results"]'); if(!panel)return;
     panel.innerHTML='<div class="cd-results-state"><span class="spinner"></span><strong>CARICAMENTO RESULTS</strong></div>';
     try {
-      const rows=await readAllResults(identity); if(token!==requestToken)return; const currentPanel=APP?.querySelector('.competition-detail-panel[data-panel="results"]'); if(!currentPanel)return;
+      const rows=await readAll('results',identity); if(token!==requestToken)return;
+      const currentPanel=APP?.querySelector('.competition-detail-panel[data-panel="results"]'); if(!currentPanel)return;
       if(!rows.length){currentPanel.innerHTML='<div class="cd-results-state"><strong>NESSUN RESULT DISPONIBILE</strong></div>';return;}
-      const matchdays=groupMatchdays(rows);
-      currentPanel.innerHTML=`<div class="cd-results-heading"><span>RESULTS</span><strong>${rows.length} MATCHES · ${matchdays.length} MATCHDAYS</strong></div><div class="cd-matchdays">${matchdays.map(matchdayBox).join('')}</div>`;
+      const matchdays=groupByDate(rows,1);
+      currentPanel.innerHTML=`<div class="cd-results-heading"><span>RESULTS</span><strong>${rows.length} MATCHES · ${matchdays.length} MATCHDAYS</strong></div><div class="cd-matchdays">${matchdays.map(group=>matchdayBox(group,'results')).join('')}</div>`;
     } catch(error) {
-      if(token!==requestToken)return; const currentPanel=APP?.querySelector('.competition-detail-panel[data-panel="results"]'); if(!currentPanel)return; const message=error?.name==='AbortError'?'GATEWAY TIMEOUT':(error?.message||'GATEWAY ERROR'); currentPanel.innerHTML=`<div class="cd-results-state error"><strong>RESULTS TEMPORANEAMENTE NON DISPONIBILI</strong><small>${esc(message)}</small></div>`;
+      if(token!==requestToken)return; const currentPanel=APP?.querySelector('.competition-detail-panel[data-panel="results"]'); if(!currentPanel)return;
+      const message=error?.name==='AbortError'?'GATEWAY TIMEOUT':(error?.message||'GATEWAY ERROR');
+      currentPanel.innerHTML=`<div class="cd-results-state error"><strong>RESULTS TEMPORANEAMENTE NON DISPONIBILI</strong><small>${esc(message)}</small></div>`;
+    }
+  }
+
+  async function loadSchedule(identity,token) {
+    const panel=APP?.querySelector('.competition-detail-panel[data-panel="schedule"]'); if(!panel)return;
+    panel.innerHTML='<div class="cd-results-state"><span class="spinner"></span><strong>CARICAMENTO SCHEDULE</strong></div>';
+    try {
+      const [resultsRows,scheduleRows]=await Promise.all([readAll('results',identity),readAll('schedule',identity)]);
+      if(token!==requestToken)return;
+      const currentPanel=APP?.querySelector('.competition-detail-panel[data-panel="schedule"]'); if(!currentPanel)return;
+      if(!scheduleRows.length){currentPanel.innerHTML='<div class="cd-results-state"><strong>NESSUNA FIXTURE FUTURA DISPONIBILE</strong></div>';return;}
+      const firstScheduleMatchday=uniqueDateCount(resultsRows)+1;
+      const matchdays=groupByDate(scheduleRows,firstScheduleMatchday);
+      currentPanel.innerHTML=`<div class="cd-results-heading"><span>SCHEDULE</span><strong>${scheduleRows.length} MATCHES · ${matchdays.length} MATCHDAYS</strong></div><div class="cd-matchdays">${matchdays.map(group=>matchdayBox(group,'schedule')).join('')}</div>`;
+    } catch(error) {
+      if(token!==requestToken)return; const currentPanel=APP?.querySelector('.competition-detail-panel[data-panel="schedule"]'); if(!currentPanel)return;
+      const message=error?.name==='AbortError'?'GATEWAY TIMEOUT':(error?.message||'GATEWAY ERROR');
+      currentPanel.innerHTML=`<div class="cd-results-state error"><strong>SCHEDULE TEMPORANEAMENTE NON DISPONIBILE</strong><small>${esc(message)}</small></div>`;
     }
   }
 
@@ -120,5 +165,6 @@
     const tab=event.target.closest('[data-cd-tab]');if(!tab)return;const identity=parseCompetitionHash(location.hash);if(!identity)return;event.preventDefault();const id=tab.dataset.cdTab;if(!TABS.some(([tabId])=>tabId===id))return;render(identity,id);
   },true);
 
-  const pending=window.__GW001_PENDING_COMPETITION_HASH__; if(pending){const identity=parseCompetitionHash(pending);window.__GW001_PENDING_COMPETITION_HASH__=null;if(identity){history.replaceState({gw001Competition:true},'',`${location.pathname}${location.search}${pending}`);render(identity,'overview');}}
+  const pending=window.__GW001_PENDING_COMPETITION_HASH__;
+  if(pending){const identity=parseCompetitionHash(pending);window.__GW001_PENDING_COMPETITION_HASH__=null;if(identity){history.replaceState({gw001Competition:true},'',`${location.pathname}${location.search}${pending}`);render(identity,'overview');}}
 })();
