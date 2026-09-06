@@ -67,6 +67,27 @@ function clear_route(string $gameWorldId): string {
     throw new InvalidArgumentException('Unsupported game_world_id.');
 }
 
+function clear_allowed_repositories(): array {
+    return [
+        'results',
+        'schedule',
+        'match_report',
+        'match_report_team_stats',
+        'match_report_players',
+        'match_report_events',
+        'match_report_tactics',
+        'match_report_commentary',
+        'player_codex',
+        'player_codex_roster',
+        'player_codex_stats',
+        'player_codex_rating_history',
+        'player_codex_transfer_history',
+        'player_codex_injury_history',
+        'player_codex_snapshots',
+        'transfers',
+    ];
+}
+
 try {
     clear_auth();
     $payload = clear_payload();
@@ -81,7 +102,7 @@ try {
     if (!preg_match('/^GW00[1-9]$/', $gameWorldId)) {
         throw new InvalidArgumentException('Invalid game_world_id.');
     }
-    if ($repository !== 'transfers') {
+    if (!in_array($repository, clear_allowed_repositories(), true)) {
         throw new InvalidArgumentException('Repository not enabled.');
     }
 
@@ -93,9 +114,9 @@ try {
 
     $database = (string)$registry[$target]['database'];
     $db = smm_storage_db($target);
-    $table = $gameWorldId . '_transfers';
+    $table = $gameWorldId . '_' . $repository;
 
-    $exists = $db->prepare('SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema=? AND table_name=?');
+    $exists = $db->prepare('SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema=? AND table_name=? AND table_type=\'BASE TABLE\'');
     $exists->bind_param('ss', $database, $table);
     $exists->execute();
     $row = $exists->get_result()->fetch_assoc();
