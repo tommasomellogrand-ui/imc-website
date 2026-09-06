@@ -1105,7 +1105,6 @@
       return;
     }
 
-    const base = allEvidence[0];
     const title = identity.competition_key || identity.sm_action || 'Competition Detail';
 
     const values = (field) => [...new Set(
@@ -1224,13 +1223,26 @@
 
   async function renderManagers(token, tab = 'imc') {
     renderLoadingView('Managers');
-    const master = await gateway.read('managers', { limit: 100 });
-    if (token !== state.renderToken) return;
     const tabs = `<div class="tabs two"><a class="tab ${tab==='imc'?'active':''}" href="${routeUrl('/managers/imc')}">IMC</a><a class="tab ${tab==='external'?'active':''}" href="${routeUrl('/managers/external')}">External</a></div>`;
-    let body;
-    if (master.state === 'error') body = gatewayError(master.error);
-    else if (master.state === 'empty') body = unavailable('DATI NON ANCORA DISPONIBILI','Il repository managers è vuoto e i dataset secondari non contengono un campo certificato per distinguere IMC da External.');
-    else body = unavailable('CLASSIFICAZIONE NON DISPONIBILE','Il mapping IMC / External richiede un attributo certificato del repository managers.');
+
+    if (tab === 'external') {
+      if (token !== state.renderToken) return;
+      shell(`${sectionHead(GAME_WORLD_ID,'Managers','/overview')}${tabs}${unavailable('DATI NON ANCORA DISPONIBILI','La tab External non è stata modificata.')}`, '/managers');
+      return;
+    }
+
+    const managers = [{"manager_id":"MNG029","full_name":"Al Zubeidi","sm_manager_id":"4455966","team_id":"86","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG011","full_name":"Alessandro Berardi","sm_manager_id":"7639079","team_id":"149","nation_id":"68","start_date":"2026-06-30"},{"manager_id":"MNG038","full_name":"Armando De Giulio","sm_manager_id":"3493065","team_id":"132","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG039","full_name":"Attilio Bonnici","sm_manager_id":"7923128","team_id":"137","nation_id":"7","start_date":"2026-06-30"},{"manager_id":"MNG026","full_name":"Clemente Liggi","sm_manager_id":"6496793","team_id":"83","nation_id":"16","start_date":"2026-06-30"},{"manager_id":"MNG027","full_name":"Danilo FC 1908","sm_manager_id":"7279515","team_id":"129","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG019","full_name":"Davide Rapisarda","sm_manager_id":"5537229","team_id":"133","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG036","full_name":"Emanuele Delli Calici","sm_manager_id":"20605515","team_id":"146","nation_id":"22","start_date":"2026-08-25"},{"manager_id":"MNG028","full_name":"Fabio Ferrini","sm_manager_id":"2909837","team_id":"122","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG012","full_name":"Federico Bonzi","sm_manager_id":"22321164","team_id":"88","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG043","full_name":"Francesco Rossi","sm_manager_id":"3619783","team_id":"130","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG008","full_name":"Giorgio Grugni","sm_manager_id":"3702536","team_id":"111","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG013","full_name":"Giovanni Cabrioli","sm_manager_id":"8006256","team_id":"126","nation_id":"27","start_date":"2026-06-30"},{"manager_id":"MNG014","full_name":"Giovanni Iodice","sm_manager_id":"1052349","team_id":"101","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG034","full_name":"Igor Zanotto","sm_manager_id":"19303946","team_id":"145","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG030","full_name":"Lauro Crasti","sm_manager_id":"20338205","team_id":"89","nation_id":"14","start_date":"2026-06-30"},{"manager_id":"MNG031","full_name":"Lorenzo Errico","sm_manager_id":"2254039","team_id":"128","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG009","full_name":"Luca Nudo","sm_manager_id":"3750517","team_id":"127","nation_id":"11","start_date":"2026-06-30"},{"manager_id":"MNG004","full_name":"Luciano Catalano","sm_manager_id":"1494690","team_id":"139","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG037","full_name":"Marco Catalozzo","sm_manager_id":"20395773","team_id":"144","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG015","full_name":"Marco Fioretti","sm_manager_id":"1796567","team_id":"85","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG040","full_name":"Mathieu Pioche","sm_manager_id":"3122610","team_id":"138","nation_id":"64","start_date":"2026-06-30"},{"manager_id":"MNG035","full_name":"Matteo Giovi","sm_manager_id":"9887891","team_id":"81","nation_id":"69","start_date":"2026-06-30"},{"manager_id":"MNG003","full_name":"Matteo Sartori","sm_manager_id":"20670677","team_id":"84","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG010","full_name":"Mattia Bertonati","sm_manager_id":"10762592","team_id":"121","nation_id":"49","start_date":"2026-06-30"},{"manager_id":"MNG002","full_name":"Max Palace","sm_manager_id":"5249538","team_id":"136","nation_id":"20","start_date":"2026-06-30"},{"manager_id":"MNG023","full_name":"Max Zanoni","sm_manager_id":"5143835","team_id":"134","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG042","full_name":"Nick Keyen","sm_manager_id":"2614539","team_id":"87","nation_id":"17","start_date":"2026-06-30"},{"manager_id":"MNG025","full_name":"Nicolae Sasarman","sm_manager_id":"2982514","team_id":"123","nation_id":"46","start_date":"2026-06-30"},{"manager_id":"MNG022","full_name":"Oleksandr Medvid","sm_manager_id":"1284739","team_id":"142","nation_id":"8","start_date":"2026-06-30"},{"manager_id":"MNG006","full_name":"Pep Buitre","sm_manager_id":"20881721","team_id":"148","nation_id":"2","start_date":"2026-06-30"},{"manager_id":"MNG017","full_name":"Ringhio Gattuso","sm_manager_id":"1411779","team_id":"124","nation_id":"57","start_date":"2026-06-30"},{"manager_id":"MNG041","full_name":"Rosario Giamundo","sm_manager_id":"1993750","team_id":"131","nation_id":null,"start_date":"2026-06-30"},{"manager_id":"MNG016","full_name":"Saverio Cordiano","sm_manager_id":"3166489","team_id":"82","nation_id":"4","start_date":"2026-06-30"},{"manager_id":"MNG033","full_name":"Simone Campanella","sm_manager_id":"1794994","team_id":"143","nation_id":"53","start_date":"2026-06-30"},{"manager_id":"MNG005","full_name":"Sir Simone","sm_manager_id":"7235173","team_id":"135","nation_id":"6","start_date":"2026-06-30"},{"manager_id":"MNG001","full_name":"Tommaso Mello","sm_manager_id":"13051324","team_id":"150","nation_id":"1","start_date":"2026-06-30"},{"manager_id":"MNG021","full_name":"Tommaso Prisco","sm_manager_id":"23150225","team_id":"90","nation_id":"19","start_date":"2026-06-30"},{"manager_id":"MNG032","full_name":"Vardan Minasyan","sm_manager_id":"8100894","team_id":"125","nation_id":"3","start_date":"2026-06-30"},{"manager_id":"MNG007","full_name":"Vincenzo Martorano","sm_manager_id":"4774576","team_id":"91","nation_id":"47","start_date":"2026-06-30"}];
+    if (token !== state.renderToken) return;
+
+    const body = `<div class="view-summary"><strong>${number(managers.length)}</strong><span>manager IMC attivi</span></div>
+      <div class="club-grid">${managers.map(manager => `
+        <a class="club-card" href="${routeUrl(`/manager/${encodeURIComponent(manager.manager_id)}`)}">
+          <small>${e(manager.manager_id)} · SM ${e(manager.sm_manager_id)}</small>
+          <strong>${e(manager.full_name)}</strong>
+          <span>Club ID ${e(manager.team_id)} · dal ${e(manager.start_date)}</span>
+          ${manager.nation_id ? `<span>National Team ID ${e(manager.nation_id)} · dal ${e(manager.start_date)}</span>` : ''}
+        </a>`).join('')}</div>`;
+
     shell(`${sectionHead(GAME_WORLD_ID,'Managers','/overview')}${tabs}${body}`, '/managers');
   }
 
