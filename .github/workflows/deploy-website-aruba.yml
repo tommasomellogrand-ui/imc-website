@@ -68,6 +68,7 @@ jobs:
           remote_root=os.environ['ARUBA_WEBSITE_REMOTE_DIR'].strip() or '/'
 
           ctx=ssl.create_default_context()
+          ctx.check_hostname=False
           ftp=None
           last_error=None
           for _ in range(3):
