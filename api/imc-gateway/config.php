@@ -25,6 +25,7 @@ $cfg['repositories'] = array_values(array_unique(array_merge(
         'player_codex_transfer_history',
         'player_codex_injury_history',
         'player_codex_snapshots',
+        'sm_player_stats',
     ]
 )));
 
