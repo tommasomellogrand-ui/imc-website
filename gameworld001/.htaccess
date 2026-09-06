@@ -1,6 +1,25 @@
 RewriteEngine On
 RewriteBase /gameworld001/
 
+# Always revalidate the GW001 shell and frontend assets so the main URL loads the current deploy.
+<IfModule mod_headers.c>
+  <Files "index.html">
+    Header always set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    Header always set Pragma "no-cache"
+    Header always set Expires "0"
+  </Files>
+  <FilesMatch "\.(?:js|css)$">
+    Header always set Cache-Control "no-cache, must-revalidate, max-age=0"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 0 seconds"
+  ExpiresByType application/javascript "access plus 0 seconds"
+</IfModule>
+
 # Serve real frontend assets directly; route every page URL through the GW001 shell.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.html [L]
