@@ -69,8 +69,55 @@
         stage.appendChild(wrap);stage.dataset.extraDone='1';
       }catch(e){console.warn('[GW001 Overview extra]',e);}
     }
-    const obs=new MutationObserver(()=>queueMicrotask(enhance));obs.observe(document.getElementById('app'),{childList:true,subtree:true});
-    document.addEventListener('click',e=>{if(e.target.closest('[data-cd-tab]'))setTimeout(enhance,0);});window.addEventListener('hashchange',()=>{token++;setTimeout(enhance,0);});setTimeout(enhance,0);
+
+    function configureCompetitionTabs(){
+      const id=routeIdentity();
+      const nav=document.querySelector('.competition-detail-tabs');
+      if(!id||!nav)return;
+      const action=String(id.sm_action||'').toLowerCase();
+      const hasTable=action==='league'||action==='interqualifier';
+      const overview=nav.querySelector('[data-cd-tab="overview"]');
+      const competition=nav.querySelector('[data-cd-tab="competition"]');
+      const matches=nav.querySelector('[data-cd-tab="matches"]');
+      const stats=nav.querySelector('[data-cd-tab="stats"]');
+      const trophy=nav.querySelector('[data-cd-tab="trophy"]');
+      if(!overview||!competition||!matches||!stats||!trophy)return;
+      matches.textContent='Results';
+      competition.textContent='Table';
+      competition.style.display=hasTable?'':'none';
+      if(!nav.querySelector('[data-cd-schedule]')){
+        const schedule=document.createElement('button');
+        schedule.type='button';schedule.className='competition-detail-tab';schedule.dataset.cdSchedule='1';schedule.textContent='Schedule';
+        stats.before(schedule);
+      }
+    }
+
+    function filterMatchPanel(mode){
+      const panel=document.querySelector('.competition-detail-panel[data-panel="matches"]');
+      if(!panel)return;
+      const labels=[...panel.querySelectorAll('.cd-section-label')];
+      const resultLabel=labels.find(x=>x.textContent.trim().startsWith('RESULTS'));
+      const scheduleLabel=labels.find(x=>x.textContent.trim().startsWith('SCHEDULE'));
+      if(mode==='results'&&scheduleLabel){scheduleLabel.style.display='none';let n=scheduleLabel.nextElementSibling;if(n)n.style.display='none';}
+      if(mode==='schedule'&&resultLabel){resultLabel.style.display='none';let n=resultLabel.nextElementSibling;if(n)n.style.display='none';}
+    }
+
+    document.addEventListener('click',e=>{
+      const schedule=e.target.closest('[data-cd-schedule]');
+      if(schedule){
+        e.preventDefault();e.stopPropagation();
+        const matches=document.querySelector('.competition-detail-tab[data-cd-tab="matches"]');
+        if(matches){matches.click();setTimeout(()=>{document.querySelectorAll('.competition-detail-tab').forEach(b=>b.classList.remove('active'));schedule.classList.add('active');filterMatchPanel('schedule');},0);}
+        return;
+      }
+      const results=e.target.closest('.competition-detail-tab[data-cd-tab="matches"]');
+      if(results)setTimeout(()=>filterMatchPanel('results'),0);
+      if(e.target.closest('[data-cd-tab]'))setTimeout(enhance,0);
+    },true);
+
+    const obs=new MutationObserver(()=>queueMicrotask(()=>{configureCompetitionTabs();enhance();}));obs.observe(document.getElementById('app'),{childList:true,subtree:true});
+    window.addEventListener('hashchange',()=>{token++;setTimeout(()=>{configureCompetitionTabs();enhance();},0);});
+    setTimeout(()=>{configureCompetitionTabs();enhance();},0);
   })();
   </script>
 </body>
