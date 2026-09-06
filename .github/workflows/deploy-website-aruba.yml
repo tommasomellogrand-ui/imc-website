@@ -54,10 +54,12 @@ jobs:
           test -s gameworld001/team-hub.js
           test -s gameworld001/style.css
           test -s gameworld001/.htaccess
+          test -s api/imc-gateway/index.php
           test -s api/imc-gateway/team-hub.php
           test -s api/imc-gateway/config.php
           test -s __imc-gateway/__imc-gateway/index.php
           grep -Fq 'sm_player_stats' api/imc-gateway/config.php
+          grep -Fq 'schedule_competition_key' api/imc-gateway/index.php
           grep -Fq 'GW001 · Road To History' gameworld001/index.html
           grep -Fq './app.js?v=' gameworld001/index.html
           grep -Fq './menu.js?v=' gameworld001/index.html
@@ -127,6 +129,7 @@ jobs:
               Path('gameworld001/team-hub.js'),
               Path('gameworld001/style.css'),
               Path('gameworld001/.htaccess'),
+              Path('api/imc-gateway/index.php'),
               Path('api/imc-gateway/team-hub.php'),
               Path('api/imc-gateway/config.php'),
               Path('__imc-gateway/__imc-gateway/index.php')
