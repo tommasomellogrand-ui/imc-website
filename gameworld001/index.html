@@ -19,5 +19,59 @@
   <script src="./menu.js"></script>
   <script src="./competition-detail.js"></script>
   <script src="./team-hub.js"></script>
+  <script>
+  (()=>{
+    'use strict';
+    const G='https://www.italianmastersclub.it/api/imc-gateway/';
+    const ACTIVE=[
+      ['4455966','Al Zubeidi'],['7639079','Alessandro Berardi'],['3493065','Armando De Giulio'],['7923128','Attilio Bonnici'],['6496793','Clemente Liggi'],['7279515','Danilo FC 1908'],['5537229','Davide Rapisarda'],['20605515','Emanuele Delli Calici'],['2909837','Fabio Ferrini'],['22321164','Federico Bonzi'],['3619783','Francesco Rossi'],['3702536','Giorgio Grugni'],['8006256','Giovanni Cabrioli'],['1052349','Giovanni Iodice'],['19303946','Igor Zanotto'],['20338205','Lauro Crasti'],['2254039','Lorenzo Errico'],['3750517','Luca Nudo'],['1494690','Luciano Catalano'],['20395773','Marco Catalozzo'],['1796567','Marco Fioretti'],['3122610','Mathieu Pioche'],['9887891','Matteo Giovi'],['20670677','Matteo Sartori'],['10762592','Mattia Bertonati'],['5249538','Max Palace'],['5143835','Max Zanoni'],['2614539','Nick Keyen'],['2982514','Nicolae Sasarman'],['1284739','Oleksandr Medvid'],['20881721','Pep Buitre'],['1411779','Ringhio Gattuso'],['1993750','Rosario Giamundo'],['3166489','Saverio Cordiano'],['1794994','Simone Campanella'],['7235173','Sir Simone'],['13051324','Tommaso Mello'],['23150225','Tommaso Prisco'],['8100894','Vardan Minasyan'],['4774576','Vincenzo Martorano']
+    ];
+    const ACTIVE_MAP=new Map(ACTIVE);
+    const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    const routeIdentity=()=>{
+      const m=(location.hash.replace(/^#/,'')||'').match(/^\/competition\/(.+)$/);
+      if(!m)return null;
+      try{return JSON.parse(decodeURIComponent(m[1]));}catch(_){return null;}
+    };
+    const filtersFor=(id,dataset)=>{
+      const f={competition_group:String(id.group||'').toUpperCase()};
+      if(dataset)f.result_dataset='MATCH_DATA';
+      if(id.competition_key)f.competition_key=id.competition_key;
+      else{if(id.sm_action)f.sm_action=id.sm_action;if(id.sm_division)f.sm_division=id.sm_division;}
+      return f;
+    };
+    async function read(repo,filters){
+      const u=new URL(G);u.searchParams.set('game_world_id','GW001');u.searchParams.set('action','read');u.searchParams.set('repository',repo);u.searchParams.set('limit','1000');u.searchParams.set('offset','0');
+      Object.entries(filters).forEach(([k,v])=>u.searchParams.set('filter_'+k,String(v)));
+      const r=await fetch(u,{cache:'no-store',headers:{Accept:'application/json'}});const p=await r.json();
+      if(!r.ok||p?.ok!==true)throw new Error(p?.error||'Gateway error');return Array.isArray(p.data)?p.data:[];
+    }
+    function managerRows(rows){
+      const ids=new Set();rows.forEach(r=>{if(r.home_sm_manager_id)ids.add(String(r.home_sm_manager_id));if(r.away_sm_manager_id)ids.add(String(r.away_sm_manager_id));});
+      return [...ids].filter(id=>ACTIVE_MAP.has(id)).map(id=>({id,name:ACTIVE_MAP.get(id)})).sort((a,b)=>a.name.localeCompare(b.name,'it'));
+    }
+    function teamsCount(rows){const s=new Set();rows.forEach(r=>{const h=r.home_sm_club_id||r.home_sm_team_id||r.home_name;const a=r.away_sm_club_id||r.away_sm_team_id||r.away_name;if(h)s.add(String(h));if(a)s.add(String(a));});return s.size;}
+    function ensureStyle(){if(document.getElementById('gw001-overview-extra-style'))return;const st=document.createElement('style');st.id='gw001-overview-extra-style';st.textContent='.cd-overview-extra{display:grid;gap:14px}.cd-manager-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.cd-manager-item{padding:12px 13px;border:1px solid #ead6d1;border-radius:16px;background:#fff;color:#173766;font-size:11px;font-weight:900}.cd-status-extra{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.cd-status-extra>div{padding:16px;border:1px solid #ead6d1;border-radius:18px;background:#fff}.cd-status-extra span{display:block;color:#a57569;font-size:8px;font-weight:900;text-transform:uppercase}.cd-status-extra strong{display:block;margin-top:6px;color:#173766;font-size:26px;line-height:1;font-weight:900}@media(max-width:390px){.cd-manager-list{grid-template-columns:1fr}.cd-status-extra{grid-template-columns:1fr 1fr}.cd-status-extra>div:first-child{grid-column:1/-1}}';document.head.appendChild(st);}
+    let token=0;
+    async function enhance(){
+      const id=routeIdentity();if(!id)return;const my=++token;
+      const stage=document.querySelector('.competition-detail-stage');const active=document.querySelector('.competition-detail-tab.active');
+      if(!stage||active?.dataset.cdTab!=='overview'||stage.dataset.extraDone==='1')return;
+      try{
+        const [matches,schedule]=await Promise.all([read('results',filtersFor(id,true)),read('schedule',filtersFor(id,false)).catch(()=>[])]);
+        if(my!==token||!routeIdentity())return;
+        const managers=managerRows(matches);const teamCount=teamsCount(matches);
+        let toPlay=schedule.length;
+        if(String(id.sm_action||'').toLowerCase()==='league'&&teamCount>1){const expected=teamCount*(teamCount-1);toPlay=Math.max(toPlay,expected-matches.length);}
+        ensureStyle();
+        const wrap=document.createElement('div');wrap.className='cd-overview-extra';
+        wrap.innerHTML=`<section class="cd-card"><small>STATO COMPETIZIONE</small><div class="cd-status-extra"><div><span>TEAMS</span><strong>${teamCount}</strong></div><div><span>MATCH GIOCATI</span><strong>${matches.length}</strong></div><div><span>MATCH DA GIOCARE</span><strong>${toPlay}</strong></div></div></section><section class="cd-card"><small>MANAGER IMC ATTIVI</small><div class="cd-status-extra"><div><span>NUMERO MANAGER</span><strong>${managers.length}</strong></div></div><div class="cd-manager-list">${managers.map(m=>`<div class="cd-manager-item">${esc(m.name)}</div>`).join('')}</div></section>`;
+        stage.appendChild(wrap);stage.dataset.extraDone='1';
+      }catch(e){console.warn('[GW001 Overview extra]',e);}
+    }
+    const obs=new MutationObserver(()=>queueMicrotask(enhance));obs.observe(document.getElementById('app'),{childList:true,subtree:true});
+    document.addEventListener('click',e=>{if(e.target.closest('[data-cd-tab]'))setTimeout(enhance,0);});window.addEventListener('hashchange',()=>{token++;setTimeout(enhance,0);});setTimeout(enhance,0);
+  })();
+  </script>
 </body>
 </html>
