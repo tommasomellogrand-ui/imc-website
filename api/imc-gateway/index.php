@@ -53,10 +53,43 @@ function competition_group_from_sm_action(mixed $value): ?string {
   };
 }
 
-/**
- * Restituisce tutte le tabelle realmente presenti nel database del Game World.
- * Sono visibili SOLO le tabelle con prefisso esatto GW00X_.
- */
+function schedule_competition_group_from_sm_action(mixed $value): ?string {
+  $action = strtolower(trim((string)$value));
+
+  return match ($action) {
+    'league', 'leaguecup', 'leagueshield', 'charityshield', 'playoff' => 'DOMESTIC',
+    'smfacup', 'smfashield', 'supercup' => 'INTERNATIONAL',
+    'interqualifier', 'worldcup' => 'NATIONS',
+    default => null,
+  };
+}
+
+function schedule_competition_key(string $gw, array $row, ?string $group): string {
+  $country = trim((string)($row['sm_country'] ?? ''));
+  $action = strtolower(trim((string)($row['sm_action'] ?? '')));
+  $division = trim((string)($row['sm_division'] ?? ''));
+
+  if ($action === '') {
+    throw new RuntimeException('schedule_sm_action_required');
+  }
+
+  if ($group === null) {
+    $provided = trim((string)($row['competition_key'] ?? ''));
+    if ($provided === '') {
+      throw new RuntimeException('schedule_competition_key_required');
+    }
+    return $provided;
+  }
+
+  $parts = [$gw];
+  if ($country !== '') $parts[] = $country;
+  $parts[] = $group;
+  $parts[] = $action;
+  if ($division !== '') $parts[] = $division;
+
+  return implode('|', $parts);
+}
+
 function discover_world_tables(PDO $pdo, string $gw): array {
   $prefix = $gw.'_';
 
@@ -107,30 +140,6 @@ require_once __DIR__.'/database.php';
 
 $method = (string)($_SERVER['REQUEST_METHOD'] ?? '');
 
-/* ================================================================
-   PUBLIC READ · UNIVERSAL MINISITE ACCESS
-   ---------------------------------------------------------------
-   Il GET pubblico NON usa più la whitelist dei repository.
-
-   Il Gateway:
-   - riceve il Game World;
-   - seleziona il database corretto;
-   - vede tutte le tabelle reali con prefisso GW00X_;
-   - consente lettura, discovery e schema;
-   - NON consente mai di uscire dal namespace del Game World.
-
-   DISCOVERY:
-   GET /api/imc-gateway/?game_world_id=GW001&action=repositories
-
-   SCHEMA:
-   GET /api/imc-gateway/?game_world_id=GW001&action=schema&repository=results
-
-   READ:
-   GET /api/imc-gateway/?game_world_id=GW001&repository=results
-       &limit=500&offset=0
-       &filter_sm_division=1
-       &order_by=id&order_dir=DESC
-   ================================================================ */
 if ($method === 'GET') {
   $gw = strtoupper(trim((string)($_GET['game_world_id'] ?? '')));
   $action = strtolower(trim((string)($_GET['action'] ?? 'read')));
@@ -171,7 +180,6 @@ if ($method === 'GET') {
 
     if ($action === 'schema') {
       $table = resolve_public_table($pdo, $gw, $repo);
-
       $stmt = $pdo->query("DESCRIBE `{$table}`");
       $columns = $stmt->fetchAll();
 
@@ -205,23 +213,14 @@ if ($method === 'GET') {
 
     foreach ($_GET as $key => $value) {
       if (!str_starts_with((string)$key, 'filter_')) continue;
-
       $column = substr((string)$key, 7);
 
       if (!valid_identifier($column) || !isset($columns[$column])) {
-        out([
-          'ok'=>false,
-          'error'=>'invalid_filter',
-          'column'=>$column,
-        ],422);
+        out(['ok'=>false,'error'=>'invalid_filter','column'=>$column],422);
       }
 
       if (is_array($value)) {
-        out([
-          'ok'=>false,
-          'error'=>'invalid_filter_value',
-          'column'=>$column,
-        ],422);
+        out(['ok'=>false,'error'=>'invalid_filter_value','column'=>$column],422);
       }
 
       if ((string)$value === '__NULL__') {
@@ -254,15 +253,11 @@ if ($method === 'GET') {
       $orderSql = " ORDER BY `{$orderBy}` {$orderDir}";
     }
 
-    $countStmt = $pdo->prepare(
-      "SELECT COUNT(*) AS c FROM `{$table}`{$whereSql}"
-    );
+    $countStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM `{$table}`{$whereSql}");
     $countStmt->execute($values);
     $total = (int)($countStmt->fetch()['c'] ?? 0);
 
-    $stmt = $pdo->prepare(
-      "SELECT * FROM `{$table}`{$whereSql}{$orderSql} LIMIT {$limit} OFFSET {$offset}"
-    );
+    $stmt = $pdo->prepare("SELECT * FROM `{$table}`{$whereSql}{$orderSql} LIMIT {$limit} OFFSET {$offset}");
     $stmt->execute($values);
     $rows = $stmt->fetchAll();
 
@@ -283,21 +278,10 @@ if ($method === 'GET') {
       ],
     ]);
   } catch (Throwable $e) {
-    out([
-      'ok'=>false,
-      'error'=>'gateway_read_error',
-    ],500);
+    out(['ok'=>false,'error'=>'gateway_read_error'],500);
   }
 }
 
-/* ================================================================
-   PRIVILEGED POST · IMPORT / ADMIN
-   ---------------------------------------------------------------
-   INVARIATO:
-   - token obbligatorio;
-   - whitelist repository ancora attiva;
-   - import e amministrazione non vengono aperti al pubblico.
-   ================================================================ */
 if ($method !== 'POST') {
   out(['ok'=>false,'error'=>'method_not_allowed'],405);
 }
@@ -351,12 +335,7 @@ if ($action === 'probe') {
       'database_connection'=>(int)($row['ok'] ?? 0)===1 ? 'ok' : 'failed'
     ]);
   } catch(Throwable $e) {
-    out([
-      'ok'=>false,
-      'action'=>'probe',
-      'game_world_id'=>$gw,
-      'error'=>$e->getMessage()
-    ],500);
+    out(['ok'=>false,'action'=>'probe','game_world_id'=>$gw,'error'=>$e->getMessage()],500);
   }
 }
 
@@ -403,7 +382,11 @@ try {
     foreach($rows as $row){
       if(!is_array($row)||!$row) continue;
 
-      if (in_array($repo, ['results','schedule','match_report'], true)) {
+      if ($repo === 'schedule') {
+        $group = schedule_competition_group_from_sm_action($row['sm_action'] ?? null);
+        $row['competition_group'] = $group;
+        $row['competition_key'] = schedule_competition_key($gw, $row, $group);
+      } elseif (in_array($repo, ['results','match_report'], true)) {
         $row['competition_group'] = competition_group_from_sm_action($row['sm_action'] ?? null);
       }
 
@@ -424,12 +407,7 @@ try {
 
     $pdo->commit();
 
-    out([
-      'ok'=>true,
-      'action'=>'insert_many',
-      'table'=>$table,
-      'inserted'=>$count
-    ]);
+    out(['ok'=>true,'action'=>'insert_many','table'=>$table,'inserted'=>$count]);
   }
 
   if ($action==='delete') {
@@ -451,17 +429,10 @@ try {
       $vals[]=$v;
     }
 
-    $st=$pdo->prepare(
-      "DELETE FROM `{$table}` WHERE ".implode(' AND ',$parts)
-    );
+    $st=$pdo->prepare("DELETE FROM `{$table}` WHERE ".implode(' AND ',$parts));
     $st->execute($vals);
 
-    out([
-      'ok'=>true,
-      'action'=>'delete',
-      'table'=>$table,
-      'deleted'=>$st->rowCount()
-    ]);
+    out(['ok'=>true,'action'=>'delete','table'=>$table,'deleted'=>$st->rowCount()]);
   }
 
   if ($action==='execute_sql') {
@@ -473,11 +444,7 @@ try {
 
     $affected=$pdo->exec($sql);
 
-    out([
-      'ok'=>true,
-      'action'=>'execute_sql',
-      'affected_rows'=>$affected
-    ]);
+    out(['ok'=>true,'action'=>'execute_sql','affected_rows'=>$affected]);
   }
 
   out(['ok'=>false,'error'=>'unknown_action'],422);
