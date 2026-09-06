@@ -49,11 +49,28 @@
     }
   }
 
+  function imageMarkup(row, type) {
+    const src = String(row.image_url || '').trim();
+    const alt = type === 'club' ? `Logo ${row.name || ''}` : `Bandiera ${row.name || ''}`;
+    const fallback = type === 'club' ? '⚽' : '⚑';
+    const radius = type === 'club' ? '18px' : '14px';
+    const fit = type === 'club' ? 'contain' : 'cover';
+
+    if (!src) {
+      return `<div aria-hidden="true" style="width:72px;height:72px;border:1px solid var(--line);border-radius:${radius};background:#f7f9fb;display:grid;place-items:center;font-size:28px;margin-bottom:12px">${fallback}</div>`;
+    }
+
+    return `<div style="width:72px;height:72px;border:1px solid var(--line);border-radius:${radius};background:#fff;display:grid;place-items:center;overflow:hidden;margin-bottom:12px">
+      <img src="${e(src)}" alt="${e(alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:${fit};padding:${type === 'club' ? '7px' : '0'}">
+    </div>`;
+  }
+
   function clubCards(rows) {
     return `<div class="view-summary"><strong>${rows.length}</strong><span>club active · CORE Aruba</span></div>
       <div class="club-grid">${rows.map(row => {
         const key = `world:${row.club_gw_id}`;
-        return `<a class="club-card" href="#/club/${encodeURIComponent(key)}">
+        return `<a class="club-card" href="#/club/${encodeURIComponent(key)}" style="justify-content:flex-start">
+          ${imageMarkup(row, 'club')}
           <small>CORE · WORLD ${e(row.club_gw_id)}</small>
           <strong>${e(row.name)}</strong>
           <span>${e(row.short_name || '')}</span>
@@ -64,10 +81,11 @@
   function nationCards(rows) {
     return `<div class="view-summary"><strong>${rows.length}</strong><span>national teams · GW001</span></div>
       <div class="club-grid">${rows.map(row => `
-        <div class="club-card">
-          <small>NATIONAL TEAM</small>
+        <div class="club-card" style="justify-content:flex-start">
+          ${imageMarkup(row, 'nation')}
+          <small>${row.national_team_id ? `CORE · ${e(row.national_team_id)}` : 'NATIONAL TEAM'}</small>
           <strong>${e(row.name)}</strong>
-          <span>GW001 · Nations</span>
+          <span>${e(row.short_name || 'GW001 · Nations')}</span>
         </div>`).join('')}</div>`;
   }
 
