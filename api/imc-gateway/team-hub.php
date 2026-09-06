@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate');
 
 $origin = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
 $allowedOrigins = [
@@ -28,20 +29,13 @@ function team_hub_out(array $payload, int $status = 200): never {
 
 function team_hub_core_db(array $cfg): PDO {
   $db = 'Sql1956795_1';
-  if (($cfg['db']['user'] ?? '') === '') {
-    throw new RuntimeException('db_credentials_not_configured');
-  }
+  if (($cfg['db']['user'] ?? '') === '') throw new RuntimeException('db_credentials_not_configured');
   $dsn = sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',$cfg['db']['host'],$cfg['db']['port'],$db);
   return new PDO($dsn,$cfg['db']['user'],$cfg['db']['pass'],[
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES => false,
   ]);
-}
-
-function team_hub_name_key(string $value): string {
-  $value = trim($value);
-  return function_exists('mb_strtolower') ? mb_strtolower($value,'UTF-8') : strtolower($value);
 }
 
 function team_hub_https_image(?string $url): ?string {
@@ -59,52 +53,56 @@ if (!preg_match('/^GW00[1-9]$/',$gw)) team_hub_out(['ok'=>false,'error'=>'invali
 if (!in_array($dataset,['clubs','nations'],true)) team_hub_out(['ok'=>false,'error'=>'invalid_dataset'],422);
 
 $cfg = require __DIR__.'/config.php';
-require_once __DIR__.'/database.php';
 
 try {
   $core = team_hub_core_db($cfg);
 
   if ($dataset === 'clubs') {
-    $stmt = $core->prepare("SELECT c.club_id, CASE WHEN c.name LIKE '1.%' THEN TRIM(SUBSTRING(c.name,3)) ELSE c.name END AS name, c.short_name, c.image_url, m.club_gw_id FROM clubs c INNER JOIN clubs_game_world_id m ON m.club_id=c.club_id WHERE m.game_world_id=? AND c.is_active=1 ORDER BY name ASC");
+    $stmt = $core->prepare("SELECT m.club_id,m.club_gw_id,CASE WHEN c.name LIKE '1.%' THEN TRIM(SUBSTRING(c.name,3)) ELSE c.name END AS name,c.short_name,c.image_url FROM clubs_game_world_id m INNER JOIN clubs c ON c.club_id=m.club_id WHERE m.game_world_id=? ORDER BY name ASC");
     $stmt->execute([$gw]);
     $rows = $stmt->fetchAll();
     foreach ($rows as &$row) $row['image_url'] = team_hub_https_image($row['image_url'] ?? null);
     unset($row);
     team_hub_out([
-      'ok'=>true,'dataset'=>'clubs','game_world_id'=>$gw,
-      'source'=>'Sql1956795_1.CORE · clubs + clubs_game_world_id',
-      'association'=>'club_gw_id → club_id','count'=>count($rows),
-      'image_count'=>count(array_filter($rows,static fn(array $row): bool => trim((string)($row['image_url'] ?? '')) !== '')),
+      'ok'=>true,
+      'dataset'=>'clubs',
+      'game_world_id'=>$gw,
+      'source'=>'Sql1956795_1.clubs_game_world_id + clubs',
+      'count'=>count($rows),
       'data'=>$rows,
     ]);
   }
 
-  $pdo = imc_db($cfg,$gw);
-  $table = $gw.'_results';
-  $sql = "SELECT name FROM (SELECT DISTINCT home_name AS name FROM `{$table}` WHERE competition_group='NATIONS' AND home_name IS NOT NULL AND TRIM(home_name)<>'' UNION SELECT DISTINCT away_name AS name FROM `{$table}` WHERE competition_group='NATIONS' AND away_name IS NOT NULL AND TRIM(away_name)<>'') x ORDER BY name ASC";
-  $worldRows = $pdo->query($sql)->fetchAll();
-  $masterRows = $core->query("SELECT national_team_id,name,short_name,image_url FROM national_teams WHERE is_active=1")->fetchAll();
-  $masterByName=[];
-  foreach ($masterRows as $master) $masterByName[team_hub_name_key((string)$master['name'])]=$master;
-  $aliases=['republic of macedonia'=>'north macedonia'];
+  $mapStmt = $core->prepare("SELECT nation_id,nation_gw_id FROM nations_game_world_id WHERE game_world_id=? ORDER BY nation_id ASC");
+  $mapStmt->execute([$gw]);
+  $mapping = $mapStmt->fetchAll();
+
+  /*
+   * The Game World mapping contains the 80 playable national slots.
+   * national_teams is the canonical CORE identity source.  The original
+   * source order for the playable set is alphabetical, matching nation_id
+   * 1..80 used by nations_game_world_id.
+   */
+  $master = $core->query("SELECT national_team_id,name,short_name,image_url FROM national_teams WHERE is_active=1 ORDER BY name ASC LIMIT 80")->fetchAll();
   $rows=[];
-  foreach ($worldRows as $worldRow) {
-    $name=trim((string)($worldRow['name'] ?? ''));
-    if ($name==='') continue;
-    $key=team_hub_name_key($name);
-    $master=$masterByName[$aliases[$key] ?? $key] ?? null;
+  $count=min(count($mapping),count($master));
+  for($i=0;$i<$count;$i++) {
     $rows[]=[
-      'name'=>$name,
-      'national_team_id'=>$master['national_team_id'] ?? null,
-      'short_name'=>$master['short_name'] ?? null,
-      'image_url'=>team_hub_https_image($master['image_url'] ?? null),
+      'nation_id'=>$mapping[$i]['nation_id'],
+      'nation_gw_id'=>$mapping[$i]['nation_gw_id'],
+      'national_team_id'=>$master[$i]['national_team_id'],
+      'name'=>$master[$i]['name'],
+      'short_name'=>$master[$i]['short_name'],
+      'image_url'=>team_hub_https_image($master[$i]['image_url'] ?? null),
     ];
   }
+  usort($rows,static fn(array $a,array $b): int => strcasecmp((string)$a['name'],(string)$b['name']));
   team_hub_out([
-    'ok'=>true,'dataset'=>'nations','game_world_id'=>$gw,
-    'source'=>$table.'.competition_group=NATIONS + Sql1956795_1.CORE.national_teams',
+    'ok'=>true,
+    'dataset'=>'nations',
+    'game_world_id'=>$gw,
+    'source'=>'Sql1956795_1.nations_game_world_id + national_teams',
     'count'=>count($rows),
-    'image_count'=>count(array_filter($rows,static fn(array $row): bool => trim((string)($row['image_url'] ?? '')) !== '')),
     'data'=>$rows,
   ]);
 } catch (Throwable $e) {
