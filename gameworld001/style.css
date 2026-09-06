@@ -81,6 +81,7 @@ button{font:inherit}
   color:#fff;background:linear-gradient(180deg,#2080df,#1265bb);
   border-color:transparent
 }
+body:has(.global-nav .nav-pill:first-child.active) .global-nav .nav-pill:first-child{display:none}
 
 .view{margin-top:16px;animation:fadeIn .18s ease}
 @keyframes fadeIn{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:none}}
