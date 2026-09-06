@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/core.php';
 
-const IMC_DBM_VERSION = '1.1.0';
+const IMC_DBM_VERSION = '1.2.0';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -294,6 +294,51 @@ function dbm_execute_plan(array $payload): array {
     }
 }
 
+function dbm_clear_repository(array $payload): array {
+    $gameWorldId = strtoupper(trim((string)($payload['game_world_id'] ?? '')));
+    $repository = strtolower(trim((string)($payload['repository'] ?? '')));
+    if (!preg_match('/^GW00[1-9]$/', $gameWorldId)) throw new InvalidArgumentException('Invalid game_world_id.');
+    if ($repository !== 'transfers') throw new InvalidArgumentException('Repository not enabled for clear_repository.');
+
+    $custom = ['GW001','GW004','GW005','GW006','GW009'];
+    $gold = ['GW002','GW003','GW007','GW008'];
+    if (in_array($gameWorldId, $custom, true)) $target = 'custom';
+    elseif (in_array($gameWorldId, $gold, true)) $target = 'gold';
+    else throw new InvalidArgumentException('Game World routing unavailable.');
+
+    [$database, $db] = dbm_storage($target);
+    $table = $gameWorldId . '_transfers';
+    $stmt = $db->prepare('SELECT COUNT(*) c FROM information_schema.tables WHERE table_schema=? AND table_name=? AND table_type=\'BASE TABLE\'');
+    $stmt->bind_param('ss', $database, $table);
+    $stmt->execute();
+    $exists = (int)($stmt->get_result()->fetch_assoc()['c'] ?? 0);
+    $stmt->close();
+    if ($exists !== 1) throw new RuntimeException('Repository table not found.', 404);
+
+    $escaped = str_replace('`', '``', $table);
+    $before = (int)($db->query("SELECT COUNT(*) c FROM `$escaped`")->fetch_assoc()['c'] ?? 0);
+    $started = microtime(true);
+    $db->query("DELETE FROM `$escaped`");
+    $deleted = $db->affected_rows;
+    $after = (int)($db->query("SELECT COUNT(*) c FROM `$escaped`")->fetch_assoc()['c'] ?? 0);
+    $record = [
+        'action'=>'clear_repository',
+        'target'=>$target,
+        'database'=>$database,
+        'game_world_id'=>$gameWorldId,
+        'repository'=>$repository,
+        'table'=>$table,
+        'before'=>$before,
+        'deleted'=>$deleted,
+        'after'=>$after,
+        'status'=>$after === 0 ? 'success' : 'failed',
+        'duration_ms'=>(int)round((microtime(true)-$started)*1000),
+    ];
+    dbm_audit($record);
+    if ($after !== 0) throw new RuntimeException('Repository clear verification failed.', 500);
+    return ['ok'=>true] + $record;
+}
+
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -348,6 +393,10 @@ try {
 
     if ($action === 'execute_migration') {
         dbm_reply(dbm_execute_plan($payload));
+    }
+
+    if ($action === 'clear_repository') {
+        dbm_reply(dbm_clear_repository($payload));
     }
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
