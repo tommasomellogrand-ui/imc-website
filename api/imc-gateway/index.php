@@ -39,7 +39,14 @@ function valid_identifier(string $value): bool {
 }
 
 function public_gateway_version(): string {
-  return '1.4.0';
+  return '1.5.0';
+}
+
+function public_core_tables(): array {
+  return [
+    'gw_manager_assignments',
+    'imc_managers',
+  ];
 }
 
 function competition_group_from_sm_action(mixed $value): ?string {
@@ -135,6 +142,86 @@ function resolve_public_table(PDO $pdo, string $gw, string $repo): string {
   return $tables[$repo];
 }
 
+function read_public_table(PDO $pdo, string $table, string $gw, string $repo, string $source): never {
+  $columns = [];
+  $schemaStmt = $pdo->query("DESCRIBE `{$table}`");
+  foreach ($schemaStmt->fetchAll() as $column) {
+    $name = (string)($column['Field'] ?? '');
+    if ($name !== '') $columns[$name] = true;
+  }
+
+  $where = [];
+  $values = [];
+
+  foreach ($_GET as $key => $value) {
+    if (!str_starts_with((string)$key, 'filter_')) continue;
+    $column = substr((string)$key, 7);
+
+    if (!valid_identifier($column) || !isset($columns[$column])) {
+      out(['ok'=>false,'error'=>'invalid_filter','column'=>$column],422);
+    }
+
+    if (is_array($value)) {
+      out(['ok'=>false,'error'=>'invalid_filter_value','column'=>$column],422);
+    }
+
+    if ((string)$value === '__NULL__') {
+      $where[] = "`{$column}` IS NULL";
+    } elseif ((string)$value === '__NOT_NULL__') {
+      $where[] = "`{$column}` IS NOT NULL";
+    } else {
+      $where[] = "`{$column}` = ?";
+      $values[] = (string)$value;
+    }
+  }
+
+  $limit = max(1, min(1000, (int)($_GET['limit'] ?? 500)));
+  $offset = max(0, (int)($_GET['offset'] ?? 0));
+  $whereSql = $where ? ' WHERE '.implode(' AND ', $where) : '';
+
+  $orderBy = trim((string)($_GET['order_by'] ?? ''));
+  $orderDir = strtoupper(trim((string)($_GET['order_dir'] ?? 'ASC')));
+  $orderSql = '';
+
+  if ($orderBy !== '') {
+    if (!valid_identifier($orderBy) || !isset($columns[$orderBy])) {
+      out(['ok'=>false,'error'=>'invalid_order_by'],422);
+    }
+
+    if (!in_array($orderDir, ['ASC','DESC'], true)) {
+      $orderDir = 'ASC';
+    }
+
+    $orderSql = " ORDER BY `{$orderBy}` {$orderDir}";
+  }
+
+  $countStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM `{$table}`{$whereSql}");
+  $countStmt->execute($values);
+  $total = (int)($countStmt->fetch()['c'] ?? 0);
+
+  $stmt = $pdo->prepare("SELECT * FROM `{$table}`{$whereSql}{$orderSql} LIMIT {$limit} OFFSET {$offset}");
+  $stmt->execute($values);
+  $rows = $stmt->fetchAll();
+
+  out([
+    'ok'=>true,
+    'action'=>'public_read',
+    'service'=>'IMC Universal Gateway',
+    'version'=>public_gateway_version(),
+    'source'=>$source,
+    'game_world_id'=>$gw,
+    'repository'=>$repo,
+    'table'=>$table,
+    'data'=>$rows,
+    'pagination'=>[
+      'total'=>$total,
+      'limit'=>$limit,
+      'offset'=>$offset,
+      'returned'=>count($rows),
+    ],
+  ]);
+}
+
 $cfg = require __DIR__.'/config.php';
 require_once __DIR__.'/database.php';
 
@@ -144,9 +231,27 @@ if ($method === 'GET') {
   $gw = strtoupper(trim((string)($_GET['game_world_id'] ?? '')));
   $action = strtolower(trim((string)($_GET['action'] ?? 'read')));
   $repo = strtolower(trim((string)($_GET['repository'] ?? '')));
+  $source = strtolower(trim((string)($_GET['source'] ?? 'world')));
 
   if (!valid_gw($gw)) {
     out(['ok'=>false,'error'=>'invalid_game_world'],422);
+  }
+
+  if ($source === 'core') {
+    if (!in_array($repo, public_core_tables(), true)) {
+      out(['ok'=>false,'error'=>'core_repository_not_enabled'],422);
+    }
+
+    try {
+      $pdo = imc_core_db($cfg);
+      read_public_table($pdo, $repo, $gw, $repo, 'core');
+    } catch (Throwable $e) {
+      out(['ok'=>false,'error'=>'gateway_read_error'],500);
+    }
+  }
+
+  if ($source !== '' && $source !== 'world') {
+    out(['ok'=>false,'error'=>'invalid_source'],422);
   }
 
   try {
@@ -200,83 +305,7 @@ if ($method === 'GET') {
     }
 
     $table = resolve_public_table($pdo, $gw, $repo);
-
-    $columns = [];
-    $schemaStmt = $pdo->query("DESCRIBE `{$table}`");
-    foreach ($schemaStmt->fetchAll() as $column) {
-      $name = (string)($column['Field'] ?? '');
-      if ($name !== '') $columns[$name] = true;
-    }
-
-    $where = [];
-    $values = [];
-
-    foreach ($_GET as $key => $value) {
-      if (!str_starts_with((string)$key, 'filter_')) continue;
-      $column = substr((string)$key, 7);
-
-      if (!valid_identifier($column) || !isset($columns[$column])) {
-        out(['ok'=>false,'error'=>'invalid_filter','column'=>$column],422);
-      }
-
-      if (is_array($value)) {
-        out(['ok'=>false,'error'=>'invalid_filter_value','column'=>$column],422);
-      }
-
-      if ((string)$value === '__NULL__') {
-        $where[] = "`{$column}` IS NULL";
-      } elseif ((string)$value === '__NOT_NULL__') {
-        $where[] = "`{$column}` IS NOT NULL";
-      } else {
-        $where[] = "`{$column}` = ?";
-        $values[] = (string)$value;
-      }
-    }
-
-    $limit = max(1, min(1000, (int)($_GET['limit'] ?? 500)));
-    $offset = max(0, (int)($_GET['offset'] ?? 0));
-    $whereSql = $where ? ' WHERE '.implode(' AND ', $where) : '';
-
-    $orderBy = trim((string)($_GET['order_by'] ?? ''));
-    $orderDir = strtoupper(trim((string)($_GET['order_dir'] ?? 'ASC')));
-    $orderSql = '';
-
-    if ($orderBy !== '') {
-      if (!valid_identifier($orderBy) || !isset($columns[$orderBy])) {
-        out(['ok'=>false,'error'=>'invalid_order_by'],422);
-      }
-
-      if (!in_array($orderDir, ['ASC','DESC'], true)) {
-        $orderDir = 'ASC';
-      }
-
-      $orderSql = " ORDER BY `{$orderBy}` {$orderDir}";
-    }
-
-    $countStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM `{$table}`{$whereSql}");
-    $countStmt->execute($values);
-    $total = (int)($countStmt->fetch()['c'] ?? 0);
-
-    $stmt = $pdo->prepare("SELECT * FROM `{$table}`{$whereSql}{$orderSql} LIMIT {$limit} OFFSET {$offset}");
-    $stmt->execute($values);
-    $rows = $stmt->fetchAll();
-
-    out([
-      'ok'=>true,
-      'action'=>'public_read',
-      'service'=>'IMC Universal Gateway',
-      'version'=>public_gateway_version(),
-      'game_world_id'=>$gw,
-      'repository'=>$repo,
-      'table'=>$table,
-      'data'=>$rows,
-      'pagination'=>[
-        'total'=>$total,
-        'limit'=>$limit,
-        'offset'=>$offset,
-        'returned'=>count($rows),
-      ],
-    ]);
+    read_public_table($pdo, $table, $gw, $repo, 'world');
   } catch (Throwable $e) {
     out(['ok'=>false,'error'=>'gateway_read_error'],500);
   }
