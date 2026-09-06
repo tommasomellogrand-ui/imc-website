@@ -23,8 +23,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for n in $(seq -w 1 9); do
-            d="gameworld0${n}"
+          for n in $(seq 1 9); do
+            code=$(printf "%03d" "$n")
+            d="gameworld${code}"
             sed -i "s/BUILD_ID/${GITHUB_SHA}/g" "$d/index.html"
             grep -Fq "pilot-theme.css?v=${GITHUB_SHA}" "$d/index.html"
             grep -Fq "config.js?v=${GITHUB_SHA}" "$d/index.html"
@@ -39,14 +40,15 @@ jobs:
           test -s site-assets/css/imc-site.css
           test -s site-assets/js/imc-site.js
           test -s site-assets/images/imc-logo.png
-          for n in $(seq -w 1 9); do
-            d="gameworld0${n}"
+          for n in $(seq 1 9); do
+            code=$(printf "%03d" "$n")
+            d="gameworld${code}"
             test -s "$d/index.html"
             test -s "$d/config.js"
             test -s "$d/app-core.js"
             test -s "$d/pilot-theme.css"
             test -s "$d/.htaccess"
-            grep -Fq "GW0${n}" "$d/config.js"
+            grep -Fq "GW${code}" "$d/config.js"
           done
           test -s api/imc-gateway/index.php
           test -s api/imc-gateway/config.php
