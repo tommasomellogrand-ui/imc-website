@@ -133,7 +133,8 @@
       const currentPanel=APP?.querySelector('.competition-detail-panel[data-panel="results"]'); if(!currentPanel)return;
       if(!rows.length){currentPanel.innerHTML='<div class="cd-results-state"><strong>NESSUN RESULT DISPONIBILE</strong></div>';return;}
       const matchdays=groupByDate(rows,1);
-      currentPanel.innerHTML=`<div class="cd-results-heading"><span>RESULTS</span><strong>${rows.length} MATCHES · ${matchdays.length} MATCHDAYS</strong></div><div class="cd-matchdays">${matchdays.map(group=>matchdayBox(group,'results')).join('')}</div>`;
+      const visibleMatchdays=[...matchdays].reverse();
+      currentPanel.innerHTML=`<div class="cd-results-heading"><span>RESULTS</span><strong>${rows.length} MATCHES · ${matchdays.length} MATCHDAYS</strong></div><div class="cd-matchdays">${visibleMatchdays.map(group=>matchdayBox(group,'results')).join('')}</div>`;
     } catch(error) {
       if(token!==requestToken)return; const currentPanel=APP?.querySelector('.competition-detail-panel[data-panel="results"]'); if(!currentPanel)return;
       const message=error?.name==='AbortError'?'GATEWAY TIMEOUT':(error?.message||'GATEWAY ERROR');
