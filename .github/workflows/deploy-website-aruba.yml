@@ -33,6 +33,8 @@ jobs:
           grep -Fq "competition-table.css?v=${GITHUB_SHA}" gameworld001/index.html
           grep -Fq "competition-groups.js?v=${GITHUB_SHA}" gameworld001/index.html
           grep -Fq "competition-groups.css?v=${GITHUB_SHA}" gameworld001/index.html
+          grep -Fq "player-codex.js?v=${GITHUB_SHA}" gameworld001/index.html
+          grep -Fq "player-codex.css?v=${GITHUB_SHA}" gameworld001/index.html
 
       - name: Validate package
         shell: bash
@@ -53,6 +55,8 @@ jobs:
           test -s gameworld001/competition-table.css
           test -s gameworld001/competition-groups.js
           test -s gameworld001/competition-groups.css
+          test -s gameworld001/player-codex.js
+          test -s gameworld001/player-codex.css
           test -s gameworld001/team-hub.js
           test -s gameworld001/style.css
           test -s gameworld001/.htaccess
@@ -72,6 +76,8 @@ jobs:
           grep -Fq './competition-table.css?v=' gameworld001/index.html
           grep -Fq './competition-groups.js?v=' gameworld001/index.html
           grep -Fq './competition-groups.css?v=' gameworld001/index.html
+          grep -Fq './player-codex.js?v=' gameworld001/index.html
+          grep -Fq './player-codex.css?v=' gameworld001/index.html
           grep -Fq './team-hub.js?v=' gameworld001/index.html
           grep -Fq './style.css?v=' gameworld001/index.html
 
@@ -128,6 +134,8 @@ jobs:
               Path('gameworld001/competition-table.css'),
               Path('gameworld001/competition-groups.js'),
               Path('gameworld001/competition-groups.css'),
+              Path('gameworld001/player-codex.js'),
+              Path('gameworld001/player-codex.css'),
               Path('gameworld001/team-hub.js'),
               Path('gameworld001/style.css'),
               Path('gameworld001/.htaccess'),
