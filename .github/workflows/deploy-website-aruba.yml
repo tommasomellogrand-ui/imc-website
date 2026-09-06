@@ -27,6 +27,8 @@ jobs:
           grep -Fq "app.js?v=${GITHUB_SHA}" gameworld001/index.html
           grep -Fq "menu.js?v=${GITHUB_SHA}" gameworld001/index.html
           grep -Fq "menu.css?v=${GITHUB_SHA}" gameworld001/index.html
+          grep -Fq "competition-detail.js?v=${GITHUB_SHA}" gameworld001/index.html
+          grep -Fq "competition-detail.css?v=${GITHUB_SHA}" gameworld001/index.html
           grep -Fq "competition-table.js?v=${GITHUB_SHA}" gameworld001/index.html
           grep -Fq "competition-table.css?v=${GITHUB_SHA}" gameworld001/index.html
           grep -Fq "competition-groups.js?v=${GITHUB_SHA}" gameworld001/index.html
@@ -164,6 +166,8 @@ jobs:
           grep -Fq "app.js?v=${GITHUB_SHA}" /tmp/gw001.html
           grep -Fq "menu.js?v=${GITHUB_SHA}" /tmp/gw001.html
           grep -Fq "menu.css?v=${GITHUB_SHA}" /tmp/gw001.html
+          grep -Fq "competition-detail.js?v=${GITHUB_SHA}" /tmp/gw001.html
+          grep -Fq "competition-detail.css?v=${GITHUB_SHA}" /tmp/gw001.html
           grep -Fq "competition-table.js?v=${GITHUB_SHA}" /tmp/gw001.html
           grep -Fq "competition-table.css?v=${GITHUB_SHA}" /tmp/gw001.html
           grep -Fq "competition-groups.js?v=${GITHUB_SHA}" /tmp/gw001.html
@@ -176,8 +180,8 @@ jobs:
           grep -Fq '.competition-detail-tabs' /tmp/gw001-competition-detail.css
           grep -Fq 'buildStandings' /tmp/gw001-competition-table.js
           grep -Fq '.cd-standings-table' /tmp/gw001-competition-table.css
-          grep -Fq 'competition-group-hero-card' /tmp/gw001-competition-groups.js
-          grep -Fq '.competition-group-hero-card' /tmp/gw001-competition-groups.css
+          grep -Fq 'competition-category-card' /tmp/gw001-competition-groups.js
+          grep -Fq '.competition-category-card' /tmp/gw001-competition-groups.css
           grep -Fq 'CORE Aruba' /tmp/gw001-team-hub.js
           python3 - <<'PY'
           import json
