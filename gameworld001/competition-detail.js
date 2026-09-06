@@ -38,17 +38,25 @@
     return Array.isArray(p.data)?p.data:[];
   }
 
+  function sameCompetitionIdentity(row,i){
+    const rowAction=String(row?.sm_action||'').trim().toLowerCase();
+    const wantedAction=String(i?.sm_action||'').trim().toLowerCase();
+    if(wantedAction&&rowAction!==wantedAction)return false;
+    const wantedDivision=String(i?.sm_division||'').trim();
+    if(wantedDivision&&String(row?.sm_division||'').trim()!==wantedDivision)return false;
+    return true;
+  }
+
   async function resolveCompetitionKey(i){
     if(i?.competition_key)return i;
-    const base={competition_group:i.group,sm_action:i.sm_action};
-    if(i.sm_division)base.sm_division=i.sm_division;
     const sources=[
-      ['results',{...base,result_dataset:'MATCH_DATA'}],
-      ['schedule',base]
+      ['results',{competition_group:i.group,result_dataset:'MATCH_DATA'}],
+      ['schedule',{competition_group:i.group}]
     ];
     for(const [repository,filters] of sources){
       const rows=await gatewayRows(repository,filters);
-      const keys=[...new Set(rows.map(r=>String(r.competition_key||'').trim()).filter(Boolean))];
+      const matching=rows.filter(row=>sameCompetitionIdentity(row,i));
+      const keys=[...new Set(matching.map(r=>String(r.competition_key||'').trim()).filter(Boolean))];
       if(keys.length===1)return{...i,competition_key:keys[0]};
     }
     return null;
