@@ -41,11 +41,10 @@ jobs:
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
-          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
         shell: bash
         run: |
           set -euo pipefail
-          for name in ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD ARUBA_WEBSITE_REMOTE_DIR; do
+          for name in ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD; do
             test -n "${!name:-}"
           done
 
@@ -53,7 +52,6 @@ jobs:
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
-          ARUBA_WEBSITE_REMOTE_DIR: ${{ secrets.ARUBA_WEBSITE_REMOTE_DIR }}
         shell: bash
         run: |
           python3 - <<'PY'
@@ -65,7 +63,7 @@ jobs:
           port=21
           username=os.environ['ARUBA_FTP_USERNAME']
           password=os.environ['ARUBA_FTP_PASSWORD']
-          remote_root=os.environ['ARUBA_WEBSITE_REMOTE_DIR'].strip() or '/'
+          remote_root='/'
 
           ctx=ssl.create_default_context()
           ctx.check_hostname=False
