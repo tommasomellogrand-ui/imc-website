@@ -63,6 +63,12 @@
   function openCompetition(hash) { const identity=parseCompetitionHash(hash); if(!identity)return false; history.pushState({gw001Competition:true},'',`${location.pathname}${location.search}${hash}`); return render(identity,'overview'); }
 
   function competitionFilters(identity, repository) {
+    if(repository==='schedule') {
+      const filters={};
+      if(identity.sm_action) filters.sm_action=identity.sm_action;
+      if(identity.sm_division) filters.sm_division=identity.sm_division;
+      return filters;
+    }
     const filters={competition_group:identity.group};
     if(repository==='results') filters.result_dataset='MATCH_DATA';
     if(identity.competition_key) filters.competition_key=identity.competition_key;
