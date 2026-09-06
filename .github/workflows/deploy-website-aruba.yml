@@ -30,9 +30,12 @@ jobs:
           test -s site-assets/js/world-feed.js
           test -s site-assets/images/imc-logo.png
           test -s gameworld001/index.html
-          test -s gameworld001/styles.css
+          test -s gameworld001/app.js
+          test -s gameworld001/style.css
           test -s gameworld001/.htaccess
-          grep -Fq 'GW001 · SITE STRUCTURE PREVIEW' gameworld001/index.html
+          grep -Fq 'GW001 · Road To History' gameworld001/index.html
+          grep -Fq './app.js' gameworld001/index.html
+          grep -Fq './style.css' gameworld001/index.html
 
       - name: Validate Aruba secrets
         env:
@@ -99,7 +102,12 @@ jobs:
 
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
-          files += [Path('gameworld001/index.html'),Path('gameworld001/styles.css'),Path('gameworld001/.htaccess')]
+          files += [
+              Path('gameworld001/index.html'),
+              Path('gameworld001/app.js'),
+              Path('gameworld001/style.css'),
+              Path('gameworld001/.htaccess')
+          ]
 
           for local in files:
               rel=local.as_posix(); parent=local.parent.as_posix()
@@ -120,6 +128,9 @@ jobs:
           set -euo pipefail
           token="${GITHUB_SHA}-$(date +%s)"
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/?verify=$token" -o /tmp/gw001.html
-          grep -Fq 'GW001 · SITE STRUCTURE PREVIEW' /tmp/gw001.html
-          grep -Fq 'WORLD CHRONICLE' /tmp/gw001.html
-          echo 'GW001 structure online OK'
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/app.js?verify=$token" -o /tmp/gw001-app.js
+          grep -Fq 'GW001 · Road To History' /tmp/gw001.html
+          grep -Fq './app.js' /tmp/gw001.html
+          grep -Fq 'Tommaso Mello' /tmp/gw001-app.js
+          grep -Fq 'manager IMC attivi' /tmp/gw001-app.js
+          echo 'GW001 current application online OK'
