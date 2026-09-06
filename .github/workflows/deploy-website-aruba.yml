@@ -31,10 +31,13 @@ jobs:
           test -s site-assets/images/imc-logo.png
           test -s gameworld001/index.html
           test -s gameworld001/app.js
+          test -s gameworld001/team-hub.js
           test -s gameworld001/style.css
           test -s gameworld001/.htaccess
+          test -s api/imc-gateway/team-hub.php
           grep -Fq 'GW001 · Road To History' gameworld001/index.html
           grep -Fq './app.js' gameworld001/index.html
+          grep -Fq './team-hub.js' gameworld001/index.html
           grep -Fq './style.css' gameworld001/index.html
 
       - name: Validate Aruba secrets
@@ -105,8 +108,10 @@ jobs:
           files += [
               Path('gameworld001/index.html'),
               Path('gameworld001/app.js'),
+              Path('gameworld001/team-hub.js'),
               Path('gameworld001/style.css'),
-              Path('gameworld001/.htaccess')
+              Path('gameworld001/.htaccess'),
+              Path('api/imc-gateway/team-hub.php')
           ]
 
           for local in files:
@@ -129,8 +134,22 @@ jobs:
           token="${GITHUB_SHA}-$(date +%s)"
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/?verify=$token" -o /tmp/gw001.html
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/app.js?verify=$token" -o /tmp/gw001-app.js
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/team-hub.js?verify=$token" -o /tmp/gw001-team-hub.js
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/api/imc-gateway/team-hub.php?game_world_id=GW001&dataset=clubs&verify=$token" -o /tmp/gw001-clubs.json
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/api/imc-gateway/team-hub.php?game_world_id=GW001&dataset=nations&verify=$token" -o /tmp/gw001-nations.json
           grep -Fq 'GW001 · Road To History' /tmp/gw001.html
           grep -Fq './app.js' /tmp/gw001.html
+          grep -Fq './team-hub.js' /tmp/gw001.html
           grep -Fq 'Tommaso Mello' /tmp/gw001-app.js
           grep -Fq 'manager IMC attivi' /tmp/gw001-app.js
+          grep -Fq 'CORE Aruba' /tmp/gw001-team-hub.js
+          python3 - <<'PY'
+          import json
+          clubs=json.load(open('/tmp/gw001-clubs.json'))
+          nations=json.load(open('/tmp/gw001-nations.json'))
+          assert clubs.get('ok') is True and clubs.get('count') == 40, clubs
+          assert nations.get('ok') is True and nations.get('count') == 80, nations
+          assert any(x.get('name') == 'FC Kaiserslautern' for x in clubs.get('data', [])), clubs
+          print('GW001 Team Hub online: 40 clubs / 80 nations')
+          PY
           echo 'GW001 current application online OK'
