@@ -2,27 +2,11 @@
 .competition-detail-tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:0 0 14px;padding:6px;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:var(--shadow)}
 .competition-detail-tab{min-height:54px;border:0;border-radius:16px;background:transparent;color:#b66b58;font:900 9px/1.05 "Inter",sans-serif;text-transform:uppercase;letter-spacing:.02em;padding:0 6px;cursor:pointer}
 .competition-detail-tab.active{color:#fff;background:linear-gradient(180deg,#c6533d,#a93c2b);box-shadow:0 10px 22px rgba(168,61,43,.18)}
-.competition-detail-stage{min-height:260px}
-.competition-detail-panel{min-height:260px}
+.competition-detail-stage,.competition-detail-panel{min-height:260px}
 .cd-results-state{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:#173766}
-.cd-results-state strong{font-size:13px;font-weight:900;letter-spacing:.03em}
-.cd-results-state small{font-size:10px;color:#8a96a6}
-.cd-results-heading{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 12px;color:#173766}
-.cd-results-heading span{font-size:12px;font-weight:900;letter-spacing:.04em}
-.cd-results-heading strong{font-size:24px;font-weight:900}
-.cd-results-list{display:grid;gap:10px}
-.cd-result-card{display:block;padding:14px;border:1px solid #e2b8ae;border-radius:22px;background:#fffdfc;box-shadow:var(--shadow-soft);color:#173766;text-decoration:none}
-.cd-result-meta{display:flex;justify-content:space-between;gap:12px;margin-bottom:12px;color:#8c97a6;font-size:8px;font-weight:800;text-transform:uppercase}
-.cd-result-match{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}
-.cd-result-match strong{font-size:11px;font-weight:900;line-height:1.15}
-.cd-result-match strong:last-child{text-align:right}
-.cd-result-match b{font-size:15px;color:#a84230;white-space:nowrap}
-@media(max-width:430px){
-  .competition-detail-tabs{display:flex;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .competition-detail-tabs::-webkit-scrollbar{display:none}
-  .competition-detail-tab{flex:0 0 auto;min-width:92px}
-  .cd-result-card{padding:12px 10px}
-  .cd-result-match{gap:7px}
-  .cd-result-match strong{font-size:10px}
-  .cd-result-match b{font-size:13px}
-}
+.cd-results-state strong{font-size:13px;font-weight:900;letter-spacing:.03em}.cd-results-state small{font-size:10px;color:#8a96a6}
+.cd-results-heading{display:flex;align-items:center;justify-content:space-between;margin:4px 4px 12px;color:#173766}.cd-results-heading span{font-size:12px;font-weight:900;letter-spacing:.04em}.cd-results-heading strong{font-size:10px;font-weight:900;color:#7f8b9b}
+.cd-matchdays{display:grid;gap:14px}.cd-matchday-box{overflow:hidden;border:1px solid #d9e0e8;border-radius:22px;background:#fff;box-shadow:var(--shadow-soft)}
+.cd-matchday-head{min-height:54px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:0 16px;background:linear-gradient(135deg,#153c6b,#235a89);color:#fff}.cd-matchday-head strong{font-size:15px;font-weight:900;letter-spacing:-.02em}.cd-matchday-head span{font-size:9px;font-weight:800;opacity:.78}.cd-matchday-head b{font-size:9px;font-weight:900;opacity:.82}
+.cd-matchday-matches{padding:0 14px}.cd-matchday-row{min-height:58px;display:grid;grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr) 12px;align-items:center;gap:9px;border-bottom:1px solid #e8edf2;color:#173766;text-decoration:none}.cd-matchday-row:last-child{border-bottom:0}.cd-team{font-size:10px;font-weight:800;line-height:1.15}.cd-team.home{text-align:right}.cd-team.away{text-align:left}.cd-score{padding:8px 4px;border-radius:10px;background:#f3f5f7;text-align:center;font-size:13px;font-weight:900;white-space:nowrap}.cd-chevron{font-size:22px;line-height:1;text-align:right;color:#173766}
+@media(max-width:430px){.competition-detail-tabs{display:flex;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.competition-detail-tabs::-webkit-scrollbar{display:none}.competition-detail-tab{flex:0 0 auto;min-width:92px}.cd-matchday-head{grid-template-columns:auto 1fr auto;gap:8px;padding:0 12px}.cd-matchday-head strong{font-size:13px}.cd-matchday-head span,.cd-matchday-head b{font-size:8px}.cd-matchday-matches{padding:0 10px}.cd-matchday-row{grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr) 10px;gap:6px;min-height:56px}.cd-team{font-size:9px}.cd-score{font-size:12px}}
