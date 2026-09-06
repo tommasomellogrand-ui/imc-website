@@ -55,6 +55,7 @@ jobs:
           test -s gameworld001/style.css
           test -s gameworld001/.htaccess
           test -s api/imc-gateway/team-hub.php
+          test -s __imc-gateway/__imc-gateway/index.php
           grep -Fq 'GW001 · Road To History' gameworld001/index.html
           grep -Fq './app.js?v=' gameworld001/index.html
           grep -Fq './menu.js?v=' gameworld001/index.html
@@ -124,7 +125,8 @@ jobs:
               Path('gameworld001/team-hub.js'),
               Path('gameworld001/style.css'),
               Path('gameworld001/.htaccess'),
-              Path('api/imc-gateway/team-hub.php')
+              Path('api/imc-gateway/team-hub.php'),
+              Path('__imc-gateway/__imc-gateway/index.php')
           ]
           for local in files:
               rel=local.as_posix(); parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f"{remote_root.rstrip('/')}/{parent}"
