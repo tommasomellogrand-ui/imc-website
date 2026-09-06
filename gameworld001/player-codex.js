@@ -23,6 +23,7 @@
     .replaceAll('"','&quot;').replaceAll("'",'&#039;');
 
   const path = () => (location.hash.replace(/^#/,'') || '/overview');
+  const ownsPath = () => path()==='/codex' || path()==='/codex/players' || /^\/player\/[^/]+$/.test(path());
 
   async function request(repository, options = {}) {
     const url = new URL(API);
@@ -56,6 +57,20 @@
       if (page.data.length < pageSize) break;
     }
     return out;
+  }
+
+  function rowPlayerId(row) {
+    return row?.sm_player_id ?? row?.player_id ?? row?.player_codex_id ?? row?.sm_id ?? null;
+  }
+
+  async function readPlayerRows(repository, id) {
+    try {
+      return (await request(repository,{limit:1000,filters:{sm_player_id:id}})).data;
+    } catch (err) {
+      if (String(err?.message || '') !== 'invalid_filter') throw err;
+      const all = await readAll(repository);
+      return all.filter(row => String(rowPlayerId(row) ?? '') === String(id));
+    }
   }
 
   function shell(content) {
@@ -179,7 +194,7 @@
     shell(`${head('Player Detail','/codex/players')}${loading()}`);
     try{
       const results = await Promise.all(repos.map(async repo=>{
-        try { return [repo,(await request(repo,{limit:1000,filters:{sm_player_id:id}})).data]; }
+        try { return [repo,await readPlayerRows(repo,id)]; }
         catch { return [repo,[]]; }
       }));
       if(seq!==renderSeq || !path().startsWith('/player/')) return;
@@ -202,7 +217,14 @@
     if(p==='/codex' || p==='/codex/players') setTimeout(renderList,0);
     else if(/^\/player\/[^/]+$/.test(p)) setTimeout(()=>renderDetail(decodeURIComponent(p.split('/')[2])),0);
   }
-  window.addEventListener('hashchange',route);
-  window.addEventListener('popstate',route);
+
+  function exclusiveRoute(event) {
+    if (!ownsPath()) return;
+    if (event) event.stopImmediatePropagation();
+    route();
+  }
+
+  window.addEventListener('hashchange',exclusiveRoute,true);
+  window.addEventListener('popstate',exclusiveRoute,true);
   route();
 })();
