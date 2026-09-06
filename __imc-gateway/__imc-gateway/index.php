@@ -17,9 +17,10 @@ if (!is_array($body)) out(['ok'=>false,'error'=>'invalid_json'],400);
 $action=(string)($body['action'] ?? '');
 $gw=strtoupper(trim((string)($body['game_world_id'] ?? '')));
 $repo=strtolower(trim((string)($body['repository'] ?? '')));
+$enabledRepos=array_values(array_unique(array_map(static fn($r)=>$r==='nations'?'sm_player_stats':$r,$cfg['repositories'] ?? [])));
 
 if ($action==='health') {
-  out(['ok'=>true,'service'=>'IMC Universal Gateway','version'=>$cfg['version'],'repositories'=>$cfg['repositories'],'worlds'=>array_merge($cfg['gold_worlds'],$cfg['custom_worlds'])]);
+  out(['ok'=>true,'service'=>'IMC Universal Gateway','version'=>$cfg['version'],'repositories'=>$enabledRepos,'worlds'=>array_merge($cfg['gold_worlds'],$cfg['custom_worlds'])]);
 }
 if (!preg_match('/^GW00[1-9]$/',$gw)) out(['ok'=>false,'error'=>'invalid_game_world'],422);
 if ($action==='probe') {
@@ -28,7 +29,7 @@ if ($action==='probe') {
     out(['ok'=>true,'action'=>'probe','service'=>'IMC Universal Gateway','version'=>$cfg['version'],'game_world_id'=>$gw,'database_connection'=>(int)($row['ok'] ?? 0)===1 ? 'ok' : 'failed']);
   } catch(Throwable $e) { out(['ok'=>false,'action'=>'probe','game_world_id'=>$gw,'error'=>$e->getMessage()],500); }
 }
-if (!in_array($repo,$cfg['repositories'],true)) out(['ok'=>false,'error'=>'repository_not_enabled'],422);
+if (!in_array($repo,$enabledRepos,true)) out(['ok'=>false,'error'=>'repository_not_enabled'],422);
 $table=$gw.'_'.$repo;
 try { $pdo=imc_db($cfg,$gw); } catch(Throwable $e) { out(['ok'=>false,'error'=>$e->getMessage()],500); }
 try {
