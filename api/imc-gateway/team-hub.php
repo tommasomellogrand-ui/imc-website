@@ -49,6 +49,14 @@ function team_hub_core_db(array $cfg): PDO {
   );
 }
 
+function team_hub_name_key(string $value): string {
+  $value = trim($value);
+  if (function_exists('mb_strtolower')) {
+    return mb_strtolower($value, 'UTF-8');
+  }
+  return strtolower($value);
+}
+
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
   team_hub_out(['ok'=>false,'error'=>'method_not_allowed'],405);
 }
@@ -67,8 +75,9 @@ $cfg = require __DIR__.'/config.php';
 require_once __DIR__.'/database.php';
 
 try {
+  $core = team_hub_core_db($cfg);
+
   if ($dataset === 'clubs') {
-    $core = team_hub_core_db($cfg);
     $stmt = $core->prepare(
       "SELECT
          c.club_id,
@@ -92,8 +101,10 @@ try {
       'ok'=>true,
       'dataset'=>'clubs',
       'game_world_id'=>$gw,
-      'source'=>'Sql1956795_1.CORE',
+      'source'=>'Sql1956795_1.CORE · clubs + clubs_game_world_id',
+      'association'=>'club_gw_id → club_id',
       'count'=>count($rows),
+      'image_count'=>count(array_filter($rows, static fn(array $row): bool => trim((string)($row['image_url'] ?? '')) !== '')),
       'data'=>$rows,
     ]);
   }
@@ -114,14 +125,47 @@ try {
                AND TRIM(away_name) <> ''
           ) x
           ORDER BY name ASC";
-  $rows = $pdo->query($sql)->fetchAll();
+  $worldRows = $pdo->query($sql)->fetchAll();
+
+  $masterRows = $core->query(
+    "SELECT national_team_id, name, short_name, image_url
+       FROM national_teams
+      WHERE is_active = 1"
+  )->fetchAll();
+
+  $masterByName = [];
+  foreach ($masterRows as $master) {
+    $masterByName[team_hub_name_key((string)$master['name'])] = $master;
+  }
+
+  $aliases = [
+    'republic of macedonia' => 'north macedonia',
+  ];
+
+  $rows = [];
+  foreach ($worldRows as $worldRow) {
+    $name = trim((string)($worldRow['name'] ?? ''));
+    if ($name === '') continue;
+
+    $key = team_hub_name_key($name);
+    $lookupKey = $aliases[$key] ?? $key;
+    $master = $masterByName[$lookupKey] ?? null;
+
+    $rows[] = [
+      'name' => $name,
+      'national_team_id' => $master['national_team_id'] ?? null,
+      'short_name' => $master['short_name'] ?? null,
+      'image_url' => $master['image_url'] ?? null,
+    ];
+  }
 
   team_hub_out([
     'ok'=>true,
     'dataset'=>'nations',
     'game_world_id'=>$gw,
-    'source'=>$table.'.competition_group=NATIONS',
+    'source'=>$table.'.competition_group=NATIONS + Sql1956795_1.CORE.national_teams',
     'count'=>count($rows),
+    'image_count'=>count(array_filter($rows, static fn(array $row): bool => trim((string)($row['image_url'] ?? '')) !== '')),
     'data'=>$rows,
   ]);
 } catch (Throwable $e) {
