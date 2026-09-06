@@ -19,7 +19,18 @@
   <link rel="stylesheet" href="./style.css?v=BUILD_ID">
   <link rel="stylesheet" href="./menu.css?v=BUILD_ID">
   <link rel="stylesheet" href="./competition-detail.css?v=BUILD_ID">
-  <style>.global-nav{display:none!important}</style>
+  <style>
+    .global-nav{display:none!important}
+    .overview-grid .calendar-card,.overview-grid .results-card{display:none!important}
+    .overview-grid{
+      grid-template-areas:
+        "competitions managers"
+        "competitions teamhub"
+        "trophy news"
+        "codex transfers"
+        "chronicle chronicle"!important
+    }
+  </style>
 </head>
 <body>
   <div id="app" class="app" aria-live="polite"></div>
