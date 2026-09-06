@@ -1,0 +1,110 @@
+name: Aruba second cleanup
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/aruba-cleanup-second.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete approved second-stage Aruba leftovers
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, ssl, time
+          from ftplib import FTP_TLS, error_perm
+
+          host='ftp.italianmastersclub.it'
+          port=21
+          username=os.environ['ARUBA_FTP_USERNAME']
+          password=os.environ['ARUBA_FTP_PASSWORD']
+          root='/www.italianmastersclub.it'
+
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False
+          ftp=None
+          last_error=None
+          for _ in range(3):
+              c=FTP_TLS(context=ctx)
+              try:
+                  c.connect(host, port, timeout=60)
+                  c.login(username, password)
+                  c.prot_p()
+                  c.set_pasv(True)
+                  ftp=c
+                  break
+              except Exception as e:
+                  last_error=e
+                  try: c.close()
+                  except Exception: pass
+                  time.sleep(5)
+          if ftp is None:
+              raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}: {last_error}')
+
+          def abs_path(rel):
+              return f"{root.rstrip('/')}/{rel.lstrip('/')}"
+
+          def delete_file(rel):
+              p=abs_path(rel)
+              try:
+                  ftp.delete(p)
+                  print('DELETED FILE', rel)
+              except error_perm as e:
+                  if str(e).startswith('550'):
+                      print('FILE ALREADY ABSENT', rel)
+                  else:
+                      raise
+
+          def remove_tree(rel):
+              full=abs_path(rel)
+              try:
+                  entries=list(ftp.mlsd(full))
+              except error_perm:
+                  print('DIRECTORY ALREADY ABSENT', rel)
+                  return
+              for name, facts in entries:
+                  if name in ('.','..'):
+                      continue
+                  child=f"{rel.rstrip('/')}/{name}"
+                  typ=(facts.get('type') or '').lower()
+                  if typ=='dir':
+                      remove_tree(child)
+                  else:
+                      delete_file(child)
+              ftp.rmd(full)
+              print('DELETED DIR', rel)
+
+          for rel in [
+              '__imc-gateway',
+              'nexus-test',
+              'live-test-3d',
+              'ops/__imc-sm-master',
+          ]:
+              remove_tree(rel)
+
+          for rel in [
+              'ops/sm-master-root.zip',
+              'ops/imc-filesystem-bridge-status.json',
+          ]:
+              delete_file(rel)
+
+          try:
+              if not list(ftp.mlsd(abs_path('ops'))):
+                  ftp.rmd(abs_path('ops'))
+                  print('DELETED DIR ops')
+          except error_perm:
+              pass
+
+          ftp.quit()
+          print('SECOND CLEANUP COMPLETED')
+          PY
