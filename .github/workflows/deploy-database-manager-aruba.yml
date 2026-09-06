@@ -1,0 +1,111 @@
+name: Deploy IMC Database Manager to Aruba
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '__imc-sm-master/admin/database-manager/**'
+      - '.github/workflows/deploy-database-manager-aruba.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: imc-database-manager-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s __imc-sm-master/admin/database-manager/index.php
+          test -s __imc-sm-master/admin/database-manager/clear-repository.php
+          php -l __imc-sm-master/admin/database-manager/index.php
+          php -l __imc-sm-master/admin/database-manager/clear-repository.php
+
+      - name: Validate Aruba secrets
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ARUBA_FTP_USERNAME:-}"
+          test -n "${ARUBA_FTP_PASSWORD:-}"
+
+      - name: Upload Database Manager
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+
+          host='ftp.italianmastersclub.it'
+          port=21
+          username=os.environ['ARUBA_FTP_USERNAME']
+          password=os.environ['ARUBA_FTP_PASSWORD']
+          remote_root='/www.italianmastersclub.it'
+
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False
+          ftp=None
+          last_error=None
+          for _ in range(3):
+              c=FTP_TLS(context=ctx)
+              try:
+                  c.connect(host,port,timeout=60)
+                  c.login(username,password)
+                  c.prot_p()
+                  c.set_pasv(True)
+                  ftp=c
+                  break
+              except Exception as e:
+                  last_error=e
+                  try: c.close()
+                  except Exception: pass
+                  time.sleep(5)
+          if ftp is None:
+              raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}: {last_error}')
+
+          def ensure_dir(remote_path):
+              ftp.cwd('/')
+              for part in [p for p in remote_path.split('/') if p]:
+                  try:
+                      ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part)
+                      ftp.cwd(part)
+
+          files = [
+              Path('__imc-sm-master/admin/database-manager/index.php'),
+              Path('__imc-sm-master/admin/database-manager/clear-repository.php'),
+          ]
+
+          for local in files:
+              parent=local.parent.as_posix()
+              dest=f"{remote_root.rstrip('/')}/{parent}"
+              ensure_dir(dest)
+              data=local.read_bytes()
+              with local.open('rb') as fh:
+                  ftp.storbinary(f'STOR {local.name}', fh)
+              check=io.BytesIO()
+              ftp.retrbinary(f'RETR {local.name}', check.write)
+              if check.getvalue()!=data:
+                  raise SystemExit(f'Verifica upload fallita: {local.as_posix()}')
+              print(f'Pubblicato e verificato: {local.as_posix()}')
+
+          ftp.quit()
+          PY
