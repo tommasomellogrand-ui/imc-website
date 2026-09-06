@@ -27,6 +27,10 @@ jobs:
           grep -Fq "app.js?v=${GITHUB_SHA}" gameworld001/index.html
           grep -Fq "menu.js?v=${GITHUB_SHA}" gameworld001/index.html
           grep -Fq "menu.css?v=${GITHUB_SHA}" gameworld001/index.html
+          grep -Fq "competition-table.js?v=${GITHUB_SHA}" gameworld001/index.html
+          grep -Fq "competition-table.css?v=${GITHUB_SHA}" gameworld001/index.html
+          grep -Fq "competition-groups.js?v=${GITHUB_SHA}" gameworld001/index.html
+          grep -Fq "competition-groups.css?v=${GITHUB_SHA}" gameworld001/index.html
 
       - name: Validate package
         shell: bash
@@ -43,6 +47,10 @@ jobs:
           test -s gameworld001/menu.css
           test -s gameworld001/competition-detail.js
           test -s gameworld001/competition-detail.css
+          test -s gameworld001/competition-table.js
+          test -s gameworld001/competition-table.css
+          test -s gameworld001/competition-groups.js
+          test -s gameworld001/competition-groups.css
           test -s gameworld001/team-hub.js
           test -s gameworld001/style.css
           test -s gameworld001/.htaccess
@@ -53,6 +61,10 @@ jobs:
           grep -Fq './menu.css?v=' gameworld001/index.html
           grep -Fq './competition-detail.js?v=' gameworld001/index.html
           grep -Fq './competition-detail.css?v=' gameworld001/index.html
+          grep -Fq './competition-table.js?v=' gameworld001/index.html
+          grep -Fq './competition-table.css?v=' gameworld001/index.html
+          grep -Fq './competition-groups.js?v=' gameworld001/index.html
+          grep -Fq './competition-groups.css?v=' gameworld001/index.html
           grep -Fq './team-hub.js?v=' gameworld001/index.html
           grep -Fq './style.css?v=' gameworld001/index.html
 
@@ -98,7 +110,22 @@ jobs:
           excluded={'site-assets/css/game-world.css','site-assets/css/gameworld-engine.css','site-assets/js/gameworld-engine.js','site-assets/js/imc-data-service.js','site-assets/js/team-hub-detail.js'}
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
-          files += [Path('gameworld001/index.html'),Path('gameworld001/app.js'),Path('gameworld001/menu.js'),Path('gameworld001/menu.css'),Path('gameworld001/competition-detail.js'),Path('gameworld001/competition-detail.css'),Path('gameworld001/team-hub.js'),Path('gameworld001/style.css'),Path('gameworld001/.htaccess'),Path('api/imc-gateway/team-hub.php')]
+          files += [
+              Path('gameworld001/index.html'),
+              Path('gameworld001/app.js'),
+              Path('gameworld001/menu.js'),
+              Path('gameworld001/menu.css'),
+              Path('gameworld001/competition-detail.js'),
+              Path('gameworld001/competition-detail.css'),
+              Path('gameworld001/competition-table.js'),
+              Path('gameworld001/competition-table.css'),
+              Path('gameworld001/competition-groups.js'),
+              Path('gameworld001/competition-groups.css'),
+              Path('gameworld001/team-hub.js'),
+              Path('gameworld001/style.css'),
+              Path('gameworld001/.htaccess'),
+              Path('api/imc-gateway/team-hub.php')
+          ]
           for local in files:
               rel=local.as_posix(); parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f"{remote_root.rstrip('/')}/{parent}"
               ensure_dir(dest); data=local.read_bytes()
@@ -119,18 +146,30 @@ jobs:
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/menu.css?verify=$token" -o /tmp/gw001-menu.css
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/competition-detail.js?verify=$token" -o /tmp/gw001-competition-detail.js
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/competition-detail.css?verify=$token" -o /tmp/gw001-competition-detail.css
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/competition-table.js?verify=$token" -o /tmp/gw001-competition-table.js
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/competition-table.css?verify=$token" -o /tmp/gw001-competition-table.css
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/competition-groups.js?verify=$token" -o /tmp/gw001-competition-groups.js
+          curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/competition-groups.css?verify=$token" -o /tmp/gw001-competition-groups.css
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/gameworld001/team-hub.js?verify=$token" -o /tmp/gw001-team-hub.js
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/api/imc-gateway/team-hub.php?game_world_id=GW001&dataset=clubs&verify=$token" -o /tmp/gw001-clubs.json
           curl -fsSL -H 'Cache-Control: no-cache, no-store' "https://www.italianmastersclub.it/api/imc-gateway/team-hub.php?game_world_id=GW001&dataset=nations&verify=$token" -o /tmp/gw001-nations.json
           grep -Fq "app.js?v=${GITHUB_SHA}" /tmp/gw001.html
           grep -Fq "menu.js?v=${GITHUB_SHA}" /tmp/gw001.html
           grep -Fq "menu.css?v=${GITHUB_SHA}" /tmp/gw001.html
+          grep -Fq "competition-table.js?v=${GITHUB_SHA}" /tmp/gw001.html
+          grep -Fq "competition-table.css?v=${GITHUB_SHA}" /tmp/gw001.html
+          grep -Fq "competition-groups.js?v=${GITHUB_SHA}" /tmp/gw001.html
+          grep -Fq "competition-groups.css?v=${GITHUB_SHA}" /tmp/gw001.html
           grep -Fq 'Tommaso Mello' /tmp/gw001-app.js
           grep -Fq 'manager IMC attivi' /tmp/gw001-app.js
           grep -Fq "const NAV" /tmp/gw001-menu.js
           grep -Fq '.global-nav{display:none!important}' /tmp/gw001-menu.css
           grep -Fq 'competition-detail-tabs' /tmp/gw001-competition-detail.js
           grep -Fq '.competition-detail-tabs' /tmp/gw001-competition-detail.css
+          grep -Fq 'buildStandings' /tmp/gw001-competition-table.js
+          grep -Fq '.cd-standings-table' /tmp/gw001-competition-table.css
+          grep -Fq 'competition-group-hero-card' /tmp/gw001-competition-groups.js
+          grep -Fq '.competition-group-hero-card' /tmp/gw001-competition-groups.css
           grep -Fq 'CORE Aruba' /tmp/gw001-team-hub.js
           python3 - <<'PY'
           import json
