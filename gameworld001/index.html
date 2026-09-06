@@ -4,46 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fbfaf7">
-  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>GW001 · Road To History</title>
-  <script>
-    if (!location.hash || location.hash === '#') location.replace(`${location.pathname}${location.search}#/overview`);
-    window.__GW001_PENDING_COMPETITION_HASH__ = /^#\/competition\//.test(location.hash) ? location.hash : null;
-    if (window.__GW001_PENDING_COMPETITION_HASH__) {
-      history.replaceState(null, '', `${location.pathname}${location.search}#/competitions`);
-    }
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=BUILD_ID">
-  <link rel="stylesheet" href="./menu.css?v=BUILD_ID">
-  <link rel="stylesheet" href="./competition-detail.css?v=BUILD_ID">
-  <link rel="stylesheet" href="./competition-table.css?v=BUILD_ID">
-  <link rel="stylesheet" href="./competition-groups.css?v=BUILD_ID">
-  <link rel="stylesheet" href="./player-codex.css?v=BUILD_ID">
-  <style>
-    .global-nav{display:none!important}
-    .overview-metrics{display:none!important}
-    .overview-grid .calendar-card,.overview-grid .results-card{display:none!important}
-    .overview-grid{
-      grid-template-areas:
-        "competitions managers"
-        "competitions teamhub"
-        "trophy news"
-        "codex transfers"
-        "chronicle chronicle"!important
-    }
-  </style>
+  <link rel="stylesheet" href="./pilot-theme.css?v=BUILD_ID">
 </head>
 <body>
   <div id="app" class="app" aria-live="polite"></div>
-  <script src="./app.js?v=BUILD_ID"></script>
-  <script src="./menu.js?v=BUILD_ID"></script>
-  <script src="./competition-detail.js?v=BUILD_ID"></script>
-  <script src="./competition-table.js?v=BUILD_ID"></script>
-  <script src="./competition-groups.js?v=BUILD_ID"></script>
-  <script src="./team-hub.js?v=BUILD_ID"></script>
-  <script src="./player-codex.js?v=BUILD_ID"></script>
+  <script src="./config.js?v=BUILD_ID"></script>
+  <script src="./app-core.js?v=BUILD_ID"></script>
 </body>
 </html>

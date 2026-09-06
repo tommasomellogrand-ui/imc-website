@@ -19,22 +19,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Inject GW001 build ID
+      - name: Inject Game World build IDs
         shell: bash
         run: |
           set -euo pipefail
-          sed -i "s/BUILD_ID/${GITHUB_SHA}/g" gameworld001/index.html
-          grep -Fq "app.js?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "menu.js?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "menu.css?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "competition-detail.js?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "competition-detail.css?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "competition-table.js?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "competition-table.css?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "competition-groups.js?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "competition-groups.css?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "player-codex.js?v=${GITHUB_SHA}" gameworld001/index.html
-          grep -Fq "player-codex.css?v=${GITHUB_SHA}" gameworld001/index.html
+          for n in $(seq -w 1 9); do
+            d="gameworld0${n}"
+            sed -i "s/BUILD_ID/${GITHUB_SHA}/g" "$d/index.html"
+            grep -Fq "pilot-theme.css?v=${GITHUB_SHA}" "$d/index.html"
+            grep -Fq "config.js?v=${GITHUB_SHA}" "$d/index.html"
+            grep -Fq "app-core.js?v=${GITHUB_SHA}" "$d/index.html"
+          done
 
       - name: Validate package
         shell: bash
@@ -43,43 +38,19 @@ jobs:
           test -s index.html
           test -s site-assets/css/imc-site.css
           test -s site-assets/js/imc-site.js
-          test -s site-assets/js/world-feed.js
           test -s site-assets/images/imc-logo.png
-          test -s gameworld001/index.html
-          test -s gameworld001/app.js
-          test -s gameworld001/menu.js
-          test -s gameworld001/menu.css
-          test -s gameworld001/competition-detail.js
-          test -s gameworld001/competition-detail.css
-          test -s gameworld001/competition-table.js
-          test -s gameworld001/competition-table.css
-          test -s gameworld001/competition-groups.js
-          test -s gameworld001/competition-groups.css
-          test -s gameworld001/player-codex.js
-          test -s gameworld001/player-codex.css
-          test -s gameworld001/team-hub.js
-          test -s gameworld001/style.css
-          test -s gameworld001/.htaccess
+          for n in $(seq -w 1 9); do
+            d="gameworld0${n}"
+            test -s "$d/index.html"
+            test -s "$d/config.js"
+            test -s "$d/app-core.js"
+            test -s "$d/pilot-theme.css"
+            test -s "$d/.htaccess"
+            grep -Fq "GW0${n}" "$d/config.js"
+          done
           test -s api/imc-gateway/index.php
-          test -s api/imc-gateway/team-hub.php
           test -s api/imc-gateway/config.php
           test -s __imc-gateway/__imc-gateway/index.php
-          grep -Fq 'sm_player_stats' api/imc-gateway/config.php
-          grep -Fq 'schedule_competition_key' api/imc-gateway/index.php
-          grep -Fq 'GW001 · Road To History' gameworld001/index.html
-          grep -Fq './app.js?v=' gameworld001/index.html
-          grep -Fq './menu.js?v=' gameworld001/index.html
-          grep -Fq './menu.css?v=' gameworld001/index.html
-          grep -Fq './competition-detail.js?v=' gameworld001/index.html
-          grep -Fq './competition-detail.css?v=' gameworld001/index.html
-          grep -Fq './competition-table.js?v=' gameworld001/index.html
-          grep -Fq './competition-table.css?v=' gameworld001/index.html
-          grep -Fq './competition-groups.js?v=' gameworld001/index.html
-          grep -Fq './competition-groups.css?v=' gameworld001/index.html
-          grep -Fq './player-codex.js?v=' gameworld001/index.html
-          grep -Fq './player-codex.css?v=' gameworld001/index.html
-          grep -Fq './team-hub.js?v=' gameworld001/index.html
-          grep -Fq './style.css?v=' gameworld001/index.html
 
       - name: Validate Aruba secrets
         env:
@@ -90,7 +61,7 @@ jobs:
           set -euo pipefail
           for name in ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD; do test -n "${!name:-}"; done
 
-      - name: Upload website and GW001 structure
+      - name: Upload website and all Game Worlds
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
@@ -123,27 +94,10 @@ jobs:
           excluded={'site-assets/css/game-world.css','site-assets/css/gameworld-engine.css','site-assets/js/gameworld-engine.js','site-assets/js/imc-data-service.js','site-assets/js/team-hub-detail.js'}
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
-          files += [
-              Path('gameworld001/index.html'),
-              Path('gameworld001/app.js'),
-              Path('gameworld001/menu.js'),
-              Path('gameworld001/menu.css'),
-              Path('gameworld001/competition-detail.js'),
-              Path('gameworld001/competition-detail.css'),
-              Path('gameworld001/competition-table.js'),
-              Path('gameworld001/competition-table.css'),
-              Path('gameworld001/competition-groups.js'),
-              Path('gameworld001/competition-groups.css'),
-              Path('gameworld001/player-codex.js'),
-              Path('gameworld001/player-codex.css'),
-              Path('gameworld001/team-hub.js'),
-              Path('gameworld001/style.css'),
-              Path('gameworld001/.htaccess'),
-              Path('api/imc-gateway/index.php'),
-              Path('api/imc-gateway/team-hub.php'),
-              Path('api/imc-gateway/config.php'),
-              Path('__imc-gateway/__imc-gateway/index.php')
-          ]
+          for i in range(1,10):
+              d=Path(f'gameworld{i:03d}')
+              files += [d/'index.html', d/'config.js', d/'app-core.js', d/'pilot-theme.css', d/'.htaccess']
+          files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('__imc-gateway/__imc-gateway/index.php')]
           for local in files:
               rel=local.as_posix(); parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f"{remote_root.rstrip('/')}/{parent}"
               ensure_dir(dest); data=local.read_bytes()
