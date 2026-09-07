@@ -9,12 +9,12 @@
   const multiLeagueWorlds=new Set(['GW002','GW003','GW007','GW008']);
   const isMultiLeague=()=>multiLeagueWorlds.has(worldId());
   const tabs=[
-    ['goals','Goals',['goals','goal','goals_total','total_goals']],
-    ['assists','Assists',['assists','assist','assists_total','total_assists']],
-    ['rating','Rating',['rating','avg_rating','average_rating','rating_avg']],
-    ['mom','MOM',['mom','motm','man_of_match','man_of_match_count','mom_count']],
-    ['yellow','Yellow',['yellow','yellow_cards','yellow_card','cards_yellow']],
-    ['red','Red',['red','red_cards','red_card','cards_red']]
+    ['goals','Goals','goals'],
+    ['assists','Assists','assists'],
+    ['rating','Rating','avg_rating'],
+    ['mom','MOM','mom'],
+    ['yellow','Yellow','yellow_cards'],
+    ['red','Red','red_cards']
   ];
   let activeMetric='goals';
   let lastRoute='';
@@ -54,23 +54,42 @@
       const p=await r.json().catch(()=>({ok:false,error:'invalid_json'}));
       if(!r.ok||!p?.ok)throw new Error(p?.error||`HTTP ${r.status}`);
       const batch=Array.isArray(p.data)?p.data:[];
-      rows.push(...batch);offset+=batch.length;
+      rows.push(...batch);
+      offset+=batch.length;
       const total=Number(p?.pagination?.total||rows.length);
       if(!batch.length||offset>=total||batch.length<limit)break;
     }
     return rows;
   }
 
+  async function competitionKeys(ctx){
+    const cacheKey=`keys:${worldId()}:${ctx.group}:${ctx.action}:${ctx.country}:${ctx.division}`;
+    if(dataCache.has(cacheKey))return dataCache.get(cacheKey);
+    const [results,schedule]=await Promise.all([
+      readRepo('results').catch(()=>[]),
+      readRepo('schedule').catch(()=>[])
+    ]);
+    const keys=new Set();
+    for(const r of [...results,...schedule]){
+      if(clean(r.sm_action).toLowerCase()!==clean(ctx.action).toLowerCase())continue;
+      if(isMultiLeague()&&upper(r.sm_country)!==upper(ctx.country))continue;
+      if(clean(ctx.action).toLowerCase()==='league'&&clean(r.sm_division).toLowerCase()!==clean(ctx.division).toLowerCase())continue;
+      const key=clean(r.competition_key);
+      if(key)keys.add(key);
+    }
+    dataCache.set(cacheKey,keys);
+    return keys;
+  }
+
   async function statsRows(ctx){
     const cacheKey=`stats:${worldId()}`;
     let rows=dataCache.get(cacheKey);
-    if(!rows){rows=await readRepo('sm_player_stats');dataCache.set(cacheKey,rows);}
-    const action=clean(ctx.action).toLowerCase();
-    const division=clean(ctx.division).toLowerCase();
-    return rows.filter(r=>{
-      if(clean(r.sm_action).toLowerCase()!==action)return false;
-      return clean(r.sm_division).toLowerCase()===division;
-    });
+    if(!rows){
+      rows=await readRepo('sm_player_stats');
+      dataCache.set(cacheKey,rows);
+    }
+    const keys=await competitionKeys(ctx);
+    return rows.filter(r=>keys.has(clean(r.competition_key)));
   }
 
   function ensureStyle(){
@@ -106,22 +125,26 @@
     document.head.appendChild(s);
   }
 
-  function playerName(r){return clean(pick(r,['player_name','name','sm_player_name','player','display_name']))||`Player ${clean(pick(r,['player_id','sm_player_id']))}`;}
-  function clubName(r){return clean(pick(r,['club_name','team_name','sm_club_name','club','team']))||'—';}
-  function appearances(r){return clean(pick(r,['appearances','apps','matches','played','presences','appearances_total']));}
-  function playerImage(r){return clean(pick(r,['player_image_url','image_url','photo_url','player_photo','avatar_url']));}
-  function metricValue(r,metric){const def=tabs.find(([k])=>k===metric);return pick(r,def?.[2]||[]);}
-  function displayValue(v,metric){if(v===''||v===null||v===undefined)return '0';if(metric==='rating'){const n=num(v);return n?n.toFixed(2):'0.00';}return String(v);}
+  function playerName(r){return clean(r.player_name)||`Player ${clean(r.sm_player_id)}`;}
+  function clubName(r){return clean(r.club_name)||'—';}
+  function appearances(r){return clean(r.appearances);}
+  function metricValue(r,metric){const def=tabs.find(([k])=>k===metric);return def?r[def[2]]:'';}
+  function displayValue(v,metric){
+    if(v===''||v===null||v===undefined)return metric==='rating'?'0.00':'0';
+    if(metric==='rating')return num(v).toFixed(2);
+    return String(v);
+  }
 
   function tableHtml(rows,metric){
-    const ranked=rows.map(r=>({r,value:num(metricValue(r,metric))}))
+    const ranked=rows
+      .map(r=>({r,value:num(metricValue(r,metric))}))
       .filter(x=>metric==='rating'?x.value>0:x.value>=0)
       .sort((a,b)=>b.value-a.value||playerName(a.r).localeCompare(playerName(b.r),'it'));
-    if(!ranked.length)return `<div class="competition-stats-empty"><div><strong>NESSUNA STATISTICA</strong><br><span>Nessun dato disponibile per questa SM Action e Division.</span></div></div>`;
+    if(!ranked.length)return `<div class="competition-stats-empty"><div><strong>NESSUNA STATISTICA</strong><br><span>Nessun dato disponibile per la Competition Key selezionata.</span></div></div>`;
     const label=tabs.find(([k])=>k===metric)?.[1]||metric;
     return `<div class="competition-stats-table"><div class="competition-stats-head"><span>Pos</span><span>Player / Club</span><span style="text-align:right">${esc(label)}</span></div>${ranked.map((x,i)=>{
-      const r=x.r,name=playerName(r),img=playerImage(r),initials=name.split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase();
-      return `<div class="competition-stats-row"><div class="competition-stats-pos">${i+1}</div><div class="competition-stats-person">${img?`<img class="competition-stats-avatar" src="${esc(img)}" alt="">`:`<div class="competition-stats-avatar fallback">${esc(initials||'P')}</div>`}<div><div class="competition-stats-name">${esc(name)}</div><div class="competition-stats-club">${esc(clubName(r))}</div>${appearances(r)?`<div class="competition-stats-apps">${esc(appearances(r))} presenze</div>`:''}</div></div><div class="competition-stats-value ${metric==='yellow'?'yellow':metric==='red'?'red':''}">${esc(displayValue(metricValue(r,metric),metric))}</div></div>`;
+      const r=x.r,name=playerName(r),initials=name.split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase();
+      return `<div class="competition-stats-row"><div class="competition-stats-pos">${i+1}</div><div class="competition-stats-person"><div class="competition-stats-avatar fallback">${esc(initials||'P')}</div><div><div class="competition-stats-name">${esc(name)}</div><div class="competition-stats-club">${esc(clubName(r))}</div>${appearances(r)?`<div class="competition-stats-apps">${esc(appearances(r))} presenze</div>`:''}</div></div><div class="competition-stats-value ${metric==='yellow'?'yellow':metric==='red'?'red':''}">${esc(displayValue(metricValue(r,metric),metric))}</div></div>`;
     }).join('')}</div>`;
   }
 
@@ -141,7 +164,7 @@
     if(!host)return;
     ensureStyle();
     host.classList.add('competition-stats-live');
-    host.innerHTML=`<div class="competition-stats-tabs">${tabs.map(([k,l])=>`<button type="button" class="competition-stats-tab ${k===activeMetric?'active':''}" data-metric="${k}" disabled>${l}</button>`).join('')}</div><div class="competition-stats-loading">Caricamento stats · MySQL Aruba</div>`;
+    host.innerHTML=`<div class="competition-stats-tabs">${tabs.map(([k,l])=>`<button type="button" class="competition-stats-tab ${k===activeMetric?'active':''}" disabled>${l}</button>`).join('')}</div><div class="competition-stats-loading">Caricamento stats · MySQL Aruba</div>`;
     try{
       const rows=await statsRows(ctx);
       if(!parseCompetitionRoute())return;
