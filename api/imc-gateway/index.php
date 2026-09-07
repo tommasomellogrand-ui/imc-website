@@ -26,7 +26,7 @@ function out(array $x, int $s = 200): never {
 function valid_gw(string $gw): bool { return (bool)preg_match('/^GW00[1-9]$/', $gw); }
 function valid_identifier(string $value): bool { return (bool)preg_match('/^[A-Za-z0-9_]+$/', $value); }
 function public_gateway_version(): string { return '1.7.0'; }
-function public_core_tables(): array { return ['gw_manager_assignments','imc_managers']; }
+function public_core_tables(): array { return ['gw_manager_assignments','imc_managers','clubs_game_world_id']; }
 
 function competition_group_from_sm_action(mixed $value): ?string {
   $action = strtolower(trim((string)$value));
