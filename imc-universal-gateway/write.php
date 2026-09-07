@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-function imc_transfer_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_transfers$/',$t)===1;}
+function imc_transfer_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Transfer$/',$t)===1;}
 
 function imc_validate_transfer_row(PDO $p,string $t,array $r):array{
     $expected=['game_world_id','imc_transfer_number','player_id','player_name','club_from','from_sm_world_club_id','club_to','to_sm_world_club_id','transfer_date','amount_text','exchange_players','imported_at'];
@@ -9,7 +9,7 @@ function imc_validate_transfer_row(PDO $p,string $t,array $r):array{
     sort($keys);
     $sortedExpected=$expected;
     sort($sortedExpected);
-    if($keys!==$sortedExpected)throw new InvalidArgumentException('invalid_payload:transfers_structure_mismatch');
+    if($keys!==$sortedExpected)throw new InvalidArgumentException('invalid_payload:transfer_structure_mismatch');
     $gw=substr($t,0,5);
     if(strtoupper(trim((string)$r['game_world_id']))!==$gw)throw new InvalidArgumentException('game_world_mismatch');
     $cols=imc_cols($p,$t);
