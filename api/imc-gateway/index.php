@@ -39,7 +39,7 @@ function valid_identifier(string $value): bool {
 }
 
 function public_gateway_version(): string {
-  return '1.5.0';
+  return '1.6.0';
 }
 
 function public_core_tables(): array {
@@ -95,6 +95,43 @@ function schedule_competition_key(string $gw, array $row, ?string $group): strin
   if ($division !== '') $parts[] = $division;
 
   return implode('|', $parts);
+}
+
+function inherit_match_report_identity(PDO $pdo, string $gw, array $row): array {
+  $fixtureId = (int)($row['sm_fixture_id'] ?? 0);
+  if ($fixtureId <= 0) {
+    throw new RuntimeException('match_report_sm_fixture_id_required');
+  }
+
+  $resultsTable = $gw.'_results';
+  $stmt = $pdo->prepare(
+    "SELECT competition_key, sm_action, sm_country, sm_division, competition_group, competition_stage, competition_round FROM `{$resultsTable}` WHERE sm_fixture_id = ? LIMIT 1"
+  );
+  $stmt->execute([$fixtureId]);
+  $identity = $stmt->fetch();
+
+  if (!$identity) {
+    throw new RuntimeException('match_report_results_fixture_not_found');
+  }
+
+  $row['game_world_id'] = $gw;
+  foreach (['competition_key','sm_action','sm_country','sm_division','competition_group','competition_stage','competition_round'] as $field) {
+    $row[$field] = $identity[$field] ?? null;
+  }
+
+  if (trim((string)($row['competition_key'] ?? '')) === '') {
+    throw new RuntimeException('match_report_competition_key_missing_in_results');
+  }
+
+  foreach (['events_json','tactics_json','commentary_json'] as $field) {
+    if (array_key_exists($field, $row) && (is_array($row[$field]) || is_object($row[$field]))) {
+      $encoded = json_encode($row[$field], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+      if ($encoded === false) throw new RuntimeException('match_report_invalid_json');
+      $row[$field] = $encoded;
+    }
+  }
+
+  return $row;
 }
 
 function discover_world_tables(PDO $pdo, string $gw): array {
@@ -415,7 +452,9 @@ try {
         $group = schedule_competition_group_from_sm_action($row['sm_action'] ?? null);
         $row['competition_group'] = $group;
         $row['competition_key'] = schedule_competition_key($gw, $row, $group);
-      } elseif (in_array($repo, ['results','match_report'], true)) {
+      } elseif ($repo === 'match_report') {
+        $row = inherit_match_report_identity($pdo, $gw, $row);
+      } elseif ($repo === 'results') {
         $row['competition_group'] = competition_group_from_sm_action($row['sm_action'] ?? null);
       }
 
