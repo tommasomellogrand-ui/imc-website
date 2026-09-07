@@ -1,4 +1,4 @@
-# Redeploy trigger 2026-09-07
+# Redeploy trigger 2026-09-07 IMC Schedule
 name: Deploy IMC Database Manager to Aruba
 
 on:
