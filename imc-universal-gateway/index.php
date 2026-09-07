@@ -7,6 +7,31 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
 $privateConfig = dirname(__DIR__) . '/__imc_private_gateway/config.php';
 $connected = is_file($privateConfig);
 
+$channels = ['IMPORT', 'CHATGPT'];
+
+$capabilityFamilies = [
+    'ROUTING',
+    'READ',
+    'SCHEMA',
+    'QUERY',
+    'WRITE',
+    'DELETE',
+    'DDL',
+    'TRANSACTIONS',
+    'VALIDATION',
+    'AUDIT',
+    'LOG',
+    'RESPONSE'
+];
+
+$databaseManager = [
+    'service' => 'IMC Database Manager',
+    'path' => '/imc-database-manager/',
+    'relationship' => 'peer',
+    'communication' => 'bidirectional',
+    'authoritative_for_own_role_and_capabilities' => true
+];
+
 $destinations = [
     'GW001' => ['database' => 'Sql1956795_3', 'game_world_type' => 'SINGLE_LEAGUE', 'schedule' => 'GW001_schedule', 'results' => 'GW001_results', 'match_report' => 'GW001_match_report', 'player_codex' => 'GW001_player_codex', 'transfers' => 'GW001_transfers', 'sm_players_stats' => 'GW001_sm_players_stats'],
     'GW002' => ['database' => 'Sql1956795_2', 'game_world_type' => 'MULTI_LEAGUE', 'schedule' => 'GW002_schedule', 'results' => 'GW002_results', 'match_report' => 'GW002_match_report', 'player_codex' => 'GW002_player_codex', 'transfers' => 'GW002_transfers', 'sm_players_stats' => 'GW002_sm_players_stats'],
@@ -19,10 +44,44 @@ $destinations = [
     'GW009' => ['database' => 'Sql1956795_3', 'game_world_type' => 'SINGLE_LEAGUE', 'schedule' => 'GW009_schedule', 'results' => 'GW009_results', 'match_report' => 'GW009_match_report', 'player_codex' => 'GW009_player_codex', 'transfers' => 'GW009_transfers', 'sm_players_stats' => 'GW009_sm_players_stats'],
 ];
 
+function readPeerStatus(string $relativePath): array
+{
+    $absolutePath = dirname(__DIR__) . $relativePath . 'index.php';
+    if (!is_file($absolutePath)) {
+        return ['reachable' => false, 'status' => 'unavailable'];
+    }
+
+    $raw = @file_get_contents($absolutePath);
+    if ($raw === false) {
+        return ['reachable' => false, 'status' => 'unavailable'];
+    }
+
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) {
+        return ['reachable' => false, 'status' => 'invalid_response'];
+    }
+
+    return [
+        'reachable' => true,
+        'service' => $decoded['service'] ?? null,
+        'status' => $decoded['status'] ?? null,
+        'version' => $decoded['version'] ?? null,
+        'role_version' => $decoded['role_version'] ?? null,
+        'current_role' => $decoded['current_role'] ?? null,
+        'capabilities' => $decoded['capabilities'] ?? []
+    ];
+}
+
+$databaseManagerStatus = readPeerStatus('/imc-database-manager/');
+
 http_response_code($connected ? 200 : 503);
 
 echo json_encode([
     'ok' => $connected,
     'service' => 'IMC Universal Gateway',
-    'status' => $connected ? 'connected' : 'not_connected'
+    'status' => $connected ? 'connected' : 'not_connected',
+    'version' => '1.0.0',
+    'channels' => $channels,
+    'capability_families' => $capabilityFamilies,
+    'database_manager' => array_merge($databaseManager, ['live_status' => $databaseManagerStatus])
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
