@@ -1,6 +1,36 @@
 <?php
 declare(strict_types=1);
-function imc_insert(PDO$p,string$t,array$r,bool$up=false):int{$r=imc_row($p,$t,$r);if(!$r)throw new InvalidArgumentException('required_field_missing');$c=array_keys($r);$q='INSERT INTO '.imc_ident($t).' ('.implode(',',array_map('imc_ident',$c)).') VALUES ('.implode(',',array_fill(0,count($c),'?')).')';if($up)$q.=' ON DUPLICATE KEY UPDATE '.implode(',',array_map(fn($x)=>imc_ident($x).'=VALUES('.imc_ident($x).')',$c));$s=$p->prepare($q);$s->execute(array_values($r));return$s->rowCount();}
+
+function imc_transfer_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_transfers$/',$t)===1;}
+
+function imc_validate_transfer_row(PDO $p,string $t,array $r):array{
+    $expected=['game_world_id','imc_transfer_number','player_id','player_name','club_from','from_sm_world_club_id','club_to','to_sm_world_club_id','transfer_date','amount_text','exchange_players','imported_at'];
+    $keys=array_keys($r);
+    sort($keys);
+    $sortedExpected=$expected;
+    sort($sortedExpected);
+    if($keys!==$sortedExpected)throw new InvalidArgumentException('invalid_payload:transfers_structure_mismatch');
+    $gw=substr($t,0,5);
+    if(strtoupper(trim((string)$r['game_world_id']))!==$gw)throw new InvalidArgumentException('game_world_mismatch');
+    $cols=imc_cols($p,$t);
+    foreach($expected as$k){
+        if(!isset($cols[$k]))throw new InvalidArgumentException('column_not_found:'.$k);
+        imc_validate_import_value($k,$r[$k],$cols[$k]);
+    }
+    return imc_row($p,$t,$r);
+}
+
+function imc_insert(PDO$p,string$t,array$r,bool$up=false):int{
+    $r=imc_transfer_table($t)?imc_validate_transfer_row($p,$t,$r):imc_row($p,$t,$r);
+    if(!$r)throw new InvalidArgumentException('required_field_missing');
+    $c=array_keys($r);
+    $q='INSERT INTO '.imc_ident($t).' ('.implode(',',array_map('imc_ident',$c)).') VALUES ('.implode(',',array_fill(0,count($c),'?')).')';
+    if($up)$q.=' ON DUPLICATE KEY UPDATE '.implode(',',array_map(fn($x)=>imc_ident($x).'=VALUES('.imc_ident($x).')',$c));
+    $s=$p->prepare($q);
+    $s->execute(array_values($r));
+    return$s->rowCount();
+}
+
 function imc_write_action(string$a,array$b,array$r,?string$t,PDO$p,array$B):bool{if(!$t)return false;
 if(in_array($a,['insert','upsert'],true)){$n=imc_insert($p,$t,$b['row']??[],$a==='upsert');imc_log($r,$a,$t,['affected_rows'=>$n]);imc_out($B+['inserted_rows'=>$n,'last_insert_id'=>$p->lastInsertId()]);}
 if(in_array($a,['insert_many','upsert_many'],true)){$rows=$b['rows']??[];if(!is_array($rows)||!$rows)throw new InvalidArgumentException('required_field_missing');$atomic=($b['atomic']??true)!==false;$n=0;if($atomic)$p->beginTransaction();try{foreach($rows as$row)$n+=imc_insert($p,$t,$row,$a==='upsert_many');if($atomic)$p->commit();}catch(Throwable$e){if($p->inTransaction())$p->rollBack();throw$e;}imc_log($r,$a,$t,['affected_rows'=>$n]);imc_out($B+['received'=>count($rows),'inserted'=>$n,'failed'=>0,'rolled_back'=>false,'errors'=>[]]);}
