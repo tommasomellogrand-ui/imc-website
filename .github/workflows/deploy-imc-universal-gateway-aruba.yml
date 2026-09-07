@@ -26,9 +26,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -s imc-universal-gateway/index.php
+          for f in index.php core.php read.php write.php ddl.php; do test -s "imc-universal-gateway/$f"; done
+          for f in imc-universal-gateway/*.php; do php -l "$f"; done
 
-      - name: Deploy only IMC Universal Gateway
+      - name: Deploy complete IMC Universal Gateway
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
@@ -38,50 +39,29 @@ jobs:
           import io, os, ssl, time
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
-
-          host='ftp.italianmastersclub.it'
-          port=21
-          username=os.environ['ARUBA_FTP_USERNAME']
-          password=os.environ['ARUBA_FTP_PASSWORD']
+          host='ftp.italianmastersclub.it'; port=21
+          username=os.environ['ARUBA_FTP_USERNAME']; password=os.environ['ARUBA_FTP_PASSWORD']
           remote_dir='/www.italianmastersclub.it/imc-universal-gateway'
-          local=Path('imc-universal-gateway/index.php')
-
-          ctx=ssl.create_default_context()
-          ctx.check_hostname=False
-          ftp=None
-          last_error=None
+          files=[Path('imc-universal-gateway')/n for n in ['index.php','core.php','read.php','write.php','ddl.php']]
+          ctx=ssl.create_default_context(); ctx.check_hostname=False; ftp=None; last_error=None
           for _ in range(3):
               c=FTP_TLS(context=ctx)
               try:
-                  c.connect(host,port,timeout=60)
-                  c.login(username,password)
-                  c.prot_p()
-                  c.set_pasv(True)
-                  ftp=c
-                  break
+                  c.connect(host,port,timeout=60); c.login(username,password); c.prot_p(); c.set_pasv(True); ftp=c; break
               except Exception as e:
                   last_error=e
                   try: c.close()
                   except Exception: pass
                   time.sleep(5)
-          if ftp is None:
-              raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}: {last_error}')
-
+          if ftp is None: raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}: {last_error}')
           ftp.cwd('/')
           for part in [p for p in remote_dir.split('/') if p]:
-              try:
-                  ftp.cwd(part)
-              except error_perm:
-                  ftp.mkd(part)
-                  ftp.cwd(part)
-
-          data=local.read_bytes()
-          with local.open('rb') as fh:
-              ftp.storbinary('STOR index.php',fh)
-          check=io.BytesIO()
-          ftp.retrbinary('RETR index.php',check.write)
-          if check.getvalue()!=data:
-              raise SystemExit('Verifica upload fallita: imc-universal-gateway/index.php')
-          ftp.quit()
-          print('IMC Universal Gateway pubblicato e verificato')
+              try: ftp.cwd(part)
+              except error_perm: ftp.mkd(part); ftp.cwd(part)
+          for local in files:
+              data=local.read_bytes()
+              with local.open('rb') as fh: ftp.storbinary('STOR '+local.name,fh)
+              check=io.BytesIO(); ftp.retrbinary('RETR '+local.name,check.write)
+              if check.getvalue()!=data: raise SystemExit('Verifica upload fallita: '+local.name)
+          ftp.quit(); print('IMC Universal Gateway completo pubblicato e verificato')
           PY
