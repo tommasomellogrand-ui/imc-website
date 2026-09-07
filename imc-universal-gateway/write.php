@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-function imc_transfer_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Transfers$/',$t)===1;}
+function imc_transfer_table(string $t):bool{return preg_match('/^GW00[1-9]_IMC Transfer$/',$t)===1;}
 function imc_match_report_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Match Report$/',$t)===1;}
 function imc_player_codex_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Player Codex$/',$t)===1;}
 
