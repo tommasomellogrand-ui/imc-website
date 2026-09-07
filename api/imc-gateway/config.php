@@ -9,32 +9,31 @@ if (!is_file($private)) {
 
 $cfg = require $private;
 
-$cfg['repositories'] = array_values(array_unique(array_merge(
-    $cfg['repositories'] ?? [],
-    [
-        'clubs',
-        'competition',
-        'managers',
-        'match_report',
-        'match_report_commentary',
-        'match_report_events',
-        'match_report_players',
-        'match_report_tactics',
-        'match_report_team_stats',
-        'news_feed',
-        'player_codex',
-        'player_codex_injury_history',
-        'player_codex_rating_history',
-        'player_codex_roster',
-        'player_codex_snapshots',
-        'player_codex_stats',
-        'player_codex_transfer_history',
-        'results',
-        'schedule',
-        'sm_player_stats',
-        'transfers',
-        'trophy_room',
-    ]
-)));
+// Whitelist POST autoritativa: esclusivamente repository GW fisicamente presenti
+// e verificati su Sql1956795_2 / Sql1956795_3.
+$cfg['repositories'] = [
+    'clubs',
+    'competition',
+    'managers',
+    'match_report',
+    'match_report_commentary',
+    'match_report_events',
+    'match_report_players',
+    'match_report_tactics',
+    'match_report_team_stats',
+    'news_feed',
+    'player_codex',
+    'player_codex_injury_history',
+    'player_codex_rating_history',
+    'player_codex_roster',
+    'player_codex_snapshots',
+    'player_codex_stats',
+    'player_codex_transfer_history',
+    'results',
+    'schedule',
+    'sm_player_stats',
+    'transfers',
+    'trophy_room',
+];
 
 return $cfg;
