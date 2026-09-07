@@ -1,3 +1,4 @@
+# Restore trigger for IMC Schedule
 name: Restore IMC private DB config v3
 on:
   push:
