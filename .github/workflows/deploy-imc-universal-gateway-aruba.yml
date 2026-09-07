@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'imc-universal-gateway/**'
+      - '__imc_private_gateway/**'
       - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
   workflow_dispatch:
 
@@ -27,7 +28,9 @@ jobs:
         run: |
           set -euo pipefail
           for f in index.php core.php read.php write.php ddl.php; do test -s "imc-universal-gateway/$f"; done
-          for f in imc-universal-gateway/*.php; do php -l "$f"; done
+          test -s "__imc_private_gateway/config.php"
+          test -s "__imc_private_gateway/.htaccess"
+          for f in imc-universal-gateway/*.php __imc_private_gateway/config.php; do php -l "$f"; done
 
       - name: Deploy complete IMC Universal Gateway
         env:
@@ -41,8 +44,15 @@ jobs:
           from pathlib import Path
           host='ftp.italianmastersclub.it'; port=21
           username=os.environ['ARUBA_FTP_USERNAME']; password=os.environ['ARUBA_FTP_PASSWORD']
-          remote_dir='/www.italianmastersclub.it/imc-universal-gateway'
-          files=[Path('imc-universal-gateway')/n for n in ['index.php','core.php','read.php','write.php','ddl.php']]
+          remote_root='/www.italianmastersclub.it'
+          uploads=[
+              (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
+              for n in ['index.php','core.php','read.php','write.php','ddl.php']
+          ]
+          uploads += [
+              (Path('__imc_private_gateway/config.php'), f'{remote_root}/__imc_private_gateway'),
+              (Path('__imc_private_gateway/.htaccess'), f'{remote_root}/__imc_private_gateway'),
+          ]
           ctx=ssl.create_default_context(); ctx.check_hostname=False; ftp=None; last_error=None
           for _ in range(3):
               c=FTP_TLS(context=ctx)
@@ -54,14 +64,16 @@ jobs:
                   except Exception: pass
                   time.sleep(5)
           if ftp is None: raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}: {last_error}')
-          ftp.cwd('/')
-          for part in [p for p in remote_dir.split('/') if p]:
-              try: ftp.cwd(part)
-              except error_perm: ftp.mkd(part); ftp.cwd(part)
-          for local in files:
+          def ensure_dir(remote_dir):
+              ftp.cwd('/')
+              for part in [p for p in remote_dir.split('/') if p]:
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
+          for local, remote_dir in uploads:
+              ensure_dir(remote_dir)
               data=local.read_bytes()
               with local.open('rb') as fh: ftp.storbinary('STOR '+local.name,fh)
               check=io.BytesIO(); ftp.retrbinary('RETR '+local.name,check.write)
-              if check.getvalue()!=data: raise SystemExit('Verifica upload fallita: '+local.name)
-          ftp.quit(); print('IMC Universal Gateway completo pubblicato e verificato')
+              if check.getvalue()!=data: raise SystemExit('Verifica upload fallita: '+local.as_posix())
+          ftp.quit(); print('IMC Universal Gateway completo, configurazione privata inclusa, pubblicato e verificato')
           PY
