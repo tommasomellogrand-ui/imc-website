@@ -53,6 +53,7 @@ jobs:
           test -s api/imc-gateway/index.php
           test -s api/imc-gateway/config.php
           test -s __imc-gateway/__imc-gateway/index.php
+          test -s __imc-sm-master/admin/database-manager/normalizer.php
 
       - name: Validate Aruba secrets
         env:
@@ -99,7 +100,7 @@ jobs:
           for i in range(1,10):
               d=Path(f'gameworld{i:03d}')
               files += [d/'index.html', d/'config.js', d/'app-core.js', d/'pilot-theme.css', d/'.htaccess']
-          files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('__imc-gateway/__imc-gateway/index.php')]
+          files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('__imc-gateway/__imc-gateway/index.php'),Path('__imc-sm-master/admin/database-manager/normalizer.php')]
           for local in files:
               rel=local.as_posix(); parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f"{remote_root.rstrip('/')}/{parent}"
               ensure_dir(dest); data=local.read_bytes()

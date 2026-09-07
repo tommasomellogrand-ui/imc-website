@@ -75,12 +75,27 @@ try {
       $count++;
     }
     $pdo->commit();
+
+    $normalization=['ok'=>true,'status'=>'not_applicable','normalized'=>0,'unresolved'=>0];
+    $normalizerFile=dirname(__DIR__,2).'/__imc-sm-master/admin/database-manager/normalizer.php';
+    if (is_file($normalizerFile)) {
+      try {
+        require_once $normalizerFile;
+        if (function_exists('imc_normalize_repository_pdo')) $normalization=imc_normalize_repository_pdo($pdo,$gw,$repo);
+      } catch(Throwable $normalizerError) {
+        $normalization=['ok'=>false,'status'=>'failed','error'=>$normalizerError->getMessage()];
+      }
+    } else {
+      $normalization=['ok'=>false,'status'=>'unavailable','error'=>'normalizer_not_found'];
+    }
+
     out([
       'ok'=>true,
       'action'=>'insert_many',
       'table'=>$table,
       'inserted'=>$count,
-      'ignored_columns'=>array_values(array_keys($ignoredColumns))
+      'ignored_columns'=>array_values(array_keys($ignoredColumns)),
+      'normalization'=>$normalization
     ]);
   }
   if ($action==='delete') {
