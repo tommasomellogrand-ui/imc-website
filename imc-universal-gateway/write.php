@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 function imc_transfer_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Transfers$/',$t)===1;}
 function imc_match_report_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Match Report$/',$t)===1;}
+function imc_player_codex_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Player Codex$/',$t)===1;}
 
 function imc_validate_transfer_row(PDO $p,string $t,array $r):array{
     $expected=['game_world_id','imc_transfer_number','player_id','player_name','club_from','from_sm_world_club_id','club_to','to_sm_world_club_id','transfer_date','amount_text','exchange_players','imported_at'];
@@ -26,9 +27,19 @@ function imc_validate_match_report_row(PDO $p,string $t,array $r):array{
     return imc_row($p,$t,$r);
 }
 
+function imc_validate_player_codex_row(PDO $p,string $t,array $r):array{
+    $expected=['player_id','full_name','nationality','position','rating','market_value','age','date_of_birth','height_cm','weight_kg','foot','current_club','current_sm_club_id','real_club','salary','contract_seasons','image_url','rating_history','transfer_history','imported_at'];
+    $keys=array_keys($r); sort($keys); $sortedExpected=$expected; sort($sortedExpected);
+    if($keys!==$sortedExpected)throw new InvalidArgumentException('invalid_payload:player_codex_structure_mismatch');
+    $cols=imc_cols($p,$t);
+    foreach($expected as$k){if(!isset($cols[$k]))throw new InvalidArgumentException('column_not_found:'.$k);imc_validate_import_value($k,$r[$k],$cols[$k]);}
+    return imc_row($p,$t,$r);
+}
+
 function imc_insert(PDO$p,string$t,array$r,bool$up=false):int{
     if(imc_transfer_table($t))$r=imc_validate_transfer_row($p,$t,$r);
     elseif(imc_match_report_table($t))$r=imc_validate_match_report_row($p,$t,$r);
+    elseif(imc_player_codex_table($t))$r=imc_validate_player_codex_row($p,$t,$r);
     else $r=imc_row($p,$t,$r);
     if(!$r)throw new InvalidArgumentException('required_field_missing');
     $c=array_keys($r);
