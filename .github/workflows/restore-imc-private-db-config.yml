@@ -1,0 +1,61 @@
+name: Restore IMC private DB config
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/restore-imc-private-db-config.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    env:
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+      ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+    steps:
+      - name: Create private runtime config
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, os, secrets, pathlib
+          def b64(v): return base64.b64encode(v.encode()).decode()
+          token=secrets.token_urlsafe(36)
+          cfg=f'''<?php\ndeclare(strict_types=1);\nreturn [\n  'db' => [\n    'host' => base64_decode('{b64(os.environ["MYSQL_HOST"])}'),\n    'database' => base64_decode('{b64(os.environ["MYSQL_DATABASE"])}'),\n    'user' => base64_decode('{b64(os.environ["MYSQL_USERNAME"])}'),\n    'password' => base64_decode('{b64(os.environ["MYSQL_PASSWORD"])}'),\n  ],\n  'admin_token' => base64_decode('{b64(token)}'),\n];\n'''
+          pathlib.Path('/tmp/imc-private').mkdir(parents=True,exist_ok=True)
+          pathlib.Path('/tmp/imc-private/config.php').write_text(cfg,encoding='utf-8')
+          pathlib.Path('/tmp/imc-private/.htaccess').write_text('Options -Indexes\nRequire all denied\n',encoding='utf-8')
+          PY
+
+      - name: Upload private runtime config to Aruba
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import io, os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          ftp=FTP_TLS(context=ssl.create_default_context())
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True)
+          path='/www.italianmastersclub.it/__imc_private_sm_master'
+          ftp.cwd('/')
+          for part in [p for p in path.split('/') if p]:
+              try: ftp.cwd(part)
+              except error_perm: ftp.mkd(part); ftp.cwd(part)
+          for name in ('config.php','.htaccess'):
+              local=Path('/tmp/imc-private')/name
+              data=local.read_bytes()
+              with local.open('rb') as fh: ftp.storbinary('STOR '+name,fh)
+              check=io.BytesIO(); ftp.retrbinary('RETR '+name,check.write)
+              if check.getvalue()!=data: raise SystemExit('verification failed '+name)
+          ftp.quit()
+          PY
