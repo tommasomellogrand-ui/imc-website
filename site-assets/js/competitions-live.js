@@ -16,6 +16,7 @@
   const countrySelection={};
   let cache=null;
   let rawResults=[];
+  let rawSchedule=[];
 
   const pick=(row,names)=>{for(const n of names){const v=row?.[n];if(v!==undefined&&v!==null&&String(v)!=='')return v;}return '';};
   const labelAction=a=>({league:'League',leaguecup:'League Cup',leagueshield:'League Shield',charityshield:'Charity Shield',playoff:'Playoff',smfacup:'SMFA Champions',smfashield:'SMFA Shield',supercup:'SMFA Super Cup',interqualifier:'World Cup Qualifier',worldcup:'World Cup'})[clean(a).toLowerCase()]||clean(a).replace(/[_-]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
@@ -39,6 +40,7 @@
     if(cache)return cache;
     const [results,schedule]=await Promise.all([readRepo('results').catch(()=>[]),readRepo('schedule').catch(()=>[])]);
     rawResults=results;
+    rawSchedule=schedule;
     const all=[...results.map(r=>({...r,__source:'results'})),...schedule.map(r=>({...r,__source:'schedule'}))];
     const out={DOMESTIC:new Map(),INTERNATIONAL:new Map(),NATIONS:new Map()};
     for(const r of all){
@@ -66,13 +68,14 @@
   function findItem(data,d){const values=[...data[d.group].values()];return values.find(x=>clean(x.action).toLowerCase()===clean(d.action).toLowerCase()&&(!isMultiLeague()||upper(x.country)===upper(d.country))&&(clean(d.action).toLowerCase()!=='league'||clean(x.division).toLowerCase()===clean(d.division).toLowerCase()))||null;}
 
   const rowDate=r=>clean(pick(r,['match_date','fixture_date','date','sm_date','played_at','kickoff_date']));
+  const rowTime=r=>clean(pick(r,['match_time','fixture_time','time','kickoff_time','sm_time']));
   const rowDay=r=>clean(pick(r,['sm_matchday','matchday','match_day','round','sm_round','turn','match_number']));
   const homeName=r=>clean(pick(r,['home_name','home_team_name','home_club_name','home_team','home']));
   const awayName=r=>clean(pick(r,['away_name','away_team_name','away_club_name','away_team','away']));
   const homeScore=r=>pick(r,['home_score','home_goals','score_home','home_result']);
   const awayScore=r=>pick(r,['away_score','away_goals','score_away','away_result']);
   const scoreText=r=>{const hs=homeScore(r),as=awayScore(r);if(hs!==''&&as!=='')return `${hs} - ${as}`;return clean(pick(r,['score','result','final_score','result_score']))||'—';};
-  function dateLabel(v){if(!v)return 'RISULTATI';const d=new Date(v);if(Number.isNaN(d.getTime()))return v;return new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'short',year:'numeric'}).format(d).toUpperCase();}
+  function dateLabel(v){if(!v)return 'MATCH';const d=new Date(v);if(Number.isNaN(d.getTime()))return v;return new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'short',year:'numeric'}).format(d).toUpperCase();}
   function resultsPanel(item){
     const keys=new Set([...(item?.competitionKeys||[])].map(clean).filter(Boolean));
     const rows=rawResults.filter(r=>keys.has(clean(r.competition_key)));
@@ -81,12 +84,20 @@
     const buckets=new Map();for(const r of rows){const key=`${rowDate(r)}|${rowDay(r)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(r);}
     return `<div class="competition-results">${[...buckets.entries()].map(([k,rs])=>{const [date,day]=k.split('|');const title=[dateLabel(date),day?`MATCH ${day}`:''].filter(Boolean).join(' · ');return `<section class="competition-results-block"><div class="competition-results-head">${esc(title)}</div>${rs.map(r=>`<div class="competition-result-row"><div class="competition-result-team">${esc(homeName(r)||'Home')}</div><div class="competition-result-score">${esc(scoreText(r))}</div><div class="competition-result-team away">${esc(awayName(r)||'Away')}</div>${clean(r.competition_key)?`<div class="competition-result-meta">${esc(r.competition_key)}</div>`:''}</div>`).join('')}</section>`;}).join('')}</div>`;
   }
+  function schedulePanel(item){
+    const keys=new Set([...(item?.competitionKeys||[])].map(clean).filter(Boolean));
+    const rows=rawSchedule.filter(r=>keys.has(clean(r.competition_key)));
+    rows.sort((a,b)=>{const da=new Date(rowDate(a)||'2999-12-31').getTime(),db=new Date(rowDate(b)||'2999-12-31').getTime();if(da!==db)return da-db;return Number(rowDay(a)||0)-Number(rowDay(b)||0);});
+    if(!rows.length)return `<div class="competition-empty"><strong>NESSUNA SCHEDULE</strong><span>Nessun record del repository Schedule collegato alla Competition Key selezionata.</span></div>`;
+    const buckets=new Map();for(const r of rows){const key=`${rowDate(r)}|${rowDay(r)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(r);}
+    return `<div class="competition-results">${[...buckets.entries()].map(([k,rs])=>{const [date,day]=k.split('|');const title=[dateLabel(date),day?`MATCH ${day}`:''].filter(Boolean).join(' · ');return `<section class="competition-results-block"><div class="competition-results-head">${esc(title)}</div>${rs.map(r=>`<div class="competition-result-row"><div class="competition-result-team">${esc(homeName(r)||'Home')}</div><div class="competition-result-score">${esc(rowTime(r)||'VS')}</div><div class="competition-result-team away">${esc(awayName(r)||'Away')}</div>${clean(r.competition_key)?`<div class="competition-result-meta">${esc(r.competition_key)}</div>`:''}</div>`).join('')}</section>`;}).join('')}</div>`;
+  }
 
   function detailPage(d,item){
     const isLeague=clean(d.action).toLowerCase()==='league',title=isLeague&&d.division?`${labelAction(d.action)} · Division ${d.division}`:labelAction(d.action),subtitle=[d.group,d.country||null,isLeague&&d.division?`Div ${d.division}`:null].filter(Boolean).join(' · ');
     const base=['#/competitions',d.group.toLowerCase(),part(d.action)];if(isMultiLeague()&&d.country)base.push(part(d.country));if(isLeague)base.push(part(d.division||'no-division'));const baseHref=base.join('/');
     const tabs=detailTabs.map(([k,l])=>`<a class="competition-detail-tab ${k===d.tab?'active':''}" href="${baseHref}/${k}">${l}</a>`).join('');
-    const content=d.tab==='results'?resultsPanel(item):`<div class="competition-tab-panel"><div><strong>${esc(detailTabs.find(([k])=>k===d.tab)?.[1]||'Overview')}</strong><p>Sezione pronta per i dati della competizione selezionata.</p></div></div>`;
+    const content=d.tab==='results'?resultsPanel(item):d.tab==='schedule'?schedulePanel(item):`<div class="competition-tab-panel"><div><strong>${esc(detailTabs.find(([k])=>k===d.tab)?.[1]||'Overview')}</strong><p>Sezione pronta per i dati della competizione selezionata.</p></div></div>`;
     return `${head('Competitions',`#/competitions/${d.group.toLowerCase()}`)}<section class="competitions-live"><div class="competition-shell-head"><a class="competition-shell-back" href="#/competitions/${d.group.toLowerCase()}" aria-label="Indietro">←</a><div class="competition-shell-copy"><small>${esc(worldId())}</small><h3>${esc(title)}</h3><p>${esc(subtitle)}</p></div><div class="competition-shell-trophy">♜</div></div><nav class="competition-detail-tabs">${tabs}</nav>${content}</section>`;
   }
 
