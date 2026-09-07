@@ -1,87 +1,53 @@
 <?php
 declare(strict_types=1);
-
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
-
-$privateConfig = dirname(__DIR__) . '/__imc_private_gateway/config.php';
-$connected = is_file($privateConfig);
-
-$channels = ['IMPORT', 'CHATGPT'];
-
-$capabilityFamilies = [
-    'ROUTING',
-    'READ',
-    'SCHEMA',
-    'QUERY',
-    'WRITE',
-    'DELETE',
-    'DDL',
-    'TRANSACTIONS',
-    'VALIDATION',
-    'AUDIT',
-    'LOG',
-    'RESPONSE'
-];
-
-$databaseManager = [
-    'service' => 'IMC Database Manager',
-    'path' => '/imc-database-manager/',
-    'relationship' => 'peer',
-    'communication' => 'bidirectional',
-    'authoritative_for_own_role_and_capabilities' => true
-];
-
-$destinations = [
-    'GW001' => ['database' => 'Sql1956795_3', 'game_world_type' => 'SINGLE_LEAGUE', 'schedule' => 'GW001_schedule', 'results' => 'GW001_results', 'match_report' => 'GW001_match_report', 'player_codex' => 'GW001_player_codex', 'transfers' => 'GW001_transfers', 'sm_players_stats' => 'GW001_sm_players_stats'],
-    'GW002' => ['database' => 'Sql1956795_2', 'game_world_type' => 'MULTI_LEAGUE', 'schedule' => 'GW002_schedule', 'results' => 'GW002_results', 'match_report' => 'GW002_match_report', 'player_codex' => 'GW002_player_codex', 'transfers' => 'GW002_transfers', 'sm_players_stats' => 'GW002_sm_players_stats'],
-    'GW003' => ['database' => 'Sql1956795_2', 'game_world_type' => 'MULTI_LEAGUE', 'schedule' => 'GW003_schedule', 'results' => 'GW003_results', 'match_report' => 'GW003_match_report', 'player_codex' => 'GW003_player_codex', 'transfers' => 'GW003_transfers', 'sm_players_stats' => 'GW003_sm_players_stats'],
-    'GW004' => ['database' => 'Sql1956795_3', 'game_world_type' => 'SINGLE_LEAGUE', 'schedule' => 'GW004_schedule', 'results' => 'GW004_results', 'match_report' => 'GW004_match_report', 'player_codex' => 'GW004_player_codex', 'transfers' => 'GW004_transfers', 'sm_players_stats' => 'GW004_sm_players_stats'],
-    'GW005' => ['database' => 'Sql1956795_3', 'game_world_type' => 'SINGLE_LEAGUE', 'schedule' => 'GW005_schedule', 'results' => 'GW005_results', 'match_report' => 'GW005_match_report', 'player_codex' => 'GW005_player_codex', 'transfers' => 'GW005_transfers', 'sm_players_stats' => 'GW005_sm_players_stats'],
-    'GW006' => ['database' => 'Sql1956795_3', 'game_world_type' => 'SINGLE_LEAGUE', 'schedule' => 'GW006_schedule', 'results' => 'GW006_results', 'match_report' => 'GW006_match_report', 'player_codex' => 'GW006_player_codex', 'transfers' => 'GW006_transfers', 'sm_players_stats' => 'GW006_sm_players_stats'],
-    'GW007' => ['database' => 'Sql1956795_2', 'game_world_type' => 'MULTI_LEAGUE', 'schedule' => 'GW007_schedule', 'results' => 'GW007_results', 'match_report' => 'GW007_match_report', 'player_codex' => 'GW007_player_codex', 'transfers' => 'GW007_transfers', 'sm_players_stats' => 'GW007_sm_players_stats'],
-    'GW008' => ['database' => 'Sql1956795_2', 'game_world_type' => 'MULTI_LEAGUE', 'schedule' => 'GW008_schedule', 'results' => 'GW008_results', 'match_report' => 'GW008_match_report', 'player_codex' => 'GW008_player_codex', 'transfers' => 'GW008_transfers', 'sm_players_stats' => 'GW008_sm_players_stats'],
-    'GW009' => ['database' => 'Sql1956795_3', 'game_world_type' => 'SINGLE_LEAGUE', 'schedule' => 'GW009_schedule', 'results' => 'GW009_results', 'match_report' => 'GW009_match_report', 'player_codex' => 'GW009_player_codex', 'transfers' => 'GW009_transfers', 'sm_players_stats' => 'GW009_sm_players_stats'],
-];
-
-function readPeerStatus(string $relativePath): array
-{
-    $absolutePath = dirname(__DIR__) . $relativePath . 'index.php';
-    if (!is_file($absolutePath)) {
-        return ['reachable' => false, 'status' => 'unavailable'];
-    }
-
-    $raw = @file_get_contents($absolutePath);
-    if ($raw === false) {
-        return ['reachable' => false, 'status' => 'unavailable'];
-    }
-
-    $decoded = json_decode($raw, true);
-    if (!is_array($decoded)) {
-        return ['reachable' => false, 'status' => 'invalid_response'];
-    }
-
-    return [
-        'reachable' => true,
-        'service' => $decoded['service'] ?? null,
-        'status' => $decoded['status'] ?? null,
-        'version' => $decoded['version'] ?? null,
-        'role_version' => $decoded['role_version'] ?? null,
-        'current_role' => $decoded['current_role'] ?? null,
-        'capabilities' => $decoded['capabilities'] ?? []
-    ];
-}
-
-$databaseManagerStatus = readPeerStatus('/imc-database-manager/');
-
-http_response_code($connected ? 200 : 503);
-
-echo json_encode([
-    'ok' => $connected,
-    'service' => 'IMC Universal Gateway',
-    'status' => $connected ? 'connected' : 'not_connected',
-    'version' => '1.0.0',
-    'channels' => $channels,
-    'capability_families' => $capabilityFamilies,
-    'database_manager' => array_merge($databaseManager, ['live_status' => $databaseManagerStatus])
-], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+header('Access-Control-Allow-Origin: https://it.soccermanager.com');
+header('Access-Control-Allow-Headers: Content-Type, X-IMC-Universal-Token, X-IMC-Channel');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+if (($_SERVER['REQUEST_METHOD']??'')==='OPTIONS'){http_response_code(204);exit;}
+const IMC_VERSION='2.0.0';
+const MAX_ROWS=1000;
+$started=microtime(true);
+$cfgPath=dirname(__DIR__).'/__imc_private_gateway/config.php';
+$families=['ROUTING','READ','SCHEMA','QUERY','WRITE','DELETE','DDL','TRANSACTIONS','VALIDATION','AUDIT','LOG','RESPONSE'];
+$actions=['health','probe','resolve_database','resolve_table','show_tables','read','read_one','sample','count','count_nulls','distinct','aggregate','show_columns','describe','schema','indexes','show_create_table','query','create_table','drop_table','rename_table','add_column','drop_column','rename_column','modify_column','add_index','drop_index','add_primary_key','drop_primary_key','insert','insert_many','upsert','upsert_many','update','delete_one','delete','clear_repository','clear_table','clone_table_structure','copy_rows','truncate_table','dry_run','validate','audit_repository','find_duplicates','foreign_keys','add_foreign_key','drop_foreign_key','table_status'];
+function reply(array $x,int $s=200):never{global $started;http_response_code($s);$x['duration_ms']??=(int)round((microtime(true)-$started)*1000);echo json_encode($x,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);exit;}
+function ident(string $v):string{if(!preg_match('/^[A-Za-z_][A-Za-z0-9_]{0,63}$/',$v))throw new InvalidArgumentException('invalid_identifier');return '`'.$v.'`';}
+function peer():array{$p=dirname(__DIR__).'/imc-database-manager/index.php';if(!is_file($p))return['reachable'=>false,'status'=>'unavailable'];$r=@file_get_contents($p);$j=is_string($r)?json_decode($r,true):null;return is_array($j)?['reachable'=>true,'service'=>$j['service']??null,'status'=>$j['status']??null,'version'=>$j['version']??null,'role_version'=>$j['role_version']??null,'current_role'=>$j['current_role']??null,'capabilities'=>$j['capabilities']??[]]:['reachable'=>false,'status'=>'invalid_response'];}
+function route(array $b,array $cfg):array{$gw=strtoupper(trim((string)($b['game_world_id']??'')));$source=strtolower(trim((string)($b['source']??'')));if($source==='core'||$gw==='CORE')return['source'=>'core','game_world_id'=>null,'database'=>$cfg['db']['core'],'family'=>'CORE'];if(!preg_match('/^GW00[1-9]$/',$gw))throw new InvalidArgumentException('invalid_game_world');if(in_array($gw,$cfg['gold_worlds'],true))return['source'=>'game_world','game_world_id'=>$gw,'database'=>$cfg['db']['gold'],'family'=>'MULTI_LEAGUE'];if(in_array($gw,$cfg['custom_worlds'],true))return['source'=>'game_world','game_world_id'=>$gw,'database'=>$cfg['db']['custom'],'family'=>'SINGLE_LEAGUE'];throw new InvalidArgumentException('unsupported_game_world');}
+function db(array $cfg,string $name):PDO{$dsn=sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',$cfg['db']['host'],$cfg['db']['port'],$name);return new PDO($dsn,$cfg['db']['user'],$cfg['db']['pass'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]);}
+function tableOf(array $b,array $r):?string{$repo=trim((string)($b['repository']??''));$table=trim((string)($b['table']??''));if($table!==''){ident($table);return$table;}if($repo==='')return null;ident($repo);return$r['game_world_id']?$r['game_world_id'].'_'.$repo:$repo;}
+function exists(PDO $p,string $db,string $t):bool{$s=$p->prepare('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=? AND table_name=?');$s->execute([$db,$t]);return(int)$s->fetchColumn()>0;}
+function cols(PDO $p,string $t):array{$q=$p->query('SHOW FULL COLUMNS FROM '.ident($t));$o=[];foreach($q as $r)$o[$r['Field']]=$r;return$o;}
+function whereSql(array $w,array &$v):string{if(!$w)throw new InvalidArgumentException('where_required');$a=[];foreach($w as $k=>$x){ident((string)$k);if($x===null)$a[]=ident((string)$k).' IS NULL';else{$a[]=ident((string)$k).' = ?';$v[]=$x;}}return implode(' AND ',$a);}
+function schemaGuard(PDO $p,string $t,array $row):array{$c=cols($p,$t);foreach($row as $k=>$v){if(!isset($c[$k]))throw new InvalidArgumentException('column_not_found:'.$k);if(stripos((string)$c[$k]['Type'],'json')===0&&is_array($v))$row[$k]=json_encode($v,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);}return$row;}
+function countWhere(PDO $p,string $t,array $w=[]):int{$v=[];$sql='SELECT COUNT(*) FROM '.ident($t);if($w)$sql.=' WHERE '.whereSql($w,$v);$s=$p->prepare($sql);$s->execute($v);return(int)$s->fetchColumn();}
+function ddlType(string $x):string{$x=strtoupper(trim($x));if(!preg_match('/^(TINYINT|SMALLINT|MEDIUMINT|INT|BIGINT|DECIMAL\([0-9]+,[0-9]+\)|FLOAT|DOUBLE|CHAR\([0-9]+\)|VARCHAR\([0-9]+\)|TEXT|MEDIUMTEXT|LONGTEXT|DATE|DATETIME|TIMESTAMP|TIME|JSON|BOOLEAN)( UNSIGNED)?$/',$x))throw new InvalidArgumentException('invalid_column_type');return$x;}
+function logOp(array $r,string $a,?string $t,bool $ok,array $extra=[]):void{$dir=dirname(__DIR__).'/__imc_private_gateway';$rec=array_merge(['timestamp'=>gmdate('c'),'action'=>$a,'source'=>$r['source']??null,'game_world_id'=>$r['game_world_id']??null,'database'=>$r['database']??null,'table'=>$t,'success'=>$ok],$extra);@file_put_contents($dir.'/universal-gateway-audit.jsonl',json_encode($rec,JSON_UNESCAPED_SLASHES)."\n",FILE_APPEND|LOCK_EX);}
+if(!is_file($cfgPath))reply(['ok'=>false,'error'=>'gateway_configuration_not_found'],503);$cfg=require$cfgPath;
+if(($_SERVER['REQUEST_METHOD']??'')!=='POST')reply(['ok'=>false,'error'=>'method_not_allowed'],405);
+$token=(string)($_SERVER['HTTP_X_IMC_UNIVERSAL_TOKEN']??'');if($token===''||!hash_equals((string)$cfg['token'],$token))reply(['ok'=>false,'error'=>'unauthorized'],401);
+try{$b=json_decode(file_get_contents('php://input')?:'',true,64,JSON_THROW_ON_ERROR);if(!is_array($b))throw new InvalidArgumentException('invalid_payload');$action=strtolower(trim((string)($b['action']??'health')));$channel=strtoupper(trim((string)($b['channel']??($_SERVER['HTTP_X_IMC_CHANNEL']??'CHATGPT'))));if(!in_array($channel,['IMPORT','CHATGPT'],true))throw new InvalidArgumentException('invalid_channel');
+if($action==='health')reply(['ok'=>true,'action'=>'health','service'=>'IMC Universal Gateway','version'=>IMC_VERSION,'channels'=>['IMPORT','CHATGPT'],'capability_families'=>$families,'actions'=>$actions,'database_manager'=>peer()]);
+$r=route($b,$cfg);$table=tableOf($b,$r);if($action==='resolve_database')reply(array_merge(['ok'=>true,'action'=>$action],$r));if($action==='resolve_table')reply(array_merge(['ok'=>true,'action'=>$action,'repository'=>$b['repository']??null,'table'=>$table],$r));$p=db($cfg,$r['database']);if($action==='probe')reply(array_merge(['ok'=>(int)$p->query('SELECT 1')->fetchColumn()===1,'action'=>$action,'database_connection'=>'ok'],$r));
+$base=array_merge(['ok'=>true,'action'=>$action,'channel'=>$channel,'repository'=>$b['repository']??null,'table'=>$table],$r);
+if($action==='show_tables'){$rows=$p->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);reply($base+['rows'=>$rows,'returned_rows'=>count($rows)]);}
+if(!$table)throw new InvalidArgumentException('table_required');$tableExists=exists($p,$r['database'],$table);
+if(in_array($action,['show_columns','describe','schema'],true)){if(!$tableExists)throw new RuntimeException('table_not_found');$rows=array_values(cols($p,$table));reply($base+['rows'=>$rows,'returned_rows'=>count($rows)]);}
+if($action==='indexes'){if(!$tableExists)throw new RuntimeException('table_not_found');$rows=$p->query('SHOW INDEX FROM '.ident($table))->fetchAll();reply($base+['rows'=>$rows,'returned_rows'=>count($rows)]);}
+if($action==='show_create_table'){if(!$tableExists)throw new RuntimeException('table_not_found');$x=$p->query('SHOW CREATE TABLE '.ident($table))->fetch();reply($base+['create_table'=>$x['Create Table']??null]);}
+if($action==='table_status'){$s=$p->prepare('SHOW TABLE STATUS LIKE ?');$s->execute([$table]);reply($base+['status'=>$s->fetch()?:null]);}
+if($action==='foreign_keys'){$s=$p->prepare("SELECT constraint_name,column_name,referenced_table_name,referenced_column_name FROM information_schema.key_column_usage WHERE table_schema=? AND table_name=? AND referenced_table_name IS NOT NULL");$s->execute([$r['database'],$table]);$rows=$s->fetchAll();reply($base+['rows'=>$rows,'returned_rows'=>count($rows)]);}
+if($action==='read'||$action==='read_one'||$action==='sample'){if(!$tableExists)throw new RuntimeException('table_not_found');$v=[];$sql='SELECT * FROM '.ident($table);$w=$b['where']??[];if($w)$sql.=' WHERE '.whereSql($w,$v);if($action==='sample')$sql.=' ORDER BY RAND()';elseif(!empty($b['order_by'])){$ob=(string)$b['order_by'];ident($ob);$dir=strtoupper((string)($b['order']??'ASC'));if(!in_array($dir,['ASC','DESC'],true))throw new InvalidArgumentException('invalid_order');$sql.=' ORDER BY '.ident($ob).' '.$dir;}$limit=$action==='read_one'?1:max(1,min(MAX_ROWS,(int)($b['limit']??100)));$offset=max(0,(int)($b['offset']??0));$sql.=" LIMIT $limit OFFSET $offset";$s=$p->prepare($sql);$s->execute($v);$rows=$s->fetchAll();reply($base+['rows'=>$rows,'row'=>$action==='read_one'?($rows[0]??null):null,'returned_rows'=>count($rows)]);}
+if($action==='count')reply($base+['count'=>countWhere($p,$table,$b['where']??[])]);
+if($action==='count_nulls'){$c=(string)($b['column']??'');ident($c);$x=$p->query('SELECT SUM('.ident($c).' IS NULL) null_count,SUM('.ident($c).' IS NOT NULL) not_null_count FROM '.ident($table))->fetch();reply($base+$x);}
+if($action==='distinct'){$c=(string)($b['column']??'');ident($c);$rows=$p->query('SELECT DISTINCT '.ident($c).' FROM '.ident($table).' LIMIT '.max(1,min(MAX_ROWS,(int)($b['limit']??500))))->fetchAll();reply($base+['rows'=>$rows,'returned_rows'=>count($rows)]);}
+if($action==='aggregate'){$fn=strtoupper((string)($b['function']??'COUNT'));if(!in_array($fn,['COUNT','SUM','AVG','MIN','MAX'],true))throw new InvalidArgumentException('invalid_aggregate');$c=(string)($b['column']??'*');$expr=$c==='*'?'*':ident($c);$group=$b['group_by']??null;$sql="SELECT $fn($expr) value".($group?', '.ident((string)$group):'').' FROM '.ident($table).($group?' GROUP BY '.ident((string)$group):'');$rows=$p->query($sql)->fetchAll();reply($base+['rows'=>$rows,'returned_rows'=>count($rows)]);}
+if($action==='query'){$sql=trim((string)($b['sql']??''));if(!preg_match('/^(SELECT|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i',$sql)||preg_match('/;\s*\S/',$sql))throw new InvalidArgumentException('read_only_query_required');$s=$p->query($sql);$rows=$s->fetchAll();reply($base+['rows'=>$rows,'returned_rows'=>count($rows)]);}
+if($action==='validate')reply($base+['valid'=>$tableExists,'table_exists'=>$tableExists,'columns'=>$tableExists?array_keys(cols($p,$table)):[]]);
+if($action==='find_duplicates'){$cs=$b['columns']??[];if(!is_array($cs)||!$cs)throw new InvalidArgumentException('columns_required');$qq=array_map(fn($x)=>ident((string)$x),$cs);$sql='SELECT '.implode(',',$qq).',COUNT(*) duplicate_count FROM '.ident($table).' GROUP BY '.implode(',',$qq).' HAVING COUNT(*)>1';$rows=$p->query($sql)->fetchAll();reply($base+['rows'=>$rows,'returned_rows'=>count($rows)]);}
+if($action==='audit_repository'){$columns=array_values(cols($p,$table));$idx=$p->query('SHOW INDEX FROM '.ident($table))->fetchAll();$nulls=[];foreach($columns as$c){$n=$c['Field'];$nulls[$n]=(int)$p->query('SELECT SUM('.ident($n).' IS NULL) FROM '.ident($table))->fetchColumn();}reply($base+['row_count'=>countWhere($p,$table),'columns'=>$columns,'indexes'=>$idx,'null_counts'=>$nulls]);}
+if($action==='dry_run')reply($base+['valid'=>true,'planned_sql'=>'generated server-side after validation','affected_estimate'=>$tableExists?countWhere($p,$table,$b['where']??[]):0,'errors'=>[]]);
+if($action==='insert'||$action==='upsert'){$row=schemaGuard($p,$table,$b['row']??[]);if(!$row)throw new InvalidArgumentException('row_required');$cs=array_keys($row);$sql='INSERT INTO '.ident($table).' ('.implode(',',array_map('ident',$cs)).') VALUES ('.implode(',',array_fill(0,count($cs),'?')).')';if($action==='upsert')$sql.=' ON DUPLICATE KEY UPDATE '.implode(',',array_map(fn($c)=>ident($c).'=VALUES('.ident($c).')',$cs));$s=$p->prepare($sql);$s->execute(array_values($row));logOp($r,$action,$table,true,['affected_rows'=>$s->rowCount()]);reply($base+['inserted_rows'=>$s->rowCount(),'last_insert_id'=>$p->lastInsertId()]);}
+if($action==='insert_many'||$action==='upsert_many'){$rows=$b['rows']??[];if(!is_array($rows)||!$rows)throw new InvalidArgumentException('rows_required');$atomic=($b['atomic']??true)!==false;$done=0;$errors=[];if($atomic)$p->beginTransaction();try{foreach($rows as$i=>$row){$row=schemaGuard($p,$table,$row);$cs=array_keys($row);$sql='INSERT INTO '.ident($table).' ('.implode(',',array_map('ident',$cs)).') VALUES ('.implode(',',array_fill(0,count($cs),'?')).')';if($action==='upsert_many')
