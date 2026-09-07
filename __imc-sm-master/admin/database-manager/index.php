@@ -317,6 +317,7 @@ function dbm_clear_repository(array $payload): array {
         'player_codex_injury_history',
         'player_codex_snapshots',
         'transfers',
+        'imc transfers',
     ];
     if (!in_array($repository, $allowedRepositories, true)) throw new InvalidArgumentException('Repository not enabled for clear_repository.');
 
@@ -327,7 +328,7 @@ function dbm_clear_repository(array $payload): array {
     else throw new InvalidArgumentException('Game World routing unavailable.');
 
     [$database, $db] = dbm_storage($target);
-    $table = $gameWorldId . '_' . $repository;
+    $table = $gameWorldId . '_' . ($repository === 'imc transfers' ? 'IMC Transfers' : $repository);
     $stmt = $db->prepare('SELECT COUNT(*) c FROM information_schema.tables WHERE table_schema=? AND table_name=? AND table_type=\'BASE TABLE\'');
     $stmt->bind_param('ss', $database, $table);
     $stmt->execute();
