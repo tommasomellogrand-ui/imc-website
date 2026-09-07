@@ -9,17 +9,17 @@ if (!is_file($private)) {
 
 $cfg = require $private;
 
-// Whitelist POST autoritativa: esclusivamente repository GW fisicamente presenti
+// Whitelist POST autoritativa: esclusivamente repository GW operativi
 // e verificati su Sql1956795_2 / Sql1956795_3.
+// Match Report: nuova architettura a 3 repository operativi.
+// I legacy match_report_events, match_report_tactics e match_report_commentary
+// possono restare fisicamente su MySQL, ma non sono più destinazioni del Gateway.
 $cfg['repositories'] = [
     'clubs',
     'competition',
     'managers',
     'match_report',
-    'match_report_commentary',
-    'match_report_events',
     'match_report_players',
-    'match_report_tactics',
     'match_report_team_stats',
     'news_feed',
     'player_codex',
