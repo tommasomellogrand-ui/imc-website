@@ -2,33 +2,39 @@
 declare(strict_types=1);
 
 function imc_transfer_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Transfer$/',$t)===1;}
+function imc_match_report_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Match Report$/',$t)===1;}
 
 function imc_validate_transfer_row(PDO $p,string $t,array $r):array{
     $expected=['game_world_id','imc_transfer_number','player_id','player_name','club_from','from_sm_world_club_id','club_to','to_sm_world_club_id','transfer_date','amount_text','exchange_players','imported_at'];
-    $keys=array_keys($r);
-    sort($keys);
-    $sortedExpected=$expected;
-    sort($sortedExpected);
+    $keys=array_keys($r); sort($keys); $sortedExpected=$expected; sort($sortedExpected);
     if($keys!==$sortedExpected)throw new InvalidArgumentException('invalid_payload:transfer_structure_mismatch');
     $gw=substr($t,0,5);
     if(strtoupper(trim((string)$r['game_world_id']))!==$gw)throw new InvalidArgumentException('game_world_mismatch');
     $cols=imc_cols($p,$t);
-    foreach($expected as$k){
-        if(!isset($cols[$k]))throw new InvalidArgumentException('column_not_found:'.$k);
-        imc_validate_import_value($k,$r[$k],$cols[$k]);
-    }
+    foreach($expected as$k){if(!isset($cols[$k]))throw new InvalidArgumentException('column_not_found:'.$k);imc_validate_import_value($k,$r[$k],$cols[$k]);}
+    return imc_row($p,$t,$r);
+}
+
+function imc_validate_match_report_row(PDO $p,string $t,array $r):array{
+    $expected=['game_world_id','sm_fixture_id','competition_key','sm_action','sm_country','sm_division','competition_group','competition_stage','competition_round','match_date','home_sm_club_id','home_name','away_sm_club_id','away_name','home_sm_manager_id','home_manager_name','away_sm_manager_id','away_manager_name','home_score','away_score','penalty_home_score','penalty_away_score','aggregate_home_score','aggregate_away_score','stadium_name','attendance','team_stats_json','players_json','events_json','tactics_json','commentary_json','fingerprint','imported_at'];
+    $keys=array_keys($r); sort($keys); $sortedExpected=$expected; sort($sortedExpected);
+    if($keys!==$sortedExpected)throw new InvalidArgumentException('invalid_payload:match_report_structure_mismatch');
+    $gw=substr($t,0,5);
+    if(strtoupper(trim((string)$r['game_world_id']))!==$gw)throw new InvalidArgumentException('game_world_mismatch');
+    $cols=imc_cols($p,$t);
+    foreach($expected as$k){if(!isset($cols[$k]))throw new InvalidArgumentException('column_not_found:'.$k);imc_validate_import_value($k,$r[$k],$cols[$k]);}
     return imc_row($p,$t,$r);
 }
 
 function imc_insert(PDO$p,string$t,array$r,bool$up=false):int{
-    $r=imc_transfer_table($t)?imc_validate_transfer_row($p,$t,$r):imc_row($p,$t,$r);
+    if(imc_transfer_table($t))$r=imc_validate_transfer_row($p,$t,$r);
+    elseif(imc_match_report_table($t))$r=imc_validate_match_report_row($p,$t,$r);
+    else $r=imc_row($p,$t,$r);
     if(!$r)throw new InvalidArgumentException('required_field_missing');
     $c=array_keys($r);
     $q='INSERT INTO '.imc_ident($t).' ('.implode(',',array_map('imc_ident',$c)).') VALUES ('.implode(',',array_fill(0,count($c),'?')).')';
     if($up)$q.=' ON DUPLICATE KEY UPDATE '.implode(',',array_map(fn($x)=>imc_ident($x).'=VALUES('.imc_ident($x).')',$c));
-    $s=$p->prepare($q);
-    $s->execute(array_values($r));
-    return$s->rowCount();
+    $s=$p->prepare($q); $s->execute(array_values($r)); return$s->rowCount();
 }
 
 function imc_write_action(string$a,array$b,array$r,?string$t,PDO$p,array$B):bool{if(!$t)return false;
