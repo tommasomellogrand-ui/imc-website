@@ -61,27 +61,16 @@
     return rows;
   }
 
-  async function competitionKeys(ctx){
-    const cacheKey=`keys:${worldId()}:${ctx.group}:${ctx.action}:${ctx.country}:${ctx.division}`;
-    if(dataCache.has(cacheKey))return dataCache.get(cacheKey);
-    const [results,schedule]=await Promise.all([readRepo('results').catch(()=>[]),readRepo('schedule').catch(()=>[])]);
-    const keys=new Set();
-    for(const r of [...results,...schedule]){
-      if(clean(r.sm_action).toLowerCase()!==clean(ctx.action).toLowerCase())continue;
-      if(isMultiLeague()&&upper(r.sm_country)!==upper(ctx.country))continue;
-      if(clean(ctx.action).toLowerCase()==='league'&&clean(r.sm_division).toLowerCase()!==clean(ctx.division).toLowerCase())continue;
-      const k=clean(r.competition_key);if(k)keys.add(k);
-    }
-    dataCache.set(cacheKey,keys);
-    return keys;
-  }
-
   async function statsRows(ctx){
     const cacheKey=`stats:${worldId()}`;
     let rows=dataCache.get(cacheKey);
     if(!rows){rows=await readRepo('sm_player_stats');dataCache.set(cacheKey,rows);}
-    const keys=await competitionKeys(ctx);
-    return rows.filter(r=>keys.has(clean(r.competition_key)));
+    const action=clean(ctx.action).toLowerCase();
+    const division=clean(ctx.division).toLowerCase();
+    return rows.filter(r=>{
+      if(clean(r.sm_action).toLowerCase()!==action)return false;
+      return clean(r.sm_division).toLowerCase()===division;
+    });
   }
 
   function ensureStyle(){
@@ -128,7 +117,7 @@
     const ranked=rows.map(r=>({r,value:num(metricValue(r,metric))}))
       .filter(x=>metric==='rating'?x.value>0:x.value>=0)
       .sort((a,b)=>b.value-a.value||playerName(a.r).localeCompare(playerName(b.r),'it'));
-    if(!ranked.length)return `<div class="competition-stats-empty"><div><strong>NESSUNA STATISTICA</strong><br><span>Nessun dato disponibile per questa Competition Key.</span></div></div>`;
+    if(!ranked.length)return `<div class="competition-stats-empty"><div><strong>NESSUNA STATISTICA</strong><br><span>Nessun dato disponibile per questa SM Action e Division.</span></div></div>`;
     const label=tabs.find(([k])=>k===metric)?.[1]||metric;
     return `<div class="competition-stats-table"><div class="competition-stats-head"><span>Pos</span><span>Player / Club</span><span style="text-align:right">${esc(label)}</span></div>${ranked.map((x,i)=>{
       const r=x.r,name=playerName(r),img=playerImage(r),initials=name.split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase();
