@@ -1,0 +1,87 @@
+name: Deploy IMC Universal Gateway to Aruba
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'imc-universal-gateway/**'
+      - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: imc-universal-gateway-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Universal Gateway
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s imc-universal-gateway/index.php
+
+      - name: Deploy only IMC Universal Gateway
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+
+          host='ftp.italianmastersclub.it'
+          port=21
+          username=os.environ['ARUBA_FTP_USERNAME']
+          password=os.environ['ARUBA_FTP_PASSWORD']
+          remote_dir='/www.italianmastersclub.it/imc-universal-gateway'
+          local=Path('imc-universal-gateway/index.php')
+
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False
+          ftp=None
+          last_error=None
+          for _ in range(3):
+              c=FTP_TLS(context=ctx)
+              try:
+                  c.connect(host,port,timeout=60)
+                  c.login(username,password)
+                  c.prot_p()
+                  c.set_pasv(True)
+                  ftp=c
+                  break
+              except Exception as e:
+                  last_error=e
+                  try: c.close()
+                  except Exception: pass
+                  time.sleep(5)
+          if ftp is None:
+              raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}: {last_error}')
+
+          ftp.cwd('/')
+          for part in [p for p in remote_dir.split('/') if p]:
+              try:
+                  ftp.cwd(part)
+              except error_perm:
+                  ftp.mkd(part)
+                  ftp.cwd(part)
+
+          data=local.read_bytes()
+          with local.open('rb') as fh:
+              ftp.storbinary('STOR index.php',fh)
+          check=io.BytesIO()
+          ftp.retrbinary('RETR index.php',check.write)
+          if check.getvalue()!=data:
+              raise SystemExit('Verifica upload fallita: imc-universal-gateway/index.php')
+          ftp.quit()
+          print('IMC Universal Gateway pubblicato e verificato')
+          PY
