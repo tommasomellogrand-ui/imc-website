@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - '__imc-sm-master/admin/database-manager/**'
+      - '__imc-sm-master/admin/core.php'
       - '.github/workflows/deploy-database-manager-aruba.yml'
   workflow_dispatch:
 
@@ -28,8 +29,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test -s __imc-sm-master/admin/core.php
           test -s __imc-sm-master/admin/database-manager/index.php
           test -s __imc-sm-master/admin/database-manager/clear-repository.php
+          php -l __imc-sm-master/admin/core.php
           php -l __imc-sm-master/admin/database-manager/index.php
           php -l __imc-sm-master/admin/database-manager/clear-repository.php
 
@@ -91,6 +94,7 @@ jobs:
                       ftp.cwd(part)
 
           files = [
+              Path('__imc-sm-master/admin/core.php'),
               Path('__imc-sm-master/admin/database-manager/index.php'),
               Path('__imc-sm-master/admin/database-manager/clear-repository.php'),
           ]
