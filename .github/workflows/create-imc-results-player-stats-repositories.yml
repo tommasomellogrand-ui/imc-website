@@ -1,0 +1,123 @@
+name: Create IMC Results Import and SM Player Stats repositories
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/create-imc-results-player-stats-repositories.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  create-and-verify:
+    runs-on: ubuntu-latest
+    env:
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install MySQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
+
+      - name: Create repositories on Aruba MySQL 2 and 3
+        shell: bash
+        env:
+          MYSQL_PWD: ${{ secrets.MYSQL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > /tmp/create_repositories.sql
+          databases = ['Sql1956795_2', 'Sql1956795_3']
+          results_cols = [
+              ('game_world_id','VARCHAR(16)'),
+              ('sm_fixture_id','BIGINT UNSIGNED'),
+              ('competition_key','VARCHAR(255)'),
+              ('sm_action','VARCHAR(64)'),
+              ('sm_country','VARCHAR(128)'),
+              ('sm_division','VARCHAR(128)'),
+              ('competition_group','VARCHAR(64)'),
+              ('competition_group_name','VARCHAR(128)'),
+              ('competition_stage','VARCHAR(128)'),
+              ('competition_round','VARCHAR(128)'),
+              ('match_date','DATE'),
+              ('home_sm_club_id','BIGINT UNSIGNED'),
+              ('home_name','VARCHAR(255)'),
+              ('away_sm_club_id','BIGINT UNSIGNED'),
+              ('away_name','VARCHAR(255)'),
+              ('home_sm_manager_id','BIGINT UNSIGNED'),
+              ('away_sm_manager_id','BIGINT UNSIGNED'),
+              ('home_score','INT UNSIGNED'),
+              ('away_score','INT UNSIGNED'),
+              ('penalty_home_score','INT UNSIGNED'),
+              ('penalty_away_score','INT UNSIGNED'),
+              ('aggregate_home_score','INT UNSIGNED'),
+              ('aggregate_away_score','INT UNSIGNED'),
+              ('result_status','VARCHAR(64)'),
+              ('fingerprint','CHAR(64)'),
+              ('imported_at','DATETIME'),
+          ]
+          stats_cols = [
+              ('game_world_id','VARCHAR(16)'),
+              ('competition_key','VARCHAR(255)'),
+              ('sm_player_id','INT UNSIGNED'),
+              ('player_name','VARCHAR(255)'),
+              ('sm_club_id','INT UNSIGNED'),
+              ('club_name','VARCHAR(255)'),
+              ('appearances','INT UNSIGNED'),
+              ('goals','INT UNSIGNED'),
+              ('avg_rating','DECIMAL(5,2)'),
+              ('assists','INT UNSIGNED'),
+              ('mom','INT UNSIGNED'),
+              ('yellow_cards','INT UNSIGNED'),
+              ('red_cards','INT UNSIGNED'),
+              ('imported_at','DATETIME'),
+          ]
+          def ddl(db, table, cols):
+              body = ',\n  '.join(f'`{name}` {typ}' for name, typ in cols)
+              return f'CREATE TABLE IF NOT EXISTS `{db}`.`{table}` (\n  {body}\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'
+          for db in databases:
+              for i in range(1, 26):
+                  gw=f'GW{i:03d}'
+                  print(ddl(db, f'{gw}_results_import', results_cols))
+                  print(ddl(db, f'{gw}_sm_player_stats', stats_cols))
+          PY
+          mysql --host="$MYSQL_HOST" --user="$MYSQL_USERNAME" < /tmp/create_repositories.sql
+
+      - name: Verify exact repository structures
+        shell: bash
+        env:
+          MYSQL_PWD: ${{ secrets.MYSQL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, subprocess, sys
+          host=os.environ['MYSQL_HOST']; user=os.environ['MYSQL_USERNAME']
+          expected_results = [
+              ('game_world_id','varchar(16)'),('sm_fixture_id','bigint unsigned'),('competition_key','varchar(255)'),('sm_action','varchar(64)'),('sm_country','varchar(128)'),('sm_division','varchar(128)'),('competition_group','varchar(64)'),('competition_group_name','varchar(128)'),('competition_stage','varchar(128)'),('competition_round','varchar(128)'),('match_date','date'),('home_sm_club_id','bigint unsigned'),('home_name','varchar(255)'),('away_sm_club_id','bigint unsigned'),('away_name','varchar(255)'),('home_sm_manager_id','bigint unsigned'),('away_sm_manager_id','bigint unsigned'),('home_score','int unsigned'),('away_score','int unsigned'),('penalty_home_score','int unsigned'),('penalty_away_score','int unsigned'),('aggregate_home_score','int unsigned'),('aggregate_away_score','int unsigned'),('result_status','varchar(64)'),('fingerprint','char(64)'),('imported_at','datetime')]
+          expected_stats = [
+              ('game_world_id','varchar(16)'),('competition_key','varchar(255)'),('sm_player_id','int unsigned'),('player_name','varchar(255)'),('sm_club_id','int unsigned'),('club_name','varchar(255)'),('appearances','int unsigned'),('goals','int unsigned'),('avg_rating','decimal(5,2)'),('assists','int unsigned'),('mom','int unsigned'),('yellow_cards','int unsigned'),('red_cards','int unsigned'),('imported_at','datetime')]
+          def q(sql):
+              r=subprocess.run(['mysql',f'--host={host}',f'--user={user}','--batch','--skip-column-names','-e',sql],text=True,capture_output=True)
+              if r.returncode: print(r.stderr); sys.exit(r.returncode)
+              return r.stdout.strip().splitlines()
+          for db in ('Sql1956795_2','Sql1956795_3'):
+              for i in range(1,26):
+                  gw=f'GW{i:03d}'
+                  for suffix, expected in [('results_import',expected_results),('sm_player_stats',expected_stats)]:
+                      table=f'{gw}_{suffix}'
+                      rows=q("SELECT CONCAT(column_name,'\\t',column_type) FROM information_schema.columns WHERE table_schema='%s' AND table_name='%s' ORDER BY ordinal_position"%(db,table))
+                      got=[tuple(x.split('\t',1)) for x in rows]
+                      if got != expected:
+                          print('STRUCTURE_MISMATCH',db,table,got)
+                          sys.exit(1)
+              count=q("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='%s' AND table_type='BASE TABLE' AND table_name REGEXP '^GW(00[1-9]|01[0-9]|02[0-5])_(results_import|sm_player_stats)$'"%db)
+              if count != ['50']:
+                  print('TABLE_COUNT_MISMATCH',db,count)
+                  sys.exit(1)
+              print('VERIFIED',db,'50 repositories')
+          PY
