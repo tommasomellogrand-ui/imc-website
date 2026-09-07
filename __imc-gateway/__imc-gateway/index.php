@@ -6,32 +6,6 @@ header('Access-Control-Allow-Headers: Content-Type, X-IMC-Universal-Token');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 function out(array $x,int $s=200): never { http_response_code($s); echo json_encode($x,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES); exit; }
-function schedule_competition_group(mixed $value): ?string {
-  $action=strtolower(trim((string)$value));
-  return match($action) {
-    'league','leaguecup','leagueshield','charityshield','playoff' => 'DOMESTIC',
-    'smfacup','smfashield','supercup' => 'INTERNATIONAL',
-    'interqualifier','worldcup' => 'NATIONS',
-    default => null,
-  };
-}
-function schedule_competition_key(string $gw,array $row,?string $group): string {
-  $country=trim((string)($row['sm_country'] ?? ''));
-  $action=strtolower(trim((string)($row['sm_action'] ?? '')));
-  $division=trim((string)($row['sm_division'] ?? ''));
-  if ($action==='') throw new RuntimeException('schedule_sm_action_required');
-  if ($group===null) {
-    $provided=trim((string)($row['competition_key'] ?? ''));
-    if ($provided==='') throw new RuntimeException('schedule_competition_key_required');
-    return $provided;
-  }
-  $parts=[$gw];
-  if ($country!=='') $parts[]=$country;
-  $parts[]=$group;
-  $parts[]=$action;
-  if ($division!=='') $parts[]=$division;
-  return implode('|',$parts);
-}
 $cfg = require __DIR__.'/config.php';
 require_once __DIR__.'/database.php';
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') out(['ok'=>false,'error'=>'method_not_allowed'],405);
@@ -69,18 +43,45 @@ try {
   }
   if ($action==='insert_many') {
     $rows=$body['rows'] ?? $body['items'] ?? null; if (!is_array($rows) || !$rows) out(['ok'=>false,'error'=>'rows_required'],422);
-    $count=0; $pdo->beginTransaction();
+
+    $columnStmt=$pdo->query("SHOW COLUMNS FROM `{$table}`");
+    $allowedColumns=[];
+    foreach($columnStmt->fetchAll() as $columnRow){
+      $field=(string)($columnRow['Field'] ?? '');
+      if($field!=='') $allowedColumns[$field]=true;
+    }
+    if(!$allowedColumns) throw new RuntimeException('repository_columns_unavailable');
+
+    $count=0;
+    $ignoredColumns=[];
+    $pdo->beginTransaction();
     foreach($rows as $row){
       if(!is_array($row)||!$row) continue;
-      if($repo==='schedule') {
-        $group=schedule_competition_group($row['sm_action'] ?? null);
-        $row['competition_group']=$group;
-        $row['competition_key']=schedule_competition_key($gw,$row,$group);
+
+      $filtered=[];
+      foreach($row as $c=>$v){
+        $c=(string)$c;
+        if(!preg_match('/^[A-Za-z0-9_]+$/',$c)) throw new RuntimeException('invalid_column');
+        if(isset($allowedColumns[$c])) $filtered[$c]=$v;
+        else $ignoredColumns[$c]=true;
       }
-      $cols=array_keys($row); foreach($cols as $c){ if(!preg_match('/^[A-Za-z0-9_]+$/',$c)) throw new RuntimeException('invalid_column'); }
-      $names='`'.implode('`,`',$cols).'`'; $ph=implode(',',array_fill(0,count($cols),'?')); $st=$pdo->prepare("INSERT INTO `{$table}` ({$names}) VALUES ({$ph})"); $st->execute(array_values($row)); $count++;
+      if(!$filtered) continue;
+
+      $cols=array_keys($filtered);
+      $names='`'.implode('`,`',$cols).'`';
+      $ph=implode(',',array_fill(0,count($cols),'?'));
+      $st=$pdo->prepare("INSERT INTO `{$table}` ({$names}) VALUES ({$ph})");
+      $st->execute(array_values($filtered));
+      $count++;
     }
-    $pdo->commit(); out(['ok'=>true,'action'=>'insert_many','table'=>$table,'inserted'=>$count]);
+    $pdo->commit();
+    out([
+      'ok'=>true,
+      'action'=>'insert_many',
+      'table'=>$table,
+      'inserted'=>$count,
+      'ignored_columns'=>array_values(array_keys($ignoredColumns))
+    ]);
   }
   if ($action==='delete') {
     $where=$body['where'] ?? null; if(!is_array($where)||!$where) out(['ok'=>false,'error'=>'where_required'],422);
