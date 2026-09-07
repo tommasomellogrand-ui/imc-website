@@ -1,0 +1,48 @@
+name: Restore IMC private DB config v2
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/restore-imc-private-db-config-v2.yml']
+permissions:
+  contents: read
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    env:
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+      ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+    steps:
+      - shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, os, secrets, pathlib
+          enc=lambda v: base64.b64encode(v.encode()).decode()
+          token=secrets.token_urlsafe(36)
+          cfg="<?php\ndeclare(strict_types=1);\nreturn [\n  'db' => [\n    'host' => base64_decode('%s'),\n    'database' => base64_decode('%s'),\n    'user' => base64_decode('%s'),\n    'password' => base64_decode('%s'),\n  ],\n  'admin_token' => base64_decode('%s'),\n];\n" % tuple(map(enc,[os.environ['MYSQL_HOST'],os.environ['MYSQL_DATABASE'],os.environ['MYSQL_USERNAME'],os.environ['MYSQL_PASSWORD'],token]))
+          p=pathlib.Path('/tmp/imc-private'); p.mkdir(parents=True,exist_ok=True)
+          (p/'config.php').write_text(cfg,encoding='utf-8')
+          (p/'.htaccess').write_text('Options -Indexes\nRequire all denied\n',encoding='utf-8')
+          PY
+      - shell: bash
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          f=FTP_TLS(context=ctx); f.connect('ftp.italianmastersclub.it',21,timeout=60); f.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); f.prot_p(); f.set_pasv(True)
+          f.cwd('/')
+          for part in ('www.italianmastersclub.it','__imc_private_sm_master'):
+              try: f.cwd(part)
+              except error_perm: f.mkd(part); f.cwd(part)
+          for name in ('config.php','.htaccess'):
+              p=Path('/tmp/imc-private')/name; data=p.read_bytes()
+              with p.open('rb') as h: f.storbinary('STOR '+name,h)
+              chk=io.BytesIO(); f.retrbinary('RETR '+name,chk.write)
+              assert chk.getvalue()==data
+          f.quit()
+          PY
