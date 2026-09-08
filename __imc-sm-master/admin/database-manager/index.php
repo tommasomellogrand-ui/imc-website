@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/core.php';
 
-const IMC_DBM_VERSION = '1.3.1';
+const IMC_DBM_VERSION = '1.3.2';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -173,25 +173,123 @@ function dbm_query(mysqli $db, string $sql, int $limit = IMC_DBM_MAX_ROWS): arra
 
 function dbm_schema(mysqli $db, string $database, bool $includeDdl): array {
     $tables = [];
-    $stmt = $db->prepare("SELECT table_name,engine,table_rows,table_collation FROM information_schema.tables WHERE table_schema=? AND table_type='BASE TABLE' ORDER BY table_name");
+    $tableOrder = [];
+
+    $stmt = $db->prepare("SELECT table_name AS table_name, engine AS engine, table_rows AS table_rows, table_collation AS table_collation FROM information_schema.tables WHERE table_schema=? AND table_type='BASE TABLE' ORDER BY table_name");
     $stmt->bind_param('s', $database); $stmt->execute(); $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
         $table = (string)$row['table_name'];
-        $entry = $row;
-        $entry['columns'] = [];
-        $column = $db->prepare("SELECT column_name,column_type,is_nullable,column_default,extra,character_set_name,collation_name FROM information_schema.columns WHERE table_schema=? AND table_name=? ORDER BY ordinal_position");
-        $column->bind_param('ss', $database, $table); $column->execute(); $cr = $column->get_result();
-        while ($c = $cr->fetch_assoc()) $entry['columns'][] = $c;
-        $column->close();
-        if ($includeDdl) {
-            $escaped = str_replace('`', '``', $table);
-            $ddl = $db->query("SHOW CREATE TABLE `$escaped`")->fetch_assoc();
-            $entry['ddl'] = $ddl['Create Table'] ?? null;
-        }
-        $tables[] = $entry;
+        $tableOrder[] = $table;
+        $tables[$table] = $row + [
+            'columns' => [],
+            'primary_key' => null,
+            'unique_indexes' => [],
+            'indexes' => [],
+            'foreign_keys' => [],
+            'triggers' => [],
+        ];
     }
     $stmt->close();
-    return ['database' => $database, 'table_count' => count($tables), 'column_count' => array_sum(array_map(static fn(array $t): int => count($t['columns']), $tables)), 'tables' => $tables];
+
+    $column = $db->prepare("SELECT table_name AS table_name, column_name AS column_name, column_type AS column_type, is_nullable AS is_nullable, column_default AS column_default, column_key AS column_key, extra AS extra, character_set_name AS character_set_name, collation_name AS collation_name FROM information_schema.columns WHERE table_schema=? ORDER BY table_name, ordinal_position");
+    $column->bind_param('s', $database); $column->execute(); $cr = $column->get_result();
+    while ($c = $cr->fetch_assoc()) {
+        $table = (string)$c['table_name'];
+        unset($c['table_name']);
+        if (isset($tables[$table])) $tables[$table]['columns'][] = $c;
+    }
+    $column->close();
+
+    $index = $db->prepare("SELECT table_name AS table_name, index_name AS index_name, non_unique AS non_unique, seq_in_index AS seq_in_index, column_name AS column_name, sub_part AS sub_part, index_type AS index_type, collation AS collation FROM information_schema.statistics WHERE table_schema=? ORDER BY table_name, index_name, seq_in_index");
+    $index->bind_param('s', $database); $index->execute(); $ir = $index->get_result();
+    $indexMap = [];
+    while ($i = $ir->fetch_assoc()) {
+        $table = (string)$i['table_name'];
+        $name = (string)$i['index_name'];
+        if (!isset($tables[$table])) continue;
+        if (!isset($indexMap[$table][$name])) {
+            $indexMap[$table][$name] = [
+                'index_name' => $name,
+                'unique' => ((int)$i['non_unique']) === 0,
+                'index_type' => $i['index_type'],
+                'columns' => [],
+            ];
+        }
+        $indexMap[$table][$name]['columns'][] = [
+            'column_name' => $i['column_name'],
+            'seq_in_index' => (int)$i['seq_in_index'],
+            'sub_part' => $i['sub_part'] === null ? null : (int)$i['sub_part'],
+            'collation' => $i['collation'],
+        ];
+    }
+    $index->close();
+
+    foreach ($indexMap as $table => $byName) {
+        foreach ($byName as $name => $definition) {
+            $tables[$table]['indexes'][] = $definition;
+            if ($name === 'PRIMARY') $tables[$table]['primary_key'] = $definition;
+            elseif ($definition['unique']) $tables[$table]['unique_indexes'][] = $definition;
+        }
+    }
+
+    $fk = $db->prepare("SELECT k.table_name AS table_name, k.constraint_name AS constraint_name, k.column_name AS column_name, k.ordinal_position AS ordinal_position, k.referenced_table_name AS referenced_table_name, k.referenced_column_name AS referenced_column_name, r.update_rule AS update_rule, r.delete_rule AS delete_rule FROM information_schema.key_column_usage k LEFT JOIN information_schema.referential_constraints r ON r.constraint_schema=k.constraint_schema AND r.table_name=k.table_name AND r.constraint_name=k.constraint_name WHERE k.table_schema=? AND k.referenced_table_name IS NOT NULL ORDER BY k.table_name, k.constraint_name, k.ordinal_position");
+    $fk->bind_param('s', $database); $fk->execute(); $fr = $fk->get_result();
+    $fkMap = [];
+    while ($f = $fr->fetch_assoc()) {
+        $table = (string)$f['table_name'];
+        $name = (string)$f['constraint_name'];
+        if (!isset($tables[$table])) continue;
+        if (!isset($fkMap[$table][$name])) {
+            $fkMap[$table][$name] = [
+                'constraint_name' => $name,
+                'referenced_table_name' => $f['referenced_table_name'],
+                'update_rule' => $f['update_rule'],
+                'delete_rule' => $f['delete_rule'],
+                'columns' => [],
+            ];
+        }
+        $fkMap[$table][$name]['columns'][] = [
+            'column_name' => $f['column_name'],
+            'referenced_column_name' => $f['referenced_column_name'],
+            'ordinal_position' => (int)$f['ordinal_position'],
+        ];
+    }
+    $fk->close();
+    foreach ($fkMap as $table => $byName) $tables[$table]['foreign_keys'] = array_values($byName);
+
+    $trigger = $db->prepare("SELECT event_object_table AS table_name, trigger_name AS trigger_name, event_manipulation AS event_manipulation, action_timing AS action_timing, action_orientation AS action_orientation, action_condition AS action_condition, action_statement AS action_statement, created AS created, sql_mode AS sql_mode, definer AS definer FROM information_schema.triggers WHERE trigger_schema=? ORDER BY event_object_table, trigger_name");
+    $trigger->bind_param('s', $database); $trigger->execute(); $tr = $trigger->get_result();
+    $triggerCount = 0;
+    while ($t = $tr->fetch_assoc()) {
+        $table = (string)$t['table_name'];
+        unset($t['table_name']);
+        if (isset($tables[$table])) {
+            $tables[$table]['triggers'][] = $t;
+            $triggerCount++;
+        }
+    }
+    $trigger->close();
+
+    if ($includeDdl) {
+        foreach ($tableOrder as $table) {
+            $escaped = str_replace('`', '``', $table);
+            $ddlRow = $db->query("SHOW CREATE TABLE `$escaped`")->fetch_assoc();
+            $tables[$table]['ddl'] = $ddlRow['Create Table'] ?? null;
+        }
+    }
+
+    $tableList = [];
+    foreach ($tableOrder as $table) $tableList[] = $tables[$table];
+
+    return [
+        'database' => $database,
+        'table_count' => count($tableList),
+        'column_count' => array_sum(array_map(static fn(array $t): int => count($t['columns']), $tableList)),
+        'index_count' => array_sum(array_map(static fn(array $t): int => count($t['indexes']), $tableList)),
+        'foreign_key_count' => array_sum(array_map(static fn(array $t): int => count($t['foreign_keys']), $tableList)),
+        'trigger_count' => $triggerCount,
+        'tables' => $tableList,
+    ];
 }
 
 function dbm_plan(array $payload): array {
@@ -258,7 +356,7 @@ function dbm_mcp_result(mixed $id, array $data): never {
 function dbm_mcp_tools(): array {
     return [
         ['name'=>'health','description'=>'Read-only connectivity check for the three authorized IMC MySQL databases.','inputSchema'=>['type'=>'object','properties'=>(object)[],'additionalProperties'=>false]],
-        ['name'=>'schema','description'=>'Read the authoritative schema of one authorized database.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'include_ddl'=>['type'=>'boolean','default'=>false]],'required'=>['target'],'additionalProperties'=>false]],
+        ['name'=>'schema','description'=>'Read the authoritative MySQL structure of one authorized database, including tables, columns, keys, indexes, foreign keys, triggers and optional table DDL.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'include_ddl'=>['type'=>'boolean','default'=>false]],'required'=>['target'],'additionalProperties'=>false]],
         ['name'=>'read_query','description'=>'Execute one read-only SELECT, SHOW, DESCRIBE or EXPLAIN query.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'sql'=>['type'=>'string'],'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>500]],'required'=>['target','sql'],'additionalProperties'=>false]],
         ['name'=>'plan_migration','description'=>'Validate a controlled MySQL migration and return a short-lived confirmation token. Does not modify the database. INSERT, UPDATE and DELETE require data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false]],'required'=>['target','migration_id','statements'],'additionalProperties'=>false]],
         ['name'=>'execute_migration','description'=>'Execute the exact previously planned migration. This modifies MySQL and requires its confirmation token. DML plans must preserve data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false],'confirmation_token'=>['type'=>'string']],'required'=>['target','migration_id','statements','confirmation_token'],'additionalProperties'=>false]],
