@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/core.php';
 
-const IMC_DBM_VERSION = '1.3.0';
+const IMC_DBM_VERSION = '1.3.1';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -135,9 +135,12 @@ function dbm_validate_write_sql(string $sql, string $database, bool $allowDestru
         throw new InvalidArgumentException('Forbidden SQL capability.');
     }
     $kind = dbm_statement_kind($sql);
-    $allowed = ['CREATE', 'ALTER', 'INSERT', 'UPDATE', 'DELETE', 'RENAME'];
+    $allowed = ['CREATE', 'ALTER', 'INSERT', 'UPDATE', 'DELETE', 'RENAME', 'DROP'];
     if (!in_array($kind, $allowed, true)) throw new InvalidArgumentException("SQL kind $kind is not allowed for migrations.");
-    $destructive = (bool)preg_match('/^\s*(DELETE\b|RENAME\b)|\b(DROP\s+(?:COLUMN|INDEX|KEY|FOREIGN\s+KEY|TABLE)|RENAME\s+(?:COLUMN|INDEX|TABLE))\b/i', $sql);
+    if ($kind === 'DROP' && !preg_match('/^\s*DROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\s*$/i', $sql)) {
+        throw new InvalidArgumentException('Only DROP TRIGGER is allowed as DROP migration SQL.');
+    }
+    $destructive = (bool)preg_match('/^\s*(DELETE\b|RENAME\b|DROP\s+TRIGGER\b)|\b(DROP\s+(?:COLUMN|INDEX|KEY|FOREIGN\s+KEY|TABLE)|RENAME\s+(?:COLUMN|INDEX|TABLE))\b/i', $sql);
     if ($destructive && !$allowDestructive) throw new InvalidArgumentException('Destructive SQL requires allow_destructive=true.');
     if (preg_match('/^\s*(DROP\s+DATABASE|TRUNCATE)\b/i', $sql)) throw new InvalidArgumentException('DROP DATABASE and TRUNCATE are forbidden.');
     return ['sql' => $sql, 'kind' => $kind, 'destructive' => $destructive, 'sha256' => hash('sha256', $sql)];
