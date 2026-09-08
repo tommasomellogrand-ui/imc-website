@@ -25,8 +25,9 @@ function out(array $x, int $s = 200): never {
 }
 function valid_gw(string $gw): bool { return (bool)preg_match('/^GW00[1-9]$/', $gw); }
 function valid_identifier(string $value): bool { return (bool)preg_match('/^[A-Za-z0-9_]+$/', $value); }
-function public_gateway_version(): string { return '1.7.0'; }
+function public_gateway_version(): string { return '1.8.0'; }
 function public_core_tables(): array { return ['gw_manager_assignments','imc_managers','clubs_game_world_id']; }
+function public_site_results_table(): string { return 'IMC Site Results'; }
 
 function competition_group_from_sm_action(mixed $value): ?string {
   $action = strtolower(trim((string)$value));
@@ -75,6 +76,11 @@ function resolve_world_table(PDO $pdo, string $gw, string $repo): string {
   $tables = discover_world_tables($pdo, $gw);
   if (!isset($tables[$repo])) throw new RuntimeException('repository_not_found');
   return $tables[$repo];
+}
+
+function resolve_public_world_table(PDO $pdo, string $gw, string $repo): string {
+  if ($repo === 'results' || $repo === 'site_results') return public_site_results_table();
+  return resolve_world_table($pdo,$gw,$repo);
 }
 
 function table_schema(PDO $pdo, string $table): array {
@@ -226,14 +232,17 @@ if ($method === 'GET') {
     if ($action === 'repositories' || $action === 'discover') {
       $tables=discover_world_tables($pdo,$gw); $repositories=[];
       foreach($tables as $repository=>$table) $repositories[]=['repository'=>$repository,'table'=>$table];
+      $repositories[]=['repository'=>'site_results','table'=>public_site_results_table(),'read_only'=>true];
       out(['ok'=>true,'action'=>'repositories','service'=>'IMC Universal Gateway','version'=>public_gateway_version(),'game_world_id'=>$gw,'repositories'=>$repositories,'count'=>count($repositories)]);
     }
     if ($action === 'schema') {
-      $table=resolve_world_table($pdo,$gw,$repo);
+      $table=resolve_public_world_table($pdo,$gw,$repo);
       out(['ok'=>true,'action'=>'schema','service'=>'IMC Universal Gateway','version'=>public_gateway_version(),'game_world_id'=>$gw,'repository'=>$repo,'table'=>$table,'columns'=>table_schema($pdo,$table),'indexes'=>table_indexes($pdo,$table)]);
     }
     if ($action !== '' && $action !== 'read' && $action !== 'public_read') out(['ok'=>false,'error'=>'unknown_public_action'],422);
-    $table=resolve_world_table($pdo,$gw,$repo); read_public_table($pdo,$table,$gw,$repo,'world');
+    $table=resolve_public_world_table($pdo,$gw,$repo);
+    if ($repo === 'results' || $repo === 'site_results') $_GET['filter_game_world_id']=$gw;
+    read_public_table($pdo,$table,$gw,$repo,'world');
   } catch(Throwable $e) { out(['ok'=>false,'error'=>$e->getMessage()],$e->getMessage()==='repository_not_found'?404:500); }
 }
 
