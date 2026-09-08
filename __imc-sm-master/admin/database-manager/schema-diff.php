@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 /*
  * IMC Database Manager - read-only Schema Diff & Structural Audit Engine.
- * Loaded by index.php. It only consumes dbm_schema() snapshots and never
- * executes mutating SQL.
+ * Loaded by index.php. It only consumes authoritative schema metadata and
+ * never executes mutating SQL.
  */
 
 function dbm_diff_normalize_name(string $value): string {
@@ -80,8 +80,7 @@ function dbm_diff_signature_set(array $items, callable $normalizer): array {
     foreach ($items as $item) {
         if (!is_array($item)) continue;
         $normalized = $normalizer($item);
-        $key = dbm_canonical($normalized);
-        $out[$key] = $normalized;
+        $out[dbm_canonical($normalized)] = $normalized;
     }
     ksort($out, SORT_STRING);
     return array_values($out);
@@ -115,15 +114,7 @@ function dbm_diff_compare_columns(array $left, array $right, array &$differences
             dbm_diff_add($differences, 'EXTRA', 'column', $name, null, $rightMap[$name], 'MEDIUM', 'Column exists only on right/candidate.');
             continue;
         }
-        $fields = [
-            'column_type' => 'HIGH',
-            'is_nullable' => 'MEDIUM',
-            'column_default' => 'MEDIUM',
-            'extra' => 'MEDIUM',
-            'character_set_name' => 'LOW',
-            'collation_name' => 'LOW',
-        ];
-        foreach ($fields as $field => $criticality) {
+        foreach (['column_type'=>'HIGH','is_nullable'=>'MEDIUM','column_default'=>'MEDIUM','extra'=>'MEDIUM','character_set_name'=>'LOW','collation_name'=>'LOW'] as $field => $criticality) {
             $lv = $leftMap[$name][$field] ?? null;
             $rv = $rightMap[$name][$field] ?? null;
             if ($lv !== $rv) dbm_diff_add($differences, 'DIFFERENT', 'column.' . $field, $name, $lv, $rv, $criticality);
@@ -136,30 +127,30 @@ function dbm_diff_compare_sets(string $type, array $leftSet, array $rightSet, ar
     $rightCanonical = [];
     foreach ($leftSet as $item) $leftCanonical[dbm_canonical($item)] = $item;
     foreach ($rightSet as $item) $rightCanonical[dbm_canonical($item)] = $item;
-    foreach ($leftCanonical as $key => $item) {
-        if (!isset($rightCanonical[$key])) dbm_diff_add($differences, 'MISSING', $type, substr(hash('sha256', $key), 0, 12), $item, null, $criticality);
-    }
-    foreach ($rightCanonical as $key => $item) {
-        if (!isset($leftCanonical[$key])) dbm_diff_add($differences, 'EXTRA', $type, substr(hash('sha256', $key), 0, 12), null, $item, $criticality);
-    }
+    foreach ($leftCanonical as $key => $item) if (!isset($rightCanonical[$key])) dbm_diff_add($differences, 'MISSING', $type, substr(hash('sha256', $key), 0, 12), $item, null, $criticality);
+    foreach ($rightCanonical as $key => $item) if (!isset($leftCanonical[$key])) dbm_diff_add($differences, 'EXTRA', $type, substr(hash('sha256', $key), 0, 12), null, $item, $criticality);
 }
 
 function dbm_diff_compare_table(array $left, array $right): array {
     $differences = [];
+
+    foreach (['engine'=>'MEDIUM','table_collation'=>'LOW'] as $field => $criticality) {
+        $lv = $left[$field] ?? null;
+        $rv = $right[$field] ?? null;
+        if ($lv !== $rv) dbm_diff_add($differences, 'DIFFERENT', 'table.' . $field, $field, $lv, $rv, $criticality);
+    }
+
     dbm_diff_compare_columns($left, $right, $differences);
 
     $leftPk = isset($left['primary_key']) && is_array($left['primary_key']) ? dbm_diff_index_signature($left['primary_key']) : null;
     $rightPk = isset($right['primary_key']) && is_array($right['primary_key']) ? dbm_diff_index_signature($right['primary_key']) : null;
     if ($leftPk !== $rightPk) dbm_diff_add($differences, 'DIFFERENT', 'primary_key', 'PRIMARY', $leftPk, $rightPk, 'HIGH');
 
-    $leftUnique = dbm_diff_signature_set((array)($left['unique_indexes'] ?? []), 'dbm_diff_index_signature');
-    $rightUnique = dbm_diff_signature_set((array)($right['unique_indexes'] ?? []), 'dbm_diff_index_signature');
-    dbm_diff_compare_sets('unique_index', $leftUnique, $rightUnique, $differences, 'HIGH');
+    dbm_diff_compare_sets('unique_index', dbm_diff_signature_set((array)($left['unique_indexes'] ?? []), 'dbm_diff_index_signature'), dbm_diff_signature_set((array)($right['unique_indexes'] ?? []), 'dbm_diff_index_signature'), $differences, 'HIGH');
 
     $leftIndexes = array_filter((array)($left['indexes'] ?? []), static fn($i): bool => is_array($i) && (($i['index_name'] ?? '') !== 'PRIMARY') && (($i['unique'] ?? false) !== true));
     $rightIndexes = array_filter((array)($right['indexes'] ?? []), static fn($i): bool => is_array($i) && (($i['index_name'] ?? '') !== 'PRIMARY') && (($i['unique'] ?? false) !== true));
     dbm_diff_compare_sets('index', dbm_diff_signature_set($leftIndexes, 'dbm_diff_index_signature'), dbm_diff_signature_set($rightIndexes, 'dbm_diff_index_signature'), $differences, 'MEDIUM');
-
     dbm_diff_compare_sets('foreign_key', dbm_diff_signature_set((array)($left['foreign_keys'] ?? []), 'dbm_diff_fk_signature'), dbm_diff_signature_set((array)($right['foreign_keys'] ?? []), 'dbm_diff_fk_signature'), $differences, 'HIGH');
     dbm_diff_compare_sets('trigger', dbm_diff_signature_set((array)($left['triggers'] ?? []), 'dbm_diff_trigger_signature'), dbm_diff_signature_set((array)($right['triggers'] ?? []), 'dbm_diff_trigger_signature'), $differences, 'HIGH');
 
@@ -175,21 +166,21 @@ function dbm_diff_compare_table(array $left, array $right): array {
         if (($diff['criticality'] ?? '') === 'MEDIUM') $maxCriticality = 'MEDIUM';
         elseif (($diff['criticality'] ?? '') === 'LOW' && $maxCriticality === 'NONE') $maxCriticality = 'LOW';
     }
-    return [
-        'status' => $differences === [] ? 'IDENTICAL' : 'DIFFERENT',
-        'difference_count' => count($differences),
-        'max_criticality' => $maxCriticality,
-        'differences' => $differences,
-    ];
+    return ['status'=>$differences===[]?'IDENTICAL':'DIFFERENT','difference_count'=>count($differences),'max_criticality'=>$maxCriticality,'differences'=>$differences];
 }
 
 function dbm_diff_load_side(string $target, ?string $table): array {
     [$database, $db] = dbm_storage($target);
-    $schema = dbm_schema($db, $database, true);
-    if ($table === null || $table === '') return ['target'=>$target, 'database'=>$database, 'table'=>null, 'structure'=>$schema];
+    $schema = dbm_schema($db, $database, false);
+    if ($table === null || $table === '') return ['target'=>$target,'database'=>$database,'table'=>null,'structure'=>$schema];
     $map = dbm_diff_table_map($schema);
-    if (!isset($map[$table])) return ['target'=>$target, 'database'=>$database, 'table'=>$table, 'structure'=>null];
-    return ['target'=>$target, 'database'=>$database, 'table'=>$table, 'structure'=>$map[$table]];
+    if (!isset($map[$table])) return ['target'=>$target,'database'=>$database,'table'=>$table,'structure'=>null];
+    $escaped = str_replace('`', '``', $table);
+    $ddlResult = $db->query("SHOW CREATE TABLE `$escaped`");
+    $ddlRow = $ddlResult->fetch_assoc();
+    $ddlResult->free();
+    $map[$table]['ddl'] = $ddlRow['Create Table'] ?? null;
+    return ['target'=>$target,'database'=>$database,'table'=>$table,'structure'=>$map[$table]];
 }
 
 function dbm_schema_diff(array $payload): array {
@@ -204,7 +195,7 @@ function dbm_schema_diff(array $payload): array {
     if (!$hasReference && $rightTarget === '') throw new InvalidArgumentException('right_target or reference_schema is required.');
 
     if ($hasReference) {
-        $right = ['target'=>'reference', 'database'=>null, 'table'=>isset($payload['right_table']) ? trim((string)$payload['right_table']) : null, 'structure'=>$payload['reference_schema']];
+        $right = ['target'=>'reference','database'=>null,'table'=>isset($payload['right_table'])?trim((string)$payload['right_table']):null,'structure'=>$payload['reference_schema']];
     } else {
         $rightTable = isset($payload['right_table']) ? trim((string)$payload['right_table']) : null;
         $right = dbm_diff_load_side($rightTarget, $rightTable);
@@ -215,11 +206,14 @@ function dbm_schema_diff(array $payload): array {
     if ($leftIsTable !== $rightIsTable && !$hasReference) throw new InvalidArgumentException('Compare table-to-table or database-to-database; both sides must use the same scope.');
 
     if ($leftIsTable || ($hasReference && isset($right['structure']['columns']))) {
+        if ($left['structure'] === null && $right['structure'] === null) {
+            return ['status'=>'MISSING','objects'=>['left'=>$left,'right'=>$right],'difference_count'=>1,'max_criticality'=>'HIGH','differences'=>[['status'=>'MISSING','object_type'=>'table','object_name'=>(string)$left['table'],'criticality'=>'HIGH','detail'=>'Both requested table structures are missing.','left'=>null,'right'=>null]]];
+        }
         if ($left['structure'] === null) {
-            return ['status'=>'MISSING','objects'=>['left'=>$left,'right'=>$right],'difference_count'=>1,'max_criticality'=>'HIGH','differences'=>[['status'=>'MISSING','object_type'=>'table','object_name'=>(string)$left['table'],'criticality'=>'HIGH','detail'=>'Left/reference table is missing.','left'=>null,'right'=>$right['structure']]]];
+            return ['status'=>'EXTRA','objects'=>['left'=>$left,'right'=>$right],'difference_count'=>1,'max_criticality'=>'MEDIUM','differences'=>[['status'=>'EXTRA','object_type'=>'table','object_name'=>(string)$right['table'],'criticality'=>'MEDIUM','detail'=>'Table exists only on right/candidate.','left'=>null,'right'=>$right['structure']]]];
         }
         if ($right['structure'] === null) {
-            return ['status'=>'MISSING','objects'=>['left'=>$left,'right'=>$right],'difference_count'=>1,'max_criticality'=>'HIGH','differences'=>[['status'=>'MISSING','object_type'=>'table','object_name'=>(string)$right['table'],'criticality'=>'HIGH','detail'=>'Right/candidate table is missing.','left'=>$left['structure'],'right'=>null]]];
+            return ['status'=>'MISSING','objects'=>['left'=>$left,'right'=>$right],'difference_count'=>1,'max_criticality'=>'HIGH','differences'=>[['status'=>'MISSING','object_type'=>'table','object_name'=>(string)$right['table'],'criticality'=>'HIGH','detail'=>'Table exists on left/reference but is missing on right/candidate.','left'=>$left['structure'],'right'=>null]]];
         }
         $comparison = dbm_diff_compare_table($left['structure'], $right['structure']);
         return ['objects'=>['left'=>['target'=>$left['target'],'database'=>$left['database'],'table'=>$left['table']], 'right'=>['target'=>$right['target'],'database'=>$right['database'],'table'=>$right['table']]]] + $comparison;
@@ -257,11 +251,11 @@ function dbm_schema_diff(array $payload): array {
         elseif (($diff['criticality'] ?? '') === 'LOW' && $maxCriticality === 'NONE') $maxCriticality = 'LOW';
     }
     return [
-        'status' => $differences === [] ? 'IDENTICAL' : 'DIFFERENT',
-        'objects' => ['left'=>['target'=>$left['target'],'database'=>$left['database']], 'right'=>['target'=>$right['target'],'database'=>$right['database']]],
-        'difference_count' => count($differences),
-        'max_criticality' => $maxCriticality,
-        'table_results' => $tableResults,
-        'differences' => $differences,
+        'status'=>$differences===[]?'IDENTICAL':'DIFFERENT',
+        'objects'=>['left'=>['target'=>$left['target'],'database'=>$left['database']], 'right'=>['target'=>$right['target'],'database'=>$right['database']]],
+        'difference_count'=>count($differences),
+        'max_criticality'=>$maxCriticality,
+        'table_results'=>$tableResults,
+        'differences'=>$differences,
     ];
 }
