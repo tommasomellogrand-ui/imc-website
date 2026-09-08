@@ -127,7 +127,7 @@ function dbm_assert_no_cross_database(string $sql, string $database): void {
     }
 }
 
-function dbm_validate_write_sql(string $sql, string $database, bool $allowDestructive): array {
+function dbm_validate_write_sql(string $sql, string $database, bool $allowDestructive, bool $dataMigration): array {
     $sql = dbm_strip_sql($sql);
     dbm_assert_single_statement($sql);
     dbm_assert_no_cross_database($sql, $database);
@@ -137,6 +137,9 @@ function dbm_validate_write_sql(string $sql, string $database, bool $allowDestru
     $kind = dbm_statement_kind($sql);
     $allowed = ['CREATE', 'ALTER', 'INSERT', 'UPDATE', 'DELETE', 'RENAME', 'DROP'];
     if (!in_array($kind, $allowed, true)) throw new InvalidArgumentException("SQL kind $kind is not allowed for migrations.");
+    if (in_array($kind, ['INSERT', 'UPDATE', 'DELETE'], true) && !$dataMigration) {
+        throw new InvalidArgumentException('INSERT, UPDATE and DELETE require data_migration=true for an explicit data migration or backfill.');
+    }
     if ($kind === 'DROP' && !preg_match('/^\s*DROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\s*$/i', $sql)) {
         throw new InvalidArgumentException('Only DROP TRIGGER is allowed as DROP migration SQL.');
     }
@@ -199,12 +202,13 @@ function dbm_plan(array $payload): array {
     $statements = $payload['statements'] ?? null;
     if (!is_array($statements) || $statements === [] || count($statements) > 50) throw new InvalidArgumentException('statements must contain 1 to 50 items.');
     $allowDestructive = ($payload['allow_destructive'] ?? false) === true;
+    $dataMigration = ($payload['data_migration'] ?? false) === true;
     $validated = [];
     foreach ($statements as $sql) {
         if (!is_string($sql)) throw new InvalidArgumentException('Every statement must be a string.');
-        $validated[] = dbm_validate_write_sql($sql, $database, $allowDestructive);
+        $validated[] = dbm_validate_write_sql($sql, $database, $allowDestructive, $dataMigration);
     }
-    $plan = ['target' => $target, 'database' => $database, 'migration_id' => $migrationId, 'allow_destructive' => $allowDestructive, 'statements' => array_column($validated, 'sql')];
+    $plan = ['target' => $target, 'database' => $database, 'migration_id' => $migrationId, 'allow_destructive' => $allowDestructive, 'data_migration' => $dataMigration, 'statements' => array_column($validated, 'sql')];
     $hash = hash('sha256', dbm_canonical($plan));
     $expires = time() + IMC_DBM_PLAN_TTL;
     $signature = hash_hmac('sha256', $hash . '|' . $expires, dbm_secret());
@@ -256,8 +260,8 @@ function dbm_mcp_tools(): array {
         ['name'=>'health','description'=>'Read-only connectivity check for the three authorized IMC MySQL databases.','inputSchema'=>['type'=>'object','properties'=>(object)[],'additionalProperties'=>false]],
         ['name'=>'schema','description'=>'Read the authoritative schema of one authorized database.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'include_ddl'=>['type'=>'boolean','default'=>false]],'required'=>['target'],'additionalProperties'=>false]],
         ['name'=>'read_query','description'=>'Execute one read-only SELECT, SHOW, DESCRIBE or EXPLAIN query.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'sql'=>['type'=>'string'],'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>500]],'required'=>['target','sql'],'additionalProperties'=>false]],
-        ['name'=>'plan_migration','description'=>'Validate a controlled MySQL migration and return a short-lived confirmation token. Does not modify the database.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false]],'required'=>['target','migration_id','statements'],'additionalProperties'=>false]],
-        ['name'=>'execute_migration','description'=>'Execute the exact previously planned migration. This modifies MySQL and requires its confirmation token.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'confirmation_token'=>['type'=>'string']],'required'=>['target','migration_id','statements','confirmation_token'],'additionalProperties'=>false]],
+        ['name'=>'plan_migration','description'=>'Validate a controlled MySQL migration and return a short-lived confirmation token. Does not modify the database. INSERT, UPDATE and DELETE require data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false]],'required'=>['target','migration_id','statements'],'additionalProperties'=>false]],
+        ['name'=>'execute_migration','description'=>'Execute the exact previously planned migration. This modifies MySQL and requires its confirmation token. DML plans must preserve data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false],'confirmation_token'=>['type'=>'string']],'required'=>['target','migration_id','statements','confirmation_token'],'additionalProperties'=>false]],
         ['name'=>'history','description'=>'Read the protected Database Manager audit history.','inputSchema'=>['type'=>'object','properties'=>['limit'=>['type'=>'integer','minimum'=>1,'maximum'=>200]],'additionalProperties'=>false]],
     ];
 }
@@ -287,12 +291,12 @@ function dbm_execute_plan(array $payload): array {
     try {
         foreach ($plan['statements'] as $index => $sql) $results[] = ['statement'=>$index+1,'sha256'=>hash('sha256',$sql)] + dbm_query($db,$sql,1);
         $after = dbm_schema($db, $database, false);
-        $record = ['action'=>'execute_migration','target'=>$plan['target'],'database'=>$database,'migration_id'=>$plan['migration_id'],'plan_sha256'=>$verified['plan_sha256'],'status'=>'success','statement_count'=>count($plan['statements']),'duration_ms'=>(int)round((microtime(true)-$started)*1000),'before'=>['tables'=>$before['table_count'],'columns'=>$before['column_count']],'after'=>['tables'=>$after['table_count'],'columns'=>$after['column_count']]];
+        $record = ['action'=>'execute_migration','target'=>$plan['target'],'database'=>$database,'migration_id'=>$plan['migration_id'],'data_migration'=>$plan['data_migration'],'plan_sha256'=>$verified['plan_sha256'],'status'=>'success','statement_count'=>count($plan['statements']),'duration_ms'=>(int)round((microtime(true)-$started)*1000),'before'=>['tables'=>$before['table_count'],'columns'=>$before['column_count']],'after'=>['tables'=>$after['table_count'],'columns'=>$after['column_count']]];
         dbm_audit($record);
         if (file_put_contents($marker,json_encode($record,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),LOCK_EX)===false) throw new RuntimeException('Migration completed but idempotency marker could not be written.');
         return ['ok'=>true]+$record+['results'=>$results];
     } catch (Throwable $e) {
-        dbm_audit(['action'=>'execute_migration','target'=>$plan['target'],'database'=>$database,'migration_id'=>$plan['migration_id'],'plan_sha256'=>$verified['plan_sha256'],'status'=>'failed','completed_statements'=>count($results),'error'=>$e->getMessage()]);
+        dbm_audit(['action'=>'execute_migration','target'=>$plan['target'],'database'=>$database,'migration_id'=>$plan['migration_id'],'data_migration'=>$plan['data_migration'],'plan_sha256'=>$verified['plan_sha256'],'status'=>'failed','completed_statements'=>count($results),'error'=>$e->getMessage()]);
         throw $e;
     }
 }
@@ -309,7 +313,7 @@ function dbm_handle_mcp(array $request): never {
     if ($name === 'health') dbm_mcp_result($id, dbm_health_data());
     if ($name === 'schema') { [$database,$db]=dbm_storage((string)($args['target']??'')); $data=dbm_schema($db,$database,($args['include_ddl']??false)===true); dbm_audit(['action'=>'schema','target'=>$args['target'],'database'=>$database,'status'=>'success']); dbm_mcp_result($id,['ok'=>true,'schema'=>$data]); }
     if ($name === 'read_query') { $target=(string)($args['target']??''); [$database,$db]=dbm_storage($target); $sql=dbm_validate_read_sql((string)($args['sql']??''),$database); $result=dbm_query($db,$sql,min(max((int)($args['limit']??500),1),500)); dbm_audit(['action'=>'query','target'=>$target,'database'=>$database,'status'=>'success','sql_sha256'=>hash('sha256',$sql)]); dbm_mcp_result($id,['ok'=>true,'target'=>$target,'database'=>$database,'result'=>$result]); }
-    if ($name === 'plan_migration') { $plan=dbm_plan($args); dbm_audit(['action'=>'plan_migration','target'=>$plan['plan']['target'],'database'=>$plan['plan']['database'],'migration_id'=>$plan['plan']['migration_id'],'plan_sha256'=>$plan['plan_sha256'],'status'=>'planned']); dbm_mcp_result($id,['ok'=>true]+$plan); }
+    if ($name === 'plan_migration') { $plan=dbm_plan($args); dbm_audit(['action'=>'plan_migration','target'=>$plan['plan']['target'],'database'=>$plan['plan']['database'],'migration_id'=>$plan['plan']['migration_id'],'data_migration'=>$plan['plan']['data_migration'],'plan_sha256'=>$plan['plan_sha256'],'status'=>'planned']); dbm_mcp_result($id,['ok'=>true]+$plan); }
     if ($name === 'execute_migration') dbm_mcp_result($id,dbm_execute_plan($args));
     if ($name === 'history') dbm_mcp_result($id,['ok'=>true,'history'=>dbm_history((int)($args['limit']??50))]);
     dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'error'=>['code'=>-32602,'message'=>'Unknown tool']],200);
@@ -345,7 +349,7 @@ try {
 
     if ($action === 'plan_migration') {
         $plan = dbm_plan($payload);
-        dbm_audit(['action' => $action, 'target' => $plan['plan']['target'], 'database' => $plan['plan']['database'], 'migration_id' => $plan['plan']['migration_id'], 'plan_sha256' => $plan['plan_sha256'], 'status' => 'planned']);
+        dbm_audit(['action' => $action, 'target' => $plan['plan']['target'], 'database' => $plan['plan']['database'], 'migration_id' => $plan['plan']['migration_id'], 'data_migration' => $plan['plan']['data_migration'], 'plan_sha256' => $plan['plan_sha256'], 'status' => 'planned']);
         dbm_reply(['ok' => true, 'action' => $action] + $plan);
     }
 
