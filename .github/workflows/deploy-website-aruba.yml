@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for i in $(seq 1 9); do
+          for i in $(seq 1 10); do
             n=$(printf "%03d" "$i")
             d="gameworld${n}"
             sed -i "s/BUILD_ID/${GITHUB_SHA}/g" "$d/index.html"
@@ -44,7 +44,7 @@ jobs:
           test -s sensible-soccer-academy/index.html
           test -s sensible-soccer-academy/save.php
           test -s sensible-soccer-academy/replay/index.html
-          for i in $(seq 1 9); do
+          for i in $(seq 1 10); do
             n=$(printf "%03d" "$i")
             d="gameworld${n}"
             test -s "$d/index.html"
@@ -105,7 +105,7 @@ jobs:
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
           files += [p for p in sorted(Path('sensible-soccer-academy').rglob('*')) if p.is_file()]
-          for i in range(1,10):
+          for i in range(1,11):
               d=Path(f'gameworld{i:03d}')
               files += [d/'index.html', d/'config.js', d/'app-core.js', d/'pilot-theme.css', d/'.htaccess']
           files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('api/imc-data/v1/site-ready.php'),Path('api/imc-data/v1/.htaccess'),Path('__imc-gateway/__imc-gateway/index.php'),Path('__imc-sm-master/admin/database-manager/normalizer.php')]
