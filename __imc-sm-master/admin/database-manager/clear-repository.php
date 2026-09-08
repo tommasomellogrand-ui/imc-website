@@ -156,3 +156,5 @@ try {
     }
     clear_reply(['ok' => false, 'error' => $e->getMessage()], $status);
 }
+
+// Deploy marker: Schedule competition_key migration
