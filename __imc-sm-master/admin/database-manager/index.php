@@ -258,7 +258,6 @@ function dbm_mcp_tools(): array {
         ['name'=>'read_query','description'=>'Execute one read-only SELECT, SHOW, DESCRIBE or EXPLAIN query.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'sql'=>['type'=>'string'],'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>500]],'required'=>['target','sql'],'additionalProperties'=>false]],
         ['name'=>'plan_migration','description'=>'Validate a controlled MySQL migration and return a short-lived confirmation token. Does not modify the database.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false]],'required'=>['target','migration_id','statements'],'additionalProperties'=>false]],
         ['name'=>'execute_migration','description'=>'Execute the exact previously planned migration. This modifies MySQL and requires its confirmation token.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'confirmation_token'=>['type'=>'string']],'required'=>['target','migration_id','statements','confirmation_token'],'additionalProperties'=>false]],
-        ['name'=>'clear_repository','description'=>'Clear all rows from one whitelisted Game World repository using automatic Game World routing.','inputSchema'=>['type'=>'object','properties'=>['game_world_id'=>['type'=>'string','pattern'=>'^GW00[1-9]$'],'repository'=>['type'=>'string']],'required'=>['game_world_id','repository'],'additionalProperties'=>false]],
         ['name'=>'history','description'=>'Read the protected Database Manager audit history.','inputSchema'=>['type'=>'object','properties'=>['limit'=>['type'=>'integer','minimum'=>1,'maximum'=>200]],'additionalProperties'=>false]],
     ];
 }
@@ -298,71 +297,6 @@ function dbm_execute_plan(array $payload): array {
     }
 }
 
-function dbm_clear_repository(array $payload): array {
-    $gameWorldId = strtoupper(trim((string)($payload['game_world_id'] ?? '')));
-    $repository = strtolower(trim((string)($payload['repository'] ?? '')));
-    if (!preg_match('/^GW00[1-9]$/', $gameWorldId)) throw new InvalidArgumentException('Invalid game_world_id.');
-
-    $allowedRepositories = [
-        'results',
-        'schedule',
-        'match_report',
-        'match_report_team_stats',
-        'match_report_players',
-        'match_report_events',
-        'match_report_tactics',
-        'match_report_commentary',
-        'player_codex',
-        'player_codex_roster',
-        'player_codex_stats',
-        'player_codex_rating_history',
-        'player_codex_transfer_history',
-        'player_codex_injury_history',
-        'player_codex_snapshots',
-        'transfers',
-        'imc transfers',
-    ];
-    if (!in_array($repository, $allowedRepositories, true)) throw new InvalidArgumentException('Repository not enabled for clear_repository.');
-
-    $custom = ['GW001','GW004','GW005','GW006','GW009'];
-    $gold = ['GW002','GW003','GW007','GW008'];
-    if (in_array($gameWorldId, $custom, true)) $target = 'custom';
-    elseif (in_array($gameWorldId, $gold, true)) $target = 'gold';
-    else throw new InvalidArgumentException('Game World routing unavailable.');
-
-    [$database, $db] = dbm_storage($target);
-    $table = $gameWorldId . '_' . ($repository === 'imc transfers' ? 'IMC Transfers' : $repository);
-    $stmt = $db->prepare('SELECT COUNT(*) c FROM information_schema.tables WHERE table_schema=? AND table_name=? AND table_type=\'BASE TABLE\'');
-    $stmt->bind_param('ss', $database, $table);
-    $stmt->execute();
-    $exists = (int)($stmt->get_result()->fetch_assoc()['c'] ?? 0);
-    $stmt->close();
-    if ($exists !== 1) throw new RuntimeException('Repository table not found.', 404);
-
-    $escaped = str_replace('`', '``', $table);
-    $before = (int)($db->query("SELECT COUNT(*) c FROM `$escaped`")->fetch_assoc()['c'] ?? 0);
-    $started = microtime(true);
-    $db->query("DELETE FROM `$escaped`");
-    $deleted = $db->affected_rows;
-    $after = (int)($db->query("SELECT COUNT(*) c FROM `$escaped`")->fetch_assoc()['c'] ?? 0);
-    $record = [
-        'action'=>'clear_repository',
-        'target'=>$target,
-        'database'=>$database,
-        'game_world_id'=>$gameWorldId,
-        'repository'=>$repository,
-        'table'=>$table,
-        'before'=>$before,
-        'deleted'=>$deleted,
-        'after'=>$after,
-        'status'=>$after === 0 ? 'success' : 'failed',
-        'duration_ms'=>(int)round((microtime(true)-$started)*1000),
-    ];
-    dbm_audit($record);
-    if ($after !== 0) throw new RuntimeException('Repository clear verification failed.', 500);
-    return ['ok'=>true] + $record;
-}
-
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -377,7 +311,6 @@ function dbm_handle_mcp(array $request): never {
     if ($name === 'read_query') { $target=(string)($args['target']??''); [$database,$db]=dbm_storage($target); $sql=dbm_validate_read_sql((string)($args['sql']??''),$database); $result=dbm_query($db,$sql,min(max((int)($args['limit']??500),1),500)); dbm_audit(['action'=>'query','target'=>$target,'database'=>$database,'status'=>'success','sql_sha256'=>hash('sha256',$sql)]); dbm_mcp_result($id,['ok'=>true,'target'=>$target,'database'=>$database,'result'=>$result]); }
     if ($name === 'plan_migration') { $plan=dbm_plan($args); dbm_audit(['action'=>'plan_migration','target'=>$plan['plan']['target'],'database'=>$plan['plan']['database'],'migration_id'=>$plan['plan']['migration_id'],'plan_sha256'=>$plan['plan_sha256'],'status'=>'planned']); dbm_mcp_result($id,['ok'=>true]+$plan); }
     if ($name === 'execute_migration') dbm_mcp_result($id,dbm_execute_plan($args));
-    if ($name === 'clear_repository') dbm_mcp_result($id,dbm_clear_repository($args));
     if ($name === 'history') dbm_mcp_result($id,['ok'=>true,'history'=>dbm_history((int)($args['limit']??50))]);
     dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'error'=>['code'=>-32602,'message'=>'Unknown tool']],200);
 }
@@ -418,10 +351,6 @@ try {
 
     if ($action === 'execute_migration') {
         dbm_reply(dbm_execute_plan($payload));
-    }
-
-    if ($action === 'clear_repository') {
-        dbm_reply(dbm_clear_repository($payload));
     }
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);

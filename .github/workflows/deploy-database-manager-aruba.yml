@@ -29,9 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           test -s __imc-sm-master/admin/database-manager/index.php
-          test -s __imc-sm-master/admin/database-manager/clear-repository.php
           php -l __imc-sm-master/admin/database-manager/index.php
-          php -l __imc-sm-master/admin/database-manager/clear-repository.php
 
       - name: Validate Aruba secrets
         env:
@@ -90,9 +88,18 @@ jobs:
                       ftp.mkd(part)
                       ftp.cwd(part)
 
+          database_manager_remote=f"{remote_root.rstrip('/')}/__imc-sm-master/admin/database-manager"
+          ensure_dir(database_manager_remote)
+          try:
+              ftp.delete('clear-repository.php')
+              print('Rimosso da Aruba: clear-repository.php')
+          except error_perm as e:
+              if not str(e).startswith('550'):
+                  raise
+              print('clear-repository.php già assente su Aruba')
+
           files = [
               Path('__imc-sm-master/admin/database-manager/index.php'),
-              Path('__imc-sm-master/admin/database-manager/clear-repository.php'),
           ]
 
           for local in files:
