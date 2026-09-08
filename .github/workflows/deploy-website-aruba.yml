@@ -39,6 +39,7 @@ jobs:
           test -s index.html
           test -s site-assets/css/imc-site.css
           test -s site-assets/js/imc-site.js
+          test -s site-assets/js/gw004-public-data-beta.js
           test -s site-assets/images/imc-logo.png
           test -s sensible-soccer-academy/index.html
           test -s sensible-soccer-academy/save.php
@@ -55,6 +56,9 @@ jobs:
           done
           test -s api/imc-gateway/index.php
           test -s api/imc-gateway/config.php
+          test -s api/imc-data/v1/site-ready.php
+          test -s api/imc-data/v1/.htaccess
+          php -l api/imc-data/v1/site-ready.php
           test -s __imc-gateway/__imc-gateway/index.php
           test -s __imc-sm-master/admin/database-manager/normalizer.php
 
@@ -104,7 +108,7 @@ jobs:
           for i in range(1,10):
               d=Path(f'gameworld{i:03d}')
               files += [d/'index.html', d/'config.js', d/'app-core.js', d/'pilot-theme.css', d/'.htaccess']
-          files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('__imc-gateway/__imc-gateway/index.php'),Path('__imc-sm-master/admin/database-manager/normalizer.php')]
+          files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('api/imc-data/v1/site-ready.php'),Path('api/imc-data/v1/.htaccess'),Path('__imc-gateway/__imc-gateway/index.php'),Path('__imc-sm-master/admin/database-manager/normalizer.php')]
           for local in files:
               rel=local.as_posix(); parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f"{remote_root.rstrip('/')}/{parent}"
               ensure_dir(dest); data=local.read_bytes()
