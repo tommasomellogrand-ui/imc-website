@@ -29,7 +29,9 @@ jobs:
         run: |
           set -euo pipefail
           test -s __imc-sm-master/admin/database-manager/index.php
+          test -s __imc-sm-master/admin/database-manager/schema-diff.php
           php -l __imc-sm-master/admin/database-manager/index.php
+          php -l __imc-sm-master/admin/database-manager/schema-diff.php
 
       - name: Validate Aruba secrets
         env:
@@ -100,6 +102,7 @@ jobs:
 
           files = [
               Path('__imc-sm-master/admin/database-manager/index.php'),
+              Path('__imc-sm-master/admin/database-manager/schema-diff.php'),
           ]
 
           for local in files:
