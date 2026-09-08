@@ -1,1 +1,1 @@
-window.IMC_GAME_WORLD={gameWorldId:'GW010',worldName:'Sensible Soccer Academy',mode:'single_league',usesSmCountry:false};
+window.IMC_GAME_WORLD={id:'GW010',name:'Game word 010'};

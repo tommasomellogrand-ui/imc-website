@@ -1,1 +1,1 @@
-window.IMC_GAME_WORLD={gameWorldId:'GW008',worldName:'GOLD 1',mode:'multi_league',usesSmCountry:true};
+window.IMC_GAME_WORLD={id:'GW008',name:'Game word 008'};

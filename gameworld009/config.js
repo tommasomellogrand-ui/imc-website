@@ -1,1 +1,1 @@
-window.IMC_GAME_WORLD={gameWorldId:'GW009',worldName:'KICK OFF',mode:'single_league',usesSmCountry:false};
+window.IMC_GAME_WORLD={id:'GW009',name:'Game word 009'};

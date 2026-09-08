@@ -23,13 +23,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for i in $(seq 1 10); do
+          sed -i "s/BUILD_ID/${GITHUB_SHA}/g" site-assets/gameworld/app-core.js || true
+          for i in $(seq 1 15); do
             n=$(printf "%03d" "$i")
             d="gameworld${n}"
             sed -i "s/BUILD_ID/${GITHUB_SHA}/g" "$d/index.html"
             grep -Fq "pilot-theme.css?v=${GITHUB_SHA}" "$d/index.html"
             grep -Fq "config.js?v=${GITHUB_SHA}" "$d/index.html"
-            grep -Fq "app-core.js?v=${GITHUB_SHA}" "$d/index.html"
+            grep -Fq "/site-assets/gameworld/app-core.js?v=${GITHUB_SHA}" "$d/index.html"
           done
 
       - name: Validate package
@@ -39,23 +40,23 @@ jobs:
           test -s index.html
           test -s site-assets/css/imc-site.css
           test -s site-assets/js/imc-site.js
-          test -s site-assets/js/gw004-public-data-beta.js
           test -s site-assets/images/imc-logo.png
+          test -s site-assets/gameworld/app-core.js
           test -s sensible-soccer-academy/index.html
           test -s sensible-soccer-academy/save.php
           test -s sensible-soccer-academy/replay/index.html
           test -s sensible-soccer-academy/draw/index.html
           test -s sensible-soccer-academy/draw/save.php
           php -l sensible-soccer-academy/draw/save.php
-          for i in $(seq 1 10); do
+          for i in $(seq 1 15); do
             n=$(printf "%03d" "$i")
             d="gameworld${n}"
             test -s "$d/index.html"
             test -s "$d/config.js"
-            test -s "$d/app-core.js"
             test -s "$d/pilot-theme.css"
             test -s "$d/.htaccess"
             grep -Fq "GW${n}" "$d/config.js"
+            grep -Fq "Game word ${n}" "$d/config.js"
           done
           test -s api/imc-gateway/index.php
           test -s api/imc-gateway/config.php
@@ -104,19 +105,31 @@ jobs:
               for part in [p for p in remote_path.split('/') if p]:
                   try: ftp.cwd(part)
                   except error_perm: ftp.mkd(part); ftp.cwd(part)
-          gw010_draw=f"{remote_root}/gameworld010/draw"
-          for name in ('index.html','save.php','replay-data.json','replay-data.json.tmp'):
-              try: ftp.delete(f"{gw010_draw}/{name}")
-              except error_perm: pass
-          try: ftp.rmd(gw010_draw)
-          except error_perm: pass
+          def clear_dir(remote_path):
+              try:
+                  names=ftp.nlst(remote_path)
+              except error_perm:
+                  return
+              for item in names:
+                  name=item.rsplit('/',1)[-1]
+                  if name in ('.','..'): continue
+                  try:
+                      ftp.delete(item)
+                  except error_perm:
+                      clear_dir(item)
+                      try: ftp.rmd(item)
+                      except error_perm: pass
+          for i in range(1,16):
+              remote=f"{remote_root}/gameworld{i:03d}"
+              clear_dir(remote)
+              ensure_dir(remote)
           excluded={'site-assets/css/game-world.css','site-assets/css/gameworld-engine.css','site-assets/js/gameworld-engine.js','site-assets/js/imc-data-service.js','site-assets/js/team-hub-detail.js'}
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
           files += [p for p in sorted(Path('sensible-soccer-academy').rglob('*')) if p.is_file()]
-          for i in range(1,11):
+          for i in range(1,16):
               d=Path(f'gameworld{i:03d}')
-              files += [d/'index.html', d/'config.js', d/'app-core.js', d/'pilot-theme.css', d/'.htaccess']
+              files += [d/'index.html', d/'config.js', d/'pilot-theme.css', d/'.htaccess']
           files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('api/imc-data/v1/site-ready.php'),Path('api/imc-data/v1/.htaccess'),Path('__imc-gateway/__imc-gateway/index.php'),Path('__imc-sm-master/admin/database-manager/normalizer.php')]
           for local in files:
               rel=local.as_posix(); parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f"{remote_root.rstrip('/')}/{parent}"

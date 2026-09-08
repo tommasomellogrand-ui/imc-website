@@ -1,1 +1,1 @@
-window.IMC_GAME_WORLD={gameWorldId:'GW005',worldName:'HALL OF FAMERS',mode:'single_league',usesSmCountry:false};
+window.IMC_GAME_WORLD={id:'GW005',name:'Game word 005'};
