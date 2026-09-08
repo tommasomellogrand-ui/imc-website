@@ -8,8 +8,9 @@ declare(strict_types=1);
  */
 
 require dirname(__DIR__) . '/core.php';
+require __DIR__ . '/schema-diff.php';
 
-const IMC_DBM_VERSION = '1.3.2';
+const IMC_DBM_VERSION = '1.4.0';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -357,6 +358,7 @@ function dbm_mcp_tools(): array {
     return [
         ['name'=>'health','description'=>'Read-only connectivity check for the three authorized IMC MySQL databases.','inputSchema'=>['type'=>'object','properties'=>(object)[],'additionalProperties'=>false]],
         ['name'=>'schema','description'=>'Read the authoritative MySQL structure of one authorized database, including tables, columns, keys, indexes, foreign keys, triggers and optional table DDL.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'include_ddl'=>['type'=>'boolean','default'=>false]],'required'=>['target'],'additionalProperties'=>false]],
+        ['name'=>'schema_diff','description'=>'Read-only structural comparison between MySQL schemas/tables or an explicitly supplied reference schema. Reports IDENTICAL, MISSING, EXTRA and DIFFERENT without applying corrections.','inputSchema'=>['type'=>'object','properties'=>['left_target'=>['type'=>'string','enum'=>['core','gold','custom']],'left_table'=>['type'=>'string'],'right_target'=>['type'=>'string','enum'=>['core','gold','custom']],'right_table'=>['type'=>'string'],'reference_schema'=>['type'=>'object']], 'required'=>['left_target'],'additionalProperties'=>false]],
         ['name'=>'read_query','description'=>'Execute one read-only SELECT, SHOW, DESCRIBE or EXPLAIN query.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'sql'=>['type'=>'string'],'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>500]],'required'=>['target','sql'],'additionalProperties'=>false]],
         ['name'=>'plan_migration','description'=>'Validate a controlled MySQL migration and return a short-lived confirmation token. Does not modify the database. INSERT, UPDATE and DELETE require data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false]],'required'=>['target','migration_id','statements'],'additionalProperties'=>false]],
         ['name'=>'execute_migration','description'=>'Execute the exact previously planned migration. This modifies MySQL and requires its confirmation token. DML plans must preserve data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false],'confirmation_token'=>['type'=>'string']],'required'=>['target','migration_id','statements','confirmation_token'],'additionalProperties'=>false]],
@@ -410,6 +412,7 @@ function dbm_handle_mcp(array $request): never {
     $name = (string)($params['name'] ?? ''); $args = is_array($params['arguments'] ?? null) ? $params['arguments'] : [];
     if ($name === 'health') dbm_mcp_result($id, dbm_health_data());
     if ($name === 'schema') { [$database,$db]=dbm_storage((string)($args['target']??'')); $data=dbm_schema($db,$database,($args['include_ddl']??false)===true); dbm_audit(['action'=>'schema','target'=>$args['target'],'database'=>$database,'status'=>'success']); dbm_mcp_result($id,['ok'=>true,'schema'=>$data]); }
+    if ($name === 'schema_diff') { $data=dbm_schema_diff($args); dbm_audit(['action'=>'schema_diff','left_target'=>$args['left_target']??null,'left_table'=>$args['left_table']??null,'right_target'=>$args['right_target']??null,'right_table'=>$args['right_table']??null,'status'=>'success','difference_count'=>$data['difference_count']??null]); dbm_mcp_result($id,['ok'=>true,'diff'=>$data]); }
     if ($name === 'read_query') { $target=(string)($args['target']??''); [$database,$db]=dbm_storage($target); $sql=dbm_validate_read_sql((string)($args['sql']??''),$database); $result=dbm_query($db,$sql,min(max((int)($args['limit']??500),1),500)); dbm_audit(['action'=>'query','target'=>$target,'database'=>$database,'status'=>'success','sql_sha256'=>hash('sha256',$sql)]); dbm_mcp_result($id,['ok'=>true,'target'=>$target,'database'=>$database,'result'=>$result]); }
     if ($name === 'plan_migration') { $plan=dbm_plan($args); dbm_audit(['action'=>'plan_migration','target'=>$plan['plan']['target'],'database'=>$plan['plan']['database'],'migration_id'=>$plan['plan']['migration_id'],'data_migration'=>$plan['plan']['data_migration'],'plan_sha256'=>$plan['plan_sha256'],'status'=>'planned']); dbm_mcp_result($id,['ok'=>true]+$plan); }
     if ($name === 'execute_migration') dbm_mcp_result($id,dbm_execute_plan($args));
@@ -434,6 +437,12 @@ try {
         $schema = dbm_schema($db, $database, $includeDdl);
         dbm_audit(['action' => $action, 'target' => $target, 'database' => $database, 'status' => 'success', 'include_ddl' => $includeDdl]);
         dbm_reply(['ok' => true, 'action' => $action, 'schema' => $schema]);
+    }
+
+    if ($action === 'schema_diff') {
+        $diff = dbm_schema_diff($payload);
+        dbm_audit(['action'=>$action,'left_target'=>$payload['left_target']??null,'left_table'=>$payload['left_table']??null,'right_target'=>$payload['right_target']??null,'right_table'=>$payload['right_table']??null,'status'=>'success','difference_count'=>$diff['difference_count']??null]);
+        dbm_reply(['ok'=>true,'action'=>$action,'diff'=>$diff]);
     }
 
     if ($action === 'query') {
