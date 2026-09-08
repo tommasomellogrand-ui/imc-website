@@ -4,25 +4,32 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#06142f">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>GW010 · Sensible Soccer Academy</title>
   <style>
-    *{box-sizing:border-box}html,body{margin:0;background:#02070e;color:#fff;font-family:"Courier New",monospace}body{min-height:100vh;background:linear-gradient(#061f4e 0 280px,#0a376e 280px 420px,#168a48 420px 100%)}
-    .wrap{min-height:100vh;display:grid;place-items:center;padding:24px}.card{width:min(760px,94vw);background:#071425;border:4px solid #f4c73f;box-shadow:0 0 0 4px #000,inset 0 0 0 2px #35557e;text-align:center;padding:28px}
-    h1{margin:0 0 8px;font-size:clamp(42px,8vw,86px);line-height:.9;color:#fff;text-shadow:4px 4px #000;-webkit-text-stroke:2px #d51e1e}h2{margin:0 0 18px;color:#f4c73f;letter-spacing:2px}.gw{font-weight:900;letter-spacing:3px;margin-bottom:24px}.actions{display:grid;gap:12px}.btn{display:block;padding:15px 18px;border:3px solid #fff;background:#123d79;color:#fff;text-decoration:none;font-weight:900;box-shadow:0 5px #000}.btn.primary{background:#b91f1f}.btn.secondary{background:#0f6d43}.note{margin-top:18px;color:#c9d4e5;font-size:13px;line-height:1.5}
+    *{box-sizing:border-box}html,body{margin:0;background:#02070e;color:#fff;font-family:"Courier New",monospace}body{overflow-x:hidden}.app{min-height:100vh;position:relative;background:linear-gradient(#061f4e 0 285px,#0a376e 285px 430px,#168a48 430px 100%)}
+    .crowd{position:absolute;left:0;right:0;top:275px;height:165px;background:repeating-linear-gradient(90deg,#d62a2a 0 4px,#f2c84a 4px 8px,#226bd4 8px 12px,#fff 12px 16px,#168b4b 16px 20px);opacity:.48;clip-path:polygon(0 28%,50% 0,100% 28%,100% 100%,0 100%)}
+    .pitch{position:absolute;left:0;right:0;top:420px;bottom:0;background:repeating-linear-gradient(90deg,#168847 0 90px,#1f9b51 90px 180px)}
+    .shell{position:relative;z-index:2;max-width:1120px;margin:auto;padding:18px 16px 30px}.hero{text-align:center;padding:8px 0 18px}.brand{line-height:.84;text-transform:uppercase;text-shadow:5px 5px #000}.sensible{font-size:clamp(48px,8vw,94px);font-weight:900;background:linear-gradient(90deg,#ef2b2b,#ffd53d,#2dc56f,#3985ff,#fff,#ffd53d);-webkit-background-clip:text;color:transparent;-webkit-text-stroke:2px #fff;paint-order:stroke fill}.soccer{font-size:clamp(70px,10vw,132px);font-weight:900;color:#fff;-webkit-text-stroke:4px #d51e1e}.academy{display:inline-block;margin-top:10px;padding:4px 28px;background:#07101a;border:4px solid #fff;border-left-color:#11864b;border-right-color:#d32727;font-size:clamp(24px,3.5vw,42px);font-weight:900;letter-spacing:4px}.gw{margin-top:8px;font-size:clamp(15px,2vw,22px);font-weight:900;letter-spacing:3px}.tagline{margin:16px auto 0;max-width:760px;padding:10px 16px;background:#06111f;border:4px solid #f4c73f;box-shadow:0 0 0 4px #000,inset 0 0 0 2px #35557e;color:#f4c73f;font-weight:900;letter-spacing:2px}.menu{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}.tile{display:block;min-height:230px;text-decoration:none;color:#fff;background:linear-gradient(#071629,#02070e);border:4px solid #f4c73f;box-shadow:0 0 0 4px #000,inset 0 0 0 2px #35557e;padding:16px;position:relative;overflow:hidden}.tile:active{transform:translateY(3px)}.tile h2{margin:0;color:#f4c73f;font-size:clamp(22px,3vw,34px)}.tile p{color:#cbd7e9;line-height:1.45;font-size:13px}.ico{font-size:60px;margin:18px 0 8px}.live{border-color:#ef3c32}.live h2{color:#ff554d}.replay{border-color:#70b5ff}.replay h2{color:#7bc0ff}.draw{border-color:#f4c73f}.badge{display:inline-block;margin-top:8px;padding:6px 10px;background:#0f6d43;border:2px solid #fff;font-weight:900;font-size:12px}.live .badge{background:#b41d1d}.replay .badge{background:#174d89}.scoreboard{margin-top:18px;display:grid;grid-template-columns:1fr auto 1fr;background:#06111f;border:4px solid #f4c73f;box-shadow:0 0 0 4px #000;align-items:center}.boardSide{padding:14px;text-align:center;font-weight:900}.boardSide b{display:block;color:#f4c73f;font-size:22px}.ball{font-size:42px;padding:0 12px}.footer{text-align:center;margin-top:20px;padding:13px;background:#06121f;border-top:4px solid #f4c73f;font-size:10px;letter-spacing:2px}@media(max-width:820px){.app{background:linear-gradient(#061f4e 0 235px,#0a376e 235px 345px,#168a48 345px 100%)}.crowd{top:228px;height:125px}.pitch{top:340px}.shell{padding:10px}.hero{padding-top:2px}.sensible{font-size:43px}.soccer{font-size:66px;-webkit-text-stroke:2px #d51e1e}.academy{font-size:18px;padding:4px 14px;letter-spacing:2px}.gw{font-size:13px}.tagline{font-size:12px}.menu{grid-template-columns:1fr}.tile{min-height:160px}.ico{font-size:46px;margin:10px 0}.scoreboard{grid-template-columns:1fr}.ball{padding:6px}.boardSide{padding:10px}}
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="card">
-      <h1>SENSIBLE SOCCER</h1>
-      <h2>ACADEMY</h2>
-      <div class="gw">GAME WORLD 010</div>
-      <div class="actions">
-        <a class="btn primary" href="/sensible-soccer-academy/draw/">🎡 APRI MANAGER DRAW</a>
-        <a class="btn secondary" href="/sensible-soccer-academy/replay/">▶ APRI REPLAY</a>
-      </div>
-      <div class="note">Cartella ufficiale GW010 creata. La waiting room e il live draw verranno pubblicati qui, mantenendo il sorteggio sotto il Game World 010.</div>
-    </section>
-  </main>
+<div class="app"><div class="crowd"></div><div class="pitch"></div><main class="shell">
+  <section class="hero">
+    <div class="brand"><div class="sensible">Sensible</div><div class="soccer">SOCCER</div><div class="academy">ACADEMY</div><div class="gw">GAME WORLD 010</div></div>
+    <div class="tagline">YOUNG TALENTS · BIGGER STORIES · PLAY · MANAGE · DEVELOP · TOGETHER</div>
+  </section>
+
+  <section class="menu">
+    <a class="tile live" href="/gameworld010/live/"><h2>LIVE DRAW</h2><div class="ico">📡</div><p>Waiting room pubblica e diretta del sorteggio. Gli spettatori entrano qui e seguono tutto in tempo reale.</p><span class="badge">ENTRA NEL LIVE</span></a>
+    <a class="tile draw" href="/sensible-soccer-academy/draw/"><h2>MANAGER DRAW</h2><div class="ico">🎡</div><p>Pannello operativo del sorteggio con ruota manager, filtro continente e ruota squadre.</p><span class="badge">APRI IL SORTEGGIO</span></a>
+    <a class="tile replay" href="/sensible-soccer-academy/replay/"><h2>REPLAY</h2><div class="ico">▶️</div><p>Rivedi integralmente il sorteggio ufficiale già salvato, nello stesso ordine e con gli stessi abbinamenti.</p><span class="badge">GUARDA IL REPLAY</span></a>
+  </section>
+
+  <section class="scoreboard"><div class="boardSide"><b>24 SQUADRE</b>12 EUROPA · 12 SUD AMERICA</div><div class="ball">⚽</div><div class="boardSide"><b>18 MANAGER</b>12 EUROPA · 6 SUD AMERICA</div></section>
+  <footer class="footer">ITALIAN MASTER CLUB · TALENT · PASSION · COMMUNITY · A BRIGHTER TOMORROW</footer>
+</main></div>
 </body>
 </html>
