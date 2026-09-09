@@ -10,8 +10,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204);
 $imcRawInput = (string)file_get_contents('php://input');
 $imcPreflight = json_decode($imcRawInput, true);
 if (is_array($imcPreflight)) {
-    $imcRepository = trim((string)($imcPreflight['repository'] ?? ''));
     $imcAction = strtolower(trim((string)($imcPreflight['action'] ?? '')));
+
+    if ($imcAction === 'minisite_read') {
+        require __DIR__.'/minisite.php';
+        try {
+            imc_minisite_read($imcPreflight);
+        } catch (InvalidArgumentException $e) {
+            imc_minisite_out(['ok' => false, 'error' => $e->getMessage()], 422);
+        } catch (Throwable $e) {
+            imc_minisite_out(['ok' => false, 'error' => 'gateway_error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    $imcRepository = trim((string)($imcPreflight['repository'] ?? ''));
     if ($imcRepository === 'transfers' && in_array($imcAction, ['read', 'insert_many'], true)) {
         $imcConfigFile = dirname(__DIR__).'/__imc_private_gateway/config.php';
         if (is_file($imcConfigFile)) {
