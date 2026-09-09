@@ -32,6 +32,11 @@ if (is_array($imcPreflight)) {
             }
         }
         try {
+            $imcMinisiteResource = strtolower(trim((string)($imcPreflight['resource'] ?? '')));
+            if (in_array($imcMinisiteResource, ['results','schedule','match_report','transfers','sm_player_stats'], true)) {
+                require __DIR__.'/minisite-site.php';
+                imc_minisite_site_read($imcPreflight);
+            }
             imc_minisite_read($imcPreflight);
         } catch (InvalidArgumentException $e) {
             imc_minisite_out(['ok' => false, 'error' => $e->getMessage()], 422);
