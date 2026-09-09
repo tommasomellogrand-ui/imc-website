@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-label="Road To History stadium horizon">
+<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#eef5fb"/><stop offset=".58" stop-color="#dceaf4"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+ <linearGradient id="gold" x1="0" x2="1"><stop stop-color="#f4d889"/><stop offset=".5" stop-color="#bd8d28"/><stop offset="1" stop-color="#f6df9e"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#fff7d6"/><stop offset=".35" stop-color="#e8bd55" stop-opacity=".9"/><stop offset="1" stop-color="#e8bd55" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1200" height="700" fill="url(#sky)"/>
+<circle cx="610" cy="425" r="190" fill="url(#sun)"/>
+<g opacity=".5" fill="#aebfce"><path d="M0 340C180 285 315 305 480 360v105H0z"/><path d="M720 350c180-75 325-70 480-15v130H720z"/></g>
+<g fill="#6d8496" opacity=".75"><path d="M0 465h1200v74H0z"/><path d="M40 420l170-42 132 24 110-23 122 43v43H40z"/><path d="M670 430l156-51 131 28 117-24 102 45v37H670z"/></g>
+<g fill="#f8fbfd"><path d="M90 431h398v12H90zM709 438h388v12H709z"/></g>
+<g stroke="#ffffff" stroke-width="3" opacity=".65"><path d="M130 420v46M187 405v61M244 396v70M302 405v61M360 398v68M418 408v58M759 408v58M817 397v69M875 403v63M933 395v71M991 406v60M1048 415v51"/></g>
+<g fill="url(#gold)" transform="translate(548 322)"><path d="M62 0l18 38 39-18-8 55H15L7 20l39 18z"/><rect x="20" y="78" width="86" height="13" rx="5"/></g>
+<path d="M0 610c160-52 320-70 600-70s440 18 600 70v90H0z" fill="#ffffff"/>
+<g stroke="#d4dde5" opacity=".65"><path d="M0 610h1200M78 590l-36 110M180 575l-20 125M1020 575l20 125M1122 590l36 110"/></g>
+</svg>
