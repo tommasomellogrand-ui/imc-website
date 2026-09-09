@@ -22,10 +22,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html config.js home-master.css home-app.js home-hero.svg legacy.html sky-theme.css app.js .htaccess; do test -s "minisite/GW001/$f"; done
+          for f in index.html config.js home-master.css home-app.js road-to-history-hero.webp legacy.html sky-theme.css app.js .htaccess; do test -s "minisite/GW001/$f"; done
           grep -Fq '/minisite/shared/app-core.js' minisite/GW001/index.html
           grep -Fq "id:'GW001'" minisite/GW001/config.js
           grep -Fq 'window.IMC_MINISITE_DATA' minisite/GW001/home-app.js
+          grep -Fq "road-to-history-hero.webp" minisite/GW001/home-master.css
 
       - name: Upload GW001 to Aruba
         env:
@@ -40,7 +41,7 @@ jobs:
           from pathlib import Path
           host='ftp.italianmastersclub.it'; port=21
           remote='/www.italianmastersclub.it/minisite/GW001'
-          files=['index.html','config.js','home-master.css','home-app.js','home-hero.svg','legacy.html','sky-theme.css','app.js','.htaccess']
+          files=['index.html','config.js','home-master.css','home-app.js','road-to-history-hero.webp','legacy.html','sky-theme.css','app.js','.htaccess']
           ctx=ssl.create_default_context(); ctx.check_hostname=False
           ftp=FTP_TLS(context=ctx)
           ftp.connect(host,port,timeout=60); ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
@@ -69,7 +70,9 @@ jobs:
           html=$(curl -fsSL --max-time 30 "${base}?verify=${GITHUB_SHA}")
           printf '%s' "$html" | grep -Fq 'home-master.css'
           printf '%s' "$html" | grep -Fq 'home-app.js'
-          for f in home-app.js home-master.css home-hero.svg legacy.html; do curl -fsSIL --max-time 30 "${base}${f}?verify=${GITHUB_SHA}" | grep -Eq '^HTTP/.* 200'; done
+          for f in home-app.js home-master.css road-to-history-hero.webp legacy.html; do curl -fsSIL --max-time 30 "${base}${f}?verify=${GITHUB_SHA}" | grep -Eq '^HTTP/.* 200'; done
+          css=$(curl -fsSL --max-time 30 "${base}home-master.css?verify=${GITHUB_SHA}")
+          printf '%s' "$css" | grep -Fq 'road-to-history-hero.webp'
           headers=$(curl -fsSIL --max-time 30 "${base}?verify_headers=${GITHUB_SHA}")
           printf '%s\n' "$headers" | grep -Eqi '^cache-control:.*(no-store|no-cache|max-age=0)'
-          echo 'GW001 master home live verification passed.'
+          echo 'GW001 cinematic master home live verification passed.'
