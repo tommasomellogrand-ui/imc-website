@@ -6,6 +6,7 @@ header('Pragma: no-cache');
 $store = __DIR__ . '/room-state.json';
 $now = time();
 $ttl = 30;
+$hostKey = 'mWgCg_NudRFnIz1GTYFjupT4';
 
 function clean_name($v) {
     $v = trim((string)$v);
@@ -20,6 +21,13 @@ function clean_message($v) {
 function default_state() {
     return [
         'event' => 'waiting',
+        'phase' => 'idle',
+        'current_manager' => null,
+        'current_region' => null,
+        'current_team' => null,
+        'assignments' => [],
+        'started_at' => null,
+        'completed_at' => null,
         'updated_at' => gmdate('c'),
         'presence' => [],
         'messages' => []
@@ -30,7 +38,7 @@ function load_locked($fp) {
     $raw = stream_get_contents($fp);
     if (!$raw) return default_state();
     $data = json_decode($raw, true);
-    return is_array($data) ? $data : default_state();
+    return is_array($data) ? array_merge(default_state(), $data) : default_state();
 }
 function save_locked($fp, $state) {
     $state['updated_at'] = gmdate('c');
@@ -51,11 +59,27 @@ function public_state($state) {
     return [
         'ok' => true,
         'event' => $state['event'] ?? 'waiting',
+        'phase' => $state['phase'] ?? 'idle',
+        'current_manager' => $state['current_manager'] ?? null,
+        'current_region' => $state['current_region'] ?? null,
+        'current_team' => $state['current_team'] ?? null,
+        'assignments' => array_values($state['assignments'] ?? []),
+        'started_at' => $state['started_at'] ?? null,
+        'completed_at' => $state['completed_at'] ?? null,
         'updated_at' => $state['updated_at'] ?? null,
         'online_count' => count($people),
         'people' => $people,
         'messages' => array_slice(array_values($state['messages'] ?? []), -100)
     ];
+}
+function require_host($input, $hostKey) {
+    $k = (string)($input['host_key'] ?? '');
+    if (!hash_equals($hostKey, $k)) {
+        http_response_code(403);
+        echo json_encode(['ok'=>false,'error'=>'host_auth_failed']);
+        return false;
+    }
+    return true;
 }
 
 $fp = @fopen($store, 'c+');
@@ -69,25 +93,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     if (!is_array($input)) $input = $_POST;
     $action = $input['action'] ?? '';
-    $sid = preg_replace('/[^a-zA-Z0-9_-]/', '', (string)($input['sid'] ?? ''));
-    if (strlen($sid) < 8 || strlen($sid) > 80) { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'invalid_session']); flock($fp,LOCK_UN); fclose($fp); exit; }
 
-    if ($action === 'join' || $action === 'heartbeat') {
-        $name = clean_name($input['name'] ?? ($state['presence'][$sid]['name'] ?? ''));
-        if ($name === '') { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'name_required']); flock($fp,LOCK_UN); fclose($fp); exit; }
-        $state['presence'][$sid] = ['name'=>$name,'last_seen'=>$now];
-    } elseif ($action === 'chat') {
-        $name = clean_name($input['name'] ?? ($state['presence'][$sid]['name'] ?? ''));
-        $text = clean_message($input['message'] ?? '');
-        if ($name === '' || $text === '') { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'invalid_message']); flock($fp,LOCK_UN); fclose($fp); exit; }
-        $state['presence'][$sid] = ['name'=>$name,'last_seen'=>$now];
-        if (!isset($state['messages']) || !is_array($state['messages'])) $state['messages'] = [];
-        $state['messages'][] = ['id'=>bin2hex(random_bytes(6)),'name'=>$name,'message'=>$text,'time'=>gmdate('c')];
-        if (count($state['messages']) > 100) $state['messages'] = array_slice($state['messages'], -100);
-    } elseif ($action === 'leave') {
-        unset($state['presence'][$sid]);
+    if (strpos($action, 'host_') === 0) {
+        if (!require_host($input, $hostKey)) { flock($fp,LOCK_UN); fclose($fp); exit; }
+        if ($action === 'host_reset') {
+            $keepPresence = $state['presence'];
+            $keepMessages = $state['messages'];
+            $state = default_state();
+            $state['presence'] = $keepPresence;
+            $state['messages'] = $keepMessages;
+        } elseif ($action === 'host_start') {
+            $state['event'] = 'starting';
+            $state['phase'] = 'countdown';
+            $state['started_at'] = gmdate('c');
+            $state['completed_at'] = null;
+            $state['assignments'] = [];
+            $state['current_manager'] = null;
+            $state['current_region'] = null;
+            $state['current_team'] = null;
+        } elseif ($action === 'host_live') {
+            $state['event'] = 'live';
+            $state['phase'] = 'manager_spinning';
+        } elseif ($action === 'host_phase') {
+            $allowed = ['idle','countdown','manager_spinning','manager_selected','team_spinning','assignment'];
+            $phase = (string)($input['phase'] ?? 'idle');
+            if (!in_array($phase, $allowed, true)) $phase = 'idle';
+            $state['event'] = $state['event'] === 'starting' ? 'live' : ($state['event'] ?? 'live');
+            $state['phase'] = $phase;
+            if (array_key_exists('manager',$input)) $state['current_manager'] = clean_name($input['manager']);
+            if (array_key_exists('region',$input)) $state['current_region'] = in_array($input['region'], ['EU','SA'], true) ? $input['region'] : null;
+            if (array_key_exists('team',$input)) $state['current_team'] = clean_name($input['team']);
+        } elseif ($action === 'host_assignment') {
+            $seq = (int)($input['seq'] ?? 0);
+            $manager = clean_name($input['manager'] ?? '');
+            $team = clean_name($input['team'] ?? '');
+            $region = in_array(($input['region'] ?? ''), ['EU','SA'], true) ? $input['region'] : null;
+            if ($seq < 1 || $manager === '' || $team === '' || !$region) {
+                http_response_code(400); echo json_encode(['ok'=>false,'error'=>'invalid_assignment']); flock($fp,LOCK_UN); fclose($fp); exit;
+            }
+            $found = false;
+            foreach ($state['assignments'] as $i => $a) {
+                if ((int)($a['seq'] ?? 0) === $seq) {
+                    $state['assignments'][$i] = ['seq'=>$seq,'manager'=>$manager,'team'=>$team,'region'=>$region,'time'=>gmdate('c')];
+                    $found = true; break;
+                }
+            }
+            if (!$found) $state['assignments'][] = ['seq'=>$seq,'manager'=>$manager,'team'=>$team,'region'=>$region,'time'=>gmdate('c')];
+            usort($state['assignments'], function($a,$b){ return ((int)$a['seq']) <=> ((int)$b['seq']); });
+            $state['event'] = 'live';
+            $state['phase'] = 'assignment';
+            $state['current_manager'] = $manager;
+            $state['current_region'] = $region;
+            $state['current_team'] = $team;
+        } elseif ($action === 'host_complete') {
+            $state['event'] = 'completed';
+            $state['phase'] = 'idle';
+            $state['completed_at'] = gmdate('c');
+        } else {
+            http_response_code(400); echo json_encode(['ok'=>false,'error'=>'unknown_host_action']); flock($fp,LOCK_UN); fclose($fp); exit;
+        }
     } else {
-        http_response_code(400); echo json_encode(['ok'=>false,'error'=>'unknown_action']); flock($fp,LOCK_UN); fclose($fp); exit;
+        $sid = preg_replace('/[^a-zA-Z0-9_-]/', '', (string)($input['sid'] ?? ''));
+        if (strlen($sid) < 8 || strlen($sid) > 80) { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'invalid_session']); flock($fp,LOCK_UN); fclose($fp); exit; }
+
+        if ($action === 'join' || $action === 'heartbeat') {
+            $name = clean_name($input['name'] ?? ($state['presence'][$sid]['name'] ?? ''));
+            if ($name === '') { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'name_required']); flock($fp,LOCK_UN); fclose($fp); exit; }
+            $state['presence'][$sid] = ['name'=>$name,'last_seen'=>$now];
+        } elseif ($action === 'chat') {
+            $name = clean_name($input['name'] ?? ($state['presence'][$sid]['name'] ?? ''));
+            $text = clean_message($input['message'] ?? '');
+            if ($name === '' || $text === '') { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'invalid_message']); flock($fp,LOCK_UN); fclose($fp); exit; }
+            $state['presence'][$sid] = ['name'=>$name,'last_seen'=>$now];
+            if (!isset($state['messages']) || !is_array($state['messages'])) $state['messages'] = [];
+            $state['messages'][] = ['id'=>bin2hex(random_bytes(6)),'name'=>$name,'message'=>$text,'time'=>gmdate('c')];
+            if (count($state['messages']) > 100) $state['messages'] = array_slice($state['messages'], -100);
+        } elseif ($action === 'leave') {
+            unset($state['presence'][$sid]);
+        } else {
+            http_response_code(400); echo json_encode(['ok'=>false,'error'=>'unknown_action']); flock($fp,LOCK_UN); fclose($fp); exit;
+        }
     }
 }
 
