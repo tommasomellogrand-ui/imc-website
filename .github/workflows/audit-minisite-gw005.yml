@@ -36,3 +36,4 @@ jobs:
               b=io.BytesIO(); ftp.retrbinary(f'RETR {p}',b.write); print(b.getvalue().decode('utf-8','replace'))
           ftp.quit()
           PY
+          # audit-trigger: 2026-09-09T12:00
