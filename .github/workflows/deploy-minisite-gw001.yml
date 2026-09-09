@@ -26,19 +26,38 @@ jobs:
           grep -Fq 'hero.jpg' minisite/GW001/index.html
           python3 - <<'PY'
           from pathlib import Path
-          import base64
-          src=Path('minisite/GW001/hero.b64').read_bytes().decode('utf-8-sig','ignore')
-          start=src.find('/9j/')
-          end=src.rfind('2//Z')
-          if start < 0 or end < start:
-              raise SystemExit('hero base64 markers missing')
-          payload=''.join(src[start:end+4].split())
-          data=base64.b64decode(payload, validate=True)
-          if len(data) < 10000: raise SystemExit('hero.jpg too small')
-          if not data.startswith(b'\xff\xd8\xff'): raise SystemExit('hero.jpg is not a JPEG')
-          if not data.endswith(b'\xff\xd9'): raise SystemExit('hero.jpg JPEG end marker missing')
+          import base64, hashlib
+
+          target='6d2479d5e8064c263d9f17133027276685e885bbd68b3470796a3848883cc076'
+          payload=''.join(Path('minisite/GW001/hero.b64').read_text(encoding='utf-8-sig', errors='ignore').split())
+
+          def decode_exact(s):
+              try:
+                  data=base64.b64decode(s, validate=True)
+              except Exception:
+                  return None
+              return data if hashlib.sha256(data).hexdigest()==target else None
+
+          data=decode_exact(payload)
+          if data is None and len(payload)==16225:
+              for i in range(len(payload)-4):
+                  candidate=payload[:i]+payload[i+5:]
+                  data=decode_exact(candidate)
+                  if data is not None:
+                      print(f'Recovered exact hero payload by removing transport noise at offset {i}')
+                      break
+
+          if data is None:
+              raise SystemExit('Could not recover exact hero payload')
+          if len(data) < 10000:
+              raise SystemExit('hero.jpg too small')
+          if not data.startswith(b'\xff\xd8\xff'):
+              raise SystemExit('hero.jpg is not a JPEG')
+          if not data.endswith(b'\xff\xd9'):
+              raise SystemExit('hero.jpg JPEG end marker missing')
+
           Path('minisite/GW001/hero.jpg').write_bytes(data)
-          print(f'hero.jpg valid: {len(data)} bytes')
+          print(f'hero.jpg valid: {len(data)} bytes sha256={hashlib.sha256(data).hexdigest()}')
           PY
 
       - name: Upload clean GW001 home to Aruba
@@ -85,11 +104,13 @@ jobs:
           curl -fsSL --max-time 30 "${base}hero.jpg?verify=${GITHUB_SHA}" -o /tmp/hero-live.jpg
           python3 - <<'PY'
           from pathlib import Path
+          import hashlib
+          target='6d2479d5e8064c263d9f17133027276685e885bbd68b3470796a3848883cc076'
           data=Path('/tmp/hero-live.jpg').read_bytes()
-          if len(data) < 10000: raise SystemExit('live hero too small')
+          if hashlib.sha256(data).hexdigest()!=target: raise SystemExit('live hero checksum mismatch')
           if not data.startswith(b'\xff\xd8\xff'): raise SystemExit('live hero is not JPEG')
           if not data.endswith(b'\xff\xd9'): raise SystemExit('live hero JPEG end marker missing')
-          print(f'live hero valid: {len(data)} bytes')
+          print(f'live hero valid: {len(data)} bytes sha256={hashlib.sha256(data).hexdigest()}')
           PY
           ct=$(curl -fsSI --max-time 30 "${base}hero.jpg?verify=${GITHUB_SHA}" | tr -d '\r' | awk 'BEGIN{IGNORECASE=1}/^content-type:/{print $0}')
           printf '%s\n' "$ct" | grep -Eqi 'image/jpeg'
