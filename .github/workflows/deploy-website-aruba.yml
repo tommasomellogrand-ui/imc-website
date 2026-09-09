@@ -45,6 +45,7 @@ jobs:
           test -s sensible-soccer-academy-creation/gw-setting/draft-matrix.html
           test -s sensible-soccer-academy-creation/gw-setting/.htaccess
           test -s sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg
+          test -s sensible-soccer-academy-creation/gw-setting/crest-local-map.js
           test -s sensible-soccer-academy-creation/gw-setting/draft-enhancements.js
           test -s sensible-soccer-academy/assets/crest-overrides.js
           for i in $(seq 1 15); do
@@ -81,7 +82,7 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
-          import io, os, ssl, time
+          import io, os, ssl, time, urllib.request
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
           host='ftp.italianmastersclub.it'; port=21
@@ -134,13 +135,66 @@ jobs:
               with local.open('rb') as fh: ftp.storbinary(f'STOR {local.name}',fh)
               check=io.BytesIO(); ftp.retrbinary(f'RETR {local.name}',check.write)
               if check.getvalue()!=data: raise SystemExit(f'Verifica upload fallita: {rel}')
+
+          crest_sources={
+            'penarol.png':('uruguay','penarol'),
+            'colo-colo.png':('chile','colo-colo'),
+            'millonarios.png':('colombia','millonarios'),
+            'bolivar.png':('bolivia','bolivar'),
+            'olimpia.png':('paraguay','olimpia'),
+            'alianza-lima.png':('peru','alianza-lima'),
+            'santos.png':('brazil','santos'),
+            'sao-paulo.png':('brazil','sao-paulo'),
+            'gremio.png':('brazil','gremio'),
+            'argentinos-juniors.png':('argentina','argentinos-juniors'),
+            'newells-old-boys.png':('argentina','newells-old-boys'),
+            'velez-sarsfield.png':('argentina','velez-sarsfield'),
+            'atalanta.png':('italy','atalanta'),
+            'ferencvaros.png':('hungary','ferencvaros'),
+            'ifk-goteborg.png':('sweden','ifk-goteborg'),
+            'aberdeen.png':('scotland','aberdeen'),
+            'sevilla.png':('spain','sevilla'),
+            'west-ham.png':('england','west-ham'),
+            'vfb-stuttgart.png':('germany','vfb-stuttgart'),
+            'anderlecht.png':('belgium','anderlecht'),
+            'ajax.png':('netherlands','ajax'),
+            'lyon.png':('france','lyon'),
+            'dinamo-zagreb.png':('croatia','dinamo-zagreb'),
+            'benfica.png':('portugal','benfica'),
+          }
+          crest_remote=f"{remote_root}/sensible-soccer-academy-creation/gw-setting/crests"
+          clear_dir(crest_remote); ensure_dir(crest_remote)
+          opener=urllib.request.build_opener()
+          opener.addheaders=[('User-Agent','Mozilla/5.0 IMC-GW010/1.0'),('Accept','image/png,image/*;q=0.9,*/*;q=0.1')]
+          uploaded=0
+          for filename,(country,slug) in crest_sources.items():
+              data=None; errors=[]
+              for size in ('512x512','256x256'):
+                  url=f'https://football-logos.cc/logos/{country}/{size}/{slug}.png'
+                  try:
+                      with opener.open(url,timeout=20) as r:
+                          candidate=r.read()
+                          if len(candidate)>64 and candidate.startswith(b'\x89PNG'):
+                              data=candidate; break
+                          errors.append(f'{url}: invalid PNG {len(candidate)} bytes')
+                  except Exception as e:
+                      errors.append(f'{url}: {type(e).__name__}: {e}')
+              if data is None:
+                  raise SystemExit('Logo non scaricato '+filename+' | '+' | '.join(errors))
+              ftp.storbinary(f'STOR {filename}',io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary(f'RETR {filename}',check.write)
+              if check.getvalue()!=data: raise SystemExit(f'Verifica upload fallita crest: {filename}')
+              uploaded+=1
+          if uploaded!=24: raise SystemExit(f'Attesi 24 crest, caricati {uploaded}')
+
           crest_local=Path('sensible-soccer-academy/assets/crest-overrides.js')
+          crest_map_local=Path('sensible-soccer-academy-creation/gw-setting/crest-local-map.js')
           enhancement_local=Path('sensible-soccer-academy-creation/gw-setting/draft-enhancements.js')
           crest_dest=f"{remote_root}/sensible-soccer-academy-creation/gw-setting"
           ensure_dir(crest_dest)
-          crest_data=crest_local.read_bytes()+b'\n'+enhancement_local.read_bytes()
+          crest_data=crest_local.read_bytes()+b'\n'+crest_map_local.read_bytes()+b'\n'+enhancement_local.read_bytes()
           ftp.storbinary('STOR crest-overrides.js',io.BytesIO(crest_data))
           crest_check=io.BytesIO(); ftp.retrbinary('RETR crest-overrides.js',crest_check.write)
-          if crest_check.getvalue()!=crest_data: raise SystemExit('Verifica upload fallita: Draft Matrix crest-overrides.js + enhancements')
-          ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; sensible-soccer-academy lasciata vuota')
+          if crest_check.getvalue()!=crest_data: raise SystemExit('Verifica upload fallita: Draft Matrix crest bundle')
+          ftp.quit(); print(f'Pubblicati e verificati {len(files)+25} file; GW010 crest locali 24/24')
           PY
