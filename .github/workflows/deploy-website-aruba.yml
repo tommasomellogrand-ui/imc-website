@@ -44,6 +44,7 @@ jobs:
           test -s site-assets/gameworld/app-core.js
           test -s sensible-soccer-academy-creation/gw-setting/draft-matrix.html
           test -s sensible-soccer-academy-creation/gw-setting/.htaccess
+          test -s sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg
           test -s sensible-soccer-academy/assets/crest-overrides.js
           for i in $(seq 1 15); do
             n=$(printf "%03d" "$i")
@@ -103,33 +104,28 @@ jobs:
                   try: ftp.cwd(part)
                   except error_perm: ftp.mkd(part); ftp.cwd(part)
           def clear_dir(remote_path):
-              try:
-                  names=ftp.nlst(remote_path)
-              except error_perm:
-                  return
+              try: names=ftp.nlst(remote_path)
+              except error_perm: return
               for item in names:
                   name=item.rsplit('/',1)[-1]
                   if name in ('.','..'): continue
-                  try:
-                      ftp.delete(item)
+                  try: ftp.delete(item)
                   except error_perm:
                       clear_dir(item)
                       try: ftp.rmd(item)
                       except error_perm: pass
           sensible_remote=f"{remote_root}/sensible-soccer-academy"
-          clear_dir(sensible_remote)
-          ensure_dir(sensible_remote)
+          clear_dir(sensible_remote); ensure_dir(sensible_remote)
           for i in range(1,16):
               remote=f"{remote_root}/gameworld{i:03d}"
-              clear_dir(remote)
-              ensure_dir(remote)
+              clear_dir(remote); ensure_dir(remote)
           excluded={'site-assets/css/game-world.css','site-assets/css/gameworld-engine.css','site-assets/js/gameworld-engine.js','site-assets/js/imc-data-service.js','site-assets/js/team-hub-detail.js'}
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
-          files += [Path('sensible-soccer-academy-creation/gw-setting/draft-matrix.html'), Path('sensible-soccer-academy-creation/gw-setting/.htaccess')]
+          files += [Path('sensible-soccer-academy-creation/gw-setting/draft-matrix.html'),Path('sensible-soccer-academy-creation/gw-setting/.htaccess'),Path('sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg')]
           for i in range(1,16):
               d=Path(f'gameworld{i:03d}')
-              files += [d/'index.html', d/'config.js', d/'pilot-theme.css', d/'.htaccess']
+              files += [d/'index.html',d/'config.js',d/'pilot-theme.css',d/'.htaccess']
           files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('api/imc-data/v1/site-ready.php'),Path('api/imc-data/v1/.htaccess'),Path('__imc-gateway/__imc-gateway/index.php'),Path('__imc-sm-master/admin/database-manager/normalizer.php')]
           for local in files:
               rel=local.as_posix(); parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f"{remote_root.rstrip('/')}/{parent}"
@@ -137,10 +133,8 @@ jobs:
               with local.open('rb') as fh: ftp.storbinary(f'STOR {local.name}',fh)
               check=io.BytesIO(); ftp.retrbinary(f'RETR {local.name}',check.write)
               if check.getvalue()!=data: raise SystemExit(f'Verifica upload fallita: {rel}')
-          crest_local=Path('sensible-soccer-academy/assets/crest-overrides.js')
-          crest_dest=f"{remote_root}/sensible-soccer-academy-creation/gw-setting"
-          ensure_dir(crest_dest)
-          crest_data=crest_local.read_bytes()
+          crest_local=Path('sensible-soccer-academy/assets/crest-overrides.js'); crest_dest=f"{remote_root}/sensible-soccer-academy-creation/gw-setting"
+          ensure_dir(crest_dest); crest_data=crest_local.read_bytes()
           with crest_local.open('rb') as fh: ftp.storbinary('STOR crest-overrides.js',fh)
           crest_check=io.BytesIO(); ftp.retrbinary('RETR crest-overrides.js',crest_check.write)
           if crest_check.getvalue()!=crest_data: raise SystemExit('Verifica upload fallita: Draft Matrix crest-overrides.js')
