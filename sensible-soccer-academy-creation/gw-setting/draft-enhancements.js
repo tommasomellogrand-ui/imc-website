@@ -45,6 +45,15 @@
   .sceneStatus{background:#02070e;border:2px solid #35557e;padding:8px;margin-top:12px;text-shadow:2px 2px #000}
   .sceneFinal.show{box-shadow:inset 0 0 0 2px rgba(255,255,255,.08),6px 6px #000;background:linear-gradient(180deg,#071629,#02070e)}
   .pauseLine{letter-spacing:1px}
+  .card.managerSprite{grid-template-columns:34px 30px 1fr;position:relative}
+  .imcMiniPlayer{width:24px;height:35px;position:relative;display:block;image-rendering:pixelated;filter:drop-shadow(2px 2px #000);margin:auto}
+  .imcMiniPlayer i{display:block;position:absolute}
+  .imcMiniPlayer .pHead{width:10px;height:10px;left:7px;top:0;background:#efb178;box-shadow:0 0 0 2px #111}
+  .imcMiniPlayer .pBody{width:15px;height:14px;left:5px;top:13px;box-shadow:0 0 0 2px #111}
+  .imcMiniPlayer.sa .pBody{background:#d9483f}.imcMiniPlayer.eu .pBody{background:#3d83e6}
+  .imcMiniPlayer .pLeg1,.imcMiniPlayer .pLeg2{width:5px;height:9px;top:28px;background:#fff;box-shadow:0 0 0 2px #111}
+  .imcMiniPlayer .pLeg1{left:4px}.imcMiniPlayer .pLeg2{right:4px}
+  .imcMiniPlayer .pBall{width:6px;height:6px;right:-2px;bottom:0;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #111}
   .finalDraft{position:fixed;inset:0;z-index:2400;background:linear-gradient(180deg,rgba(2,7,14,.98),rgba(5,21,38,.99));display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;color:#fff;font-family:"Courier New",monospace}
   .finalDraft.show{display:block}.finalWrap{max-width:1200px;margin:0 auto;padding:10px 0 40px}.finalHero{text-align:center;border:5px solid #f0e6b4;box-shadow:0 0 0 5px #000;background:#071629;padding:14px;position:relative;overflow:hidden}
   .finalHero:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(22,137,74,.17) 0 70px,rgba(32,155,81,.12) 70px 140px);pointer-events:none}
@@ -52,6 +61,7 @@
   .finalTitle{position:relative;font-size:clamp(26px,6vw,58px);font-weight:900;color:#f4c93d;text-shadow:4px 4px #000;margin:6px 0}.finalSub{position:relative;font-weight:900;letter-spacing:2px;color:#9eb9db}
   .finalDivisions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}.finalDivision{background:#071629;border:4px solid #f0e6b4;box-shadow:5px 5px #000}.finalDivision h2{text-align:center;margin:0;padding:10px;background:#02070e;color:#f4c93d;border-bottom:3px solid #35557e}.finalDivision .balance{text-align:center;padding:6px;font-size:11px;color:#9eb9db;border-bottom:2px solid #02070e}.finalTeam{display:grid;grid-template-columns:46px 1fr;gap:10px;align-items:center;padding:8px;border-bottom:1px solid #35557e;background:#0b213e}.finalTeam.sa{border-left:5px solid #d9483f}.finalTeam.eu{border-left:5px solid #3d83e6}.finalTeam img{width:42px;height:42px;object-fit:contain;background:#fff;border:2px solid #f0e6b4}.finalTeam b{display:block;font-size:12px}.finalTeam span{display:block;font-size:10px;color:#9eb9db;margin-top:3px}.finalActions{text-align:center;margin-top:16px}.finalBtn{background:#198247;color:#fff;border:4px solid #fff;box-shadow:4px 4px #000;padding:12px 18px;font:900 14px "Courier New",monospace}
   @media(max-width:850px){.finalDivisions{grid-template-columns:1fr}.finalHero img{max-height:145px}.finalDraft{padding:8px}.finalTeam{grid-template-columns:40px 1fr}.finalTeam img{width:36px;height:36px}}
+  @media(max-width:650px){.card.managerSprite{grid-template-columns:27px 25px 1fr}.imcMiniPlayer{transform:scale(.86);transform-origin:center}}
   `;
   const style=document.createElement('style'); style.id='gw010-enhancements'; style.textContent=css; document.head.appendChild(style);
 
@@ -68,6 +78,23 @@
     const club=img.closest('.club')?.querySelector('.name')?.textContent?.trim() || img.closest('.lock')?.querySelector('.clubname')?.textContent?.trim() || document.getElementById('sceneClubValue')?.textContent?.trim();
     const v=resolve(club); if(v && img.dataset.repaired!=='1'){img.dataset.repaired='1';img.src=v;}
   },true);
+
+  const playerMarkup=region=>`<span class="imcMiniPlayer ${region.toLowerCase()}" aria-hidden="true"><i class="pHead"></i><i class="pBody"></i><i class="pLeg1"></i><i class="pLeg2"></i><i class="pBall"></i></span>`;
+  function decorateManagers(){
+    ['managerSA','managerEU'].forEach(id=>{
+      const root=document.getElementById(id); if(!root)return;
+      root.querySelectorAll('.card').forEach(card=>{
+        if(card.querySelector('.imcMiniPlayer'))return;
+        const region=card.classList.contains('sa')?'SA':'EU';
+        const badge=card.querySelector('.badge'); if(!badge)return;
+        badge.insertAdjacentHTML('afterend',playerMarkup(region)); card.classList.add('managerSprite');
+      });
+    });
+  }
+  function watchManagerSprites(){
+    decorateManagers();
+    ['managerSA','managerEU'].forEach(id=>{const root=document.getElementById(id);if(root)new MutationObserver(decorateManagers).observe(root,{childList:true,subtree:true});});
+  }
 
   function managerFromSlot(slot){
     const clone=slot.cloneNode(true); const b=clone.querySelector('b'); if(b)b.remove(); return clone.textContent.trim();
@@ -94,5 +121,6 @@
     new MutationObserver(()=>{patchBrokenCrests();check();}).observe(count,{childList:true,subtree:true,characterData:true}); check();
     const scene=document.getElementById('draftScene'); if(scene)new MutationObserver(patchBrokenCrests).observe(scene,{childList:true,subtree:true,characterData:true,attributes:true});
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',watchCompletion); else watchCompletion();
+  const boot=()=>{watchManagerSprites();watchCompletion();patchBrokenCrests();};
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
