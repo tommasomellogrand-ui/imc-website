@@ -18,12 +18,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate clean GW001 home
+      - name: Build and validate clean GW001 home
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html home.css road-to-history-hero-new.webp .htaccess; do test -s "minisite/GW001/$f"; done
-          grep -Fq 'road-to-history-hero-new.webp' minisite/GW001/index.html
+          for f in index.html home.css hero.b64 .htaccess; do test -s "minisite/GW001/$f"; done
+          grep -Fq 'hero.jpg' minisite/GW001/index.html
+          base64 -d minisite/GW001/hero.b64 > minisite/GW001/hero.jpg
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('minisite/GW001/hero.jpg')
+          data=p.read_bytes()
+          if len(data) < 20000: raise SystemExit('hero.jpg too small')
+          if not data.startswith(b'\xff\xd8\xff'): raise SystemExit('hero.jpg is not a JPEG')
+          if not data.endswith(b'\xff\xd9'): raise SystemExit('hero.jpg JPEG end marker missing')
+          print(f'hero.jpg valid: {len(data)} bytes')
+          PY
 
       - name: Upload clean GW001 home to Aruba
         env:
@@ -38,7 +48,7 @@ jobs:
           from pathlib import Path
           host='ftp.italianmastersclub.it'; port=21
           remote='/www.italianmastersclub.it/minisite/GW001'
-          files=['index.html','home.css','road-to-history-hero-new.webp','.htaccess']
+          files=['index.html','home.css','hero.jpg','.htaccess']
           ctx=ssl.create_default_context(); ctx.check_hostname=False
           ftp=FTP_TLS(context=ctx)
           ftp.connect(host,port,timeout=60); ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
@@ -65,8 +75,17 @@ jobs:
           sleep 5
           base='https://www.italianmastersclub.it/minisite/GW001/'
           html=$(curl -fsSL --max-time 30 "${base}?verify=${GITHUB_SHA}")
-          printf '%s' "$html" | grep -Fq 'road-to-history-hero-new.webp'
-          curl -fsSIL --max-time 30 "${base}road-to-history-hero-new.webp?verify=${GITHUB_SHA}" | grep -Eq '^HTTP/.* 200'
-          ct=$(curl -fsSI --max-time 30 "${base}road-to-history-hero-new.webp?verify=${GITHUB_SHA}" | tr -d '\r' | awk 'BEGIN{IGNORECASE=1}/^content-type:/{print $0}')
-          printf '%s\n' "$ct" | grep -Eqi 'image/(webp|octet-stream)'
+          printf '%s' "$html" | grep -Fq 'hero.jpg'
+          curl -fsSL --max-time 30 "${base}hero.jpg?verify=${GITHUB_SHA}" -o /tmp/hero-live.jpg
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/hero-live.jpg')
+          data=p.read_bytes()
+          if len(data) < 20000: raise SystemExit('live hero too small')
+          if not data.startswith(b'\xff\xd8\xff'): raise SystemExit('live hero is not JPEG')
+          if not data.endswith(b'\xff\xd9'): raise SystemExit('live hero JPEG end marker missing')
+          print(f'live hero valid: {len(data)} bytes')
+          PY
+          ct=$(curl -fsSI --max-time 30 "${base}hero.jpg?verify=${GITHUB_SHA}" | tr -d '\r' | awk 'BEGIN{IGNORECASE=1}/^content-type:/{print $0}')
+          printf '%s\n' "$ct" | grep -Eqi 'image/jpeg'
           echo 'GW001 clean home live verification passed.'
