@@ -24,7 +24,7 @@ jobs:
           set -euo pipefail
           for f in index.html home.css hero.b64 .htaccess; do test -s "minisite/GW001/$f"; done
           grep -Fq 'hero.jpg' minisite/GW001/index.html
-          base64 -d minisite/GW001/hero.b64 > minisite/GW001/hero.jpg
+          base64 --decode --ignore-garbage minisite/GW001/hero.b64 > minisite/GW001/hero.jpg
           python3 - <<'PY'
           from pathlib import Path
           p=Path('minisite/GW001/hero.jpg')
