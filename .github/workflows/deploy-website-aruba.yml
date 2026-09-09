@@ -42,12 +42,6 @@ jobs:
           test -s site-assets/js/imc-site.js
           test -s site-assets/images/imc-logo.png
           test -s site-assets/gameworld/app-core.js
-          test -s sensible-soccer-academy/index.html
-          test -s sensible-soccer-academy/save.php
-          test -s sensible-soccer-academy/replay/index.html
-          test -s sensible-soccer-academy/draw/index.html
-          test -s sensible-soccer-academy/draw/save.php
-          php -l sensible-soccer-academy/draw/save.php
           for i in $(seq 1 15); do
             n=$(printf "%03d" "$i")
             d="gameworld${n}"
@@ -119,6 +113,9 @@ jobs:
                       clear_dir(item)
                       try: ftp.rmd(item)
                       except error_perm: pass
+          sensible_remote=f"{remote_root}/sensible-soccer-academy"
+          clear_dir(sensible_remote)
+          ensure_dir(sensible_remote)
           for i in range(1,16):
               remote=f"{remote_root}/gameworld{i:03d}"
               clear_dir(remote)
@@ -126,7 +123,6 @@ jobs:
           excluded={'site-assets/css/game-world.css','site-assets/css/gameworld-engine.css','site-assets/js/gameworld-engine.js','site-assets/js/imc-data-service.js','site-assets/js/team-hub-detail.js'}
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
-          files += [p for p in sorted(Path('sensible-soccer-academy').rglob('*')) if p.is_file()]
           for i in range(1,16):
               d=Path(f'gameworld{i:03d}')
               files += [d/'index.html', d/'config.js', d/'pilot-theme.css', d/'.htaccess']
@@ -137,5 +133,5 @@ jobs:
               with local.open('rb') as fh: ftp.storbinary(f'STOR {local.name}',fh)
               check=io.BytesIO(); ftp.retrbinary(f'RETR {local.name}',check.write)
               if check.getvalue()!=data: raise SystemExit(f'Verifica upload fallita: {rel}')
-          ftp.quit(); print(f'Pubblicati e verificati {len(files)} file')
+          ftp.quit(); print(f'Pubblicati e verificati {len(files)} file; sensible-soccer-academy lasciata vuota')
           PY
