@@ -1,0 +1,37 @@
+name: Audit minisite GW005
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/audit-minisite-gw005.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read GW005 and shared files from Aruba
+        env:
+          BRIDGE_TOKEN: ${{ secrets.BRIDGE_TOKEN }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          url='https://www.italianmastersclub.it/bridge/publication-bridge.php'
+          token=os.environ['BRIDGE_TOKEN']
+          def call(payload):
+              req=urllib.request.Request(url, data=json.dumps(payload).encode(), headers={'Content-Type':'application/json','Authorization':f'Bearer {token}'})
+              with urllib.request.urlopen(req, timeout=60) as r:
+                  return json.loads(r.read().decode())
+          for p in ['minisite/GW005','minisite/shared']:
+              print('\n### LIST', p)
+              print(json.dumps(call({'action':'list','path':p}), ensure_ascii=False, indent=2))
+          for p in ['minisite/GW005/index.html','minisite/GW005/config.js','minisite/GW005/pilot-theme.css','minisite/GW005/.htaccess','minisite/shared/app-core.js']:
+              print('\n### FILE', p)
+              res=call({'action':'read','path':p})
+              print(res.get('content',''))
+          PY
