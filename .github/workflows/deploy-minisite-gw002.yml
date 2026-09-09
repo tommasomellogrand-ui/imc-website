@@ -1,0 +1,81 @@
+name: Deploy minisite GW002 Sports Newspaper
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'minisite/GW002/**'
+      - '.github/workflows/deploy-minisite-gw002.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate GW002 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s minisite/GW002/index.html
+          test -s minisite/GW002/config.js
+          test -s minisite/GW002/press.css
+          test -s minisite/GW002/app.js
+          test -s minisite/GW002/.htaccess
+          grep -Fq '/minisite/shared/app-core.js' minisite/GW002/index.html
+          grep -Fq "id:'GW002'" minisite/GW002/config.js
+          grep -Fq "window.IMC_MINISITE_DATA" minisite/GW002/app.js
+          grep -Fq "DOMESTIC" minisite/GW002/app.js
+          grep -Fq "INTERNATIONAL" minisite/GW002/app.js
+          grep -Fq "NATIONS" minisite/GW002/app.js
+
+      - name: Upload GW002 to Aruba
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import io, os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          host='ftp.italianmastersclub.it'; port=21
+          remote='/www.italianmastersclub.it/minisite/GW002'
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect(host,port,timeout=60); ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
+          def ensure(path):
+              ftp.cwd('/')
+              for part in [p for p in path.split('/') if p]:
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
+          ensure(remote)
+          for name in ['index.html','config.js','press.css','app.js','.htaccess']:
+              local=Path('minisite/GW002')/name
+              data=local.read_bytes()
+              with local.open('rb') as f: ftp.storbinary(f'STOR {name}',f)
+              check=io.BytesIO(); ftp.retrbinary(f'RETR {name}',check.write)
+              if check.getvalue()!=data: raise SystemExit(f'FTP verify failed: {name}')
+              print(f'GW002 {name}: {len(data)} bytes verified')
+          ftp.quit()
+          PY
+
+      - name: Verify live GW002
+        shell: bash
+        run: |
+          set -euo pipefail
+          sleep 5
+          base='https://www.italianmastersclub.it/minisite/GW002/'
+          html=$(curl -fsSL --max-time 30 "${base}?verify=${GITHUB_SHA}")
+          printf '%s' "$html" | grep -Fq 'Gold 558 · GW002'
+          curl -fsSIL --max-time 30 "${base}app.js?verify=${GITHUB_SHA}" | grep -Eq '^HTTP/.* 200'
+          curl -fsSIL --max-time 30 "${base}press.css?verify=${GITHUB_SHA}" | grep -Eq '^HTTP/.* 200'
+          headers=$(curl -fsSIL --max-time 30 "${base}?verify_headers=${GITHUB_SHA}")
+          printf '%s\n' "$headers" | grep -Eqi '^cache-control:.*(no-store|no-cache|max-age=0)'
+          echo 'GW002 live verification passed.'
