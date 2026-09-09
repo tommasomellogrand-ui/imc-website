@@ -47,6 +47,10 @@ jobs:
           test -s sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg
           test -s sensible-soccer-academy-creation/gw-setting/crest-local-map.js
           test -s sensible-soccer-academy-creation/gw-setting/draft-enhancements.js
+          test -s sensible-soccer-academy-creation/gw-setting/replay-recorder.js
+          test -s sensible-soccer-academy-creation/draw-replay/index.html
+          test -s sensible-soccer-academy-creation/draw-replay/replay.php
+          php -l sensible-soccer-academy-creation/draw-replay/replay.php
           for i in $(seq 1 15); do
             n=$(printf "%03d" "$i")
             d="gameworld${n}"
@@ -124,6 +128,7 @@ jobs:
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
           files += [Path('sensible-soccer-academy-creation/gw-setting/draft-matrix.html'),Path('sensible-soccer-academy-creation/gw-setting/.htaccess'),Path('sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg')]
+          files += [Path('sensible-soccer-academy-creation/draw-replay/index.html'),Path('sensible-soccer-academy-creation/draw-replay/replay.php')]
           for i in range(1,16):
               d=Path(f'gameworld{i:03d}')
               files += [d/'index.html',d/'config.js',d/'pilot-theme.css',d/'.htaccess']
@@ -140,11 +145,12 @@ jobs:
 
           crest_map_local=Path('sensible-soccer-academy-creation/gw-setting/crest-local-map.js')
           enhancement_local=Path('sensible-soccer-academy-creation/gw-setting/draft-enhancements.js')
+          recorder_local=Path('sensible-soccer-academy-creation/gw-setting/replay-recorder.js')
           crest_dest=f"{remote_root}/sensible-soccer-academy-creation/gw-setting"
           ensure_dir(crest_dest)
-          crest_data=crest_map_local.read_bytes()+b'\n'+enhancement_local.read_bytes()
+          crest_data=crest_map_local.read_bytes()+b'\n'+enhancement_local.read_bytes()+b'\n'+recorder_local.read_bytes()
           ftp.storbinary('STOR crest-overrides.js',io.BytesIO(crest_data))
           crest_check=io.BytesIO(); ftp.retrbinary('RETR crest-overrides.js',crest_check.write)
-          if crest_check.getvalue()!=crest_data: raise SystemExit('Verifica upload fallita: Draft Matrix crest bundle')
-          ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; GW010 usa esclusivamente 24 crest SoccerWiki HTTPS')
+          if crest_check.getvalue()!=crest_data: raise SystemExit('Verifica upload fallita: Draft Matrix crest/replay bundle')
+          ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; GW010 crest SoccerWiki + Draw Replay recorder attivi')
           PY
