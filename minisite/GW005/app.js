@@ -2,341 +2,113 @@
   const GW='GW005';
   const root=document.getElementById('app');
   if(!root) return;
-
-  const state={
-    ready:false,
-    loading:true,
-    error:null,
-    world:null,
-    clubs:[],
-    clubCodex:new Map(),
-    competitions:[],
-    managers:[],
-    nationals:[],
-    results:[],
-    schedule:[],
-    transfers:[],
-    stats:[],
-    reports:[]
-  };
-
+  const state={world:null,clubs:[],clubCodex:new Map(),competitions:[],managers:[],nationals:[],results:[],schedule:[],transfers:[],stats:[],reports:[],loading:true,error:null};
   const routes=['home','scores','calendar','competitions','clubs','managers','transfers','players','reports'];
-  document.title='Hall Of Famers · GW005';
   window.addEventListener('hashchange',render);
   boot();
 
   async function boot(){
-    renderShell();
+    shell();
     const api=await waitApi(2500);
     if(!api){state.loading=false;state.error='Data service unavailable';render();return;}
     try{
       const [world,clubs,competitions,managers,nationals,results,schedule,transfers,stats,reports]=await Promise.all([
-        read(api,'game_world_codex'),
-        read(api,'game_world_club_mapping'),
-        read(api,'competition_codex'),
-        read(api,'manager_assignments'),
-        read(api,'national_team_codex',{limit:200}),
-        read(api,'results',{limit:1000}),
-        read(api,'schedule',{limit:1000}),
-        read(api,'transfers',{limit:1000}),
-        read(api,'sm_player_stats',{limit:1000}),
-        read(api,'match_report',{limit:1000})
+        read(api,'game_world_codex'),read(api,'game_world_club_mapping'),read(api,'competition_codex'),read(api,'manager_assignments'),read(api,'national_team_codex',{limit:200}),read(api,'results',{limit:1000}),read(api,'schedule',{limit:1000}),read(api,'transfers',{limit:1000}),read(api,'sm_player_stats',{limit:1000}),read(api,'match_report',{limit:1000})
       ]);
-      state.world=rows(world)[0]||null;
-      state.clubs=rows(clubs);
-      state.competitions=rows(competitions);
-      state.managers=rows(managers);
-      state.nationals=rows(nationals);
-      state.results=rows(results);
-      state.schedule=rows(schedule);
-      state.transfers=rows(transfers);
-      state.stats=rows(stats);
-      state.reports=rows(reports);
-      state.ready=true;
-      await hydrateClubCodex(api);
-    }catch(err){
-      console.error(err);
-      state.error=err?.message||'Unable to load data';
-    }finally{
-      state.loading=false;
-      render();
-    }
+      state.world=rows(world)[0]||{}; state.clubs=rows(clubs); state.competitions=rows(competitions); state.managers=rows(managers); state.nationals=rows(nationals); state.results=rows(results); state.schedule=rows(schedule); state.transfers=rows(transfers); state.stats=rows(stats); state.reports=rows(reports);
+      await Promise.all(state.clubs.map(async c=>{if(!c.club_id)return;try{const x=rows(await read(api,'club_codex',{club_id:c.club_id}))[0];if(x)state.clubCodex.set(String(c.club_id),x);}catch{}}));
+    }catch(e){state.error=e?.message||'Unable to load data';}finally{state.loading=false;render();}
   }
 
-  async function hydrateClubCodex(api){
-    const jobs=state.clubs.map(async c=>{
-      const id=c.club_id;
-      if(!id) return;
-      try{
-        const data=await read(api,'club_codex',{club_id:id});
-        const row=rows(data)[0];
-        if(row) state.clubCodex.set(String(id),row);
-      }catch{}
-    });
-    await Promise.all(jobs);
+  function shell(){
+    root.innerHTML=`<div class="game-shell">
+      <header class="game-topbar">
+        <a class="game-brand" href="#home"><span class="brand-cube">IMC</span><span><b>HALL OF FAMERS</b><small>GW005</small></span></a>
+        <div class="status-pill"><i></i> LIVE</div>
+      </header>
+      <main id="view"></main>
+      <nav class="game-dock">
+        ${[['home','⌂','HOME'],['scores','◉','SCORES'],['clubs','⬡','CLUBS'],['players','★','PLAYERS'],['managers','◎','MNG']].map(([r,i,l])=>`<a href="#${r}" data-dock="${r}"><span>${i}</span><b>${l}</b></a>`).join('')}
+      </nav>
+    </div>`;
   }
 
-  function renderShell(){
-    root.innerHTML=`
-      <div class="site-shell">
-        <header class="topbar">
-          <a class="brand" href="#home"><span class="brand-mark">IMC</span><span>HALL OF FAMERS</span></a>
-          <div class="live-chip"><i></i> LIVE DATA</div>
-        </header>
-        <nav class="section-nav" aria-label="Primary">
-          ${[['home','Home'],['scores','Results'],['calendar','Fixtures'],['competitions','Competitions'],['clubs','Clubs'],['managers','Managers'],['transfers','Transfers'],['players','Players'],['reports','Reports']].map(([r,l])=>`<a href="#${r}" data-nav="${r}">${l}</a>`).join('')}
-        </nav>
-        <main id="view"></main>
-        <nav class="dock" aria-label="Quick navigation">
-          <a href="#home" data-dock="home"><span>⌂</span><b>Home</b></a>
-          <a href="#scores" data-dock="scores"><span>◉</span><b>Scores</b></a>
-          <a href="#clubs" data-dock="clubs"><span>◆</span><b>Clubs</b></a>
-          <a href="#players" data-dock="players"><span>★</span><b>Players</b></a>
-          <a href="#managers" data-dock="managers"><span>◎</span><b>Managers</b></a>
-        </nav>
-      </div>`;
-    render();
-  }
-
-  function route(){
-    const r=(location.hash||'#home').slice(1).split('?')[0];
-    return routes.includes(r)?r:'home';
-  }
-
+  function route(){const r=(location.hash||'#home').slice(1).split('?')[0];return routes.includes(r)?r:'home';}
   function render(){
-    const view=document.getElementById('view');
-    if(!view) return;
-    const r=route();
-    document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('active',a.dataset.nav===r));
-    document.querySelectorAll('[data-dock]').forEach(a=>a.classList.toggle('active',a.dataset.dock===r));
-    if(state.loading){view.innerHTML=loadingView();return;}
-    const map={home:homeView,scores:scoresView,calendar:calendarView,competitions:competitionsView,clubs:clubsView,managers:managersView,transfers:transfersView,players:playersView,reports:reportsView};
-    view.innerHTML=map[r]();
+    const v=document.getElementById('view'); if(!v)return;
+    const r=route(); document.querySelectorAll('[data-dock]').forEach(a=>a.classList.toggle('active',a.dataset.dock===r));
+    if(state.loading){v.innerHTML='<section class="boot-screen"><div class="boot-logo">HOF</div><strong>LOADING GAME WORLD</strong><span>SYNCING LIVE DATA</span></section>';return;}
+    const map={home:home,scores:()=>listPage('RESULTS','MATCH ARCHIVE',state.results,scoreCard),calendar:()=>listPage('FIXTURES','SEASON SCHEDULE',state.schedule,fixtureCard),competitions:competitions,clubs:clubs,managers:managers,transfers:()=>listPage('TRANSFERS','MARKET FEED',state.transfers,transferCard),players:players,reports:()=>listPage('MATCH REPORTS','MATCHROOM',state.reports,reportCard)};
+    v.innerHTML=map[r](); window.scrollTo({top:0,behavior:'instant'});
   }
 
-  function loadingView(){
-    return `<section class="loading-screen"><div class="loader"></div><strong>Loading Hall Of Famers</strong><span>Syncing live Game World data</span></section>`;
+  function home(){
+    const w=state.world||{}; const latest=latestResult(); const next=nextFixture(); const heroClubs=state.clubs.slice(0,7); const top=topStats(3); const active=activeManagers().length;
+    return `<section class="stadium-hero">
+      <div class="stadium-grid"></div>
+      <div class="club-cloud">${heroClubs.map((c,i)=>`<div class="cloud-logo l${i}">${clubLogo(c)}</div>`).join('')}</div>
+      <div class="hero-copy"><span class="season-tag">ITALIAN MASTERS CLUB · ${esc(w.game_world_id||GW)}</span><h1>${esc(w.game_world_name||'Hall Of Famers')}</h1><p>SM WORLD ${esc(w.sm_game_world_id||'468194')} · ${state.clubs.length} CLUBS · ${active} ACTIVE MANAGERS</p></div>
+      <a class="continue-btn" href="#scores"><span>CONTINUE</span><b>ENTER MATCH CENTRE</b><i>›</i></a>
+    </section>
+
+    <section class="match-centre">
+      <div class="mc-label"><span>LIVE HUB</span><b>SEASON CENTRE</b></div>
+      <div class="versus-stage">${matchStage(latest,next)}</div>
+      <div class="quick-grid">
+        ${quick('#calendar','NEXT','FIXTURES',state.schedule.length,'◷')}
+        ${quick('#competitions','WORLD','COMPETITIONS',state.competitions.length,'◇')}
+        ${quick('#transfers','MARKET','TRANSFERS',state.transfers.length,'↔')}
+        ${quick('#reports','MEDIA','REPORTS',state.reports.length,'▣')}
+      </div>
+    </section>
+
+    <section class="feature-strip">
+      <a class="feature-card clubs-feature" href="#clubs"><div><span>CLUB UNIVERSE</span><strong>${state.clubs.length}</strong><p>Explore every club in GW005</p></div><div class="logo-river">${state.clubs.slice(0,6).map(clubLogo).join('')}</div></a>
+      <a class="feature-card managers-feature" href="#managers"><div><span>MANAGER NETWORK</span><strong>${active}</strong><p>Assignments, clubs and national teams</p></div><div class="manager-orbs">${activeManagers().slice(0,5).map(m=>`<i>${initials(m.full_name||m.manager_id||'IMC')}</i>`).join('')}</div></a>
+    </section>
+
+    <section class="elite-zone"><div class="zone-title"><span>ELITE FORM</span><a href="#players">ALL PLAYERS ›</a></div><div class="podium">${top.map((p,i)=>playerPodium(p,i)).join('')||'<div class="empty">No player stats</div>'}</div></section>`;
   }
 
-  function homeView(){
-    const w=state.world||{};
-    const latest=latestResults(5);
-    const next=nextFixtures(4);
-    const activeClubs=w.active_club||state.clubs.length||24;
-    const compCount=state.competitions.length;
-    const managerCount=activeManagers().length;
-    const resultCount=state.results.length;
-    const transferCount=state.transfers.length;
-    const topPlayers=topStats(5);
-    const divisions=[...new Set(state.competitions.filter(c=>String(c.sm_action||'').toLowerCase()==='league').map(c=>c.sm_division).filter(v=>v!=null))].length;
-    return `
-      <section class="hero">
-        <div class="hero-copy">
-          <div class="eyebrow">ITALIAN MASTERS CLUB · ${esc(w.game_world_id||GW)}</div>
-          <h1>${esc(w.game_world_name||'Hall Of Famers')}</h1>
-          <p class="hero-sub">Game World ${esc(w.sm_game_world_id||'468194')} · ${activeClubs} clubs · ${divisions||3} divisions</p>
-        </div>
-        <div class="hero-orbit" aria-hidden="true"><span>HOF</span></div>
-        <div class="hero-metrics">
-          ${metric(activeClubs,'CLUBS')}${metric(compCount,'COMPETITIONS')}${metric(resultCount,'RESULTS')}${metric(transferCount,'TRANSFERS')}
-        </div>
-      </section>
-
-      <section class="ticker"><span>LIVE</span><div>${tickerText()}</div></section>
-
-      <section class="home-grid">
-        <article class="panel scores-panel">
-          ${sectionHead('Latest results','#scores','ALL RESULTS')}
-          <div class="score-list">${latest.length?latest.map(scoreRow).join(''):empty('No results yet')}</div>
-        </article>
-
-        <article class="panel fixtures-panel">
-          ${sectionHead('Next fixtures','#calendar','FULL CALENDAR')}
-          <div class="fixture-list">${next.length?next.map(fixtureRow).join(''):empty('No upcoming fixtures')}</div>
-        </article>
-
-        <article class="panel competition-panel">
-          ${sectionHead('Competition desk','#competitions','EXPLORE')}
-          <div class="competition-strip">${competitionSummary()}</div>
-        </article>
-
-        <article class="panel club-panel">
-          ${sectionHead('Club hub','#clubs',`${activeClubs} CLUBS`)}
-          <div class="club-preview">${state.clubs.slice(0,8).map(clubTile).join('')}</div>
-        </article>
-
-        <article class="panel manager-panel">
-          ${sectionHead('Manager room','#managers',`${managerCount} ACTIVE`)}
-          <div class="manager-preview">${activeManagers().slice(0,5).map(managerRow).join('')||empty('No assignments')}</div>
-        </article>
-
-        <article class="panel transfer-panel">
-          ${sectionHead('Transfer wire','#transfers','LIVE FEED')}
-          <div class="news-list">${state.transfers.slice(0,5).map(transferRow).join('')||empty('No transfers')}</div>
-        </article>
-
-        <article class="panel player-panel">
-          ${sectionHead('Top performers','#players','PLAYER STATS')}
-          <div class="rank-list">${topPlayers.map((p,i)=>playerRank(p,i)).join('')||empty('No player stats')}</div>
-        </article>
-
-        <article class="panel reports-panel">
-          ${sectionHead('Matchroom','#reports',`${state.reports.length} REPORTS`)}
-          <div class="report-feature">${reportFeature()}</div>
-        </article>
-      </section>`;
+  function matchStage(latest,next){
+    if(latest){const h=get(latest,['home_name','home_team'],'Home'),a=get(latest,['away_name','away_team'],'Away'),hs=get(latest,['home_score','home_goals'],'-'),as=get(latest,['away_score','away_goals'],'-');return `<div class="stage-meta">LAST RESULT · ${esc(compLabel(latest))}</div><div class="stage-teams"><div>${teamVisual(h)}<b>${esc(h)}</b></div><strong>${esc(hs)}<small>:</small>${esc(as)}</strong><div>${teamVisual(a)}<b>${esc(a)}</b></div></div><a href="#scores">MATCH CENTRE ›</a>`;}
+    if(next){const h=get(next,['home_name','home_team'],'Home'),a=get(next,['away_name','away_team'],'Away');return `<div class="stage-meta">NEXT FIXTURE · ${esc(fmtDate(dateValue(next)))}</div><div class="stage-teams"><div>${teamVisual(h)}<b>${esc(h)}</b></div><strong class="vs">VS</strong><div>${teamVisual(a)}<b>${esc(a)}</b></div></div><a href="#calendar">FULL FIXTURES ›</a>`;}
+    return '<div class="empty">No match data</div>';
   }
 
-  function scoresView(){
-    const all=[...state.results].sort((a,b)=>dateValue(b)-dateValue(a));
-    return page('RESULTS','All recorded results',`${all.length} matches`,all.length?`<div class="score-list full">${all.map(scoreRow).join('')}</div>`:empty('No results'));
-  }
+  function quick(href,kicker,label,value,icon){return `<a class="quick-tile" href="${href}"><span>${kicker}</span><i>${icon}</i><strong>${value}</strong><b>${label}</b></a>`;}
+  function clubLogo(c){const x=state.clubCodex.get(String(c.club_id));return x?.image_url?`<img src="${esc(x.image_url)}" alt="${esc(c.club_name||'Club')}" loading="lazy">`:`<span class="fallback-logo">${initials(c.club_name||'CL')}</span>`;}
+  function teamVisual(name){const c=state.clubs.find(x=>String(x.club_name).toLowerCase()===String(name).toLowerCase());return c?clubLogo(c):`<span class="fallback-logo">${initials(name)}</span>`;}
+  function playerPodium(p,i){const name=get(p,['player_name','full_name','name'],'Player');const club=get(p,['club_name','team_name'],'');const goals=num(p,['goals'],0);const rating=get(p,['avg_rating','rating'],'-');return `<a class="podium-card rank-${i+1}" href="#players"><span>#${i+1}</span><div class="player-silhouette">${initials(name)}</div><strong>${esc(name)}</strong><small>${esc(club)}</small><div><b>${goals}</b><em>G</em><b>${esc(rating)}</b><em>RAT</em></div></a>`;}
 
-  function calendarView(){
-    const all=[...state.schedule].sort((a,b)=>dateValue(a)-dateValue(b));
-    return page('FIXTURES','Full schedule',`${all.length} fixtures`,all.length?`<div class="fixture-list full">${all.map(fixtureRow).join('')}</div>`:empty('No fixtures'));
-  }
+  function listPage(title,sub,arr,renderer){const sorted=[...arr].sort((a,b)=>dateValue(b)-dateValue(a));return pageHead(title,sub,`${arr.length}`)+`<section class="stack-list">${sorted.map(renderer).join('')||'<div class="empty">No data</div>'}</section>`;}
+  function competitions(){const groups=groupBy(state.competitions,x=>x.sm_action_group||'OTHER');return pageHead('COMPETITIONS','WORLD STRUCTURE',state.competitions.length)+`<section class="competition-board">${Object.entries(groups).map(([g,items])=>`<article><header><span>${esc(g)}</span><b>${items.length}</b></header>${items.map(x=>`<div><strong>${esc(x.custom_competition||x.sm_action||'Competition')}</strong><small>${esc([x.sm_country,x.sm_division&&`Division ${x.sm_division}`].filter(Boolean).join(' · '))}</small></div>`).join('')}</article>`).join('')}</section>`;}
+  function clubs(){return pageHead('CLUBS','THE CLUB UNIVERSE',state.clubs.length)+`<section class="club-wall">${state.clubs.map(c=>`<article>${clubLogo(c)}<div><strong>${esc(c.club_name)}</strong><small>SM ${esc(c.sm_club_id||'')}</small></div><span>›</span></article>`).join('')}</section>`;}
+  function managers(){return pageHead('MANAGERS','ASSIGNMENT NETWORK',state.managers.length)+`<section class="manager-grid">${state.managers.map(m=>`<article><div class="avatar-big">${initials(m.full_name||m.manager_id||'IMC')}</div><div><span>${esc(m.assignment_type||'MANAGER')}</span><strong>${esc(m.full_name||m.manager_id||'Manager')}</strong><p>${esc(clubName(m.club_id)||nationalName(m.national_team_id)||'IMC')}</p></div></article>`).join('')}</section>`;}
+  function players(){const s=topStats(Math.max(state.stats.length,1000));return pageHead('PLAYERS','PERFORMANCE DATABASE',s.length)+`<section class="player-board">${s.map((p,i)=>`<article><b>#${i+1}</b><div><strong>${esc(get(p,['player_name','full_name'],'Player'))}</strong><small>${esc(get(p,['club_name'],'Unknown club'))}</small></div><span>${esc(get(p,['avg_rating','rating'],'-'))}</span><em>${num(p,['goals'],0)} G</em></article>`).join('')}</section>`;}
 
-  function competitionsView(){
-    const groups=groupBy(state.competitions,c=>c.sm_action_group||'OTHER');
-    return page('COMPETITIONS','Competition architecture',`${state.competitions.length} entries`,Object.entries(groups).map(([g,items])=>`
-      <section class="content-block"><div class="block-title"><span>${esc(g)}</span><b>${items.length}</b></div><div class="competition-list">${items.map(competitionRow).join('')}</div></section>`).join(''));
-  }
+  function pageHead(title,sub,count){return `<section class="page-hero"><a href="#home">‹ HOME</a><span>${sub}</span><h1>${title}</h1><b>${count}</b></section>`;}
+  function scoreCard(r){return `<article class="data-card"><span>${esc(compLabel(r))} · ${fmtDate(dateValue(r))}</span><div><strong>${esc(get(r,['home_name'],'Home'))}</strong><b>${esc(get(r,['home_score'],'-'))}:${esc(get(r,['away_score'],'-'))}</b><strong>${esc(get(r,['away_name'],'Away'))}</strong></div></article>`;}
+  function fixtureCard(r){return `<article class="data-card"><span>${fmtDate(dateValue(r))} · ${esc(compLabel(r))}</span><div><strong>${esc(get(r,['home_name'],'Home'))}</strong><b>VS</b><strong>${esc(get(r,['away_name'],'Away'))}</strong></div></article>`;}
+  function transferCard(t){return `<article class="data-card"><span>${esc(get(t,['transfer_date'],'TRANSFER'))}</span><div><strong>${esc(get(t,['player_name','full_name'],'Player'))}</strong><b>↔</b><strong>${esc(get(t,['to_club_name','club_name'],'Club'))}</strong></div></article>`;}
+  function reportCard(r){return `<article class="data-card"><span>${fmtDate(dateValue(r))}</span><div><strong>${esc(matchText(r,false))}</strong><b>REPORT</b><strong>${esc(get(r,['competition_group_name','competition_key'],'MATCH'))}</strong></div></article>`;}
 
-  function clubsView(){
-    return page('CLUBS','Game World club directory',`${state.clubs.length} clubs`,`<div class="club-directory">${state.clubs.map(clubCard).join('')}</div>`);
-  }
-
-  function managersView(){
-    const nationalMap=new Map(state.nationals.map(n=>[String(n.id),n]));
-    const rows=state.managers.map(m=>{
-      const nat=m.national_team_id?nationalMap.get(String(m.national_team_id)):null;
-      return {...m,national_name:nat?.name||null,national_image:nat?.image_url||null};
-    });
-    return page('MANAGERS','Club and national assignments',`${rows.length} assignments`,`<div class="manager-directory">${rows.map(managerCard).join('')}</div>`);
-  }
-
-  function transfersView(){
-    return page('TRANSFERS','Latest market activity',`${state.transfers.length} moves`,`<div class="news-list full">${state.transfers.map(transferRow).join('')||empty('No transfers')}</div>`);
-  }
-
-  function playersView(){
-    const sorted=topStats(Math.max(state.stats.length,1000));
-    return page('PLAYERS','SM performance leaderboard',`${state.stats.length} stat rows`,`<div class="player-table">${sorted.map((p,i)=>playerTableRow(p,i)).join('')||empty('No player stats')}</div>`);
-  }
-
-  function reportsView(){
-    const all=[...state.reports].sort((a,b)=>dateValue(b)-dateValue(a));
-    return page('MATCH REPORTS','Matchroom archive',`${all.length} reports`,`<div class="report-list">${all.map(reportRow).join('')||empty('No match reports')}</div>`);
-  }
-
-  function page(title,sub,meta,content){return `<section class="page-head"><div class="eyebrow">${GW}</div><h1>${title}</h1><p>${sub}</p><span>${meta}</span></section><section class="page-content">${content}</section>`;}
-  function metric(v,l){return `<div><strong>${esc(v)}</strong><span>${l}</span></div>`;}
-  function sectionHead(title,href,meta){return `<div class="section-head"><h2>${title}</h2><a href="${href}">${meta} <b>›</b></a></div>`;}
-
-  function tickerText(){
-    const r=latestResults(1)[0], f=nextFixtures(1)[0], t=state.transfers[0];
-    const chunks=[];
-    if(r) chunks.push(`Latest: ${matchText(r,true)}`);
-    if(f) chunks.push(`Next: ${matchText(f,false)}`);
-    if(t) chunks.push(`Market: ${transferText(t)}`);
-    return esc(chunks.join('  ·  ')||'Hall Of Famers data feed connected');
-  }
-
-  function latestResults(n){return [...state.results].sort((a,b)=>dateValue(b)-dateValue(a)).slice(0,n);}
-  function nextFixtures(n){
-    const now=Date.now();
-    const future=state.schedule.filter(x=>!Number.isFinite(dateValue(x))||dateValue(x)>=now).sort((a,b)=>dateValue(a)-dateValue(b));
-    return (future.length?future:[...state.schedule].sort((a,b)=>dateValue(a)-dateValue(b))).slice(0,n);
-  }
-
-  function scoreRow(r){
-    const home=get(r,['home_name','home_team','home_club_name'],'Home');
-    const away=get(r,['away_name','away_team','away_club_name'],'Away');
-    const hs=get(r,['home_score','score_home','home_goals'],'–');
-    const as=get(r,['away_score','score_away','away_goals'],'–');
-    return `<div class="score-row"><div class="score-meta"><span>${esc(compLabel(r))}</span><time>${fmtDate(dateValue(r))}</time></div><div class="score-main"><span>${esc(home)}</span><strong>${esc(hs)}<i>:</i>${esc(as)}</strong><span>${esc(away)}</span></div></div>`;
-  }
-
-  function fixtureRow(r){
-    const home=get(r,['home_name','home_team','home_club_name'],'Home');
-    const away=get(r,['away_name','away_team','away_club_name'],'Away');
-    const time=get(r,['match_time','time','kickoff_time'],'');
-    return `<div class="fixture-row"><div><b>${fmtDate(dateValue(r))}</b><span>${esc(compLabel(r))}</span></div><p><strong>${esc(home)}</strong><em>vs</em><strong>${esc(away)}</strong></p><time>${esc(time||'')}</time></div>`;
-  }
-
-  function competitionSummary(){
-    const league=state.competitions.filter(c=>String(c.sm_action||'').toLowerCase()==='league');
-    const domestic=state.competitions.filter(c=>String(c.sm_action_group||'').toUpperCase()==='DOMESTIC').length;
-    const intl=state.competitions.filter(c=>String(c.sm_action_group||'').toUpperCase()==='INTERNATIONAL').length;
-    const nations=state.competitions.filter(c=>String(c.sm_action_group||'').toUpperCase()==='NATIONS').length;
-    return [
-      ['League divisions',[...new Set(league.map(x=>x.sm_division).filter(Boolean))].length],
-      ['Domestic',domestic],['International',intl],['Nations',nations]
-    ].map(([l,v])=>`<a href="#competitions"><strong>${v}</strong><span>${l}</span></a>`).join('');
-  }
-
-  function clubTile(c){
-    const x=state.clubCodex.get(String(c.club_id));
-    return `<a class="club-tile" href="#clubs">${logo(x?.image_url,c.club_name)}<span>${esc(c.club_name)}</span></a>`;
-  }
-
-  function clubCard(c){
-    const x=state.clubCodex.get(String(c.club_id));
-    const mgr=state.managers.find(m=>String(m.club_id||'')===String(c.club_id||'')&&!m.end_date);
-    const recent=state.results.filter(r=>String(get(r,['home_name'],'')).toLowerCase()===String(c.club_name).toLowerCase()||String(get(r,['away_name'],'')).toLowerCase()===String(c.club_name).toLowerCase()).slice(0,1)[0];
-    return `<article class="club-card">${logo(x?.image_url,c.club_name)}<div><h3>${esc(c.club_name)}</h3><p>${mgr?esc(mgr.full_name):'Manager not assigned'}</p><span>${recent?esc(matchText(recent,true)):'No recent result'}</span></div><b>${esc(c.sm_club_id||'')}</b></article>`;
-  }
-
-  function managerRow(m){return `<div class="manager-row"><span>${initials(m.full_name)}</span><div><strong>${esc(m.full_name||'Manager')}</strong><small>${esc(managerDestination(m))}</small></div><time>${fmtDate(Date.parse(m.start_date||''))}</time></div>`;}
-  function managerCard(m){return `<article class="manager-card"><div class="avatar">${initials(m.full_name)}</div><div><h3>${esc(m.full_name||'Manager')}</h3><p>${esc(managerDestination(m))}</p><span>${esc(m.assignment_type||'assignment')}</span></div><time>${fmtDate(Date.parse(m.start_date||''))}</time></article>`;}
-  function managerDestination(m){
-    if(m.club_id){const c=state.clubs.find(x=>String(x.club_id)===String(m.club_id));if(c)return c.club_name;}
-    if(m.national_name)return m.national_name;
-    if(m.national_team_id){const n=state.nationals.find(x=>String(x.id)===String(m.national_team_id));if(n)return n.name;}
-    return 'IMC';
-  }
-
-  function transferRow(t){return `<article class="news-row"><div class="news-date">${fmtDate(transferDate(t))}</div><div><strong>${esc(get(t,['player_name','full_name','name'],'Transfer'))}</strong><p>${esc(transferText(t))}</p></div><span>${esc(transferFee(t))}</span></article>`;}
-  function transferText(t){
-    const from=get(t,['from_club_name','old_club_name','seller_club_name','from_name'],'');
-    const to=get(t,['to_club_name','new_club_name','buyer_club_name','to_name'],'');
-    if(from||to)return `${from||'—'} → ${to||'—'}`;
-    return get(t,['description','transfer_type','type'],'Transfer');
-  }
-  function transferFee(t){return get(t,['transfer_fee','fee','amount','value','transfer_value'],'');}
-  function transferDate(t){const raw=get(t,['transfer_date','date','created_at'],null);const d=Date.parse(raw||'');return Number.isFinite(d)?d:NaN;}
-
-  function topStats(n){return [...state.stats].sort((a,b)=>Number(get(b,['goals'],0))-Number(get(a,['goals'],0))||Number(get(b,['avg_rating','rating'],0))-Number(get(a,['avg_rating','rating'],0))).slice(0,n);}
-  function playerRank(p,i){return `<div class="rank-row"><b>${i+1}</b><div><strong>${esc(get(p,['player_name','full_name','name'],'Player'))}</strong><span>${esc(get(p,['club_name'],'—'))}</span></div><em>${esc(get(p,['goals'],0))} G</em><small>${esc(get(p,['avg_rating','rating'],'—'))}</small></div>`;}
-  function playerTableRow(p,i){return `<article class="player-row"><b>${i+1}</b><div><strong>${esc(get(p,['player_name','full_name','name'],'Player'))}</strong><span>${esc(get(p,['club_name'],'—'))} · ${esc(get(p,['appearances'],0))} apps</span></div><div><strong>${esc(get(p,['goals'],0))}</strong><small>GOALS</small></div><div><strong>${esc(get(p,['avg_rating','rating'],'—'))}</strong><small>AVG</small></div></article>`;}
-
-  function reportFeature(){const r=[...state.reports].sort((a,b)=>dateValue(b)-dateValue(a))[0];if(!r)return empty('No match reports');return `<a href="#reports" class="report-hero"><span>MATCH REPORT</span><strong>${esc(matchText(r,false))}</strong><p>${fmtDate(dateValue(r))} · ${esc(compLabel(r))}</p><b>Read archive ›</b></a>`;}
-  function reportRow(r){return `<article class="report-row"><div><span>${fmtDate(dateValue(r))}</span><strong>${esc(matchText(r,false))}</strong><small>${esc(compLabel(r))}</small></div><b>›</b></article>`;}
-
-  function competitionRow(c){
-    const title=c.custom_competition||actionLabel(c.sm_action,c.sm_division);
-    const bits=[c.sm_country,c.sm_division?`Division ${c.sm_division}`:null,c.teams_count?`${c.teams_count} teams`:null,c.expected_match?`${c.expected_match} expected matches`:null].filter(Boolean);
-    return `<article class="competition-row"><div><span>${esc(c.sm_action_group||'')}</span><strong>${esc(title)}</strong><p>${esc(bits.join(' · '))}</p></div><b>${c.is_sm_action?'SM':'IMC'}</b></article>`;
-  }
-  function actionLabel(a,d){const x=String(a||'Competition');const map={league:'League',leaguecup:'League Cup',leagueshield:'League Shield',charityshield:'Charity Shield',playoff:'Playoff',smfacup:'SMFA Cup',smfashield:'SMFA Shield',supercup:'Super Cup',interqualifier:'Inter Qualifier',worldcup:'World Cup',friendly:'Friendly'};return `${map[x.toLowerCase()]||x}${x.toLowerCase()==='league'&&d?` · Division ${d}`:''}`;}
-
+  function latestResult(){return [...state.results].sort((a,b)=>dateValue(b)-dateValue(a))[0]||null;}
+  function nextFixture(){const n=Date.now(),f=state.schedule.filter(x=>dateValue(x)>=n).sort((a,b)=>dateValue(a)-dateValue(b));return f[0]||state.schedule[0]||null;}
   function activeManagers(){return state.managers.filter(m=>!m.end_date);}
-  function compLabel(r){return get(r,['competition_key','competition_group_name','sm_action','competition'],'Competition');}
-  function matchText(r,score){
-    const h=get(r,['home_name','home_team','home_club_name'],'Home'),a=get(r,['away_name','away_team','away_club_name'],'Away');
-    if(score){const hs=get(r,['home_score','score_home','home_goals'],'–'),as=get(r,['away_score','score_away','away_goals'],'–');return `${h} ${hs}-${as} ${a}`;}
-    return `${h} vs ${a}`;
-  }
-  function dateValue(r){const raw=get(r,['match_date','date','kickoff','fixture_date','played_at','scheduled_at'],null);const d=Date.parse(raw||'');return Number.isFinite(d)?d:NaN;}
-  function fmtDate(v){if(!Number.isFinite(v))return '—';return new Date(v).toLocaleDateString('it-IT',{day:'2-digit',month:'short'});}
-  function groupBy(arr,fn){return arr.reduce((a,x)=>{const k=fn(x);(a[k]||(a[k]=[])).push(x);return a;},{});}
-  function get(o,keys,fallback=''){for(const k of keys){if(o&&o[k]!==undefined&&o[k]!==null&&o[k]!=='')return o[k];}return fallback;}
+  function topStats(n){return [...state.stats].sort((a,b)=>num(b,['goals'],0)-num(a,['goals'],0)||num(b,['avg_rating','rating'],0)-num(a,['avg_rating','rating'],0)).slice(0,n);}
+  function clubName(id){return state.clubs.find(c=>String(c.club_id)===String(id))?.club_name||'';}
+  function nationalName(id){return state.nationals.find(n=>String(n.id)===String(id))?.name||'';}
+  function matchText(r,score){const h=get(r,['home_name'],'Home'),a=get(r,['away_name'],'Away');return score?`${h} ${get(r,['home_score'],'-')}:${get(r,['away_score'],'-')} ${a}`:`${h} vs ${a}`;}
+  function compLabel(r){return get(r,['competition_group_name','competition_key','sm_action'],'MATCH');}
+  function dateValue(r){const raw=get(r,['match_date','transfer_date','date','played_at','scheduled_at'],'');const t=Date.parse(raw);return Number.isFinite(t)?t:0;}
+  function fmtDate(t){if(!t)return '';return new Date(t).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}).toUpperCase();}
+  function groupBy(arr,fn){return arr.reduce((o,x)=>{const k=fn(x);(o[k]||(o[k]=[])).push(x);return o;},{});}
+  function get(o,keys,f=''){for(const k of keys)if(o&&o[k]!=null&&o[k]!=='')return o[k];return f;}
+  function num(o,keys,f=0){const v=Number(get(o,keys,f));return Number.isFinite(v)?v:f;}
+  function initials(v){return String(v||'IMC').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
   function rows(v){return Array.isArray(v)?v:Array.isArray(v?.rows)?v.rows:Array.isArray(v?.data)?v.data:[];}
-  async function read(api,name,params={}){return api.read(name,params);}
-  function waitApi(ms){return new Promise(resolve=>{const s=Date.now();const t=()=>window.IMC_MINISITE_DATA?.read?resolve(window.IMC_MINISITE_DATA):Date.now()-s>ms?resolve(null):setTimeout(t,50);t();});}
+  async function read(api,res,params={}){return api.read(res,params);}
+  function waitApi(ms){return new Promise(resolve=>{const s=Date.now();(function t(){if(window.IMC_MINISITE_DATA?.read)return resolve(window.IMC_MINISITE_DATA);if(Date.now()-s>=ms)return resolve(null);setTimeout(t,80)})();});}
   function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-  function initials(n){return esc(String(n||'IMC').split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase());}
-  function logo(url,name){return url?`<img class="club-logo" src="${esc(url)}" alt="${esc(name)}" loading="lazy">`:`<span class="club-logo fallback">${initials(name)}</span>`;}
-  function empty(t){return `<div class="empty">${esc(t)}</div>`;}
 })();
