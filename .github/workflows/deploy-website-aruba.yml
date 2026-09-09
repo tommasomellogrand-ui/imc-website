@@ -46,6 +46,7 @@ jobs:
           test -s sensible-soccer-academy-creation/gw-setting/.htaccess
           test -s sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg
           test -s sensible-soccer-academy-creation/gw-setting/draft-enhancements.js
+          test -s sensible-soccer-academy-creation/gw-setting/draft-chat.js
           test -s sensible-soccer-academy-creation/gw-setting/replay-recorder.js
           test -s sensible-soccer-academy-creation/draw-replay/index.html
           test -s sensible-soccer-academy-creation/draw-replay/replay.php
@@ -140,12 +141,13 @@ jobs:
               if check.getvalue()!=data: raise SystemExit(f'Verifica upload fallita: {rel}')
 
           enhancement_local=Path('sensible-soccer-academy-creation/gw-setting/draft-enhancements.js')
+          chat_local=Path('sensible-soccer-academy-creation/gw-setting/draft-chat.js')
           recorder_local=Path('sensible-soccer-academy-creation/gw-setting/replay-recorder.js')
           runtime_dest=f"{remote_root}/sensible-soccer-academy-creation/gw-setting"
           ensure_dir(runtime_dest)
-          runtime_data=enhancement_local.read_bytes()+b'\n'+recorder_local.read_bytes()
+          runtime_data=enhancement_local.read_bytes()+b'\n'+chat_local.read_bytes()+b'\n'+recorder_local.read_bytes()
           ftp.storbinary('STOR crest-overrides.js',io.BytesIO(runtime_data))
           runtime_check=io.BytesIO(); ftp.retrbinary('RETR crest-overrides.js',runtime_check.write)
           if runtime_check.getvalue()!=runtime_data: raise SystemExit('Verifica upload fallita: Draft Matrix runtime bundle')
-          ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; GW010 runtime senza legacy crest patch')
+          ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; GW010 runtime + Manager Chat + Replay attivi')
           PY
