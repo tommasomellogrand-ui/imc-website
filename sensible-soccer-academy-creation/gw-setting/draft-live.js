@@ -28,17 +28,25 @@
     };
   }
 
-  async function publish(){
+  async function postPayload(payload,force=false){
     if(MODE!=='host'||busy)return;
-    const payload=hostSnapshot();
     const sig=JSON.stringify({...payload,sequence:0});
-    if(sig===lastSent)return;
+    if(!force&&sig===lastSent)return;
     busy=true;payload.sequence=++sequence;
     try{
       const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),cache:'no-store'});
       if(r.ok)lastSent=sig;
     }catch(e){}
     finally{busy=false;}
+  }
+
+  async function publish(){
+    await postPayload(hostSnapshot(),false);
+  }
+
+  function publishHome(){
+    const payload={...hostSnapshot(),status:'idle',scene_show:false,scanning:false,locked:false,final_show:false};
+    postPayload(payload,true);
   }
 
   function setText(id,value){const el=$(id);if(el&&clean(el.textContent)!==clean(value))el.textContent=value||'';}
@@ -88,6 +96,7 @@
   if(MODE==='host'){
     publish();
     setInterval(publish,300);
+    window.addEventListener('gw010:home',publishHome);
     window.addEventListener('beforeunload',()=>{try{navigator.sendBeacon(API,new Blob([JSON.stringify({...hostSnapshot(),status:'idle',scene_show:false,source:'host',sequence:++sequence})],{type:'application/json'}));}catch(e){}});
   }else{
     const draftBtn=$('draftBtn');if(draftBtn)draftBtn.style.display='none';
