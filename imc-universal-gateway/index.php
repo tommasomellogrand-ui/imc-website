@@ -24,6 +24,13 @@ if (is_array($imcPreflight)) {
             }
         }
         require __DIR__.'/minisite.php';
+        if ($imcChannel === 'MINISITE') {
+            foreach (['sql','table','repository','target_database','target_table','route_mode'] as $imcForbiddenField) {
+                if (array_key_exists($imcForbiddenField, $imcPreflight)) {
+                    imc_minisite_out(['ok' => false, 'error' => 'forbidden_parameter'], 422);
+                }
+            }
+        }
         try {
             imc_minisite_read($imcPreflight);
         } catch (InvalidArgumentException $e) {
