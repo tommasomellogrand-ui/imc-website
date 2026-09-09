@@ -1,11 +1,21 @@
 (()=>{
   const API='../draw-waiting-room/chat.php';
+  const mode=(new URLSearchParams(location.search).get('mode')||'host').toLowerCase()==='manager'?'manager':'host';
+  const scene=document.getElementById('draftScene');
   const sceneBox=document.querySelector('#draftScene .sceneBox');
-  if(!sceneBox||document.getElementById('gw010DraftChat')) return;
+  const matrix=document.querySelector('.matrix');
+  if(!sceneBox||!matrix||document.getElementById('gw010DraftChat')) return;
+
+  if(mode==='manager'){
+    const draftBtn=document.getElementById('draftBtn');
+    if(draftBtn) draftBtn.style.display='none';
+  }
+
   const style=document.createElement('style');
   style.id='gw010-draft-chat-style';
   style.textContent=`
-  .gw010DraftChat{margin-top:12px;background:#071629;border:4px solid #f0e6b4;box-shadow:4px 4px #000;overflow:hidden}
+  .gw010DraftChat{margin:0 0 16px;background:#071629;border:4px solid #f0e6b4;box-shadow:4px 4px #000;overflow:hidden}
+  #draftScene .gw010DraftChat{margin:12px 0 0}
   .gw010DraftChatHead{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:9px;background:#06111f;color:#f4c93d;border-bottom:3px solid #000;font-weight:900}
   .gw010OnlineBadge{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:2px solid #42e47a;background:#082216;color:#42e47a;font-size:11px;line-height:1;box-shadow:2px 2px #000}
   .gw010OnlineDot{width:8px;height:8px;background:#42e47a;display:inline-block;animation:gw010Pulse 1.2s steps(2,end) infinite}
@@ -18,10 +28,19 @@
   @keyframes gw010Pulse{50%{opacity:.45}}@media(max-width:650px){.gw010ChatRow{grid-template-columns:1fr}.gw010ChatMessages{max-height:180px}}
   `;
   document.head.appendChild(style);
+
   const root=document.createElement('section');
   root.id='gw010DraftChat'; root.className='gw010DraftChat';
   root.innerHTML=`<div class="gw010DraftChatHead">MANAGER CHAT <span class="gw010OnlineBadge"><span class="gw010OnlineDot"></span><span id="gw010OnlineCount">0 ONLINE</span></span></div><div class="gw010ChatJoin"><div class="gw010ChatRow"><input id="gw010NameInput" maxlength="40" autocomplete="name" placeholder="INSERISCI IL TUO NOME"><button class="gw010ChatBtn" id="gw010JoinBtn" type="button">ENTRA</button></div><div class="gw010ChatStatus" id="gw010ChatStatus">Non sei ancora entrato nella chat.</div></div><div class="gw010ChatMessages" id="gw010ChatMessages" aria-live="polite"></div><div class="gw010ChatComposer"><div class="gw010ChatRow"><input id="gw010MessageInput" maxlength="500" autocomplete="off" placeholder="SCRIVI UN MESSAGGIO..." disabled><button class="gw010ChatBtn" id="gw010SendBtn" type="button" disabled>INVIA</button></div></div>`;
-  sceneBox.appendChild(root);
+
+  const moveHome=()=>{if(root.parentElement!==matrix.parentElement||root.nextElementSibling!==matrix)matrix.parentElement.insertBefore(root,matrix);};
+  const moveLive=()=>{if(root.parentElement!==sceneBox)sceneBox.appendChild(root);};
+  moveHome();
+  if(scene){
+    new MutationObserver(()=>scene.classList.contains('show')?moveLive():moveHome()).observe(scene,{attributes:true,attributeFilter:['class']});
+  }
+  window.addEventListener('gw010:home',moveHome);
+
   const $=id=>document.getElementById(id),nameInput=$('gw010NameInput'),joinBtn=$('gw010JoinBtn'),status=$('gw010ChatStatus'),messages=$('gw010ChatMessages'),messageInput=$('gw010MessageInput'),sendBtn=$('gw010SendBtn'),onlineCount=$('gw010OnlineCount');
   let manager=(localStorage.getItem('imc_gw010_waiting_name')||'').trim(),lastSig='';let clientId=localStorage.getItem('imc_gw010_waiting_client')||'';
   if(!clientId){clientId=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));localStorage.setItem('imc_gw010_waiting_client',clientId);}
