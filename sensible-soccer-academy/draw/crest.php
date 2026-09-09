@@ -9,6 +9,36 @@ if (!in_array($id, $allowed, true)) {
   http_response_code(404);
   exit;
 }
+
+// Local overrides supplied for the GW010 live draw. These are served before
+// trying the legacy Soccer Manager CDN, so the draw can use reliable HTTPS.
+$overrideNames = [
+  '420' => 'Aberdeen',
+  '267' => 'Argentinos Juniors',
+  '96'  => 'Atalanta',
+  '218' => 'Benfica',
+];
+$overrideFile = __DIR__ . '/../assets/crest-overrides.js';
+if (isset($overrideNames[$id]) && is_file($overrideFile)) {
+  $raw = @file_get_contents($overrideFile);
+  $prefix = 'window.IMC_CREST_OVERRIDES=';
+  if (is_string($raw) && strpos($raw, $prefix) === 0) {
+    $json = rtrim(substr($raw, strlen($prefix)), ";\r\n \t");
+    $map = json_decode($json, true);
+    $uri = is_array($map) ? ($map[$overrideNames[$id]] ?? null) : null;
+    if (is_string($uri) && preg_match('#^data:image/webp;base64,(.+)$#s', $uri, $m)) {
+      $decoded = base64_decode($m[1], true);
+      if ($decoded !== false && strlen($decoded) > 32) {
+        header('Content-Type: image/webp');
+        header('Cache-Control: public, max-age=86400, stale-while-revalidate=604800');
+        header('X-Content-Type-Options: nosniff');
+        echo $decoded;
+        exit;
+      }
+    }
+  }
+}
+
 $url = 'http://cdn.cloudfiles.mosso.com/c12351/' . $id . '.png';
 $data = false;
 $contentType = 'image/png';
