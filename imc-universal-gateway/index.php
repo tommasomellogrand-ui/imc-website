@@ -11,8 +11,18 @@ $imcRawInput = (string)file_get_contents('php://input');
 $imcPreflight = json_decode($imcRawInput, true);
 if (is_array($imcPreflight)) {
     $imcAction = strtolower(trim((string)($imcPreflight['action'] ?? '')));
+    $imcChannel = strtoupper(trim((string)($imcPreflight['channel'] ?? ($_SERVER['HTTP_X_IMC_CHANNEL'] ?? ''))));
 
     if ($imcAction === 'minisite_read') {
+        if ($imcChannel === 'MINISITE') {
+            $imcConfigFile = dirname(__DIR__).'/__imc_private_gateway/config.php';
+            if (is_file($imcConfigFile)) {
+                $imcConfig = require $imcConfigFile;
+                if (is_array($imcConfig) && isset($imcConfig['token'])) {
+                    $_SERVER['HTTP_X_IMC_UNIVERSAL_TOKEN'] = (string)$imcConfig['token'];
+                }
+            }
+        }
         require __DIR__.'/minisite.php';
         try {
             imc_minisite_read($imcPreflight);
