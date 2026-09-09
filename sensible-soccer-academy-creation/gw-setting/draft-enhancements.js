@@ -1,34 +1,36 @@
 (()=>{
-  const CLUBS=['Peñarol','Colo-Colo','Millonarios','Bolívar','Olimpia','Alianza Lima','Santos','São Paulo','Grêmio','Argentinos Juniors',"Newell's Old Boys",'Vélez Sarsfield','Atalanta','Ferencváros','IFK Göteborg','Aberdeen','Siviglia','West Ham United','Stoccarda','Anderlecht','Ajax','Olympique Lyonnais','Dinamo Zagreb','Benfica'];
-  const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
-  const map=window.IMC_CREST_OVERRIDES||{};
-  const byNorm={}; Object.keys(map).forEach(k=>byNorm[norm(k)]=map[k]);
-  const candidates={
-    'Siviglia':['Sevilla','Sevilla FC','sevilla'],
-    'Stoccarda':['VfB Stuttgart','Stuttgart','vfb-stuttgart'],
-    'Ferencváros':['Ferencvaros','Ferencvárosi TC','ferencvaros'],
-    'IFK Göteborg':['IFK Goteborg','IFK Göteborg','ifk-goteborg'],
-    'São Paulo':['Sao Paulo','São Paulo FC','sao-paulo'],
-    'Grêmio':['Gremio','Grêmio FBPA','gremio'],
-    'Peñarol':['Penarol','CA Peñarol','penarol'],
-    'Bolívar':['Bolivar','Club Bolívar','bolivar'],
-    'Vélez Sarsfield':['Velez Sarsfield','Club Atlético Vélez Sarsfield','velez-sarsfield'],
-    "Newell's Old Boys":["Newells Old Boys","Newell's Old Boys",'newells-old-boys'],
-    'Olympique Lyonnais':['Olympique Lyon','Lyon','olympique-lyon'],
-    'West Ham United':['West Ham','West Ham United FC','west-ham-united'],
-    'Dinamo Zagreb':['Dinamo Zagreb','GNK Dinamo Zagreb','dinamo-zagreb']
+  const CRESTS={
+    'Peñarol':'https://cdn.soccerwiki.org/images/logos/clubs/376.png',
+    'Colo-Colo':'https://cdn.soccerwiki.org/images/logos/clubs/362.png',
+    'Millonarios':'https://cdn.soccerwiki.org/images/logos/clubs/618.png',
+    'Bolívar':'https://cdn.soccerwiki.org/images/logos/clubs/1238.png',
+    'Olimpia':'https://cdn.soccerwiki.org/images/logos/clubs/613.png',
+    'Alianza Lima':'https://cdn.soccerwiki.org/images/logos/clubs/621.png',
+    'Santos':'https://cdn.soccerwiki.org/images/logos/clubs/304.png',
+    'São Paulo':'https://cdn.soccerwiki.org/images/logos/clubs/306.png',
+    'Grêmio':'https://cdn.soccerwiki.org/images/logos/clubs/602.png',
+    'Argentinos Juniors':'https://cdn.soccerwiki.org/images/logos/clubs/267.png',
+    "Newell's Old Boys":'https://cdn.soccerwiki.org/images/logos/clubs/278.png',
+    'Vélez Sarsfield':'https://cdn.soccerwiki.org/images/logos/clubs/285.png',
+    'Atalanta':'https://cdn.soccerwiki.org/images/logos/clubs/96.png',
+    'Ferencváros':'https://cdn.soccerwiki.org/images/logos/clubs/1416.png',
+    'IFK Göteborg':'https://cdn.soccerwiki.org/images/logos/clubs/471.png',
+    'Aberdeen':'https://cdn.soccerwiki.org/images/logos/clubs/420.png',
+    'Siviglia':'https://cdn.soccerwiki.org/images/logos/clubs/168.png',
+    'West Ham United':'https://cdn.soccerwiki.org/images/logos/clubs/85.png',
+    'Stoccarda':'https://cdn.soccerwiki.org/images/logos/clubs/417.png',
+    'Anderlecht':'https://cdn.soccerwiki.org/images/logos/clubs/353.png',
+    'Ajax':'https://cdn.soccerwiki.org/images/logos/clubs/180.png',
+    'Olympique Lyonnais':'https://cdn.soccerwiki.org/images/logos/clubs/329.png',
+    'Dinamo Zagreb':'https://cdn.soccerwiki.org/images/logos/clubs/365.png',
+    'Benfica':'https://cdn.soccerwiki.org/images/logos/clubs/218.png'
   };
-  const resolve=name=>{
-    if(map[name]) return map[name];
-    if(byNorm[norm(name)]) return byNorm[norm(name)];
-    for(const c of (candidates[name]||[])) if(map[c]||byNorm[norm(c)]) return map[c]||byNorm[norm(c)];
-    return '';
-  };
-  CLUBS.forEach(name=>{const v=resolve(name); if(v) map[name]=v;});
-  window.IMC_CREST_OVERRIDES=map;
+  window.IMC_CREST_OVERRIDES=CRESTS;
+  const resolve=name=>CRESTS[name]||'';
 
   const css=`
   :root{--imc-gold:#f4c93d;--imc-ink:#06111f;--imc-blue:#3d83e6;--imc-red:#d9483f;--pitch1:#178948;--pitch2:#209b51}
+  .matrix > .panel:last-child .pool .grid{padding-top:14px}.matrix > .panel:last-child .pool h3{margin-bottom:0}
   .sceneBox{background:linear-gradient(180deg,#0a1930,#071629 68%,#04101d);position:relative;overflow:hidden}
   .sceneBox:before,.sceneBox:after{content:'';position:absolute;pointer-events:none;opacity:.22}
   .sceneBox:before{inset:0;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.035) 3px 4px)}
@@ -54,159 +56,40 @@
   .imcMiniPlayer .pLeg1,.imcMiniPlayer .pLeg2{width:5px;height:9px;top:28px;background:#fff;box-shadow:0 0 0 2px #111}
   .imcMiniPlayer .pLeg1{left:4px}.imcMiniPlayer .pLeg2{right:4px}
   .imcMiniPlayer .pBall{width:6px;height:6px;right:-2px;bottom:0;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #111}
-
-  /* GW010 approved scan layout: three principal rows, three vertical cells inside each row */
   .sceneStage.gw010ScanLayout{min-height:0!important;overflow:visible!important;padding:10px!important;display:grid!important;grid-template-columns:1fr!important;gap:12px!important;background:repeating-linear-gradient(90deg,#168747 0 86px,#209b51 86px 172px)!important}
-  .sceneStage.gw010ScanLayout .scanline{z-index:8}
-  .sceneStage.gw010ScanLayout .spriteTrack{display:none!important}
+  .sceneStage.gw010ScanLayout .scanline{z-index:8}.sceneStage.gw010ScanLayout .spriteTrack{display:none!important}
   .sceneStage.gw010ScanLayout .zone{position:relative!important;left:auto!important;right:auto!important;top:auto!important;width:100%!important;min-height:190px!important;margin:0!important;padding:0!important;display:grid!important;grid-template-columns:29% 29% 42%!important;align-items:stretch!important;opacity:.28;transform:scale(.985);transition:.22s}
   .sceneStage.gw010ScanLayout .zone.active{opacity:1;transform:scale(1)}
   .sceneStage.gw010ScanLayout .zone.sa{border-color:var(--imc-red)!important}.sceneStage.gw010ScanLayout .zone.eu{border-color:var(--imc-blue)!important}
   .gw010Cell{position:relative;z-index:2;min-width:0;padding:14px;display:flex;align-items:center;justify-content:center;text-align:center;border-right:2px solid rgba(240,230,180,.72)}
   .gw010Cell:last-child{border-right:0}.gw010Step{font-size:clamp(13px,2vw,21px);font-weight:900;line-height:1.35;letter-spacing:1px;color:#f4c93d;text-shadow:2px 2px #000}
-  .gw010Step span{display:block}.gw010Visual{background:rgba(2,7,14,.22)}
-  .gw010ManagerPlayer{transform:scale(2.15);transform-origin:center}
-  .gw010ManagerName{font-size:clamp(20px,3.8vw,35px);font-weight:900;line-height:1.12;text-shadow:3px 3px #000;overflow-wrap:anywhere}
-  .gw010ManagerName span{display:block}.gw010ManagerName .surname{margin-top:6px}
+  .gw010Step span{display:block}.gw010Visual{background:rgba(2,7,14,.22)}.gw010ManagerPlayer{transform:scale(2.15);transform-origin:center}
+  .gw010ManagerName{font-size:clamp(20px,3.8vw,35px);font-weight:900;line-height:1.12;text-shadow:3px 3px #000;overflow-wrap:anywhere}.gw010ManagerName span{display:block}.gw010ManagerName .surname{margin-top:6px}
   .gw010ClubCrest{width:112px!important;height:112px!important;max-width:86%;object-fit:contain!important;margin:0!important;background:#fff!important;border:5px solid #f0e6b4!important;box-shadow:6px 6px #000!important}
   .gw010ClubName{font-size:clamp(20px,3.4vw,34px);font-weight:900;line-height:1.15;text-shadow:3px 3px #000;overflow-wrap:anywhere}
   .gw010DivisionChoices{grid-column:2 / 4!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;padding:18px!important;align-items:center!important}
   .gw010DivisionBanner{min-height:78px;padding:10px 6px;border:3px solid #35557e;background:#071629;color:#dce8f7;box-shadow:4px 4px #000;display:flex;align-items:center;justify-content:center;font-size:clamp(13px,2vw,22px);font-weight:900;line-height:1.1;transition:.18s}
   .gw010DivisionBanner.selected{background:#f4c93d;color:#06111f;border-color:#fff;box-shadow:5px 5px #000,0 0 0 2px #f4c93d;transform:translateY(-2px)}
   #sceneManagerValue,#sceneClubValue,#sceneDivisionValue{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;opacity:0!important;pointer-events:none!important}
-
   .finalDraft{position:fixed;inset:0;z-index:2400;background:linear-gradient(180deg,rgba(2,7,14,.98),rgba(5,21,38,.99));display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;color:#fff;font-family:"Courier New",monospace}
   .finalDraft.show{display:block}.finalWrap{max-width:1200px;margin:0 auto;padding:10px 0 40px}.finalHero{text-align:center;border:5px solid #f0e6b4;box-shadow:0 0 0 5px #000;background:#071629;padding:14px;position:relative;overflow:hidden}
-  .finalHero:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(22,137,74,.17) 0 70px,rgba(32,155,81,.12) 70px 140px);pointer-events:none}
-  .finalHero img{position:relative;width:min(560px,92%);max-height:190px;object-fit:contain;filter:drop-shadow(5px 5px #000)}
+  .finalHero:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(22,137,74,.17) 0 70px,rgba(32,155,81,.12) 70px 140px);pointer-events:none}.finalHero img{position:relative;width:min(560px,92%);max-height:190px;object-fit:contain;filter:drop-shadow(5px 5px #000)}
   .finalTitle{position:relative;font-size:clamp(26px,6vw,58px);font-weight:900;color:#f4c93d;text-shadow:4px 4px #000;margin:6px 0}.finalSub{position:relative;font-weight:900;letter-spacing:2px;color:#9eb9db}
   .finalDivisions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}.finalDivision{background:#071629;border:4px solid #f0e6b4;box-shadow:5px 5px #000}.finalDivision h2{text-align:center;margin:0;padding:10px;background:#02070e;color:#f4c93d;border-bottom:3px solid #35557e}.finalDivision .balance{text-align:center;padding:6px;font-size:11px;color:#9eb9db;border-bottom:2px solid #02070e}.finalTeam{display:grid;grid-template-columns:46px 1fr;gap:10px;align-items:center;padding:8px;border-bottom:1px solid #35557e;background:#0b213e}.finalTeam.sa{border-left:5px solid #d9483f}.finalTeam.eu{border-left:5px solid #3d83e6}.finalTeam img{width:42px;height:42px;object-fit:contain;background:#fff;border:2px solid #f0e6b4}.finalTeam b{display:block;font-size:12px}.finalTeam span{display:block;font-size:10px;color:#9eb9db;margin-top:3px}.finalActions{text-align:center;margin-top:16px}.finalBtn{background:#198247;color:#fff;border:4px solid #fff;box-shadow:4px 4px #000;padding:12px 18px;font:900 14px "Courier New",monospace}
   @media(max-width:850px){.finalDivisions{grid-template-columns:1fr}.finalHero img{max-height:145px}.finalDraft{padding:8px}.finalTeam{grid-template-columns:40px 1fr}.finalTeam img{width:36px;height:36px}}
-  @media(max-width:650px){
-    .card.managerSprite{grid-template-columns:27px 25px 1fr}.imcMiniPlayer{transform:scale(.86);transform-origin:center}
-    .sceneStage.gw010ScanLayout{padding:7px!important;gap:9px!important}
-    .sceneStage.gw010ScanLayout .zone{grid-template-columns:30% 28% 42%!important;min-height:150px!important}
-    .gw010Cell{padding:8px}.gw010Step{font-size:12px}.gw010ManagerPlayer{transform:scale(1.55)}
-    .gw010ManagerName,.gw010ClubName{font-size:18px}.gw010ClubCrest{width:78px!important;height:78px!important;border-width:4px!important}
-    .gw010DivisionChoices{padding:9px!important;gap:6px!important}.gw010DivisionBanner{min-height:62px;font-size:11px;padding:6px 3px;border-width:2px}
-  }
+  @media(max-width:650px){.card.managerSprite{grid-template-columns:27px 25px 1fr}.imcMiniPlayer{transform:scale(.86);transform-origin:center}.sceneStage.gw010ScanLayout{padding:7px!important;gap:9px!important}.sceneStage.gw010ScanLayout .zone{grid-template-columns:30% 28% 42%!important;min-height:150px!important}.gw010Cell{padding:8px}.gw010Step{font-size:12px}.gw010ManagerPlayer{transform:scale(1.55)}.gw010ManagerName,.gw010ClubName{font-size:18px}.gw010ClubCrest{width:78px!important;height:78px!important;border-width:4px!important}.gw010DivisionChoices{padding:9px!important;gap:6px!important}.gw010DivisionBanner{min-height:62px;font-size:11px;padding:6px 3px;border-width:2px}}
   `;
   const style=document.createElement('style'); style.id='gw010-enhancements'; style.textContent=css; document.head.appendChild(style);
 
-  function patchBrokenCrests(){
-    document.querySelectorAll('img').forEach(img=>{
-      if(img.id==='sceneCrest'){
-        const name=document.getElementById('sceneClubValue')?.textContent?.trim();
-        if(name && name!=='WAITING'){const v=resolve(name); if(v && img.src!==v) img.src=v;}
-      }
-    });
-  }
-  document.addEventListener('error',e=>{
-    const img=e.target; if(!(img instanceof HTMLImageElement)) return;
-    const club=img.closest('.club')?.querySelector('.name')?.textContent?.trim() || img.closest('.lock')?.querySelector('.clubname')?.textContent?.trim() || document.getElementById('sceneClubValue')?.textContent?.trim();
-    const v=resolve(club); if(v && img.dataset.repaired!=='1'){img.dataset.repaired='1';img.src=v;}
-  },true);
-
   const playerMarkup=region=>`<span class="imcMiniPlayer ${region.toLowerCase()}" aria-hidden="true"><i class="pHead"></i><i class="pBody"></i><i class="pLeg1"></i><i class="pLeg2"></i><i class="pBall"></i></span>`;
-  function decorateManagers(){
-    ['managerSA','managerEU'].forEach(id=>{
-      const root=document.getElementById(id); if(!root)return;
-      root.querySelectorAll('.card').forEach(card=>{
-        if(card.querySelector('.imcMiniPlayer'))return;
-        const region=card.classList.contains('sa')?'SA':'EU';
-        const badge=card.querySelector('.badge'); if(!badge)return;
-        badge.insertAdjacentHTML('afterend',playerMarkup(region)); card.classList.add('managerSprite');
-      });
-    });
-  }
-  function watchManagerSprites(){
-    decorateManagers();
-    ['managerSA','managerEU'].forEach(id=>{const root=document.getElementById(id);if(root)new MutationObserver(decorateManagers).observe(root,{childList:true,subtree:true});});
-  }
-
-  function splitManagerName(value){
-    const parts=String(value||'').trim().split(/\s+/).filter(Boolean);
-    if(!parts.length) return ['WAITING',''];
-    if(parts.length===1) return [parts[0],''];
-    return [parts[0],parts.slice(1).join(' ')];
-  }
-  function syncScanPresentation(){
-    const managerSource=document.getElementById('sceneManagerValue');
-    const clubSource=document.getElementById('sceneClubValue');
-    const divisionSource=document.getElementById('sceneDivisionValue');
-    const managerDisplay=document.getElementById('gw010ManagerDisplay');
-    const clubDisplay=document.getElementById('gw010ClubDisplay');
-    const managerPlayer=document.getElementById('gw010ManagerPlayer');
-    if(managerSource&&managerDisplay){
-      const [first,last]=splitManagerName(managerSource.textContent);
-      managerDisplay.innerHTML=`<span>${first}</span>${last?`<span class="surname">${last}</span>`:''}`;
-    }
-    if(clubSource&&clubDisplay) clubDisplay.textContent=clubSource.textContent||'WAITING';
-    const managerZone=document.getElementById('sceneManager');
-    if(managerPlayer&&managerZone){
-      managerPlayer.classList.toggle('sa',managerZone.classList.contains('sa'));
-      managerPlayer.classList.toggle('eu',managerZone.classList.contains('eu'));
-      if(!managerPlayer.classList.contains('sa')&&!managerPlayer.classList.contains('eu')) managerPlayer.classList.add('eu');
-    }
-    if(divisionSource){
-      const m=String(divisionSource.textContent||'').match(/([123])/);
-      document.querySelectorAll('.gw010DivisionBanner').forEach((el,i)=>el.classList.toggle('selected',!!m&&Number(m[1])===i+1));
-    }
-    patchBrokenCrests();
-  }
-  function buildScanLayout(){
-    const stage=document.querySelector('#draftScene .sceneStage');
-    const manager=document.getElementById('sceneManager');
-    const club=document.getElementById('sceneClub');
-    const division=document.getElementById('sceneDivision');
-    if(!stage||!manager||!club||!division||stage.dataset.gw010Layout==='1') return;
-    stage.dataset.gw010Layout='1'; stage.classList.add('gw010ScanLayout');
-
-    const managerSource=document.getElementById('sceneManagerValue');
-    const clubSource=document.getElementById('sceneClubValue');
-    const divisionSource=document.getElementById('sceneDivisionValue');
-    if(!managerSource||!clubSource||!divisionSource) return;
-
-    manager.innerHTML=`<div class="gw010Cell"><div class="gw010Step"><span>STEP 1</span><span>MANAGER</span></div></div><div class="gw010Cell gw010Visual"><span id="gw010ManagerPlayer" class="imcMiniPlayer gw010ManagerPlayer" aria-hidden="true"><i class="pHead"></i><i class="pBody"></i><i class="pLeg1"></i><i class="pLeg2"></i><i class="pBall"></i></span></div><div class="gw010Cell"><div id="gw010ManagerDisplay" class="gw010ManagerName"></div></div>`;
-    manager.appendChild(managerSource);
-
-    const sceneCrest=document.getElementById('sceneCrest');
-    club.innerHTML=`<div class="gw010Cell"><div class="gw010Step"><span>STEP 2</span><span>CLUB</span></div></div><div class="gw010Cell gw010Visual" id="gw010ClubVisual"></div><div class="gw010Cell"><div id="gw010ClubDisplay" class="gw010ClubName"></div></div>`;
-    club.appendChild(clubSource);
-    if(sceneCrest){sceneCrest.classList.add('gw010ClubCrest');document.getElementById('gw010ClubVisual').appendChild(sceneCrest);}
-
-    division.innerHTML=`<div class="gw010Cell"><div class="gw010Step"><span>STEP 3</span><span>DIVISIONE</span></div></div><div class="gw010DivisionChoices"><div class="gw010DivisionBanner">DIVISIONE 1</div><div class="gw010DivisionBanner">DIVISIONE 2</div><div class="gw010DivisionBanner">DIVISIONE 3</div></div>`;
-    division.appendChild(divisionSource);
-
-    [managerSource,clubSource,divisionSource,manager,club,division].forEach(el=>new MutationObserver(syncScanPresentation).observe(el,{childList:true,subtree:true,characterData:true,attributes:true}));
-    syncScanPresentation();
-  }
-
-  function managerFromSlot(slot){
-    const clone=slot.cloneNode(true); const b=clone.querySelector('b'); if(b)b.remove(); return clone.textContent.trim();
-  }
-  function showFinal(){
-    if(document.getElementById('finalDraft')) return;
-    const overlay=document.createElement('div'); overlay.id='finalDraft'; overlay.className='finalDraft';
-    const divisions=[...document.querySelectorAll('#divisions .divisionBox')];
-    const columns=divisions.map((box,i)=>{
-      const teams=[...box.querySelectorAll('.slot')].filter(s=>s.querySelector('b')).map(slot=>{
-        const club=slot.querySelector('b').textContent.trim(); const manager=managerFromSlot(slot); const region=slot.classList.contains('sa')?'SA':'EU'; const crest=resolve(club);
-        return `<div class="finalTeam ${region.toLowerCase()}"><img src="${crest}" alt="${club}"><div><b>${club}</b><span>${manager}</span></div></div>`;
-      }).join('');
-      return `<section class="finalDivision"><h2>DIVISIONE ${i+1}</h2><div class="balance">4 SUD AMERICA · 4 EUROPA</div>${teams}</section>`;
-    }).join('');
-    overlay.innerHTML=`<div class="finalWrap"><header class="finalHero"><img src="./sensible-soccer-academy-logo.svg" alt="Sensible Soccer Academy IMC GW010"><div class="finalTitle">DRAFT COMPLETATO</div><div class="finalSub">24 / 24 LOCKED · 3 DIVISIONI CREATE</div></header><main class="finalDivisions">${columns}</main><div class="finalActions"><button class="finalBtn" type="button">RIVEDI TABELLONE</button></div></div>`;
-    document.body.appendChild(overlay); document.querySelector('#draftScene')?.classList.remove('show'); overlay.classList.add('show');
-    overlay.querySelector('.finalBtn').addEventListener('click',()=>overlay.classList.remove('show'));
-  }
-  function watchCompletion(){
-    const count=document.getElementById('count'); if(!count)return;
-    let scheduled=false;
-    const check=()=>{if(!scheduled && /24\s*\/\s*24\s*LOCKED/i.test(count.textContent)){scheduled=true;setTimeout(showFinal,3200);}};
-    new MutationObserver(()=>{patchBrokenCrests();syncScanPresentation();check();}).observe(count,{childList:true,subtree:true,characterData:true}); check();
-    const scene=document.getElementById('draftScene'); if(scene)new MutationObserver(()=>{patchBrokenCrests();syncScanPresentation();}).observe(scene,{childList:true,subtree:true,characterData:true,attributes:true});
-  }
-  const boot=()=>{watchManagerSprites();buildScanLayout();watchCompletion();patchBrokenCrests();syncScanPresentation();};
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  function decorateManagers(){['managerSA','managerEU'].forEach(id=>{const root=document.getElementById(id);if(!root)return;root.querySelectorAll('.card').forEach(card=>{if(card.querySelector('.imcMiniPlayer'))return;const region=card.classList.contains('sa')?'SA':'EU';const badge=card.querySelector('.badge');if(!badge)return;badge.insertAdjacentHTML('afterend',playerMarkup(region));card.classList.add('managerSprite');});});}
+  function watchManagerSprites(){decorateManagers();['managerSA','managerEU'].forEach(id=>{const root=document.getElementById(id);if(root)new MutationObserver(decorateManagers).observe(root,{childList:true,subtree:true});});}
+  function splitManagerName(value){const parts=String(value||'').trim().split(/\s+/).filter(Boolean);if(!parts.length)return['WAITING',''];if(parts.length===1)return[parts[0],''];return[parts[0],parts.slice(1).join(' ')];}
+  function syncScanPresentation(){const managerSource=document.getElementById('sceneManagerValue'),clubSource=document.getElementById('sceneClubValue'),divisionSource=document.getElementById('sceneDivisionValue'),managerDisplay=document.getElementById('gw010ManagerDisplay'),clubDisplay=document.getElementById('gw010ClubDisplay'),managerPlayer=document.getElementById('gw010ManagerPlayer');if(managerSource&&managerDisplay){const[first,last]=splitManagerName(managerSource.textContent);managerDisplay.innerHTML=`<span>${first}</span>${last?`<span class="surname">${last}</span>`:''}`;}if(clubSource&&clubDisplay)clubDisplay.textContent=clubSource.textContent||'WAITING';const managerZone=document.getElementById('sceneManager');if(managerPlayer&&managerZone){managerPlayer.classList.toggle('sa',managerZone.classList.contains('sa'));managerPlayer.classList.toggle('eu',managerZone.classList.contains('eu'));if(!managerPlayer.classList.contains('sa')&&!managerPlayer.classList.contains('eu'))managerPlayer.classList.add('eu');}if(divisionSource){const m=String(divisionSource.textContent||'').match(/([123])/);document.querySelectorAll('.gw010DivisionBanner').forEach((el,i)=>el.classList.toggle('selected',!!m&&Number(m[1])===i+1));}}
+  function buildScanLayout(){const stage=document.querySelector('#draftScene .sceneStage'),manager=document.getElementById('sceneManager'),club=document.getElementById('sceneClub'),division=document.getElementById('sceneDivision');if(!stage||!manager||!club||!division||stage.dataset.gw010Layout==='1')return;stage.dataset.gw010Layout='1';stage.classList.add('gw010ScanLayout');const managerSource=document.getElementById('sceneManagerValue'),clubSource=document.getElementById('sceneClubValue'),divisionSource=document.getElementById('sceneDivisionValue');if(!managerSource||!clubSource||!divisionSource)return;manager.innerHTML=`<div class="gw010Cell"><div class="gw010Step"><span>STEP 1</span><span>MANAGER</span></div></div><div class="gw010Cell gw010Visual"><span id="gw010ManagerPlayer" class="imcMiniPlayer gw010ManagerPlayer" aria-hidden="true"><i class="pHead"></i><i class="pBody"></i><i class="pLeg1"></i><i class="pLeg2"></i><i class="pBall"></i></span></div><div class="gw010Cell"><div id="gw010ManagerDisplay" class="gw010ManagerName"></div></div>`;manager.appendChild(managerSource);const sceneCrest=document.getElementById('sceneCrest');club.innerHTML=`<div class="gw010Cell"><div class="gw010Step"><span>STEP 2</span><span>CLUB</span></div></div><div class="gw010Cell gw010Visual" id="gw010ClubVisual"></div><div class="gw010Cell"><div id="gw010ClubDisplay" class="gw010ClubName"></div></div>`;club.appendChild(clubSource);if(sceneCrest){sceneCrest.classList.add('gw010ClubCrest');document.getElementById('gw010ClubVisual').appendChild(sceneCrest);}division.innerHTML=`<div class="gw010Cell"><div class="gw010Step"><span>STEP 3</span><span>DIVISIONE</span></div></div><div class="gw010DivisionChoices"><div class="gw010DivisionBanner">DIVISIONE 1</div><div class="gw010DivisionBanner">DIVISIONE 2</div><div class="gw010DivisionBanner">DIVISIONE 3</div></div>`;division.appendChild(divisionSource);[managerSource,clubSource,divisionSource,manager,club,division].forEach(el=>new MutationObserver(syncScanPresentation).observe(el,{childList:true,subtree:true,characterData:true,attributes:true}));syncScanPresentation();}
+  function managerFromSlot(slot){const clone=slot.cloneNode(true);const b=clone.querySelector('b');if(b)b.remove();return clone.textContent.trim();}
+  function showFinal(){if(document.getElementById('finalDraft'))return;const overlay=document.createElement('div');overlay.id='finalDraft';overlay.className='finalDraft';const divisions=[...document.querySelectorAll('#divisions .divisionBox')];const columns=divisions.map((box,i)=>{const teams=[...box.querySelectorAll('.slot')].filter(s=>s.querySelector('b')).map(slot=>{const club=slot.querySelector('b').textContent.trim(),manager=managerFromSlot(slot),region=slot.classList.contains('sa')?'SA':'EU',crest=resolve(club);return `<div class="finalTeam ${region.toLowerCase()}"><img src="${crest}" alt="${club}"><div><b>${club}</b><span>${manager}</span></div></div>`;}).join('');return `<section class="finalDivision"><h2>DIVISIONE ${i+1}</h2><div class="balance">4 SUD AMERICA · 4 EUROPA</div>${teams}</section>`;}).join('');overlay.innerHTML=`<div class="finalWrap"><header class="finalHero"><img src="./sensible-soccer-academy-logo.svg" alt="Sensible Soccer Academy IMC GW010"><div class="finalTitle">DRAFT COMPLETATO</div><div class="finalSub">24 / 24 LOCKED · 3 DIVISIONI CREATE</div></header><main class="finalDivisions">${columns}</main><div class="finalActions"><button class="finalBtn" type="button">RIVEDI TABELLONE</button></div></div>`;document.body.appendChild(overlay);document.querySelector('#draftScene')?.classList.remove('show');overlay.classList.add('show');overlay.querySelector('.finalBtn').addEventListener('click',()=>overlay.classList.remove('show'));}
+  function watchCompletion(){const count=document.getElementById('count');if(!count)return;let scheduled=false;const check=()=>{if(!scheduled&&/24\s*\/\s*24\s*LOCKED/i.test(count.textContent)){scheduled=true;setTimeout(showFinal,3200);}};new MutationObserver(()=>{syncScanPresentation();check();}).observe(count,{childList:true,subtree:true,characterData:true});check();const scene=document.getElementById('draftScene');if(scene)new MutationObserver(syncScanPresentation).observe(scene,{childList:true,subtree:true,characterData:true,attributes:true});}
+  const boot=()=>{watchManagerSprites();buildScanLayout();watchCompletion();syncScanPresentation();};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
