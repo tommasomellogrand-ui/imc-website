@@ -3,121 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#05070c">
+  <meta name="theme-color" content="#05070b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Hall Of Famers · GW005</title>
-  <link rel="stylesheet" href="./pilot-theme.css?v=GW005_GAME_3">
-  <style>
-    :root{
-      --game-bg:#05070c;
-      --game-panel:#0f1420;
-      --game-panel-2:#161d2b;
-      --game-gold:#f0c75e;
-      --game-gold-hi:#ffe59a;
-      --game-blue:#57b8ff;
-      --game-cyan:#68f1ff;
-      --game-red:#ff4e66;
-      --game-line:rgba(126,175,255,.18);
-      --game-shadow:#02040a;
-    }
-
-    html,body{background:var(--game-bg)!important}
-    body{position:relative;background:
-      radial-gradient(circle at 15% -10%,rgba(70,127,255,.18),transparent 34%),
-      radial-gradient(circle at 100% 18%,rgba(240,199,94,.11),transparent 32%),
-      linear-gradient(180deg,#070a11 0%,#05070c 100%)!important}
-    body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opacity:.16;background:repeating-linear-gradient(180deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px);mix-blend-mode:screen}
-    body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:79;background:radial-gradient(circle at 50% 35%,transparent 48%,rgba(0,0,0,.34) 100%)}
-
-    .site-shell{position:relative;background:
-      linear-gradient(90deg,rgba(80,153,255,.025) 1px,transparent 1px),
-      linear-gradient(rgba(80,153,255,.02) 1px,transparent 1px),
-      linear-gradient(180deg,#080b12,#05070c)!important;background-size:28px 28px,28px 28px,auto;box-shadow:0 0 0 1px rgba(255,255,255,.02),0 0 80px rgba(0,0,0,.65)}
-
-    .topbar{height:68px!important;background:linear-gradient(180deg,rgba(12,17,28,.98),rgba(7,10,16,.94))!important;border-bottom:1px solid rgba(104,241,255,.16)!important;box-shadow:0 8px 24px rgba(0,0,0,.38),inset 0 -1px 0 rgba(255,255,255,.025)}
-    .brand{font-size:10px!important;letter-spacing:.11em!important;text-transform:uppercase}
-    .brand-mark{width:36px!important;height:36px!important;border-radius:10px!important;background:linear-gradient(145deg,#ffe59a 0%,#d29b25 56%,#6e4911 100%)!important;border:1px solid rgba(255,233,156,.72);box-shadow:0 4px 0 #5f420e,0 8px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.7)!important;text-shadow:0 1px 0 rgba(255,255,255,.3)}
-    .live-chip{padding:7px 10px;border-radius:999px;border:1px solid rgba(104,241,255,.2);background:linear-gradient(180deg,rgba(17,29,43,.95),rgba(8,13,20,.95));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 3px 0 #03050a}
-    .live-chip i{background:#ff4e66!important;box-shadow:0 0 0 4px rgba(255,78,102,.1),0 0 14px rgba(255,78,102,.8)!important;animation:gamePulse 1.15s ease-in-out infinite}
-    @keyframes gamePulse{50%{transform:scale(.72);opacity:.55}}
-
-    .section-nav{gap:8px!important;padding:10px 12px 13px!important;background:linear-gradient(180deg,#0a0f18,#070a10)!important;border-bottom:1px solid rgba(87,184,255,.13)!important}
-    .section-nav a{position:relative;padding:9px 13px!important;border-radius:10px!important;color:#8d9bb1!important;border:1px solid rgba(255,255,255,.07)!important;background:linear-gradient(180deg,#141b28,#0b1018)!important;box-shadow:0 3px 0 #03050a,inset 0 1px 0 rgba(255,255,255,.04);transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
-    .section-nav a:active{transform:translateY(2px);box-shadow:0 1px 0 #03050a,inset 0 1px 0 rgba(255,255,255,.04)}
-    .section-nav a.active{color:#061018!important;background:linear-gradient(180deg,#8df7ff,#3abde8)!important;border-color:#aefaff!important;box-shadow:0 3px 0 #14718f,0 0 18px rgba(87,184,255,.28),inset 0 1px 0 rgba(255,255,255,.8)!important;text-shadow:0 1px rgba(255,255,255,.35)}
-
-    .hero{border:1px solid rgba(112,181,255,.26)!important;border-radius:22px!important;background:
-      linear-gradient(135deg,rgba(28,39,59,.98),rgba(12,17,27,.98) 52%,rgba(36,28,15,.96))!important;
-      box-shadow:0 7px 0 #03050a,0 18px 42px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.06)!important;transform:translateZ(0)}
-    .hero::before{content:"PLAYER HUB";position:absolute;left:18px;bottom:9px;font-size:6px;font-weight:800;letter-spacing:.2em;color:rgba(104,241,255,.28)}
-    .hero:after{border-color:rgba(104,241,255,.15)!important;box-shadow:0 0 0 18px rgba(87,184,255,.025),0 0 0 36px rgba(240,199,94,.018)!important}
-    .eyebrow{color:var(--game-cyan)!important;text-shadow:0 0 14px rgba(104,241,255,.28)}
-    .hero h1,.page-head h1{text-shadow:0 3px 0 rgba(0,0,0,.6);letter-spacing:-.055em!important}
-    .hero-sub{color:#aebcd0!important}
-    .hero-orbit{border-radius:14px!important;background:linear-gradient(145deg,#1d2636,#0b1018)!important;border:1px solid rgba(240,199,94,.45)!important;color:var(--game-gold-hi)!important;box-shadow:0 5px 0 #03050a,0 0 24px rgba(240,199,94,.16),inset 0 1px 0 rgba(255,255,255,.06)!important}
-    .hero-metrics div{position:relative;background:linear-gradient(180deg,#192232,#0c111a)!important;border:1px solid rgba(104,241,255,.12)!important;border-radius:12px!important;box-shadow:0 4px 0 #03050a,inset 0 1px 0 rgba(255,255,255,.05)!important}
-    .hero-metrics div::after{content:"";position:absolute;left:8px;right:8px;bottom:4px;height:1px;background:linear-gradient(90deg,transparent,var(--game-blue),transparent);opacity:.38}
-    .hero-metrics strong{color:var(--game-gold-hi)!important;text-shadow:0 0 10px rgba(240,199,94,.16)}
-
-    .ticker{border-radius:10px!important;border:1px solid rgba(104,241,255,.15)!important;background:linear-gradient(180deg,#111827,#09101a)!important;box-shadow:0 4px 0 #03050a,inset 0 1px 0 rgba(255,255,255,.04)!important}
-    .ticker>span{background:linear-gradient(180deg,#ff6a7f,#cf2942)!important;color:#fff!important;text-shadow:0 1px 0 rgba(0,0,0,.4);box-shadow:inset -1px 0 0 rgba(255,255,255,.12)}
-
-    .panel,.content-block{position:relative;border-radius:18px!important;border:1px solid rgba(104,241,255,.12)!important;background:linear-gradient(180deg,rgba(20,27,41,.98),rgba(10,15,24,.98))!important;box-shadow:0 6px 0 #03050a,0 14px 30px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.035)!important;overflow:hidden}
-    .panel::after,.content-block::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.025),transparent 35%,rgba(87,184,255,.025));mix-blend-mode:screen}
-    .section-head,.block-title{position:relative;background:linear-gradient(180deg,rgba(30,40,58,.7),rgba(13,18,28,.35));border-bottom:1px solid rgba(104,241,255,.1)!important}
-    .section-head h2,.block-title span{font-size:14px!important;text-transform:uppercase;letter-spacing:.015em!important}
-    .section-head a{display:inline-flex;align-items:center;gap:4px;padding:6px 9px;border-radius:8px;background:linear-gradient(180deg,#2a3549,#111825);border:1px solid rgba(255,255,255,.08);box-shadow:0 2px 0 #03050a;color:var(--game-gold-hi)!important}
-    .section-head a:active{transform:translateY(1px);box-shadow:0 1px 0 #03050a}
-
-    .score-row,.fixture-row,.news-row,.rank-row,.manager-row,.report-row{transition:background .12s ease,transform .08s ease}
-    .score-row:active,.fixture-row:active,.news-row:active,.rank-row:active,.manager-row:active,.report-row:active{background:rgba(87,184,255,.055);transform:scale(.992)}
-    .score-main strong{padding:6px 9px;border-radius:9px;background:linear-gradient(180deg,#202a3a,#0d131d);border:1px solid rgba(240,199,94,.2);box-shadow:0 2px 0 #03050a;color:var(--game-gold-hi)!important;text-shadow:0 0 8px rgba(240,199,94,.18)}
-    .fixture-row>div b{color:var(--game-cyan)!important}
-
-    .competition-strip a{position:relative;border-radius:13px!important;background:linear-gradient(180deg,#1b2638,#0d141f)!important;border:1px solid rgba(87,184,255,.15)!important;box-shadow:0 4px 0 #03050a,inset 0 1px 0 rgba(255,255,255,.04);transition:transform .08s ease,box-shadow .08s ease}
-    .competition-strip a:active{transform:translateY(2px);box-shadow:0 2px 0 #03050a}
-    .competition-strip strong{color:var(--game-gold-hi)!important;text-shadow:0 0 10px rgba(240,199,94,.14)}
-
-    .club-logo{border-radius:10px!important;background:linear-gradient(180deg,#fff,#d9e2ee)!important;border:1px solid rgba(255,255,255,.7);box-shadow:0 3px 0 #03050a,0 0 16px rgba(87,184,255,.07)}
-    .club-tile,.club-card{transition:transform .1s ease,filter .12s ease}
-    .club-tile:active,.club-card:active{transform:translateY(2px) scale(.98);filter:brightness(1.12)}
-    .club-card{background:linear-gradient(180deg,#182131,#0b111b)!important;border-color:rgba(87,184,255,.13)!important;box-shadow:0 4px 0 #03050a,inset 0 1px 0 rgba(255,255,255,.03)}
-
-    .manager-row>span,.avatar{background:radial-gradient(circle at 35% 25%,#33435d,#131a26 62%,#090d13)!important;border:1px solid rgba(104,241,255,.16)!important;color:var(--game-gold-hi)!important;box-shadow:0 3px 0 #03050a,0 0 16px rgba(87,184,255,.05)}
-    .news-row>span,.rank-row em{color:var(--game-cyan)!important}
-
-    .report-hero{border-radius:14px!important;background:linear-gradient(145deg,#202a3b,#111720 55%,#271e0d)!important;border:1px solid rgba(240,199,94,.18)!important;box-shadow:0 5px 0 #03050a,inset 0 1px 0 rgba(255,255,255,.04)}
-
-    .page-head{position:relative;margin:12px 14px 0;padding:20px 16px 16px!important;border:1px solid rgba(87,184,255,.14);border-radius:18px;background:linear-gradient(145deg,#182132,#0c111a);box-shadow:0 5px 0 #03050a,inset 0 1px 0 rgba(255,255,255,.035)}
-    .page-head>span{background:linear-gradient(180deg,#172335,#0b111b)!important;border:1px solid rgba(104,241,255,.14)!important;color:var(--game-cyan)!important;box-shadow:0 2px 0 #03050a}
-    .page-content{padding-top:12px!important}
-
-    .competition-row>b,.block-title b{background:linear-gradient(180deg,#213047,#101723)!important;border:1px solid rgba(87,184,255,.12);color:var(--game-cyan)!important;box-shadow:0 2px 0 #03050a}
-    .player-row>div:nth-child(n+3) strong{color:var(--game-gold-hi)!important}
-
-    .dock{padding-top:8px!important;background:linear-gradient(180deg,rgba(7,10,16,.9),rgba(5,7,12,.98))!important;border-top:1px solid rgba(104,241,255,.13)!important;box-shadow:0 -10px 28px rgba(0,0,0,.44)!important}
-    .dock a{position:relative;margin:0 2px;padding:7px 4px 8px;border-radius:12px;color:#708096!important;transition:transform .08s ease,filter .12s ease}
-    .dock a span{display:grid;place-items:center;width:34px;height:30px;margin:0 auto 3px;border-radius:9px;background:linear-gradient(180deg,#161e2c,#0b1018);border:1px solid rgba(255,255,255,.07);box-shadow:0 3px 0 #03050a,inset 0 1px 0 rgba(255,255,255,.035)}
-    .dock a:active{transform:translateY(2px)}
-    .dock a:active span{box-shadow:0 1px 0 #03050a}
-    .dock a.active{color:#071019!important}
-    .dock a.active span{background:linear-gradient(180deg,#8ff7ff,#38b8e7);border-color:#b8fbff;box-shadow:0 3px 0 #126f8c,0 0 20px rgba(87,184,255,.34),inset 0 1px 0 rgba(255,255,255,.85);color:#071019!important}
-    .dock a.active b{color:var(--game-cyan)!important;text-shadow:0 0 9px rgba(104,241,255,.35)}
-
-    @media (hover:hover){
-      .section-nav a:hover,.competition-strip a:hover,.section-head a:hover,.club-card:hover{filter:brightness(1.12);transform:translateY(-1px)}
-      .score-row:hover,.fixture-row:hover,.news-row:hover,.rank-row:hover,.manager-row:hover,.report-row:hover{background:rgba(87,184,255,.045)}
-    }
-
-    @media (max-width:390px){
-      .hero h1{font-size:30px!important}.hero{margin:12px!important}.hero-metrics{gap:5px!important}.hero-metrics div{padding-left:3px!important;padding-right:3px!important}.section-nav a{padding:8px 11px!important}.dock a b{font-size:6px!important}
-    }
-  </style>
+  <link rel="stylesheet" href="./pilot-theme.css?v=GW005_CINEMA_4">
 </head>
 <body>
   <main id="app"></main>
-  <script src="./config.js?v=GW005_GAME_3"></script>
-  <script src="/minisite/shared/app-core.js?v=GW005_GAME_3"></script>
-  <script src="./app.js?v=GW005_GAME_3"></script>
+  <script src="./config.js?v=GW005_CINEMA_4"></script>
+  <script src="/minisite/shared/app-core.js?v=GW005_CINEMA_4"></script>
+  <script src="./app.js?v=GW005_CINEMA_4"></script>
 </body>
 </html>
