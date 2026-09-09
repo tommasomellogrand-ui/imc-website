@@ -1,0 +1,78 @@
+name: Deploy GW010 Draw Waiting Room to Aruba
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sensible-soccer-academy-creation/draw-waiting-room/**'
+      - '.github/workflows/deploy-gw010-draw-waiting-room.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gw010-draw-waiting-room-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Waiting Room
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s sensible-soccer-academy-creation/draw-waiting-room/index.html
+          test -s sensible-soccer-academy-creation/draw-waiting-room/chat.php
+          test -s sensible-soccer-academy-creation/draw-waiting-room/.htaccess
+          php -l sensible-soccer-academy-creation/draw-waiting-room/chat.php
+
+      - name: Upload Waiting Room to Aruba
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          host='ftp.italianmastersclub.it'; port=21
+          username=os.environ['ARUBA_FTP_USERNAME']; password=os.environ['ARUBA_FTP_PASSWORD']
+          remote='/www.italianmastersclub.it/sensible-soccer-academy-creation/draw-waiting-room'
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=None; last=None
+          for _ in range(3):
+              c=FTP_TLS(context=ctx)
+              try:
+                  c.connect(host,port,timeout=60); c.login(username,password); c.prot_p(); c.set_pasv(True); ftp=c; break
+              except Exception as e:
+                  last=e
+                  try: c.close()
+                  except Exception: pass
+                  time.sleep(5)
+          if ftp is None: raise SystemExit(f'FTPS Aruba non riuscito: {last}')
+          def ensure_dir(path):
+              ftp.cwd('/')
+              for part in [p for p in path.split('/') if p]:
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
+          ensure_dir(remote)
+          base=Path('sensible-soccer-academy-creation/draw-waiting-room')
+          for name in ('index.html','chat.php','.htaccess'):
+              local=base/name; data=local.read_bytes()
+              with local.open('rb') as fh: ftp.storbinary(f'STOR {name}',fh)
+              check=io.BytesIO(); ftp.retrbinary(f'RETR {name}',check.write)
+              if check.getvalue()!=data: raise SystemExit(f'Verifica upload fallita: {name}')
+          try:
+              ftp.size('chat-data.json')
+          except Exception:
+              data=b'[]\n'; ftp.storbinary('STOR chat-data.json',io.BytesIO(data))
+          try: ftp.sendcmd('SITE CHMOD 666 chat-data.json')
+          except Exception: pass
+          ftp.quit(); print('GW010 Draw Waiting Room pubblicata e verificata')
+          PY
