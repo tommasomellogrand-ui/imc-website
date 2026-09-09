@@ -45,6 +45,7 @@ jobs:
           test -s sensible-soccer-academy-creation/gw-setting/draft-matrix.html
           test -s sensible-soccer-academy-creation/gw-setting/.htaccess
           test -s sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg
+          test -s sensible-soccer-academy-creation/gw-setting/draft-enhancements.js
           test -s sensible-soccer-academy/assets/crest-overrides.js
           for i in $(seq 1 15); do
             n=$(printf "%03d" "$i")
@@ -133,10 +134,13 @@ jobs:
               with local.open('rb') as fh: ftp.storbinary(f'STOR {local.name}',fh)
               check=io.BytesIO(); ftp.retrbinary(f'RETR {local.name}',check.write)
               if check.getvalue()!=data: raise SystemExit(f'Verifica upload fallita: {rel}')
-          crest_local=Path('sensible-soccer-academy/assets/crest-overrides.js'); crest_dest=f"{remote_root}/sensible-soccer-academy-creation/gw-setting"
-          ensure_dir(crest_dest); crest_data=crest_local.read_bytes()
-          with crest_local.open('rb') as fh: ftp.storbinary('STOR crest-overrides.js',fh)
+          crest_local=Path('sensible-soccer-academy/assets/crest-overrides.js')
+          enhancement_local=Path('sensible-soccer-academy-creation/gw-setting/draft-enhancements.js')
+          crest_dest=f"{remote_root}/sensible-soccer-academy-creation/gw-setting"
+          ensure_dir(crest_dest)
+          crest_data=crest_local.read_bytes()+b'\n'+enhancement_local.read_bytes()
+          ftp.storbinary('STOR crest-overrides.js',io.BytesIO(crest_data))
           crest_check=io.BytesIO(); ftp.retrbinary('RETR crest-overrides.js',crest_check.write)
-          if crest_check.getvalue()!=crest_data: raise SystemExit('Verifica upload fallita: Draft Matrix crest-overrides.js')
+          if crest_check.getvalue()!=crest_data: raise SystemExit('Verifica upload fallita: Draft Matrix crest-overrides.js + enhancements')
           ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; sensible-soccer-academy lasciata vuota')
           PY
