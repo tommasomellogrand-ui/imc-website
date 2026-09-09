@@ -24,14 +24,20 @@ jobs:
           set -euo pipefail
           for f in index.html home.css hero.b64 .htaccess; do test -s "minisite/GW001/$f"; done
           grep -Fq 'hero.jpg' minisite/GW001/index.html
-          head -c 16220 minisite/GW001/hero.b64 | base64 --decode > minisite/GW001/hero.jpg
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('minisite/GW001/hero.jpg')
-          data=p.read_bytes()
+          import base64
+          src=Path('minisite/GW001/hero.b64').read_bytes().decode('utf-8-sig','ignore')
+          start=src.find('/9j/')
+          end=src.rfind('2//Z')
+          if start < 0 or end < start:
+              raise SystemExit('hero base64 markers missing')
+          payload=''.join(src[start:end+4].split())
+          data=base64.b64decode(payload, validate=True)
           if len(data) < 10000: raise SystemExit('hero.jpg too small')
           if not data.startswith(b'\xff\xd8\xff'): raise SystemExit('hero.jpg is not a JPEG')
           if not data.endswith(b'\xff\xd9'): raise SystemExit('hero.jpg JPEG end marker missing')
+          Path('minisite/GW001/hero.jpg').write_bytes(data)
           print(f'hero.jpg valid: {len(data)} bytes')
           PY
 
@@ -79,8 +85,7 @@ jobs:
           curl -fsSL --max-time 30 "${base}hero.jpg?verify=${GITHUB_SHA}" -o /tmp/hero-live.jpg
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('/tmp/hero-live.jpg')
-          data=p.read_bytes()
+          data=Path('/tmp/hero-live.jpg').read_bytes()
           if len(data) < 10000: raise SystemExit('live hero too small')
           if not data.startswith(b'\xff\xd8\xff'): raise SystemExit('live hero is not JPEG')
           if not data.endswith(b'\xff\xd9'): raise SystemExit('live hero JPEG end marker missing')
