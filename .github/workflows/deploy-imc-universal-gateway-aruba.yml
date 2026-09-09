@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.php core.php read.php write.php ddl.php minisite.php; do test -s "imc-universal-gateway/$f"; done
+          for f in index.php core.php read.php write.php ddl.php minisite.php minisite-site.php; do test -s "imc-universal-gateway/$f"; done
           test -s "__imc_private_gateway/config.php"
           test -s "__imc_private_gateway/.htaccess"
           for f in imc-universal-gateway/*.php __imc_private_gateway/config.php; do php -l "$f"; done
@@ -47,7 +47,7 @@ jobs:
           remote_root='/www.italianmastersclub.it'
           uploads=[
               (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
-              for n in ['index.php','core.php','read.php','write.php','ddl.php','minisite.php']
+              for n in ['index.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
           ]
           uploads += [
               (Path('__imc_private_gateway/config.php'), f'{remote_root}/__imc_private_gateway'),
