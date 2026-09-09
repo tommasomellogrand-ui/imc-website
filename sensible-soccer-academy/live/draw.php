@@ -7,5 +7,5 @@ $src = __DIR__ . '/../draw24/index.html';
 $html = @file_get_contents($src);
 if ($html === false) { http_response_code(500); echo 'draw_unavailable'; exit; }
 $html = str_replace('<head>', '<head><base href="../draw24/"><meta name="robots" content="noindex,nofollow">', $html);
-$html = str_replace('</body>', '<script src="../live/spectator.js?v=3"></script></body>', $html);
+$html = str_replace('</body>', '<script src="../live/spectator.js?v=4"></script></body>', $html);
 echo $html;
