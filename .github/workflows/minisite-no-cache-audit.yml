@@ -1,0 +1,120 @@
+name: Audit and enforce minisite no-cache
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/minisite-no-cache-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-fix-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Audit live cache headers
+        id: audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          needs_fix=0
+          for i in $(seq 1 15); do
+            gw=$(printf 'GW%03d' "$i")
+            url="https://www.italianmastersclub.it/minisite/${gw}/"
+            headers=$(curl -fsSI --max-time 20 "$url" || true)
+            echo "===== ${gw} BEFORE ====="
+            printf '%s\n' "$headers"
+            cc=$(printf '%s\n' "$headers" | awk 'BEGIN{IGNORECASE=1}/^cache-control:/{sub(/^[^:]+:[[:space:]]*/,""); print; exit}')
+            if ! printf '%s' "$cc" | grep -Eqi 'no-store|no-cache|max-age=0'; then
+              needs_fix=1
+            fi
+          done
+          echo "needs_fix=$needs_fix" >> "$GITHUB_OUTPUT"
+
+      - name: Enforce no-cache in GW001-GW015 htaccess
+        if: steps.audit.outputs.needs_fix == '1'
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import io, os, ssl
+          from ftplib import FTP_TLS, error_perm
+
+          host='ftp.italianmastersclub.it'; port=21
+          username=os.environ['ARUBA_FTP_USERNAME']; password=os.environ['ARUBA_FTP_PASSWORD']
+          root='/www.italianmastersclub.it/minisite'
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect(host,port,timeout=60); ftp.login(username,password); ftp.prot_p(); ftp.set_pasv(True)
+
+          begin='# BEGIN IMC MINISITE NO CACHE'
+          end='# END IMC MINISITE NO CACHE'
+          block='''# BEGIN IMC MINISITE NO CACHE\n<IfModule mod_headers.c>\n  Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"\n  Header always set Pragma "no-cache"\n  Header always set Expires "0"\n  Header always unset ETag\n</IfModule>\nFileETag None\n# END IMC MINISITE NO CACHE\n'''
+
+          def get_file(path):
+              buf=io.BytesIO()
+              try:
+                  ftp.retrbinary(f'RETR {path}', buf.write)
+                  return buf.getvalue().decode('utf-8')
+              except error_perm as e:
+                  if str(e).startswith('550'):
+                      return ''
+                  raise
+
+          def replace_block(text):
+              if begin in text and end in text:
+                  start=text.index(begin)
+                  finish=text.index(end,start)+len(end)
+                  prefix=text[:start].rstrip()
+                  suffix=text[finish:].lstrip('\r\n')
+                  parts=[]
+                  if prefix: parts.append(prefix)
+                  parts.append(block.rstrip())
+                  if suffix: parts.append(suffix.rstrip())
+                  return '\n\n'.join(parts)+'\n'
+              base=text.rstrip()
+              return (base+'\n\n' if base else '')+block
+
+          for i in range(1,16):
+              gw=f'GW{i:03d}'
+              path=f'{root}/{gw}/.htaccess'
+              old=get_file(path)
+              new=replace_block(old)
+              data=new.encode('utf-8')
+              ftp.storbinary(f'STOR {path}', io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary(f'RETR {path}', check.write)
+              if check.getvalue()!=data:
+                  raise SystemExit(f'Verifica FTP fallita: {path}')
+              print(f'{gw}: .htaccess verificato ({len(data)} bytes)')
+          ftp.quit()
+          PY
+
+      - name: Verify live cache headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          sleep 5
+          failures=0
+          for i in $(seq 1 15); do
+            gw=$(printf 'GW%03d' "$i")
+            url="https://www.italianmastersclub.it/minisite/${gw}/?cache_audit=${GITHUB_RUN_ID}_${i}"
+            headers=$(curl -fsSI --max-time 20 "$url" || true)
+            echo "===== ${gw} AFTER ====="
+            printf '%s\n' "$headers"
+            status=$(printf '%s\n' "$headers" | awk '/^HTTP\//{code=$2} END{print code}')
+            cc=$(printf '%s\n' "$headers" | awk 'BEGIN{IGNORECASE=1}/^cache-control:/{sub(/^[^:]+:[[:space:]]*/,""); print; exit}')
+            if [ "$status" != "200" ] || ! printf '%s' "$cc" | grep -Eqi 'no-store|no-cache|max-age=0'; then
+              echo "ERROR ${gw}: status=${status:-missing} cache-control=${cc:-missing}"
+              failures=$((failures+1))
+            fi
+          done
+          if [ "$failures" -ne 0 ]; then
+            echo "No-cache verification failed for $failures minisite(s)"
+            exit 1
+          fi
+          echo "All 15 minisites return HTTP 200 with no-cache semantics."
