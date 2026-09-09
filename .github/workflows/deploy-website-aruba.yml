@@ -47,6 +47,9 @@ jobs:
           test -s sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg
           test -s sensible-soccer-academy-creation/gw-setting/draft-enhancements.js
           test -s sensible-soccer-academy-creation/gw-setting/draft-chat.js
+          test -s sensible-soccer-academy-creation/gw-setting/draft-live.js
+          test -s sensible-soccer-academy-creation/gw-setting/draw-live.php
+          php -l sensible-soccer-academy-creation/gw-setting/draw-live.php
           test -s sensible-soccer-academy-creation/gw-setting/replay-recorder.js
           test -s sensible-soccer-academy-creation/draw-replay/index.html
           test -s sensible-soccer-academy-creation/draw-replay/replay.php
@@ -127,7 +130,7 @@ jobs:
           excluded={'site-assets/css/game-world.css','site-assets/css/gameworld-engine.css','site-assets/js/gameworld-engine.js','site-assets/js/imc-data-service.js','site-assets/js/team-hub-detail.js'}
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
-          files += [Path('sensible-soccer-academy-creation/gw-setting/draft-matrix.html'),Path('sensible-soccer-academy-creation/gw-setting/.htaccess'),Path('sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg')]
+          files += [Path('sensible-soccer-academy-creation/gw-setting/draft-matrix.html'),Path('sensible-soccer-academy-creation/gw-setting/.htaccess'),Path('sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg'),Path('sensible-soccer-academy-creation/gw-setting/draw-live.php')]
           files += [Path('sensible-soccer-academy-creation/draw-replay/index.html'),Path('sensible-soccer-academy-creation/draw-replay/replay.php')]
           for i in range(1,16):
               d=Path(f'gameworld{i:03d}')
@@ -142,12 +145,13 @@ jobs:
 
           enhancement_local=Path('sensible-soccer-academy-creation/gw-setting/draft-enhancements.js')
           chat_local=Path('sensible-soccer-academy-creation/gw-setting/draft-chat.js')
+          live_local=Path('sensible-soccer-academy-creation/gw-setting/draft-live.js')
           recorder_local=Path('sensible-soccer-academy-creation/gw-setting/replay-recorder.js')
           runtime_dest=f"{remote_root}/sensible-soccer-academy-creation/gw-setting"
           ensure_dir(runtime_dest)
-          runtime_data=enhancement_local.read_bytes()+b'\n'+chat_local.read_bytes()+b'\n'+recorder_local.read_bytes()
+          runtime_data=enhancement_local.read_bytes()+b'\n'+chat_local.read_bytes()+b'\n'+live_local.read_bytes()+b'\n'+recorder_local.read_bytes()
           ftp.storbinary('STOR crest-overrides.js',io.BytesIO(runtime_data))
           runtime_check=io.BytesIO(); ftp.retrbinary('RETR crest-overrides.js',runtime_check.write)
           if runtime_check.getvalue()!=runtime_data: raise SystemExit('Verifica upload fallita: Draft Matrix runtime bundle')
-          ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; GW010 runtime + Manager Chat + Replay attivi')
+          ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; GW010 runtime + Chat + Live Sync + Replay attivi')
           PY
