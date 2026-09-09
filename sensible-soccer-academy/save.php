@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_
 $raw = file_get_contents('php://input');
 if ($raw === false || strlen($raw) > 200000) { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'invalid_payload']); exit; }
 $data = json_decode($raw, true);
-if (!is_array($data) || ($data['gameWorld'] ?? '') !== 'GW010' || !isset($data['assignments']) || !is_array($data['assignments']) || count($data['assignments']) !== 18) {
+if (!is_array($data) || ($data['gameWorld'] ?? '') !== 'GW010' || !isset($data['assignments']) || !is_array($data['assignments']) || count($data['assignments']) !== 24) {
   http_response_code(400); echo json_encode(['ok'=>false,'error'=>'invalid_draw']); exit;
 }
 $seenManagers=[]; $seenTeams=[]; $normalized=[];
@@ -31,8 +31,6 @@ function atomic_write(string $dst,string $json): bool {
   return false;
 }
 
-// Keep the historical root replay file, but also persist inside /live/ where
-// the room state is already known to be writable on Aruba.
 $rootDst=__DIR__.'/replay-data.json';
 $liveDst=__DIR__.'/live/replay-data.json';
 $rootOk=atomic_write($rootDst,$json);
