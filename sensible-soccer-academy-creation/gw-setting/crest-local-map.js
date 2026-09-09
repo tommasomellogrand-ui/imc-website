@@ -28,7 +28,7 @@
   const remote={};
   Object.entries(clubs).forEach(([name,meta])=>{remote[name]=meta.source;});
   window.IMC_GW010_CLUB_CODEX=clubs;
-  window.IMC_CREST_OVERRIDES=Object.assign(window.IMC_CREST_OVERRIDES||{},remote);
+  window.IMC_CREST_OVERRIDES=remote;
   const spacing=document.createElement('style');
   spacing.textContent='.matrix > .panel:last-child .pool .grid{padding-top:14px}.matrix > .panel:last-child .pool h3{margin-bottom:0}';
   document.head.appendChild(spacing);
