@@ -1,0 +1,82 @@
+name: Deploy GW004 World League exploration
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'minisite/GW004/**'
+      - '.github/workflows/deploy-minisite-gw004.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: minisite-gw004-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate GW004
+        run: |
+          node --check minisite/GW004/app.js
+          node --check minisite/GW004/real-data.js
+          node --check minisite/GW004/context-data.js
+          test -s minisite/GW004/world-league.css
+          test -s minisite/GW004/fonts.css
+          test -s minisite/GW004/assets/font-7.ttf
+          for page in index world division-1 division-2 division-3 division-4 standings results schedule match manager player club transfers promotion relegation data sources review; do
+            test -s "minisite/GW004/$page.html"
+          done
+      - name: Publish only GW004 to Aruba
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          root=Path('minisite/GW004')
+          remote='/www.italianmastersclub.it/minisite/GW004'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True)
+          def ensure(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
+          files=[p for p in root.rglob('*') if p.is_file()]
+          files.sort(key=lambda p: (p.suffix=='.html',p.as_posix()))
+          for local in files:
+              rel=local.relative_to(root)
+              ensure(remote+'/'+str(rel.parent))
+              data=local.read_bytes()
+              ftp.storbinary('STOR '+local.name,io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary('RETR '+local.name,check.write)
+              if check.getvalue()!=data: raise RuntimeError('Upload verification failed: '+str(rel))
+              print('Verified',rel,len(data))
+          ftp.quit()
+          PY
+      - name: Verify every live page and asset
+        run: |
+          python3 - <<'PY'
+          import urllib.request, pathlib, time
+          base='https://www.italianmastersclub.it/minisite/GW004/'
+          root=pathlib.Path('minisite/GW004')
+          for p in sorted(root.rglob('*')):
+              if not p.is_file() or p.name.startswith('.'): continue
+              url=base+p.relative_to(root).as_posix()+'?verify='+__import__('os').environ['GITHUB_SHA']
+              for attempt in range(3):
+                  try:
+                      with urllib.request.urlopen(url,timeout=40) as r:
+                          data=r.read()
+                          if r.status!=200 or data!=p.read_bytes(): raise ValueError('Live bytes differ')
+                      print('LIVE OK',p.name); break
+                  except Exception:
+                      if attempt==2: raise
+                      time.sleep(3)
+          PY
