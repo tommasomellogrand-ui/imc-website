@@ -19,7 +19,7 @@ function manager_scan_uuid(): string {
     return substr($h,0,8).'-'.substr($h,8,4).'-'.substr($h,12,4).'-'.substr($h,16,4).'-'.substr($h,20);
 }
 function manager_scan_imc_map(): array {
-    $core=smm_db();$r=$core->query('SELECT sm_manager_id,full_name FROM imc_managers WHERE sm_manager_id IS NOT NULL');$out=[];
+    $core=smm_db();$r=$core->query('SELECT sm_manager_id,full_name FROM `IMC Manager Codex Global` WHERE sm_manager_id IS NOT NULL');$out=[];
     while($x=$r->fetch_assoc())$out[(int)$x['sm_manager_id']]=(string)$x['full_name'];
     return $out;
 }

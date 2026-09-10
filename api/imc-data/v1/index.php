@@ -385,7 +385,7 @@ function api_managers(string $world): never {
     $core = api_database('Sql1956795_1');
     $managerRows = api_all(
         $core,
-        'SELECT manager_id,full_name,sm_manager_id,sm_username FROM imc_managers ORDER BY full_name,manager_id'
+        'SELECT manager_id,full_name,sm_manager_id,NULL AS sm_username FROM `IMC Manager Codex Global` ORDER BY full_name,manager_id'
     );
     $managerIndex = [];
     foreach ($managerRows as $managerRow) {

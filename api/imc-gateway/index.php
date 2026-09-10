@@ -25,8 +25,8 @@ function out(array $x, int $s = 200): never {
 }
 function valid_gw(string $gw): bool { return (bool)preg_match('/^GW00[1-9]$/', $gw); }
 function valid_identifier(string $value): bool { return (bool)preg_match('/^[A-Za-z0-9_]+$/', $value); }
-function public_gateway_version(): string { return '1.9.0'; }
-function public_core_tables(): array { return ['gw_manager_assignments','imc_managers','clubs_game_world_id']; }
+function public_gateway_version(): string { return '1.9.1'; }
+function public_core_tables(): array { return ['gw_manager_assignments'=>'IMC Manager Assignment Global','imc_managers'=>'IMC Manager Codex Global']; }
 function public_site_tables(): array {
   return [
     'results' => 'IMC Site Results',
@@ -214,6 +214,14 @@ function normalize_insert_row(PDO $pdo, string $gw, string $repo, array $row, ar
 }
 
 function normalize_public_rows(array $rows, string $repo): array {
+  if ($repo === 'gw_manager_assignments') {
+    foreach ($rows as &$row) {
+      $row['team_id'] = $row['club_id'] ?? null;
+      $row['nation_id'] = $row['national_team_id'] ?? null;
+      if (!array_key_exists('season_id',$row)) $row['season_id'] = null;
+    }
+    unset($row);
+  }
   if ($repo === 'schedule' || $repo === 'site_schedule') {
     foreach ($rows as &$row) {
       if (!array_key_exists('competition_key',$row) && array_key_exists('source_competition_key',$row)) {
@@ -261,8 +269,9 @@ if ($method === 'GET') {
   $gw=strtoupper(trim((string)($_GET['game_world_id'] ?? ''))); $action=strtolower(trim((string)($_GET['action'] ?? 'read'))); $repo=strtolower(trim((string)($_GET['repository'] ?? ''))); $source=strtolower(trim((string)($_GET['source'] ?? 'world')));
   if (!valid_gw($gw)) out(['ok'=>false,'error'=>'invalid_game_world'],422);
   if ($source === 'core') {
-    if (!in_array($repo,public_core_tables(),true)) out(['ok'=>false,'error'=>'core_repository_not_enabled'],422);
-    try { $pdo=imc_core_db($cfg); read_public_table($pdo,$repo,$gw,$repo,'core'); } catch(Throwable $e) { out(['ok'=>false,'error'=>'gateway_read_error'],500); }
+    $coreTables=public_core_tables();
+    if (!isset($coreTables[$repo])) out(['ok'=>false,'error'=>'core_repository_not_enabled'],422);
+    try { $pdo=imc_core_db($cfg); read_public_table($pdo,$coreTables[$repo],$gw,$repo,'core'); } catch(Throwable $e) { out(['ok'=>false,'error'=>'gateway_read_error'],500); }
   }
   if ($source !== '' && $source !== 'world') out(['ok'=>false,'error'=>'invalid_source'],422);
   try { $pdo=imc_db($cfg,$gw); } catch(Throwable $e) { out(['ok'=>false,'error'=>'database_connection_failed'],500); }
