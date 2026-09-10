@@ -36,11 +36,14 @@ function matches_enrich(PDO $db,array $list): array {
     if($c){$r[$side.'_club_id']=$c['id'];$r[$side.'_image_url']=safe_image($c['image_url']);}
   } unset($r);return $list;
 }
+$stage='configuration';
 try {
   $root=dirname(__DIR__,2);
   $cfg=require $root.'/api/imc-gateway/config.php';
   require_once $root.'/api/imc-gateway/database.php';
+  $stage='connection';
   $db=imc_core_db($cfg);
+  $stage='query';
   $results=union_table('IMC Site Results','site_result_id','game_world_id',true);
   $schedule=union_table('IMC Site Schedule','site_schedule_id','game_world_id',true);
   $reports=union_table('IMC Site Match Report','site_match_report_id','game_world_id',true);
@@ -144,4 +147,4 @@ try {
   default:respond(['ok'=>false,'error'=>'Sezione non disponibile.'],404);
   }
   respond(['ok'=>true,'data'=>$payload,'context'=>$context,'source'=>'MySQL Aruba · IMC','generated_at'=>gmdate('c')]);
-} catch(Throwable $e){error_log('IMC master read: '.$e->getMessage());respond(['ok'=>false,'error'=>'Dati temporaneamente non disponibili. Riprova tra poco.'],503);}
+} catch(Throwable $e){error_log('IMC master read: '.$e->getMessage());respond(['ok'=>false,'error'=>'Dati temporaneamente non disponibili. Riprova tra poco.','stage'=>$stage,'code'=>(string)$e->getCode()],503);}

@@ -54,11 +54,14 @@ jobs:
       - name: Verify public data before root publication
         run: |
           python3 - <<'PY'
-          import json,urllib.request,urllib.parse
+          import json,urllib.request,urllib.parse,urllib.error
           base='https://www.italianmastersclub.it/site-assets/master/api.php?'
           for dataset in ['pulse','worlds','managers','clubs','players','results','schedule','today','transfers','rankings','records','stories','archive','competitions']:
               url=base+urllib.parse.urlencode({'dataset':dataset,'limit':2,'release':'${{ github.sha }}'})
-              with urllib.request.urlopen(url,timeout=90) as response:data=json.load(response)
+              try:
+                  with urllib.request.urlopen(url,timeout=90) as response:data=json.load(response)
+              except urllib.error.HTTPError as error:
+                  print(dataset,error.code,error.read().decode());raise
               assert data.get('ok'),dataset
               print(dataset,'OK')
           PY
