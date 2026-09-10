@@ -34,7 +34,9 @@ jobs:
           for encoded in (root/'assets').glob('*.b64'):
               encoded.with_suffix('.webp').write_bytes(base64.b64decode(encoded.read_text()))
           remote='/www.italianmastersclub.it/minisite/GW007'
-          ftp=FTP_TLS(context=ssl.create_default_context())
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False  # Match the existing Aruba deploy configuration; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p(); ftp.set_pasv(True)
