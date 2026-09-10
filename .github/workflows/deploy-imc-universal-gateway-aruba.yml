@@ -44,7 +44,7 @@ jobs:
           from pathlib import Path
           host='ftp.italianmastersclub.it'; port=21
           username=os.environ['ARUBA_FTP_USERNAME']; password=os.environ['ARUBA_FTP_PASSWORD']
-          remote_root='/www.italianmastersclub.it'
+          remote_root='/www/italianmastersclub.it'
           uploads=[
               (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
               for n in ['index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
@@ -76,4 +76,31 @@ jobs:
               check=io.BytesIO(); ftp.retrbinary('RETR '+local.name,check.write)
               if check.getvalue()!=data: raise SystemExit('Verifica upload fallita: '+local.as_posix())
           ftp.quit(); print('IMC Universal Gateway completo, ingress-only incluso, configurazione privata inclusa, pubblicato e verificato')
+          PY
+
+      - name: Verify live ingress-only and legacy minisite compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          ingress="$(curl -fsS --retry 3 --retry-delay 2 \
+            -H 'Content-Type: application/json' \
+            --data '{"channel":"IMPORT","action":"read","route_mode":"explicit","game_world_id":"GW005","repository":"IMC Results","target_database":"Sql1956795_3","target_table":"GW005_IMC Results","limit":1,"future_business_field":{"ignored_by_gateway":true}}' \
+            'https://www.italianmastersclub.it/imc-universal-gateway/')"
+          RESPONSE="$ingress" python3 - <<'PY'
+          import json,os
+          j=json.loads(os.environ['RESPONSE'])
+          assert j.get('ok') is True, j
+          assert j.get('mode') == 'INGRESS_ONLY', j
+          assert j.get('action') == 'read', j
+          print('Ingress-only live OK')
+          PY
+          minisite="$(curl -fsS --retry 3 --retry-delay 2 \
+            -H 'Content-Type: application/json' \
+            --data '{"channel":"MINISITE","action":"minisite_read","resource":"game_world_codex","game_world_id":"GW005"}' \
+            'https://www.italianmastersclub.it/imc-universal-gateway/')"
+          RESPONSE="$minisite" python3 - <<'PY'
+          import json,os
+          j=json.loads(os.environ['RESPONSE'])
+          assert j.get('ok') is True, j
+          print('Legacy MINISITE compatibility live OK')
           PY
