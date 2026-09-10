@@ -111,7 +111,7 @@ try {
     $context['total']=(int)rows($db,"SELECT COUNT(*) total FROM `IMC Club Codex Global` c WHERE $w",$args)[0]['total'];
     if($dataset==='club'){
       $payload['worlds']=rows($db,'SELECT game_world_id,club_gw_id FROM clubs_game_world_id WHERE club_id=? ORDER BY game_world_id',[$id]);
-      $payload['results']=matches_enrich($db,rows($db,"SELECT r.* FROM $results r WHERE $valid AND EXISTS(SELECT 1 FROM clubs_game_world_id m WHERE m.club_id=? AND m.game_world_id=r.game_world_id AND (m.club_gw_id=r.home_sm_club_id OR m.club_gw_id=r.away_sm_club_id)) ORDER BY r.match_date DESC LIMIT 30",[$id]));
+      $payload['results']=matches_enrich($db,rows($db,"SELECT r.* FROM $results r WHERE $valid AND EXISTS(SELECT 1 FROM clubs_game_world_id m WHERE m.club_id=? AND BINARY m.game_world_id=BINARY r.game_world_id AND (m.club_gw_id=r.home_sm_club_id OR m.club_gw_id=r.away_sm_club_id)) ORDER BY r.match_date DESC LIMIT 30",[$id]));
     }break;
   case 'players':case 'player':
     $id=number('id',0,PHP_INT_MAX);$where=[];$args=[];
