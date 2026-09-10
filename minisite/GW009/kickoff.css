@@ -17,3 +17,5 @@ h1{font-size:clamp(34px,4.7vw,70px);line-height:1.12}
 .sprite-icon{width:20px;height:20px;flex:none;color:var(--cyan);shape-rendering:crispEdges}
 #system-nav a{gap:8px}.navcode{font-size:10px}
 @media(max-width:760px){h1{font-size:clamp(26px,7.2vw,48px)}.homeheadline h1{font-size:clamp(60px,17vw,92px)}.homeheadline{padding-right:94px}.worldmark{top:54px}.digits{font-size:48px}.scoreteams{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}.archivecover h1{font-size:clamp(28px,7.2vw,48px)}.compnumber{font-size:52px}.portrait-slot>strong{font-size:82px}}
+
+.homeheadline h1{font-family:Silkscreen,'Courier New',monospace;font-weight:700}
