@@ -1,4 +1,4 @@
-name: IMC DB 001-04 Enable Controlled Drop Table
+name: IMC DB 001-04 Patch Exact CORE Consumers
 
 on:
   push:
@@ -19,34 +19,93 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Patch Database Manager safely
+      - name: Patch exact semantic replacements
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('__imc-sm-master/admin/database-manager/index.php')
-          text = path.read_text()
-          old_version = "const IMC_DBM_VERSION = '1.5.0';"
-          new_version = "const IMC_DBM_VERSION = '1.5.1';"
-          if old_version not in text:
-              raise SystemExit('Expected Database Manager version marker not found')
-          text = text.replace(old_version, new_version, 1)
-          old = "    if ($kind === 'DROP' && !preg_match('/^\\s*DROP\\s+TRIGGER\\s+(?:IF\\s+EXISTS\\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\\s*$/i', $sql)) {\n        throw new InvalidArgumentException('Only DROP TRIGGER is allowed as DROP migration SQL.');\n    }\n"
-          new = "    if ($kind === 'DROP') {\n        $dropTrigger = (bool)preg_match('/^\\s*DROP\\s+TRIGGER\\s+(?:IF\\s+EXISTS\\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\\s*$/i', $sql);\n        $dropTable = preg_match('/^\\s*DROP\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?`?([A-Za-z_][A-Za-z0-9_]{0,63})`?\\s*$/i', $sql, $dropTableMatch) === 1;\n        if (!$dropTrigger && !$dropTable) throw new InvalidArgumentException('Only single DROP TRIGGER or DROP TABLE statements are allowed as DROP migration SQL.');\n        if ($dropTable && str_starts_with(strtoupper((string)$dropTableMatch[1]), 'IMC')) throw new InvalidArgumentException('DROP TABLE is forbidden for IMC-prefixed tables.');\n    }\n"
-          if old not in text:
-              raise SystemExit('Expected DROP validation block not found')
-          text = text.replace(old, new, 1)
-          path.write_text(text)
+
+          def replace(path, old, new, label):
+              p=Path(path); text=p.read_text()
+              if old not in text:
+                  raise SystemExit(f'Expected block not found: {label} in {path}')
+              p.write_text(text.replace(old,new,1))
+
+          # Public gateway: keep legacy logical repository names for clients,
+          # but route physical reads to the authoritative existing IMC tables.
+          p=Path('api/imc-gateway/index.php'); text=p.read_text()
+          text=text.replace("function public_gateway_version(): string { return '1.9.0'; }","function public_gateway_version(): string { return '1.9.1'; }",1)
+          text=text.replace("function public_core_tables(): array { return ['gw_manager_assignments','imc_managers','clubs_game_world_id']; }","function public_core_tables(): array { return ['gw_manager_assignments'=>'IMC Manager Assignment Global','imc_managers'=>'IMC Manager Codex Global']; }",1)
+          old="""function normalize_public_rows(array $rows, string $repo): array {
+  if ($repo === 'schedule' || $repo === 'site_schedule') {
+"""
+          new="""function normalize_public_rows(array $rows, string $repo): array {
+  if ($repo === 'gw_manager_assignments') {
+    foreach ($rows as &$row) {
+      $row['team_id'] = $row['club_id'] ?? null;
+      $row['nation_id'] = $row['national_team_id'] ?? null;
+    }
+    unset($row);
+  }
+  if ($repo === 'gw_manager_assignments') {
+    foreach ($rows as &$row) {
+      if (!array_key_exists('season_id',$row)) $row['season_id'] = null;
+    }
+    unset($row);
+  }
+  if ($repo === 'schedule' || $repo === 'site_schedule') {
+"""
+          if old not in text: raise SystemExit('gateway normalize block not found')
+          text=text.replace(old,new,1)
+          old="""  if ($source === 'core') {
+    if (!in_array($repo,public_core_tables(),true)) out(['ok'=>false,'error'=>'core_repository_not_enabled'],422);
+    try { $pdo=imc_core_db($cfg); read_public_table($pdo,$repo,$gw,$repo,'core'); } catch(Throwable $e) { out(['ok'=>false,'error'=>'gateway_read_error'],500); }
+  }
+"""
+          new="""  if ($source === 'core') {
+    $coreTables=public_core_tables();
+    if (!isset($coreTables[$repo])) out(['ok'=>false,'error'=>'core_repository_not_enabled'],422);
+    try { $pdo=imc_core_db($cfg); read_public_table($pdo,$coreTables[$repo],$gw,$repo,'core'); } catch(Throwable $e) { out(['ok'=>false,'error'=>'gateway_read_error'],500); }
+  }
+"""
+          if old not in text: raise SystemExit('gateway core branch not found')
+          p.write_text(text.replace(old,new,1))
+
+          # api/imc-data: only the manager identity query has an exact IMC replacement.
+          replace('api/imc-data/v1/index.php',
+              "'SELECT manager_id,full_name,sm_manager_id,sm_username FROM imc_managers ORDER BY full_name,manager_id'",
+              "'SELECT manager_id,full_name,sm_manager_id,NULL AS sm_username FROM `IMC Manager Codex Global` ORDER BY full_name,manager_id'",
+              'api manager identity')
+
+          # Manager scan: exact identity source replacement.
+          replace('__imc-sm-master/admin/ingestion/handlers/manager-scan.php',
+              "$core=smm_db();$r=$core->query('SELECT sm_manager_id,full_name FROM imc_managers WHERE sm_manager_id IS NOT NULL');$out=[];",
+              "$core=smm_db();$r=$core->query('SELECT sm_manager_id,full_name FROM `IMC Manager Codex Global` WHERE sm_manager_id IS NOT NULL');$out=[];",
+              'manager scan identity')
+
+          # Match Report: assignment semantics are present in IMC Global; legacy sm_username was NULL for all IMC managers.
+          replace('__imc-sm-master/admin/ingestion/handlers/match-report.php',
+              "$core=smm_db();$sql='SELECT a.assignment_id,a.manager_id,a.team_id,a.nation_id,a.assignment_type,a.start_date,a.end_date,m.sm_manager_id,m.sm_username FROM gw_manager_assignments a LEFT JOIN imc_managers m ON m.manager_id=a.manager_id WHERE a.game_world_id=?';",
+              "$core=smm_db();$sql='SELECT a.id AS assignment_id,a.manager_id,a.club_id AS team_id,a.national_team_id AS nation_id,a.assignment_type,a.start_date,a.end_date,m.sm_manager_id,NULL AS sm_username FROM `IMC Manager Assignment Global` a LEFT JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id WHERE a.game_world_id=?';",
+              'match report assignments')
+          replace('__imc-sm-master/admin/ingestion/handlers/match-report.php',
+              "$core=smm_db();$q=$core->prepare('SELECT 1 FROM gw_manager_assignments a LEFT JOIN imc_managers m ON m.manager_id=a.manager_id WHERE a.game_world_id=? AND a.start_date<=? AND (a.end_date IS NULL OR a.end_date>=?) AND ((a.team_id IS NOT NULL AND a.team_id IN (?,?)) OR (m.sm_manager_id IS NOT NULL AND m.sm_manager_id IN (?,?))) LIMIT 1');",
+              "$core=smm_db();$q=$core->prepare('SELECT 1 FROM `IMC Manager Assignment Global` a LEFT JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id WHERE a.game_world_id=? AND a.start_date<=? AND (a.end_date IS NULL OR a.end_date>=?) AND ((a.club_id IS NOT NULL AND a.club_id IN (?,?)) OR (m.sm_manager_id IS NOT NULL AND m.sm_manager_id IN (?,?))) LIMIT 1');",
+              'match report managed check')
           PY
-          php -l __imc-sm-master/admin/database-manager/index.php
+
+          php -l api/imc-gateway/index.php
+          php -l api/imc-data/v1/index.php
+          php -l __imc-sm-master/admin/ingestion/handlers/manager-scan.php
+          php -l __imc-sm-master/admin/ingestion/handlers/match-report.php
           git diff --check
 
-      - name: Commit Database Manager patch
+      - name: Commit exact replacements
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'IMC Database Manager'
           git config user.email 'actions@users.noreply.github.com'
-          git add __imc-sm-master/admin/database-manager/index.php
-          git commit -m 'IMC-DB-001-04: allow controlled non-IMC DROP TABLE'
+          git add api/imc-gateway/index.php api/imc-data/v1/index.php __imc-sm-master/admin/ingestion/handlers/manager-scan.php __imc-sm-master/admin/ingestion/handlers/match-report.php
+          git commit -m 'IMC-DB-001-04: route exact CORE readers to IMC tables'
           git push origin HEAD:main
