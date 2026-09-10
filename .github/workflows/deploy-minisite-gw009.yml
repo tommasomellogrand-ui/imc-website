@@ -46,7 +46,9 @@ jobs:
           from ftplib import FTP_TLS,error_perm
           root=Path('minisite/GW009')
           remote='/www.italianmastersclub.it/minisite/GW009'
-          ftp=FTP_TLS(context=ssl.create_default_context())
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False  # Same Aruba certificate handling as existing minisite deploys
+          ftp=FTP_TLS(context=ctx)
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p()
