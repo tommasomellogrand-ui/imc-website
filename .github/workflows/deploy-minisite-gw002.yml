@@ -62,7 +62,7 @@ jobs:
                   try: ftp.cwd(part)
                   except error_perm: ftp.mkd(part); ftp.cwd(part)
           ensure(remote)
-          for name in ['config.js','press.css','app.js','.htaccess','press-v1.html','exploration.css','exploration-data.js','exploration.js','stadium.webp','index.html']:
+          for name in ['config.js','press.css','app.js','.htaccess','press-v1.html','exploration.css','exploration-data.js','exploration.js','stadium.webp','imc-logo.png','review.html','index.html']:
               local=Path('minisite/GW002')/name
               data=local.read_bytes()
               with local.open('rb') as f: ftp.storbinary(f'STOR {name}',f)
