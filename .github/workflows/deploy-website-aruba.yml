@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'minisite/GW006/**'
+      - '.github/workflows/deploy-minisite-gw006.yml'
       - 'minisite/GW009/**'
       - '.github/workflows/deploy-minisite-gw009.yml'
       - 'minisite/GW004/**'
@@ -165,4 +167,3 @@ jobs:
           if runtime_check.getvalue()!=runtime_data: raise SystemExit('Verifica upload fallita: Draft Matrix runtime bundle')
           ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; GW010 runtime + Chat + Live Sync + Replay attivi')
           PY
-

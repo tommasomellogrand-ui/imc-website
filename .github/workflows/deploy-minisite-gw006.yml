@@ -1,0 +1,72 @@
+name: Deploy GW006 World Stage exploration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'minisite/GW006/**'
+      - '.github/workflows/deploy-minisite-gw006.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: imc-gw006-exploration
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate GW006
+        run: |
+          node --check minisite/GW006/stage.js
+          for page in index competitions league results schedule match standings managers manager players player club transfers playoffs data archive moodboard sources; do
+            test -s "minisite/GW006/$page.html"
+          done
+          test -s minisite/GW006/stage.css
+      - name: Upload only GW006
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          context=ssl.create_default_context()
+          ftp=FTP_TLS(context=context)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p()
+          ftp.cwd('/')
+          for part in ['www.italianmastersclub.it','minisite','GW006']:
+              try: ftp.cwd(part)
+              except error_perm: ftp.mkd(part); ftp.cwd(part)
+          for path in sorted(Path('minisite/GW006').iterdir()):
+              if not path.is_file(): continue
+              if path.suffix not in ['.html','.js','.css','.md'] and path.name!='.htaccess': continue
+              data=path.read_bytes()
+              ftp.storbinary('STOR '+path.name,io.BytesIO(data))
+              check=io.BytesIO()
+              ftp.retrbinary('RETR '+path.name,check.write)
+              if check.getvalue()!=data: raise RuntimeError('Upload mismatch: '+path.name)
+              print('Verified '+path.name)
+          ftp.quit()
+          PY
+      - name: Verify every published route and asset
+        run: |
+          python3 - <<'PY'
+          import os, urllib.request
+          from pathlib import Path
+          base='https://www.italianmastersclub.it/minisite/GW006/'
+          for path in sorted(Path('minisite/GW006').iterdir()):
+              if path.suffix not in ['.html','.js','.css']: continue
+              url=base+path.name+'?verify='+os.environ['GITHUB_SHA']
+              with urllib.request.urlopen(url,timeout=45) as r:
+                  data=r.read()
+                  if r.status!=200 or data!=path.read_bytes(): raise RuntimeError('Live mismatch: '+path.name)
+              print('Live verified '+path.name)
+          PY
