@@ -1,0 +1,85 @@
+name: Deploy GW009 visual exploration only
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'minisite/GW009/**'
+      - '.github/workflows/deploy-minisite-gw009.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-minisite-gw009
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate GW009
+        run: |
+          node --check minisite/GW009/kickoff.js
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          from urllib.parse import urlsplit
+          root=Path('minisite/GW009')
+          class Check(HTMLParser):
+              def handle_starttag(self,tag,attrs):
+                  for key,value in attrs:
+                      if key in ('href','src') and value and not value.startswith(('#','http')):
+                          assert (root/urlsplit(value).path).is_file(),value
+          pages=list(root.glob('*.html'))
+          assert len(pages)>=12
+          for page in pages:
+              Check().feed(page.read_text())
+          print('All routes and local references verified')
+          PY
+      - name: Upload only minisite GW009
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl
+          from pathlib import Path
+          from ftplib import FTP_TLS,error_perm
+          root=Path('minisite/GW009')
+          remote='/www.italianmastersclub.it/minisite/GW009'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False  # Same Aruba certificate handling as existing minisite deploys
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p()
+          def ensure(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part);ftp.cwd(part)
+          for path in sorted(root.rglob('*')):
+              if not path.is_file() or path.suffix=='.md': continue
+              rel=path.relative_to(root)
+              ensure(remote+'/'+str(rel.parent) if str(rel.parent)!='.' else remote)
+              data=path.read_bytes()
+              ftp.storbinary('STOR '+path.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+path.name,check.write)
+              assert check.getvalue()==data,str(rel)
+              print('Verified',rel)
+          ftp.quit()
+          PY
+      - name: Verify all live files
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from urllib.request import urlopen
+          import os,hashlib
+          root=Path('minisite/GW009')
+          for p in root.rglob('*'):
+              if not p.is_file() or p.name.startswith('.') or p.suffix=='.md':continue
+              url='https://www.italianmastersclub.it/minisite/GW009/'+p.relative_to(root).as_posix()+'?verify='+os.environ['GITHUB_SHA']
+              with urlopen(url,timeout=30) as r:
+                  assert r.status==200
+                  assert hashlib.sha256(r.read()).digest()==hashlib.sha256(p.read_bytes()).digest(),str(p)
+              print('Live OK',p.name)
+          PY

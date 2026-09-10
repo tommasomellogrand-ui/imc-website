@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'minisite/GW009/**'
+      - '.github/workflows/deploy-minisite-gw009.yml'
       - 'minisite/GW004/**'
       - '.github/workflows/deploy-minisite-gw004.yml'
       - 'index.html'
