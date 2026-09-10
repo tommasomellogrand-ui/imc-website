@@ -85,7 +85,7 @@ try {
     if($isSchedule&&$list){foreach($list as &$s){$done=rows($db,"SELECT r.home_score,r.away_score,r.result_status FROM $results r WHERE r.game_world_id=? AND r.sm_fixture_id=? AND $valid",[$s['game_world_id'],$s['sm_fixture_id']]);if($done)$s=array_merge($s,$done[0]);}unset($s);}
     $payload=matches_enrich($db,$list);$context=['total'=>$total,'offset'=>$offset,'limit'=>$limit,'date'=>$date,'time_note'=>'Orari come registrati nella fonte; fuso non specificato.','source'=>$isSchedule?'IMC Site Schedule':'IMC Site Results'];break;
   case 'match':
-    $id=number('id');
+    $id=number('id',0,PHP_INT_MAX);
     $r=rows($db,"SELECT r.* FROM $results r WHERE r.game_world_id=? AND r.sm_fixture_id=?",[$world,$id])[0]??null;
     $report=rows($db,"SELECT r.* FROM $reports r WHERE r.game_world_id=? AND r.sm_fixture_id=?",[$world,$id])[0]??null;
     if(!$r)$r=$report?:rows($db,"SELECT r.* FROM $schedule r WHERE r.game_world_id=? AND r.sm_fixture_id=?",[$world,$id])[0]??null;
@@ -99,7 +99,7 @@ try {
       $payload['summary']=rows($db,"SELECT COUNT(*) matches,COUNT(DISTINCT r.game_world_id) worlds,SUM((r.home_sm_manager_id=? AND r.home_score>r.away_score) OR (r.away_sm_manager_id=? AND r.away_score>r.home_score)) wins FROM $results r WHERE $valid AND (r.home_sm_manager_id=? OR r.away_sm_manager_id=?)",[$sm,$sm,$sm,$sm])[0];
     }break;
   case 'clubs':case 'club':
-    $id=number('id');$where=[];$args=[];
+    $id=number('id',0,PHP_INT_MAX);$where=[];$args=[];
     if($dataset==='club'){$where[]='c.id=?';$args[]=$id;}
     else {$where[]="EXISTS(SELECT 1 FROM clubs_game_world_id m WHERE m.club_id=c.id AND m.game_world_id IN ('GW001','GW002','GW003','GW004','GW005','GW006','GW007','GW008','GW009','GW010'))";}
     if($search!==''){$where[]='c.name LIKE ?';$args[]='%'.$search.'%';}
@@ -112,7 +112,7 @@ try {
       $payload['results']=matches_enrich($db,rows($db,"SELECT r.* FROM $results r WHERE $valid AND EXISTS(SELECT 1 FROM clubs_game_world_id m WHERE m.club_id=? AND m.game_world_id=r.game_world_id AND (m.club_gw_id=r.home_sm_club_id OR m.club_gw_id=r.away_sm_club_id)) ORDER BY r.match_date DESC LIMIT 30",[$id]));
     }break;
   case 'players':case 'player':
-    $id=number('id');$where=[];$args=[];
+    $id=number('id',0,PHP_INT_MAX);$where=[];$args=[];
     if($dataset==='player'){$where[]='s.sm_player_id=?';$args[]=$id;}
     if($world!==''){$where[]='s.source_game_world_id=?';$args[]=$world;}
     if($search!==''){$where[]='s.player_name LIKE ?';$args[]='%'.$search.'%';}
