@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.php core.php read.php write.php ddl.php minisite.php minisite-site.php; do test -s "imc-universal-gateway/$f"; done
+          for f in index.php ingress.php core.php read.php write.php ddl.php minisite.php minisite-site.php; do test -s "imc-universal-gateway/$f"; done
           test -s "__imc_private_gateway/config.php"
           test -s "__imc_private_gateway/.htaccess"
           for f in imc-universal-gateway/*.php __imc_private_gateway/config.php; do php -l "$f"; done
@@ -47,7 +47,7 @@ jobs:
           remote_root='/www.italianmastersclub.it'
           uploads=[
               (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
-              for n in ['index.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
+              for n in ['index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
           ]
           uploads += [
               (Path('__imc_private_gateway/config.php'), f'{remote_root}/__imc_private_gateway'),
@@ -75,5 +75,5 @@ jobs:
               with local.open('rb') as fh: ftp.storbinary('STOR '+local.name,fh)
               check=io.BytesIO(); ftp.retrbinary('RETR '+local.name,check.write)
               if check.getvalue()!=data: raise SystemExit('Verifica upload fallita: '+local.as_posix())
-          ftp.quit(); print('IMC Universal Gateway completo, configurazione privata inclusa, pubblicato e verificato')
+          ftp.quit(); print('IMC Universal Gateway completo, ingress-only incluso, configurazione privata inclusa, pubblicato e verificato')
           PY
