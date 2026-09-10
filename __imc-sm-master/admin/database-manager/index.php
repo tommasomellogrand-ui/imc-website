@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.5.0';
+const IMC_DBM_VERSION = '1.5.1';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -142,8 +142,11 @@ function dbm_validate_write_sql(string $sql, string $database, bool $allowDestru
     if (in_array($kind, ['INSERT', 'UPDATE', 'DELETE'], true) && !$dataMigration) {
         throw new InvalidArgumentException('INSERT, UPDATE and DELETE require data_migration=true for an explicit data migration or backfill.');
     }
-    if ($kind === 'DROP' && !preg_match('/^\s*DROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\s*$/i', $sql)) {
-        throw new InvalidArgumentException('Only DROP TRIGGER is allowed as DROP migration SQL.');
+    if ($kind === 'DROP') {
+        $dropTrigger = (bool)preg_match('/^\s*DROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\s*$/i', $sql);
+        $dropTable = preg_match('/^\s*DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?`?([A-Za-z_][A-Za-z0-9_]{0,63})`?\s*$/i', $sql, $dropTableMatch) === 1;
+        if (!$dropTrigger && !$dropTable) throw new InvalidArgumentException('Only single DROP TRIGGER or DROP TABLE statements are allowed as DROP migration SQL.');
+        if ($dropTable && str_starts_with(strtoupper((string)$dropTableMatch[1]), 'IMC')) throw new InvalidArgumentException('DROP TABLE is forbidden for IMC-prefixed tables.');
     }
     $destructive = (bool)preg_match('/^\s*(DELETE\b|RENAME\b|DROP\s+TRIGGER\b)|\b(DROP\s+(?:COLUMN|INDEX|KEY|FOREIGN\s+KEY|TABLE)|RENAME\s+(?:COLUMN|INDEX|TABLE))\b/i', $sql);
     if ($destructive && !$allowDestructive) throw new InvalidArgumentException('Destructive SQL requires allow_destructive=true.');
