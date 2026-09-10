@@ -13,15 +13,6 @@ if (is_array($imcPreflight)) {
     $imcAction = strtolower(trim((string)($imcPreflight['action'] ?? '')));
     $imcChannel = strtoupper(trim((string)($imcPreflight['channel'] ?? ($_SERVER['HTTP_X_IMC_CHANNEL'] ?? ''))));
 
-    /* IMC-ENG-008: ordinary explicit importer traffic enters the business-agnostic path.
-       Legacy MINISITE / CHATGPT and non-explicit callers remain temporarily available
-       until their separate migrations are completed. */
-    $imcRouteMode = strtolower(trim((string)($imcPreflight['route_mode'] ?? '')));
-    if ($imcChannel === 'IMPORT' && $imcRouteMode === 'explicit' && in_array($imcAction, ['read', 'insert_many'], true)) {
-        require __DIR__.'/ingress.php';
-        imc_ingress_run($imcPreflight);
-    }
-
     if ($imcAction === 'minisite_read') {
         if ($imcChannel === 'MINISITE') {
             $imcConfigFile = dirname(__DIR__).'/__imc_private_gateway/config.php';
