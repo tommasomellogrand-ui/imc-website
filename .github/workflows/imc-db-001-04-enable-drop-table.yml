@@ -1,0 +1,65 @@
+name: IMC DB 001-04 Enable Controlled Drop Table
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/imc-db-001-04-enable-drop-table.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch Database Manager safely
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('__imc-sm-master/admin/database-manager/index.php')
+          text = path.read_text()
+
+          old_version = "const IMC_DBM_VERSION = '1.5.0';"
+          new_version = "const IMC_DBM_VERSION = '1.5.1';"
+          if old_version not in text:
+              raise SystemExit('Expected Database Manager version marker not found')
+          text = text.replace(old_version, new_version, 1)
+
+          old = """    if ($kind === 'DROP' && !preg_match('/^\\s*DROP\\s+TRIGGER\\s+(?:IF\\s+EXISTS\\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\\s*$/i', $sql)) {
+        throw new InvalidArgumentException('Only DROP TRIGGER is allowed as DROP migration SQL.');
+    }
+"""
+          new = """    if ($kind === 'DROP') {
+        $dropTrigger = (bool)preg_match('/^\\s*DROP\\s+TRIGGER\\s+(?:IF\\s+EXISTS\\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\\s*$/i', $sql);
+        $dropTable = preg_match('/^\\s*DROP\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?`?([A-Za-z_][A-Za-z0-9_]{0,63})`?\\s*$/i', $sql, $dropTableMatch) === 1;
+        if (!$dropTrigger && !$dropTable) throw new InvalidArgumentException('Only single DROP TRIGGER or DROP TABLE statements are allowed as DROP migration SQL.');
+        if ($dropTable && str_starts_with(strtoupper((string)$dropTableMatch[1]), 'IMC')) throw new InvalidArgumentException('DROP TABLE is forbidden for IMC-prefixed tables.');
+    }
+"""
+          if old not in text:
+              raise SystemExit('Expected DROP validation block not found')
+          text = text.replace(old, new, 1)
+          path.write_text(text)
+          PY
+
+          php -l __imc-sm-master/admin/database-manager/index.php
+          git diff --check
+
+      - name: Commit Database Manager patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'IMC Database Manager'
+          git config user.email 'actions@users.noreply.github.com'
+          git add __imc-sm-master/admin/database-manager/index.php
+          git commit -m 'IMC-DB-001-04: allow controlled non-IMC DROP TABLE'
+          git push origin HEAD:main
