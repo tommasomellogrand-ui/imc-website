@@ -137,7 +137,7 @@ try {
   case 'records':
     $payload['scope']=rows($db,"SELECT COUNT(*) matches,MIN(match_date) first_date,MAX(match_date) last_date FROM $results r WHERE $valid")[0];
     $payload['goals']=matches_enrich($db,rows($db,"SELECT r.* FROM $results r WHERE $valid AND (r.home_score+r.away_score)=(SELECT MAX(x.home_score+x.away_score) FROM $results x WHERE x.result_status='COMPLETED' AND x.home_score IS NOT NULL AND x.away_score IS NOT NULL) ORDER BY match_date DESC LIMIT 100"));
-    $payload['margin']=matches_enrich($db,rows($db,"SELECT r.* FROM $results r WHERE $valid AND ABS(r.home_score-r.away_score)=(SELECT MAX(ABS(x.home_score-x.away_score)) FROM $results x WHERE x.result_status='COMPLETED' AND x.home_score IS NOT NULL AND x.away_score IS NOT NULL) ORDER BY match_date DESC LIMIT 100"));
+    $payload['margin']=matches_enrich($db,rows($db,"SELECT r.* FROM $results r WHERE $valid AND ABS(CAST(r.home_score AS SIGNED)-CAST(r.away_score AS SIGNED))=(SELECT MAX(ABS(CAST(x.home_score AS SIGNED)-CAST(x.away_score AS SIGNED))) FROM $results x WHERE x.result_status='COMPLETED' AND x.home_score IS NOT NULL AND x.away_score IS NOT NULL) ORDER BY match_date DESC LIMIT 100"));
     $context['definition']='Massimi nell’archivio disponibile, non record di tutta la storia del gioco. Rigori esclusi dai gol e dallo scarto.';break;
   case 'stories':
     $payload=matches_enrich($db,rows($db,"SELECT r.game_world_id,r.sm_fixture_id,r.home_name,r.away_name,r.home_score,r.away_score,r.match_date,r.sm_action,r.home_sm_club_id,r.away_sm_club_id,r.home_sm_manager_id,r.away_sm_manager_id,r.stadium_name FROM $reports r ORDER BY r.match_date DESC,r.sm_fixture_id DESC LIMIT 12"));break;
