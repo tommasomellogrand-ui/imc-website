@@ -59,7 +59,9 @@ try {
     $volume=rows($db,"SELECT r.game_world_id,COUNT(*) matches,SUM(r.home_score+r.away_score) goals,MIN(r.match_date) first_date,MAX(r.match_date) last_date FROM $results r WHERE $valid GROUP BY r.game_world_id");
     $coverage=rows($db,'SELECT * FROM `Sql1956795_2`.`IMC Repository Report` UNION ALL SELECT * FROM `Sql1956795_3`.`IMC Repository Report`');
     $managerCount=rows($db,'SELECT COUNT(*) total FROM `IMC Manager Codex Global`')[0]['total'];
-    $latest=matches_enrich($db,rows($db,"SELECT r.* FROM $results r WHERE $valid ORDER BY r.match_date DESC,r.game_world_id,r.sm_fixture_id DESC LIMIT 8"));
+    $recent=rows($db,"SELECT r.* FROM $results r JOIN (SELECT r.game_world_id,MAX(r.match_date) last_date FROM $results r WHERE $valid GROUP BY r.game_world_id) d ON d.game_world_id=r.game_world_id AND d.last_date=r.match_date WHERE $valid ORDER BY r.match_date DESC,r.game_world_id,r.sm_fixture_id DESC");
+    $selected=[];foreach($recent as $item){if(!isset($selected[$item['game_world_id']]))$selected[$item['game_world_id']]=$item;}
+    $latest=matches_enrich($db,array_values($selected));
     $feature=matches_enrich($db,rows($db,"SELECT r.game_world_id,r.sm_fixture_id,r.home_name,r.away_name,r.home_score,r.away_score,r.match_date,r.sm_action,r.sm_division,r.home_sm_club_id,r.away_sm_club_id,r.home_sm_manager_id,r.away_sm_manager_id,r.stadium_name,r.attendance FROM $reports r ORDER BY r.match_date DESC,r.sm_fixture_id DESC LIMIT 1"));
     $payload=['worlds'=>$worlds,'managers'=>(int)$managerCount,'volume'=>$volume,'coverage'=>$coverage,'latest'=>$latest,'feature'=>$feature[0]??null];
     $context=['definition'=>'Partite concluse distinte per Game World e fixture. Copertura limitata agli archivi importati.','source'=>'IMC Site Results; IMC Repository Report; CORE'];break;
