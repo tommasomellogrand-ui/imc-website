@@ -1,0 +1,84 @@
+name: Deploy IMC Master Website
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'site-assets/master/**'
+      - '.github/workflows/deploy-imc-master.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-public-website-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate master application
+        run: |
+          node --check site-assets/master/app.js
+          php -l site-assets/master/api.php
+          python3 -m json.tool site-assets/master/release.json >/dev/null
+      - name: Upload bounded master manifest and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,json,os,ssl
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path
+          root='/www.italianmastersclub.it'
+          ftp=FTP_TLS(context=ssl.create_default_context())
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          files=[p for p in sorted(Path('site-assets/master').glob('*')) if p.is_file() and p.suffix in {'.php','.js','.css','.html','.json'}]
+          for p in files:
+              directory(root+'/'+p.parent.as_posix())
+              data=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              if check.getvalue()!=data:raise SystemExit('Upload verification failed: '+str(p))
+          ftp.quit()
+          print('Master assets uploaded and byte verified:',len(files))
+          PY
+      - name: Verify public data before root publication
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request,urllib.parse
+          base='https://www.italianmastersclub.it/site-assets/master/api.php?'
+          for dataset in ['pulse','worlds','managers','clubs','players','results','schedule','today','transfers','rankings','records','stories','archive','competitions']:
+              url=base+urllib.parse.urlencode({'dataset':dataset,'limit':2,'release':'${{ github.sha }}'})
+              with urllib.request.urlopen(url,timeout=90) as response:data=json.load(response)
+              assert data.get('ok'),dataset
+              print(dataset,'OK')
+          PY
+      - name: Publish root only after data verification
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,json,os,ssl
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          release=json.loads(Path('site-assets/master/release.json').read_text())
+          if not release.get('publish_root'):
+              print('Review stage only; production homepage preserved.');raise SystemExit(0)
+          ftp=FTP_TLS(context=ssl.create_default_context())
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p()
+          ftp.cwd('/www.italianmastersclub.it')
+          data=Path('index.html').read_bytes();ftp.storbinary('STOR index.html',io.BytesIO(data))
+          check=io.BytesIO();ftp.retrbinary('RETR index.html',check.write)
+          assert check.getvalue()==data,'Root byte verification failed'
+          ftp.quit();print('Root published and byte verified')
+          PY
