@@ -24,33 +24,20 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
           path = Path('__imc-sm-master/admin/database-manager/index.php')
           text = path.read_text()
-
           old_version = "const IMC_DBM_VERSION = '1.5.0';"
           new_version = "const IMC_DBM_VERSION = '1.5.1';"
           if old_version not in text:
               raise SystemExit('Expected Database Manager version marker not found')
           text = text.replace(old_version, new_version, 1)
-
-          old = """    if ($kind === 'DROP' && !preg_match('/^\\s*DROP\\s+TRIGGER\\s+(?:IF\\s+EXISTS\\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\\s*$/i', $sql)) {
-        throw new InvalidArgumentException('Only DROP TRIGGER is allowed as DROP migration SQL.');
-    }
-"""
-          new = """    if ($kind === 'DROP') {
-        $dropTrigger = (bool)preg_match('/^\\s*DROP\\s+TRIGGER\\s+(?:IF\\s+EXISTS\\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\\s*$/i', $sql);
-        $dropTable = preg_match('/^\\s*DROP\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?`?([A-Za-z_][A-Za-z0-9_]{0,63})`?\\s*$/i', $sql, $dropTableMatch) === 1;
-        if (!$dropTrigger && !$dropTable) throw new InvalidArgumentException('Only single DROP TRIGGER or DROP TABLE statements are allowed as DROP migration SQL.');
-        if ($dropTable && str_starts_with(strtoupper((string)$dropTableMatch[1]), 'IMC')) throw new InvalidArgumentException('DROP TABLE is forbidden for IMC-prefixed tables.');
-    }
-"""
+          old = "    if ($kind === 'DROP' && !preg_match('/^\\s*DROP\\s+TRIGGER\\s+(?:IF\\s+EXISTS\\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\\s*$/i', $sql)) {\n        throw new InvalidArgumentException('Only DROP TRIGGER is allowed as DROP migration SQL.');\n    }\n"
+          new = "    if ($kind === 'DROP') {\n        $dropTrigger = (bool)preg_match('/^\\s*DROP\\s+TRIGGER\\s+(?:IF\\s+EXISTS\\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\\s*$/i', $sql);\n        $dropTable = preg_match('/^\\s*DROP\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?`?([A-Za-z_][A-Za-z0-9_]{0,63})`?\\s*$/i', $sql, $dropTableMatch) === 1;\n        if (!$dropTrigger && !$dropTable) throw new InvalidArgumentException('Only single DROP TRIGGER or DROP TABLE statements are allowed as DROP migration SQL.');\n        if ($dropTable && str_starts_with(strtoupper((string)$dropTableMatch[1]), 'IMC')) throw new InvalidArgumentException('DROP TABLE is forbidden for IMC-prefixed tables.');\n    }\n"
           if old not in text:
               raise SystemExit('Expected DROP validation block not found')
           text = text.replace(old, new, 1)
           path.write_text(text)
           PY
-
           php -l __imc-sm-master/admin/database-manager/index.php
           git diff --check
 
