@@ -44,7 +44,7 @@ jobs:
           from pathlib import Path
           host='ftp.italianmastersclub.it'; port=21
           username=os.environ['ARUBA_FTP_USERNAME']; password=os.environ['ARUBA_FTP_PASSWORD']
-          remote_root='/www/italianmastersclub.it'
+          remote_root='/www.italianmastersclub.it'
           uploads=[
               (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
               for n in ['index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
