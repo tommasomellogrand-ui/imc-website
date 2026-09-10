@@ -6,3 +6,5 @@
 
 /* Readable status labels on porcelain surfaces. */
 .row .ranknum.gold{color:var(--navy)}.competition .goldlabel{color:#80601f}.matchrow .score small{display:block;font:600 11px Arial,sans-serif;letter-spacing:.06em;margin-top:4px}
+
+@media(max-width:380px){.filters label{flex-basis:100%}}
