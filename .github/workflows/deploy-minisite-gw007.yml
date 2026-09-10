@@ -1,0 +1,73 @@
+name: Deploy GW007 Football Territories
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'minisite/GW007/**'
+      - '.github/workflows/deploy-minisite-gw007.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: minisite-gw007-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate GW007
+        run: |
+          node --check minisite/GW007/app.js
+          node --check minisite/GW007/data.js
+          python3 minisite/GW007/validate.py
+      - name: Upload only GW007 and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, base64
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          root=Path('minisite/GW007')
+          for encoded in (root/'assets').glob('*.b64'):
+              encoded.with_suffix('.webp').write_bytes(base64.b64decode(encoded.read_text()))
+          remote='/www.italianmastersclub.it/minisite/GW007'
+          ftp=FTP_TLS(context=ssl.create_default_context())
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True)
+          def ensure(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
+          files=[p for p in root.rglob('*') if p.is_file() and p.suffix in ('.html','.css','.js','.ttf','.webp')]
+          files += [root/'.htaccess']
+          for p in sorted(files):
+              relative=p.relative_to(root)
+              ensure(remote+'/'+str(relative.parent))
+              data=p.read_bytes()
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary('RETR '+p.name,check.write)
+              if check.getvalue()!=data: raise RuntimeError('Upload verification: '+str(relative))
+              print('Verified',relative,len(data))
+          ftp.quit()
+          PY
+      - name: Verify every live page and asset
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from urllib.request import urlopen
+          import os
+          root=Path('minisite/GW007')
+          base='https://www.italianmastersclub.it/minisite/GW007/'
+          for p in root.rglob('*'):
+              if not p.is_file() or p.suffix not in ('.html','.css','.js','.ttf','.webp'): continue
+              url=base+p.relative_to(root).as_posix()+'?verify='+os.environ['GITHUB_SHA']
+              with urlopen(url,timeout=45) as r:
+                  assert r.status==200,url
+                  assert r.read()==p.read_bytes(),'Live bytes mismatch: '+url
+              print('LIVE OK',p.relative_to(root))
+          PY
