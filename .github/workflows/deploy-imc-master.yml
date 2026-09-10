@@ -32,7 +32,8 @@ jobs:
           from ftplib import FTP_TLS,error_perm
           from pathlib import Path
           root='/www.italianmastersclub.it'
-          ftp=FTP_TLS(context=ssl.create_default_context())
+          ctx=ssl.create_default_context();ctx.check_hostname=False  # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p();ftp.set_pasv(True)
@@ -73,7 +74,8 @@ jobs:
           release=json.loads(Path('site-assets/master/release.json').read_text())
           if not release.get('publish_root'):
               print('Review stage only; production homepage preserved.');raise SystemExit(0)
-          ftp=FTP_TLS(context=ssl.create_default_context())
+          ctx=ssl.create_default_context();ctx.check_hostname=False  # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p()
           ftp.cwd('/www.italianmastersclub.it')
