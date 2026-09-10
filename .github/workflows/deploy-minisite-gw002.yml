@@ -1,4 +1,4 @@
-name: Deploy minisite GW002 Sports Newspaper
+name: Deploy minisite GW002 Visual Exploration
 
 on:
   push:
@@ -27,7 +27,13 @@ jobs:
           test -s minisite/GW002/press.css
           test -s minisite/GW002/app.js
           test -s minisite/GW002/.htaccess
-          grep -Fq '/minisite/shared/app-core.js' minisite/GW002/index.html
+          test -s minisite/GW002/exploration.js
+          test -s minisite/GW002/exploration-data.js
+          test -s minisite/GW002/exploration.css
+          test -s minisite/GW002/stadium.webp
+          grep -Fq 'exploration.js' minisite/GW002/index.html
+          node --check minisite/GW002/exploration.js
+          node --check minisite/GW002/exploration-data.js
           grep -Fq "id:'GW002'" minisite/GW002/config.js
           grep -Fq "window.IMC_MINISITE_DATA" minisite/GW002/app.js
           grep -Fq "DOMESTIC" minisite/GW002/app.js
@@ -56,7 +62,7 @@ jobs:
                   try: ftp.cwd(part)
                   except error_perm: ftp.mkd(part); ftp.cwd(part)
           ensure(remote)
-          for name in ['index.html','config.js','press.css','app.js','.htaccess']:
+          for name in ['config.js','press.css','app.js','.htaccess','press-v1.html','exploration.css','exploration-data.js','exploration.js','stadium.webp','index.html']:
               local=Path('minisite/GW002')/name
               data=local.read_bytes()
               with local.open('rb') as f: ftp.storbinary(f'STOR {name}',f)
