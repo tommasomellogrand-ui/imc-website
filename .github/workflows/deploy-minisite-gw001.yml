@@ -1,4 +1,4 @@
-name: Deploy minisite GW001 clean home
+name: Deploy minisite GW001 visual exploration
 
 on:
   push:
@@ -18,49 +18,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build and validate clean GW001 home
-        shell: bash
+      - name: Validate GW001 visual exploration
         run: |
-          set -euo pipefail
-          for f in index.html home.css hero.b64 .htaccess; do test -s "minisite/GW001/$f"; done
-          grep -Fq 'hero.jpg' minisite/GW001/index.html
-          python3 - <<'PY'
-          from pathlib import Path
-          import base64, hashlib
+          node --check minisite/GW001/exploration.js
+          node --check minisite/GW001/exploration-data.js
+          python3 minisite/GW001/validate-exploration.py
 
-          target='6d2479d5e8064c263d9f17133027276685e885bbd68b3470796a3848883cc076'
-          payload=''.join(Path('minisite/GW001/hero.b64').read_text(encoding='utf-8-sig', errors='ignore').split())
-
-          def decode_exact(s):
-              try:
-                  data=base64.b64decode(s, validate=True)
-              except Exception:
-                  return None
-              return data if hashlib.sha256(data).hexdigest()==target else None
-
-          data=decode_exact(payload)
-          if data is None and len(payload)==16225:
-              for i in range(len(payload)-4):
-                  candidate=payload[:i]+payload[i+5:]
-                  data=decode_exact(candidate)
-                  if data is not None:
-                      print(f'Recovered exact hero payload by removing transport noise at offset {i}')
-                      break
-
-          if data is None:
-              raise SystemExit('Could not recover exact hero payload')
-          if len(data) < 10000:
-              raise SystemExit('hero.jpg too small')
-          if not data.startswith(b'\xff\xd8\xff'):
-              raise SystemExit('hero.jpg is not a JPEG')
-          if not data.endswith(b'\xff\xd9'):
-              raise SystemExit('hero.jpg JPEG end marker missing')
-
-          Path('minisite/GW001/hero.jpg').write_bytes(data)
-          print(f'hero.jpg valid: {len(data)} bytes sha256={hashlib.sha256(data).hexdigest()}')
-          PY
-
-      - name: Upload clean GW001 home to Aruba
+      - name: Upload GW001 visual exploration to Aruba
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
@@ -73,7 +37,8 @@ jobs:
           from pathlib import Path
           host='ftp.italianmastersclub.it'; port=21
           remote='/www.italianmastersclub.it/minisite/GW001'
-          files=['index.html','home.css','hero.jpg','.htaccess']
+          files=[line.strip() for line in Path('minisite/GW001/exploration-manifest.txt').read_text().splitlines() if line.strip()]
+          files=[f for f in files if f!='index.html']+['index.html']
           ctx=ssl.create_default_context(); ctx.check_hostname=False
           ftp=FTP_TLS(context=ctx)
           ftp.connect(host,port,timeout=60); ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
@@ -85,33 +50,14 @@ jobs:
           ensure(remote)
           for name in files:
               local=Path('minisite/GW001')/name
+              ensure(remote+'/'+str(Path(name).parent))
               data=local.read_bytes()
-              with local.open('rb') as f: ftp.storbinary(f'STOR {name}',f)
-              check=io.BytesIO(); ftp.retrbinary(f'RETR {name}',check.write)
+              with local.open('rb') as f: ftp.storbinary(f'STOR {local.name}',f)
+              check=io.BytesIO(); ftp.retrbinary(f'RETR {local.name}',check.write)
               if check.getvalue()!=data: raise SystemExit(f'FTP verify failed: {name}')
               print(f'GW001 {name}: {len(data)} bytes verified')
           ftp.quit()
           PY
 
-      - name: Verify live GW001
-        shell: bash
-        run: |
-          set -euo pipefail
-          sleep 5
-          base='https://www.italianmastersclub.it/minisite/GW001/'
-          html=$(curl -fsSL --max-time 30 "${base}?verify=${GITHUB_SHA}")
-          printf '%s' "$html" | grep -Fq 'hero.jpg'
-          curl -fsSL --max-time 30 "${base}hero.jpg?verify=${GITHUB_SHA}" -o /tmp/hero-live.jpg
-          python3 - <<'PY'
-          from pathlib import Path
-          import hashlib
-          target='6d2479d5e8064c263d9f17133027276685e885bbd68b3470796a3848883cc076'
-          data=Path('/tmp/hero-live.jpg').read_bytes()
-          if hashlib.sha256(data).hexdigest()!=target: raise SystemExit('live hero checksum mismatch')
-          if not data.startswith(b'\xff\xd8\xff'): raise SystemExit('live hero is not JPEG')
-          if not data.endswith(b'\xff\xd9'): raise SystemExit('live hero JPEG end marker missing')
-          print(f'live hero valid: {len(data)} bytes sha256={hashlib.sha256(data).hexdigest()}')
-          PY
-          ct=$(curl -fsSI --max-time 30 "${base}hero.jpg?verify=${GITHUB_SHA}" | tr -d '\r' | awk 'BEGIN{IGNORECASE=1}/^content-type:/{print $0}')
-          printf '%s\n' "$ct" | grep -Eqi 'image/jpeg'
-          echo 'GW001 clean home live verification passed.'
+      - name: Verify all live GW001 files
+        run: python3 minisite/GW001/validate-exploration.py --live
