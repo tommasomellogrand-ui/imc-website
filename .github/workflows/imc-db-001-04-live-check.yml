@@ -1,4 +1,4 @@
-name: IMC DB 001-05 Live Gateway Diagnostic
+name: IMC DB 001-05 Live Gateway Verification
 
 on:
   push:
@@ -8,35 +8,51 @@ on:
       - '.github/workflows/imc-db-001-04-live-check.yml'
 
 jobs:
-  diagnose:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe world discovery route
+      - name: Verify world discovery route
         shell: bash
         run: |
           set -euo pipefail
           URL='https://www.italianmastersclub.it/api/imc-gateway/?game_world_id=GW001&action=repositories'
-          curl -sS -D /tmp/world.headers -w '\nHTTP_STATUS=%{http_code}\n' "$URL" -o /tmp/world.body || true
-          cat /tmp/world.headers
-          cat /tmp/world.body
-          echo
+          curl -fsS --retry 3 --retry-delay 2 "$URL" -o /tmp/world.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/world.json'))
+          assert d.get('ok') is True, d
+          assert d.get('version') == '1.9.2', d
+          print('world route live OK')
+          PY
 
-      - name: Probe manager CORE route
+      - name: Verify manager CORE route
         shell: bash
         run: |
           set -euo pipefail
           URL='https://www.italianmastersclub.it/api/imc-gateway/?game_world_id=GW001&source=core&repository=imc_managers&limit=1'
-          curl -sS -D /tmp/manager.headers -w '\nHTTP_STATUS=%{http_code}\n' "$URL" -o /tmp/manager.body || true
-          cat /tmp/manager.headers
-          cat /tmp/manager.body
-          echo
+          curl -fsS --retry 3 --retry-delay 2 "$URL" -o /tmp/managers.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/managers.json'))
+          assert d.get('ok') is True, d
+          assert d.get('version') == '1.9.2', d
+          assert d.get('table') == 'IMC Manager Codex Global', d
+          assert len(d.get('data',[])) >= 1, d
+          print('manager CORE route live OK')
+          PY
 
-      - name: Probe assignment CORE route
+      - name: Verify assignment CORE route
         shell: bash
         run: |
           set -euo pipefail
           URL='https://www.italianmastersclub.it/api/imc-gateway/?game_world_id=GW001&source=core&repository=gw_manager_assignments&filter_assignment_type=club&limit=1'
-          curl -sS -D /tmp/assignment.headers -w '\nHTTP_STATUS=%{http_code}\n' "$URL" -o /tmp/assignment.body || true
-          cat /tmp/assignment.headers
-          cat /tmp/assignment.body
-          echo
+          curl -fsS --retry 3 --retry-delay 2 "$URL" -o /tmp/assignments.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/assignments.json'))
+          assert d.get('ok') is True, d
+          assert d.get('version') == '1.9.2', d
+          assert d.get('table') == 'IMC Manager Assignment Global', d
+          assert len(d.get('data',[])) >= 1, d
+          print('assignment CORE route live OK')
+          PY
