@@ -87,7 +87,7 @@ replace(
 # 6) Site-ready enrichment that depended on deleted local club mapping becomes an explicit no-op.
 p = Path('api/imc-data/v1/site-ready.php')
 s = p.read_text()
-needle = 'function core_club_assets('
+needle = 'function club_index('
 if needle in s:
     start = s.index(needle)
     brace = s.index('{', start)
@@ -101,9 +101,9 @@ if needle in s:
                 end = i + 1
                 break
     if end is None:
-        raise SystemExit('core_club_assets function end not found')
+        raise SystemExit('club_index function end not found')
     header = s[start:brace+1]
     s = s[:start] + header + "\n    return []; // world-local CORE mapping removed by IMC-DB-001-04; rebuild required.\n}" + s[end:]
     p.write_text(s)
 else:
-    raise SystemExit('core_club_assets function not found')
+    raise SystemExit('club_index function not found')
