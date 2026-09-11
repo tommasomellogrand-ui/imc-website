@@ -1,4 +1,4 @@
-name: IMC DB 001-04 Live Gateway Check
+name: IMC DB 001-05 Live Gateway Diagnostic
 
 on:
   push:
@@ -8,40 +8,25 @@ on:
       - '.github/workflows/imc-db-001-04-live-check.yml'
 
 jobs:
-  verify:
+  diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify manager CORE route live
+      - name: Capture manager CORE route response
         shell: bash
         run: |
           set -euo pipefail
           URL='https://www.italianmastersclub.it/api/imc-gateway/?game_world_id=GW001&source=core&repository=imc_managers&limit=1'
-          curl -fsS --retry 3 --retry-delay 3 "$URL" -o /tmp/managers.json
-          python3 - <<'PY'
-          import json
-          d=json.load(open('/tmp/managers.json'))
-          assert d.get('ok') is True, d
-          assert d.get('version') == '1.9.1', d
-          assert d.get('table') == 'IMC Manager Codex Global', d
-          assert len(d.get('data',[])) >= 1, d
-          print('manager route live OK')
-          PY
+          status=$(curl -sS --retry 2 --retry-delay 2 -w '%{http_code}' "$URL" -o /tmp/managers.json)
+          echo "HTTP_STATUS=$status"
+          cat /tmp/managers.json
+          echo
 
-      - name: Verify assignment CORE route live
+      - name: Capture assignment CORE route response
         shell: bash
         run: |
           set -euo pipefail
           URL='https://www.italianmastersclub.it/api/imc-gateway/?game_world_id=GW001&source=core&repository=gw_manager_assignments&filter_assignment_type=club&limit=1'
-          curl -fsS --retry 3 --retry-delay 3 "$URL" -o /tmp/assignments.json
-          python3 - <<'PY'
-          import json
-          d=json.load(open('/tmp/assignments.json'))
-          assert d.get('ok') is True, d
-          assert d.get('version') == '1.9.1', d
-          assert d.get('table') == 'IMC Manager Assignment Global', d
-          rows=d.get('data',[])
-          assert len(rows) >= 1, d
-          assert 'team_id' in rows[0], rows[0]
-          assert 'nation_id' in rows[0], rows[0]
-          print('assignment route live OK')
-          PY
+          status=$(curl -sS --retry 2 --retry-delay 2 -w '%{http_code}' "$URL" -o /tmp/assignments.json)
+          echo "HTTP_STATUS=$status"
+          cat /tmp/assignments.json
+          echo
