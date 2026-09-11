@@ -1,0 +1,115 @@
+name: Deploy Last Man Standing Demo to Aruba
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'last-man-standing/**'
+      - '.github/workflows/deploy-last-man-standing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: last-man-standing-demo-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Last Man Standing demo
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s last-man-standing/index.html
+          grep -q '<title>Last Man Standing' last-man-standing/index.html
+          grep -q 'Tommaso Mello' last-man-standing/index.html
+
+      - name: Upload Last Man Standing demo to Aruba
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+
+          host='ftp.italianmastersclub.it'
+          port=21
+          remote='/www.italianmastersclub.it/last-man-standing'
+          username=os.environ['ARUBA_FTP_USERNAME']
+          password=os.environ['ARUBA_FTP_PASSWORD']
+
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False
+
+          ftp=None
+          last=None
+          for _ in range(3):
+              c=FTP_TLS(context=ctx)
+              try:
+                  c.connect(host,port,timeout=60)
+                  c.login(username,password)
+                  c.prot_p()
+                  c.set_pasv(True)
+                  ftp=c
+                  break
+              except Exception as e:
+                  last=e
+                  try: c.close()
+                  except Exception: pass
+                  time.sleep(5)
+
+          if ftp is None:
+              raise SystemExit(f'FTPS Aruba non riuscito: {last}')
+
+          def ensure_dir(path):
+              ftp.cwd('/')
+              for part in [p for p in path.split('/') if p]:
+                  try:
+                      ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part)
+                      ftp.cwd(part)
+
+          ensure_dir(remote)
+          local=Path('last-man-standing/index.html')
+          data=local.read_bytes()
+          with local.open('rb') as fh:
+              ftp.storbinary('STOR index.html',fh)
+
+          check=io.BytesIO()
+          ftp.retrbinary('RETR index.html',check.write)
+          if check.getvalue()!=data:
+              raise SystemExit('Verifica upload fallita: index.html')
+
+          ftp.quit()
+          print('Last Man Standing demo pubblicata e verificata')
+          PY
+
+      - name: Verify public URL
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request, time
+          url='https://www.italianmastersclub.it/last-man-standing/'
+          last=None
+          for _ in range(6):
+              try:
+                  with urllib.request.urlopen(url,timeout=30) as r:
+                      body=r.read().decode('utf-8','replace')
+                  if 'Last Man Standing' in body and 'Tommaso Mello' in body:
+                      print('Public URL verified:',url)
+                      raise SystemExit(0)
+              except Exception as e:
+                  last=e
+              time.sleep(10)
+          raise SystemExit(f'Public verification failed: {last}')
+          PY
