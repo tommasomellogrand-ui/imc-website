@@ -1,0 +1,44 @@
+name: IMC DB 001-05 Remediate Legacy CORE Consumers
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/imc-db-001-05-remediate-legacy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply legacy remediation
+        run: python3 .github/scripts/imc-db-001-05-remediate-legacy.py
+      - name: Validate PHP
+        run: |
+          set -euo pipefail
+          php -l ops/sm-master/admin/core.php
+          php -l ops/sm-master/admin/canonical.php
+          php -l ops/sm-master/admin/ingestion.php
+          php -l ops/__imc-sm-master/admin/core.php
+          php -l 'ops/__imc-sm-master copy 1/admin/core.php'
+          php -l __imc-sm-master/admin/ingestion/router.php
+          php -l api/imc-gateway/team-hub.php
+          php -l api/imc-data/v1/site-ready.php
+          git diff --check
+      - name: Commit remediation
+        run: |
+          set -euo pipefail
+          git config user.name 'IMC Database Manager'
+          git config user.email 'actions@users.noreply.github.com'
+          git add ops/sm-master/admin/core.php ops/sm-master/admin/canonical.php ops/sm-master/admin/ingestion.php \
+            ops/__imc-sm-master/admin/core.php ops/__imc-sm-master/admin/canonical.php \
+            'ops/__imc-sm-master copy 1/admin/core.php' 'ops/__imc-sm-master copy 1/admin/canonical.php' \
+            __imc-sm-master/admin/ingestion/router.php api/imc-gateway/team-hub.php api/imc-data/v1/site-ready.php
+          git commit -m 'IMC-DB-001-05: block legacy CORE recreation paths'
+          git push origin HEAD:main
