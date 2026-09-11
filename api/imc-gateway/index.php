@@ -25,7 +25,7 @@ function out(array $x, int $s = 200): never {
 }
 function valid_gw(string $gw): bool { return (bool)preg_match('/^GW00[1-9]$/', $gw); }
 function valid_identifier(string $value): bool { return (bool)preg_match('/^[A-Za-z0-9_]+$/', $value); }
-function public_gateway_version(): string { return '1.9.1'; }
+function public_gateway_version(): string { return '1.9.2'; }
 function public_core_tables(): array { return ['gw_manager_assignments'=>'IMC Manager Assignment Global','imc_managers'=>'IMC Manager Codex Global']; }
 function public_site_tables(): array {
   return [
