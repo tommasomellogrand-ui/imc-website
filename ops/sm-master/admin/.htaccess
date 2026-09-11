@@ -1,4 +1,6 @@
 Options -Indexes
-<FilesMatch "^(core|import-sm|import-sw|canonical)\.php$">
+
+# IMC-DB-001-05 · legacy CORE bootstrap/import surface disabled.
+<FilesMatch "^(api|ingestion|core|import-sm|import-sw|canonical)\.php$">
   Require all denied
 </FilesMatch>
