@@ -1,4 +1,4 @@
-name: IMC DB 001-05 Patch Gateway Deploy
+name: IMC DB 001-05 Trigger Gateway Redeploy
 
 on:
   push:
@@ -17,15 +17,25 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Patch deploy workflow
-        run: python3 .github/scripts/imc-db-001-05-fix-gateway-deploy.py
-      - name: Validate workflow diff
-        run: git diff --check
-      - name: Commit patch
+      - name: Bump Gateway version
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('api/imc-gateway/index.php')
+          s=p.read_text()
+          old="function public_gateway_version(): string { return '1.9.1'; }"
+          new="function public_gateway_version(): string { return '1.9.2'; }"
+          if old not in s: raise SystemExit('gateway version anchor not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+          php -l api/imc-gateway/index.php
+          php -l api/imc-gateway/database.php
+          git diff --check
+      - name: Commit redeploy trigger
         run: |
           set -euo pipefail
           git config user.name 'IMC Database Manager'
           git config user.email 'actions@users.noreply.github.com'
-          git add .github/workflows/deploy-website-aruba.yml
-          git commit -m 'IMC-DB-001-05: deploy gateway database dependency'
+          git add api/imc-gateway/index.php
+          git commit -m 'IMC-DB-001-05: redeploy Gateway with database dependency'
           git push origin HEAD:main
