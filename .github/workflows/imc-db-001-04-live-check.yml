@@ -11,22 +11,32 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Capture manager CORE route response
+      - name: Probe world discovery route
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://www.italianmastersclub.it/api/imc-gateway/?game_world_id=GW001&action=repositories'
+          curl -sS -D /tmp/world.headers -w '\nHTTP_STATUS=%{http_code}\n' "$URL" -o /tmp/world.body || true
+          cat /tmp/world.headers
+          cat /tmp/world.body
+          echo
+
+      - name: Probe manager CORE route
         shell: bash
         run: |
           set -euo pipefail
           URL='https://www.italianmastersclub.it/api/imc-gateway/?game_world_id=GW001&source=core&repository=imc_managers&limit=1'
-          status=$(curl -sS --retry 2 --retry-delay 2 -w '%{http_code}' "$URL" -o /tmp/managers.json)
-          echo "HTTP_STATUS=$status"
-          cat /tmp/managers.json
+          curl -sS -D /tmp/manager.headers -w '\nHTTP_STATUS=%{http_code}\n' "$URL" -o /tmp/manager.body || true
+          cat /tmp/manager.headers
+          cat /tmp/manager.body
           echo
 
-      - name: Capture assignment CORE route response
+      - name: Probe assignment CORE route
         shell: bash
         run: |
           set -euo pipefail
           URL='https://www.italianmastersclub.it/api/imc-gateway/?game_world_id=GW001&source=core&repository=gw_manager_assignments&filter_assignment_type=club&limit=1'
-          status=$(curl -sS --retry 2 --retry-delay 2 -w '%{http_code}' "$URL" -o /tmp/assignments.json)
-          echo "HTTP_STATUS=$status"
-          cat /tmp/assignments.json
+          curl -sS -D /tmp/assignment.headers -w '\nHTTP_STATUS=%{http_code}\n' "$URL" -o /tmp/assignment.body || true
+          cat /tmp/assignment.headers
+          cat /tmp/assignment.body
           echo
