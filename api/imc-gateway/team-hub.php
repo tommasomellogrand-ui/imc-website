@@ -93,9 +93,9 @@ try {
     if ($id <= 0 || !in_array($asset,['club','nation'],true)) team_hub_out(['ok'=>false,'error'=>'invalid_asset'],422);
 
     if ($asset === 'club') {
-      $stmt = $core->prepare('SELECT image_url FROM clubs WHERE club_id=? LIMIT 1');
+      $stmt = $core->prepare('SELECT image_url FROM `IMC Club Codex Global` WHERE id=? LIMIT 1');
     } else {
-      $stmt = $core->prepare('SELECT image_url FROM national_teams WHERE national_team_id=? LIMIT 1');
+      $stmt = $core->prepare('SELECT image_url FROM `IMC National Team Codex Global` WHERE id=? LIMIT 1');
     }
     $stmt->execute([$id]);
     $url = trim((string)($stmt->fetchColumn() ?: ''));
@@ -113,6 +113,7 @@ try {
   $dataset = strtolower(trim((string)($_GET['dataset'] ?? '')));
   if (!preg_match('/^GW00[1-9]$/',$gw)) team_hub_out(['ok'=>false,'error'=>'invalid_game_world'],422);
   if (!in_array($dataset,['clubs','nations'],true)) team_hub_out(['ok'=>false,'error'=>'invalid_dataset'],422);
+  team_hub_out(['ok'=>false,'error'=>'core_mapping_rebuild_required','dataset'=>$dataset],503);
 
   if ($dataset === 'clubs') {
     $stmt = $core->prepare("SELECT m.club_id,m.club_gw_id,CASE WHEN c.name LIKE '1.%' THEN TRIM(SUBSTRING(c.name,3)) ELSE c.name END AS name,c.short_name,c.image_url FROM clubs_game_world_id m INNER JOIN clubs c ON c.club_id=m.club_id WHERE m.game_world_id=? ORDER BY name ASC");

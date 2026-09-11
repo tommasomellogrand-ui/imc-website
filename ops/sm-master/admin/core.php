@@ -81,6 +81,7 @@ function smm_data_dir(): string {
 }
 
 function smm_install_schema(): array {
+    throw new RuntimeException('legacy_core_removed: schema installation disabled by IMC-DB-001-05');
     $schema = dirname(__DIR__) . '/schema.sql';
     if (!is_file($schema)) throw new RuntimeException('Schema file missing.');
     $sql = file_get_contents($schema);
@@ -120,6 +121,7 @@ function smm_batch_upsert(mysqli $db, string $table, array $columns, array $rows
 }
 
 function smm_create_snapshot(string $source, string $date, string $filename, string $path): array {
+    throw new RuntimeException('legacy_core_removed: source import pipeline disabled by IMC-DB-001-05');
     $db = smm_db();
     $sha = hash_file('sha256', $path);
     $size = filesize($path);

@@ -74,17 +74,7 @@ function ids_from(array $rows, array $fields): array {
 }
 
 function club_index(string $world, array $ids): array {
-    if (!$ids) return [];
-    $ph = implode(',', array_fill(0, count($ids), '?'));
-    $rows = all(db(IMC_CORE_DB),
-        "SELECT m.club_gw_id,m.club_id,c.name,c.image_url FROM clubs_game_world_id m LEFT JOIN `IMC Club Codex Global` c ON c.id=m.club_id WHERE m.game_world_id=? AND m.club_gw_id IN ($ph)",
-        array_merge([$world], $ids)
-    );
-    $idx = [];
-    foreach ($rows as $r) $idx[(string)$r['club_gw_id']] = [
-        'club_id'=>(int)$r['club_id'], 'name'=>$r['name'] ?? null, 'image_url'=>image_url($r['image_url'] ?? null)
-    ];
-    return $idx;
+    return []; // world-local CORE mapping removed by IMC-DB-001-04; rebuild required.
 }
 
 function manager_index(array $ids): array {

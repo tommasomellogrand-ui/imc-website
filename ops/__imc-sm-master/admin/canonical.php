@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 function smm_rebuild_canonical(): array {
+    throw new RuntimeException('legacy_core_removed: canonical rebuild disabled by IMC-DB-001-05');
     $db=smm_db(); $db->begin_transaction();
     try{
         $db->query('UPDATE players SET is_active=0,present_in_sm=0,present_in_soccerwiki=0');
