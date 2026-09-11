@@ -1,0 +1,52 @@
+name: IMC DB 001-05 Live Remediation Check
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/imc-db-001-05-live-remediation-check.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Team Hub rebuild-required guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://www.italianmastersclub.it/api/imc-gateway/team-hub.php?game_world_id=GW001&dataset=clubs'
+          code=$(curl -sS -o /tmp/teamhub.json -w '%{http_code}' "$URL")
+          test "$code" = '503'
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/teamhub.json'))
+          assert d.get('ok') is False, d
+          assert d.get('error') == 'core_mapping_rebuild_required', d
+          print('team hub guard live OK')
+          PY
+
+      - name: Verify legacy SM Master endpoints are denied
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in api.php ingestion.php; do
+            code=$(curl -sS -o /tmp/body -w '%{http_code}' "https://www.italianmastersclub.it/__imc-sm-master/admin/$path")
+            test "$code" = '403'
+            echo "$path denied with HTTP $code"
+          done
+
+      - name: Verify canonical manager route remains live
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://www.italianmastersclub.it/api/imc-gateway/?game_world_id=GW001&source=core&repository=imc_managers&limit=1'
+          curl -fsS "$URL" -o /tmp/manager.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/manager.json'))
+          assert d.get('ok') is True, d
+          assert d.get('version') == '1.9.2', d
+          assert d.get('table') == 'IMC Manager Codex Global', d
+          print('canonical manager route remains live')
+          PY
