@@ -1,0 +1,80 @@
+name: IMC DB 001-05 Safe Runtime Remediation Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/imc-db-001-05-safe-runtime-deploy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate remediation files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s ops/sm-master/admin/.htaccess
+          test -s __imc-sm-master/admin/ingestion/router.php
+          test -s api/imc-gateway/team-hub.php
+          test -s api/imc-data/v1/site-ready.php
+          php -l __imc-sm-master/admin/ingestion/router.php
+          php -l api/imc-gateway/team-hub.php
+          php -l api/imc-data/v1/site-ready.php
+
+      - name: Upload remediation files to Aruba
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ARUBA_FTP_USERNAME:-}"
+          test -n "${ARUBA_FTP_PASSWORD:-}"
+          python3 - <<'PY'
+          import io, os, ssl, time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+
+          host='ftp.italianmastersclub.it'; port=21
+          user=os.environ['ARUBA_FTP_USERNAME']; password=os.environ['ARUBA_FTP_PASSWORD']
+          root='/www.italianmastersclub.it'
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=None; last=None
+          for _ in range(3):
+              c=FTP_TLS(context=ctx)
+              try:
+                  c.connect(host,port,timeout=60); c.login(user,password); c.prot_p(); c.set_pasv(True); ftp=c; break
+              except Exception as e:
+                  last=e
+                  try:c.close()
+                  except Exception:pass
+                  time.sleep(4)
+          if ftp is None: raise SystemExit(f'FTPS failed: {type(last).__name__}: {last}')
+
+          def ensure(path):
+              ftp.cwd('/')
+              for part in [p for p in path.split('/') if p]:
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
+
+          items=[
+              (Path('ops/sm-master/admin/.htaccess'), f'{root}/__imc-sm-master/admin/.htaccess'),
+              (Path('__imc-sm-master/admin/ingestion/router.php'), f'{root}/__imc-sm-master/admin/ingestion/router.php'),
+              (Path('api/imc-gateway/team-hub.php'), f'{root}/api/imc-gateway/team-hub.php'),
+              (Path('api/imc-data/v1/site-ready.php'), f'{root}/api/imc-data/v1/site-ready.php'),
+          ]
+          for local, remote in items:
+              parent,name=remote.rsplit('/',1); ensure(parent); data=local.read_bytes()
+              with local.open('rb') as fh: ftp.storbinary('STOR '+name,fh)
+              out=io.BytesIO(); ftp.retrbinary('RETR '+name,out.write)
+              if out.getvalue()!=data: raise SystemExit('upload verification failed: '+remote)
+              print('published+verified', remote)
+          ftp.quit()
+          PY
