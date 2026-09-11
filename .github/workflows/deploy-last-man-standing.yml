@@ -22,13 +22,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate Last Man Standing demo
+      - name: Validate and prepare Last Man Standing demo
         shell: bash
         run: |
           set -euo pipefail
           test -s last-man-standing/index.html
+          test -s last-man-standing/status-patch.js
           grep -q '<title>Last Man Standing' last-man-standing/index.html
           grep -q 'Tommaso Mello' last-man-standing/index.html
+          grep -q 'losingPicksG1' last-man-standing/status-patch.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('last-man-standing/index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<script src="status-patch.js?v=${{ github.sha }}"></script>'
+          if marker not in s:
+              s=s.replace('</body>',marker+'\n</body>')
+          p.write_text(s,encoding='utf-8')
+          PY
 
       - name: Upload Last Man Standing demo to Aruba
         env:
@@ -80,15 +91,15 @@ jobs:
                       ftp.cwd(part)
 
           ensure_dir(remote)
-          local=Path('last-man-standing/index.html')
-          data=local.read_bytes()
-          with local.open('rb') as fh:
-              ftp.storbinary('STOR index.html',fh)
-
-          check=io.BytesIO()
-          ftp.retrbinary('RETR index.html',check.write)
-          if check.getvalue()!=data:
-              raise SystemExit('Verifica upload fallita: index.html')
+          for name in ('index.html','status-patch.js'):
+              local=Path('last-man-standing')/name
+              data=local.read_bytes()
+              with local.open('rb') as fh:
+                  ftp.storbinary('STOR '+name,fh)
+              check=io.BytesIO()
+              ftp.retrbinary('RETR '+name,check.write)
+              if check.getvalue()!=data:
+                  raise SystemExit('Verifica upload fallita: '+name)
 
           ftp.quit()
           print('Last Man Standing demo pubblicata e verificata')
@@ -99,14 +110,16 @@ jobs:
         run: |
           python3 - <<'PY'
           import urllib.request, time
-          url='https://www.italianmastersclub.it/last-man-standing/'
+          base='https://www.italianmastersclub.it/last-man-standing/'
           last=None
           for _ in range(6):
               try:
-                  with urllib.request.urlopen(url,timeout=30) as r:
+                  with urllib.request.urlopen(base,timeout=30) as r:
                       body=r.read().decode('utf-8','replace')
-                  if 'Last Man Standing' in body and 'Tommaso Mello' in body:
-                      print('Public URL verified:',url)
+                  with urllib.request.urlopen(base+'status-patch.js?v=${{ github.sha }}',timeout=30) as r:
+                      patch=r.read().decode('utf-8','replace')
+                  if 'Last Man Standing' in body and 'Tommaso Mello' in body and 'losingPicksG1' in patch and 'ELIMINATO' in patch:
+                      print('Public URL verified:',base)
                       raise SystemExit(0)
               except Exception as e:
                   last=e
