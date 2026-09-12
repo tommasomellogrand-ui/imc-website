@@ -1,0 +1,212 @@
+[
+  {
+    "world": "GW001",
+    "width": 390,
+    "route": "index",
+    "expectedHeading": "heading \"Road to history\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 390,
+    "route": "index",
+    "expectedHeading": "heading \"THE FOUR KINGDOMS\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 390,
+    "route": "competitions",
+    "expectedHeading": "heading \"Competition archive.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 390,
+    "route": "world",
+    "expectedHeading": "heading \"QUATTRO TERRITORI. UN EQUILIBRIO.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 390,
+    "route": "results",
+    "expectedHeading": "heading \"Final whistle.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 390,
+    "route": "results",
+    "expectedHeading": "heading \"IL CAMPO HA RISPOSTO.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 390,
+    "route": "schedule",
+    "expectedHeading": "heading \"Before the whistle.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 390,
+    "route": "schedule",
+    "expectedHeading": "heading \"IL PROSSIMO PUNTO DI CONTATTO.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 390,
+    "route": "standings",
+    "expectedHeading": "heading \"Every position matters.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 390,
+    "route": "standings",
+    "expectedHeading": "heading \"L’IMPATTO DI UNA GIORNATA.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 390,
+    "route": "match",
+    "expectedHeading": "heading \"The final word.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 390,
+    "route": "match",
+    "expectedHeading": "heading \"IL CONFINE È IL CAMPO.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 390,
+    "route": "archive",
+    "expectedHeading": "heading \"Nothing is forgotten.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 390,
+    "route": "kingdom",
+    "expectedHeading": "heading \"ENGLAND\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 1440,
+    "route": "index",
+    "expectedHeading": "heading \"Road to history\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 390,
+    "route": "map",
+    "expectedHeading": "heading \"IL CALCIO PRENDE SPAZIO.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 1440,
+    "route": "competitions",
+    "expectedHeading": "heading \"Competition archive.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 1440,
+    "route": "index",
+    "expectedHeading": "heading \"THE FOUR KINGDOMS\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 1440,
+    "route": "results",
+    "expectedHeading": "heading \"Final whistle.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 1440,
+    "route": "world",
+    "expectedHeading": "heading \"QUATTRO TERRITORI. UN EQUILIBRIO.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 1440,
+    "route": "schedule",
+    "expectedHeading": "heading \"Before the whistle.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 1440,
+    "route": "results",
+    "expectedHeading": "heading \"IL CAMPO HA RISPOSTO.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 1440,
+    "route": "standings",
+    "expectedHeading": "heading \"Every position matters.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 1440,
+    "route": "schedule",
+    "expectedHeading": "heading \"IL PROSSIMO PUNTO DI CONTATTO.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 1440,
+    "route": "match",
+    "expectedHeading": "heading \"The final word.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 1440,
+    "route": "standings",
+    "expectedHeading": "heading \"L’IMPATTO DI UNA GIORNATA.\"",
+    "verified": true
+  },
+  {
+    "world": "GW001",
+    "width": 1440,
+    "route": "archive",
+    "expectedHeading": "heading \"Nothing is forgotten.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 1440,
+    "route": "match",
+    "expectedHeading": "heading \"IL CONFINE È IL CAMPO.\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 1440,
+    "route": "kingdom",
+    "expectedHeading": "heading \"ENGLAND\"",
+    "verified": true
+  },
+  {
+    "world": "GW007",
+    "width": 1440,
+    "route": "map",
+    "expectedHeading": "heading \"IL CALCIO PRENDE SPAZIO.\"",
+    "verified": true
+  }
+]

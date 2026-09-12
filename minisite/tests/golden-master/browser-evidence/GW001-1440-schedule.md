@@ -1,0 +1,229 @@
+- banner:
+  - link "← Road To History":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "Home"
+    - option "Competizioni"
+    - option "Risultati"
+    - option "Calendario" [selected]
+    - option "Match Center"
+    - option "Classifiche"
+    - option "Manager"
+    - option "Player"
+    - option "Club"
+    - option "Archivio"
+  - text: Viewport
+  - combobox "Viewport":
+    - option "Mobile · 390 px"
+    - option "Mobile · 360 px"
+    - option "Desktop · 1440 px" [selected]
+- paragraph: Revisione della composizione responsive. Il riquadro carica le pagine pubblicate alla larghezza selezionata; non simula hardware o Safari iOS.
+- iframe [id="preview"]:
+  - link "Vai al contenuto":
+    - /url: "#main"
+  - complementary:
+    - link "RTH ROAD TO HISTORY":
+      - /url: index.html
+      - text: RTH
+      - generic: ROAD TO HISTORY
+    - generic: COMMAND ARCHIVE
+    - navigation "Navigazione principale":
+      - link "01 Il mondo":
+        - /url: index.html
+        - generic: "01"
+        - text: Il mondo
+      - link "02 Competizioni":
+        - /url: competitions.html
+        - generic: "02"
+        - text: Competizioni
+      - link "03 Risultati":
+        - /url: results.html
+        - generic: "03"
+        - text: Risultati
+      - link "04 Calendario":
+        - /url: schedule.html
+        - generic: "04"
+        - text: Calendario
+      - link "05 Match Center":
+        - /url: match.html
+        - generic: "05"
+        - text: Match Center
+      - link "06 Classifiche":
+        - /url: standings.html
+        - generic: "06"
+        - text: Classifiche
+      - link "07 Manager":
+        - /url: manager.html
+        - generic: "07"
+        - text: Manager
+      - link "08 Player":
+        - /url: player.html
+        - generic: "08"
+        - text: Player
+      - link "09 Club":
+        - /url: club.html
+        - generic: "09"
+        - text: Club
+      - link "10 Archivio":
+        - /url: archive.html
+        - generic: "10"
+        - text: Archivio
+    - text: ITALIAN MASTERS CLUB
+    - text: GW001 · VISUAL EXPLORATION
+    - text: LIVE NOW.
+    - text: ARCHIVED FOREVER.
+  - banner:
+    - link "Italian Masters Club ROAD TO HISTORY ITALIAN MASTERS CLUB · GW001":
+      - /url: index.html
+      - img "Italian Masters Club"
+      - strong: ROAD TO HISTORY
+      - text: ITALIAN MASTERS CLUB · GW001
+    - generic: ARCHIVE × COMMAND CENTER
+  - generic: VISUAL DESIGN EXPLORATION · 01
+  - generic: ISTANTANEA 10.09.2026 · DEMO DOVE INDICATO
+  - main:
+    - text: CALENDARIO · IL PROSSIMO ATTO
+    - heading "Before the whistle." [level=1]:
+      - text: Before
+      - text: the whistle.
+    - paragraph: Le partite che aspettano di diventare storia.
+    - paragraph: Calendario reali · Istantanea MySQL Aruba del 10.09.2026. Campione di consultazione, senza aggiornamento automatico.
+    - paragraph: Orari come registrati dalla fonte; fuso orario non specificato. Nessun countdown presunto.
+    - generic "Filtro divisione":
+      - generic: Divisione
+      - button "Tutte" [pressed]
+      - button "Platinum"
+      - button "Gold"
+      - button "Silver"
+      - button "Bronze"
+    - strong: "10"
+    - text: set
+    - text: "2026"
+    - article:
+      - generic: Gold · Divisione 2
+      - strong:
+        - text: Boca Juniors
+        - text: vs Feyenoord
+      - generic: 20:00
+    - article:
+      - generic: Silver · Divisione 3
+      - strong:
+        - text: SSC Napoli
+        - text: vs FC Schalke 04
+      - generic: 20:00
+    - article:
+      - generic: Silver · Divisione 3
+      - strong:
+        - text: Atlético Madrid
+        - text: vs Shakhtar Donetsk
+      - generic: 20:00
+    - article:
+      - generic: Silver · Divisione 3
+      - strong:
+        - text: Tottenham Hotspur
+        - text: vs Olympique Marseille
+      - generic: 20:00
+    - article:
+      - generic: Silver · Divisione 3
+      - strong:
+        - text: Celtic
+        - text: vs Valencia CF
+      - generic: 20:00
+    - article:
+      - generic: Silver · Divisione 3
+      - strong:
+        - text: Guangzhou FC
+        - text: vs São Paulo FC
+      - generic: 20:00
+    - article:
+      - generic: Gold · Divisione 2
+      - strong:
+        - text: Genoa CFC
+        - text: vs 1. FC Kaiserslautern
+      - generic: 20:00
+    - article:
+      - generic: Gold · Divisione 2
+      - strong:
+        - text: Fenerbahçe SK
+        - text: vs Sampdoria
+      - generic: 20:00
+    - article:
+      - generic: Gold · Divisione 2
+      - strong:
+        - text: Eintracht Frankfurt
+        - text: vs Bologna FC
+      - generic: 20:00
+    - article:
+      - generic: Gold · Divisione 2
+      - strong:
+        - text: Palmeiras
+        - text: vs Sunderland
+      - generic: 20:00
+    - article:
+      - generic: Bronze · Divisione 4
+      - strong:
+        - text: SS Lazio
+        - text: vs Club América
+      - generic: 20:00
+    - article:
+      - generic: Platinum · Divisione 1
+      - strong:
+        - text: AS Reggina 1914
+        - text: vs TSV 1860 München
+      - generic: 20:00
+    - article:
+      - generic: Platinum · Divisione 1
+      - strong:
+        - text: Torino
+        - text: vs Atalanta BC
+      - generic: 20:00
+    - article:
+      - generic: Platinum · Divisione 1
+      - strong:
+        - text: Parma Calcio 1913
+        - text: vs FK Partizan
+      - generic: 20:00
+    - article:
+      - generic: Platinum · Divisione 1
+      - strong:
+        - text: Dynamo Dresden
+        - text: vs Académica de Coimbra
+      - generic: 20:00
+    - article:
+      - generic: Platinum · Divisione 1
+      - strong:
+        - text: AEK Athens
+        - text: vs Palermo FC
+      - generic: 20:00
+    - article:
+      - generic: Bronze · Divisione 4
+      - strong:
+        - text: Legia Warszawa
+        - text: vs CR Flamengo
+      - generic: 20:00
+    - article:
+      - generic: Bronze · Divisione 4
+      - strong:
+        - text: Dynamo Kyiv
+        - text: vs River Plate
+      - generic: 20:00
+    - article:
+      - generic: Bronze · Divisione 4
+      - strong:
+        - text: Campobasso Calcio
+        - text: vs Borussia Dortmund
+      - generic: 20:00
+    - article:
+      - generic: Bronze · Divisione 4
+      - strong:
+        - text: AS Roma
+        - text: vs HERTHA BSC
+      - generic: 20:00
+    - generic: LIVE NOW → ARCHIVED FOREVER
+    - text: Il calendario indica l’attesa. Il registro dei risultati ne conserva l’esito.
+  - contentinfo:
+    - strong: IMC · ROAD TO HISTORY
+    - text: Live now. Archived forever.
+    - text: Visual exploration 01 · Nessun dato live automatico
+    - text: Immagini AI simboliche · Dati demo segnalati

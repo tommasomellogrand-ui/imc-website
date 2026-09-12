@@ -1,0 +1,349 @@
+- banner:
+  - link "← Road To History":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "Home"
+    - option "Competizioni"
+    - option "Risultati" [selected]
+    - option "Calendario"
+    - option "Match Center"
+    - option "Classifiche"
+    - option "Manager"
+    - option "Player"
+    - option "Club"
+    - option "Archivio"
+  - text: Viewport
+  - combobox "Viewport":
+    - option "Mobile · 390 px" [selected]
+    - option "Mobile · 360 px"
+    - option "Desktop · 1440 px"
+- paragraph: Revisione della composizione responsive. Il riquadro carica le pagine pubblicate alla larghezza selezionata; non simula hardware o Safari iOS.
+- iframe [id="preview"]:
+  - link "Vai al contenuto":
+    - /url: "#main"
+  - banner:
+    - link "Italian Masters Club ROAD TO HISTORY ITALIAN MASTERS CLUB · GW001":
+      - /url: index.html
+      - img "Italian Masters Club"
+      - strong: ROAD TO HISTORY
+      - text: ITALIAN MASTERS CLUB · GW001
+    - button "Apri menu":
+      - generic: Menu
+  - generic: VISUAL DESIGN EXPLORATION · 01
+  - main:
+    - text: RISULTATI · REGISTRO DELLE PARTITE
+    - heading "Final whistle." [level=1]
+    - paragraph: Il risultato è definitivo. La lettura continua.
+    - paragraph: Risultati reali · Istantanea MySQL Aruba del 10.09.2026. Campione di consultazione, senza aggiornamento automatico.
+    - generic "Filtro divisione":
+      - generic: Divisione
+      - button "Tutte" [pressed]
+      - button "Platinum"
+      - button "Gold"
+      - button "Silver"
+      - button "Bronze"
+    - text: Data della partita
+    - combobox "Data della partita":
+      - option "Tutte le date del campione" [selected]
+      - option "06 set 2026"
+      - option "04 set 2026"
+      - option "03 set 2026"
+      - option "31 ago 2026"
+    - status: 80 risultati
+    - region "Risultati delle partite":
+      - article:
+        - generic: Gold · Divisione 2
+        - generic: FINALE · 06 set 2026
+        - link "Sampdoria":
+          - /url: club.html?name=Sampdoria
+          - generic: Sampdoria
+        - strong: 1:0
+        - link "1. FC Kaiserslautern":
+          - /url: club.html?name=1.%20FC%20Kaiserslautern
+          - generic: 1. FC Kaiserslautern
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418764
+      - article:
+        - generic: Platinum · Divisione 1
+        - generic: FINALE · 06 set 2026
+        - link "AEK Athens":
+          - /url: club.html?name=AEK%20Athens
+          - generic: AEK Athens
+        - strong: 2:0
+        - link "AS Reggina 1914":
+          - /url: club.html?name=AS%20Reggina%201914
+          - generic: AS Reggina 1914
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418670
+      - article:
+        - generic: Platinum · Divisione 1
+        - generic: FINALE · 06 set 2026
+        - link "Palermo FC":
+          - /url: club.html?name=Palermo%20FC
+          - generic: Palermo FC
+        - strong: 2:1
+        - link "Dynamo Dresden":
+          - /url: club.html?name=Dynamo%20Dresden
+          - generic: Dynamo Dresden
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418671
+      - article:
+        - generic: Platinum · Divisione 1
+        - generic: FINALE · 06 set 2026
+        - link "Atalanta BC":
+          - /url: club.html?name=Atalanta%20BC
+          - generic: Atalanta BC
+        - strong: 1:1
+        - link "TSV 1860 München":
+          - /url: club.html?name=TSV%201860%20M%C3%BCnchen
+          - generic: TSV 1860 München
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418674
+      - article:
+        - generic: Platinum · Divisione 1
+        - generic: FINALE · 06 set 2026
+        - link "Académica de Coimbra":
+          - /url: club.html?name=Acad%C3%A9mica%20de%20Coimbra
+          - generic: Académica de Coimbra
+        - strong: 1:3
+        - link "Parma Calcio 1913":
+          - /url: club.html?name=Parma%20Calcio%201913
+          - generic: Parma Calcio 1913
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418672
+      - article:
+        - generic: Platinum · Divisione 1
+        - generic: FINALE · 06 set 2026
+        - link "FK Partizan":
+          - /url: club.html?name=FK%20Partizan
+          - generic: FK Partizan
+        - strong: 1:2
+        - link "Torino":
+          - /url: club.html?name=Torino
+          - generic: Torino
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418673
+      - article:
+        - generic: Gold · Divisione 2
+        - generic: FINALE · 06 set 2026
+        - link "Feyenoord":
+          - /url: club.html?name=Feyenoord
+          - generic: Feyenoord
+        - strong: 1:0
+        - link "Palmeiras":
+          - /url: club.html?name=Palmeiras
+          - generic: Palmeiras
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418761
+      - article:
+        - generic: Gold · Divisione 2
+        - generic: FINALE · 06 set 2026
+        - link "Boca Juniors":
+          - /url: club.html?name=Boca%20Juniors
+          - generic: Boca Juniors
+        - strong: 1:2
+        - link "Genoa CFC":
+          - /url: club.html?name=Genoa%20CFC
+          - generic: Genoa CFC
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418760
+      - article:
+        - generic: Bronze · Divisione 4
+        - generic: FINALE · 06 set 2026
+        - link "SS Lazio":
+          - /url: club.html?name=SS%20Lazio
+          - generic: SS Lazio
+        - strong: 2:2
+        - link "Legia Warszawa":
+          - /url: club.html?name=Legia%20Warszawa
+          - generic: Legia Warszawa
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418940
+      - article:
+        - generic: Gold · Divisione 2
+        - generic: FINALE · 06 set 2026
+        - link "Sunderland":
+          - /url: club.html?name=Sunderland
+          - generic: Sunderland
+        - strong: 2:0
+        - link "Eintracht Frankfurt":
+          - /url: club.html?name=Eintracht%20Frankfurt
+          - generic: Eintracht Frankfurt
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418762
+      - article:
+        - generic: Gold · Divisione 2
+        - generic: FINALE · 06 set 2026
+        - link "Bologna FC":
+          - /url: club.html?name=Bologna%20FC
+          - generic: Bologna FC
+        - strong: 4:2
+        - link "Fenerbahçe SK":
+          - /url: club.html?name=Fenerbah%C3%A7e%20SK
+          - generic: Fenerbahçe SK
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418763
+      - article:
+        - generic: Bronze · Divisione 4
+        - generic: FINALE · 06 set 2026
+        - link "Club América":
+          - /url: club.html?name=Club%20Am%C3%A9rica
+          - generic: Club América
+        - strong: 2:2
+        - link "AS Roma":
+          - /url: club.html?name=AS%20Roma
+          - generic: AS Roma
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418941
+      - article:
+        - generic: Bronze · Divisione 4
+        - generic: FINALE · 06 set 2026
+        - link "HERTHA BSC":
+          - /url: club.html?name=HERTHA%20BSC
+          - generic: HERTHA BSC
+        - strong: 4:1
+        - link "Campobasso Calcio":
+          - /url: club.html?name=Campobasso%20Calcio
+          - generic: Campobasso Calcio
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418942
+      - article:
+        - generic: Bronze · Divisione 4
+        - generic: FINALE · 06 set 2026
+        - link "Borussia Dortmund":
+          - /url: club.html?name=Borussia%20Dortmund
+          - generic: Borussia Dortmund
+        - strong: 2:0
+        - link "Dynamo Kyiv":
+          - /url: club.html?name=Dynamo%20Kyiv
+          - generic: Dynamo Kyiv
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418943
+      - article:
+        - generic: Bronze · Divisione 4
+        - generic: FINALE · 06 set 2026
+        - link "River Plate":
+          - /url: club.html?name=River%20Plate
+          - generic: River Plate
+        - strong: 1:3
+        - link "CR Flamengo":
+          - /url: club.html?name=CR%20Flamengo
+          - generic: CR Flamengo
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367418944
+      - article:
+        - generic: interqualifier
+        - generic: FINALE · 04 set 2026
+        - link "Slovakia":
+          - /url: club.html?name=Slovakia
+          - generic: Slovakia
+        - strong: 0:0
+        - link "Moldova":
+          - /url: club.html?name=Moldova
+          - generic: Moldova
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367419140
+      - article:
+        - generic: interqualifier
+        - generic: FINALE · 04 set 2026
+        - link "Korea Republic":
+          - /url: club.html?name=Korea%20Republic
+          - generic: Korea Republic
+        - strong: 2:0
+        - link "Peru":
+          - /url: club.html?name=Peru
+          - generic: Peru
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367419261
+      - article:
+        - generic: interqualifier
+        - generic: FINALE · 04 set 2026
+        - link "Iraq":
+          - /url: club.html?name=Iraq
+          - generic: Iraq
+        - strong: 0:0
+        - link "Russia":
+          - /url: club.html?name=Russia
+          - generic: Russia
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367419260
+      - article:
+        - generic: interqualifier
+        - generic: FINALE · 04 set 2026
+        - link "Jamaica":
+          - /url: club.html?name=Jamaica
+          - generic: Jamaica
+        - strong: 3:0
+        - link "Czech Republic":
+          - /url: club.html?name=Czech%20Republic
+          - generic: Czech Republic
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367419280
+      - article:
+        - generic: interqualifier
+        - generic: FINALE · 04 set 2026
+        - link "Nigeria":
+          - /url: club.html?name=Nigeria
+          - generic: Nigeria
+        - strong: 3:0
+        - link "Wales":
+          - /url: club.html?name=Wales
+          - generic: Wales
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367419160
+      - article:
+        - generic: interqualifier
+        - generic: FINALE · 04 set 2026
+        - link "Turkey":
+          - /url: club.html?name=Turkey
+          - generic: Turkey
+        - strong: 3:2
+        - link "Trinidad & Tobago":
+          - /url: club.html?name=Trinidad%20%26%20Tobago
+          - generic: Trinidad & Tobago
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367419281
+      - article:
+        - generic: interqualifier
+        - generic: FINALE · 04 set 2026
+        - link "Guinea":
+          - /url: club.html?name=Guinea
+          - generic: Guinea
+        - strong: 1:1
+        - link "Colombia":
+          - /url: club.html?name=Colombia
+          - generic: Colombia
+        - generic: RISULTATO ARCHIVIATO
+        - link "Match Center ↗":
+          - /url: match.html?id=367419120
+      - article:
+        - generic: interqualifier
+        - generic: FINALE · 04 set 2026
+        - link "Germany":
+          - /url: club.html?name=Germany
+          - generic: Germany
+        - strong: 4:0
+    
+[Additional rows omitted.]

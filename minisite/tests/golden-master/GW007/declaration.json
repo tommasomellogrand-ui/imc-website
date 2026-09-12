@@ -1,0 +1,44 @@
+{
+  "world": "GW007",
+  "family": "MULTI_GOLD",
+  "contractVersion": 1,
+  "context": {
+    "type": "TERRITORY",
+    "model": "KINGDOM",
+    "dimensions": [
+      "k"
+    ]
+  },
+  "capabilities": [
+    "contexts",
+    "competitions",
+    "results",
+    "schedule",
+    "standings",
+    "match",
+    "territory-map",
+    "rivalries"
+  ],
+  "liveIntegration": false,
+  "primaryContext": {
+    "provider": "FIXED_CONTEXT_SET",
+    "entries": [
+      {
+        "contextId": "ENG",
+        "label": "Inghilterra"
+      },
+      {
+        "contextId": "ESP",
+        "label": "Spagna"
+      },
+      {
+        "contextId": "GER",
+        "label": "Germania"
+      },
+      {
+        "contextId": "ITA",
+        "label": "Italia"
+      }
+    ]
+  }
+}

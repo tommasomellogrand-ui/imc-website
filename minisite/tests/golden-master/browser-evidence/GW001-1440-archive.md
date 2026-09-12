@@ -1,0 +1,160 @@
+- banner:
+  - link "← Road To History":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "Home"
+    - option "Competizioni"
+    - option "Risultati"
+    - option "Calendario"
+    - option "Match Center"
+    - option "Classifiche"
+    - option "Manager"
+    - option "Player"
+    - option "Club"
+    - option "Archivio" [selected]
+  - text: Viewport
+  - combobox "Viewport":
+    - option "Mobile · 390 px"
+    - option "Mobile · 360 px"
+    - option "Desktop · 1440 px" [selected]
+- paragraph: Revisione della composizione responsive. Il riquadro carica le pagine pubblicate alla larghezza selezionata; non simula hardware o Safari iOS.
+- iframe [id="preview"]:
+  - link "Vai al contenuto":
+    - /url: "#main"
+  - complementary:
+    - link "RTH ROAD TO HISTORY":
+      - /url: index.html
+      - text: RTH
+      - generic: ROAD TO HISTORY
+    - generic: COMMAND ARCHIVE
+    - navigation "Navigazione principale":
+      - link "01 Il mondo":
+        - /url: index.html
+        - generic: "01"
+        - text: Il mondo
+      - link "02 Competizioni":
+        - /url: competitions.html
+        - generic: "02"
+        - text: Competizioni
+      - link "03 Risultati":
+        - /url: results.html
+        - generic: "03"
+        - text: Risultati
+      - link "04 Calendario":
+        - /url: schedule.html
+        - generic: "04"
+        - text: Calendario
+      - link "05 Match Center":
+        - /url: match.html
+        - generic: "05"
+        - text: Match Center
+      - link "06 Classifiche":
+        - /url: standings.html
+        - generic: "06"
+        - text: Classifiche
+      - link "07 Manager":
+        - /url: manager.html
+        - generic: "07"
+        - text: Manager
+      - link "08 Player":
+        - /url: player.html
+        - generic: "08"
+        - text: Player
+      - link "09 Club":
+        - /url: club.html
+        - generic: "09"
+        - text: Club
+      - link "10 Archivio":
+        - /url: archive.html
+        - generic: "10"
+        - text: Archivio
+    - text: ITALIAN MASTERS CLUB
+    - text: GW001 · VISUAL EXPLORATION
+    - text: LIVE NOW.
+    - text: ARCHIVED FOREVER.
+  - banner:
+    - link "Italian Masters Club ROAD TO HISTORY ITALIAN MASTERS CLUB · GW001":
+      - /url: index.html
+      - img "Italian Masters Club"
+      - strong: ROAD TO HISTORY
+      - text: ITALIAN MASTERS CLUB · GW001
+    - generic: ARCHIVE × COMMAND CENTER
+  - generic: VISUAL DESIGN EXPLORATION · 01
+  - generic: ISTANTANEA 10.09.2026 · DEMO DOVE INDICATO
+  - main:
+    - text: ROAD TO HISTORY · HISTORICAL ARCHIVE
+    - heading "Nothing is forgotten." [level=1]:
+      - text: Nothing
+      - text: is forgotten.
+    - paragraph:
+      - text: Il presente lascia il campo.
+      - text: Il risultato resta.
+    - generic: "01"
+    - article:
+      - time: 31 AGO 2026
+      - heading "18 risultati. Una data nella memoria." [level=3]:
+        - text: 18 risultati.
+        - text: Una data nella memoria.
+      - paragraph: France 2–1 Morocco
+      - link "Rileggi la giornata":
+        - /url: results.html?date=2026-08-31
+        - text: Rileggi la giornata
+        - generic: ↗
+    - article:
+      - time: 03 SET 2026
+      - heading "15 risultati. Una data nella memoria." [level=3]:
+        - text: 15 risultati.
+        - text: Una data nella memoria.
+      - paragraph: Campobasso Calcio 0–3 Club América
+      - link "Rileggi la giornata":
+        - /url: results.html?date=2026-09-03
+        - text: Rileggi la giornata
+        - generic: ↗
+    - article:
+      - time: 04 SET 2026
+      - heading "32 risultati. Una data nella memoria." [level=3]:
+        - text: 32 risultati.
+        - text: Una data nella memoria.
+      - paragraph: Slovakia 0–0 Moldova
+      - link "Rileggi la giornata":
+        - /url: results.html?date=2026-09-04
+        - text: Rileggi la giornata
+        - generic: ↗
+    - article:
+      - time: 06 SET 2026
+      - heading "15 risultati. Una data nella memoria." [level=3]:
+        - text: 15 risultati.
+        - text: Una data nella memoria.
+      - paragraph: Sampdoria 1–0 1. FC Kaiserslautern
+      - link "Rileggi la giornata":
+        - /url: results.html?date=2026-09-06
+        - text: Rileggi la giornata
+        - generic: ↗
+    - article:
+      - time: 10 SET 2026 · CALENDARIO REGISTRATO
+      - heading "Il prossimo capitolo." [level=3]
+      - paragraph: 20 incontri nel campione del calendario.
+      - link "Apri il calendario":
+        - /url: schedule.html
+        - text: Apri il calendario
+        - generic: ↗
+    - paragraph: Cronologia ricavata dal campione dei risultati reali · Istantanea MySQL Aruba del 10.09.2026. Campione di consultazione, senza aggiornamento automatico.
+    - complementary:
+      - text: HERITAGE RECORD STUDY
+      - generic: DEMO / PLACEHOLDER VISUAL DATA · record non reale
+      - text: ESEMPIO DI MILESTONE
+      - strong: "100"
+      - heading "Una soglia da ricordare." [level=3]:
+        - text: Una soglia
+        - text: da ricordare.
+      - paragraph: Studio del marcatore Heritage Gold. Il valore non indica un record conseguito.
+      - text: ARCHIVE PRINCIPLE
+      - paragraph:
+        - text: Live now.
+        - text: Archived forever.
+  - contentinfo:
+    - strong: IMC · ROAD TO HISTORY
+    - text: Live now. Archived forever.
+    - text: Visual exploration 01 · Nessun dato live automatico
+    - text: Immagini AI simboliche · Dati demo segnalati

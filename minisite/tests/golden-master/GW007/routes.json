@@ -1,0 +1,74 @@
+{
+  "basePath": "/minisite/GW007/",
+  "routes": {
+    "competitions": {
+      "path": "competitions.html",
+      "query": []
+    },
+    "results": {
+      "path": "results.html",
+      "query": [
+        "k"
+      ]
+    },
+    "schedule": {
+      "path": "schedule.html",
+      "query": [
+        "k"
+      ]
+    },
+    "standings": {
+      "path": "standings.html",
+      "query": []
+    },
+    "match": {
+      "path": "match.html",
+      "query": [
+        "id"
+      ]
+    },
+    "club": {
+      "path": "club.html",
+      "query": [
+        "name",
+        "k"
+      ]
+    },
+    "manager": {
+      "path": "manager.html",
+      "query": []
+    },
+    "player": {
+      "path": "player.html",
+      "query": [
+        "id"
+      ]
+    },
+    "home": {
+      "path": "index.html",
+      "query": []
+    },
+    "context-index": {
+      "path": "world.html",
+      "query": []
+    },
+    "context-detail": {
+      "path": "kingdom.html",
+      "query": [
+        "k"
+      ]
+    },
+    "territory-map": {
+      "path": "map.html",
+      "query": []
+    },
+    "rivalries": {
+      "path": "rivalries.html",
+      "query": []
+    },
+    "transfers": {
+      "path": "transfers.html",
+      "query": []
+    }
+  }
+}

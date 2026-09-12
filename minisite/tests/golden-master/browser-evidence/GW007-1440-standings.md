@@ -1,0 +1,284 @@
+- banner:
+  - link "GW007":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "index"
+    - option "world"
+    - option "kingdom"
+    - option "competitions"
+    - option "results"
+    - option "schedule"
+    - option "match"
+    - option "standings" [selected]
+    - option "manager"
+    - option "player"
+    - option "club"
+    - option "transfers"
+    - option "map"
+    - option "rivalries"
+  - button "Mobile 390"
+  - button "Desktop 1440" [active]
+- iframe [id="frame"]:
+  - link "Salta al contenuto":
+    - /url: "#main"
+  - banner:
+    - link "IMC THE FOUR KINGDOMS GW007 / FOOTBALL TERRITORIES":
+      - /url: index.html
+      - generic: IMC
+      - text: THE FOUR KINGDOMS
+      - generic: GW007 / FOOTBALL TERRITORIES
+    - generic: VISUAL DESIGN EXPLORATION · 01
+  - complementary:
+    - paragraph: WORLD NAVIGATION
+    - navigation "Navigazione principale":
+      - link "01Home":
+        - /url: index.html
+      - link "02Four Kingdoms":
+        - /url: world.html
+      - link "03Territory Map":
+        - /url: map.html
+      - link "04Competizioni":
+        - /url: competitions.html
+      - link "05Risultati":
+        - /url: results.html
+      - link "06Calendario":
+        - /url: schedule.html
+      - link "07Power Rankings":
+        - /url: standings.html
+      - link "08Manager":
+        - /url: manager.html
+      - link "09Giocatori":
+        - /url: player.html
+      - link "10Club":
+        - /url: club.html
+      - link "11Trasferimenti":
+        - /url: transfers.html
+      - link "12Rivalità":
+        - /url: rivalries.html
+    - generic: YOUR TERRITORY
+    - link "ENG Inghilterra":
+      - /url: kingdom.html?k=ENG
+      - generic: ENG
+      - generic: Inghilterra
+    - link "ESP Spagna":
+      - /url: kingdom.html?k=ESP
+      - generic: ESP
+      - generic: Spagna
+    - link "GER Germania":
+      - /url: kingdom.html?k=GER
+      - generic: GER
+      - generic: Germania
+    - link "ITA Italia":
+      - /url: kingdom.html?k=ITA
+      - generic: ITA
+      - generic: Italia
+    - paragraph:
+      - text: FOUR NATIONS.
+      - text: ONE CROWN.
+  - generic "Seleziona Kingdom":
+    - 'link "Bandiera dell’Inghilterra: croce di San Giorgio ENG Inghilterra"':
+      - /url: kingdom.html?k=ENG
+      - 'img "Bandiera dell’Inghilterra: croce di San Giorgio"'
+      - generic: ENG
+      - generic: Inghilterra
+    - link "ESP Spagna":
+      - /url: kingdom.html?k=ESP
+      - generic: ESP
+      - generic: Spagna
+    - link "GER Germania":
+      - /url: kingdom.html?k=GER
+      - generic: GER
+      - generic: Germania
+    - link "ITA Italia":
+      - /url: kingdom.html?k=ITA
+      - generic: ITA
+      - generic: Italia
+  - main:
+    - generic: POWER HIERARCHY / 07
+    - heading "L’IMPATTO DI UNA GIORNATA." [level=1]:
+      - text: L’IMPATTO
+      - text: DI UNA GIORNATA.
+    - paragraph: Graduatoria derivata dal turno del 9 settembre. Non è la classifica del campionato.
+    - strong: "+5"
+    - generic: MASSIMA DIFFERENZA RETI DEL TURNO
+    - heading "La forza si legge nel confronto." [level=2]:
+      - text: La forza si legge
+      - text: nel confronto.
+    - paragraph: "Ordine: differenza reti, gol segnati, nome. I pari merito numerici hanno lo stesso impatto sportivo."
+    - table "Impatto del turno · primi 20 club · D1":
+      - caption: Impatto del turno · primi 20 club · D1
+      - rowgroup:
+        - row "Club Kingdom GF GS DR":
+          - columnheader "Club"
+          - columnheader "Kingdom"
+          - columnheader "GF"
+          - columnheader "GS"
+          - columnheader "DR"
+      - rowgroup:
+        - row "AS Roma ITA 5 0 +5":
+          - cell "AS Roma":
+            - link "AS Roma":
+              - /url: club.html?name=AS+Roma&k=ITA
+          - cell "ITA"
+          - cell "5"
+          - cell "0"
+          - cell "+5"
+        - row "Crystal Palace ENG 5 0 +5":
+          - cell "Crystal Palace":
+            - link "Crystal Palace":
+              - /url: club.html?name=Crystal+Palace&k=ENG
+          - cell "ENG"
+          - cell "5"
+          - cell "0"
+          - cell "+5"
+        - row "REAL BETIS ESP 5 0 +5":
+          - cell "REAL BETIS":
+            - link "REAL BETIS":
+              - /url: club.html?name=REAL+BETIS&k=ESP
+          - cell "ESP"
+          - cell "5"
+          - cell "0"
+          - cell "+5"
+        - row "Villarreal CF ESP 5 1 +4":
+          - cell "Villarreal CF":
+            - link "Villarreal CF":
+              - /url: club.html?name=Villarreal+CF&k=ESP
+          - cell "ESP"
+          - cell "5"
+          - cell "1"
+          - cell "+4"
+        - row "Atalanta BC ITA 4 0 +4":
+          - cell "Atalanta BC":
+            - link "Atalanta BC":
+              - /url: club.html?name=Atalanta+BC&k=ITA
+          - cell "ITA"
+          - cell "4"
+          - cell "0"
+          - cell "+4"
+        - row "Bayer Leverkusen GER 4 0 +4":
+          - cell "Bayer Leverkusen":
+            - link "Bayer Leverkusen":
+              - /url: club.html?name=Bayer+Leverkusen&k=GER
+          - cell "GER"
+          - cell "4"
+          - cell "0"
+          - cell "+4"
+        - row "Tottenham Hotspur ENG 4 0 +4":
+          - cell "Tottenham Hotspur":
+            - link "Tottenham Hotspur":
+              - /url: club.html?name=Tottenham+Hotspur&k=ENG
+          - cell "ENG"
+          - cell "4"
+          - cell "0"
+          - cell "+4"
+        - row "Athletic Club ESP 3 0 +3":
+          - cell "Athletic Club":
+            - link "Athletic Club":
+              - /url: club.html?name=Athletic+Club&k=ESP
+          - cell "ESP"
+          - cell "3"
+          - cell "0"
+          - cell "+3"
+        - row "Como 1907 ITA 3 0 +3":
+          - cell "Como 1907":
+            - link "Como 1907":
+              - /url: club.html?name=Como+1907&k=ITA
+          - cell "ITA"
+          - cell "3"
+          - cell "0"
+          - cell "+3"
+        - row "Everton ENG 3 1 +2":
+          - cell "Everton":
+            - link "Everton":
+              - /url: club.html?name=Everton&k=ENG
+          - cell "ENG"
+          - cell "3"
+          - cell "1"
+          - cell "+2"
+        - row "FC Augsburg GER 3 1 +2":
+          - cell "FC Augsburg":
+            - link "FC Augsburg":
+              - /url: club.html?name=FC+Augsburg&k=GER
+          - cell "GER"
+          - cell "3"
+          - cell "1"
+          - cell "+2"
+        - row "FC Schalke 04 GER 3 1 +2":
+          - cell "FC Schalke 04":
+            - link "FC Schalke 04":
+              - /url: club.html?name=FC+Schalke+04&k=GER
+          - cell "GER"
+          - cell "3"
+          - cell "1"
+          - cell "+2"
+        - row "VfL Wolfsburg GER 3 1 +2":
+          - cell "VfL Wolfsburg":
+            - link "VfL Wolfsburg":
+              - /url: club.html?name=VfL+Wolfsburg&k=GER
+          - cell "GER"
+          - cell "3"
+          - cell "1"
+          - cell "+2"
+        - row "Atlético Madrid ESP 2 0 +2":
+          - cell "Atlético Madrid":
+            - link "Atlético Madrid":
+              - /url: club.html?name=Atl%C3%A9tico+Madrid&k=ESP
+          - cell "ESP"
+          - cell "2"
+          - cell "0"
+          - cell "+2"
+        - row "Barcelona ESP 2 0 +2":
+          - cell "Barcelona":
+            - link "Barcelona":
+              - /url: club.html?name=Barcelona&k=ESP
+          - cell "ESP"
+          - cell "2"
+          - cell "0"
+          - cell "+2"
+        - row "Juventus ITA 2 0 +2":
+          - cell "Juventus":
+            - link "Juventus":
+              - /url: club.html?name=Juventus&k=ITA
+          - cell "ITA"
+          - cell "2"
+          - cell "0"
+          - cell "+2"
+        - row "Manchester United ENG 2 0 +2":
+          - cell "Manchester United":
+            - link "Manchester United":
+              - /url: club.html?name=Manchester+United&k=ENG
+          - cell "ENG"
+          - cell "2"
+          - cell "0"
+          - cell "+2"
+        - row "RCD Espanyol ESP 2 0 +2":
+          - cell "RCD Espanyol":
+            - link "RCD Espanyol":
+              - /url: club.html?name=RCD+Espanyol&k=ESP
+          - cell "ESP"
+          - cell "2"
+          - cell "0"
+          - cell "+2"
+        - row "Coventry City ENG 3 2 +1":
+          - cell "Coventry City":
+            - link "Coventry City":
+              - /url: club.html?name=Coventry+City&k=ENG
+          - cell "ENG"
+          - cell "3"
+          - cell "2"
+          - cell "+1"
+        - row "1. FC Kaiserslautern GER 2 1 +1":
+          - cell "1. FC Kaiserslautern":
+            - link "1. FC Kaiserslautern":
+              - /url: club.html?name=1.+FC+Kaiserslautern&k=GER
+          - cell "GER"
+          - cell "2"
+          - cell "1"
+          - cell "+1"
+    - paragraph: "Power Index ufficiale non definito: nessun punteggio composito o crown holder viene attribuito."
+    - paragraph: Risultati del 09.09.2026 · League D1 · Snapshot verificato 10.09.2026 · MySQL Aruba · Sql1956795_2 · IMC Nexus
+  - contentinfo:
+    - generic: IMC / GW007
+    - generic: The World is our Playground.
+    - paragraph: "Visual Design Exploration 01 · Dati reali: snapshot 10.09.2026. Esempi segnalati DEMO. Immagine dello stadio generata, non documentaria."

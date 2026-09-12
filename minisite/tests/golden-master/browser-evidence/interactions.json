@@ -1,0 +1,30 @@
+[
+  {
+    "world": "GW001",
+    "step": "deep-link division=1",
+    "url": "https://www.italianmastersclub.it/minisite/GW001/results.html?division=1",
+    "pressed": "true"
+  },
+  {
+    "world": "GW001",
+    "step": "result opens fixture",
+    "url": "https://www.italianmastersclub.it/minisite/GW001/match.html?id=367418670"
+  },
+  {
+    "world": "GW001",
+    "step": "native back restores division",
+    "url": "https://www.italianmastersclub.it/minisite/GW001/results.html?division=1",
+    "pressed": "true"
+  },
+  {
+    "world": "GW007",
+    "step": "kingdom result deep link",
+    "url": "https://www.italianmastersclub.it/minisite/GW007/results.html?k=ITA"
+  },
+  {
+    "world": "GW007",
+    "step": "filter ENG leaves original URL unchanged",
+    "url": "https://www.italianmastersclub.it/minisite/GW007/results.html?k=ITA",
+    "snapshot": "   - generic: GER\n    - generic: Germania\n  - link \"ITA Italia\":\n    - /url: kingdom.html?k=ITA\n    - generic: ITA\n    - generic: Italia\n- main:\n  - generic: BORDER SCORES / 04\n  - heading \"IL CAMPO HA RISPOSTO.\" [level=1]:\n    - text: IL CAMPO\n    - text: HA RISPOSTO.\n  - paragraph: 09 settembre 2026 · Risultati verificati dei quattro territori\n  - text: Territorio\n  - combobox \"Territorio\":\n    - option \"Tutti i Kingdom\"\n    - option \"Inghilterra\" [selected]\n    - option \"Spagna\"\n    - option \"Germania\"\n    - option \"Italia\"\n  - generic: LEAGUE / DIVISIONE 1\n  - link \"ENG / LEAGUE D1 09 set 2026 · FINALE Fulham 0:0 AFC Bournemouth Match Center ↗\":\n    - /url: match.html?id=380649798\n    - text: ENG / LEAGUE D1\n    - generic: 09 set 2026 · FINALE\n    - generic: Fulham\n    - strong: 0:0\n    - generic: AFC Bournemouth\n    - text: Match Center\n    - generic: ↗\n  - link \"ENG / LEAGUE D1 09 "
+  }
+]

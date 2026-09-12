@@ -1,0 +1,40 @@
+name: Minisite Phase 1 foundation
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'minisite/platform/**'
+      - 'minisite/tests/**'
+      - '.github/workflows/minisite-platform-foundation.yml'
+  pull_request:
+    paths:
+      - 'minisite/platform/**'
+      - 'minisite/tests/**'
+      - '.github/workflows/minisite-platform-foundation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Contract and boundary tests
+        run: node --test minisite/tests/contracts.test.mjs
+      - name: Legacy byte baseline and rollback without platform
+        run: |
+          node minisite/tests/verify-isolation.mjs
+          mv minisite/platform "$RUNNER_TEMP/imc-platform"
+          node minisite/tests/verify-isolation.mjs
+          mv "$RUNNER_TEMP/imc-platform" minisite/platform
+      - name: Read-only live verification
+        run: python3 minisite/tests/live-check.py live-check.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: minisite-phase1-evidence
+          path: live-check.json

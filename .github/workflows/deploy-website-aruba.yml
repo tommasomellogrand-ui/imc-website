@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      # Non-runtime Phase 1 foundation: never trigger the broad production upload.
+      - 'minisite/platform/**'
+      - 'minisite/tests/**'
+      - '.github/workflows/minisite-platform-foundation.yml'
       - 'minisite/GW006/**'
       - '.github/workflows/deploy-minisite-gw006.yml'
       - 'minisite/GW009/**'

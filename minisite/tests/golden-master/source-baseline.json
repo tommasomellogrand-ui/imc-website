@@ -1,0 +1,306 @@
+{
+  "case": "IMC-ENG-009-04",
+  "baselineCommit": "6295bec41fceec7dc9a410016c2ea0dd9d1d909d",
+  "files": {
+    "minisite/GW001/.htaccess": "c3ee502a33fd759689ce96d6b01e22c948f5a306",
+    "minisite/GW001/RESET_MARKER.txt": "d1c5781410bc30ee455b3b1d33decb773aa9bea8",
+    "minisite/GW001/app.js": "e31f90ad008331092d8ade30c7d2b9ebb36fc4e7",
+    "minisite/GW001/archive.html": "3a08d9355377e612a5ef2fb483e73eaf4b66333c",
+    "minisite/GW001/club.html": "0e88edb51d224ac546d5c4e2e92e050f70cece3c",
+    "minisite/GW001/competitions.html": "956a44f4d2d1f4fd89caa0e3de56f597a790f889",
+    "minisite/GW001/config.js": "5d026a84d2522b1c40833f6cfd364592c3eeeff5",
+    "minisite/GW001/exploration-assets/academica-coimbra.png": "5767882cec4a3e5e405fc79668ccd9e7bc899f65",
+    "minisite/GW001/exploration-assets/aek-atene.png": "7e722aaf3a9b4bd71485c9aa1df54939d713c7a0",
+    "minisite/GW001/exploration-assets/atalanta.png": "0d41cc1ba0ed30ac90b09fc3765657107d815283",
+    "minisite/GW001/exploration-assets/boca-juniors.png": "c47223a2ffd87b9057313b15b5213ef2d17ec15c",
+    "minisite/GW001/exploration-assets/club-america.png": "dfa9368b47f9f4b26a7517f0da5858849ccdd166",
+    "minisite/GW001/exploration-assets/dinamo-dresda.png": "da61aa1a402f293ab36470d829c15e4fff5de405",
+    "minisite/GW001/exploration-assets/font-0.ttf": "d0b4616c27230b89b7f140006e8d36df7c8b67f4",
+    "minisite/GW001/exploration-assets/font-1.ttf": "a7a1fa958ac0a35a7ace3c03bbe935363d35e05c",
+    "minisite/GW001/exploration-assets/font-2.ttf": "7710411b1308d53acbf3bfa2cc6efb8e103667cc",
+    "minisite/GW001/exploration-assets/font-3.ttf": "6c789eadb84764a2d7f75fc989ccb78873ec1540",
+    "minisite/GW001/exploration-assets/font-4.ttf": "dc447543b7d04d75f68cf303ea911f539c244922",
+    "minisite/GW001/exploration-assets/font-5.ttf": "ec5dcf3e2f8f1c4e8a3e68370d8537147c9df2ad",
+    "minisite/GW001/exploration-assets/font-6.ttf": "811136c6dafecfa0880718f2709ef86e71dc2ff8",
+    "minisite/GW001/exploration-assets/font-7.ttf": "cffca1b05946b2360e727a1b4caddf4f9248d327",
+    "minisite/GW001/exploration-assets/font-8.ttf": "c918f2173671add6f60b364fc0fc6b268693d11c",
+    "minisite/GW001/exploration-assets/font-9.ttf": "784f2a52fbab312f74ff8a5abc05cb8f88da0aac",
+    "minisite/GW001/exploration-assets/imc-logo.png": "d7902d0a8ac6e156b2cb240237dae127716c289e",
+    "minisite/GW001/exploration-assets/kaiserslautern.png": "0c1f12d2a3d4737c2617d7cbaad8a48cd6b15f2b",
+    "minisite/GW001/exploration-assets/lazio.png": "911820985f8833cceedb01f7cf28e4dff0904fe1",
+    "minisite/GW001/exploration-assets/legia-varsavia.png": "509912ffdeea27a7d63a9978f0f679fc0de90bda",
+    "minisite/GW001/exploration-assets/manager.webp": "247c8746a6c69e752a514c8dad152cfe1ea45d9e",
+    "minisite/GW001/exploration-assets/monaco-1860.png": "a5f80691bf30b9c839e49689704c958559307e6a",
+    "minisite/GW001/exploration-assets/palermo.png": "23e1a5b9d4c0e38a14f782dd6794c525c401f3cf",
+    "minisite/GW001/exploration-assets/parma.png": "986d8f75bc925b8f07a48175fbe66d916e5f70f1",
+    "minisite/GW001/exploration-assets/player.webp": "e36059b6f72b9b87130e111df7ed48a82e55f755",
+    "minisite/GW001/exploration-assets/reggina.png": "af836f924cb03e31c29212ba43bb5ca6563c8a0e",
+    "minisite/GW001/exploration-assets/sampdoria.png": "01b60f029503769c4674ad5625e28799e83ce512",
+    "minisite/GW001/exploration-assets/stadium.webp": "4a71cbec47cbbc414c7bf116efb07db2de492710",
+    "minisite/GW001/exploration-data.js": "1a06107711146ec00cc263637f414371a8373180",
+    "minisite/GW001/exploration-fonts.css": "6764e01746d9bd56d9c56f1eb6c788ea7a9e2f98",
+    "minisite/GW001/exploration-manifest.txt": "0961c265a26d4af711cc8ecbe21da5a08bd6b271",
+    "minisite/GW001/exploration.css": "ff379b3caeec1b7a31f82112128b03ea605398a2",
+    "minisite/GW001/exploration.js": "52cc5dbfd96a4c780ae0953f3bc598764265730b",
+    "minisite/GW001/hero-note.txt": "b3a425249b207819e63bf9a2716fd16f63b0f7b7",
+    "minisite/GW001/hero.b64": "6f0a133ba7aeccdaf417b0fcd16c49c42e7e1185",
+    "minisite/GW001/home-app.js": "8f2411412d1bd8596af3f38a43e90771679f2a17",
+    "minisite/GW001/home-hero.svg": "25cc57ef8aabd1450c66cb32ccf45deb43d90b10",
+    "minisite/GW001/home-master.css": "6bb2d2db4770564f081aacf778cdbc281c91b9ae",
+    "minisite/GW001/home.css": "4fdeb58b2edf981e3c7572be0eaa455a08eef72a",
+    "minisite/GW001/index.html": "5dafcf69764141b56333389eb28166845ec8c9a2",
+    "minisite/GW001/legacy.html": "44f3728cc2491cfdaec4f3954af7e59f6f8810ec",
+    "minisite/GW001/manager.html": "320677467f2f173acf48b9c09f056452fa5ab633",
+    "minisite/GW001/match.html": "d72784972c8dd05d4708313883ea8cfdb9476790",
+    "minisite/GW001/player.html": "41888cbace29d1cd321524aa05fda18910897d0c",
+    "minisite/GW001/results.html": "21ef8f03ea6680a9d6544a4fb86b46776b4e9534",
+    "minisite/GW001/road-to-history-hero-new.webp": "50c66981f36c1cb6c77bf1ca1d0d4597ba1de3c7",
+    "minisite/GW001/road-to-history-hero.webp": "952a90b6768a2de97dbe8ae2630b28e6845d2f5e",
+    "minisite/GW001/schedule.html": "d8224f7e284148de0126ec425548edc505933488",
+    "minisite/GW001/sky-theme.css": "9a55083bf9461a9e2b825f0e8ece2d77e345697d",
+    "minisite/GW001/standings.html": "8dd2d0ecdee26d75b6036bc40fb717f19447f7d7",
+    "minisite/GW001/validate-exploration.py": "8a870b8e6c749496a479cb66f23bf6170db3911f",
+    "minisite/GW001/visual-review.html": "10b83864a7faf01d9c88c8c3068db3a639a721da",
+    "minisite/GW007/.htaccess": "4f4b7d3d2db6acdd484d4d346a7bcb82d59bc133",
+    "minisite/GW007/app.js": "6a2585387ca2ca0a4dce40ebcd02bf4449459e4a",
+    "minisite/GW007/assets/interface.ttf": "6c789eadb84764a2d7f75fc989ccb78873ec1540",
+    "minisite/GW007/assets/numbers.ttf": "7710411b1308d53acbf3bfa2cc6efb8e103667cc",
+    "minisite/GW007/assets/stadium.b64": "7012ce931da0e73260cd6d997b016f6fc354d3d9",
+    "minisite/GW007/club.html": "ce385275eca1e86eb6b38c0a6d7e64994192b96b",
+    "minisite/GW007/competitions.html": "c5b12e07987b2aa15f058a21fee7ec975fd933c8",
+    "minisite/GW007/data.js": "6406006ac8e33cbb4130ee9375aa37e8b776fbf4",
+    "minisite/GW007/index.html": "a470cbde12f59f7e2f15f8dec06989632bfa4e80",
+    "minisite/GW007/kingdom.html": "ae03581f413ba5a9caebbaf606be57624756df19",
+    "minisite/GW007/manager.html": "5482660238d28bce5a454c68906ac0c1ab143eb2",
+    "minisite/GW007/map.html": "5e711be81089a1bfd54e8e9323d96244faca7420",
+    "minisite/GW007/match.html": "31e036fa9212e9b9dc80138b76005d6d6e69aef1",
+    "minisite/GW007/player.html": "7da41984e726d7d8294a909f0e6760e2a5ec1a3e",
+    "minisite/GW007/results.html": "f1cb621623f1f17bd4cfdf61b169c9d40ed24389",
+    "minisite/GW007/review.html": "236b6318b078dbb52d2de0d030cb866ecf71481c",
+    "minisite/GW007/rivalries.html": "e2b5dff683aadcd95e3de11733ac70a9d1801d5a",
+    "minisite/GW007/schedule.html": "5052c160f71f0b354631768442b282403d26a61f",
+    "minisite/GW007/standings.html": "1d88ce30a4fa5fdfc3878c937c468c07d08292fc",
+    "minisite/GW007/style.css": "cc9deadc654826b1da61137f231052d4e1d24f38",
+    "minisite/GW007/transfers.html": "69a53d7d2fe62d8c7f11ffc2981d41a02741b13a",
+    "minisite/GW007/validate.py": "8f5f6b814a2427f6f68ecd65d8304982fac98106",
+    "minisite/GW007/world.html": "117f5264a8ef78b319220c51679c4508792ff637",
+    "site-assets/gameworld/app-core.js": "20032de374aa8fdd3a691e5346b3e2366172df6c"
+  },
+  "routes": {
+    "GW001": [
+      {
+        "path": "archive.html",
+        "page": "archive",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "club.html",
+        "page": "club",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "competitions.html",
+        "page": "competitions",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "index.html",
+        "page": "home",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "legacy.html",
+        "page": null,
+        "scripts": [
+          "./config.js?v=GW001_MASTER_HOME_1",
+          "/minisite/shared/app-core.js?v=GW001_MASTER_HOME_1",
+          "./app.js?v=GW001_MASTER_HOME_1"
+        ]
+      },
+      {
+        "path": "manager.html",
+        "page": "manager",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "match.html",
+        "page": "match",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "player.html",
+        "page": "player",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "results.html",
+        "page": "results",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "schedule.html",
+        "page": "schedule",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "standings.html",
+        "page": "standings",
+        "scripts": [
+          "./exploration-data.js?v=RTH_EXP_01",
+          "./exploration.js?v=RTH_EXP_01"
+        ]
+      },
+      {
+        "path": "visual-review.html",
+        "page": null,
+        "scripts": []
+      }
+    ],
+    "GW007": [
+      {
+        "path": "club.html",
+        "page": "club",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "competitions.html",
+        "page": "competitions",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "index.html",
+        "page": "index",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "kingdom.html",
+        "page": "kingdom",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "manager.html",
+        "page": "manager",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "map.html",
+        "page": "map",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "match.html",
+        "page": "match",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "player.html",
+        "page": "player",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "results.html",
+        "page": "results",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "review.html",
+        "page": null,
+        "scripts": []
+      },
+      {
+        "path": "rivalries.html",
+        "page": "rivalries",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "schedule.html",
+        "page": "schedule",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "standings.html",
+        "page": "standings",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "transfers.html",
+        "page": "transfers",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      },
+      {
+        "path": "world.html",
+        "page": "world",
+        "scripts": [
+          "data.js?v=01",
+          "app.js?v=01"
+        ]
+      }
+    ]
+  }
+}

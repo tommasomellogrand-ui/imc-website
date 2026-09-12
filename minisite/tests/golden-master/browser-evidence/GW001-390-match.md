@@ -1,0 +1,110 @@
+- banner:
+  - link "← Road To History":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "Home"
+    - option "Competizioni"
+    - option "Risultati"
+    - option "Calendario"
+    - option "Match Center" [selected]
+    - option "Classifiche"
+    - option "Manager"
+    - option "Player"
+    - option "Club"
+    - option "Archivio"
+  - text: Viewport
+  - combobox "Viewport":
+    - option "Mobile · 390 px" [selected]
+    - option "Mobile · 360 px"
+    - option "Desktop · 1440 px"
+- paragraph: Revisione della composizione responsive. Il riquadro carica le pagine pubblicate alla larghezza selezionata; non simula hardware o Safari iOS.
+- iframe [id="preview"]:
+  - link "Vai al contenuto":
+    - /url: "#main"
+  - banner:
+    - link "Italian Masters Club ROAD TO HISTORY ITALIAN MASTERS CLUB · GW001":
+      - /url: index.html
+      - img "Italian Masters Club"
+      - strong: ROAD TO HISTORY
+      - text: ITALIAN MASTERS CLUB · GW001
+    - button "Apri menu":
+      - generic: Menu
+  - generic: VISUAL DESIGN EXPLORATION · 01
+  - main:
+    - link "← Registro risultati":
+      - /url: results.html
+    - text: MATCH CENTER · RISULTATO REALE
+    - heading "The final word." [level=1]
+    - article:
+      - generic: Platinum · Divisione 1
+      - generic: FINALE · 06 set 2026
+      - link "Académica de Coimbra":
+        - /url: club.html?name=Acad%C3%A9mica%20de%20Coimbra
+        - generic: Académica de Coimbra
+      - strong: 1:3
+      - link "Parma Calcio 1913":
+        - /url: club.html?name=Parma%20Calcio%201913
+        - generic: Parma Calcio 1913
+      - generic: RISULTATO ARCHIVIATO
+      - generic: REF. 367418672
+    - paragraph: Risultati reali · Istantanea MySQL Aruba del 10.09.2026. Campione di consultazione, senza aggiornamento automatico.
+    - navigation "Sezioni partita":
+      - link "Lettura":
+        - /url: "#reading"
+      - link "Statistiche":
+        - /url: "#statistics"
+      - link "Cronologia":
+        - /url: "#timeline"
+    - text: IL VERDETTO
+    - heading "Il segno della trasferta." [level=2]
+    - paragraph: "Académica de Coimbra e Parma Calcio 1913: 1–3 nel risultato registrato del 06 set 2026."
+    - generic: Historical annotation · 06 set 2026
+    - text: Questo esito entra nel registro Platinum · Divisione 1. Il campione non contiene una cronaca verificata della partita.
+    - heading "Match timeline" [level=2]
+    - generic: DEMO / PLACEHOLDER VISUAL DATA · eventi illustrativi
+    - time: 00′
+    - paragraph: Calcio d’inizio
+    - time: 27′
+    - paragraph: Evento chiave · esempio compositivo
+    - time: 64′
+    - paragraph: Cambio tattico · esempio compositivo
+    - time: 90′
+    - paragraph: Fischio finale
+    - complementary:
+      - heading "Il confronto" [level=2]
+      - generic: DEMO / PLACEHOLDER VISUAL DATA · statistiche non riferite alla partita
+      - generic: 54%
+      - generic: Possesso
+      - generic: 46%
+      - generic: "12"
+      - generic: Tiri
+      - generic: "8"
+      - generic: "6"
+      - generic: Tiri in porta
+      - generic: "3"
+      - generic: DEMO / PLACEHOLDER VISUAL DATA · motion study
+      - status: STATO SIMULATO · IN CORSO
+      - heading "Live → Archive" [level=3]
+      - paragraph: Osserva il passaggio visivo da partita attiva a risultato archiviato.
+      - button "Simula fine partita"
+  - contentinfo:
+    - strong: IMC · ROAD TO HISTORY
+    - text: Live now. Archived forever.
+    - text: Visual exploration 01 · Nessun dato live automatico
+    - text: Immagini AI simboliche · Dati demo segnalati
+  - navigation "Navigazione mobile":
+    - link "Mondo":
+      - /url: index.html
+      - generic: Mondo
+    - link "Risultati":
+      - /url: results.html
+      - generic: Risultati
+    - link "Ranking":
+      - /url: standings.html
+      - generic: Ranking
+    - link "Archivio":
+      - /url: archive.html
+      - generic: Archivio
+    - button "Apri tutte le pagine":
+      - generic: Esplora

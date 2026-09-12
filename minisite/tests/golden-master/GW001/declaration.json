@@ -1,0 +1,20 @@
+{
+  "world": "GW001",
+  "family": "SINGLE",
+  "contractVersion": 1,
+  "context": {
+    "type": "COMPETITION",
+    "dimensions": [
+      "division"
+    ]
+  },
+  "capabilities": [
+    "competitions",
+    "results",
+    "schedule",
+    "standings",
+    "match",
+    "archive"
+  ],
+  "liveIntegration": false
+}

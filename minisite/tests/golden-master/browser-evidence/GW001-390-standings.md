@@ -1,0 +1,216 @@
+- banner:
+  - link "← Road To History":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "Home"
+    - option "Competizioni"
+    - option "Risultati"
+    - option "Calendario"
+    - option "Match Center"
+    - option "Classifiche" [selected]
+    - option "Manager"
+    - option "Player"
+    - option "Club"
+    - option "Archivio"
+  - text: Viewport
+  - combobox "Viewport":
+    - option "Mobile · 390 px" [selected]
+    - option "Mobile · 360 px"
+    - option "Desktop · 1440 px"
+- paragraph: Revisione della composizione responsive. Il riquadro carica le pagine pubblicate alla larghezza selezionata; non simula hardware o Safari iOS.
+- iframe [id="preview"]:
+  - link "Vai al contenuto":
+    - /url: "#main"
+  - banner:
+    - link "Italian Masters Club ROAD TO HISTORY ITALIAN MASTERS CLUB · GW001":
+      - /url: index.html
+      - img "Italian Masters Club"
+      - strong: ROAD TO HISTORY
+      - text: ITALIAN MASTERS CLUB · GW001
+    - button "Apri menu":
+      - generic: Menu
+  - generic: VISUAL DESIGN EXPLORATION · 01
+  - main:
+    - text: RANKING SPINE · PLATINUM
+    - heading "Every position matters." [level=1]:
+      - text: Every position
+      - text: matters.
+    - paragraph: Posizione, distanza, forma. Leggere la competizione attraverso il confronto.
+    - generic: DEMO / PLACEHOLDER VISUAL DATA · intera classifica illustrativa
+    - generic: Ordina
+    - combobox "Ordina":
+      - option "Punti" [selected]
+      - option "Nome club"
+    - table "DEMO · Platinum · G17 · V vittoria / N pareggio / P sconfitta":
+      - caption: DEMO · Platinum · G17 · V vittoria / N pareggio / P sconfitta
+      - rowgroup:
+        - row "# Club / forma G PT":
+          - columnheader "#"
+          - columnheader "Club / forma"
+          - columnheader "G"
+          - columnheader "PT"
+      - rowgroup:
+        - 'row "01 Parma Calcio 1913 Forma: V, V, P, V, V 17 38"':
+          - cell "01"
+          - 'cell "Parma Calcio 1913 Forma: V, V, P, V, V"':
+            - text: Parma Calcio 1913
+            - 'generic "Forma: V, V, P, V, V"':
+              - generic: V
+              - generic: V
+              - generic: P
+              - generic: V
+              - generic: V
+          - cell "17"
+          - cell "38"
+        - 'row "02 Atalanta BC Forma: V, P, V, V, N 17 35"':
+          - cell "02"
+          - 'cell "Atalanta BC Forma: V, P, V, V, N"':
+            - text: Atalanta BC
+            - 'generic "Forma: V, P, V, V, N"':
+              - generic: V
+              - generic: P
+              - generic: V
+              - generic: V
+              - generic: "N"
+          - cell "17"
+          - cell "35"
+        - 'row "03 Palermo FC Forma: V, V, N, V, P 17 34"':
+          - cell "03"
+          - 'cell "Palermo FC Forma: V, V, N, V, P"':
+            - text: Palermo FC
+            - 'generic "Forma: V, V, N, V, P"':
+              - generic: V
+              - generic: V
+              - generic: "N"
+              - generic: V
+              - generic: P
+          - cell "17"
+          - cell "34"
+        - 'row "04 AEK Athens Forma: N, P, V, V, V 17 30"':
+          - cell "04"
+          - 'cell "AEK Athens Forma: N, P, V, V, V"':
+            - text: AEK Athens
+            - 'generic "Forma: N, P, V, V, V"':
+              - generic: "N"
+              - generic: P
+              - generic: V
+              - generic: V
+              - generic: V
+          - cell "17"
+          - cell "30"
+        - 'row "05 Académica de Coimbra Forma: P, V, N, V, P 17 28"':
+          - cell "05"
+          - 'cell "Académica de Coimbra Forma: P, V, N, V, P"':
+            - text: Académica de Coimbra
+            - 'generic "Forma: P, V, N, V, P"':
+              - generic: P
+              - generic: V
+              - generic: "N"
+              - generic: V
+              - generic: P
+          - cell "17"
+          - cell "28"
+        - 'row "06 Dynamo Dresden Forma: N, V, P, V, N 17 26"':
+          - cell "06"
+          - 'cell "Dynamo Dresden Forma: N, V, P, V, N"':
+            - text: Dynamo Dresden
+            - 'generic "Forma: N, V, P, V, N"':
+              - generic: "N"
+              - generic: V
+              - generic: P
+              - generic: V
+              - generic: "N"
+          - cell "17"
+          - cell "26"
+        - 'row "07 TSV 1860 München Forma: P, N, V, N, V 17 24"':
+          - cell "07"
+          - 'cell "TSV 1860 München Forma: P, N, V, N, V"':
+            - text: TSV 1860 München
+            - 'generic "Forma: P, N, V, N, V"':
+              - generic: P
+              - generic: "N"
+              - generic: V
+              - generic: "N"
+              - generic: V
+          - cell "17"
+          - cell "24"
+        - 'row "08 AS Reggina 1914 Forma: P, P, N, V, N 17 22"':
+          - cell "08"
+          - 'cell "AS Reggina 1914 Forma: P, P, N, V, N"':
+            - text: AS Reggina 1914
+            - 'generic "Forma: P, P, N, V, N"':
+              - generic: P
+              - generic: P
+              - generic: "N"
+              - generic: V
+              - generic: "N"
+          - cell "17"
+          - cell "22"
+        - 'row "09 Club 09 Forma: N, P, P, V, P 17 19"':
+          - cell "09"
+          - 'cell "Club 09 Forma: N, P, P, V, P"':
+            - text: Club 09
+            - 'generic "Forma: N, P, P, V, P"':
+              - generic: "N"
+              - generic: P
+              - generic: P
+              - generic: V
+              - generic: P
+          - cell "17"
+          - cell "19"
+        - 'row "10 Club 10 Forma: P, P, N, P, P 17 16"':
+          - cell "10"
+          - 'cell "Club 10 Forma: P, P, N, P, P"':
+            - text: Club 10
+            - 'generic "Forma: P, P, N, P, P"':
+              - generic: P
+              - generic: P
+              - generic: "N"
+              - generic: P
+              - generic: P
+          - cell "17"
+          - cell "16"
+    - complementary:
+      - heading "La distanza" [level=2]
+      - generic: "03"
+      - paragraph:
+        - text: Punti fra prima e seconda.
+        - text: Scenario dimostrativo.
+      - generic: Una posizione è una storia in movimento.
+      - text: Il numero resta allineato. Il contesto spiega quanto pesa.
+      - figure "Forma del leader · indice demo Ultime 8 giornate · DEMO":
+        - img "Forma del leader · indice demo. Dati dimostrativi da 6.4 a 8.1.":
+          - generic: "8.2"
+          - generic: "7.2"
+          - generic: "6.0"
+          - generic: Cambio di ritmo
+          - generic: G10
+          - generic: G14
+          - generic: G17
+        - generic: Forma del leader · indice demo
+        - generic: Ultime 8 giornate · DEMO
+      - link "Competition Hub":
+        - /url: competitions.html
+        - text: Competition Hub
+        - generic: ↗
+  - contentinfo:
+    - strong: IMC · ROAD TO HISTORY
+    - text: Live now. Archived forever.
+    - text: Visual exploration 01 · Nessun dato live automatico
+    - text: Immagini AI simboliche · Dati demo segnalati
+  - navigation "Navigazione mobile":
+    - link "Mondo":
+      - /url: index.html
+      - generic: Mondo
+    - link "Risultati":
+      - /url: results.html
+      - generic: Risultati
+    - link "Ranking":
+      - /url: standings.html
+      - generic: Ranking
+    - link "Archivio":
+      - /url: archive.html
+      - generic: Archivio
+    - button "Apri tutte le pagine":
+      - generic: Esplora

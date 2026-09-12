@@ -1,0 +1,343 @@
+- banner:
+  - link "GW007":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "index"
+    - option "world"
+    - option "kingdom"
+    - option "competitions"
+    - option "results" [selected]
+    - option "schedule"
+    - option "match"
+    - option "standings"
+    - option "manager"
+    - option "player"
+    - option "club"
+    - option "transfers"
+    - option "map"
+    - option "rivalries"
+  - button "Mobile 390" [active]
+  - button "Desktop 1440"
+- iframe [id="frame"]:
+  - link "Salta al contenuto":
+    - /url: "#main"
+  - banner:
+    - link "IMC THE FOUR KINGDOMS GW007 / FOOTBALL TERRITORIES":
+      - /url: index.html
+      - generic: IMC
+      - text: THE FOUR KINGDOMS
+      - generic: GW007 / FOOTBALL TERRITORIES
+    - button "Menu"
+  - generic "Seleziona Kingdom":
+    - link "ENG Inghilterra":
+      - /url: kingdom.html?k=ENG
+      - generic: ENG
+      - generic: Inghilterra
+    - link "ESP Spagna":
+      - /url: kingdom.html?k=ESP
+      - generic: ESP
+      - generic: Spagna
+    - link "GER Germania":
+      - /url: kingdom.html?k=GER
+      - generic: GER
+      - generic: Germania
+    - link "ITA Italia":
+      - /url: kingdom.html?k=ITA
+      - generic: ITA
+      - generic: Italia
+  - main:
+    - generic: BORDER SCORES / 04
+    - heading "IL CAMPO HA RISPOSTO." [level=1]:
+      - text: IL CAMPO
+      - text: HA RISPOSTO.
+    - paragraph: 09 settembre 2026 · Risultati verificati dei quattro territori
+    - text: Territorio
+    - combobox "Territorio":
+      - option "Tutti i Kingdom" [selected]
+      - option "Inghilterra"
+      - option "Spagna"
+      - option "Germania"
+      - option "Italia"
+    - generic: LEAGUE / DIVISIONE 1
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Fulham 0:0 AFC Bournemouth Match Center ↗":
+      - /url: match.html?id=380649798
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Fulham
+      - strong: 0:0
+      - generic: AFC Bournemouth
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Arsenal 2:3 Coventry City Match Center ↗":
+      - /url: match.html?id=380649799
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Arsenal
+      - strong: 2:3
+      - generic: Coventry City
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Manchester United 2:0 Brighton & Hove Albion Match Center ↗":
+      - /url: match.html?id=380649800
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Manchester United
+      - strong: 2:0
+      - generic: Brighton & Hove Albion
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Chelsea 2:1 Nottingham Forest Match Center ↗":
+      - /url: match.html?id=380649801
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Chelsea
+      - strong: 2:1
+      - generic: Nottingham Forest
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Brentford 1:0 Liverpool Match Center ↗":
+      - /url: match.html?id=380649802
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Brentford
+      - strong: 1:0
+      - generic: Liverpool
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE West Ham United 1:2 Burnley Match Center ↗":
+      - /url: match.html?id=380649803
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: West Ham United
+      - strong: 1:2
+      - generic: Burnley
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Crystal Palace 5:0 Leeds United Match Center ↗":
+      - /url: match.html?id=380649804
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Crystal Palace
+      - strong: 5:0
+      - generic: Leeds United
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Aston Villa 0:1 Newcastle United Match Center ↗":
+      - /url: match.html?id=380649805
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Aston Villa
+      - strong: 0:1
+      - generic: Newcastle United
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Everton 3:1 Sunderland Match Center ↗":
+      - /url: match.html?id=380649806
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Everton
+      - strong: 3:1
+      - generic: Sunderland
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Manchester City 0:4 Tottenham Hotspur Match Center ↗":
+      - /url: match.html?id=380649807
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Manchester City
+      - strong: 0:4
+      - generic: Tottenham Hotspur
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE RCD Espanyol 2:0 Elche CF Match Center ↗":
+      - /url: match.html?id=380652386
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: RCD Espanyol
+      - strong: 2:0
+      - generic: Elche CF
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE Valencia CF 0:5 REAL BETIS Match Center ↗":
+      - /url: match.html?id=380652387
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Valencia CF
+      - strong: 0:5
+      - generic: REAL BETIS
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE Real Madrid 0:2 Barcelona Match Center ↗":
+      - /url: match.html?id=380652388
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Real Madrid
+      - strong: 0:2
+      - generic: Barcelona
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE Celta Vigo 0:3 Athletic Club Match Center ↗":
+      - /url: match.html?id=380652389
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Celta Vigo
+      - strong: 0:3
+      - generic: Athletic Club
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE CA Osasuna 1:0 Real Valladolid Match Center ↗":
+      - /url: match.html?id=380652390
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: CA Osasuna
+      - strong: 1:0
+      - generic: Real Valladolid
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE Rayo Vallecano 1:0 Real Racing Club Match Center ↗":
+      - /url: match.html?id=380652391
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Rayo Vallecano
+      - strong: 1:0
+      - generic: Real Racing Club
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE RCD Mallorca 0:1 Levante UD Match Center ↗":
+      - /url: match.html?id=380652392
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: RCD Mallorca
+      - strong: 0:1
+      - generic: Levante UD
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE Villarreal CF 5:1 Getafe CF Match Center ↗":
+      - /url: match.html?id=380652393
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Villarreal CF
+      - strong: 5:1
+      - generic: Getafe CF
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE UD Almería 0:2 Atlético Madrid Match Center ↗":
+      - /url: match.html?id=380652394
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: UD Almería
+      - strong: 0:2
+      - generic: Atlético Madrid
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 09 set 2026 · FINALE Sevilla FC 1:0 Real Sociedad Match Center ↗":
+      - /url: match.html?id=380652395
+      - text: ESP / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Sevilla FC
+      - strong: 1:0
+      - generic: Real Sociedad
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 09 set 2026 · FINALE FC St. Pauli 2:1 VfB Stuttgart Match Center ↗":
+      - /url: match.html?id=380653981
+      - text: GER / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: FC St. Pauli
+      - strong: 2:1
+      - generic: VfB Stuttgart
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 09 set 2026 · FINALE Bayer Leverkusen 4:0 TSG 1899 Hoffenheim Match Center ↗":
+      - /url: match.html?id=380653982
+      - text: GER / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Bayer Leverkusen
+      - strong: 4:0
+      - generic: TSG 1899 Hoffenheim
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 09 set 2026 · FINALE FC Schalke 04 3:1 1. FC Heidenheim 1846 Match Center ↗":
+      - /url: match.html?id=380653983
+      - text: GER / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: FC Schalke 04
+      - strong: 3:1
+      - generic: 1. FC Heidenheim 1846
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 09 set 2026 · FINALE Bayern München 1:0 Werder Bremen Match Center ↗":
+      - /url: match.html?id=380653984
+      - text: GER / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Bayern München
+      - strong: 1:0
+      - generic: Werder Bremen
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 09 set 2026 · FINALE Hamburger SV 1:3 FC Augsburg Match Center ↗":
+      - /url: match.html?id=380653985
+      - text: GER / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Hamburger SV
+      - strong: 1:3
+      - generic: FC Augsburg
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 09 set 2026 · FINALE 1. FC Union Berlin 1:3 VfL Wolfsburg Match Center ↗":
+      - /url: match.html?id=380653986
+      - text: GER / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: 1. FC Union Berlin
+      - strong: 1:3
+      - generic: VfL Wolfsburg
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 09 set 2026 · FINALE 1. FC Kaiserslautern 2:1 1. FSV Mainz 05 Match Center ↗":
+      - /url: match.html?id=380653987
+      - text: GER / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: 1. FC Kaiserslautern
+      - strong: 2:1
+      - generic: 1. FSV Mainz 05
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 09 set 2026 · FINALE Borussia Mönchengladbach 0:0 Borussia Dortmund Match Center ↗":
+      - /url: match.html?id=380653988
+      - text: GER / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Borussia Mönchengladbach
+      - strong: 0:0
+      - generic: Borussia Dortmund
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 09 set 2026 · FINALE SC Freiburg 1:1 Eintracht Frankfurt Match Center ↗":
+      - /url: match.html?id=380653989
+      - text: GER / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: SC Freiburg
+      - strong: 1:1
+      - generic: Eintracht Frankfurt
+      - text: Match Center
+      - generic: ↗
+    - link "ITA / LEAGUE D1 09 set 2026 · FINALE Atalanta BC 4:0 Spezia Calcio Match Center ↗":
+      - /url: match.html?id=380655220
+      - text: ITA / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Atalanta BC
+      - strong: 4:0
+      - generic: Spezia Calcio
+      - text: Match Center
+      - generic: ↗
+    - link "ITA / LEAGUE D1 09 set 2026 · FINALE Bologna FC 2:1 Torino Match Center ↗":
+      - /url: match.html?id=380655221
+      - text: ITA / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Bologna FC
+      - strong: 2:1
+      - generic: Torino
+      - text: Match Center
+      - generic: ↗
+    - link "ITA / LEAGUE D1 09 
+[Additional rows omitted.]

@@ -1,0 +1,112 @@
+- banner:
+  - link "GW007":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "index"
+    - option "world"
+    - option "kingdom" [selected]
+    - option "competitions"
+    - option "results"
+    - option "schedule"
+    - option "match"
+    - option "standings"
+    - option "manager"
+    - option "player"
+    - option "club"
+    - option "transfers"
+    - option "map"
+    - option "rivalries"
+  - button "Mobile 390"
+  - button "Desktop 1440"
+- iframe [id="frame"]:
+  - link "Salta al contenuto":
+    - /url: "#main"
+  - banner:
+    - link "IMC THE FOUR KINGDOMS GW007 / FOOTBALL TERRITORIES":
+      - /url: index.html
+      - generic: IMC
+      - text: THE FOUR KINGDOMS
+      - generic: GW007 / FOOTBALL TERRITORIES
+    - button "Menu"
+  - generic "Seleziona Kingdom":
+    - link "ENG Inghilterra":
+      - /url: kingdom.html?k=ENG
+      - generic: ENG
+      - generic: Inghilterra
+    - link "ESP Spagna":
+      - /url: kingdom.html?k=ESP
+      - generic: ESP
+      - generic: Spagna
+    - link "GER Germania":
+      - /url: kingdom.html?k=GER
+      - generic: GER
+      - generic: Germania
+    - link "ITA Italia":
+      - /url: kingdom.html?k=ITA
+      - generic: ITA
+      - generic: Italia
+  - main:
+    - generic: KINGDOM / ENG
+    - heading "ENGLAND" [level=1]
+    - generic: BELONGING
+    - paragraph: Ogni campo, un’appartenenza.
+    - strong:
+      - text: "28"
+      - generic: GOL NEL TURNO
+    - strong:
+      - text: "10"
+      - generic: PARTITE OSSERVATE
+    - strong:
+      - text: "20"
+      - generic: CLUB NEL CAMPIONE
+    - heading "Il confronto in evidenza" [level=2]
+    - link "ENG / LEAGUE D1 09 set 2026 · FINALE Crystal Palace 5:0 Leeds United Apri Match Center ↗":
+      - /url: match.html?id=380649804
+      - text: ENG / LEAGUE D1
+      - generic: 09 set 2026 · FINALE
+      - generic: Crystal Palace
+      - strong: 5:0
+      - generic: Leeds United
+      - text: Apri Match Center
+      - generic: ↗
+    - heading "I nodi del territorio" [level=2]
+    - link "Fulham ↗":
+      - /url: club.html?name=Fulham&k=ENG
+      - text: Fulham
+      - generic: ↗
+    - link "AFC Bournemouth ↗":
+      - /url: club.html?name=AFC+Bournemouth&k=ENG
+      - text: AFC Bournemouth
+      - generic: ↗
+    - link "Arsenal ↗":
+      - /url: club.html?name=Arsenal&k=ENG
+      - text: Arsenal
+      - generic: ↗
+    - link "Coventry City ↗":
+      - /url: club.html?name=Coventry+City&k=ENG
+      - text: Coventry City
+      - generic: ↗
+    - link "Manchester United ↗":
+      - /url: club.html?name=Manchester+United&k=ENG
+      - text: Manchester United
+      - generic: ↗
+    - link "Brighton & Hove Albion ↗":
+      - /url: club.html?name=Brighton+%26+Hove+Albion&k=ENG
+      - text: Brighton & Hove Albion
+      - generic: ↗
+    - link "Chelsea ↗":
+      - /url: club.html?name=Chelsea&k=ENG
+      - text: Chelsea
+      - generic: ↗
+    - link "Nottingham Forest ↗":
+      - /url: club.html?name=Nottingham+Forest&k=ENG
+      - text: Nottingham Forest
+      - generic: ↗
+    - link "Tutti i risultati del territorio ↗":
+      - /url: results.html?k=ENG
+    - paragraph: Risultati del 09.09.2026 · League D1 · Snapshot verificato 10.09.2026 · MySQL Aruba · Sql1956795_2 · IMC Nexus
+  - contentinfo:
+    - generic: IMC / GW007
+    - generic: The World is our Playground.
+    - paragraph: "Visual Design Exploration 01 · Dati reali: snapshot 10.09.2026. Esempi segnalati DEMO. Immagine dello stadio generata, non documentaria."

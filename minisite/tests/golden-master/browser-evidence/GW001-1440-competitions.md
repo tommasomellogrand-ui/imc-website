@@ -1,0 +1,173 @@
+- banner:
+  - link "← Road To History":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "Home"
+    - option "Competizioni" [selected]
+    - option "Risultati"
+    - option "Calendario"
+    - option "Match Center"
+    - option "Classifiche"
+    - option "Manager"
+    - option "Player"
+    - option "Club"
+    - option "Archivio"
+  - text: Viewport
+  - combobox "Viewport":
+    - option "Mobile · 390 px"
+    - option "Mobile · 360 px"
+    - option "Desktop · 1440 px" [selected]
+- paragraph: Revisione della composizione responsive. Il riquadro carica le pagine pubblicate alla larghezza selezionata; non simula hardware o Safari iOS.
+- iframe [id="preview"]:
+  - link "Vai al contenuto":
+    - /url: "#main"
+  - complementary:
+    - link "RTH ROAD TO HISTORY":
+      - /url: index.html
+      - text: RTH
+      - generic: ROAD TO HISTORY
+    - generic: COMMAND ARCHIVE
+    - navigation "Navigazione principale":
+      - link "01 Il mondo":
+        - /url: index.html
+        - generic: "01"
+        - text: Il mondo
+      - link "02 Competizioni":
+        - /url: competitions.html
+        - generic: "02"
+        - text: Competizioni
+      - link "03 Risultati":
+        - /url: results.html
+        - generic: "03"
+        - text: Risultati
+      - link "04 Calendario":
+        - /url: schedule.html
+        - generic: "04"
+        - text: Calendario
+      - link "05 Match Center":
+        - /url: match.html
+        - generic: "05"
+        - text: Match Center
+      - link "06 Classifiche":
+        - /url: standings.html
+        - generic: "06"
+        - text: Classifiche
+      - link "07 Manager":
+        - /url: manager.html
+        - generic: "07"
+        - text: Manager
+      - link "08 Player":
+        - /url: player.html
+        - generic: "08"
+        - text: Player
+      - link "09 Club":
+        - /url: club.html
+        - generic: "09"
+        - text: Club
+      - link "10 Archivio":
+        - /url: archive.html
+        - generic: "10"
+        - text: Archivio
+    - text: ITALIAN MASTERS CLUB
+    - text: GW001 · VISUAL EXPLORATION
+    - text: LIVE NOW.
+    - text: ARCHIVED FOREVER.
+  - banner:
+    - link "Italian Masters Club ROAD TO HISTORY ITALIAN MASTERS CLUB · GW001":
+      - /url: index.html
+      - img "Italian Masters Club"
+      - strong: ROAD TO HISTORY
+      - text: ITALIAN MASTERS CLUB · GW001
+    - generic: ARCHIVE × COMMAND CENTER
+  - generic: VISUAL DESIGN EXPLORATION · 01
+  - generic: ISTANTANEA 10.09.2026 · DEMO DOVE INDICATO
+  - main:
+    - text: DOMESTIC · GW001
+    - heading "Competition archive." [level=1]:
+      - text: Competition
+      - text: archive.
+    - paragraph: Quattro divisioni. Un percorso da osservare, giornata dopo giornata.
+    - generic: "01"
+    - text: LEAGUE · DIVISIONE 1
+    - heading "Platinum" [level=2]
+    - paragraph: Il vertice del sistema Road To History.
+    - link "Esplora i risultati":
+      - /url: results.html?division=1
+      - text: Esplora i risultati
+      - generic: ↗
+    - generic: DEMO / PLACEHOLDER VISUAL DATA · stato competizione
+    - generic: 17 / 18
+    - paragraph: Giornate · simulazione visuale
+    - paragraph: Una giornata al capitolo successivo.
+    - article:
+      - text: DIVISIONE 1
+      - heading "Platinum" [level=2]
+      - paragraph:
+        - text: 10 club · doppio confronto
+        - text: Struttura stagione 1
+      - link "Risultati":
+        - /url: results.html?division=1
+        - text: Risultati
+        - generic: ↗
+      - link "Calendario":
+        - /url: schedule.html?division=1
+        - text: Calendario
+        - generic: ↗
+    - article:
+      - text: DIVISIONE 2
+      - heading "Gold" [level=2]
+      - paragraph:
+        - text: 10 club · doppio confronto
+        - text: Struttura stagione 1
+      - link "Risultati":
+        - /url: results.html?division=2
+        - text: Risultati
+        - generic: ↗
+      - link "Calendario":
+        - /url: schedule.html?division=2
+        - text: Calendario
+        - generic: ↗
+    - article:
+      - text: DIVISIONE 3
+      - heading "Silver" [level=2]
+      - paragraph:
+        - text: 10 club · doppio confronto
+        - text: Struttura stagione 1
+      - link "Risultati":
+        - /url: results.html?division=3
+        - text: Risultati
+        - generic: ↗
+      - link "Calendario":
+        - /url: schedule.html?division=3
+        - text: Calendario
+        - generic: ↗
+    - article:
+      - text: DIVISIONE 4
+      - heading "Bronze" [level=2]
+      - paragraph:
+        - text: 10 club · doppio confronto
+        - text: Struttura stagione 1
+      - link "Risultati":
+        - /url: results.html?division=4
+        - text: Risultati
+        - generic: ↗
+      - link "Calendario":
+        - /url: schedule.html?division=4
+        - text: Calendario
+        - generic: ↗
+    - generic: "18"
+    - text: IL TEMPO DELLA COMPETIZIONE
+    - heading "Ogni giornata ha il suo posto." [level=2]:
+      - text: Ogni giornata
+      - text: ha il suo posto.
+    - paragraph: Dal calendario alla memoria dei risultati.
+    - link "Cronologia della stagione":
+      - /url: archive.html
+      - text: Cronologia della stagione
+      - generic: ↗
+  - contentinfo:
+    - strong: IMC · ROAD TO HISTORY
+    - text: Live now. Archived forever.
+    - text: Visual exploration 01 · Nessun dato live automatico
+    - text: Immagini AI simboliche · Dati demo segnalati

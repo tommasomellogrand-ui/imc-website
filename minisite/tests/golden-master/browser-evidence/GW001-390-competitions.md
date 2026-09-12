@@ -1,0 +1,137 @@
+- banner:
+  - link "← Road To History":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "Home"
+    - option "Competizioni" [selected]
+    - option "Risultati"
+    - option "Calendario"
+    - option "Match Center"
+    - option "Classifiche"
+    - option "Manager"
+    - option "Player"
+    - option "Club"
+    - option "Archivio"
+  - text: Viewport
+  - combobox "Viewport":
+    - option "Mobile · 390 px" [selected]
+    - option "Mobile · 360 px"
+    - option "Desktop · 1440 px"
+- paragraph: Revisione della composizione responsive. Il riquadro carica le pagine pubblicate alla larghezza selezionata; non simula hardware o Safari iOS.
+- iframe [id="preview"]:
+  - link "Vai al contenuto":
+    - /url: "#main"
+  - banner:
+    - link "Italian Masters Club ROAD TO HISTORY ITALIAN MASTERS CLUB · GW001":
+      - /url: index.html
+      - img "Italian Masters Club"
+      - strong: ROAD TO HISTORY
+      - text: ITALIAN MASTERS CLUB · GW001
+    - button "Apri menu":
+      - generic: Menu
+  - generic: VISUAL DESIGN EXPLORATION · 01
+  - main:
+    - text: DOMESTIC · GW001
+    - heading "Competition archive." [level=1]:
+      - text: Competition
+      - text: archive.
+    - paragraph: Quattro divisioni. Un percorso da osservare, giornata dopo giornata.
+    - generic: "01"
+    - text: LEAGUE · DIVISIONE 1
+    - heading "Platinum" [level=2]
+    - paragraph: Il vertice del sistema Road To History.
+    - link "Esplora i risultati":
+      - /url: results.html?division=1
+      - text: Esplora i risultati
+      - generic: ↗
+    - generic: DEMO / PLACEHOLDER VISUAL DATA · stato competizione
+    - generic: 17 / 18
+    - paragraph: Giornate · simulazione visuale
+    - paragraph: Una giornata al capitolo successivo.
+    - article:
+      - text: DIVISIONE 1
+      - heading "Platinum" [level=2]
+      - paragraph:
+        - text: 10 club · doppio confronto
+        - text: Struttura stagione 1
+      - link "Risultati":
+        - /url: results.html?division=1
+        - text: Risultati
+        - generic: ↗
+      - link "Calendario":
+        - /url: schedule.html?division=1
+        - text: Calendario
+        - generic: ↗
+    - article:
+      - text: DIVISIONE 2
+      - heading "Gold" [level=2]
+      - paragraph:
+        - text: 10 club · doppio confronto
+        - text: Struttura stagione 1
+      - link "Risultati":
+        - /url: results.html?division=2
+        - text: Risultati
+        - generic: ↗
+      - link "Calendario":
+        - /url: schedule.html?division=2
+        - text: Calendario
+        - generic: ↗
+    - article:
+      - text: DIVISIONE 3
+      - heading "Silver" [level=2]
+      - paragraph:
+        - text: 10 club · doppio confronto
+        - text: Struttura stagione 1
+      - link "Risultati":
+        - /url: results.html?division=3
+        - text: Risultati
+        - generic: ↗
+      - link "Calendario":
+        - /url: schedule.html?division=3
+        - text: Calendario
+        - generic: ↗
+    - article:
+      - text: DIVISIONE 4
+      - heading "Bronze" [level=2]
+      - paragraph:
+        - text: 10 club · doppio confronto
+        - text: Struttura stagione 1
+      - link "Risultati":
+        - /url: results.html?division=4
+        - text: Risultati
+        - generic: ↗
+      - link "Calendario":
+        - /url: schedule.html?division=4
+        - text: Calendario
+        - generic: ↗
+    - generic: "18"
+    - text: IL TEMPO DELLA COMPETIZIONE
+    - heading "Ogni giornata ha il suo posto." [level=2]:
+      - text: Ogni giornata
+      - text: ha il suo posto.
+    - paragraph: Dal calendario alla memoria dei risultati.
+    - link "Cronologia della stagione":
+      - /url: archive.html
+      - text: Cronologia della stagione
+      - generic: ↗
+  - contentinfo:
+    - strong: IMC · ROAD TO HISTORY
+    - text: Live now. Archived forever.
+    - text: Visual exploration 01 · Nessun dato live automatico
+    - text: Immagini AI simboliche · Dati demo segnalati
+  - navigation "Navigazione mobile":
+    - link "Mondo":
+      - /url: index.html
+      - generic: Mondo
+    - link "Risultati":
+      - /url: results.html
+      - generic: Risultati
+    - link "Ranking":
+      - /url: standings.html
+      - generic: Ranking
+    - link "Archivio":
+      - /url: archive.html
+      - generic: Archivio
+    - button "Apri tutte le pagine":
+      - generic: Esplora

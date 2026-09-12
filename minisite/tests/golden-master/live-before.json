@@ -1,0 +1,390 @@
+{
+  "baselineCommit": "6295bec41fceec7dc9a410016c2ea0dd9d1d909d",
+  "checks": [
+    {
+      "path": "minisite/GW001/archive.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "4a11fb50e878a48572e0fa802fc784f18917944416fc70a5b0d3e151ae8c2a36"
+    },
+    {
+      "path": "minisite/GW001/club.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "1d26295175d454344859daa37665dcf61ba4a029b15857759a9cf67c56adad08"
+    },
+    {
+      "path": "minisite/GW001/competitions.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "549c0df9e51feda1dbafc3635af94c7b0a1855177843b4f7f880a3e8b91d464b"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/academica-coimbra.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "b4e782495c42a9f685613371429d33c509578a5c31f03a4a68df2b1dbd4ef644"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/aek-atene.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "23272d716ad8e69c62874c47cc344bc189de02d5bf377a8e4e6cb077b6bc5b00"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/atalanta.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "a117839bb6aaba1d0e6cd3649b87b9b5637c73443d71929cb1595b2ca2b33ef3"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/boca-juniors.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "6d1ced41063b751498522d4c01baa9686b2ae340737fdde2d2d5a17dd2256001"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/club-america.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "8d544f2c0869c89ac2c924646d05222d9ad60757e45c2f39c52eaf2cd9df181b"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/dinamo-dresda.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "0aa2cbf2b081e3e184f81bf302c48e568bd75c9ab181e96e0033452e3b2deeb0"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-0.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "cc9fb2539cf27df48255982e896d28f544483537cdb41f9fabd741af8992d719"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-1.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "0d85af813fc3ed87db0c6265515689b2eef5cbaf7aab17922528dfc95a2cd73f"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-2.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "7dde307fa887fc65ff5830cfada77a7decc5dae8d3c816c9d39ba3f1af1c4ed7"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-3.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "b0ae3e89a7d3ef2b1838bb4b1ceb0b17cc3435af061eee809d76aa623ff116e9"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-4.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "376427b5322148d8de1e03f263bcca4935a2d60ba71d9f94f4947ab664c711ae"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-5.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "b79a2ea7a38f33fd96a282fadb9ce97626bb0724a44d21075859f0e50239993a"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-6.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "2a8e7f713ee79fbccdef3cef5c787aff47580299f7da60144961e7db2ec08211"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-7.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "ef1515fa19156794b36e5f362c677f78837c38ccdd6fa1fa76d1dd918ea7abbe"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-8.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "b60ffb0ee2b4e09d71d67ff3ea16d6a23cf2e0cf637c5f4e36fff2e3b1465252"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/font-9.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "8ab6a1db2d7caeb46c742371da500d0f3de1dc6ec6bea2aef0106f678d7a1f8d"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/imc-logo.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "6da08a54274a4fc811e9c2d96c85d8672d8c20ab9965836db73d23d01da98232"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/kaiserslautern.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "63af6f9a6f94a770c53fc42c1a5b67e652ad49484bea26e4b438f7b38774834f"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/lazio.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "b742ca0a652d80570067e75325109eaeeae554f8e5baa1e3a3690fa45502d310"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/legia-varsavia.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "721f873044edcae708d17951c8cf77b9e6322339c883d7d2b452a5bd2cab58b1"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/manager.webp",
+      "status": 200,
+      "equal": true,
+      "sha256": "fc61140a71e81161c1a953f38e40d35be17ee0b462016f066727f9ae2bb5cfa6"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/monaco-1860.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "86ae4274ec5f9dc30c47089b75df52045ac4e7a0d1973270fe0996b5676f89f5"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/palermo.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "f09b6a29fc5735ef30ebaefcc880b22d07f42bdbe17d1a01f5238202d3c67d7c"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/parma.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "c070b008832c14888edee0a2cb63558d5cff5ba5cfabe8ba79dbf32a7084fbfa"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/player.webp",
+      "status": 200,
+      "equal": true,
+      "sha256": "5c334438303a40a7d334e5954a639f1f6cb9c1c596a03b20de051078df7cb7ff"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/reggina.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "3583399ccf1d604b87d373379c6ae315a52acb0daade3031e4491b2df7b51e52"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/sampdoria.png",
+      "status": 200,
+      "equal": true,
+      "sha256": "7e0e593cc2a387a9226cfdad3b6c9e87940c37b0c63d149b22c7bedda0423808"
+    },
+    {
+      "path": "minisite/GW001/exploration-assets/stadium.webp",
+      "status": 200,
+      "equal": true,
+      "sha256": "a982e9dc003e7f1fbbe9c7ae63c57b1224137280d3d215176fd7dbec5f28f002"
+    },
+    {
+      "path": "minisite/GW001/exploration-data.js",
+      "status": 200,
+      "equal": true,
+      "sha256": "a55b5c457abca93b20f376e6bbf06b736e2e3496862e0dff45f80a68ced8d941"
+    },
+    {
+      "path": "minisite/GW001/exploration-fonts.css",
+      "status": 200,
+      "equal": true,
+      "sha256": "72306259e67396b573785852b345f6481589e472aa9d9f1824f916c5c8d6ea21"
+    },
+    {
+      "path": "minisite/GW001/exploration.css",
+      "status": 200,
+      "equal": true,
+      "sha256": "b2a536ac6b8bae42502491a3dc8e9efdf91f2a559932010ff6c0fc0a970fb264"
+    },
+    {
+      "path": "minisite/GW001/exploration.js",
+      "status": 200,
+      "equal": true,
+      "sha256": "768c99b717cd4cda1537a510c969bcea56c507b45f5fafa4a2510cd5c8fc6c42"
+    },
+    {
+      "path": "minisite/GW001/index.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "3356de195389a8f7a1b45a04db6c07785472cd2434a59860d10a6267f3fd9a4a"
+    },
+    {
+      "path": "minisite/GW001/manager.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "960cc16b37bcc48557e70a0dbd446d0c21502f9800b5aaaa29bcf7a22e3fd40a"
+    },
+    {
+      "path": "minisite/GW001/match.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "a54d939fbad3d799a611a2c8939153fc5edbd01819a7c83d264dbbcf40661d7b"
+    },
+    {
+      "path": "minisite/GW001/player.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "7c285085cf2ea98f1e0467439cb261e36c3bfca0a90c86322796f6eba61a96e8"
+    },
+    {
+      "path": "minisite/GW001/results.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "2cc0778b3348392f475f507218ed07fb76529a5c31a62013e5f7a850871797f4"
+    },
+    {
+      "path": "minisite/GW001/schedule.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "508fae3a70bb9e5db803b8f69526853e42329fd6d18eb2146cd9f50ebb316a7c"
+    },
+    {
+      "path": "minisite/GW001/standings.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "f1e77e6317fdd4a5aea52283d148174037d6bb2a988709c6ce91ebe7769a0a64"
+    },
+    {
+      "path": "minisite/GW001/visual-review.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "2c7d8778e1080a767180a6c9e6f3595d80a1a8afc2672a464f41a8e4498d9f03"
+    },
+    {
+      "path": "minisite/GW007/app.js",
+      "status": 200,
+      "equal": true,
+      "sha256": "d5af18ea77e90d1565d10f037ecf401c54246beae5ccdd60ed4db56408daa2f7"
+    },
+    {
+      "path": "minisite/GW007/assets/interface.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "b0ae3e89a7d3ef2b1838bb4b1ceb0b17cc3435af061eee809d76aa623ff116e9"
+    },
+    {
+      "path": "minisite/GW007/assets/numbers.ttf",
+      "status": 200,
+      "equal": true,
+      "sha256": "7dde307fa887fc65ff5830cfada77a7decc5dae8d3c816c9d39ba3f1af1c4ed7"
+    },
+    {
+      "path": "minisite/GW007/assets/stadium.webp",
+      "status": 200,
+      "equal": true,
+      "sha256": "349fcb3a0c29b9ccf7d46fe9a1ed2a591610b74a6117205baa68d0ff652b8436"
+    },
+    {
+      "path": "minisite/GW007/club.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "c2938b69e468ea0b112e35e8f9fc223694fa4823f812fa99ded4fa86925139b8"
+    },
+    {
+      "path": "minisite/GW007/competitions.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "90e22b23cc60b5692e91c84c6ce07861ebe09b0f4970402381c04506a3e35397"
+    },
+    {
+      "path": "minisite/GW007/data.js",
+      "status": 200,
+      "equal": true,
+      "sha256": "ca76ae64a49944fe2306fd1a8d7abe34b30313bc6e2762e103f2299718c0fc21"
+    },
+    {
+      "path": "minisite/GW007/index.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "fa223e2dea4fb997a89318686d854862b225f2ae8cbb5eedb9f151dd9e224a58"
+    },
+    {
+      "path": "minisite/GW007/kingdom.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "f42b3214f08e6141fccf85f217ee96e5c5c94e17905fb07b9be7f163898cd484"
+    },
+    {
+      "path": "minisite/GW007/manager.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "9f01b9c19466a3617da9dec69dc590839fd9e37b2827e34361d9a2500afb564c"
+    },
+    {
+      "path": "minisite/GW007/map.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "3625019fee4187611f1222dac0a49a5c5a40f77ae80e4cd5946f08ed0d123482"
+    },
+    {
+      "path": "minisite/GW007/match.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "c282e58c0d0a0c6009d5cc060986a493becd5f0c01d4ac06ac13b814c28b8c64"
+    },
+    {
+      "path": "minisite/GW007/player.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "0c787fde6f7b2203cf2c51b4fe33bf86deaba5959ec64ec1c9151d776f2cc668"
+    },
+    {
+      "path": "minisite/GW007/results.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "1df3775bc28044cdefdac906560b2210fe03b5fa5cb667276a11febf513eccae"
+    },
+    {
+      "path": "minisite/GW007/review.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "09639f4a1074bf3fcdd8c21fb8d941c8407b3a1307cc0e9ecfab44b06a300579"
+    },
+    {
+      "path": "minisite/GW007/rivalries.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "6e56e9543ed884a73394315c2a410fed98eccd1290bfa84cb060c1088232dcc7"
+    },
+    {
+      "path": "minisite/GW007/schedule.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "419d01dbedaba7a27e5456a8010ccf8e84f0a0428d9ef80d7d912afa63c13062"
+    },
+    {
+      "path": "minisite/GW007/standings.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "72057e6a71981b18022d226c4f3c88dfd955e1e01c5484ec575aa44b843f3263"
+    },
+    {
+      "path": "minisite/GW007/style.css",
+      "status": 200,
+      "equal": true,
+      "sha256": "fc3fc11541b67991b7fcd328e0a5ca729d24d251e2cae0bc22e0bfbb1d0f0c3e"
+    },
+    {
+      "path": "minisite/GW007/transfers.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "7c984fb4c7fde1fbf10602d41747dff96744ca49312028b195474cc594247de8"
+    },
+    {
+      "path": "minisite/GW007/world.html",
+      "status": 200,
+      "equal": true,
+      "sha256": "e6f0394e3a7a791c8ae912e622f5a2e12a85debb1920fd2dc11badb8a380e9ba"
+    }
+  ],
+  "pass": true
+}

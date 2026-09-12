@@ -1,0 +1,334 @@
+- banner:
+  - link "GW007":
+    - /url: index.html
+  - text: Pagina
+  - combobox "Pagina":
+    - option "index"
+    - option "world"
+    - option "kingdom"
+    - option "competitions"
+    - option "results"
+    - option "schedule" [selected]
+    - option "match"
+    - option "standings"
+    - option "manager"
+    - option "player"
+    - option "club"
+    - option "transfers"
+    - option "map"
+    - option "rivalries"
+  - button "Mobile 390"
+  - button "Desktop 1440"
+- iframe [id="frame"]:
+  - link "Salta al contenuto":
+    - /url: "#main"
+  - banner:
+    - link "IMC THE FOUR KINGDOMS GW007 / FOOTBALL TERRITORIES":
+      - /url: index.html
+      - generic: IMC
+      - text: THE FOUR KINGDOMS
+      - generic: GW007 / FOOTBALL TERRITORIES
+    - button "Menu"
+  - generic "Seleziona Kingdom":
+    - link "ENG Inghilterra":
+      - /url: kingdom.html?k=ENG
+      - generic: ENG
+      - generic: Inghilterra
+    - link "ESP Spagna":
+      - /url: kingdom.html?k=ESP
+      - generic: ESP
+      - generic: Spagna
+    - link "GER Germania":
+      - /url: kingdom.html?k=GER
+      - generic: GER
+      - generic: Germania
+    - link "ITA Italia":
+      - /url: kingdom.html?k=ITA
+      - generic: ITA
+      - generic: Italia
+  - main:
+    - generic: NEXT CONFRONTATIONS / 05
+    - heading "IL PROSSIMO PUNTO DI CONTATTO." [level=1]:
+      - text: IL PROSSIMO
+      - text: PUNTO DI CONTATTO.
+    - paragraph: Calendario letto dalla fonte · orari riportati come registrati, fuso non specificato
+    - text: Territorio
+    - combobox "Territorio":
+      - option "Tutti i Kingdom" [selected]
+      - option "Inghilterra"
+      - option "Spagna"
+      - option "Germania"
+      - option "Italia"
+    - generic: LEAGUE / DIVISIONE 1
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Coventry City VS AFC Bournemouth Match Center ↗":
+      - /url: match.html?id=380649808
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Coventry City
+      - strong: VS
+      - generic: AFC Bournemouth
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Brighton & Hove Albion VS Arsenal Match Center ↗":
+      - /url: match.html?id=380649809
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Brighton & Hove Albion
+      - strong: VS
+      - generic: Arsenal
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Nottingham Forest VS Manchester United Match Center ↗":
+      - /url: match.html?id=380649810
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Nottingham Forest
+      - strong: VS
+      - generic: Manchester United
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Liverpool VS Chelsea Match Center ↗":
+      - /url: match.html?id=380649811
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Liverpool
+      - strong: VS
+      - generic: Chelsea
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Burnley VS Brentford Match Center ↗":
+      - /url: match.html?id=380649812
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Burnley
+      - strong: VS
+      - generic: Brentford
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Leeds United VS West Ham United Match Center ↗":
+      - /url: match.html?id=380649813
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Leeds United
+      - strong: VS
+      - generic: West Ham United
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Newcastle United VS Crystal Palace Match Center ↗":
+      - /url: match.html?id=380649814
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Newcastle United
+      - strong: VS
+      - generic: Crystal Palace
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Sunderland VS Aston Villa Match Center ↗":
+      - /url: match.html?id=380649815
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Sunderland
+      - strong: VS
+      - generic: Aston Villa
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Tottenham Hotspur VS Everton Match Center ↗":
+      - /url: match.html?id=380649816
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Tottenham Hotspur
+      - strong: VS
+      - generic: Everton
+      - text: Match Center
+      - generic: ↗
+    - link "ENG / LEAGUE D1 12 set 2026 · IN PROGRAMMA Manchester City VS Fulham Match Center ↗":
+      - /url: match.html?id=380649817
+      - text: ENG / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Manchester City
+      - strong: VS
+      - generic: Fulham
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA REAL BETIS VS Elche CF Match Center ↗":
+      - /url: match.html?id=380652396
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: REAL BETIS
+      - strong: VS
+      - generic: Elche CF
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA Barcelona VS Valencia CF Match Center ↗":
+      - /url: match.html?id=380652397
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Barcelona
+      - strong: VS
+      - generic: Valencia CF
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA Athletic Club VS Real Madrid Match Center ↗":
+      - /url: match.html?id=380652398
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Athletic Club
+      - strong: VS
+      - generic: Real Madrid
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA Real Valladolid VS Celta Vigo Match Center ↗":
+      - /url: match.html?id=380652399
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Real Valladolid
+      - strong: VS
+      - generic: Celta Vigo
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA Real Racing Club VS CA Osasuna Match Center ↗":
+      - /url: match.html?id=380652400
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Real Racing Club
+      - strong: VS
+      - generic: CA Osasuna
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA Levante UD VS Rayo Vallecano Match Center ↗":
+      - /url: match.html?id=380652401
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Levante UD
+      - strong: VS
+      - generic: Rayo Vallecano
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA Getafe CF VS RCD Mallorca Match Center ↗":
+      - /url: match.html?id=380652402
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Getafe CF
+      - strong: VS
+      - generic: RCD Mallorca
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA Atlético Madrid VS Villarreal CF Match Center ↗":
+      - /url: match.html?id=380652403
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Atlético Madrid
+      - strong: VS
+      - generic: Villarreal CF
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA Real Sociedad VS UD Almería Match Center ↗":
+      - /url: match.html?id=380652404
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Real Sociedad
+      - strong: VS
+      - generic: UD Almería
+      - text: Match Center
+      - generic: ↗
+    - link "ESP / LEAGUE D1 12 set 2026 · IN PROGRAMMA Sevilla FC VS RCD Espanyol Match Center ↗":
+      - /url: match.html?id=380652405
+      - text: ESP / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Sevilla FC
+      - strong: VS
+      - generic: RCD Espanyol
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 12 set 2026 · IN PROGRAMMA TSG 1899 Hoffenheim VS VfB Stuttgart Match Center ↗":
+      - /url: match.html?id=380653990
+      - text: GER / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: TSG 1899 Hoffenheim
+      - strong: VS
+      - generic: VfB Stuttgart
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 12 set 2026 · IN PROGRAMMA 1. FC Heidenheim 1846 VS Bayer Leverkusen Match Center ↗":
+      - /url: match.html?id=380653991
+      - text: GER / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: 1. FC Heidenheim 1846
+      - strong: VS
+      - generic: Bayer Leverkusen
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 12 set 2026 · IN PROGRAMMA Werder Bremen VS FC Schalke 04 Match Center ↗":
+      - /url: match.html?id=380653992
+      - text: GER / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Werder Bremen
+      - strong: VS
+      - generic: FC Schalke 04
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 12 set 2026 · IN PROGRAMMA FC Augsburg VS Bayern München Match Center ↗":
+      - /url: match.html?id=380653993
+      - text: GER / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: FC Augsburg
+      - strong: VS
+      - generic: Bayern München
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 12 set 2026 · IN PROGRAMMA VfL Wolfsburg VS Hamburger SV Match Center ↗":
+      - /url: match.html?id=380653994
+      - text: GER / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: VfL Wolfsburg
+      - strong: VS
+      - generic: Hamburger SV
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 12 set 2026 · IN PROGRAMMA 1. FSV Mainz 05 VS 1. FC Union Berlin Match Center ↗":
+      - /url: match.html?id=380653995
+      - text: GER / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: 1. FSV Mainz 05
+      - strong: VS
+      - generic: 1. FC Union Berlin
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 12 set 2026 · IN PROGRAMMA Borussia Dortmund VS 1. FC Kaiserslautern Match Center ↗":
+      - /url: match.html?id=380653996
+      - text: GER / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Borussia Dortmund
+      - strong: VS
+      - generic: 1. FC Kaiserslautern
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 12 set 2026 · IN PROGRAMMA Eintracht Frankfurt VS Borussia Mönchengladbach Match Center ↗":
+      - /url: match.html?id=380653997
+      - text: GER / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Eintracht Frankfurt
+      - strong: VS
+      - generic: Borussia Mönchengladbach
+      - text: Match Center
+      - generic: ↗
+    - link "GER / LEAGUE D1 12 set 2026 · IN PROGRAMMA SC Freiburg VS FC St. Pauli Match Center ↗":
+      - /url: match.html?id=380653998
+      - text: GER / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: SC Freiburg
+      - strong: VS
+      - generic: FC St. Pauli
+      - text: Match Center
+      - generic: ↗
+    - link "ITA / LEAGUE D1 12 set 2026 · IN PROGRAMMA Torino VS Spezia Calcio Match Center ↗":
+      - /url: match.html?id=380655230
+      - text: ITA / LEAGUE D1
+      - generic: 12 set 2026 · IN PROGRAMMA
+      - generic: Torino
+      - strong: VS
+      - generic: Spezia Calcio
+      - text: Match Center
+      - generic: ↗
+    - link "ITA 
+[Additional rows omitted.]

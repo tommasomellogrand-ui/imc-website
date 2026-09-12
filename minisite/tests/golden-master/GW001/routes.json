@@ -1,0 +1,54 @@
+{
+  "basePath": "/minisite/GW001/",
+  "routes": {
+    "competitions": {
+      "path": "competitions.html",
+      "query": []
+    },
+    "results": {
+      "path": "results.html",
+      "query": [
+        "division",
+        "date"
+      ]
+    },
+    "schedule": {
+      "path": "schedule.html",
+      "query": [
+        "division"
+      ]
+    },
+    "standings": {
+      "path": "standings.html",
+      "query": []
+    },
+    "match": {
+      "path": "match.html",
+      "query": [
+        "id"
+      ]
+    },
+    "club": {
+      "path": "club.html",
+      "query": [
+        "name"
+      ]
+    },
+    "manager": {
+      "path": "manager.html",
+      "query": []
+    },
+    "player": {
+      "path": "player.html",
+      "query": []
+    },
+    "home": {
+      "path": "index.html",
+      "query": []
+    },
+    "archive": {
+      "path": "archive.html",
+      "query": []
+    }
+  }
+}
