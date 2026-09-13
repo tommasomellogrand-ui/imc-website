@@ -48,7 +48,7 @@ const assert=require('node:assert/strict');
         assert.ok(keys.every(k=>expected.keys.includes(k)));
         for(const section of sections){
           await page.locator(`[data-hub-link="${section}"]`).click();
-          assert.equal(await page.locator(`[data-hub-panel="${section}"]`).isVisible(),true);
+          await page.locator(`[data-hub-panel="${section}"]`).waitFor({state:'visible',timeout:10000});
           assert.equal(await page.locator('[data-hub-panel]:visible').count(),1);
           assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
           if(section==='standings'){
@@ -64,6 +64,7 @@ const assert=require('node:assert/strict');
           await page.screenshot({path:path.join(dir,`hub-${item.id}-${width}-trophy.png`)});
           const section=groups?'standings':'results';
           await page.locator(`[data-hub-link="${section}"]`).click();
+          await page.locator(`[data-hub-panel="${section}"]`).waitFor({state:'visible',timeout:10000});
           await page.screenshot({path:path.join(dir,`hub-${item.id}-${width}.png`)});
         }
         evidence.push({width,id:item.id,url:base+item.hrefs[0],sections,results:expected.results.length,schedule:expected.schedule.length,ranking:expected.ranking,winner:expected.winner?.name??null,pass:true});
