@@ -22,6 +22,9 @@ const assert=require('node:assert/strict');
       };
       const results=(await readFixtures('GW001','results',{fetcher})).rows;
       const schedules=(await readFixtures('GW001','schedule',{fetcher})).rows;
+      const clubResults=results.filter(r=>r.competition_group!=='NATIONS');
+      assert.ok(clubResults.length>0);
+      assert.ok(clubResults.every(r=>r.home_identity?.image_url&&r.away_identity?.image_url),'Every club result must expose both crest URLs');
       const activity=await (await page.request.post(base+'api.php',{data:{game_world_id:'GW001',resource:'competition_activity'}})).json();
       const manifest=await (await page.request.get(base+'data/core-manifest.json')).json();
       const snapshot=await (await page.request.get(base+'data/'+manifest.file)).json();
@@ -44,6 +47,13 @@ const assert=require('node:assert/strict');
         assert.equal(await page.locator('#hub-results [data-fixture-id]').count(),expected.results.length);
         const fixtureIds=await page.locator('#hub-results [data-fixture-id]').evaluateAll(a=>a.map(n=>n.dataset.fixtureId).sort());
         assert.deepEqual(fixtureIds,expected.results.map(r=>String(r.sm_fixture_id)).sort());
+        const expectedResultCrests=expected.results.reduce((n,r)=>n+(r.home_identity?.image_url?1:0)+(r.away_identity?.image_url?1:0),0);
+        assert.equal(await page.locator('#hub-results .team img').count(),expectedResultCrests);
+        if(expectedResultCrests){
+          await page.locator('#hub-results .team img').first().waitFor({state:'visible',timeout:10000});
+          const crestsLoaded=await page.locator('#hub-results .team img').evaluateAll(imgs=>imgs.every(img=>img.complete&&img.naturalWidth>0));
+          assert.equal(crestsLoaded,true,'Every rendered competition crest must load');
+        }
         const keys=await page.locator('[data-hub-fixture-key],[data-hub-schedule-key]').evaluateAll(a=>a.map(n=>n.dataset.hubFixtureKey||n.dataset.hubScheduleKey));
         assert.ok(keys.every(k=>expected.keys.includes(k)));
         for(const section of sections){
@@ -67,7 +77,7 @@ const assert=require('node:assert/strict');
           await page.locator(`[data-hub-panel="${section}"]`).waitFor({state:'visible',timeout:10000});
           await page.screenshot({path:path.join(dir,`hub-${item.id}-${width}.png`)});
         }
-        evidence.push({width,id:item.id,url:base+item.hrefs[0],sections,results:expected.results.length,schedule:expected.schedule.length,ranking:expected.ranking,winner:expected.winner?.name??null,pass:true});
+        evidence.push({width,id:item.id,url:base+item.hrefs[0],sections,results:expected.results.length,schedule:expected.schedule.length,ranking:expected.ranking,winner:expected.winner?.name??null,crests:expectedResultCrests,pass:true});
       }
       await page.goto(base+'competition.html?id=missing');
       await page.getByRole('heading',{name:'Competizione non disponibile.'}).waitFor({timeout:60000});
