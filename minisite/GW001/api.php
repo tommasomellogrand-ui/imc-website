@@ -37,7 +37,7 @@ function gw001_identity(array $s, mixed $id, bool $national): ?array {
     if ($national) {
         foreach ($s['nations_mapping'] as $n) if ((string)$n['SM National Team ID']===(string)$id) return ['kind'=>'nation','game_world_id'=>'GW001','national_team_id'=>(string)$n['National Team ID'],'sm_national_team_id'=>(string)$id,'name'=>$n['National Team Name']];
     } else {
-        foreach ($s['teams'] as $t) if ((string)$t['sm_world_club_id']===(string)$id) return ['kind'=>'club',...$t,'name'=>$t['team_name'],'image_url'=>gw001_club_logo($id)];
+        foreach ($s['teams'] as $t) if ((string)$t['sm_world_club_id']===(string)$id) return ['kind'=>'club',...$t,'name'=>$t['team_name'],'image_url'=>gw001_club_logo($t['sm_club_id'])];
     }
     return null;
 }
@@ -80,7 +80,6 @@ try {
     $now=new DateTimeImmutable('now',new DateTimeZone('Europe/Rome'));
     $today=$now->format('Y-m-d');
     if ($resource==='competition_activity') {
-        // Existence across the whole archive, not only the calendar's future window.
         $fields='game_world_id,competition_key,competition_group,sm_action,sm_division,sm_country';
         $rows=imc_minisite_rows($pdo,"SELECT DISTINCT 'results' AS source,$fields,competition_stage,competition_group_name,competition_round FROM `IMC Site Results` WHERE game_world_id='GW001' UNION ALL SELECT DISTINCT 'schedule' AS source,$fields,competition_stage,NULL AS competition_group_name,competition_round FROM `IMC Site Schedule` WHERE game_world_id='GW001'");
         imc_minisite_out(['ok'=>true,'game_world_id'=>'GW001','resource'=>$resource,'snapshot_version'=>$s['version'],'rows'=>$rows]);
