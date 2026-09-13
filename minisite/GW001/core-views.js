@@ -5,7 +5,7 @@ const date=displayDate;
 const link=(href,text)=>`<a class="text-link" style="white-space:normal;overflow-wrap:anywhere" href="${esc(href)}">${esc(text)}<span class="arrow" aria-hidden="true">↗</span></a>`;
 const head=(k,t,p='')=>`<header class="pagehead"><span class="eyebrow">${esc(k)}</span><h1>${t}</h1><p>${esc(p)}</p></header>`;
 const empty=t=>`<p class="empty">${esc(t)}</p>`;
-const stats=items=>`<div class="stat-row">${items.map(([v,l])=>`<div><strong>${esc(v)}</strong><small>${esc(l)}</small></div>`).join('')}</div>`;
+const stats=items=>`<div class="stat-row" style="grid-template-columns:repeat(3,minmax(0,1fr))">${items.map(([v,l])=>`<div><strong${String(v).length>5?' style="font-size:clamp(1.35rem,3vw,2.6rem);overflow-wrap:anywhere"':''}>${esc(v)}</strong><small>${esc(l)}</small></div>`).join('')}</div>`;
 const name=p=>[p.forename,p.surname].filter(Boolean).join(' ');
 const teamUrl=t=>t?.kind==='external_club'?`club.html?instance=${encodeURIComponent(t.sm_world_club_id)}`:t?.kind==='nation'?`club.html?nation=${encodeURIComponent(t.national_team_id)}`:t?.team_id?`club.html?id=${encodeURIComponent(t.team_id)}`:null;
 const teamLink=(t,n)=>teamUrl(t)?link(teamUrl(t),n):esc(n);

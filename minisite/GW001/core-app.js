@@ -1,5 +1,5 @@
 import {readFixtures,readSnapshot,readReport} from './data-client.js';
-import {createViews,esc} from './core-views.js?v=ENG00907-2';
+import {createViews,esc} from './core-views.js?v=ENG00907-3';
 const root=document.getElementById('app'),page=document.body.dataset.page||'home';
 const NAV=[['home','Il mondo','index.html'],['competitions','Competizioni','competitions.html'],['results','Risultati','results.html'],['schedule','Calendario','schedule.html'],['match','Match Center','match.html'],['standings','Classifiche','standings.html'],['manager','Manager','manager.html'],['player','Player','player.html'],['club','Club','club.html'],['archive','Archivio','archive.html']];
 const icon=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">${({home:'<path d="M3 10 12 3l9 7v11H3Z"/><path d="M9 21v-8h6v8"/>',results:'<rect x="3" y="5" width="18" height="14"/><path d="M12 5v14M6 10h3v4H6M15 10h3v4h-3"/>',standings:'<path d="M5 21V11h4v10M10 21V4h4v17M15 21v-7h4v7"/>',archive:'<path d="M3 5h18v4H3zM5 9v12h14V9M9 13h6"/>',menu:'<path d="M4 6h16M4 12h16M4 18h16"/>'})[n]}</svg>`;
