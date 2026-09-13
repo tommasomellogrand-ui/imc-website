@@ -1,0 +1,2 @@
+/* Menu heroes reuse the home cinema and its responsive grid. */
+.page-hero{margin-bottom:36px}.page-hero .main-grid>*{min-width:0}.page-hero+.archive-page{margin-top:0}.archive-page .archive-title{font-family:var(--serif);text-transform:none;font-size:clamp(3rem,6vw,6rem);line-height:1.1;max-width:850px}@media(max-width:599px){.archive-page .archive-title{font-size:2.9rem}}
