@@ -52,17 +52,24 @@ export function competitionHub(catalogue,activity,data,id){
     groupResults:results.filter(isGroup),winner:league?null:finalWinner(results,schedule)};
 }
 
-export function renderCompetitionHub(h,{esc,link,head,empty,source,score,schedule,teamLink,date}){
+// Only resolved identities supply a logo; names never participate in the lookup.
+export function createHubTeam({esc,teamLink}){
+  return (t,n,compact=false)=>{
+    const size=compact?[32,36]:[38,42];
+    const image=t?.image_url?.startsWith('https://')?`<img data-club-crest="${esc(t.sm_world_club_id)}" src="${esc(t.image_url)}" alt="" width="${size[0]}" height="${size[1]}" loading="lazy" style="display:inline-block;width:${size[0]}px;height:${size[1]}px;object-fit:contain;flex-shrink:0;vertical-align:middle${compact?';margin-right:8px':''}">`:'';
+    return image+teamLink(t,n);
+  };
+}
+
+export function renderCompetitionHub(h,{esc,link,head,empty,source,score,schedule,teamLink,date,team=createHubTeam({esc,teamLink})}){
   if(!h)return head('COMPETITION HUB · GW001','Competizione non disponibile.')+empty('Il riferimento richiesto non è presente tra le competizioni attive.')+link('competitions.html','Torna alle competizioni');
   const phase=r=>[r.competition_group_name,r.competition_stage,r.competition_round].filter(Boolean).join(' · ');
-  const crest=t=>t?.image_url?.startsWith('https://')?`<img src="${esc(t.image_url)}" alt="" width="32" height="36" loading="lazy" style="width:32px;height:36px;object-fit:contain;vertical-align:middle;margin-right:8px">`:'';
-  const team=(t,n)=>`${crest(t)}${teamLink(t,n)}`;
   const ranking=h.ranking==='groups'?
     '<p>La classifica riguarda esclusivamente la fase a gironi.</p>'+h.groups.map(g=>`<h3 style="margin:24px 0 12px">${esc(g)}</h3>`+empty('Classifica ufficiale del girone non disponibile nelle fonti collegate.')).join('')+(h.groups.length?'':empty('Identificativi e classifiche ufficiali dei gironi non disponibili.')):
     empty('Classifica ufficiale della divisione non disponibile nelle fonti collegate.');
-  const trophy=h.winner?`<article class="record" data-winner="${esc(h.winner.name)}"><span class="eyebrow">VINCITORE · FINALE</span><h3 class="serif" style="font-size:2rem;margin:18px 0">${team(h.winner.identity,h.winner.name)}</h3><p>Finale del ${date(h.winner.fixture.match_date)}</p>${score(h.winner.fixture)}</article>`:
+  const trophy=h.winner?`<article class="record" data-winner="${esc(h.winner.name)}"><span class="eyebrow">VINCITORE · FINALE</span><h3 class="serif" style="font-size:2rem;margin:18px 0">${team(h.winner.identity,h.winner.name,true)}</h3><p>Finale del ${date(h.winner.fixture.match_date)}</p>${score(h.winner.fixture)}</article>`:
     empty(h.ranking==='league'?'Vincitore non determinabile: classifica finale ufficiale non disponibile.':'Vincitore non ancora determinabile dai dati conclusivi disponibili.');
-  const hubSchedule=rows=>rows.length?rows.map(r=>`<article class="fixture-row"><div><small>${date(r.match_date)} · ${esc(phase(r)||h.label)}</small><strong>${team(r.home_identity,r.home_name)}<br>vs ${team(r.away_identity,r.away_name)}</strong></div><span class="fixture-time">${esc(r.match_time?.slice(0,5)||'—')}</span></article>`).join(''):empty('Nessun incontro da oggi · Europe/Rome.');
+  const hubSchedule=rows=>rows.length?rows.map(r=>`<article class="fixture-row"><div><small>${date(r.match_date)} · ${esc(phase(r)||h.label)}</small><strong>${team(r.home_identity,r.home_name,true)}<br>vs ${team(r.away_identity,r.away_name,true)}</strong></div><span class="fixture-time">${esc(r.match_time?.slice(0,5)||'—')}</span></article>`).join(''):empty('Nessun incontro da oggi · Europe/Rome.');
   const contents={results:`<p class="source">${h.results.length} risultati · tutte le fasi della competizione.</p><div class="match-list">${h.results.map(r=>`<div data-hub-fixture-key="${esc(r.competition_key)}">${phase(r)?`<p class="source">${esc(phase(r))}</p>`:''}${score(r)}</div>`).join('')||empty('Nessun risultato disponibile per questa competizione.')}</div>`,
     schedule:`<p class="source">Incontri da oggi · Europe/Rome · tutte le fasi della competizione.</p>${hubSchedule(h.schedule)}`,standings:ranking,trophy};
   return link('competitions.html','← Tutte le competizioni')+head('GW001 · '+h.group+' · COMPETITION HUB',esc(h.label))+source()+
