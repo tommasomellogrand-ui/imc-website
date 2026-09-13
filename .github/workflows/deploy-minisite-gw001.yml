@@ -34,6 +34,7 @@ jobs:
           node --test minisite/tests/contracts.test.mjs minisite/tests/gw001-core.test.mjs
           node --test minisite/GW001/world-state.test.mjs
           node --test minisite/GW001/competition-catalog.test.mjs
+          node --test minisite/GW001/competition-hub.test.mjs
           node minisite/tests/verify-isolation.mjs
       - name: Deploy only GW001 dependencies and entry points
         env:
@@ -47,6 +48,7 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/gw001-competitions" --no-audit --no-fund playwright@1.62.1
           "$RUNNER_TEMP/gw001-competitions/node_modules/.bin/playwright" install --with-deps chromium
           NODE_PATH="$RUNNER_TEMP/gw001-competitions/node_modules" node minisite/GW001/competitions-live.cjs
+          NODE_PATH="$RUNNER_TEMP/gw001-competitions/node_modules" node minisite/GW001/competition-hub-live.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

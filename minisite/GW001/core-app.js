@@ -1,3 +1,4 @@
+import {mountCompetitionHub} from './competition-hub.js';
 import {readFixtures,readSnapshot,readReport,readCompetitionActivity} from './data-client.js';
 import {startWorldState} from './world-state.js?v=GW001_SEASONS_01';
 startWorldState();
@@ -21,7 +22,9 @@ async function load(){
     if(active!==controller)return;
     if([results.meta.snapshot_version,schedule.meta.snapshot_version,...(report?[report.snapshot_version]:[]),...(activity?[activity.snapshot_version]:[])].some(v=>v!==snapshot.version))throw new Error('snapshot_changed');
     const views=createViews(snapshot,{results:results.rows,schedule:schedule.rows,competitionActivity:activity?.rows},report);
-    main.innerHTML=views[page]?views[page]():'<h1>Pagina non trovata</h1>';
+    const view=document.body.dataset.view||page;
+    main.innerHTML=views[view]?views[view]():'<h1>Pagina non trovata</h1>';
+    if(view==='competition')mountCompetitionHub();
     main.dataset.state='ready';main.dataset.snapshotVersion=snapshot.version;
     document.getElementById('dossier-search')?.addEventListener('input',e=>{const term=e.target.value.trim().toLocaleLowerCase('it');document.querySelectorAll('[data-search]').forEach(el=>{el.hidden=!el.dataset.search.includes(term);});});
   } catch(e){

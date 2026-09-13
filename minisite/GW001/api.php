@@ -64,7 +64,7 @@ try {
     if ($resource==='competition_activity') {
         // Existence across the whole archive, not only the calendar's future window.
         $fields='game_world_id,competition_key,competition_group,sm_action,sm_division,sm_country';
-        $rows=imc_minisite_rows($pdo,"SELECT DISTINCT 'results' AS source,$fields FROM `IMC Site Results` WHERE game_world_id='GW001' UNION ALL SELECT DISTINCT 'schedule' AS source,$fields FROM `IMC Site Schedule` WHERE game_world_id='GW001'");
+        $rows=imc_minisite_rows($pdo,"SELECT DISTINCT 'results' AS source,$fields,competition_stage,competition_group_name,competition_round FROM `IMC Site Results` WHERE game_world_id='GW001' UNION ALL SELECT DISTINCT 'schedule' AS source,$fields,competition_stage,NULL AS competition_group_name,competition_round FROM `IMC Site Schedule` WHERE game_world_id='GW001'");
         imc_minisite_out(['ok'=>true,'game_world_id'=>'GW001','resource'=>$resource,'snapshot_version'=>$s['version'],'rows'=>$rows]);
     }
     if ($resource==='match_report') {

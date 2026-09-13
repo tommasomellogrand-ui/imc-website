@@ -1,4 +1,5 @@
 [
+  "competition-hub.js",
   "competition-catalog.js",
   "seasons.php",
   "world-state.js",
@@ -17,6 +18,7 @@
   "manager.html",
   "player.html",
   "competitions.html",
+  "competition.html",
   "standings.html",
   "archive.html",
   "results.html",
