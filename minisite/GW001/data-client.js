@@ -1,5 +1,12 @@
 import {readFixtures as sharedRead} from '../integrations/results-schedule/adapter.js';
 export {selectFixtures,countries,validDay,romeDay,competitionLabel} from '../integrations/results-schedule/adapter.js';
+export async function readCompetitionActivity({signal,fetcher=fetch}={}) {
+  const response=await fetcher('/minisite/GW001/api.php',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal,body:JSON.stringify({game_world_id:'GW001',resource:'competition_activity'})});
+  if(!response.ok)throw new Error('competition_activity_unavailable');
+  const data=await response.json();
+  if(!data.ok||data.game_world_id!=='GW001'||data.resource!=='competition_activity'||!Array.isArray(data.rows)||data.rows.some(r=>r.game_world_id!=='GW001'||!['results','schedule'].includes(r.source)||!r.competition_key?.startsWith('GW001|')||!['DOMESTIC','INTERNATIONAL','NATIONS'].includes(r.competition_group)))throw new Error('competition_activity_scope');
+  return data;
+}
 export async function readSeasons({signal,fetcher=fetch}={}) {
   const response=await fetcher('/minisite/GW001/api.php',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal,body:JSON.stringify({game_world_id:'GW001',resource:'seasons'})});
   if(!response.ok)throw new Error('seasons_unavailable');

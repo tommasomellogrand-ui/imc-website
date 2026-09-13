@@ -1,4 +1,4 @@
-import {readFixtures,readSnapshot,readReport} from './data-client.js';
+import {readFixtures,readSnapshot,readReport,readCompetitionActivity} from './data-client.js';
 import {startWorldState} from './world-state.js?v=GW001_SEASONS_01';
 startWorldState();
 import {createViews,esc} from './core-views.js?v=RTH_HERO_01';
@@ -17,10 +17,10 @@ async function load(){
   main.innerHTML='<p role="status" data-state="loading">Caricamento in corso…</p>';
   try {
     const id=new URLSearchParams(location.search).get('id');
-    const [snapshot,results,schedule,report]=await Promise.all([readSnapshot({signal:controller.signal}),readFixtures('GW001','results',{signal:controller.signal}),readFixtures('GW001','schedule',{signal:controller.signal}),page==='match'&&id?readReport(id,{signal:controller.signal}):null]);
+    const [snapshot,results,schedule,report,activity]=await Promise.all([readSnapshot({signal:controller.signal}),readFixtures('GW001','results',{signal:controller.signal}),readFixtures('GW001','schedule',{signal:controller.signal}),page==='match'&&id?readReport(id,{signal:controller.signal}):null,page==='competitions'?readCompetitionActivity({signal:controller.signal}):null]);
     if(active!==controller)return;
-    if([results.meta.snapshot_version,schedule.meta.snapshot_version,...(report?[report.snapshot_version]:[])].some(v=>v!==snapshot.version))throw new Error('snapshot_changed');
-    const views=createViews(snapshot,{results:results.rows,schedule:schedule.rows},report);
+    if([results.meta.snapshot_version,schedule.meta.snapshot_version,...(report?[report.snapshot_version]:[]),...(activity?[activity.snapshot_version]:[])].some(v=>v!==snapshot.version))throw new Error('snapshot_changed');
+    const views=createViews(snapshot,{results:results.rows,schedule:schedule.rows,competitionActivity:activity?.rows},report);
     main.innerHTML=views[page]?views[page]():'<h1>Pagina non trovata</h1>';
     main.dataset.state='ready';main.dataset.snapshotVersion=snapshot.version;
     document.getElementById('dossier-search')?.addEventListener('input',e=>{const term=e.target.value.trim().toLocaleLowerCase('it');document.querySelectorAll('[data-search]').forEach(el=>{el.hidden=!el.dataset.search.includes(term);});});

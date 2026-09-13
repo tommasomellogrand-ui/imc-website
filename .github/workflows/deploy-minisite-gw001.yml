@@ -33,6 +33,7 @@ jobs:
           python3 minisite/GW001/verify.py
           node --test minisite/tests/contracts.test.mjs minisite/tests/gw001-core.test.mjs
           node --test minisite/GW001/world-state.test.mjs
+          node --test minisite/GW001/competition-catalog.test.mjs
           node minisite/tests/verify-isolation.mjs
       - name: Deploy only GW001 dependencies and entry points
         env:
@@ -41,8 +42,15 @@ jobs:
         run: python3 minisite/GW001/deploy.py
       - name: Verify live bytes and every available club report
         run: python3 minisite/GW001/verify.py --live
+      - name: Verify competitions desktop and mobile
+        run: |
+          npm install --prefix "$RUNNER_TEMP/gw001-competitions" --no-audit --no-fund playwright@1.62.1
+          "$RUNNER_TEMP/gw001-competitions/node_modules/.bin/playwright" install --with-deps chromium
+          NODE_PATH="$RUNNER_TEMP/gw001-competitions/node_modules" node minisite/GW001/competitions-live.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: gw001-core-match-report-evidence
-          path: minisite/GW001/live-evidence.json
+          path: |
+            minisite/GW001/live-evidence.json
+            minisite/GW001/competition-evidence/

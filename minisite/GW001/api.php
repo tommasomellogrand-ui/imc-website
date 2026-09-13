@@ -47,7 +47,7 @@ function gw001_enrich(array $r, array $s): array {
 try {
     if (($_SERVER['REQUEST_METHOD']??'')!=='POST') imc_minisite_out(['ok'=>false,'error'=>'method_not_allowed'],405);
     $body=json_decode(file_get_contents('php://input'),true,32,JSON_THROW_ON_ERROR);
-    if (!is_array($body) || ($body['game_world_id']??'')!=='GW001' || !in_array($body['resource']??'', ['results','schedule','match_report','seasons'],true)) throw new InvalidArgumentException('unsupported_scope');
+    if (!is_array($body) || ($body['game_world_id']??'')!=='GW001' || !in_array($body['resource']??'', ['results','schedule','match_report','seasons','competition_activity'],true)) throw new InvalidArgumentException('unsupported_scope');
     if ($body['resource']==='seasons') {
         $pdo=imc_minisite_db(imc_minisite_config());
         $rows=imc_minisite_rows($pdo,'SELECT game_world_id,imc_season,soccer_manager_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season', ['GW001']);
@@ -61,6 +61,12 @@ try {
     $resource=$body['resource'];
     $now=new DateTimeImmutable('now',new DateTimeZone('Europe/Rome'));
     $today=$now->format('Y-m-d');
+    if ($resource==='competition_activity') {
+        // Existence across the whole archive, not only the calendar's future window.
+        $fields='game_world_id,competition_key,competition_group,sm_action,sm_division,sm_country';
+        $rows=imc_minisite_rows($pdo,"SELECT DISTINCT 'results' AS source,$fields FROM `IMC Site Results` WHERE game_world_id='GW001' UNION ALL SELECT DISTINCT 'schedule' AS source,$fields FROM `IMC Site Schedule` WHERE game_world_id='GW001'");
+        imc_minisite_out(['ok'=>true,'game_world_id'=>'GW001','resource'=>$resource,'snapshot_version'=>$s['version'],'rows'=>$rows]);
+    }
     if ($resource==='match_report') {
         $id=imc_minisite_positive_id($body['sm_fixture_id']??null,'invalid_fixture');
         $pdo->beginTransaction();
