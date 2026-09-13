@@ -16,11 +16,28 @@ function gw001_snapshot(): array {
     foreach ($manifest['counts'] as $name=>$count) if (!isset($s[$name]) || count($s[$name])!==$count) throw new RuntimeException('snapshot_incomplete');
     return $s;
 }
+function gw001_club_logo(mixed $clubGwId): ?string {
+    static $logos=null;
+    if ($logos===null) {
+        $logos=[];
+        try {
+            $pdo=imc_minisite_db(imc_minisite_config());
+            $rows=imc_minisite_rows($pdo,"SELECT m.club_gw_id,c.image_url FROM clubs_game_world_id m JOIN clubs c ON c.club_id=m.club_id WHERE m.game_world_id='GW001'");
+            foreach ($rows as $row) {
+                $url=trim((string)($row['image_url']??''));
+                if ($url!=='') $logos[(string)$row['club_gw_id']]=preg_replace('/^http:/i','https:',$url);
+            }
+        } catch (Throwable $e) {
+            $logos=[];
+        }
+    }
+    return $logos[(string)$clubGwId]??null;
+}
 function gw001_identity(array $s, mixed $id, bool $national): ?array {
     if ($national) {
         foreach ($s['nations_mapping'] as $n) if ((string)$n['SM National Team ID']===(string)$id) return ['kind'=>'nation','game_world_id'=>'GW001','national_team_id'=>(string)$n['National Team ID'],'sm_national_team_id'=>(string)$id,'name'=>$n['National Team Name']];
     } else {
-        foreach ($s['teams'] as $t) if ((string)$t['sm_world_club_id']===(string)$id) return ['kind'=>'club',...$t,'name'=>$t['team_name']];
+        foreach ($s['teams'] as $t) if ((string)$t['sm_world_club_id']===(string)$id) return ['kind'=>'club',...$t,'name'=>$t['team_name'],'image_url'=>gw001_club_logo($id)];
     }
     return null;
 }
@@ -28,10 +45,11 @@ function gw001_enrich(array $r, array $s): array {
     if (($r['game_world_id']??'')!=='GW001' || !str_starts_with($r['competition_key']??'','GW001|')) throw new RuntimeException('source_scope');
     $national=($r['competition_group']??'')==='NATIONS';
     foreach (['home','away'] as $side) {
-        $identity=gw001_identity($s,$r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']??null,$national);
+        $worldId=$r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']??null;
+        $identity=gw001_identity($s,$worldId,$national);
         // International opponents outside IMC membership retain the authoritative
         // fixture's world-instance ID and name, without an invented CORE team ID.
-        if (!$identity && !$national && !empty($r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']??null)) $identity=['kind'=>'external_club','game_world_id'=>'GW001','team_id'=>null,'sm_club_id'=>null,'sm_world_club_id'=>(string)($r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']),'name'=>$r[$side.'_name']];
+        if (!$identity && !$national && !empty($worldId)) $identity=['kind'=>'external_club','game_world_id'=>'GW001','team_id'=>null,'sm_club_id'=>null,'sm_world_club_id'=>(string)$worldId,'name'=>$r[$side.'_name'],'image_url'=>gw001_club_logo($worldId)];
         $r[$side.'_identity']=$identity;
         $r[$side.'_manager_id']=null;
         foreach ($s['managers'] as $m) if ((string)$m['sm_manager_id']===(string)($r[$side.'_sm_manager_id']??'')) $r[$side.'_manager_id']=$m['manager_id'];
