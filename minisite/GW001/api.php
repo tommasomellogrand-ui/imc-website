@@ -22,7 +22,7 @@ function gw001_club_logo(mixed $clubGwId): ?string {
         $logos=[];
         try {
             $pdo=imc_minisite_db(imc_minisite_config());
-            $rows=imc_minisite_rows($pdo,"SELECT m.club_gw_id,c.image_url FROM clubs_game_world_id m JOIN clubs c ON c.club_id=m.club_id WHERE m.game_world_id='GW001'");
+            $rows=imc_minisite_rows($pdo,"SELECT m.`SM Club ID` AS club_gw_id,c.image_url FROM `IMC Game World Club Mapping` m JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`='GW001'");
             foreach ($rows as $row) {
                 $url=trim((string)($row['image_url']??''));
                 if ($url!=='') $logos[(string)$row['club_gw_id']]=preg_replace('/^http:/i','https:',$url);
