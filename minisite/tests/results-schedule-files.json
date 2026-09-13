@@ -1,0 +1,16 @@
+[
+  "minisite/api/results-schedule.php",
+  "minisite/platform/utilities/contract.js",
+  "minisite/platform/contracts/core-behavior.contract.js",
+  "minisite/platform/contracts/components.js",
+  "minisite/platform/data/source-state.js",
+  "minisite/platform/data/client.js",
+  "minisite/integrations/results-schedule/adapter.js",
+  "minisite/integrations/results-schedule/controller.js",
+  "minisite/GW001/live-fixtures.js",
+  "minisite/GW007/live-fixtures.js",
+  "minisite/GW001/results.html",
+  "minisite/GW001/schedule.html",
+  "minisite/GW007/results.html",
+  "minisite/GW007/schedule.html"
+]

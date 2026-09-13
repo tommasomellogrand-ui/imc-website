@@ -1,0 +1,69 @@
+name: Deploy GW001 GW007 Results Schedule live
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'minisite/GW001/results.html'
+      - 'minisite/GW001/schedule.html'
+      - 'minisite/GW001/live-fixtures.js'
+      - 'minisite/GW007/results.html'
+      - 'minisite/GW007/schedule.html'
+      - 'minisite/GW007/live-fixtures.js'
+      - 'minisite/api/results-schedule.php'
+      - 'minisite/platform/**'
+      - 'minisite/integrations/results-schedule/**'
+      - 'minisite/tests/results-schedule*'
+      - '.github/workflows/deploy-minisite-results-schedule.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: minisite-results-schedule-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate scope and contracts
+        run: |
+          php -l minisite/api/results-schedule.php
+          node --check minisite/GW001/live-fixtures.js
+          node --check minisite/GW007/live-fixtures.js
+          node --test minisite/tests/contracts.test.mjs minisite/tests/results-schedule.test.mjs
+          node minisite/tests/verify-isolation.mjs
+      - name: Deploy only read endpoint, dependencies and four entry points
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl,json
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path
+          files=json.loads(Path('minisite/tests/results-schedule-files.json').read_text())
+          # The manifest puts dependencies first and HTML entry points last.
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p()
+          for name in files:
+              local=Path(name);ftp.cwd('/')
+              for part in ('www.italianmastersclub.it/'+str(local.parent)).split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+              content=local.read_bytes();ftp.storbinary('STOR '+local.name,io.BytesIO(content))
+              check=io.BytesIO();ftp.retrbinary('RETR '+local.name,check.write)
+              assert check.getvalue()==content,name
+              print('FTPS verified:',name)
+          ftp.quit()
+          PY
+      - name: Verify live bytes, reads, contexts and date predicate
+        run: python3 minisite/tests/results-schedule-live.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-schedule-live-evidence
+          path: results-schedule-live-evidence.json

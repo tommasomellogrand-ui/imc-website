@@ -5,7 +5,10 @@ on:
     branches: [main]
     paths:
       - 'minisite/GW001/**'
-      - '.github/workflows/deploy-minisite-gw001.yml'
+      # These entry points have their own dependency-ordered deployment.
+      - '!minisite/GW001/results.html'
+      - '!minisite/GW001/schedule.html'
+      - '!minisite/GW001/live-fixtures.js'
   workflow_dispatch:
 
 permissions:
@@ -61,3 +64,4 @@ jobs:
 
       - name: Verify all live GW001 files
         run: python3 minisite/GW001/validate-exploration.py --live
+

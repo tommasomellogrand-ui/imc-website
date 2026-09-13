@@ -4,7 +4,10 @@ on:
     branches: [main]
     paths:
       - 'minisite/GW007/**'
-      - '.github/workflows/deploy-minisite-gw007.yml'
+      # These entry points have their own dependency-ordered deployment.
+      - '!minisite/GW007/results.html'
+      - '!minisite/GW007/schedule.html'
+      - '!minisite/GW007/live-fixtures.js'
   workflow_dispatch:
 permissions:
   contents: read
@@ -73,3 +76,4 @@ jobs:
                   assert r.read()==p.read_bytes(),'Live bytes mismatch: '+url
               print('LIVE OK',p.relative_to(root))
           PY
+
