@@ -16,7 +16,7 @@ foreach (['gold','custom'] as $family) {
       $body=['game_world_id'=>$gw,'repository'=>$repo,'target_database'=>$family,'target_table'=>$gw.'_'.$suffix];
       check(imc_explicit_import_route($body,$cfg)['database']===$family);
       check(imc_ingress_route($body,$cfg)['database']===$family);
-      check(imc_ident($body['target_table'])==='\x60'.$body['target_table'].'\x60');
+      check(imc_ident($body['target_table'])===chr(96).$body['target_table'].chr(96));
       $bad=$body; $bad['target_database']=$family==='gold'?'custom':'gold';
       rejects(fn()=>imc_explicit_import_route($bad,$cfg));
       rejects(fn()=>imc_ingress_route($bad,$cfg));
