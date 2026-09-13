@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "game_world_id": "GW001",
+  "file": "core.2a7c2d21a4226026.json",
+  "sha256": "2a7c2d21a4226026c1a7ec34c28ec91c63ce2e0d8820f80bd7648178995c18e2",
+  "generated_at": "2026-09-13T10:50:40.304Z",
+  "counts": {
+    "world": 1,
+    "membership": 40,
+    "nations_mapping": 80,
+    "clubs": 40,
+    "nations": 80,
+    "managers": 41,
+    "assignments": 66,
+    "competitions": 15,
+    "countries": 37,
+    "players": 1615,
+    "player_data": 1237,
+    "history": 8029,
+    "teams": 40,
+    "player_ids": 1615
+  }
+}

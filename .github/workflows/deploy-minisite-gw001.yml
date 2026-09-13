@@ -1,67 +1,45 @@
-name: Deploy minisite GW001 visual exploration
-
+name: Deploy GW001 CORE and Match Report
 on:
   push:
     branches: [main]
     paths:
       - 'minisite/GW001/**'
-      # These entry points have their own dependency-ordered deployment.
-      - '!minisite/GW001/results.html'
-      - '!minisite/GW001/schedule.html'
-      - '!minisite/GW001/live-fixtures.js'
+      - '.github/workflows/deploy-minisite-gw001.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
-
+concurrency:
+  group: minisite-gw001-production
+  cancel-in-progress: false
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Validate GW001 visual exploration
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate GW001 snapshot and contracts
         run: |
-          node --check minisite/GW001/exploration.js
-          node --check minisite/GW001/exploration-data.js
-          python3 minisite/GW001/validate-exploration.py
-
-      - name: Upload GW001 visual exploration to Aruba
+          php -l minisite/GW001/api.php
+          node --check minisite/GW001/core-app.js
+          node --check minisite/GW001/core-views.js
+          node --check minisite/GW001/data-client.js
+          node --check minisite/GW001/live-fixtures.js
+          python3 minisite/GW001/verify.py
+          node --test minisite/tests/contracts.test.mjs minisite/tests/gw001-core.test.mjs
+          node minisite/tests/verify-isolation.mjs
+      - name: Deploy only GW001 dependencies and entry points
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import io, os, ssl
-          from ftplib import FTP_TLS, error_perm
-          from pathlib import Path
-          host='ftp.italianmastersclub.it'; port=21
-          remote='/www.italianmastersclub.it/minisite/GW001'
-          files=[line.strip() for line in Path('minisite/GW001/exploration-manifest.txt').read_text().splitlines() if line.strip()]
-          files=[f for f in files if f!='index.html']+['index.html']
-          ctx=ssl.create_default_context(); ctx.check_hostname=False
-          ftp=FTP_TLS(context=ctx)
-          ftp.connect(host,port,timeout=60); ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
-          def ensure(path):
-              ftp.cwd('/')
-              for part in [p for p in path.split('/') if p]:
-                  try: ftp.cwd(part)
-                  except error_perm: ftp.mkd(part); ftp.cwd(part)
-          ensure(remote)
-          for name in files:
-              local=Path('minisite/GW001')/name
-              ensure(remote+'/'+str(Path(name).parent))
-              data=local.read_bytes()
-              with local.open('rb') as f: ftp.storbinary(f'STOR {local.name}',f)
-              check=io.BytesIO(); ftp.retrbinary(f'RETR {local.name}',check.write)
-              if check.getvalue()!=data: raise SystemExit(f'FTP verify failed: {name}')
-              print(f'GW001 {name}: {len(data)} bytes verified')
-          ftp.quit()
-          PY
-
-      - name: Verify all live GW001 files
-        run: python3 minisite/GW001/validate-exploration.py --live
-
+        run: python3 minisite/GW001/deploy.py
+      - name: Verify live bytes and every available club report
+        run: python3 minisite/GW001/verify.py --live
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gw001-core-match-report-evidence
+          path: minisite/GW001/live-evidence.json

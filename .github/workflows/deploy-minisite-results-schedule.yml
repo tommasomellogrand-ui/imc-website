@@ -3,17 +3,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'minisite/GW001/results.html'
-      - 'minisite/GW001/schedule.html'
-      - 'minisite/GW001/live-fixtures.js'
       - 'minisite/GW007/results.html'
       - 'minisite/GW007/schedule.html'
       - 'minisite/GW007/live-fixtures.js'
       - 'minisite/api/results-schedule.php'
       - 'minisite/platform/**'
       - 'minisite/integrations/results-schedule/**'
-      - 'minisite/tests/results-schedule*'
-      - '.github/workflows/deploy-minisite-results-schedule.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -44,7 +39,7 @@ jobs:
           import io,os,ssl,json
           from ftplib import FTP_TLS,error_perm
           from pathlib import Path
-          files=json.loads(Path('minisite/tests/results-schedule-files.json').read_text())
+          files=[f for f in json.loads(Path('minisite/tests/results-schedule-files.json').read_text()) if not f.startswith('minisite/GW001/')]
           # The manifest puts dependencies first and HTML entry points last.
           ctx=ssl.create_default_context();ctx.check_hostname=False
           ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60)

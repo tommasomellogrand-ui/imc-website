@@ -1,0 +1,20 @@
+[
+  "data/core.2a7c2d21a4226026.json",
+  "data/core-manifest.json",
+  "api.php",
+  "data-client.js",
+  "fixtures-controller.js",
+  "core-views.js",
+  "core-app.js",
+  "live-fixtures.js",
+  "match.html",
+  "club.html",
+  "manager.html",
+  "player.html",
+  "competitions.html",
+  "standings.html",
+  "archive.html",
+  "results.html",
+  "schedule.html",
+  "index.html"
+]
