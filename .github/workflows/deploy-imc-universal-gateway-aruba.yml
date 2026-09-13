@@ -7,6 +7,7 @@ on:
       - 'imc-universal-gateway/**'
       - '__imc_private_gateway/**'
       - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
+      - 'tests/gateway-world-*'
   workflow_dispatch:
 
 permissions:
@@ -31,6 +32,9 @@ jobs:
           test -s "__imc_private_gateway/config.php"
           test -s "__imc_private_gateway/.htaccess"
           for f in imc-universal-gateway/*.php __imc_private_gateway/config.php; do php -l "$f"; done
+
+      - name: Test world routing
+        run: php tests/gateway-world-routing.php
 
       - name: Deploy complete IMC Universal Gateway
         env:
@@ -104,3 +108,6 @@ jobs:
           assert j.get('ok') is True, j
           print('Legacy MINISITE compatibility live OK')
           PY
+
+      - name: Verify GW010 and pending world routing live
+        run: python3 tests/gateway-world-live.py

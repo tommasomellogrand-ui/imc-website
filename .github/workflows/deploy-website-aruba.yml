@@ -4,6 +4,13 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      # Gateway changes have their own scoped deployment.
+      - 'imc-universal-gateway/**'
+      - '__imc_private_gateway/**'
+      - 'tests/gateway-world-*'
+      - 'docs/gateway-gw015-routing-pending.md'
+      - '.github/workflows/test-gateway-world-routing.yml'
+      - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
       # Non-runtime Phase 1 foundation: never trigger the broad production upload.
       - 'minisite/platform/**'
       - 'minisite/tests/**'

@@ -28,7 +28,7 @@ function imc_ingress_ident(string $value): string {
 }
 
 function imc_ingress_table_ident(string $value, string $gw): string {
-    if (!preg_match('/^GW00[1-9]_IMC [A-Za-z0-9 _-]{1,80}$/', $value) || !str_starts_with($value, $gw . '_IMC ')) {
+    if (!preg_match('/^GW(?:00[1-9]|01[0-5])_IMC [A-Za-z0-9 _-]{1,80}$/', $value) || !str_starts_with($value, $gw . '_IMC ')) {
         throw new InvalidArgumentException('target_not_allowed');
     }
     return '`' . str_replace('`', '', $value) . '`';
@@ -38,7 +38,7 @@ function imc_ingress_route(array $body, array $cfg): array {
     $gw = strtoupper(trim((string)($body['game_world_id'] ?? '')));
     $database = trim((string)($body['target_database'] ?? ''));
     $table = trim((string)($body['target_table'] ?? ''));
-    if (!preg_match('/^GW00[1-9]$/', $gw)) throw new InvalidArgumentException('invalid_game_world');
+    if (!preg_match('/^GW(?:00[1-9]|01[0-5])$/', $gw)) throw new InvalidArgumentException('invalid_game_world');
 
     $gold = array_map('strtoupper', (array)($cfg['gold_worlds'] ?? []));
     $custom = array_map('strtoupper', (array)($cfg['custom_worlds'] ?? []));
