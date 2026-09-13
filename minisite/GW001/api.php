@@ -1,7 +1,8 @@
 <?php
-/** IMC-ENG-009-07. Fixed GW001 Site reads; CORE comes only from a verified local snapshot. */
+/** Fixed GW001 Site reads; versioned CORE dossiers and live CORE seasons. */
 declare(strict_types=1);
 require_once dirname(__DIR__, 2).'/imc-universal-gateway/minisite.php';
+require_once __DIR__.'/seasons.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
@@ -46,7 +47,12 @@ function gw001_enrich(array $r, array $s): array {
 try {
     if (($_SERVER['REQUEST_METHOD']??'')!=='POST') imc_minisite_out(['ok'=>false,'error'=>'method_not_allowed'],405);
     $body=json_decode(file_get_contents('php://input'),true,32,JSON_THROW_ON_ERROR);
-    if (!is_array($body) || ($body['game_world_id']??'')!=='GW001' || !in_array($body['resource']??'', ['results','schedule','match_report'],true)) throw new InvalidArgumentException('unsupported_scope');
+    if (!is_array($body) || ($body['game_world_id']??'')!=='GW001' || !in_array($body['resource']??'', ['results','schedule','match_report','seasons'],true)) throw new InvalidArgumentException('unsupported_scope');
+    if ($body['resource']==='seasons') {
+        $pdo=imc_minisite_db(imc_minisite_config());
+        $rows=imc_minisite_rows($pdo,'SELECT game_world_id,imc_season,soccer_manager_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season', ['GW001']);
+        imc_minisite_out(gw001_season_state($rows,new DateTimeImmutable('now',new DateTimeZone('Europe/Rome'))));
+    }
     $s=gw001_snapshot();
     $config=imc_minisite_config();
     $database=$config['db']['custom']??'';

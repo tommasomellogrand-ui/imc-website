@@ -24,12 +24,15 @@ jobs:
       - name: Validate GW001 snapshot and contracts
         run: |
           php -l minisite/GW001/api.php
+          php -l minisite/GW001/seasons.php
+          php minisite/GW001/seasons.test.php
           node --check minisite/GW001/core-app.js
           node --check minisite/GW001/core-views.js
           node --check minisite/GW001/data-client.js
           node --check minisite/GW001/live-fixtures.js
           python3 minisite/GW001/verify.py
           node --test minisite/tests/contracts.test.mjs minisite/tests/gw001-core.test.mjs
+          node --test minisite/GW001/world-state.test.mjs
           node minisite/tests/verify-isolation.mjs
       - name: Deploy only GW001 dependencies and entry points
         env:

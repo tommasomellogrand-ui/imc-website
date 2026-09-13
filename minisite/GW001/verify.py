@@ -37,6 +37,18 @@ def live():
         with urllib.request.urlopen(BASE+name+'?verify='+os.environ.get('GITHUB_SHA','local'),timeout=60) as response:content=response.read()
         assert content==(ROOT/name).read_bytes(),name
         evidence['files'].append(name)
+    seasons=post('seasons')
+    assert seasons['ok'] and seasons['game_world_id']=='GW001' and seasons['source']=='IMC Game World Season'
+    assert seasons['timezone']=='Europe/Rome'
+    first=next(s for s in seasons['seasons'] if s['imc_season']==1)
+    assert first['imc_season_start_date']=='2026-07-12' and first['imc_season_end_date']=='2026-09-20'
+    assert first['soccer_manager_season'] is None
+    for s in seasons['seasons']:
+        assert s['game_world_id']=='GW001'
+        assert s['is_current']==bool(s['imc_season_start_date'] and s['imc_season_end_date'] and s['imc_season_start_date']<=seasons['today']<=s['imc_season_end_date'])
+    current=[s for s in seasons['seasons'] if s['is_current']]
+    assert seasons['current_season']==(current[0] if len(current)==1 else None)
+    evidence['season_state']=seasons
     results=post('results');schedule=post('schedule');rows=results['rows']
     assert results['ok'] and len(rows)==results['total'] and results['next_offset'] is None
     assert len({r['sm_fixture_id'] for r in rows})==len(rows)

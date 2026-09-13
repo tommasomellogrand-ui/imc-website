@@ -1,4 +1,6 @@
 import {readFixtures,readSnapshot,readReport} from './data-client.js';
+import {startWorldState} from './world-state.js?v=GW001_SEASONS_01';
+startWorldState();
 import {createViews,esc} from './core-views.js?v=RTH_HERO_01';
 const root=document.getElementById('app'),page=document.body.dataset.page||'home';
 const NAV=[['home','Il mondo','index.html'],['competitions','Competizioni','competitions.html'],['results','Risultati','results.html'],['schedule','Calendario','schedule.html'],['match','Match Center','match.html'],['standings','Classifiche','standings.html'],['manager','Manager','manager.html'],['player','Player','player.html'],['club','Club','club.html'],['archive','Archivio','archive.html']];

@@ -1,4 +1,6 @@
 import {pageHero} from './page-hero.js?v=RTH_HERO_01';
+import {startWorldState} from './world-state.js?v=GW001_SEASONS_01';
+startWorldState();
 import { mountFixtures, extraScores, displayDate } from './fixtures-controller.js?v=ENG00907-1';
 const gw='GW001';
 const root=document.getElementById('app'),page=document.body.dataset.page;

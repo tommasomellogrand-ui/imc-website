@@ -1,5 +1,17 @@
 import {readFixtures as sharedRead} from '../integrations/results-schedule/adapter.js';
 export {selectFixtures,countries,validDay,romeDay,competitionLabel} from '../integrations/results-schedule/adapter.js';
+export async function readSeasons({signal,fetcher=fetch}={}) {
+  const response=await fetcher('/minisite/GW001/api.php',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal,body:JSON.stringify({game_world_id:'GW001',resource:'seasons'})});
+  if(!response.ok)throw new Error('seasons_unavailable');
+  const data=await response.json();
+  if(!data.ok||data.version!==1||data.resource!=='seasons'||data.game_world_id!=='GW001'||data.source!=='IMC Game World Season'||data.timezone!=='Europe/Rome'||!/^\d{4}-\d{2}-\d{2}$/.test(data.today)||!Number.isFinite(Date.parse(data.read_at))||!Array.isArray(data.seasons))throw new Error('seasons_scope');
+  if(data.seasons.some(s=>s.game_world_id!=='GW001'||!Number.isInteger(s.imc_season)||(s.soccer_manager_season!==null&&!Number.isInteger(s.soccer_manager_season))||typeof s.is_current!=='boolean'||['imc_season_start_date','imc_season_end_date'].some(k=>s[k]!==null&&!/^\d{4}-\d{2}-\d{2}$/.test(s[k]))))throw new Error('seasons_invalid');
+  if(new Set(data.seasons.map(s=>s.imc_season)).size!==data.seasons.length)throw new Error('seasons_duplicate');
+  const current=data.seasons.filter(s=>s.is_current);
+  const status=current.length>1?'ambiguous':current.length===1?'current':data.seasons.length?'no_current':'empty';
+  if(data.current_status!==status||(current.length===1?JSON.stringify(data.current_season)!==JSON.stringify(current[0]):data.current_season!==null))throw new Error('seasons_current');
+  return data;
+}
 export async function readFixtures(gw,resource,{fetcher=fetch,...options}={}) {
   if(gw!=='GW001') throw new Error('unsupported_scope');
   return sharedRead(gw,resource,{...options,fetcher:(_url,init)=>fetcher('/minisite/GW001/api.php',init)});
