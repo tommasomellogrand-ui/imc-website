@@ -1,0 +1,18 @@
+name: Test gateway world routing
+on:
+  push:
+    branches: [codex/gateway-gw015]
+  pull_request:
+    paths: ['imc-universal-gateway/**', 'tests/gateway-world-routing.php', '.github/workflows/test-gateway-world-routing.yml']
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP syntax
+        run: |
+          for file in imc-universal-gateway/*.php tests/gateway-world-routing.php; do php -l "$file"; done
+      - name: Routing regression
+        run: php tests/gateway-world-routing.php
