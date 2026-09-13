@@ -33,9 +33,26 @@ function gw001_club_logo(mixed $globalSmClubId): ?string {
     }
     return $logos[(string)$globalSmClubId]??null;
 }
+function gw001_national_logo(mixed $smNationalTeamId): ?string {
+    static $logos=null;
+    if ($logos===null) {
+        $logos=[];
+        try {
+            $pdo=imc_minisite_db(imc_minisite_config());
+            $rows=imc_minisite_rows($pdo,"SELECT m.`SM National Team ID` AS sm_national_team_id,c.image_url FROM `IMC Game World National Team Mapping` m JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`='GW001'");
+            foreach ($rows as $row) {
+                $url=trim((string)($row['image_url']??''));
+                if ($url!=='') $logos[(string)$row['sm_national_team_id']]=preg_replace('/^http:/i','https:',$url);
+            }
+        } catch (Throwable $e) {
+            $logos=[];
+        }
+    }
+    return $logos[(string)$smNationalTeamId]??null;
+}
 function gw001_identity(array $s, mixed $id, bool $national): ?array {
     if ($national) {
-        foreach ($s['nations_mapping'] as $n) if ((string)$n['SM National Team ID']===(string)$id) return ['kind'=>'nation','game_world_id'=>'GW001','national_team_id'=>(string)$n['National Team ID'],'sm_national_team_id'=>(string)$id,'name'=>$n['National Team Name']];
+        foreach ($s['nations_mapping'] as $n) if ((string)$n['SM National Team ID']===(string)$id) return ['kind'=>'nation','game_world_id'=>'GW001','national_team_id'=>(string)$n['National Team ID'],'sm_national_team_id'=>(string)$id,'name'=>$n['National Team Name'],'image_url'=>gw001_national_logo($id)];
     } else {
         foreach ($s['teams'] as $t) if ((string)$t['sm_world_club_id']===(string)$id) return ['kind'=>'club',...$t,'name'=>$t['team_name'],'image_url'=>gw001_club_logo($t['sm_club_id'])];
     }
