@@ -5,8 +5,11 @@ root=Path(__file__).resolve().parents[2]
 baseline=json.loads((Path(__file__).parent/'golden-master/source-baseline.json').read_text())
 paths=['minisite/GW001/'+n for n in (root/'minisite/GW001/exploration-manifest.txt').read_text().splitlines() if n.strip() and not n.startswith('.')]
 paths += [p for p in baseline['files'] if p.startswith('minisite/GW007/') and Path(p).suffix in ('.html','.css','.js','.ttf','.webp')]
-# Phase 2 verifies these live pages in the dedicated deployment workflow.
-paths=[p for p in paths if p not in {'minisite/GW001/results.html','minisite/GW001/schedule.html','minisite/GW007/results.html','minisite/GW007/schedule.html'}]
+# Active entry points are byte-verified after their dedicated deploy, not
+# concurrently against production while that deploy is still transferring them.
+active={'minisite/GW001/'+n+'.html' for n in ('index','results','schedule','match','club','manager','player','competitions','standings','archive')}
+active.update({'minisite/GW007/results.html','minisite/GW007/schedule.html'})
+paths=[p for p in paths if p not in active]
 decoded={p.with_suffix('.webp').relative_to(root).as_posix():base64.b64decode(p.read_text()) for p in (root/'minisite/GW007/assets').glob('*.b64')}
 paths += list(decoded)
 def check(path):
@@ -24,4 +27,3 @@ report={'baselineCommit':baseline['baselineCommit'],'checks':results,'pass':all(
 if len(sys.argv)>1:Path(sys.argv[1]).write_text(json.dumps(report,indent=2)+'\n')
 print(json.dumps({'pass':report['pass'],'files':len(results),'failures':[r for r in results if not r['equal']]},indent=2))
 sys.exit(0 if report['pass'] else 1)
-

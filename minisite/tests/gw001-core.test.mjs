@@ -41,3 +41,13 @@ test('report strings are escaped and source manager conflict stays visible',()=>
   const html=createViews(snapshot,{results:[],schedule:[]},{fixture,report,quality:['home_manager_source_conflict']}).match();
   assert.match(html,/Informazioni manager discordanti/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/<img src=x/);
 });
+test('club dossiers join numeric Site IDs to string snapshot IDs and preserve source-name deep links',()=>{
+  const team=snapshot.teams.find(t=>t.team_id==='146');
+  const fixture={sm_fixture_id:'123',home_sm_club_id:Number(team.sm_world_club_id),away_sm_club_id:1234,home_name:'CLUB AMÉRICA',away_name:'Away',home_identity:{kind:'club',...team},competition_key:'GW001|CUS|DOMESTIC|league|4',match_date:'2026-09-13',home_score:2,away_score:1};
+  for(const query of ['?id=146','?name=CLUB%20AM%C3%89RICA']){
+    globalThis.location={search:query};
+    const html=createViews(snapshot,{results:[fixture],schedule:[]},null).club();
+    assert.match(html,/<strong>1<\/strong><small>Risultati disponibili/);
+    assert.match(html,/data-fixture-id="123"/);
+  }
+});
