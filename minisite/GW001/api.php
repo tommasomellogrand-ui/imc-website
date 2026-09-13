@@ -37,7 +37,7 @@ function gw001_identity(array $s, mixed $id, bool $national): ?array {
     if ($national) {
         foreach ($s['nations_mapping'] as $n) if ((string)$n['SM National Team ID']===(string)$id) return ['kind'=>'nation','game_world_id'=>'GW001','national_team_id'=>(string)$n['National Team ID'],'sm_national_team_id'=>(string)$id,'name'=>$n['National Team Name']];
     } else {
-        foreach ($s['teams'] as $t) if ((string)$t['sm_world_club_id']===(string)$id) return ['kind'=>'club',...$t,'name'=>$t['team_name'],'image_url'=>gw001_club_logo($t['sm_club_id'])];
+        foreach ($s['teams'] as $t) if ((string)$t['sm_world_club_id']===(string)$id) return ['kind'=>'club',...$t,'name'=>$t['team_name'],'image_url'=>gw001_club_logo($id)];
     }
     return null;
 }
