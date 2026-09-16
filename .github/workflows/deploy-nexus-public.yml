@@ -1,0 +1,82 @@
+name: Deploy Nexus public runtime
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/deploy-nexus-public.yml
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Nexus public runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f nexus/index.html
+          test -f nexus/.htaccess
+          ! grep -Eiq 'AuthType|AuthName|AuthUserFile|Require[[:space:]]+valid-user' nexus/.htaccess
+          ! grep -Eiq '<input[^>]+type=["'"']password|signInWithPassword|sign_in_with_password' nexus/index.html
+
+      - name: Publish Nexus through Publication Bridge
+        env:
+          BRIDGE_TOKEN: ${{ secrets.IMC_PUBLICATION_BRIDGE_TOKEN || secrets.PUBLICATION_BRIDGE_TOKEN || secrets.BRIDGE_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${BRIDGE_TOKEN:-}" || { echo "BRIDGE_TOKEN_SECRET_MISSING"; exit 2; }
+          python3 - <<'PY'
+          import base64, json, mimetypes, os, pathlib, urllib.request, urllib.error
+
+          root = pathlib.Path('nexus')
+          endpoint = 'https://www.italianmastersclub.it/bridge/publication-bridge.php'
+          token = os.environ['BRIDGE_TOKEN']
+
+          def call(payload):
+              req = urllib.request.Request(endpoint, data=json.dumps(payload).encode(), headers={'Content-Type':'application/json','X-IMC-Bridge-Token':token}, method='POST')
+              try:
+                  with urllib.request.urlopen(req, timeout=90) as r:
+                      body=r.read().decode('utf-8','replace'); status=r.status
+              except urllib.error.HTTPError as e:
+                  body=e.read().decode('utf-8','replace'); status=e.code
+              try: data=json.loads(body)
+              except Exception: raise SystemExit(f'BRIDGE_NON_JSON HTTP {status}: {body[:500]}')
+              if status >= 400 or not data.get('ok'): raise SystemExit(f'BRIDGE_FAILED HTTP {status}: {data}')
+              return data
+
+          files=[p for p in root.rglob('*') if p.is_file()]
+          for p in files:
+              rel=p.as_posix()
+              raw=p.read_bytes()
+              call({'action':'write','path':rel,'encoding':'base64','content':base64.b64encode(raw).decode('ascii')})
+              print('PUBLISHED', rel, len(raw))
+          print('NEXUS_PUBLISHED_FILES', len(files))
+          PY
+
+      - name: Verify Nexus live without username/password challenge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import urllib.request, urllib.error
+          url='https://www.italianmastersclub.it/nexus/?imc_public_verify=1'
+          req=urllib.request.Request(url,headers={'User-Agent':'IMC-Nexus-Live-Verify/1.0','Cache-Control':'no-cache'})
+          try:
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  body=r.read().decode('utf-8','replace'); status=r.status; headers=r.headers
+          except urllib.error.HTTPError as e:
+              body=e.read().decode('utf-8','replace'); status=e.code; headers=e.headers
+          print('HTTP',status)
+          if status != 200: raise SystemExit(f'NEXUS_HTTP_{status}')
+          if headers.get('WWW-Authenticate'): raise SystemExit('NEXUS_AUTH_CHALLENGE_PRESENT')
+          if 'IMC Nexus' not in body: raise SystemExit('NEXUS_MARKER_MISSING')
+          print('NEXUS_LIVE_PUBLIC_OK')
+          PY
