@@ -1,0 +1,53 @@
+<?php
+declare(strict_types=1);
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store');
+header('X-Content-Type-Options: nosniff');
+function respond(array $data, int $status=200): never { http_response_code($status); echo json_encode($data,JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE); exit; }
+try {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') respond(['ok'=>false,'error'=>'method_not_allowed'],405);
+    $world = (string)($_GET['world'] ?? 'GW001');
+    if (!preg_match('/^GW00[1-9]$|^GW010$/D',$world)) respond(['ok'=>false,'error'=>'invalid_world'],422);
+    $resources = ['results'=>['IMC Site Results','site_result_id','match_date'],'schedule'=>['IMC Site Schedule','site_schedule_id','match_date'],'match_report'=>['IMC Site Match Report','site_match_report_id','match_date'],'transfers'=>['IMC Site Transfers','site_transfer_id','transfer_date']];
+    $resource=(string)($_GET['resource'] ?? 'results');
+    if (!isset($resources[$resource])) respond(['ok'=>false,'error'=>'invalid_resource'],422);
+    [$table,$id,$date]=$resources[$resource];
+    $config=require dirname(__DIR__,2).'/__imc_private_gateway/config.php';
+    $family=in_array($world,['GW002','GW003','GW007','GW008'],true)?'gold':'custom';
+    $cfg=$config['db'];
+    $pdo=new PDO(sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',$cfg['host'],$cfg['port'],$cfg[$family]),$cfg['user'],$cfg['pass'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]);
+    $where='game_world_id=?'; $params=[$world];
+    $search=trim((string)($_GET['search'] ?? ''));
+    if (strlen($search)>200) respond(['ok'=>false,'error'=>'invalid_search'],422);
+    if ($search!=='') {
+        $fields=$resource==='transfers'?['player_name','club_from','club_to']:['home_name','away_name','competition_key','sm_action'];
+        $where.=' AND ('.implode(' OR ',array_map(fn($f)=>"`$f` LIKE ?",$fields)).')';
+        foreach($fields as $f) $params[]='%'.$search.'%';
+    }
+    foreach(['from'=>'>=','to'=>'<='] as $key=>$op) if (!empty($_GET[$key])) {
+        $value=(string)$_GET[$key];
+        if(!preg_match('/^\d{4}-\d{2}-\d{2}$/D',$value)) respond(['ok'=>false,'error'=>'invalid_date'],422);
+        $where.=" AND `$date` $op ?"; $params[]=$value;
+    }
+    $detail=isset($_GET['fixture']);
+    if($detail) {
+        if($resource!=='match_report'||!ctype_digit((string)$_GET['fixture'])) respond(['ok'=>false,'error'=>'invalid_fixture'],422);
+        $where.=' AND sm_fixture_id=?'; $params[]=$_GET['fixture'];
+    }
+    $limit=min(100,max(1,(int)($_GET['limit']??50))); $offset=max(0,(int)($_GET['offset']??0));
+    $common='game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,synced_at';
+    $score='home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score';
+    $fields=match($resource){
+        'results'=>"$common,$score,result_status,competition_group_name",
+        'schedule'=>"$common,match_time",
+        'match_report'=>"$common,$score,home_manager_name,away_manager_name,stadium_name,attendance".($detail?',team_stats_json,players_json,events_json,tactics_json,commentary_json':''),
+        'transfers'=>'game_world_id,imc_transfer_number,player_id,player_name,club_from,club_to,transfer_date,amount_text,exchange_players,synced_at'
+    };
+    $pdo->beginTransaction();
+    $stmt=$pdo->prepare("SELECT COUNT(*) total,MAX(synced_at) updated_at FROM `$table` WHERE $where"); $stmt->execute($params); $meta=$stmt->fetch();
+    $direction=$resource==='schedule'?'ASC':'DESC';
+    $stmt=$pdo->prepare("SELECT `$id` AS site_id,$fields FROM `$table` WHERE $where ORDER BY `$date` $direction,`$id` $direction LIMIT $limit OFFSET $offset"); $stmt->execute($params); $rows=$stmt->fetchAll();
+    $pdo->commit();
+    foreach($rows as &$row)foreach($row as $key=>&$value)if(str_ends_with($key,'_json')||$key==='exchange_players')$value=$value===null?null:json_decode($value,true); unset($row,$value);
+    respond(['ok'=>true,'version'=>'nexus-public-2','world'=>$world,'resource'=>$resource,'source'=>$table,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset,'limit'=>$limit,'rows'=>$rows]);
+} catch(Throwable $e) { respond(['ok'=>false,'error'=>'read_unavailable'],503); }
