@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      # Dedicated bounded minisite deployments.
       - 'minisite/GW001/**'
       - 'minisite/GW007/**'
       - 'minisite/api/results-schedule.php'
@@ -12,14 +11,12 @@ on:
       - '.github/workflows/deploy-minisite-results-schedule.yml'
       - '.github/workflows/deploy-minisite-gw001.yml'
       - '.github/workflows/deploy-minisite-gw007.yml'
-      # Gateway changes have their own scoped deployment.
       - 'imc-universal-gateway/**'
       - '__imc_private_gateway/**'
       - 'tests/gateway-world-*'
       - 'docs/gateway-gw015-routing-pending.md'
       - '.github/workflows/test-gateway-world-routing.yml'
       - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
-      # Non-runtime Phase 1 foundation: never trigger the broad production upload.
       - 'minisite/platform/**'
       - 'minisite/tests/**'
       - '.github/workflows/minisite-platform-foundation.yml'
@@ -33,37 +30,31 @@ on:
       - 'site-assets/master/**'
       - 'docs/official-website/**'
       - '.github/workflows/deploy-imc-master.yml'
-      - '.github/workflows/deploy-website-aruba.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
-
 concurrency:
   group: imc-public-website-production
   cancel-in-progress: false
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Inject Game World build IDs
         shell: bash
         run: |
           set -euo pipefail
           sed -i "s/BUILD_ID/${GITHUB_SHA}/g" site-assets/gameworld/app-core.js || true
           for i in $(seq 1 15); do
-            n=$(printf "%03d" "$i")
-            d="gameworld${n}"
+            n=$(printf "%03d" "$i"); d="gameworld${n}"
             sed -i "s/BUILD_ID/${GITHUB_SHA}/g" "$d/index.html"
             grep -Fq "pilot-theme.css?v=${GITHUB_SHA}" "$d/index.html"
             grep -Fq "config.js?v=${GITHUB_SHA}" "$d/index.html"
             grep -Fq "/site-assets/gameworld/app-core.js?v=${GITHUB_SHA}" "$d/index.html"
           done
-
       - name: Validate package
         shell: bash
         run: |
@@ -73,6 +64,10 @@ jobs:
           test -s site-assets/js/imc-site.js
           test -s site-assets/images/imc-logo.png
           test -s site-assets/gameworld/app-core.js
+          test -s sensible-soccer-academy/world-cup-draw/index.html
+          test -s sensible-soccer-academy/world-cup-draw/api.php
+          test -s sensible-soccer-academy/world-cup-draw/live/index.html
+          php -l sensible-soccer-academy/world-cup-draw/api.php
           test -s sensible-soccer-academy-creation/gw-setting/draft-matrix.html
           test -s sensible-soccer-academy-creation/gw-setting/.htaccess
           test -s sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg
@@ -86,14 +81,9 @@ jobs:
           test -s sensible-soccer-academy-creation/draw-replay/replay.php
           php -l sensible-soccer-academy-creation/draw-replay/replay.php
           for i in $(seq 1 15); do
-            n=$(printf "%03d" "$i")
-            d="gameworld${n}"
-            test -s "$d/index.html"
-            test -s "$d/config.js"
-            test -s "$d/pilot-theme.css"
-            test -s "$d/.htaccess"
-            grep -Fq "GW${n}" "$d/config.js"
-            grep -Fq "Game word ${n}" "$d/config.js"
+            n=$(printf "%03d" "$i"); d="gameworld${n}"
+            test -s "$d/index.html"; test -s "$d/config.js"; test -s "$d/pilot-theme.css"; test -s "$d/.htaccess"
+            grep -Fq "GW${n}" "$d/config.js"; grep -Fq "Game word ${n}" "$d/config.js"
           done
           test -s api/imc-gateway/index.php
           test -s api/imc-gateway/config.php
@@ -105,7 +95,6 @@ jobs:
           php -l api/imc-data/v1/site-ready.php
           test -s __imc-gateway/__imc-gateway/index.php
           test -s __imc-sm-master/admin/database-manager/normalizer.php
-
       - name: Validate Aruba secrets
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -114,7 +103,6 @@ jobs:
         run: |
           set -euo pipefail
           for name in ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD; do test -n "${!name:-}"; done
-
       - name: Upload website and all Game Worlds
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -125,68 +113,79 @@ jobs:
           import io, os, ssl, time
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
-          host='ftp.italianmastersclub.it'; port=21
+          host='ftp.italianmastersclub.it'; port=21; remote_root='/www.italianmastersclub.it'
           username=os.environ['ARUBA_FTP_USERNAME']; password=os.environ['ARUBA_FTP_PASSWORD']
-          remote_root='/www.italianmastersclub.it'
-          ctx=ssl.create_default_context(); ctx.check_hostname=False
-          ftp=None; last_error=None
+          ctx=ssl.create_default_context(); ctx.check_hostname=False; ftp=None; last_error=None
           for _ in range(3):
               c=FTP_TLS(context=ctx)
-              try:
-                  c.connect(host,port,timeout=60); c.login(username,password); c.prot_p(); c.set_pasv(True); ftp=c; break
+              try: c.connect(host,port,timeout=60); c.login(username,password); c.prot_p(); c.set_pasv(True); ftp=c; break
               except Exception as e:
                   last_error=e
-                  try: c.close()
-                  except Exception: pass
+                  try:c.close()
+                  except Exception:pass
                   time.sleep(5)
           if ftp is None: raise SystemExit(f'FTPS Aruba non riuscito: {type(last_error).__name__}: {last_error}')
-          def ensure_dir(remote_path):
+          def ensure_dir(path):
               ftp.cwd('/')
-              for part in [p for p in remote_path.split('/') if p]:
-                  try: ftp.cwd(part)
-                  except error_perm: ftp.mkd(part); ftp.cwd(part)
-          def clear_dir(remote_path):
-              try: names=ftp.nlst(remote_path)
-              except error_perm: return
+              for part in [p for p in path.split('/') if p]:
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          def clear_dir(path):
+              try:names=ftp.nlst(path)
+              except error_perm:return
               for item in names:
-                  name=item.rsplit('/',1)[-1]
-                  if name in ('.','..'): continue
-                  try: ftp.delete(item)
+                  if item.rsplit('/',1)[-1] in ('.','..'):continue
+                  try:ftp.delete(item)
                   except error_perm:
                       clear_dir(item)
-                      try: ftp.rmd(item)
-                      except error_perm: pass
-          sensible_remote=f"{remote_root}/sensible-soccer-academy"
-          clear_dir(sensible_remote); ensure_dir(sensible_remote)
+                      try:ftp.rmd(item)
+                      except error_perm:pass
+          sensible_remote=f'{remote_root}/sensible-soccer-academy'; clear_dir(sensible_remote); ensure_dir(sensible_remote)
           for i in range(1,16):
-              remote=f"{remote_root}/gameworld{i:03d}"
-              clear_dir(remote); ensure_dir(remote)
+              remote=f'{remote_root}/gameworld{i:03d}'; clear_dir(remote); ensure_dir(remote)
           excluded={'site-assets/css/game-world.css','site-assets/css/gameworld-engine.css','site-assets/js/gameworld-engine.js','site-assets/js/imc-data-service.js','site-assets/js/team-hub-detail.js'}
           files=[Path('index.html')]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
+          files += [Path('sensible-soccer-academy/world-cup-draw/index.html'),Path('sensible-soccer-academy/world-cup-draw/api.php'),Path('sensible-soccer-academy/world-cup-draw/live/index.html')]
           files += [Path('sensible-soccer-academy-creation/gw-setting/draft-matrix.html'),Path('sensible-soccer-academy-creation/gw-setting/.htaccess'),Path('sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg'),Path('sensible-soccer-academy-creation/gw-setting/draw-live.php')]
           files += [Path('sensible-soccer-academy-creation/draw-replay/index.html'),Path('sensible-soccer-academy-creation/draw-replay/replay.php')]
           for i in range(1,16):
-              d=Path(f'gameworld{i:03d}')
-              files += [d/'index.html',d/'config.js',d/'pilot-theme.css',d/'.htaccess']
+              d=Path(f'gameworld{i:03d}'); files += [d/'index.html',d/'config.js',d/'pilot-theme.css',d/'.htaccess']
           files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('api/imc-gateway/database.php'),Path('api/imc-data/v1/site-ready.php'),Path('api/imc-data/v1/.htaccess'),Path('__imc-gateway/__imc-gateway/index.php'),Path('__imc-sm-master/admin/database-manager/normalizer.php')]
           for local in files:
-              rel=local.as_posix(); parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f"{remote_root.rstrip('/')}/{parent}"
+              parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f'{remote_root}/{parent}'
               ensure_dir(dest); data=local.read_bytes()
-              with local.open('rb') as fh: ftp.storbinary(f'STOR {local.name}',fh)
-              check=io.BytesIO(); ftp.retrbinary(f'RETR {local.name}',check.write)
-              if check.getvalue()!=data: raise SystemExit(f'Verifica upload fallita: {rel}')
-
-          enhancement_local=Path('sensible-soccer-academy-creation/gw-setting/draft-enhancements.js')
-          chat_local=Path('sensible-soccer-academy-creation/gw-setting/draft-chat.js')
-          live_local=Path('sensible-soccer-academy-creation/gw-setting/draft-live.js')
-          recorder_local=Path('sensible-soccer-academy-creation/gw-setting/replay-recorder.js')
-          runtime_dest=f"{remote_root}/sensible-soccer-academy-creation/gw-setting"
-          ensure_dir(runtime_dest)
+              with local.open('rb') as fh:ftp.storbinary(f'STOR {local.name}',fh)
+              check=io.BytesIO();ftp.retrbinary(f'RETR {local.name}',check.write)
+              if check.getvalue()!=data:raise SystemExit(f'Verifica upload fallita: {local}')
+          state_dest=f'{remote_root}/sensible-soccer-academy/world-cup-draw'; ensure_dir(state_dest)
+          try:ftp.size('state.json')
+          except Exception:ftp.storbinary('STOR state.json',io.BytesIO(b'{"event":"waiting","phase":"idle","current_manager":null,"current_slot":null,"assignments":[]}\n'))
+          try:ftp.sendcmd('SITE CHMOD 666 state.json')
+          except Exception:pass
+          enhancement_local=Path('sensible-soccer-academy-creation/gw-setting/draft-enhancements.js'); chat_local=Path('sensible-soccer-academy-creation/gw-setting/draft-chat.js'); live_local=Path('sensible-soccer-academy-creation/gw-setting/draft-live.js'); recorder_local=Path('sensible-soccer-academy-creation/gw-setting/replay-recorder.js')
+          runtime_dest=f'{remote_root}/sensible-soccer-academy-creation/gw-setting'; ensure_dir(runtime_dest)
           runtime_data=enhancement_local.read_bytes()+b'\n'+chat_local.read_bytes()+b'\n'+live_local.read_bytes()+b'\n'+recorder_local.read_bytes()
-          ftp.storbinary('STOR crest-overrides.js',io.BytesIO(runtime_data))
-          runtime_check=io.BytesIO(); ftp.retrbinary('RETR crest-overrides.js',runtime_check.write)
-          if runtime_check.getvalue()!=runtime_data: raise SystemExit('Verifica upload fallita: Draft Matrix runtime bundle')
-          ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; GW010 runtime + Chat + Live Sync + Replay attivi')
+          ftp.storbinary('STOR crest-overrides.js',io.BytesIO(runtime_data)); check=io.BytesIO();ftp.retrbinary('RETR crest-overrides.js',check.write)
+          if check.getvalue()!=runtime_data:raise SystemExit('Verifica upload fallita: Draft Matrix runtime bundle')
+          ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; World Cup Draw incluso')
           PY
-
+      - name: Verify GW010 World Cup Draw live
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import urllib.request,time
+          urls=['https://www.italianmastersclub.it/sensible-soccer-academy/world-cup-draw/','https://www.italianmastersclub.it/sensible-soccer-academy/world-cup-draw/live/','https://www.italianmastersclub.it/sensible-soccer-academy/world-cup-draw/api.php']
+          for url in urls:
+              last=None
+              for _ in range(6):
+                  try:
+                      req=urllib.request.Request(url,headers={'User-Agent':'IMC-Deploy-Verify/1.0'})
+                      with urllib.request.urlopen(req,timeout=30) as r:
+                          body=r.read()
+                          if r.status==200 and body:
+                              print(url,'OK',len(body));break
+                  except Exception as e:last=e;time.sleep(5)
+              else:raise SystemExit(f'Live verification failed: {url}: {last}')
+          PY
