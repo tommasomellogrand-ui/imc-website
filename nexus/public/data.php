@@ -10,9 +10,10 @@ try {
     if (!preg_match('/^GW00[1-9]$|^GW010$/D',$world)) respond(['ok'=>false,'error'=>'invalid_world'],422);
     $resources = ['results'=>['IMC Site Results','site_result_id','match_date'],'schedule'=>['IMC Site Schedule','site_schedule_id','match_date'],'match_report'=>['IMC Site Match Report','site_match_report_id','match_date'],'transfers'=>['IMC Site Transfers','site_transfer_id','transfer_date']];
     $resource=(string)($_GET['resource'] ?? 'results');
-    if ($resource==='worlds') {
+    if ($resource==='worlds'||$resource==='directory') {
         require_once __DIR__.'/core.php';
         $config=require dirname(__DIR__,2).'/__imc_private_gateway/config.php';
+        if ($resource==='directory') respond(['ok'=>true,'core'=>nexus_world_directory(nexus_core_db($config['db']),$world)]);
         respond(['ok'=>true,'source'=>'MYSQL_ARUBA_CORE','worlds'=>nexus_worlds(nexus_core_db($config['db']))]);
     }
     if (!isset($resources[$resource])) respond(['ok'=>false,'error'=>'invalid_resource'],422);
