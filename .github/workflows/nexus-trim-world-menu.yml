@@ -1,0 +1,39 @@
+name: Trim Nexus world menu
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/nexus-trim-world-menu.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove requested entries from visible world menu
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('nexus/public/site.js')
+          s=p.read_text()
+          old="const links=Object.entries(sections).map(([id,title],i)=>`<a href=\"?world=${encodeURIComponent(state.world)}&resource=${id}\" data-resource=\"${id}\" ${state.resource===id?'aria-current=\"true\"':''}><span>${String(i+1).padStart(2,'0')}</span>${esc(title)}</a>`).join('');"
+          new="const menuEntries=[['01','home'],['02','competitions'],['07','manager'],['08','player'],['09','club'],['11','transfers']];\nconst links=menuEntries.map(([n,id])=>`<a href=\"?world=${encodeURIComponent(state.world)}&resource=${id}\" data-resource=\"${id}\" ${state.resource===id?'aria-current=\"true\"':''}><span>${n}</span>${esc(sections[id])}</a>`).join('');"
+          if old not in s: raise SystemExit('WORLD_MENU_PATTERN_NOT_FOUND')
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check nexus/public/site.js
+          grep -F "['01','home'],['02','competitions'],['07','manager'],['08','player'],['09','club'],['11','transfers']" nexus/public/site.js
+      - name: Commit menu change
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nexus/public/site.js
+          git commit -m "Nexus: hide Results Calendar Match Center Standings Archive from world menu"
+          git push origin main
