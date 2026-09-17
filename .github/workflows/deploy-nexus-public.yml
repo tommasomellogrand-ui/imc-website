@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate public website
         run: |
+          php -l nexus/public/core.php
           php -l nexus/public/data.php
           node --check nexus/public/site.js
           ! grep -Eiq 'supabase|v1/app|password|loginView' nexus/index.html nexus/public/site.js

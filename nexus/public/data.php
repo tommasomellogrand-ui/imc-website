@@ -10,6 +10,11 @@ try {
     if (!preg_match('/^GW00[1-9]$|^GW010$/D',$world)) respond(['ok'=>false,'error'=>'invalid_world'],422);
     $resources = ['results'=>['IMC Site Results','site_result_id','match_date'],'schedule'=>['IMC Site Schedule','site_schedule_id','match_date'],'match_report'=>['IMC Site Match Report','site_match_report_id','match_date'],'transfers'=>['IMC Site Transfers','site_transfer_id','transfer_date']];
     $resource=(string)($_GET['resource'] ?? 'results');
+    if ($resource==='worlds') {
+        require_once __DIR__.'/core.php';
+        $config=require dirname(__DIR__,2).'/__imc_private_gateway/config.php';
+        respond(['ok'=>true,'source'=>'MYSQL_ARUBA_CORE','worlds'=>nexus_worlds(nexus_core_db($config['db']))]);
+    }
     if (!isset($resources[$resource])) respond(['ok'=>false,'error'=>'invalid_resource'],422);
     [$table,$id,$date]=$resources[$resource];
     $config=require dirname(__DIR__,2).'/__imc_private_gateway/config.php';
@@ -38,10 +43,10 @@ try {
     $common='game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,synced_at';
     $score='home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score';
     $fields=match($resource){
-        'results'=>"$common,$score,result_status,competition_group_name",
-        'schedule'=>"$common,match_time",
-        'match_report'=>"$common,$score,home_manager_name,away_manager_name,stadium_name,attendance".($detail?',team_stats_json,players_json,events_json,tactics_json,commentary_json':''),
-        'transfers'=>'game_world_id,imc_transfer_number,player_id,player_name,club_from,club_to,transfer_date,amount_text,exchange_players,synced_at'
+        'results'=>"$common,$score,result_status,competition_group_name,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id",
+        'schedule'=>"$common,match_time,home_sm_team_id,away_sm_team_id,home_sm_manager_id,away_sm_manager_id",
+        'match_report'=>"$common,$score,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id,home_manager_name,away_manager_name,stadium_name,attendance".($detail?',team_stats_json,players_json,events_json,tactics_json,commentary_json':''),
+        'transfers'=>'game_world_id,imc_transfer_number,player_id,player_name,club_from,club_to,from_sm_world_club_id,to_sm_world_club_id,transfer_date,amount_text,exchange_players,synced_at'
     };
     $pdo->beginTransaction();
     $stmt=$pdo->prepare("SELECT COUNT(*) total,MAX(synced_at) updated_at FROM `$table` WHERE $where"); $stmt->execute($params); $meta=$stmt->fetch();
@@ -49,5 +54,7 @@ try {
     $stmt=$pdo->prepare("SELECT `$id` AS site_id,$fields FROM `$table` WHERE $where ORDER BY `$date` $direction,`$id` $direction LIMIT $limit OFFSET $offset"); $stmt->execute($params); $rows=$stmt->fetchAll();
     $pdo->commit();
     foreach($rows as &$row)foreach($row as $key=>&$value)if(str_ends_with($key,'_json')||$key==='exchange_players')$value=$value===null?null:json_decode($value,true); unset($row,$value);
-    respond(['ok'=>true,'version'=>'nexus-public-2','world'=>$world,'resource'=>$resource,'source'=>$table,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset,'limit'=>$limit,'rows'=>$rows]);
+    require_once __DIR__.'/core.php';
+    $core=nexus_core_enrich(nexus_core_db($cfg),$world,$resource,$rows);
+    respond(['ok'=>true,'core'=>$core,'version'=>'nexus-public-2','world'=>$world,'resource'=>$resource,'source'=>$table,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset,'limit'=>$limit,'rows'=>$rows]);
 } catch(Throwable $e) { respond(['ok'=>false,'error'=>'read_unavailable'],503); }

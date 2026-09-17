@@ -9,7 +9,7 @@ ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
 ftp.prot_p()
 ftp.set_pasv(True)
 # Only the public Nexus entry point and its dependencies are published.
-files=['nexus/public/data.php','nexus/public/site.css','nexus/public/site.js','nexus/assets/imc-logo.png','nexus/.htaccess','nexus/index.html']
+files=['nexus/public/core.php','nexus/public/data.php','nexus/public/site.css','nexus/public/site.js','nexus/assets/imc-logo.png','nexus/.htaccess','nexus/index.html']
 for name in files:
     p=Path(name)
     ftp.cwd('/')
