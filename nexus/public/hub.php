@@ -46,7 +46,7 @@ function nexus_hub(PDO $db,PDO $core,string $world): array {
 }
 function nexus_players(PDO $db,PDO $core,string $world): array {
     $params=[$world];$where='s.game_world_id=? AND NOT EXISTS (SELECT 1 FROM `IMC Site Player Codex` newer WHERE newer.game_world_id=s.game_world_id AND newer.player_id=s.player_id AND (COALESCE(newer.imported_at,\'1000-01-01\')>COALESCE(s.imported_at,\'1000-01-01\') OR (newer.imported_at<=>s.imported_at AND newer.site_player_codex_id>s.site_player_codex_id)))';
-    foreach(['search'=>'full_name','club'=>'current_sm_club_id','position'=>'position','player'=>'player_id'] as $key=>$col)if(($_GET[$key]??'')!==''){$value=substr((string)$_GET[$key],0,200);$like=in_array($key,['search','position'],true);$where.=" AND s.`$col` ".($like?'LIKE ?':'= ?');$params[]=$like?'%'.$value.'%':$value;}
+    foreach(['search'=>'full_name','club'=>'current_sm_club_id','position'=>'position','player'=>'player_id'] as $key=>$col)if(($_GET[$key]??'')!==''){$value=substr((string)$_GET[$key],0,200);$like=$key==='search';$role=$key==='position';$where.=" AND s.`$col` ".($role?'REGEXP ?':($like?'LIKE ?':'= ?'));$params[]=$role?nexus_position_pattern($value):($like?'%'.$value.'%':$value);}
     $value="(CASE WHEN TRIM(s.market_value) REGEXP '^[€£$]?[0-9]+([.,][0-9]+)?[[:space:]]*[MKmk]?$' THEN CAST(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(s.market_value),'€',''),'£',''),'$',''),'M',''),'K',''),',','.') AS DECIMAL(18,3))*CASE WHEN UPPER(TRIM(s.market_value)) LIKE '%M' THEN 1000000 WHEN UPPER(TRIM(s.market_value)) LIKE '%K' THEN 1000 ELSE 1 END ELSE NULL END)";
     foreach(['rating'=>'s.rating','age'=>'s.age','value'=>$value] as $prefix=>$column)foreach(['min'=>'>=','max'=>'<='] as $suffix=>$op){$input=$_GET[$prefix.'_'.$suffix]??'';if($input!==''){if(!is_numeric($input)||(float)$input<0)respond(['ok'=>false,'error'=>'invalid_filter'],422);$where.=" AND $column $op ?";$params[]=(float)$input*($prefix==='value'?1000000:1);}}
     $orders=['rating'=>'s.rating DESC','age'=>'s.age ASC','value'=>"$value DESC",'name'=>'s.full_name ASC'];$sort=$orders[$_GET['sort']??'rating']??$orders['rating'];
@@ -69,7 +69,7 @@ function nexus_stats(PDO $db,string $world): array {
 }
 function nexus_global_players(PDO $core,string $world): array {
     $params=[];$where='1=1';
-    foreach(['search'=>"COALESCE(d.full_name,CONCAT_WS(' ',p.forename,p.surname))",'position'=>'d.position','club'=>'d.soccerwiki_club_id','player'=>'p.id'] as $key=>$col)if(($_GET[$key]??'')!==''){$like=in_array($key,['search','position'],true);$where.=" AND $col ".($like?'LIKE ?':'= ?');$params[]=$like?'%'.substr((string)$_GET[$key],0,200).'%':(string)$_GET[$key];}
+    foreach(['search'=>"COALESCE(d.full_name,CONCAT_WS(' ',p.forename,p.surname))",'position'=>'d.position','club'=>'d.soccerwiki_club_id','player'=>'p.id'] as $key=>$col)if(($_GET[$key]??'')!==''){$like=$key==='search';$role=$key==='position';$where.=" AND $col ".($role?'REGEXP ?':($like?'LIKE ?':'= ?'));$params[]=$role?nexus_position_pattern((string)$_GET[$key]):($like?'%'.substr((string)$_GET[$key],0,200).'%':(string)$_GET[$key]);}
     foreach(['rating'=>'d.rating','age'=>'d.age','value'=>'d.market_value'] as $prefix=>$col)foreach(['min'=>'>=','max'=>'<='] as $suffix=>$op){$input=$_GET[$prefix.'_'.$suffix]??'';if($input!==''){if(!is_numeric($input)||(float)$input<0)respond(['ok'=>false,'error'=>'invalid_filter'],422);$where.=" AND $col $op ?";$params[]=(float)$input*($prefix==='value'?1000000:1);}}
     $from='`IMC Player Codex Global` p LEFT JOIN `IMC Player Codex Global Data` d ON d.player_id=p.id';
     $meta=nexus_core_rows($core,"SELECT COUNT(*) total,MAX(d.updated_at) updated_at FROM $from WHERE $where",$params)[0];
@@ -79,4 +79,10 @@ function nexus_global_players(PDO $core,string $world): array {
     if(!empty($_GET['player'])&&$rows)$rows[0]['rating_history']=nexus_core_rows($core,'SELECT change_date,old_rating,new_rating FROM `IMC Player Codex Global Rating History` WHERE player_id=? ORDER BY change_date DESC LIMIT 100',[$_GET['player']]);
     $clubs=nexus_core_rows($core,'SELECT DISTINCT soccerwiki_club_id id,soccerwiki_club_name name FROM `IMC Player Codex Global Data` WHERE soccerwiki_club_id IS NOT NULL ORDER BY soccerwiki_club_name');
     return ['ok'=>true,'world'=>$world,'scope'=>'global','rows'=>$rows,'clubs'=>$clubs,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset];
+}
+
+function nexus_position_pattern(string $role): string {
+    $roles=['P'=>'P(T)?','D'=>'D','CD'=>'CD','CC'=>'CC','CO'=>'CO','A'=>'A'];
+    if(!isset($roles[$role]))respond(['ok'=>false,'error'=>'invalid_position'],422);
+    return '(^|,)[[:space:]]*'.$roles[$role].'([(]|,|$)';
 }
