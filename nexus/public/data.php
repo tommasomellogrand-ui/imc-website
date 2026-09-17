@@ -74,6 +74,16 @@ try {
     require_once __DIR__.'/core.php';
     $core=nexus_core_enrich(nexus_core_db($cfg),$world,$resource,$rows);
     $facets=[];
-    if($resource==='transfers')$facets=nexus_core_rows($pdo,"SELECT id,MAX(name) name FROM (SELECT COALESCE(CAST(from_sm_world_club_id AS CHAR),CONCAT('name:',club_from)) id,club_from name FROM `IMC Site Transfers` WHERE game_world_id=? UNION ALL SELECT COALESCE(CAST(to_sm_world_club_id AS CHAR),CONCAT('name:',club_to)) id,club_to name FROM `IMC Site Transfers` WHERE game_world_id=?) clubs WHERE id IS NOT NULL AND name IS NOT NULL GROUP BY id ORDER BY name,id",[$world,$world]);
+    if($resource==='transfers'){
+        $teams=[];
+        foreach(['from'=>'club_from','to'=>'club_to'] as $side=>$nameField){
+            foreach(nexus_core_rows($pdo,"SELECT DISTINCT `{$side}_sm_world_club_id` id,`$nameField` name FROM `IMC Site Transfers` WHERE game_world_id=?",[$world]) as $team){
+                if(!$team['name'])continue;
+                $key=$team['id']===null?'name:'.$team['name']:(string)$team['id'];
+                $teams[$key]=['id'=>$key,'name'=>$team['name']];
+            }
+        }
+        $facets=array_values($teams);usort($facets,fn($a,$b)=>strcasecmp($a['name'],$b['name']));
+    }
     respond(['ok'=>true,'clubs'=>$facets,'core'=>$core,'version'=>'nexus-public-2','world'=>$world,'resource'=>$resource,'source'=>$table,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset,'limit'=>$limit,'rows'=>$rows]);
 } catch(Throwable $e) { respond(['ok'=>false,'error'=>'read_unavailable'],503); }
