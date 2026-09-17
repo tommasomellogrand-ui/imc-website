@@ -16,7 +16,7 @@ try {
         if ($resource==='directory') respond(['ok'=>true,'core'=>nexus_world_directory(nexus_core_db($config['db']),$world)]);
         respond(['ok'=>true,'source'=>'MYSQL_ARUBA_CORE','worlds'=>nexus_worlds(nexus_core_db($config['db']))]);
     }
-    if (!isset($resources[$resource])&&!in_array($resource,['catalog','competition','players','stats','manager_profile','team_profile'],true)) respond(['ok'=>false,'error'=>'invalid_resource'],422);
+    if (!isset($resources[$resource])&&!in_array($resource,['catalog','competition','players','stats','manager_profile','team_profile','competition_reports'],true)) respond(['ok'=>false,'error'=>'invalid_resource'],422);
 
     $config=require dirname(__DIR__,2).'/__imc_private_gateway/config.php';
     $family=in_array($world,['GW002','GW003','GW007','GW008'],true)?'gold':'custom';
@@ -29,6 +29,7 @@ try {
     if($resource==='competition')respond(nexus_hub($pdo,$coreDb,$world));
     if($resource==='players')respond(($_GET['scope']??'world')==='global'?nexus_global_players($coreDb,$world):nexus_players($pdo,$coreDb,$world));
     if($resource==='stats')respond(nexus_stats($pdo,$world));
+    if($resource==='competition_reports')respond(nexus_competition_reports($pdo,$coreDb,$world));
     if($resource==='manager_profile')respond(nexus_manager_profile($pdo,$coreDb,$world));
     if($resource==='team_profile')respond(nexus_team_profile($pdo,$coreDb,$world));
     [$table,$id,$date]=$resources[$resource];

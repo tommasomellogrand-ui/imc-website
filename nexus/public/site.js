@@ -141,9 +141,9 @@ async function managerProfile(c,signal){
  }else if(state.profileTab==='trophy'){
  const candidates=new Map();for(const r of rows){if(!r.competition_key||!r.imc_season)continue;if(/^(finale?|playoff finale?)$/i.test(r.competition_stage||'')||/^(finale?|playoff finale?)$/i.test(r.competition_round||'')||['charityshield','supercup'].includes(r.sm_action))candidates.set(r.competition_key+'|'+r.imc_season,r)}
  const trophies=[];for(const r of candidates.values()){
- const hub=await cached({world:state.world,resource:'competition',competition:r.competition_key,season:r.imc_season},signal);
- const done=L.unique(hub.results).filter(L.completed),oneOff=['charityshield','supercup'].includes(hub.competition.sm_action)&&done.length===1&&hub.schedule.length===0;
- const w=L.winner(oneOff?[{...done[0],competition_stage:'Finale'}]:hub.results,hub.schedule);
+ const hub=await cached({world:state.world,resource:'competition_reports',competition:r.competition_key,season:r.imc_season},signal);
+ const done=L.unique(hub.reports).filter(L.completed),oneOff=['charityshield','supercup'].includes(hub.competition.sm_action)&&done.length===1&&hub.schedule.length===0;
+ const w=L.winner(oneOff?[{...done[0],competition_stage:'Finale'}]:hub.reports,hub.schedule);
  const report=w&&rows.find(x=>sameId(x.sm_fixture_id,w.match.sm_fixture_id));
  if(w&&report&&L.managerSide(report,id)===w.side)trophies.push(`<article class="card trophy-card"><span class="eyebrow">VINCITORE · STAGIONE ${esc(r.imc_season)}</span><h3>${go({resource:'competitions',competition:r.competition_key,season:r.imc_season,manager:'',tab:'trophy',offset:0},esc(compName(hub.competition)))}</h3>${entity(w.core,w.name)}<p>${date(w.match.match_date)}</p>${matchCard(w.match)}</article>`);
  }

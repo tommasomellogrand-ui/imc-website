@@ -38,7 +38,8 @@ async function render(query){
    case 'catalog':data={rows:[cmp]};break;
    case 'competition':data={competition:cmp,core:c,results:[match(1,10,20,2,1,{match_date:'2026-09-01'})],schedule:[]};break;
    case 'stats':data={rows:[]};break;
-   case 'manager_profile':data={manager:{sm_manager_id:123},assignments:c.managers,source:'IMC Site Match Report',rows:[match(20,10,20,2,1,{match_date:'2026-09-01',competition_group:'DOMESTIC',home_sm_manager_id:123,away_sm_manager_id:456,away_manager_name:'Opponent Test'})]};break;
+   case 'manager_profile':data={manager:{sm_manager_id:123},assignments:c.managers,source:'IMC Site Match Report',rows:[match(20,10,20,2,1,{match_date:'2026-09-01',competition_group:'DOMESTIC',home_sm_manager_id:123,away_sm_manager_id:456,away_manager_name:'Opponent Test',competition_stage:'Finale',imc_season:1,competition_key:cmp.competition_key})]};break;
+   case 'competition_reports':data={competition:cmp,reports:[match(20,10,20,2,1,{match_date:'2026-09-01',competition_stage:'Finale',home_sm_manager_id:123,away_sm_manager_id:456})],schedule:[]};break;
    case 'team_profile':data={team:c.clubs[0],source:'IMC Site Match Report',rows:[match(20,10,20,2,1,{match_date:'2026-09-01'})]};break;
    case 'players':data={rows:[{player_id:1,full_name:'Player Test',rating:90,market_value:'1M',current_club:'Club 10'}],clubs:[],total:1};break;
    case 'transfers':data={rows:[],total:0};break;
@@ -89,6 +90,7 @@ test('all manager tabs and team statistics are routed through report profile end
  const r=await render('?world=GW003&resource=manager&manager=MNG001&profileTab='+tab+'&opponent=456');
  assert.ok(r.requests.some(q=>q.resource==='manager_profile'));assert.ok(!r.requests.some(q=>q.resource==='results'));assert.ok(r.html.includes('match report'));assert.ok(!r.status.includes('non disponibili'));
  if(tab==='h2h')assert.ok(r.html.includes('Opponent Test'));
+ if(tab==='trophy'){assert.ok(r.html.includes('VINCITORE'));assert.ok(r.requests.some(q=>q.resource==='competition_reports'));assert.ok(!r.requests.some(q=>q.resource==='competition'));}
  }
  const t=await render('?world=GW003&resource=club&team=1&profileTab=stats');assert.ok(t.requests.some(q=>q.resource==='team_profile'));assert.ok(t.html.includes('Vittorie'));
 });

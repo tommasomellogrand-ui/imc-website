@@ -75,3 +75,11 @@ for i in range(1,11):
             tid=str(profile['team']['sm_team_id'])
             assert all(r['game_world_id']==world and tid in [str(r['home_sm_club_id']),str(r['away_sm_club_id'])] for r in profile['rows'])
     print('REPORT_PROFILES_OK',world)
+
+report_trophy=json.loads(get('public/data.php?'+urlencode(dict(world='GW001',resource='manager_profile',manager='MNG004'))))
+finals=[r for r in report_trophy['rows'] if 'final' in str(r.get('competition_stage','')).lower() and r.get('competition_key')]
+if finals:
+    competition=json.loads(get('public/data.php?'+urlencode(dict(world='GW001',resource='competition_reports',competition=finals[0]['competition_key']))))
+    assert competition['ok'] and competition['source']=='IMC Site Match Report'
+    assert all(r['game_world_id']=='GW001' and r['competition_key']==finals[0]['competition_key'] for r in competition['reports'])
+    print('MANAGER_TROPHY_REPORT_SOURCE_OK')

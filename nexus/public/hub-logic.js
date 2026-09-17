@@ -10,7 +10,7 @@ function winner(results,schedule){const finals=unique(results).filter(r=>/^(fina
 
 function managerSide(r,id){if(!text(id))return null;const h=text(r.home_sm_manager_id)===text(id),a=text(r.away_sm_manager_id)===text(id);return h===a?null:h?'home':'away'}
 function managerRows(rows,id,assignments,national=false){return unique(rows).filter(r=>{
- const type=token(r.competition_group);const isNational=['nations','national'].includes(type);
+ const type=token(r.competition_group).replace(/ competition$/, '');const isNational=['nations','national'].includes(type);
  if(!['nations','national','domestic','international'].includes(type)||isNational!==national||!managerSide(r,id)||!completed(r)||!r.match_date)return false;
  return true;
 })}
