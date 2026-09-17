@@ -23,6 +23,9 @@ function worldMenus(){
 const name=worlds[state.world];$('worldTitle').textContent=name;$('menuWorld').textContent=state.world+' · '+name;$('mobileWorldTitle').textContent=state.world+' · '+name;
 const links=Object.entries(sections).map(([id,title],i)=>`<a href="?world=${encodeURIComponent(state.world)}&resource=${id}" data-resource="${id}" ${state.resource===id?'aria-current="true"':''}><span>${String(i+1).padStart(2,'0')}</span>${esc(title)}</a>`).join('');
 $('worldMenu').innerHTML=links;$('tabs').innerHTML=links;$('mobileWorldMenu').innerHTML=links;
+const icons={manager:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-5 4-7 8-7s6.8 2 8 7"/>',club:'<path d="M12 3 4 7v5c0 5 3.2 8 8 9 4.8-1 8-4 8-9V7Z"/><path d="M8 10h8M9 14h6"/>',home:'<path d="M3 10 12 3l9 7v11H3Z"/><path d="M9 21v-8h6v8"/>',competitions:'<path d="M8 4h8v4c0 3-1.8 5-4 5s-4-2-4-5Z"/><path d="M6 5H4v2c0 2 1.3 3 3 3M18 5h2v2c0 2-1.3 3-3 3M12 13v4M8 21h8M9 17h6v4"/>'};
+$('bottomWorldMenu').setAttribute('aria-label','Navigazione mobile · '+state.world+' · '+name);
+$('bottomWorldMenu').innerHTML=[['manager','Manager'],['club','Club'],['home','Home'],['competitions','Competition'],['archive','Trophy Room']].map(([id,title])=>`<a href="?world=${encodeURIComponent(state.world)}&resource=${id}" data-resource="${id}" aria-current="${state.resource===id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">${icons[id]||icons.competitions}</svg><span>${title}</span></a>`).join('');
 }
 async function directoryView(signal){const d=await fetchData({world:state.world,resource:'directory'},signal);const c=d.core;let rows=[];
 if(c.world?.world_name){worlds[state.world]=c.world.world_name;worldMenus()}
