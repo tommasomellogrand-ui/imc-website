@@ -99,8 +99,9 @@ async function playersView(c,signal){
 }
 function transferCard(r,latest=false){const p=r.player_core;return `<article class="card ${latest?'latest-transfer':''}">${latest?'<span class="eyebrow">ULTIMO TRASFERIMENTO DELLA SELEZIONE</span>':''}${meta(r)}<div class="transfer-head">${entity({name:p?[p.forename,p.surname].filter(Boolean).join(' '):r.player_name,image_url:p?.image_url},r.player_name)}<strong>${esc(r.amount_text||'—')}</strong></div>${p?`<p class="player-core">${esc([p.rating?'Rating attuale '+p.rating:'',p.age?p.age+' anni':'',p.position].filter(Boolean).join(' · '))}</p>`:''}<div class="transfer-route">${entity(r.from_core,r.club_from)}<span>→</span>${entity(r.to_core,r.club_to)}</div>${r.exchange_players?`<details><summary>Contropartite</summary>${structured(r.exchange_players)}</details>`:''}</article>`}
 async function transfersView(c,signal){
- $('viewControls').innerHTML=form(select('club','Squadra',[['','Tutte le squadre'],...c.clubs.map(r=>[r.sm_team_id,r.name])])+select('season','Stagione',[['','Tutte le stagioni'],...c.seasons.map(s=>[s.imc_season,'Stagione '+s.imc_season])])+input('search','Cerca giocatore o squadra')+input('from','Dal','date')+input('to','Al','date'));
- const d=await fetchData({...state,resource:'transfers',limit:50},signal);page(d.rows.map((r,i)=>transferCard(r,state.offset===0&&i===0)).join(''),d.total,'trasferimenti');$('status').textContent+=d.updated_at?' · Aggiornato al '+date(d.updated_at)+' '+d.updated_at.slice(11,16):'';
+ const d=await fetchData({...state,resource:'transfers',limit:50},signal);
+ $('viewControls').innerHTML=form(select('club','Squadra',[['','Tutte le squadre'],...(d.clubs||[]).map(r=>[r.id,r.name])])+select('season','Stagione',[['','Tutte le stagioni'],...c.seasons.map(s=>[s.imc_season,'Stagione '+s.imc_season])])+input('search','Cerca giocatore o squadra')+input('from','Dal','date')+input('to','Al','date'));
+ page(d.rows.map((r,i)=>transferCard(r,state.offset===0&&i===0)).join(''),d.total,'trasferimenti');$('status').textContent+=d.updated_at?' · Aggiornato al '+date(d.updated_at)+' '+d.updated_at.slice(11,16):'';
 }
 async function directoryView(signal){const d=await cached({world:state.world,resource:'directory'},signal),c=d.core;
  if(c.world?.world_name){worlds[state.world]=c.world.world_name;worldMenus()}

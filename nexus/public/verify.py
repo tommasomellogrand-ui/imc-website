@@ -49,3 +49,11 @@ for i in range(1,11):
 global_players=json.loads(get('public/data.php?world=GW001&resource=players&scope=global&rating_min=90'))
 assert global_players['ok'] and all(float(r['rating'])>=90 for r in global_players['rows'])
 print('GLOBAL_CODEX_FILTER_OK')
+
+transfers=json.loads(get('public/data.php?world=GW002&resource=transfers&limit=1'))
+if transfers['clubs']:
+    club=next((c for c in transfers['clubs'] if c['name']=='AS Roma'),transfers['clubs'][0])
+    filtered=json.loads(get('public/data.php?'+urlencode(dict(world='GW002',resource='transfers',club=club['id'],limit=5))))
+    assert filtered['ok'] and filtered['total']>0
+    assert all(str(r['from_sm_world_club_id'])==str(club['id']) or str(r['to_sm_world_club_id'])==str(club['id']) or ('name:'+str(r['club_from']))==club['id'] or ('name:'+str(r['club_to']))==club['id'] for r in filtered['rows'])
+    print('TRANSFER_TEAM_FILTER_OK',club['name'],filtered['total'])

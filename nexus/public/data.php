@@ -33,7 +33,11 @@ try {
     $where='game_world_id=?'; $params=[$world];
     $where.=nexus_date_where("`$date`",nexus_season($coreDb,$world,(string)($_GET['season']??'')),$params);
     if(($_GET['competition']??'')!==''){$where.=' AND competition_key=?';$params[]=(string)$_GET['competition'];}
-    if($resource==='transfers'&&($_GET['club']??'')!==''){$where.=' AND (from_sm_world_club_id=? OR to_sm_world_club_id=?)';$params[]=(string)$_GET['club'];$params[]=(string)$_GET['club'];}
+    if($resource==='transfers'&&($_GET['club']??'')!==''){
+        $club=(string)$_GET['club'];$byName=str_starts_with($club,'name:');
+        $where.=$byName?' AND (club_from=? OR club_to=?)':' AND (from_sm_world_club_id=? OR to_sm_world_club_id=?)';
+        $params[]=$byName?substr($club,5):$club;$params[]=$byName?substr($club,5):$club;
+    }
 
     $search=trim((string)($_GET['search'] ?? ''));
     if (strlen($search)>200) respond(['ok'=>false,'error'=>'invalid_search'],422);
@@ -69,5 +73,7 @@ try {
     foreach($rows as &$row)foreach($row as $key=>&$value)if(str_ends_with($key,'_json')||$key==='exchange_players')$value=$value===null?null:json_decode($value,true); unset($row,$value);
     require_once __DIR__.'/core.php';
     $core=nexus_core_enrich(nexus_core_db($cfg),$world,$resource,$rows);
-    respond(['ok'=>true,'core'=>$core,'version'=>'nexus-public-2','world'=>$world,'resource'=>$resource,'source'=>$table,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset,'limit'=>$limit,'rows'=>$rows]);
+    $facets=[];
+    if($resource==='transfers')$facets=nexus_core_rows($pdo,"SELECT id,MAX(name) name FROM (SELECT COALESCE(CAST(from_sm_world_club_id AS CHAR),CONCAT('name:',club_from)) id,club_from name FROM `IMC Site Transfers` WHERE game_world_id=? UNION ALL SELECT COALESCE(CAST(to_sm_world_club_id AS CHAR),CONCAT('name:',club_to)) id,club_to name FROM `IMC Site Transfers` WHERE game_world_id=?) clubs WHERE id IS NOT NULL AND name IS NOT NULL GROUP BY id ORDER BY name,id",[$world,$world]);
+    respond(['ok'=>true,'clubs'=>$facets,'core'=>$core,'version'=>'nexus-public-2','world'=>$world,'resource'=>$resource,'source'=>$table,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset,'limit'=>$limit,'rows'=>$rows]);
 } catch(Throwable $e) { respond(['ok'=>false,'error'=>'read_unavailable'],503); }
