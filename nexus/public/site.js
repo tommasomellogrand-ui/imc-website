@@ -95,7 +95,7 @@ async function teamsView(c){
 const managerAvatar='<svg class="manager-avatar" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="32" cy="21" r="12"/><path d="M10 59c0-14 9-22 22-22s22 8 22 22"/></svg>';
 const sameId=(a,b)=>a!=null&&b!=null&&String(a)===String(b);
 const nationalAssignment=a=>a.national_team_id!=null&&String(a.national_team_id)!=='';
-function assignedTeam(c,a){return (nationalAssignment(a)?c.nations:c.clubs).find(t=>sameId(t.id,nationalAssignment(a)?a.national_team_id:a.team_id))}
+function assignedTeam(c,a){const t=(nationalAssignment(a)?c.nations:c.clubs).find(t=>sameId(t.id,nationalAssignment(a)?a.national_team_id:a.team_id));const norm=v=>String(v||'').trim().toLocaleLowerCase('it');return t&&(!a.team_name||norm(t.name)===norm(a.team_name))?t:null}
 function assignmentStatus(a){const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'});return a.start_date&&a.start_date>today?'In programma':a.end_date&&a.end_date<today?'Concluso':'In corso'}
 function careerCard(c,a,showManager=false){const t=assignedTeam(c,a);const title=showManager?go({resource:'manager',manager:a.manager_id,team:'',teamType:'clubs',search:'',offset:0},esc(a.full_name||a.manager_id)):t?go({resource:'club',team:t.id,manager:'',teamType:nationalAssignment(a)?'nations':'clubs',search:'',offset:0},entity(t,t.name)):esc(a.team_name||'Squadra non collegata');return `<article class="card career-card"><span class="eyebrow">${esc(assignmentStatus(a))} · ${nationalAssignment(a)?'Nazionale':'Club'}</span><h3>${title}</h3><p>${esc(date(a.start_date))} — ${a.end_date?esc(date(a.end_date)):'Presente'}</p></article>`}
 function managersView(c){
@@ -121,7 +121,7 @@ function teamProfile(c){
  $('viewControls').innerHTML=go({team:'',offset:0},national?'← Tutte le nazionali':'← Tutti i club');
  if(!team){$('rows').innerHTML=empty('Squadra non presente in questo mondo.');$('status').textContent=state.world;return}
  $('sectionTitle').textContent=team.name;
- const assignments=c.managers.filter(a=>nationalAssignment(a)===national&&sameId(national?a.national_team_id:a.team_id,team.id)).sort((a,b)=>String(b.start_date||'').localeCompare(String(a.start_date||'')));
+ const assignments=c.managers.filter(a=>nationalAssignment(a)===national&&sameId(assignedTeam(c,a)?.id,team.id)).sort((a,b)=>String(b.start_date||'').localeCompare(String(a.start_date||'')));
  $('rows').innerHTML=`<article class="card profile-heading">${entity(team,team.name)}<span class="eyebrow">${esc(state.world)} · ${national?'Nazionale':'Club'}</span></article><h3>Carriera manager IMC</h3><article class="card"><div class="stat-row"><div><strong>${assignments.length}</strong><small>Incarichi registrati</small></div><div><strong>${new Set(assignments.map(a=>a.manager_id)).size}</strong><small>Manager IMC</small></div></div></article><div class="career-list">${assignments.map(a=>careerCard(c,a,true)).join('')||empty('Nessun incarico manager IMC registrato per questa squadra nel mondo selezionato.')}</div>`;
  $('status').textContent=state.world+' · Profilo '+(national?'nazionale':'club');
 }
