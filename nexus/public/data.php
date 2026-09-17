@@ -16,13 +16,25 @@ try {
         if ($resource==='directory') respond(['ok'=>true,'core'=>nexus_world_directory(nexus_core_db($config['db']),$world)]);
         respond(['ok'=>true,'source'=>'MYSQL_ARUBA_CORE','worlds'=>nexus_worlds(nexus_core_db($config['db']))]);
     }
-    if (!isset($resources[$resource])) respond(['ok'=>false,'error'=>'invalid_resource'],422);
-    [$table,$id,$date]=$resources[$resource];
+    if (!isset($resources[$resource])&&!in_array($resource,['catalog','competition','players','stats'],true)) respond(['ok'=>false,'error'=>'invalid_resource'],422);
+
     $config=require dirname(__DIR__,2).'/__imc_private_gateway/config.php';
     $family=in_array($world,['GW002','GW003','GW007','GW008'],true)?'gold':'custom';
     $cfg=$config['db'];
     $pdo=new PDO(sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',$cfg['host'],$cfg['port'],$cfg[$family]),$cfg['user'],$cfg['pass'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]);
+    require_once __DIR__.'/core.php';
+    require_once __DIR__.'/hub.php';
+    $coreDb=nexus_core_db($cfg);
+    if($resource==='catalog')respond(['ok'=>true,'world'=>$world,'rows'=>nexus_catalog($pdo,$coreDb,$world,nexus_season($coreDb,$world,(string)($_GET['season']??'')))]);
+    if($resource==='competition')respond(nexus_hub($pdo,$coreDb,$world));
+    if($resource==='players')respond(($_GET['scope']??'world')==='global'?nexus_global_players($coreDb,$world):nexus_players($pdo,$coreDb,$world));
+    if($resource==='stats')respond(nexus_stats($pdo,$world));
+    [$table,$id,$date]=$resources[$resource];
     $where='game_world_id=?'; $params=[$world];
+    $where.=nexus_date_where("`$date`",nexus_season($coreDb,$world,(string)($_GET['season']??'')),$params);
+    if(($_GET['competition']??'')!==''){$where.=' AND competition_key=?';$params[]=(string)$_GET['competition'];}
+    if($resource==='transfers'&&($_GET['club']??'')!==''){$where.=' AND (from_sm_world_club_id=? OR to_sm_world_club_id=?)';$params[]=(string)$_GET['club'];$params[]=(string)$_GET['club'];}
+
     $search=trim((string)($_GET['search'] ?? ''));
     if (strlen($search)>200) respond(['ok'=>false,'error'=>'invalid_search'],422);
     if ($search!=='') {

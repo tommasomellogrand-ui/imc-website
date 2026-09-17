@@ -12,7 +12,7 @@ def get(path):
         except Exception:
             if attempt==2: raise
             time.sleep(2)
-for path in ['index.html','public/site.js','public/site.css']:
+for path in ['index.html','public/site.js','public/site.css','public/hub-logic.js']:
     assert get(path)==Path('nexus/'+path).read_bytes(), 'Live file mismatch: '+path
 print('PUBLIC_SITE_BYTES_OK')
 def check(route):
@@ -31,3 +31,21 @@ def check(route):
     return world,resource,d['total']
 with ThreadPoolExecutor(max_workers=4) as pool:
     for row in pool.map(check,[(f'GW{i:03}',r) for i in range(1,11) for r in ['results','match_report','schedule','transfers']]): print('LIVE_ROUTE_OK',*row)
+
+# New public sections must remain independently usable in every world.
+from urllib.parse import urlencode
+for i in range(1,11):
+    world=f'GW{i:03}'
+    for resource in ['catalog','players']:
+        d=json.loads(get('public/data.php?'+urlencode(dict(world=world,resource=resource))))
+        assert d['ok'] and d['world']==world and isinstance(d['rows'],list)
+        if resource=='catalog' and d['rows']:
+            key=d['rows'][0]['competition_key']
+            hub=json.loads(get('public/data.php?'+urlencode(dict(world=world,resource='competition',competition=key))))
+            assert hub['ok'] and all(r['game_world_id']==world and r['competition_key']==key for r in hub['results']+hub['schedule'])
+            stats=json.loads(get('public/data.php?'+urlencode(dict(world=world,resource='stats',competition=key))))
+            assert stats['ok'] and isinstance(stats['rows'],list)
+        print('PUBLIC_HUB_OK',world,resource,len(d['rows']))
+global_players=json.loads(get('public/data.php?world=GW001&resource=players&scope=global&rating_min=90'))
+assert global_players['ok'] and all(float(r['rating'])>=90 for r in global_players['rows'])
+print('GLOBAL_CODEX_FILTER_OK')
