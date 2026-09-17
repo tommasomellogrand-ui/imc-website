@@ -27,7 +27,7 @@ const fs=require('node:fs'),vm=require('node:vm');
 async function render(query){
  const nodes=new Map(),requests=[];
  function node(id){if(!nodes.has(id))nodes.set(id,{value:'',innerHTML:'',textContent:'',options:[],hidden:false,add(o){this.options.push(o)},setAttribute(){},addEventListener(){},scrollIntoView(){}});return nodes.get(id)}
- const c={world:{world_name:'Test World',game_world_id:'GW003',active_clubs:2},seasons:[{imc_season:1,imc_season_start_date:'2026-01-01',imc_season_end_date:'2026-12-31'}],clubs:[{id:1,sm_team_id:10,name:'Club 10'}],nations:[{id:2,sm_team_id:20,name:'Italia'}],managers:[]};
+ const c={world:{world_name:'Test World',game_world_id:'GW003',active_clubs:2},seasons:[{imc_season:1,imc_season_start_date:'2026-01-01',imc_season_end_date:'2026-12-31'}],clubs:[{id:1,sm_team_id:10,name:'Club 10'}],nations:[{id:2,sm_team_id:20,name:'Italia'}],managers:[{manager_id:"MNG001",full_name:"Manager Uno",team_id:1,national_team_id:null,team_name:"Club 10",start_date:"2026-01-01",end_date:null},{manager_id:"MNG001",full_name:"Manager Uno",team_id:1,national_team_id:null,team_name:"Club 10",start_date:"2025-01-01",end_date:"2025-12-01"}]};
  const cmp={competition_key:'GW003|ARG|DOMESTIC|league|1',sm_action:'league',sm_country:'ARG',sm_action_group:'DOMESTIC',sm_division:1,results_count:1};
  const location={search:query,pathname:'/nexus/'};
  const context={console,URL,URLSearchParams,AbortController,DOMException,Date,Intl,setTimeout,clearTimeout,location,NexusLogic:L,Option:function(text,value){this.textContent=text;this.value=value},history:{replaceState(){},pushState(){}},document:{getElementById:node,querySelector:node,querySelectorAll:()=>[],addEventListener(){}},matchMedia:()=>({matches:true}),fetch:async input=>{
@@ -53,4 +53,14 @@ test('world scoped routing, all competition tabs and section rendering',async()=
    if(q==='resource=player')assert.ok(r.html.includes('Player Test'));
    if(q.includes('tab=competition'))assert.ok(r.html.includes('hub-table'));
  }
+});
+
+test('manager grids deduplicate identities and profiles preserve world and assignment links',async()=>{
+ const grid=await render('?world=GW003&resource=manager');
+ assert.equal((grid.html.match(/Apri profilo/g)||[]).length,1);assert.ok(grid.html.includes('team-grid'));assert.ok(grid.html.includes('manager=MNG001'));
+ const profile=await render('?world=GW003&resource=manager&manager=MNG001');
+ assert.ok(profile.html.includes('Carriera nel mondo'));assert.equal((profile.html.match(/career-card/g)||[]).length,2);assert.ok(profile.html.includes('team=1'));assert.ok(profile.html.includes('world=GW003'));
+ const club=await render('?world=GW003&resource=club&team=1');assert.ok(club.html.includes('Carriera manager IMC'));assert.ok(club.html.includes('manager=MNG001'));
+ const nations=await render('?world=GW003&resource=club&team=2&teamType=nations');assert.ok(nations.html.includes('Italia'));assert.ok(!nations.html.includes('Manager Uno'));
+ const missing=await render('?world=GW003&resource=manager&manager=MNG999');assert.ok(missing.html.includes('non presente'));
 });

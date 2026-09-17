@@ -29,7 +29,7 @@ $('bottomWorldMenu').setAttribute('aria-label','Navigazione mobile · '+state.wo
 $('bottomWorldMenu').innerHTML=[['manager','Manager'],['club','Club'],['home','Home'],['competitions','Competition'],['archive','Trophy Room']].map(([id,title])=>`<a href="?world=${encodeURIComponent(state.world)}&resource=${id}" data-resource="${id}" aria-current="${state.resource===id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">${icons[id]||icons.competitions}</svg><span>${title}</span></a>`).join('');
 }
 const L=window.NexusLogic;
-const defaults={world:'GW001',resource:'home',offset:0,search:'',from:'',to:'',season:'',competition:'',group:'',country:'',tab:'overview',match:'results',metric:'goals',teamType:'clubs',club:'',position:'',rating_min:'',rating_max:'',age_min:'',age_max:'',value_min:'',value_max:'',sort:'rating',player:'',scope:'world'};
+const defaults={world:'GW001',resource:'home',offset:0,search:'',from:'',to:'',season:'',competition:'',group:'',country:'',tab:'overview',match:'results',metric:'goals',teamType:'clubs',club:'',position:'',rating_min:'',rating_max:'',age_min:'',age_max:'',value_min:'',value_max:'',sort:'rating',player:'',scope:'world',team:'',manager:''};
 const viewCache=new Map();
 async function cached(params,signal){const key=JSON.stringify(params),hit=viewCache.get(key);if(hit&&Date.now()-hit.time<60000)return hit.data;const data=await fetchData(params,signal);if(signal?.aborted)throw new DOMException('Aborted','AbortError');viewCache.set(key,{time:Date.now(),data});return data}
 const empty=t=>`<div class="empty">${esc(t)}</div>`;
@@ -86,9 +86,44 @@ async function competitionView(c,signal){
  }
 }
 async function teamsView(c){
+ if(state.team){teamProfile(c);return}
  $('viewControls').innerHTML=tabs('teamType',[['clubs','Club'],['nations','Nazionali']])+form(input('search','Cerca squadra'));
  const all=state.teamType==='nations'?c.nations:c.clubs;const filtered=all.filter(t=>String(t.name||'').toLocaleLowerCase('it').includes(state.search.toLocaleLowerCase('it')));
- page(`<div class="team-grid">${filtered.slice(state.offset,state.offset+50).map(r=>`<article class="card team-tile">${entity(r,r.name)}<p class="eyebrow">${esc(state.world)}</p></article>`).join('')}</div>`,filtered.length,state.teamType==='nations'?'nazionali':'club');
+ page(`<div class="team-grid">${filtered.slice(state.offset,state.offset+50).map(r=>go({team:r.id,manager:'',offset:0},`${entity(r,r.name)}<p class="eyebrow">${esc(state.world)}</p><span class="text-link">Apri profilo ↗</span>`,'card team-tile')).join('')}</div>`,filtered.length,state.teamType==='nations'?'nazionali':'club');
+}
+// Profiles use CORE identifiers and assignments scoped to the selected world.
+const managerAvatar='<svg class="manager-avatar" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="32" cy="21" r="12"/><path d="M10 59c0-14 9-22 22-22s22 8 22 22"/></svg>';
+const sameId=(a,b)=>a!=null&&b!=null&&String(a)===String(b);
+const nationalAssignment=a=>a.national_team_id!=null&&String(a.national_team_id)!=='';
+function assignedTeam(c,a){return (nationalAssignment(a)?c.nations:c.clubs).find(t=>sameId(t.id,nationalAssignment(a)?a.national_team_id:a.team_id))}
+function assignmentStatus(a){const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'});return a.start_date&&a.start_date>today?'In programma':a.end_date&&a.end_date<today?'Concluso':'In corso'}
+function careerCard(c,a,showManager=false){const t=assignedTeam(c,a);const title=showManager?go({resource:'manager',manager:a.manager_id,team:'',teamType:'clubs',search:'',offset:0},esc(a.full_name||a.manager_id)):t?go({resource:'club',team:t.id,manager:'',teamType:nationalAssignment(a)?'nations':'clubs',search:'',offset:0},entity(t,t.name)):esc(a.team_name||'Squadra non collegata');return `<article class="card career-card"><span class="eyebrow">${esc(assignmentStatus(a))} · ${nationalAssignment(a)?'Nazionale':'Club'}</span><h3>${title}</h3><p>${esc(date(a.start_date))} — ${a.end_date?esc(date(a.end_date)):'Presente'}</p></article>`}
+function managersView(c){
+ if(state.manager){managerProfile(c);return}
+ $('viewControls').innerHTML=form(input('search','Cerca manager o squadra'));
+ const grouped=new Map();for(const a of c.managers){if(!a.manager_id)continue;if(!grouped.has(a.manager_id))grouped.set(a.manager_id,[]);grouped.get(a.manager_id).push(a)}
+ const rows=[...grouped.values()].filter(as=>as.some(a=>[a.full_name,a.manager_id,a.team_name].join(' ').toLocaleLowerCase('it').includes(state.search.toLocaleLowerCase('it'))));
+ page(`<div class="team-grid">${rows.slice(state.offset,state.offset+50).map(as=>{const r=as[0];return go({manager:r.manager_id,team:'',teamType:'clubs',offset:0},`${managerAvatar}<span class="entity"><span>${esc(r.full_name||r.manager_id)}</span></span><p class="eyebrow">${esc(r.manager_id)} · ${esc(state.world)}</p><span class="text-link">Apri profilo ↗</span>`,'card team-tile')}).join('')}</div>`,rows.length,'manager');
+}
+function managerProfile(c){
+ const assignments=c.managers.filter(a=>sameId(a.manager_id,state.manager));
+ $('viewControls').innerHTML=go({manager:'',offset:0},'← Tutti i manager');
+ if(!assignments.length){$('rows').innerHTML=empty('Manager non presente in questo mondo.');$('status').textContent=state.world;return}
+ const manager=assignments[0];$('sectionTitle').textContent=manager.full_name||manager.manager_id;
+ const selected=assignments.filter(a=>nationalAssignment(a)===(state.teamType==='nations')).sort((a,b)=>String(b.start_date||'').localeCompare(String(a.start_date||'')));
+ $('viewControls').innerHTML+=tabs('teamType',[['clubs','Club'],['nations','Nazionali']]);
+ const teams=new Set(selected.map(a=>nationalAssignment(a)?a.national_team_id:a.team_id).filter(v=>v!=null));
+ $('rows').innerHTML=`<article class="card profile-heading">${managerAvatar}<div><span class="eyebrow">${esc(manager.manager_id)} · ${esc(state.world)}</span><h3>${esc(manager.full_name||manager.manager_id)}</h3></div></article><h3>Carriera nel mondo</h3><article class="card"><div class="stat-row"><div><strong>${selected.length}</strong><small>Incarichi registrati</small></div><div><strong>${teams.size}</strong><small>${state.teamType==='nations'?'Nazionali':'Club'}</small></div><div><strong>${selected.filter(a=>assignmentStatus(a)==='In corso').length}</strong><small>In corso</small></div></div></article><div class="career-list">${selected.map(a=>careerCard(c,a)).join('')||empty('Nessun incarico registrato per questa selezione.')}</div>`;
+ $('status').textContent=state.world+' · Profilo manager';
+}
+function teamProfile(c){
+ const national=state.teamType==='nations',team=(national?c.nations:c.clubs).find(t=>sameId(t.id,state.team));
+ $('viewControls').innerHTML=go({team:'',offset:0},national?'← Tutte le nazionali':'← Tutti i club');
+ if(!team){$('rows').innerHTML=empty('Squadra non presente in questo mondo.');$('status').textContent=state.world;return}
+ $('sectionTitle').textContent=team.name;
+ const assignments=c.managers.filter(a=>nationalAssignment(a)===national&&sameId(national?a.national_team_id:a.team_id,team.id)).sort((a,b)=>String(b.start_date||'').localeCompare(String(a.start_date||'')));
+ $('rows').innerHTML=`<article class="card profile-heading">${entity(team,team.name)}<span class="eyebrow">${esc(state.world)} · ${national?'Nazionale':'Club'}</span></article><h3>Carriera manager IMC</h3><article class="card"><div class="stat-row"><div><strong>${assignments.length}</strong><small>Incarichi registrati</small></div><div><strong>${new Set(assignments.map(a=>a.manager_id)).size}</strong><small>Manager IMC</small></div></div></article><div class="career-list">${assignments.map(a=>careerCard(c,a,true)).join('')||empty('Nessun incarico manager IMC registrato per questa squadra nel mondo selezionato.')}</div>`;
+ $('status').textContent=state.world+' · Profilo '+(national?'nazionale':'club');
 }
 function playerTile(r){return `<article class="card player-tile"><div>${entity({name:r.full_name,image_url:r.image_url},r.full_name)}<p class="eyebrow">PLAYER ID · ${esc(r.player_id)}</p><p>${esc(r.position||'Ruolo non disponibile')} · ${r.age==null?'Età non disponibile':esc(r.age)+' anni'}</p><p>${esc(r.current_club||'Club non disponibile')} · ${esc(r.nationality||'')}</p></div><div class="player-metrics"><strong>${esc(r.rating??'—')}</strong><small>Rating</small><strong>${esc(r.market_value??'—')}</strong><small>Valore</small>${go({player:r.player_id,offset:0},'Scheda ↗')}</div></article>`}
 async function playersView(c,signal){
@@ -111,8 +146,7 @@ async function directoryView(signal){const d=await cached({world:state.world,res
  }else if(state.resource==='club')await teamsView(c);
  else if(state.resource==='player')await playersView(c,signal);
  else if(state.resource==='transfers')await transfersView(c,signal);
- else if(state.resource==='manager'){
-   $('viewControls').innerHTML=form(input('search','Cerca manager o squadra'));const rows=c.managers.filter(r=>[r.full_name,r.team_name].join(' ').toLowerCase().includes(state.search.toLowerCase()));page(rows.slice(state.offset,state.offset+50).map(r=>`<article class="card"><h3>${esc(r.full_name)}</h3><p>${esc(r.team_name||r.assignment_type)} · ${date(r.start_date)}${r.end_date?' — '+date(r.end_date):' · Incarico aperto'}</p></article>`).join(''),rows.length,'incarichi');
+ else if(state.resource==='manager'){managersView(c);
  }else{$('rows').innerHTML=`<section class="card"><h3>${esc(c.world?.world_name||state.world)}</h3><div class="stat-row"><div><strong>${number(c.world?.active_clubs||c.clubs.length)}</strong><small>Club del mondo</small></div><div><strong>${number(new Set(c.managers.map(m=>m.manager_id)).size)}</strong><small>Manager IMC con incarichi</small></div><div><strong>${esc(c.seasons[0]?.imc_season||'—')}</strong><small>Stagione IMC più recente</small></div></div><p>Scegli una sezione dal menu di ${esc(state.world)}.</p></section>`;$('status').textContent=state.world+' · '+worlds[state.world]}
 }
 async function load(push=false){
