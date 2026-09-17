@@ -57,3 +57,21 @@ if transfers['clubs']:
     assert filtered['ok'] and filtered['total']>0
     assert all(str(r['from_sm_world_club_id'])==str(club['id']) or str(r['to_sm_world_club_id'])==str(club['id']) or ('name:'+str(r['club_from']))==club['id'] or ('name:'+str(r['club_to']))==club['id'] for r in filtered['rows'])
     print('TRANSFER_TEAM_FILTER_OK',club['name'],filtered['total'])
+
+# Profiles must use report identities and retain the requested world.
+for i in range(1,11):
+    world=f'GW{i:03}'
+    directory=json.loads(get('public/data.php?'+urlencode(dict(world=world,resource='directory'))))['core']
+    if directory['managers']:
+        manager=directory['managers'][0]['manager_id']
+        profile=json.loads(get('public/data.php?'+urlencode(dict(world=world,resource='manager_profile',manager=manager))))
+        assert profile['ok'] and profile['source']=='IMC Site Match Report' and profile['world']==world
+        mid=str(profile['manager']['sm_manager_id'])
+        assert all(r['game_world_id']==world and mid in [str(r['home_sm_manager_id']),str(r['away_sm_manager_id'])] for r in profile['rows'])
+    for kind in ['clubs','nations']:
+        if directory[kind]:
+            profile=json.loads(get('public/data.php?'+urlencode(dict(world=world,resource='team_profile',teamType=kind,team=directory[kind][0]['id']))))
+            assert profile['ok'] and profile['source']=='IMC Site Match Report' and profile['world']==world
+            tid=str(profile['team']['sm_team_id'])
+            assert all(r['game_world_id']==world and tid in [str(r['home_sm_club_id']),str(r['away_sm_club_id'])] for r in profile['rows'])
+    print('REPORT_PROFILES_OK',world)

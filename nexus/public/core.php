@@ -25,7 +25,7 @@ function nexus_core_enrich(PDO $db,string $world,string $resource,array &$rows):
             $id=$r[$side.'_sm_team_id']??$r[$side.'_sm_club_id']??null;
             $r[$side.'_core']=$id===null?null:($index[(string)$id]??null);
             $r[$side.'_manager_core']=$managers[(string)($r[$side.'_sm_manager_id']??'')]??null;
-            if($r[$side.'_manager_core'])$r[$side.'_manager_name']=$r[$side.'_manager_core']['full_name'];
+            if($r[$side.'_manager_core']&&empty($r[$side.'_manager_name']))$r[$side.'_manager_name']=$r[$side.'_manager_core']['full_name'];
         }
         foreach(['from','to'] as $side)$r[$side.'_core']=$clubIndex[(string)($r[$side.'_sm_world_club_id']??'')]??null;
         $r['competition_core']=$compIndex[$r['competition_key']??'']??null;

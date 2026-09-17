@@ -38,6 +38,8 @@ async function render(query){
    case 'catalog':data={rows:[cmp]};break;
    case 'competition':data={competition:cmp,core:c,results:[match(1,10,20,2,1,{match_date:'2026-09-01'})],schedule:[]};break;
    case 'stats':data={rows:[]};break;
+   case 'manager_profile':data={manager:{sm_manager_id:123},assignments:c.managers,source:'IMC Site Match Report',rows:[match(20,10,20,2,1,{match_date:'2026-09-01',competition_group:'DOMESTIC',home_sm_manager_id:123,away_sm_manager_id:456,away_manager_name:'Opponent Test'})]};break;
+   case 'team_profile':data={team:c.clubs[0],source:'IMC Site Match Report',rows:[match(20,10,20,2,1,{match_date:'2026-09-01'})]};break;
    case 'players':data={rows:[{player_id:1,full_name:'Player Test',rating:90,market_value:'1M',current_club:'Club 10'}],clubs:[],total:1};break;
    case 'transfers':data={rows:[],total:0};break;
    default:data={rows:[],total:0};
@@ -66,3 +68,27 @@ test('manager grids deduplicate identities and profiles preserve world and assig
 });
 
 test('inconsistent assignment identifiers do not link to a different club',async()=>{const r=await render('?world=GW003&resource=manager&manager=MNG002');assert.ok(r.html.includes('Different club'));assert.ok(!r.html.includes('team=1'));});
+test('manager statistics use report identities, separate nations and deduplicate fixtures',()=>{
+ const base={match_date:'2026-01-03',competition_group:'DOMESTIC',home_sm_manager_id:123,away_sm_manager_id:456,home_manager_name:'One',away_manager_name:'Two'};
+ const win=match(10,1,2,2,0,base),draw=match(11,2,1,1,1,{...base,home_sm_manager_id:456,away_sm_manager_id:123});
+ const national=match(12,1,2,0,3,{...base,competition_group:'NATIONS'});
+ const rows=L.managerRows([win,win,draw,national,match(13,1,2,8,0,{...base,home_sm_manager_id:null})],123,[],false);
+ assert.equal(rows.length,2);assert.deepEqual(L.managerStats(rows,123),{p:2,w:1,d:1,l:0,gf:3,ga:1,clean:1});
+ assert.equal(L.managerRows([win,national],123,[],true).length,1);
+ assert.equal(L.managerSide({...win,away_sm_manager_id:123},123),null);
+});
+test('career days merge overlapping assignments and exclude future dates',()=>{
+ assert.equal(L.careerDays([{start_date:'2026-01-01',end_date:'2026-01-05'},{start_date:'2026-01-03',end_date:null},{start_date:'2027-01-01'}],'2026-01-10'),10);
+});
+test('profile statistics query match reports, never result projections',()=>{
+ const php=fs.readFileSync(__dirname+'/hub.php','utf8').split('// Match identities')[1];assert.ok(php.includes('IMC Site Match Report'));assert.ok(!php.includes('IMC Site Results'));
+});
+
+test('all manager tabs and team statistics are routed through report profile endpoints',async()=>{
+ for(const tab of ['stats','matches','h2h','trophy']){
+ const r=await render('?world=GW003&resource=manager&manager=MNG001&profileTab='+tab+'&opponent=456');
+ assert.ok(r.requests.some(q=>q.resource==='manager_profile'));assert.ok(!r.requests.some(q=>q.resource==='results'));assert.ok(r.html.includes('match report'));assert.ok(!r.status.includes('non disponibili'));
+ if(tab==='h2h')assert.ok(r.html.includes('Opponent Test'));
+ }
+ const t=await render('?world=GW003&resource=club&team=1&profileTab=stats');assert.ok(t.requests.some(q=>q.resource==='team_profile'));assert.ok(t.html.includes('Vittorie'));
+});
