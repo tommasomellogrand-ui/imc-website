@@ -1,8 +1,15 @@
 <IfModule mod_headers.c>
-Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+Header always set Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0"
 Header always set Pragma "no-cache"
-Header always set Expires "0"
+Header always set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+Header always set Clear-Site-Data "\"cache\""
 </IfModule>
 <IfModule mod_expires.c>
 ExpiresActive Off
 </IfModule>
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{THE_REQUEST} \s/+FantaArtois/index\.html[?\s] [NC]
+RewriteRule ^index\.html$ /FantaArtois/? [R=302,L,NE]
+</IfModule>
+FileETag None
