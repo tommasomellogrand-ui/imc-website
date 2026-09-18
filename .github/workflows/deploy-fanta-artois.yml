@@ -1,0 +1,49 @@
+name: Deploy Fanta Artois to Aruba
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'FantaArtois/**'
+      - '.github/workflows/deploy-fanta-artois.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fanta-artois-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate
+        run: test -s FantaArtois/index.html
+      - name: Upload to Aruba
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          host='ftp.italianmastersclub.it'; remote='/www.italianmastersclub.it/FantaArtois'
+          ftp=FTP_TLS(context=ssl.create_default_context()); ftp.connect(host,21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
+          def ensure(path):
+              ftp.cwd('/')
+              for p in [x for x in path.split('/') if x]:
+                  try: ftp.cwd(p)
+                  except error_perm: ftp.mkd(p); ftp.cwd(p)
+          for f in Path('FantaArtois').rglob('*'):
+              if not f.is_file(): continue
+              rel=f.relative_to('FantaArtois'); dest=remote if str(rel.parent)=='.' else remote+'/'+rel.parent.as_posix()
+              ensure(dest)
+              with f.open('rb') as h: ftp.storbinary('STOR '+f.name,h)
+          ftp.quit()
+          PY
+      - name: Verify live
+        run: |
+          sleep 4
+          curl -fsSL --retry 5 --retry-delay 3 https://www.italianmastersclub.it/FantaArtois/ | grep -Fq "Fanta Artois"
