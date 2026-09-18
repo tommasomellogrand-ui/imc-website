@@ -29,7 +29,8 @@ jobs:
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
           host='ftp.italianmastersclub.it'; remote='/www.italianmastersclub.it/FantaArtois'
-          ftp=FTP_TLS(context=ssl.create_default_context()); ftp.connect(host,21,timeout=60)
+          ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
+          ftp=FTP_TLS(context=ctx); ftp.connect(host,21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
           def ensure(path):
               ftp.cwd('/')
