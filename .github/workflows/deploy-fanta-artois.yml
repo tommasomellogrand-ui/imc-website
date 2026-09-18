@@ -16,16 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download approved Fanta Artois artwork
-        shell: bash
-        env:
-          ARTWORK_URL: "https://files.oaiusercontent.com/file-00000000709481f4a317603324ee3832"
-        run: |
-          curl -fL "$ARTWORK_URL" -o FantaArtois/homepage-fanta-artois.png
       - name: Validate
         run: |
           test -s FantaArtois/index.html
-          test -s FantaArtois/homepage-fanta-artois.png
+          test -s FantaArtois/listone.html
+          test -s FantaArtois/.htaccess
       - name: Upload to Aruba
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
