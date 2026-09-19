@@ -1,9 +1,8 @@
 {
-  "request_id": "gw001-leagues-fixture-alignment-20260919-13",
-  "requested_at": "2026-09-19T08:52:00Z",
-  "purpose": "Check fixture ID alignment for the four 90-row GW001 league competition keys",
-  "action": "query",
-  "target": "custom",
-  "sql": "SELECT r.competition_key, COUNT(*) AS results_rows, SUM(CASE WHEN m.sm_fixture_id IS NOT NULL THEN 1 ELSE 0 END) AS matched_fixture_ids, SUM(CASE WHEN m.sm_fixture_id IS NULL THEN 1 ELSE 0 END) AS results_without_report, SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key=r.competition_key THEN 1 ELSE 0 END) AS same_key, SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key<>r.competition_key THEN 1 ELSE 0 END) AS different_key FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.competition_key IN ('GW001|CUS|DOMESTIC|league|1','GW001|CUS|DOMESTIC|league|2','GW001|CUS|DOMESTIC|league|3','GW001|CUS|DOMESTIC|league|4') GROUP BY r.competition_key ORDER BY r.competition_key",
-  "limit": 100
+  "request_id": "trophy-room-clear-retry-20260919-30",
+  "requested_at": "2026-09-19T08:54:00Z",
+  "purpose": "Explicit user-requested complete clear of IMC Trophy Room",
+  "action": "clear_repository",
+  "target": "core",
+  "repository": "IMC Trophy Room"
 }
