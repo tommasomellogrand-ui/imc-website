@@ -1,0 +1,9 @@
+{
+  "request_id": "bridge-smoke-20260919-01",
+  "requested_at": "2026-09-19T08:10:00Z",
+  "purpose": "Initial read-only bridge verification",
+  "action": "query",
+  "target": "custom",
+  "sql": "SELECT DATABASE() AS database_name, 1 AS bridge_ok",
+  "limit": 10
+}
