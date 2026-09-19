@@ -1,9 +1,8 @@
 {
-  "request_id": "gw001-delete-leaguecup-verify-20260919-11",
-  "requested_at": "2026-09-19T08:48:00Z",
-  "purpose": "Verify no GW001 League Cup rows remain in Results or Match Report",
-  "action": "query",
-  "target": "custom",
-  "sql": "SELECT (SELECT COUNT(*) FROM `GW001_IMC Results` WHERE sm_action='leaguecup') AS results_remaining, (SELECT COUNT(*) FROM `GW001_IMC Match Report` WHERE sm_action='leaguecup') AS match_reports_remaining",
-  "limit": 10
+  "request_id": "trophy-room-clear-20260919-29",
+  "requested_at": "2026-09-19T08:49:00Z",
+  "purpose": "Explicit user-requested complete clear of IMC Trophy Room",
+  "action": "clear_repository",
+  "target": "core",
+  "repository": "IMC Trophy Room"
 }
