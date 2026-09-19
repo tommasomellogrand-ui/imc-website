@@ -16,5 +16,48 @@ function managerRows(rows,id,assignments,national=false){return unique(rows).fil
 })}
 function managerStats(rows,id){const stats={p:0,w:0,d:0,l:0,gf:0,ga:0,clean:0};for(const r of unique(rows)){const side=managerSide(r,id);if(!side||!completed(r))continue;const other=side==='home'?'away':'home',gf=score(r[side+'_score']),ga=score(r[other+'_score']);stats.p++;stats.gf+=gf;stats.ga+=ga;if(gf>ga)stats.w++;else if(gf<ga)stats.l++;else stats.d++;if(ga===0)stats.clean++}return stats}
 function careerDays(assignments,today){const ranges=assignments.filter(a=>a.start_date&&a.start_date<=today).map(a=>[Date.parse(a.start_date+'T00:00:00Z'),Date.parse((a.end_date&&a.end_date<today?a.end_date:today)+'T00:00:00Z')]).filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b)&&b>=a).sort((a,b)=>a[0]-b[0]);let total=0,end=-Infinity;for(const [a,b] of ranges){const start=Math.max(a,end+86400000);if(b>=start)total+=(b-start)/86400000+1;end=Math.max(end,b)}return total}
-const api={score,completed,unique,group,knockout,standings,winner,managerSide,managerRows,managerStats,careerDays};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NexusLogic=api;
+
+function competitionRounds(results,schedule,comp){
+ const all=unique([...schedule,...results]),done=unique(results).filter(completed),n=Number(comp.teams_count)||0;
+ const perRound=comp.sm_action==='league'&&n>1?Math.floor(n/2):null;
+ const expected=Number(comp.expected_match)||0;
+ const total=perRound&&expected&&expected%perRound===0?expected/perRound:null;
+ const key=r=>{const t=text(r.competition_round),m=t.match(/^(?:(?:turno|giornata|match|round)\s*)?(\d+)(?:\s*\/\s*\d+)?$/i);return m?'round:'+Number(m[1]):[text(r.competition_stage),t].filter(Boolean).join('|')||r.match_date||null};
+ const groups=new Map();for(const r of all){const k=key(r);if(!k)continue;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
+ const ids=new Set(done.map(r=>text(r.sm_fixture_id)));
+ let played=0;for(const rs of groups.values()){if(rs.every(r=>ids.has(text(r.sm_fixture_id)))&&(!perRound||rs.length>=perRound))played++}
+ return {played,total};
+}
+function reportSummary(reports){
+ const rows=unique(reports).filter(completed),fields=['total_shots','shots_on_target','corners','yellow_cards','red_cards'];
+ const totals={matches:rows.length,goals:rows.reduce((s,r)=>s+score(r.home_score)+score(r.away_score),0)};
+ const number=v=>v==null||text(v)===''?null:Number.isFinite(Number(v))&&Number(v)>=0?Number(v):null;
+ const json=v=>{if(typeof v==='string'){try{return JSON.parse(v)}catch{return null}}return v};
+ const flag=v=>v===true||v===1||v==='1';
+ const players=new Map();
+ for(const f of fields)totals[f]=null;
+ for(const r of rows){
+  const stats=json(r.team_stats_json)||{};
+  for(const side of ['home','away']){
+   const team=Array.isArray(stats)?stats.find(s=>s.team_side===side)||{}:stats[side]||{};
+   for(const f of fields){const v=number(team[f]);if(v!==null)totals[f]=(totals[f]??0)+v}
+  }
+  const seen=new Set(),ps=json(r.players_json);
+  for(const p of Array.isArray(ps)?ps:[]){
+   if(!['home','away'].includes(p.team_side)||!text(p.player_name))continue;
+   const team=r[p.team_side+'_core']?.name||r[p.team_side+'_name']||'';
+   const id=text(p.sm_player_id??p.player_id);
+   const key=id?'id:'+id:'name:'+team+'|'+text(p.player_name);
+   if(seen.has(key))continue;seen.add(key);
+   if(!players.has(key))players.set(key,{name:p.player_name,teams:new Set(),goals:0,assists:0,mom:0,ratingSum:0,ratingCount:0});
+   const x=players.get(key);x.teams.add(team);x.goals+=number(p.goals)||0;x.assists+=number(p.assists)||0;x.mom+=flag(p.man_of_match)?1:0;
+   const rating=number(p.rating);if(rating!==null&&rating>0&&rating<=10){x.ratingSum+=rating;x.ratingCount++}
+  }
+ }
+ const list=[...players.values()].map(p=>({...p,team:[...p.teams].filter(Boolean).join(' / '),rating:p.ratingCount?p.ratingSum/p.ratingCount:null}));
+ const leaders={};for(const metric of ['goals','assists','mom','rating'])leaders[metric]=list.filter(p=>p[metric]>0).sort((a,b)=>b[metric]-a[metric]||b.ratingCount-a.ratingCount||a.name.localeCompare(b.name,'it')).slice(0,5);
+ return {totals,leaders};
+}
+
+const api={competitionRounds,reportSummary,score,completed,unique,group,knockout,standings,winner,managerSide,managerRows,managerStats,careerDays};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NexusLogic=api;
 })(globalThis);

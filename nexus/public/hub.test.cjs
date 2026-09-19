@@ -109,3 +109,17 @@ test('every competition label uses Nexus View exclusively',()=>{
  assert.equal(label({custom_competition:'Campionato',sm_action:'league'}),'Nome competizione non configurato');
  assert.equal(label(null),'Nome competizione non configurato');
 });
+
+test('overview rounds count complete matchdays, not fixtures',()=>{
+ const played=[];for(let round=1;round<=18;round++)for(let i=0;i<5;i++)played.push(match(round*10+i,i*2+1,i*2+2,1,0,{competition_round:'Turno '+round}));
+ assert.deepEqual(L.competitionRounds(played,[],{sm_action:'league',teams_count:10,expected_match:90}),{played:18,total:18});
+ assert.equal(L.competitionRounds(played.slice(0,-1),[],{sm_action:'league',teams_count:10,expected_match:90}).played,17);
+ assert.equal(L.competitionRounds(played,[],{sm_action:'league'}).total,null);
+});
+test('overview report totals and rankings deduplicate fixtures and preserve missing values',()=>{
+ const r=match(1,1,2,2,1,{team_stats_json:JSON.stringify({home:{total_shots:10,shots_on_target:5},away:{total_shots:8,shots_on_target:3}}),players_json:[{sm_player_id:7,team_side:'home',player_name:'Player A',goals:2,assists:1,rating:8,man_of_match:1},{sm_player_id:8,team_side:'away',player_name:'Unused',rating:0}]});
+ const r2=match(2,1,2,0,0,{players_json:[{sm_player_id:7,team_side:'home',player_name:'Player A',rating:6}]});
+ const s=L.reportSummary([r,r,r2]);
+ assert.equal(s.totals.matches,2);assert.equal(s.totals.goals,3);assert.equal(s.totals.total_shots,18);assert.equal(s.totals.shots_on_target,8);assert.equal(s.totals.corners,null);
+ assert.equal(s.leaders.goals[0].goals,2);assert.equal(s.leaders.assists[0].assists,1);assert.equal(s.leaders.mom[0].mom,1);assert.equal(s.leaders.rating.length,1);assert.equal(s.leaders.rating[0].rating,7);assert.equal(s.leaders.rating[0].ratingCount,2);
+});
