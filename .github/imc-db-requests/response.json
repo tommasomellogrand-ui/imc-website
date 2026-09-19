@@ -1,119 +1,53 @@
 {
-  "request_id": "single-normalize-country-keys-execute-20260919-35",
-  "completed_at": "2026-09-19T09:57:40.815507+00:00",
+  "request_id": "single-normalize-country-keys-verify-20260919-36",
+  "completed_at": "2026-09-19T10:08:15.010221+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "single-normalize-country-keys-execute-20260919-35",
-    "requested_at": "2026-09-19T09:57:00Z",
-    "purpose": "Execute approved normalization of Single League domestic competition keys",
-    "action": "execute_migration",
+    "request_id": "single-normalize-country-keys-verify-20260919-36",
+    "requested_at": "2026-09-19T09:59:00Z",
+    "purpose": "Verify no country segment remains in domestic competition keys for Single League worlds",
+    "action": "query",
     "target": "custom",
-    "migration_id": "normalize-single-league-domestic-competition-keys-20260919",
-    "statements": [
-      "UPDATE `GW001_IMC Results` SET competition_key=CONCAT('GW001|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-      "UPDATE `GW001_IMC Match Report` SET competition_key=CONCAT('GW001|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-      "UPDATE `GW004_IMC Results` SET competition_key=CONCAT('GW004|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-      "UPDATE `GW004_IMC Match Report` SET competition_key=CONCAT('GW004|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-      "UPDATE `GW005_IMC Results` SET competition_key=CONCAT('GW005|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-      "UPDATE `GW005_IMC Match Report` SET competition_key=CONCAT('GW005|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-      "UPDATE `GW006_IMC Results` SET competition_key=CONCAT('GW006|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-      "UPDATE `GW006_IMC Match Report` SET competition_key=CONCAT('GW006|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-      "UPDATE `GW009_IMC Results` SET competition_key=CONCAT('GW009|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-      "UPDATE `GW009_IMC Match Report` SET competition_key=CONCAT('GW009|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|'"
-    ],
-    "allow_destructive": false,
-    "data_migration": true
+    "sql": "SELECT 'GW001' gw,(SELECT COUNT(*) FROM `GW001_IMC Results` WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW001_IMC Match Report` WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW004' gw,(SELECT COUNT(*) FROM `GW004_IMC Results` WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW004_IMC Match Report` WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW005' gw,(SELECT COUNT(*) FROM `GW005_IMC Results` WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW005_IMC Match Report` WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW006' gw,(SELECT COUNT(*) FROM `GW006_IMC Results` WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW006_IMC Match Report` WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW009' gw,(SELECT COUNT(*) FROM `GW009_IMC Results` WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW009_IMC Match Report` WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country",
+    "limit": 100
   },
   "response": {
     "ok": true,
-    "action": "execute_migration",
+    "action": "query",
     "target": "custom",
     "database": "Sql1956795_3",
-    "migration_id": "normalize-single-league-domestic-competition-keys-20260919",
-    "data_migration": true,
-    "plan_sha256": "b42caf7f0c474a9bf9d40f1c637b816a8ceb7c0a67bb5e647c2c91554691eddc",
-    "status": "success",
-    "statement_count": 10,
-    "duration_ms": 29426,
-    "before": {
-      "tables": 320,
-      "columns": 5566
-    },
-    "after": {
-      "tables": 320,
-      "columns": 5566
-    },
-    "results": [
-      {
-        "statement": 1,
-        "sha256": "03d7a3ef3106a4d8f1231361d066ae21a04064ca99a8ecb282715b68d97f477e",
-        "affected_rows": 399,
-        "insert_id": 0,
-        "duration_ms": 472
-      },
-      {
-        "statement": 2,
-        "sha256": "96b9b3619f4332814e002a176364cda1d02212b05384f4f6bdbce07ec778838f",
-        "affected_rows": 399,
-        "insert_id": 0,
-        "duration_ms": 4840
-      },
-      {
-        "statement": 3,
-        "sha256": "8d747b0dc0af6cb9180a70bf03145213433aa81ba07f3e70b47ad1c46bc255bd",
-        "affected_rows": 1112,
-        "insert_id": 0,
-        "duration_ms": 1300
-      },
-      {
-        "statement": 4,
-        "sha256": "3178c774743b1a74997e33f98bda0b39ee9d1fd567f993a8fd1ee4c4ba01ae23",
-        "affected_rows": 1068,
-        "insert_id": 0,
-        "duration_ms": 6494
-      },
-      {
-        "statement": 5,
-        "sha256": "f5b1caf9a05e711eec12e9a1bf4c83be0d043aa7a6b019ae3b1585e17c2e352d",
-        "affected_rows": 191,
-        "insert_id": 0,
-        "duration_ms": 217
-      },
-      {
-        "statement": 6,
-        "sha256": "03a9b25a7d606b46039424c6c9839b5f6baeb890ab550b549708757af3628c30",
-        "affected_rows": 193,
-        "insert_id": 0,
-        "duration_ms": 1063
-      },
-      {
-        "statement": 7,
-        "sha256": "a230e86764f0dfb564ac830549cef402e9f010979c09562412de8cfadea9a6a8",
-        "affected_rows": 1028,
-        "insert_id": 0,
-        "duration_ms": 1056
-      },
-      {
-        "statement": 8,
-        "sha256": "af527ff15b8420b919fff96ab82d728b5512a66ec4741fa25a5273b13b2d5949",
-        "affected_rows": 1112,
-        "insert_id": 0,
-        "duration_ms": 12359
-      },
-      {
-        "statement": 9,
-        "sha256": "28f2d4905ace801bfe6f2a528f9e308253b9deaa96dd71fba4664b004b5a18e1",
-        "affected_rows": 112,
-        "insert_id": 0,
-        "duration_ms": 118
-      },
-      {
-        "statement": 10,
-        "sha256": "2a5383274ded9c641797e1b86767b76867eb5f26264b2b156eb4a8565562e655",
-        "affected_rows": 112,
-        "insert_id": 0,
-        "duration_ms": 1223
-      }
-    ]
+    "result": {
+      "rows": [
+        {
+          "gw": "GW001",
+          "results_with_country": "0",
+          "reports_with_country": "0"
+        },
+        {
+          "gw": "GW004",
+          "results_with_country": "0",
+          "reports_with_country": "0"
+        },
+        {
+          "gw": "GW005",
+          "results_with_country": "0",
+          "reports_with_country": "0"
+        },
+        {
+          "gw": "GW006",
+          "results_with_country": "0",
+          "reports_with_country": "0"
+        },
+        {
+          "gw": "GW009",
+          "results_with_country": "0",
+          "reports_with_country": "0"
+        }
+      ],
+      "returned_rows": 5,
+      "total_rows": 5,
+      "truncated": false,
+      "duration_ms": 89
+    }
   }
 }
