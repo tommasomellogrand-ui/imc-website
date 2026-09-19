@@ -1,15 +1,15 @@
 {
-  "request_id": "gw001-leagues-fixture-alignment-20260919-13",
-  "completed_at": "2026-09-19T08:52:31.129259+00:00",
+  "request_id": "gw001-all-fixture-alignment-20260919-14",
+  "completed_at": "2026-09-19T08:53:28.412953+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw001-leagues-fixture-alignment-20260919-13",
-    "requested_at": "2026-09-19T08:52:00Z",
-    "purpose": "Check fixture ID alignment for the four 90-row GW001 league competition keys",
+    "request_id": "gw001-all-fixture-alignment-20260919-14",
+    "requested_at": "2026-09-19T08:54:00Z",
+    "purpose": "Check fixture ID alignment for every GW001 competition key in Results and Match Report",
     "action": "query",
     "target": "custom",
-    "sql": "SELECT r.competition_key, COUNT(*) AS results_rows, SUM(CASE WHEN m.sm_fixture_id IS NOT NULL THEN 1 ELSE 0 END) AS matched_fixture_ids, SUM(CASE WHEN m.sm_fixture_id IS NULL THEN 1 ELSE 0 END) AS results_without_report, SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key=r.competition_key THEN 1 ELSE 0 END) AS same_key, SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key<>r.competition_key THEN 1 ELSE 0 END) AS different_key FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.competition_key IN ('GW001|CUS|DOMESTIC|league|1','GW001|CUS|DOMESTIC|league|2','GW001|CUS|DOMESTIC|league|3','GW001|CUS|DOMESTIC|league|4') GROUP BY r.competition_key ORDER BY r.competition_key",
-    "limit": 100
+    "sql": "SELECT k.competition_key, COALESCE(r.results_rows,0) results_rows, COALESCE(m.report_rows,0) report_rows, COALESCE(x.matched,0) matched_fixture_ids, COALESCE(x.same_key,0) same_key, COALESCE(x.different_key,0) different_key, COALESCE(r.results_rows,0)-COALESCE(x.matched,0) results_without_report, COALESCE(m.report_rows,0)-COALESCE(y.matched,0) reports_without_result FROM (SELECT competition_key FROM `GW001_IMC Results` UNION SELECT competition_key FROM `GW001_IMC Match Report`) k LEFT JOIN (SELECT competition_key,COUNT(*) results_rows FROM `GW001_IMC Results` GROUP BY competition_key) r ON r.competition_key=k.competition_key LEFT JOIN (SELECT competition_key,COUNT(*) report_rows FROM `GW001_IMC Match Report` GROUP BY competition_key) m ON m.competition_key=k.competition_key LEFT JOIN (SELECT r.competition_key,COUNT(m.sm_fixture_id) matched,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key=r.competition_key THEN 1 ELSE 0 END) same_key,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key<>r.competition_key THEN 1 ELSE 0 END) different_key FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id GROUP BY r.competition_key) x ON x.competition_key=k.competition_key LEFT JOIN (SELECT m.competition_key,COUNT(r.sm_fixture_id) matched FROM `GW001_IMC Match Report` m LEFT JOIN `GW001_IMC Results` r ON r.sm_fixture_id=m.sm_fixture_id GROUP BY m.competition_key) y ON y.competition_key=k.competition_key ORDER BY k.competition_key",
+    "limit": 1000
   },
   "response": {
     "ok": true,
@@ -21,40 +21,128 @@
         {
           "competition_key": "GW001|CUS|DOMESTIC|league|1",
           "results_rows": "90",
+          "report_rows": "90",
           "matched_fixture_ids": "90",
-          "results_without_report": "0",
           "same_key": "90",
-          "different_key": "0"
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
         },
         {
           "competition_key": "GW001|CUS|DOMESTIC|league|2",
           "results_rows": "90",
+          "report_rows": "90",
           "matched_fixture_ids": "90",
-          "results_without_report": "0",
           "same_key": "90",
-          "different_key": "0"
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
         },
         {
           "competition_key": "GW001|CUS|DOMESTIC|league|3",
           "results_rows": "90",
+          "report_rows": "90",
           "matched_fixture_ids": "90",
-          "results_without_report": "0",
           "same_key": "90",
-          "different_key": "0"
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
         },
         {
           "competition_key": "GW001|CUS|DOMESTIC|league|4",
           "results_rows": "90",
+          "report_rows": "90",
           "matched_fixture_ids": "90",
-          "results_without_report": "0",
           "same_key": "90",
-          "different_key": "0"
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW001|CUS|DOMESTIC|leaguecup|4",
+          "results_rows": "39",
+          "report_rows": "39",
+          "matched_fixture_ids": "39",
+          "same_key": "39",
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW001|DOMESTIC|playoff",
+          "results_rows": "1",
+          "report_rows": "0",
+          "matched_fixture_ids": "1",
+          "same_key": "0",
+          "different_key": "1",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW001|DOMESTIC|playoff|2",
+          "results_rows": "3",
+          "report_rows": "3",
+          "matched_fixture_ids": "3",
+          "same_key": "3",
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW001|DOMESTIC|playoff|3",
+          "results_rows": "3",
+          "report_rows": "3",
+          "matched_fixture_ids": "3",
+          "same_key": "3",
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW001|DOMESTIC|playoff|4",
+          "results_rows": "2",
+          "report_rows": "3",
+          "matched_fixture_ids": "2",
+          "same_key": "2",
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW001|INTERNATIONAL|smfacup",
+          "results_rows": "36",
+          "report_rows": "37",
+          "matched_fixture_ids": "36",
+          "same_key": "36",
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "1"
+        },
+        {
+          "competition_key": "GW001|INTERNATIONAL|smfashield",
+          "results_rows": "36",
+          "report_rows": "37",
+          "matched_fixture_ids": "36",
+          "same_key": "36",
+          "different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "1"
+        },
+        {
+          "competition_key": "GW001|NATIONS|interqualifier",
+          "results_rows": "320",
+          "report_rows": "0",
+          "matched_fixture_ids": "0",
+          "same_key": "0",
+          "different_key": "0",
+          "results_without_report": "320",
+          "reports_without_result": "0"
         }
       ],
-      "returned_rows": 4,
-      "total_rows": 4,
+      "returned_rows": 12,
+      "total_rows": 12,
       "truncated": false,
-      "duration_ms": 16
+      "duration_ms": 46
     }
   }
 }
