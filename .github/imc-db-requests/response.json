@@ -1,32 +1,19 @@
 {
-  "request_id": "bridge-smoke-20260919-01",
-  "completed_at": "2026-09-19T08:07:35.679554+00:00",
-  "http_status": 200,
+  "request_id": "gw005-match-report-identify-20260919-01",
+  "completed_at": "2026-09-19T08:09:03.949795+00:00",
+  "http_status": 500,
   "request": {
-    "request_id": "bridge-smoke-20260919-01",
-    "requested_at": "2026-09-19T08:10:00Z",
-    "purpose": "Initial read-only bridge verification",
+    "request_id": "gw005-match-report-identify-20260919-01",
+    "requested_at": "2026-09-19T08:15:00Z",
+    "purpose": "Identify latest GW005 Match Report before explicit deletion",
     "action": "query",
     "target": "custom",
-    "sql": "SELECT DATABASE() AS database_name, 1 AS bridge_ok",
-    "limit": 10
+    "sql": "SELECT * FROM `GW005_IMC Match Report` ORDER BY `id` DESC LIMIT 1",
+    "limit": 1
   },
   "response": {
-    "ok": true,
-    "action": "query",
-    "target": "custom",
-    "database": "Sql1956795_3",
-    "result": {
-      "rows": [
-        {
-          "database_name": "Sql1956795_3",
-          "bridge_ok": "1"
-        }
-      ],
-      "returned_rows": 1,
-      "total_rows": 1,
-      "truncated": false,
-      "duration_ms": 0
-    }
+    "ok": false,
+    "version": "1.5.3",
+    "error": "Unknown column 'id' in 'order clause'"
   }
 }
