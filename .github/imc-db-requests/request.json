@@ -1,6 +1,6 @@
 {
-  "request_id": "gw008-s1-final-winners-20260919-21",
-  "requested_at": "2026-09-19T09:12:00Z",
+  "request_id": "gw008-s1-final-winners-retry-20260919-22",
+  "requested_at": "2026-09-19T09:14:00Z",
   "purpose": "Derive GW008 season 1 knockout trophy winners from final/latest matches",
   "action": "query",
   "target": "gold",
