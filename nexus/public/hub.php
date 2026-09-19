@@ -19,6 +19,40 @@ function nexus_match_rows(PDO $db,string $world,string $key,?array $season,strin
      $rows=nexus_core_rows($db,"SELECT $id site_id,game_world_id,competition_key,sm_fixture_id,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,home_sm_manager_id,away_sm_manager_id,$fields FROM `$table` WHERE game_world_id=? AND competition_key=? $where ORDER BY match_date,`$id`",$params);
     nexus_report_logo_ids($db,$world,$rows);return $rows;
 }
+
+/** Resolve display labels exclusively from the CORE Nexus mapping.
+ * Legacy country/division tokens are normalized for lookup only.
+ * Imported competition keys and fixture data remain untouched.
+ */
+function nexus_apply_catalog_names(array &$catalog,array $mapping,string $world): void {
+    $types=[];
+    foreach($mapping as $m)if(($m['game_world_id']??'')===$world)$types[(string)$m['world_type']]=true;
+    $single=count($types)===1&&isset($types['SINGLE']);
+    $key=static function(string $value) use($single): string {
+        $parts=explode('|',$value);
+        $at=null;
+        foreach($parts as $i=>$part)if(in_array($part,['DOMESTIC','INTERNATIONAL','NATIONS'],true)){$at=$i;break;}
+        if($at===null||!isset($parts[$at+1]))return $value;
+        $group=$parts[$at];$action=$parts[$at+1];$out=[$parts[0]];
+        if(!$single&&$group==='DOMESTIC'&&$at>1)$out[]=$parts[1];
+        $out[]=$group;$out[]=$action;
+        if(in_array($action,['league','playoff'],true)&&isset($parts[$at+2]))$out[]=$parts[$at+2];
+        return implode('|',$out);
+    };
+    $labels=[];
+    foreach($mapping as $m){
+        if(($m['game_world_id']??'')!==$world||trim((string)($m['nexus_view']??''))==='')continue;
+        $labels[$key((string)$m['competition_key'])][(string)$m['nexus_view']]=true;
+    }
+    foreach($catalog as &$c){
+        $names=array_keys($labels[$key((string)($c['competition_key']??''))]??[]);
+        $c['nexus_view']=count($names)===1?$names[0]:null;
+        $c['name_mapping_status']=count($names)===1?'matched':(count($names)>1?'ambiguous':'missing');
+        $c['custom_competition']=$c['nexus_view']??'Nome competizione non configurato';
+    }
+    unset($c);
+}
+
 function nexus_catalog(PDO $db,PDO $core,string $world,?array $season): array {
     $catalog=nexus_core_rows($core,'SELECT id,competition_key,custom_competition,sm_action,sm_action_group,sm_country,sm_division,teams_count,expected_match,is_sm_action FROM `IMC Competition Codex Global` WHERE game_world_id=?',[$world]);
     $byKey=[];foreach($catalog as $c)if($c['competition_key'])$byKey[$c['competition_key']]=$c;
@@ -31,7 +65,10 @@ function nexus_catalog(PDO $db,PDO $core,string $world,?array $season): array {
             $byKey[$key]=array_merge($base,$r);
         }$byKey[$key][$kind.'_count']=(int)$r['matches'];$byKey[$key]['updated_at']=max($byKey[$key]['updated_at']??'',$r['updated_at']??'');if($kind==='schedule')$byKey[$key]['next_date']=$r['next_date'];}
     }
-    return array_values(array_filter($byKey,fn($c)=>($c['results_count']??0)+($c['schedule_count']??0)>0));
+    $visible=array_values(array_filter($byKey,fn($c)=>($c['results_count']??0)+($c['schedule_count']??0)>0));
+    $mapping=nexus_core_rows($core,'SELECT game_world_id,world_type,competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$world]);
+    nexus_apply_catalog_names($visible,$mapping,$world);
+    return $visible;
 }
 function nexus_hub(PDO $db,PDO $core,string $world): array {
     $key=(string)($_GET['competition']??'');if($key===''||strlen($key)>255)respond(['ok'=>false,'error'=>'invalid_competition'],422);
