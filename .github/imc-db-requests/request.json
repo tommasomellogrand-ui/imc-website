@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-key-count-final-20260919-04",
-  "requested_at": "2026-09-19T08:28:00Z",
-  "purpose": "GW001 exact competition_key counts Results vs Match Report",
+  "request_id": "gw008-s1-trophy-source-audit-20260919-20",
+  "requested_at": "2026-09-19T09:10:00Z",
+  "purpose": "List GW008 season 1 competition keys, actions, dates and row counts for trophy derivation",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT competition_key, SUM(results_count) AS results_count, SUM(match_report_count) AS match_report_count FROM (SELECT competition_key,COUNT(*) results_count,0 match_report_count FROM `GW001_IMC Results` GROUP BY competition_key UNION ALL SELECT competition_key,0 results_count,COUNT(*) match_report_count FROM `GW001_IMC Match Report` GROUP BY competition_key) q GROUP BY competition_key ORDER BY competition_key",
-  "limit": 1000
+  "target": "gold",
+  "sql": "SELECT competition_key, competition_group, sm_action, sm_country, sm_division, MIN(match_date) AS first_date, MAX(match_date) AS last_date, COUNT(*) AS matches FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND ((match_date BETWEEN '2026-03-30' AND '2026-08-29') OR (sm_action='worldcup' AND match_date IS NULL)) GROUP BY competition_key, competition_group, sm_action, sm_country, sm_division ORDER BY competition_group, sm_action, sm_country, sm_division",
+  "limit": 500
 }
