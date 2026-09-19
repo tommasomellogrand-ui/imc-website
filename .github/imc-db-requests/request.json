@@ -1,9 +1,15 @@
 {
-  "request_id": "gw008-group-distinct-20260919-09",
-  "requested_at": "2026-09-19T08:35:00Z",
-  "purpose": "Final audit of sm_action values with missing competition_group before explicit backfill",
-  "action": "query",
+  "request_id": "gw008-group-plan-20260919-10",
+  "requested_at": "2026-09-19T08:37:00Z",
+  "purpose": "Plan explicit GW008 competition_group backfill from sm_action",
+  "action": "plan_migration",
   "target": "gold",
-  "sql": "SELECT sm_action, COUNT(*) AS rows_count FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') GROUP BY sm_action ORDER BY sm_action",
-  "limit": 100
+  "migration_id": "gw008-results-competition-group-backfill-20260919",
+  "statements": [
+    "UPDATE `GW008_IMC Results` SET competition_group='DOMESTIC' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('league','leaguecup','leagueshield','charityshield')",
+    "UPDATE `GW008_IMC Results` SET competition_group='INTERNATIONAL' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('smfacup','smfashield','supercup')",
+    "UPDATE `GW008_IMC Results` SET competition_group='NATIONS' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('worldcup','interqualifier')"
+  ],
+  "allow_destructive": false,
+  "data_migration": true
 }
