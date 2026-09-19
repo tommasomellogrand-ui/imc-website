@@ -1,9 +1,9 @@
 {
-  "request_id": "core-trophy-room-count-20260919-07",
-  "requested_at": "2026-09-19T08:25:00Z",
-  "purpose": "Count current rows in IMC Trophy Room",
+  "request_id": "gw008-results-competition-key-audit-20260919-08",
+  "requested_at": "2026-09-19T08:30:00Z",
+  "purpose": "Audit GW008 Results missing competition_key and inspect source fields",
   "action": "query",
-  "target": "core",
-  "sql": "SELECT COUNT(*) AS total_rows FROM `IMC Trophy Room`",
-  "limit": 10
+  "target": "gold",
+  "sql": "SELECT sm_action, sm_country, sm_division, competition_group, competition_stage, competition_round, COUNT(*) AS rows_count, SUM(CASE WHEN competition_key IS NULL OR TRIM(competition_key)='' THEN 1 ELSE 0 END) AS missing_key, MIN(competition_key) AS sample_key FROM `GW008_IMC Results` WHERE game_world_id='GW008' GROUP BY sm_action, sm_country, sm_division, competition_group, competition_stage, competition_round ORDER BY missing_key DESC, rows_count DESC",
+  "limit": 500
 }
