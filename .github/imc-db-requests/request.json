@@ -1,9 +1,9 @@
 {
-  "request_id": "gw008-group-verify-20260919-12",
-  "requested_at": "2026-09-19T08:40:00Z",
-  "purpose": "Verify GW008 competition_group backfill",
+  "request_id": "gw008-key-buildability-20260919-13",
+  "requested_at": "2026-09-19T08:45:00Z",
+  "purpose": "Count GW008 Results missing competition_key that are deterministically buildable",
   "action": "query",
   "target": "gold",
-  "sql": "SELECT competition_group, COUNT(*) AS rows_count FROM `GW008_IMC Results` WHERE game_world_id='GW008' GROUP BY competition_group ORDER BY competition_group",
-  "limit": 20
+  "sql": "SELECT COUNT(*) AS missing_total, SUM(CASE WHEN competition_group='DOMESTIC' AND sm_action='league' AND sm_country IS NOT NULL AND TRIM(sm_country)<>'' AND sm_division IS NOT NULL AND TRIM(sm_division)<>'' THEN 1 WHEN competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_country IS NOT NULL AND TRIM(sm_country)<>'' THEN 1 WHEN competition_group='INTERNATIONAL' AND sm_action IN ('smfacup','smfashield','supercup') THEN 1 WHEN competition_group='NATIONS' AND sm_action IN ('worldcup','interqualifier') THEN 1 ELSE 0 END) AS buildable, SUM(CASE WHEN NOT ((competition_group='DOMESTIC' AND sm_action='league' AND sm_country IS NOT NULL AND TRIM(sm_country)<>'' AND sm_division IS NOT NULL AND TRIM(sm_division)<>'') OR (competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_country IS NOT NULL AND TRIM(sm_country)<>'') OR (competition_group='INTERNATIONAL' AND sm_action IN ('smfacup','smfashield','supercup')) OR (competition_group='NATIONS' AND sm_action IN ('worldcup','interqualifier'))) THEN 1 ELSE 0 END) AS unresolved FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='')",
+  "limit": 10
 }
