@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.5.2';
+const IMC_DBM_VERSION = '1.5.3';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -474,6 +474,27 @@ try {
 
     if ($action === 'execute_migration') {
         dbm_reply(dbm_execute_plan($payload));
+    }
+
+    if ($action === 'delete_one') {
+        $target = trim((string)($payload['target'] ?? ''));
+        $table = trim((string)($payload['table'] ?? ''));
+        $where = $payload['where'] ?? null;
+        if (!preg_match('/^[A-Za-z0-9_ ]{1,128}$/', $table)) throw new InvalidArgumentException('Invalid table.');
+        if (!is_array($where) || $where === [] || count($where) > 8) throw new InvalidArgumentException('where must contain 1 to 8 fields.');
+        [$database, $db] = dbm_storage($target);
+        $parts = []; $values = []; $types = '';
+        foreach ($where as $column => $value) {
+            if (!is_string($column) || !preg_match('/^[A-Za-z_][A-Za-z0-9_]{0,63}$/', $column)) throw new InvalidArgumentException('Invalid where column.');
+            if (!is_scalar($value) && $value !== null) throw new InvalidArgumentException('Invalid where value.');
+            $parts[] = '`' . $column . '` <=> ?'; $values[] = $value; $types .= is_int($value) ? 'i' : (is_float($value) ? 'd' : 's');
+        }
+        $escapedTable = str_replace('`', '``', $table);
+        $stmt = $db->prepare('DELETE FROM `' . $escapedTable . '` WHERE ' . implode(' AND ', $parts) . ' LIMIT 1');
+        if ($values !== []) $stmt->bind_param($types, ...$values);
+        $stmt->execute(); $affected = $stmt->affected_rows; $stmt->close();
+        dbm_audit(['action'=>$action,'target'=>$target,'database'=>$database,'table'=>$table,'where_sha256'=>hash('sha256',dbm_canonical($where)),'affected_rows'=>$affected,'status'=>'success']);
+        dbm_reply(['ok'=>true,'action'=>$action,'target'=>$target,'database'=>$database,'table'=>$table,'affected_rows'=>$affected]);
     }
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
