@@ -1,7 +1,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const L=require('./hub-logic.js');
-const match=(id,h,a,hs,as,extra={})=>({sm_fixture_id:id,home_sm_club_id:h,away_sm_club_id:a,home_name:'Club '+h,away_name:'Club '+a,home_score:hs,away_score:as,result_status:'COMPLETED',...extra});
+const match=(id,h,a,hs,as,extra={})=>({sm_fixture_id:id,home_sm_club_id:h,away_sm_club_id:a,home_name:'Club '+h,away_name:'Club '+a,home_core:{name:'Club '+h,image_url:'https://example.test/home.png'},away_core:{name:'Club '+a,image_url:'https://example.test/away.png'},home_score:hs,away_score:as,result_status:'COMPLETED',...extra});
 test('standings ignore missing scores, pending results and duplicate fixtures',()=>{
  const a=match(1,10,20,2,0),b=match(2,20,10,1,1);
  const table=L.standings([a,a,b,match(3,10,20,null,0),match(4,10,20,0,0,{result_status:'POSTPONED'})]);
@@ -41,7 +41,7 @@ async function render(query){
    case 'manager_profile':data={manager:{sm_manager_id:123},assignments:c.managers,source:'IMC Site Match Report',rows:[match(20,10,20,2,1,{match_date:'2026-09-01',competition_group:'DOMESTIC',home_sm_manager_id:123,away_sm_manager_id:456,away_manager_name:'Opponent Test',competition_stage:'Finale',imc_season:1,competition_key:cmp.competition_key})]};break;
    case 'competition_reports':data={competition:cmp,reports:[match(20,10,20,2,1,{match_date:'2026-09-01',competition_stage:'Finale',home_sm_manager_id:123,away_sm_manager_id:456})],schedule:[]};break;
    case 'team_profile':data={team:c.clubs[0],source:'IMC Site Match Report',rows:[match(20,10,20,2,1,{match_date:'2026-09-01'})]};break;
-   case 'players':data={rows:[{player_id:1,full_name:'Player Test',rating:90,market_value:'1M',current_club:'Club 10'}],clubs:[],total:1};break;
+   case 'players':data={rows:[{player_id:1,full_name:'Player Test',rating:90,market_value:'1M',current_club:'Club 10',club_core:{name:'Club 10',image_url:'https://example.test/club.png'}}],clubs:[],total:1};break;
    case 'transfers':data={rows:[],total:0};break;
    default:data={rows:[],total:0};
    }return {ok:true,json:async()=>({ok:true,...data})};
@@ -93,4 +93,9 @@ test('all manager tabs and team statistics are routed through report profile end
  if(tab==='trophy'){assert.ok(r.html.includes('VINCITORE'));assert.ok(r.requests.some(q=>q.resource==='competition_reports'));assert.ok(!r.requests.some(q=>q.resource==='competition'));}
  }
  const t=await render('?world=GW003&resource=club&team=1&profileTab=stats');assert.ok(t.requests.some(q=>q.resource==='team_profile'));assert.ok(t.html.includes('Vittorie'));
+});
+
+test('team crests render in fixtures, standings and player club summaries',async()=>{
+ for(const tab of ['overview','competition','matches']){const r=await render('?world=GW003&resource=competitions&competition=GW003%7CARG%7CDOMESTIC%7Cleague%7C1&tab='+tab);assert.ok(r.html.includes('https://example.test/home.png'));assert.ok(r.html.includes('class="core-crest"'));}
+ const p=await render('?world=GW003&resource=player');assert.ok(p.html.includes('https://example.test/club.png'));assert.ok(p.html.includes('team-context'));
 });

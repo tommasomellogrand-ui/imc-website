@@ -49,6 +49,8 @@ for i in range(1,11):
 global_players=json.loads(get('public/data.php?world=GW001&resource=players&scope=global&rating_min=90'))
 assert global_players['ok'] and all(float(r['rating'])>=90 for r in global_players['rows'])
 print('GLOBAL_CODEX_FILTER_OK')
+assert any(r.get('club_core',{}).get('image_url') for r in global_players['rows'] if r.get('club_core')), 'Global player clubs need CORE logos'
+print('PLAYER_CLUB_LOGOS_OK')
 
 transfers=json.loads(get('public/data.php?world=GW002&resource=transfers&limit=1'))
 if transfers['clubs']:

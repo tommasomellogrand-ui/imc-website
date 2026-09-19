@@ -28,7 +28,7 @@ try {
     if($resource==='catalog')respond(['ok'=>true,'world'=>$world,'rows'=>nexus_catalog($pdo,$coreDb,$world,nexus_season($coreDb,$world,(string)($_GET['season']??'')))]);
     if($resource==='competition')respond(nexus_hub($pdo,$coreDb,$world));
     if($resource==='players')respond(($_GET['scope']??'world')==='global'?nexus_global_players($coreDb,$world):nexus_players($pdo,$coreDb,$world));
-    if($resource==='stats')respond(nexus_stats($pdo,$world));
+    if($resource==='stats')respond(nexus_stats($pdo,$world,$coreDb));
     if($resource==='competition_reports')respond(nexus_competition_reports($pdo,$coreDb,$world));
     if($resource==='manager_profile')respond(nexus_manager_profile($pdo,$coreDb,$world));
     if($resource==='team_profile')respond(nexus_team_profile($pdo,$coreDb,$world));
@@ -76,6 +76,7 @@ try {
     $pdo->commit();
     foreach($rows as &$row)foreach($row as $key=>&$value)if(str_ends_with($key,'_json')||$key==='exchange_players')$value=$value===null?null:json_decode($value,true); unset($row,$value);
     require_once __DIR__.'/core.php';
+    if(in_array($resource,['results','schedule'],true))nexus_report_logo_ids($pdo,$world,$rows);
     $core=nexus_core_enrich(nexus_core_db($cfg),$world,$resource,$rows);
     $facets=[];
     if($resource==='transfers'){
