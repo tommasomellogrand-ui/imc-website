@@ -1,15 +1,15 @@
 {
-  "request_id": "single-normalize-country-keys-verify-20260919-36",
-  "completed_at": "2026-09-19T10:08:15.010221+00:00",
+  "request_id": "single-canonical-keys-after-normalization-20260919-37",
+  "completed_at": "2026-09-19T10:14:24.946968+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "single-normalize-country-keys-verify-20260919-36",
-    "requested_at": "2026-09-19T09:59:00Z",
-    "purpose": "Verify no country segment remains in domestic competition keys for Single League worlds",
+    "request_id": "single-canonical-keys-after-normalization-20260919-37",
+    "requested_at": "2026-09-19T10:12:00Z",
+    "purpose": "Extract exact current competition keys for all Single League worlds after normalization",
     "action": "query",
     "target": "custom",
-    "sql": "SELECT 'GW001' gw,(SELECT COUNT(*) FROM `GW001_IMC Results` WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW001_IMC Match Report` WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW004' gw,(SELECT COUNT(*) FROM `GW004_IMC Results` WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW004_IMC Match Report` WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW005' gw,(SELECT COUNT(*) FROM `GW005_IMC Results` WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW005_IMC Match Report` WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW006' gw,(SELECT COUNT(*) FROM `GW006_IMC Results` WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW006_IMC Match Report` WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW009' gw,(SELECT COUNT(*) FROM `GW009_IMC Results` WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW009_IMC Match Report` WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country",
-    "limit": 100
+    "sql": "SELECT gw,competition_key FROM (SELECT 'GW001' gw,competition_key FROM `GW001_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW001' gw,competition_key FROM `GW001_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW004' gw,competition_key FROM `GW004_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW004' gw,competition_key FROM `GW004_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW005' gw,competition_key FROM `GW005_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW005' gw,competition_key FROM `GW005_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW006' gw,competition_key FROM `GW006_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW006' gw,competition_key FROM `GW006_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW009' gw,competition_key FROM `GW009_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW009' gw,competition_key FROM `GW009_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'') x GROUP BY gw,competition_key ORDER BY gw,competition_key",
+    "limit": 1000
   },
   "response": {
     "ok": true,
@@ -20,34 +20,213 @@
       "rows": [
         {
           "gw": "GW001",
-          "results_with_country": "0",
-          "reports_with_country": "0"
+          "competition_key": "GW001|DOMESTIC|league|1"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|DOMESTIC|league|2"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|DOMESTIC|league|3"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|DOMESTIC|league|4"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|DOMESTIC|leaguecup|4"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|DOMESTIC|playoff|2"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|DOMESTIC|playoff|3"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|DOMESTIC|playoff|4"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|INTERNATIONAL|smfacup"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|INTERNATIONAL|smfashield"
+        },
+        {
+          "gw": "GW001",
+          "competition_key": "GW001|NATIONS|interqualifier"
         },
         {
           "gw": "GW004",
-          "results_with_country": "0",
-          "reports_with_country": "0"
+          "competition_key": "GW004"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|DOMESTIC|charityshield"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|DOMESTIC|league|1"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|DOMESTIC|league|2"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|DOMESTIC|league|3"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|DOMESTIC|league|4"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|DOMESTIC|leaguecup|2"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|DOMESTIC|leagueshield|2"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|INTERNATIONAL|smfacup"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|INTERNATIONAL|smfashield"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|INTERNATIONAL|supercup"
+        },
+        {
+          "gw": "GW004",
+          "competition_key": "GW004|NATIONS|interqualifier"
         },
         {
           "gw": "GW005",
-          "results_with_country": "0",
-          "reports_with_country": "0"
+          "competition_key": "GW005"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|DOMESTIC|charityshield"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|DOMESTIC|league|1"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|DOMESTIC|league|2"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|DOMESTIC|league|3"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|DOMESTIC|leaguecup|1"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|DOMESTIC|playoff|2"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|DOMESTIC|playoff|3"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|INTERNATIONAL|smfacup"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|INTERNATIONAL|smfashield"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|NATIONS|interqualifier"
+        },
+        {
+          "gw": "GW005",
+          "competition_key": "GW005|NATIONS|worldcup"
         },
         {
           "gw": "GW006",
-          "results_with_country": "0",
-          "reports_with_country": "0"
+          "competition_key": "GW006|DOMESTIC|league|1"
+        },
+        {
+          "gw": "GW006",
+          "competition_key": "GW006|DOMESTIC|league|2"
+        },
+        {
+          "gw": "GW006",
+          "competition_key": "GW006|DOMESTIC|league|3"
+        },
+        {
+          "gw": "GW006",
+          "competition_key": "GW006|DOMESTIC|league|4"
+        },
+        {
+          "gw": "GW006",
+          "competition_key": "GW006|DOMESTIC|leaguecup|1"
+        },
+        {
+          "gw": "GW006",
+          "competition_key": "GW006|DOMESTIC|leagueshield|1"
+        },
+        {
+          "gw": "GW006",
+          "competition_key": "GW006|INTERNATIONAL|smfacup"
+        },
+        {
+          "gw": "GW006",
+          "competition_key": "GW006|INTERNATIONAL|smfashield"
+        },
+        {
+          "gw": "GW006",
+          "competition_key": "GW006|NATIONS|interqualifier"
         },
         {
           "gw": "GW009",
-          "results_with_country": "0",
-          "reports_with_country": "0"
+          "competition_key": "GW009|DOMESTIC|league|1"
+        },
+        {
+          "gw": "GW009",
+          "competition_key": "GW009|DOMESTIC|league|2"
+        },
+        {
+          "gw": "GW009",
+          "competition_key": "GW009|DOMESTIC|league|3"
+        },
+        {
+          "gw": "GW009",
+          "competition_key": "GW009|DOMESTIC|leaguecup|2"
+        },
+        {
+          "gw": "GW009",
+          "competition_key": "GW009|INTERNATIONAL|smfacup"
+        },
+        {
+          "gw": "GW009",
+          "competition_key": "GW009|INTERNATIONAL|smfashield"
+        },
+        {
+          "gw": "GW009",
+          "competition_key": "GW009|NATIONS|interqualifier"
         }
       ],
-      "returned_rows": 5,
-      "total_rows": 5,
+      "returned_rows": 51,
+      "total_rows": 51,
       "truncated": false,
-      "duration_ms": 89
+      "duration_ms": 82
     }
   }
 }
