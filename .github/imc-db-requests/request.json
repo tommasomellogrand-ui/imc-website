@@ -1,9 +1,13 @@
 {
-  "request_id": "gw001-playoff-full-fixture-map-20260919-17",
-  "requested_at": "2026-09-19T08:58:00Z",
-  "purpose": "List every GW001 playoff Result with matching Match Report by fixture ID and expose key/division/stage differences",
-  "action": "query",
+  "request_id": "gw001-fix-playoff-d4-plan-20260919-18",
+  "requested_at": "2026-09-19T09:00:00Z",
+  "purpose": "Plan correction of GW001 Result fixture 368726159 division and playoff competition key",
+  "action": "plan_migration",
   "target": "custom",
-  "sql": "SELECT r.sm_fixture_id,r.match_date,r.home_name,r.away_name,r.home_score,r.away_score,r.competition_key result_key,r.sm_division result_division,r.competition_stage result_stage,m.sm_fixture_id report_fixture_id,m.competition_key report_key,m.sm_division report_division,m.competition_stage report_stage,m.home_name report_home,m.away_name report_away,m.home_score report_home_score,m.away_score report_away_score FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.competition_key LIKE 'GW001|DOMESTIC|playoff%' OR m.competition_key LIKE 'GW001|DOMESTIC|playoff%' ORDER BY r.match_date,r.sm_fixture_id",
-  "limit": 100
+  "migration_id": "gw001-fix-playoff-d4-result-368726159",
+  "statements": [
+    "UPDATE `GW001_IMC Results` SET sm_division='4', competition_key='GW001|DOMESTIC|playoff|4' WHERE sm_fixture_id=368726159"
+  ],
+  "allow_destructive": false,
+  "data_migration": true
 }
