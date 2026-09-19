@@ -1,0 +1,31 @@
+name: Test direct MySQL Aruba
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-direct-mysql-aruba.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+    steps:
+      - name: Install MySQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
+      - name: Test direct read-only connection to Aruba MySQL
+        env:
+          MYSQL_PWD: ${{ secrets.MYSQL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mysql --host="$MYSQL_HOST" --user="$MYSQL_USERNAME" --batch --skip-column-names \
+            -e "SELECT DATABASE(), VERSION(); SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='Sql1956795_3';"
