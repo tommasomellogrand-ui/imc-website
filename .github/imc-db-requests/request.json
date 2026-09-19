@@ -1,9 +1,9 @@
 {
-  "request_id": "gw008-s1-final-winners-retry-20260919-22",
-  "requested_at": "2026-09-19T09:14:00Z",
-  "purpose": "Derive GW008 season 1 knockout trophy winners from final/latest matches",
+  "request_id": "gw008-s1-league-winners-20260919-23",
+  "requested_at": "2026-09-19T09:16:00Z",
+  "purpose": "Derive GW008 season 1 league champions from standings",
   "action": "query",
   "target": "gold",
-  "sql": "SELECT r.competition_key,r.sm_action,r.sm_country,r.match_date,r.home_name,r.away_name,r.home_score,r.away_score,r.penalty_home_score,r.penalty_away_score,CASE WHEN COALESCE(r.penalty_home_score,-1)>COALESCE(r.penalty_away_score,-1) THEN r.home_name WHEN COALESCE(r.penalty_away_score,-1)>COALESCE(r.penalty_home_score,-1) THEN r.away_name WHEN r.home_score>r.away_score THEN r.home_name WHEN r.away_score>r.home_score THEN r.away_name ELSE NULL END AS winner FROM `GW008_IMC Results` r JOIN (SELECT competition_key,MAX(match_date) max_date FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND sm_action IN ('leaguecup','leagueshield','charityshield','smfacup','smfashield','supercup','worldcup') AND match_date BETWEEN '2026-03-30' AND '2026-08-29' GROUP BY competition_key) x ON x.competition_key=r.competition_key AND x.max_date=r.match_date WHERE r.game_world_id='GW008' AND r.sm_action IN ('leaguecup','leagueshield','charityshield','smfacup','smfashield','supercup','worldcup') ORDER BY r.competition_key,r.sm_fixture_id DESC",
-  "limit": 200
+  "sql": "SELECT competition_key, team_name, played, points, gd FROM (SELECT competition_key, team_name, COUNT(*) played, SUM(points) points, SUM(gf-ga) gd, ROW_NUMBER() OVER (PARTITION BY competition_key ORDER BY SUM(points) DESC, SUM(gf-ga) DESC, SUM(gf) DESC, team_name) rn FROM (SELECT competition_key, home_name team_name, home_score gf, away_score ga, CASE WHEN home_score>away_score THEN 3 WHEN home_score=away_score THEN 1 ELSE 0 END points FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND sm_action='league' AND match_date BETWEEN '2026-03-30' AND '2026-08-29' UNION ALL SELECT competition_key, away_name team_name, away_score gf, home_score ga, CASE WHEN away_score>home_score THEN 3 WHEN away_score=home_score THEN 1 ELSE 0 END points FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND sm_action='league' AND match_date BETWEEN '2026-03-30' AND '2026-08-29') m GROUP BY competition_key,team_name) s WHERE rn=1 ORDER BY competition_key",
+  "limit": 100
 }
