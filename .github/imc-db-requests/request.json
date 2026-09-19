@@ -1,9 +1,13 @@
 {
-  "request_id": "single-canonical-keys-after-normalization-20260919-37",
-  "requested_at": "2026-09-19T10:12:00Z",
-  "purpose": "Extract exact current competition keys for all Single League worlds after normalization",
-  "action": "query",
-  "target": "custom",
-  "sql": "SELECT gw,competition_key FROM (SELECT 'GW001' gw,competition_key FROM `GW001_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW001' gw,competition_key FROM `GW001_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW004' gw,competition_key FROM `GW004_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW004' gw,competition_key FROM `GW004_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW005' gw,competition_key FROM `GW005_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW005' gw,competition_key FROM `GW005_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW006' gw,competition_key FROM `GW006_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW006' gw,competition_key FROM `GW006_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW009' gw,competition_key FROM `GW009_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW009' gw,competition_key FROM `GW009_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'') x GROUP BY gw,competition_key ORDER BY gw,competition_key",
-  "limit": 1000
+  "request_id": "core-create-nexus-competition-mapping-plan-20260919-38",
+  "requested_at": "2026-09-19T10:15:00Z",
+  "purpose": "Create authoritative CORE table for Nexus competition display mapping",
+  "action": "plan_migration",
+  "target": "core",
+  "migration_id": "create-imc-competition-nexus-mapping-20260919",
+  "statements": [
+    "CREATE TABLE `IMC Competition Nexus Mapping` (`mapping_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,`game_world_id` VARCHAR(10) NOT NULL,`world_type` ENUM('SINGLE','MULTI') NOT NULL,`sm_country` VARCHAR(100) NULL,`competition_group` VARCHAR(32) NOT NULL,`sm_action` VARCHAR(64) NOT NULL,`sm_division` VARCHAR(16) NULL,`competition_key` VARCHAR(255) NOT NULL,`nexus_view` VARCHAR(255) NOT NULL,`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`mapping_id`),UNIQUE KEY `uq_competition_key` (`competition_key`),KEY `idx_lookup` (`game_world_id`,`competition_group`,`sm_action`,`sm_division`),KEY `idx_country` (`game_world_id`,`sm_country`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+  ],
+  "allow_destructive": false,
+  "data_migration": false
 }
