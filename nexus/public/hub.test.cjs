@@ -60,7 +60,7 @@ test('world scoped routing, all competition tabs and section rendering',async()=
 
 test('manager grids deduplicate identities and profiles preserve world and assignment links',async()=>{
  const grid=await render('?world=GW003&resource=manager');
- assert.equal((grid.html.match(/Apri profilo/g)||[]).length,2);assert.ok(grid.html.includes('team-grid'));assert.ok(grid.html.includes('manager=MNG001'));
+ assert.equal((grid.html.match(/class="card team-tile"/g)||[]).length,2);assert.ok(!grid.html.includes('Apri profilo'));assert.ok(grid.html.includes('team-grid'));assert.ok(grid.html.includes('manager=MNG001'));
  const profile=await render('?world=GW003&resource=manager&manager=MNG001');
  assert.ok(profile.html.includes('Carriera nel mondo'));assert.equal((profile.html.match(/career-card/g)||[]).length,2);assert.ok(profile.html.includes('team=1'));assert.ok(profile.html.includes('world=GW003'));
  const club=await render('?world=GW003&resource=club&team=1');assert.ok(club.html.includes('Carriera manager IMC'));assert.ok(club.html.includes('manager=MNG001'));
