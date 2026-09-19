@@ -1,14 +1,14 @@
 {
   "request_id": "gw005-mr-latest-20260919-03",
-  "completed_at": "2026-09-19T08:10:06.498412+00:00",
+  "completed_at": "2026-09-19T08:10:22.665344+00:00",
   "http_status": 200,
   "request": {
     "request_id": "gw005-mr-latest-20260919-03",
-    "requested_at": "2026-09-19T08:17:00Z",
-    "purpose": "Identify latest GW005 match report before requested deletion",
+    "requested_at": "2026-09-19T08:18:00Z",
+    "purpose": "Identify latest GW005 Match Report before requested deletion",
     "action": "query",
     "target": "custom",
-    "sql": "SELECT game_world_id, sm_fixture_id, competition_key, competition_group, competition_stage, competition_round, match_date, home_name, away_name, home_score, away_score, fingerprint, imported_at FROM `GW005_IMC Match Report` WHERE game_world_id='GW005' ORDER BY imported_at DESC LIMIT 1",
+    "sql": "SELECT game_world_id, sm_fixture_id, competition_key, competition_group, competition_stage, competition_round, match_date, home_name, away_name, home_score, away_score, fingerprint, imported_at FROM `GW005_IMC Match Report` WHERE game_world_id='GW005' ORDER BY imported_at DESC, match_date DESC, sm_fixture_id DESC LIMIT 1",
     "limit": 1
   },
   "response": {
@@ -37,7 +37,7 @@
       "returned_rows": 1,
       "total_rows": 1,
       "truncated": false,
-      "duration_ms": 6
+      "duration_ms": 5
     }
   }
 }
