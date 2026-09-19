@@ -1,103 +1,43 @@
 {
-  "request_id": "normalize-multi-cup-keys-execute-20260919-51",
-  "completed_at": "2026-09-19T10:42:07.416014+00:00",
+  "request_id": "core-clean-cup-division-mappings-plan-20260919-52",
+  "completed_at": "2026-09-19T10:47:43.905081+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "normalize-multi-cup-keys-execute-20260919-51",
-    "requested_at": "2026-09-19T10:40:00Z",
-    "purpose": "Execute approved Multi League domestic cup key normalization without division",
-    "action": "execute_migration",
-    "target": "gold",
-    "migration_id": "normalize-multi-domestic-cup-keys-no-division-20260919",
+    "request_id": "core-clean-cup-division-mappings-plan-20260919-52",
+    "requested_at": "2026-09-19T10:48:00Z",
+    "purpose": "Normalize CORE Nexus mapping so domestic cups never carry division and remove obsolete duplicate cup mappings",
+    "action": "plan_migration",
+    "target": "core",
+    "migration_id": "normalize-core-nexus-cup-mappings-no-division-20260919",
     "statements": [
-      "UPDATE `GW002_IMC Results` SET competition_key=CONCAT('GW002|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND NULLIF(TRIM(sm_country),'') IS NOT NULL AND competition_key<>CONCAT('GW002|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action)",
-      "UPDATE `GW002_IMC Match Report` SET competition_key=CONCAT('GW002|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND NULLIF(TRIM(sm_country),'') IS NOT NULL AND competition_key<>CONCAT('GW002|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action)",
-      "UPDATE `GW003_IMC Results` SET competition_key=CONCAT('GW003|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND NULLIF(TRIM(sm_country),'') IS NOT NULL AND competition_key<>CONCAT('GW003|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action)",
-      "UPDATE `GW003_IMC Match Report` SET competition_key=CONCAT('GW003|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND NULLIF(TRIM(sm_country),'') IS NOT NULL AND competition_key<>CONCAT('GW003|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action)",
-      "UPDATE `GW007_IMC Results` SET competition_key=CONCAT('GW007|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND NULLIF(TRIM(sm_country),'') IS NOT NULL AND competition_key<>CONCAT('GW007|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action)",
-      "UPDATE `GW007_IMC Match Report` SET competition_key=CONCAT('GW007|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND NULLIF(TRIM(sm_country),'') IS NOT NULL AND competition_key<>CONCAT('GW007|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action)",
-      "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND NULLIF(TRIM(sm_country),'') IS NOT NULL AND competition_key<>CONCAT('GW008|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action)",
-      "UPDATE `GW008_IMC Match Report` SET competition_key=CONCAT('GW008|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND NULLIF(TRIM(sm_country),'') IS NOT NULL AND competition_key<>CONCAT('GW008|',UPPER(TRIM(sm_country)),'|',competition_group,'|',sm_action)"
+      "DELETE FROM `IMC Competition Nexus Mapping` WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_division IS NOT NULL"
     ],
-    "allow_destructive": false,
+    "allow_destructive": true,
     "data_migration": true
   },
   "response": {
     "ok": true,
-    "action": "execute_migration",
-    "target": "gold",
-    "database": "Sql1956795_2",
-    "migration_id": "normalize-multi-domestic-cup-keys-no-division-20260919",
-    "data_migration": true,
-    "plan_sha256": "8d870a6eb1d0b1f11aedd156cc9aa6e97080a05237ffed78069aa63fe6443a5c",
-    "status": "success",
-    "statement_count": 8,
-    "duration_ms": 112813,
-    "before": {
-      "tables": 299,
-      "columns": 5269
+    "action": "plan_migration",
+    "plan": {
+      "target": "core",
+      "database": "Sql1956795_1",
+      "migration_id": "normalize-core-nexus-cup-mappings-no-division-20260919",
+      "allow_destructive": true,
+      "data_migration": true,
+      "statements": [
+        "DELETE FROM `IMC Competition Nexus Mapping` WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_division IS NOT NULL"
+      ]
     },
-    "after": {
-      "tables": 299,
-      "columns": 5269
-    },
-    "results": [
+    "analysis": [
       {
-        "statement": 1,
-        "sha256": "d622531fe4b79b65efb5c0ca53ccf4e82472b7cb5560083638fa91c7f4d598a6",
-        "affected_rows": 562,
-        "insert_id": 0,
-        "duration_ms": 888
-      },
-      {
-        "statement": 2,
-        "sha256": "7e32470f64f9f2bc6a220b47ad6b4726acd50883f3bba7ef370adb4ef5d1cecb",
-        "affected_rows": 0,
-        "insert_id": 0,
-        "duration_ms": 29590
-      },
-      {
-        "statement": 3,
-        "sha256": "9fb05361a535b80282600a8c65d361b3bbc4b6b5d6902bc3857524eef8e57cb9",
-        "affected_rows": 860,
-        "insert_id": 0,
-        "duration_ms": 1417
-      },
-      {
-        "statement": 4,
-        "sha256": "d798d0deeb6f213092f3a85097f336c4db569fd40c144a608d12a9cd5fcf2cf5",
-        "affected_rows": 0,
-        "insert_id": 0,
-        "duration_ms": 58720
-      },
-      {
-        "statement": 5,
-        "sha256": "beaf6ae1a7d181fc9e468aeaee8ac91b74dfa1f91849bcfefcc5215906d79392",
-        "affected_rows": 432,
-        "insert_id": 0,
-        "duration_ms": 718
-      },
-      {
-        "statement": 6,
-        "sha256": "53fd567739c074467e8c4ca200bec9e98ad252bef8fa608c737fa8d1eeba58d8",
-        "affected_rows": 0,
-        "insert_id": 0,
-        "duration_ms": 17367
-      },
-      {
-        "statement": 7,
-        "sha256": "3205446d5177aff4f18f659eacab83f2420d87fecf2b79f7311b0cb45ca36ec0",
-        "affected_rows": 64,
-        "insert_id": 0,
-        "duration_ms": 268
-      },
-      {
-        "statement": 8,
-        "sha256": "3dab46615808317f9b676c35de5774a4094cad06db15873f67e83f2b5fbe5b72",
-        "affected_rows": 0,
-        "insert_id": 0,
-        "duration_ms": 3507
+        "sql": "DELETE FROM `IMC Competition Nexus Mapping` WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_division IS NOT NULL",
+        "kind": "DELETE",
+        "destructive": true,
+        "sha256": "e65657255188f696cabbbcdd1cea4f9d22ede25462f07e3ba4ae288980077cda"
       }
-    ]
+    ],
+    "plan_sha256": "c70123172caa3ee0ca3327658dbad7d06e96545b89509fe7989370a5b8891731",
+    "expires_at": "2026-09-19T11:02:43+00:00",
+    "confirmation_token": "1789815763.2eec2a41c5495dfb1358f0a786d9c64e392d3da2756534c70c7bb666831b240a"
   }
 }
