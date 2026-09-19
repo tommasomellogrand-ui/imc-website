@@ -253,3 +253,27 @@ button:active:not(:disabled),.text-link:active,.report-link:active{box-shadow:in
 .overview-club .overview-club-logo{width:26px;height:27px;object-fit:contain}
 .overview-player-copy{min-width:0}
 @media(max-width:599px){.overview-stat-grid{gap:8px}.overview-summary-grid{gap:8px}#dataSection .overview-stat{padding:15px 7px;border-radius:17px;min-height:100px}.overview-stat>small{font-size:.75rem}.overview-summary-grid .overview-stat>strong{font-size:1.6rem}.overview-leaders li{gap:10px}}
+
+/* Five compact statistic tiles and five players across on every screen. */
+.overview-stat-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.overview-leaders{grid-template-columns:1fr}
+.overview-leaders ol{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.overview-leaders li{display:flex;flex-direction:column;justify-content:flex-start;text-align:center;gap:8px;padding:12px 6px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(155deg,#fff,#f3f7fc);min-width:0}
+.overview-leaders .overview-player-copy{width:100%;flex:1}
+.overview-leaders li strong{display:block;font-size:.8125rem;line-height:1.3}
+.overview-leaders li small{font-size:.75rem;line-height:1.3;overflow-wrap:anywhere}
+.overview-leaders li>b{font-size:1.25rem}
+@media(max-width:599px){
+ .overview-stat-grid{gap:5px}
+ #dataSection .overview-stat-grid .overview-stat{min-height:86px;padding:12px 3px;border-radius:13px;gap:6px}
+ .overview-stat-grid .overview-stat>strong{font-size:clamp(.9375rem,3.7vw,1.25rem);letter-spacing:-.04em}
+ .overview-stat-grid .overview-stat>small{font-size:.6875rem;line-height:1.3}
+ #rows .overview-leaders>.card{padding:14px 8px}
+ .overview-leaders ol{gap:5px}
+ .overview-leaders li{padding:10px 3px;border-radius:12px;gap:7px}
+ .overview-leaders li strong{font-size:.6875rem;line-height:1.35}
+ .overview-leaders li small{font-size:.625rem;line-height:1.35}
+ .overview-leaders li>b{font-size:1rem}
+ .overview-leaders .overview-portrait{width:38px;height:44px}
+ .overview-leaders .overview-club-logo{width:23px;height:25px}
+}
