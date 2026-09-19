@@ -1,15 +1,15 @@
 {
-  "request_id": "gw005-mr-cols-20260919-02",
-  "completed_at": "2026-09-19T08:09:39.738455+00:00",
+  "request_id": "gw005-mr-latest-20260919-03",
+  "completed_at": "2026-09-19T08:10:06.498412+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw005-mr-cols-20260919-02",
-    "requested_at": "2026-09-19T08:16:00Z",
-    "purpose": "Inspect columns before requested deletion",
+    "request_id": "gw005-mr-latest-20260919-03",
+    "requested_at": "2026-09-19T08:17:00Z",
+    "purpose": "Identify latest GW005 match report before requested deletion",
     "action": "query",
     "target": "custom",
-    "sql": "SHOW COLUMNS FROM `GW005_IMC Match Report`",
-    "limit": 100
+    "sql": "SELECT game_world_id, sm_fixture_id, competition_key, competition_group, competition_stage, competition_round, match_date, home_name, away_name, home_score, away_score, fingerprint, imported_at FROM `GW005_IMC Match Report` WHERE game_world_id='GW005' ORDER BY imported_at DESC LIMIT 1",
+    "limit": 1
   },
   "response": {
     "ok": true,
@@ -19,272 +19,23 @@
     "result": {
       "rows": [
         {
-          "Field": "game_world_id",
-          "Type": "varchar(16)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "sm_fixture_id",
-          "Type": "bigint unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "competition_key",
-          "Type": "varchar(255)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "sm_action",
-          "Type": "varchar(64)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "sm_country",
-          "Type": "varchar(128)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "sm_division",
-          "Type": "varchar(128)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "competition_group",
-          "Type": "varchar(64)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "competition_stage",
-          "Type": "varchar(128)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "competition_round",
-          "Type": "varchar(128)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "match_date",
-          "Type": "date",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "home_sm_club_id",
-          "Type": "bigint unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "home_name",
-          "Type": "varchar(255)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "away_sm_club_id",
-          "Type": "bigint unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "away_name",
-          "Type": "varchar(255)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "home_sm_manager_id",
-          "Type": "bigint unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "home_manager_name",
-          "Type": "varchar(255)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "away_sm_manager_id",
-          "Type": "bigint unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "away_manager_name",
-          "Type": "varchar(255)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "home_score",
-          "Type": "int unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "away_score",
-          "Type": "int unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "penalty_home_score",
-          "Type": "int unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "penalty_away_score",
-          "Type": "int unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "aggregate_home_score",
-          "Type": "int unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "aggregate_away_score",
-          "Type": "int unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "stadium_name",
-          "Type": "varchar(255)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "attendance",
-          "Type": "int unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "team_stats_json",
-          "Type": "json",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "players_json",
-          "Type": "json",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "events_json",
-          "Type": "json",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "tactics_json",
-          "Type": "json",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "commentary_json",
-          "Type": "json",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "fingerprint",
-          "Type": "char(64)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
-        },
-        {
-          "Field": "imported_at",
-          "Type": "datetime",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "game_world_id": "GW005",
+          "sm_fixture_id": "312954797",
+          "competition_key": "GW005",
+          "competition_group": null,
+          "competition_stage": null,
+          "competition_round": null,
+          "match_date": null,
+          "home_name": "Brasile",
+          "away_name": "Francia",
+          "home_score": "3",
+          "away_score": "3",
+          "fingerprint": "b1b2679479656b57ebb3d246057220427efde29e41e8b6bd407b5b099cdc4bfd",
+          "imported_at": "2026-09-19 08:26:42"
         }
       ],
-      "returned_rows": 33,
-      "total_rows": 33,
+      "returned_rows": 1,
+      "total_rows": 1,
       "truncated": false,
       "duration_ms": 6
     }
