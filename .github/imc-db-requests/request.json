@@ -1,15 +1,9 @@
 {
-  "request_id": "gw001-fix-playoff-trigger-execute-20260919-28",
+  "request_id": "gw001-playoff-fix-finalverify-20260919-29",
   "requested_at": "2026-09-19T09:14:00Z",
-  "purpose": "Execute approved GW001 playoff trigger and fixture correction",
-  "action": "execute_migration",
+  "purpose": "Final verification of corrected GW001 playoff fixture and update trigger",
+  "action": "query",
   "target": "custom",
-  "migration_id": "gw001-preserve-explicit-playoff-division-update-20260919",
-  "statements": [
-    "DROP TRIGGER `trg_GW001_results_playoff_div_bu`",
-    "CREATE TRIGGER `trg_GW001_results_playoff_div_bu` BEFORE UPDATE ON `GW001_IMC Results` FOR EACH ROW SET NEW.sm_division=CASE WHEN NULLIF(TRIM(COALESCE(NEW.sm_division,'')),'') IS NOT NULL THEN NEW.sm_division WHEN NEW.game_world_id='GW001' AND (REGEXP_LIKE(TRIM(COALESCE(NEW.sm_action,'')), '^play[[:space:]-]*offs?$', 'i') OR REGEXP_LIKE(TRIM(COALESCE(NEW.competition_stage,'')), '^play[[:space:]-]*offs?([[:space:]:-]|$)', 'i') OR REGEXP_LIKE(TRIM(COALESCE(NEW.competition_group_name,'')), '^play[[:space:]-]*offs?([[:space:]:-]|$)', 'i') OR REGEXP_LIKE(TRIM(COALESCE(NEW.competition_round,'')), '^play[[:space:]-]*offs?([[:space:]:-]|$)', 'i')) THEN (SELECT CASE WHEN h.division_value IN ('2','3','4') AND h.division_value=a.division_value AND h.club_division=h.division_value AND a.club_division=a.division_value THEN h.division_value ELSE NULL END FROM gw_world_clubs h JOIN gw_world_clubs a ON a.game_world_id=h.game_world_id JOIN gw_source_captures hc ON hc.capture_id=h.capture_id AND hc.game_world_id=h.game_world_id AND hc.capture_status='complete' JOIN gw_source_captures ac ON ac.capture_id=a.capture_id AND ac.game_world_id=a.game_world_id AND ac.capture_status='complete' WHERE h.game_world_id='GW001' AND h.world_club_id=NEW.home_sm_club_id AND a.world_club_id=NEW.away_sm_club_id AND hc.generated_at < DATE_ADD(NEW.match_date,INTERVAL 1 DAY) AND ac.generated_at < DATE_ADD(NEW.match_date,INTERVAL 1 DAY)) ELSE NEW.sm_division END",
-    "UPDATE `GW001_IMC Results` SET sm_division='4', competition_key='GW001|DOMESTIC|playoff|4' WHERE sm_fixture_id=368726159"
-  ],
-  "allow_destructive": true,
-  "data_migration": true
+  "sql": "SELECT 'RESULT' source,sm_fixture_id,sm_division,competition_key FROM `GW001_IMC Results` WHERE sm_fixture_id=368726159 UNION ALL SELECT 'MATCH_REPORT',sm_fixture_id,sm_division,competition_key FROM `GW001_IMC Match Report` WHERE sm_fixture_id=368726159",
+  "limit": 10
 }
