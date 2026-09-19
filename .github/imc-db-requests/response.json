@@ -1,49 +1,31 @@
 {
-  "request_id": "gw005-mr-check-new-import-20260919-06",
-  "completed_at": "2026-09-19T08:13:53.319935+00:00",
+  "request_id": "core-trophy-room-count-20260919-07",
+  "completed_at": "2026-09-19T08:15:35.083316+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw005-mr-check-new-import-20260919-06",
-    "requested_at": "2026-09-19T08:22:00Z",
-    "purpose": "Verify newest GW005 Match Report import",
+    "request_id": "core-trophy-room-count-20260919-07",
+    "requested_at": "2026-09-19T08:25:00Z",
+    "purpose": "Count current rows in IMC Trophy Room",
     "action": "query",
-    "target": "custom",
-    "sql": "SELECT game_world_id, sm_fixture_id, competition_key, competition_group, competition_stage, competition_round, match_date, home_name, away_name, home_score, away_score, penalty_home_score, penalty_away_score, aggregate_home_score, aggregate_away_score, stadium_name, attendance, fingerprint, imported_at FROM `GW005_IMC Match Report` WHERE game_world_id='GW005' ORDER BY imported_at DESC, sm_fixture_id DESC LIMIT 1",
-    "limit": 1
+    "target": "core",
+    "sql": "SELECT COUNT(*) AS total_rows FROM `IMC Trophy Room`",
+    "limit": 10
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "custom",
-    "database": "Sql1956795_3",
+    "target": "core",
+    "database": "Sql1956795_1",
     "result": {
       "rows": [
         {
-          "game_world_id": "GW005",
-          "sm_fixture_id": "312954797",
-          "competition_key": "GW005|NATIONS|worldcup",
-          "competition_group": "NATIONS",
-          "competition_stage": "Finale",
-          "competition_round": "Finale",
-          "match_date": null,
-          "home_name": "Brasile",
-          "away_name": "Francia",
-          "home_score": "3",
-          "away_score": "3",
-          "penalty_home_score": "6",
-          "penalty_away_score": "5",
-          "aggregate_home_score": null,
-          "aggregate_away_score": null,
-          "stadium_name": "Camp Nou",
-          "attendance": "98557",
-          "fingerprint": "9b07261821ee4a344339ecb79d6165931218d9b421411adc56df4b5073e12ee4",
-          "imported_at": "2026-09-19 10:12:03"
+          "total_rows": "119"
         }
       ],
       "returned_rows": 1,
       "total_rows": 1,
       "truncated": false,
-      "duration_ms": 5
+      "duration_ms": 4
     }
   }
 }
