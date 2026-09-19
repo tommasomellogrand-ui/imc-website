@@ -1,47 +1,2420 @@
 {
-  "request_id": "core-create-nexus-competition-mapping-execute-20260919-39",
-  "completed_at": "2026-09-19T10:21:32.139481+00:00",
+  "request_id": "multi-keys-for-nexus-mapping-20260919-40",
+  "completed_at": "2026-09-19T10:25:33.647566+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "core-create-nexus-competition-mapping-execute-20260919-39",
-    "requested_at": "2026-09-19T10:22:00Z",
-    "purpose": "Execute approved creation of authoritative CORE Nexus competition display mapping table",
-    "action": "execute_migration",
-    "target": "core",
-    "migration_id": "create-imc-competition-nexus-mapping-20260919",
-    "statements": [
-      "CREATE TABLE `IMC Competition Nexus Mapping` (`mapping_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,`game_world_id` VARCHAR(10) NOT NULL,`world_type` ENUM('SINGLE','MULTI') NOT NULL,`sm_country` VARCHAR(100) NULL,`competition_group` VARCHAR(32) NOT NULL,`sm_action` VARCHAR(64) NOT NULL,`sm_division` VARCHAR(16) NULL,`competition_key` VARCHAR(255) NOT NULL,`nexus_view` VARCHAR(255) NOT NULL,`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`mapping_id`),UNIQUE KEY `uq_competition_key` (`competition_key`),KEY `idx_lookup` (`game_world_id`,`competition_group`,`sm_action`,`sm_division`),KEY `idx_country` (`game_world_id`,`sm_country`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-    ],
-    "allow_destructive": false,
-    "data_migration": false
+    "request_id": "multi-keys-for-nexus-mapping-20260919-40",
+    "requested_at": "2026-09-19T10:24:00Z",
+    "purpose": "Read distinct Multi League competition dimensions for Nexus mapping population",
+    "action": "query",
+    "target": "gold",
+    "sql": "SELECT gw,competition_key,sm_country,competition_group,sm_action,sm_division FROM (SELECT 'GW002' gw,competition_key,sm_country,competition_group,sm_action,sm_division FROM `GW002_IMC Results` UNION SELECT 'GW002',competition_key,sm_country,competition_group,sm_action,sm_division FROM `GW002_IMC Match Report` UNION SELECT 'GW003' gw,competition_key,sm_country,competition_group,sm_action,sm_division FROM `GW003_IMC Results` UNION SELECT 'GW003',competition_key,sm_country,competition_group,sm_action,sm_division FROM `GW003_IMC Match Report` UNION SELECT 'GW007' gw,competition_key,sm_country,competition_group,sm_action,sm_division FROM `GW007_IMC Results` UNION SELECT 'GW007',competition_key,sm_country,competition_group,sm_action,sm_division FROM `GW007_IMC Match Report` UNION SELECT 'GW008' gw,competition_key,sm_country,competition_group,sm_action,sm_division FROM `GW008_IMC Results` UNION SELECT 'GW008',competition_key,sm_country,competition_group,sm_action,sm_division FROM `GW008_IMC Match Report`) x WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY gw,competition_key,sm_country,competition_group,sm_action,sm_division ORDER BY gw,competition_key",
+    "limit": 1000
   },
   "response": {
     "ok": true,
-    "action": "execute_migration",
-    "target": "core",
-    "database": "Sql1956795_1",
-    "migration_id": "create-imc-competition-nexus-mapping-20260919",
-    "data_migration": false,
-    "plan_sha256": "5bdf910cbfd19383c85c7564658fcc3f3a29b0eeb91c11aa1d7be68338ec7a78",
-    "status": "success",
-    "statement_count": 1,
-    "duration_ms": 48,
-    "before": {
-      "tables": 14,
-      "columns": 97
-    },
-    "after": {
-      "tables": 15,
-      "columns": 107
-    },
-    "results": [
-      {
-        "statement": 1,
-        "sha256": "9b7c6de79c6a19b7f0d010e80a8d5e353e711f79c2fc49114bb3aec4fec0638e",
-        "affected_rows": 0,
-        "insert_id": 0,
-        "duration_ms": 26
-      }
-    ]
+    "action": "query",
+    "target": "gold",
+    "database": "Sql1956795_2",
+    "result": {
+      "rows": [
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ARG|DOMESTIC|charityshield",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ARG|DOMESTIC|league|1",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ARG|DOMESTIC|leagueshield|1",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|BEL|DOMESTIC|charityshield",
+          "sm_country": "BEL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|BEL|DOMESTIC|league|1",
+          "sm_country": "BEL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|BEL|DOMESTIC|leagueshield|1",
+          "sm_country": "BEL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|BRA|DOMESTIC|charityshield",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|BRA|DOMESTIC|league|1",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|BRA|DOMESTIC|league|2",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|BRA|DOMESTIC|leagueshield|1",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|CZE|DOMESTIC|charityshield",
+          "sm_country": "CZE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|CZE|DOMESTIC|league|1",
+          "sm_country": "CZE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|CZE|DOMESTIC|leagueshield|1",
+          "sm_country": "CZE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|DEN|DOMESTIC|charityshield",
+          "sm_country": "DEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|DEN|DOMESTIC|league|1",
+          "sm_country": "DEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|DEN|DOMESTIC|leagueshield|1",
+          "sm_country": "DEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ENG|DOMESTIC|charityshield",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ENG|DOMESTIC|league|1",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ENG|DOMESTIC|league|2",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ENG|DOMESTIC|league|3",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ENG|DOMESTIC|league|4",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "4"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ENG|DOMESTIC|league|5",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "5"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ENG|DOMESTIC|leagueshield|1",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ESP|DOMESTIC|charityshield",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ESP|DOMESTIC|league|1",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ESP|DOMESTIC|league|2",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ESP|DOMESTIC|leagueshield|1",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|FRA|DOMESTIC|charityshield",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|FRA|DOMESTIC|league|1",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|FRA|DOMESTIC|league|2",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|FRA|DOMESTIC|leagueshield|1",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|GER|DOMESTIC|charityshield",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|GER|DOMESTIC|league|1",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|GER|DOMESTIC|league|2",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|GER|DOMESTIC|league|3",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|GER|DOMESTIC|leagueshield|1",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|GRE|DOMESTIC|charityshield",
+          "sm_country": "GRE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|GRE|DOMESTIC|league|1",
+          "sm_country": "GRE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|GRE|DOMESTIC|leagueshield|1",
+          "sm_country": "GRE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|INTERNATIONAL|supercup",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "supercup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ITA|DOMESTIC|charityshield",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ITA|DOMESTIC|league|1",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ITA|DOMESTIC|league|2",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ITA|DOMESTIC|league|3",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|ITA|DOMESTIC|leagueshield|1",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|JPN|DOMESTIC|charityshield",
+          "sm_country": "JPN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|JPN|DOMESTIC|league|1",
+          "sm_country": "JPN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|JPN|DOMESTIC|leagueshield|1",
+          "sm_country": "JPN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|KSA|DOMESTIC|charityshield",
+          "sm_country": "KSA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|KSA|DOMESTIC|league|1",
+          "sm_country": "KSA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|KSA|DOMESTIC|leagueshield|1",
+          "sm_country": "KSA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|MEX|DOMESTIC|charityshield",
+          "sm_country": "MEX",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|MEX|DOMESTIC|league|1",
+          "sm_country": "MEX",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|MEX|DOMESTIC|leagueshield|1",
+          "sm_country": "MEX",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|NATIONS|interqualifier",
+          "sm_country": null,
+          "competition_group": "NATIONS",
+          "sm_action": "interqualifier",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|NED|DOMESTIC|charityshield",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|NED|DOMESTIC|league|1",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|NED|DOMESTIC|leagueshield|1",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|POL|DOMESTIC|charityshield",
+          "sm_country": "POL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|POL|DOMESTIC|league|1",
+          "sm_country": "POL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|POL|DOMESTIC|leagueshield|1",
+          "sm_country": "POL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|SUI|DOMESTIC|charityshield",
+          "sm_country": "SUI",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|SUI|DOMESTIC|league|1",
+          "sm_country": "SUI",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|TUR|DOMESTIC|charityshield",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|TUR|DOMESTIC|league|1",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|TUR|DOMESTIC|league|2",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|TUR|DOMESTIC|leagueshield|1",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|USA|DOMESTIC|charityshield",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|USA|DOMESTIC|league|1",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW002",
+          "competition_key": "GW002|USA|DOMESTIC|leagueshield|1",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ARG|DOMESTIC|charityshield",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ARG|DOMESTIC|league|1",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ARG|DOMESTIC|leaguecup|1",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ARG|DOMESTIC|leagueshield|1",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|BEL|DOMESTIC|charityshield",
+          "sm_country": "BEL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|BEL|DOMESTIC|league|1",
+          "sm_country": "BEL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|BEL|DOMESTIC|leagueshield|1",
+          "sm_country": "BEL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|BRA|DOMESTIC|charityshield",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|BRA|DOMESTIC|league|1",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|BRA|DOMESTIC|league|2",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|BRA|DOMESTIC|leaguecup|1",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|BRA|DOMESTIC|leagueshield|1",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|CZE|DOMESTIC|charityshield",
+          "sm_country": "CZE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|CZE|DOMESTIC|league|1",
+          "sm_country": "CZE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|CZE|DOMESTIC|leagueshield|1",
+          "sm_country": "CZE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|DEN|DOMESTIC|charityshield",
+          "sm_country": "DEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|DEN|DOMESTIC|league|1",
+          "sm_country": "DEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|DEN|DOMESTIC|leagueshield|1",
+          "sm_country": "DEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ENG|DOMESTIC|charityshield",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ENG|DOMESTIC|league|1",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ENG|DOMESTIC|league|2",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ENG|DOMESTIC|league|3",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ENG|DOMESTIC|league|4",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "4"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ENG|DOMESTIC|league|5",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "5"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ENG|DOMESTIC|leaguecup|1",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ENG|DOMESTIC|leagueshield|1",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ESP|DOMESTIC|charityshield",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ESP|DOMESTIC|league|1",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ESP|DOMESTIC|league|2",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ESP|DOMESTIC|leaguecup|1",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ESP|DOMESTIC|leagueshield|1",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|FRA|DOMESTIC|charityshield",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|FRA|DOMESTIC|league|1",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|FRA|DOMESTIC|league|2",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|FRA|DOMESTIC|leaguecup|1",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|FRA|DOMESTIC|leagueshield|1",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|GER|DOMESTIC|charityshield",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|GER|DOMESTIC|league|1",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|GER|DOMESTIC|league|2",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|GER|DOMESTIC|league|3",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|GER|DOMESTIC|leaguecup|1",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|GER|DOMESTIC|leagueshield|1",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|GRE|DOMESTIC|charityshield",
+          "sm_country": "GRE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|GRE|DOMESTIC|league|1",
+          "sm_country": "GRE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|GRE|DOMESTIC|leagueshield|1",
+          "sm_country": "GRE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|INTERNATIONAL|smfacup",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfacup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|INTERNATIONAL|smfashield",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfashield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|INTERNATIONAL|supercup",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "supercup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ITA|DOMESTIC|charityshield",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ITA|DOMESTIC|league|1",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ITA|DOMESTIC|league|2",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ITA|DOMESTIC|league|3",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ITA|DOMESTIC|leaguecup|1",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|ITA|DOMESTIC|leagueshield|1",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|JPN|DOMESTIC|charityshield",
+          "sm_country": "JPN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|JPN|DOMESTIC|league|1",
+          "sm_country": "JPN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|JPN|DOMESTIC|leaguecup|1",
+          "sm_country": "JPN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|JPN|DOMESTIC|leagueshield|1",
+          "sm_country": "JPN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|KSA|DOMESTIC|charityshield",
+          "sm_country": "KSA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|KSA|DOMESTIC|league|1",
+          "sm_country": "KSA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|KSA|DOMESTIC|leaguecup|1",
+          "sm_country": "KSA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|KSA|DOMESTIC|leagueshield|1",
+          "sm_country": "KSA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|MEX|DOMESTIC|charityshield",
+          "sm_country": "MEX",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|MEX|DOMESTIC|league|1",
+          "sm_country": "MEX",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|MEX|DOMESTIC|leaguecup|1",
+          "sm_country": "MEX",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|MEX|DOMESTIC|leagueshield|1",
+          "sm_country": "MEX",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|NATIONS|interqualifier",
+          "sm_country": null,
+          "competition_group": "NATIONS",
+          "sm_action": "interqualifier",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|NED|DOMESTIC|charityshield",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|NED|DOMESTIC|league|1",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|NED|DOMESTIC|leaguecup|1",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|NED|DOMESTIC|leagueshield|1",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|POL|DOMESTIC|charityshield",
+          "sm_country": "POL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|POL|DOMESTIC|league|1",
+          "sm_country": "POL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|POL|DOMESTIC|leagueshield|1",
+          "sm_country": "POL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|SUI|DOMESTIC|charityshield",
+          "sm_country": "SUI",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|SUI|DOMESTIC|league|1",
+          "sm_country": "SUI",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|TUR|DOMESTIC|charityshield",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|TUR|DOMESTIC|league|1",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|TUR|DOMESTIC|league|2",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|TUR|DOMESTIC|leaguecup|1",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|TUR|DOMESTIC|leagueshield|1",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|USA|DOMESTIC|charityshield",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|USA|DOMESTIC|league|1",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|USA|DOMESTIC|leaguecup|1",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW003",
+          "competition_key": "GW003|USA|DOMESTIC|leagueshield|1",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ARG|DOMESTIC|charityshield",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ARG|DOMESTIC|league|1",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ARG|DOMESTIC|leagueshield|1",
+          "sm_country": "ARG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|BEL|DOMESTIC|charityshield",
+          "sm_country": "BEL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|BEL|DOMESTIC|league|1",
+          "sm_country": "BEL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|BEL|DOMESTIC|leagueshield|1",
+          "sm_country": "BEL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|BRA|DOMESTIC|charityshield",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|BRA|DOMESTIC|league|1",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|BRA|DOMESTIC|league|2",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|BRA|DOMESTIC|leagueshield|1",
+          "sm_country": "BRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ENG|DOMESTIC|charityshield",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ENG|DOMESTIC|league|1",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ENG|DOMESTIC|league|2",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ENG|DOMESTIC|league|3",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ENG|DOMESTIC|league|4",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "4"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ENG|DOMESTIC|league|5",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "5"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ENG|DOMESTIC|leagueshield|1",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ESP|DOMESTIC|charityshield",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ESP|DOMESTIC|league|1",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ESP|DOMESTIC|league|2",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ESP|DOMESTIC|leagueshield|1",
+          "sm_country": "ESP",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|FRA|DOMESTIC|charityshield",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|FRA|DOMESTIC|league|1",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|FRA|DOMESTIC|league|2",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|FRA|DOMESTIC|leagueshield|1",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|GER|DOMESTIC|charityshield",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|GER|DOMESTIC|league|1",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|GER|DOMESTIC|league|2",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|GER|DOMESTIC|league|3",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|GER|DOMESTIC|leagueshield|1",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|GRE|DOMESTIC|charityshield",
+          "sm_country": "GRE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|GRE|DOMESTIC|league|1",
+          "sm_country": "GRE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|GRE|DOMESTIC|leagueshield|1",
+          "sm_country": "GRE",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|INTERNATIONAL|smfacup",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfacup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|INTERNATIONAL|smfashield",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfashield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|INTERNATIONAL|supercup",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "supercup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ITA|DOMESTIC|charityshield",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ITA|DOMESTIC|league|1",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ITA|DOMESTIC|league|2",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ITA|DOMESTIC|league|3",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|ITA|DOMESTIC|leagueshield|1",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|KOR|DOMESTIC|charityshield",
+          "sm_country": "KOR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|KOR|DOMESTIC|league|1",
+          "sm_country": "KOR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|KOR|DOMESTIC|leagueshield|1",
+          "sm_country": "KOR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|NATIONS|interqualifier",
+          "sm_country": null,
+          "competition_group": "NATIONS",
+          "sm_action": "interqualifier",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|NED|DOMESTIC|charityshield",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|NED|DOMESTIC|league|1",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|NED|DOMESTIC|leagueshield|1",
+          "sm_country": "NED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|PER|DOMESTIC|charityshield",
+          "sm_country": "PER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|PER|DOMESTIC|league|1",
+          "sm_country": "PER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|PER|DOMESTIC|leagueshield|1",
+          "sm_country": "PER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|POL|DOMESTIC|charityshield",
+          "sm_country": "POL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|POL|DOMESTIC|league|1",
+          "sm_country": "POL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|POL|DOMESTIC|leagueshield|1",
+          "sm_country": "POL",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|POR|DOMESTIC|charityshield",
+          "sm_country": "POR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|POR|DOMESTIC|league|1",
+          "sm_country": "POR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|POR|DOMESTIC|league|2",
+          "sm_country": "POR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|POR|DOMESTIC|leagueshield|1",
+          "sm_country": "POR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|RUS|DOMESTIC|charityshield",
+          "sm_country": "RUS",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|RUS|DOMESTIC|league|1",
+          "sm_country": "RUS",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|RUS|DOMESTIC|leagueshield|1",
+          "sm_country": "RUS",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|SCO|DOMESTIC|charityshield",
+          "sm_country": "SCO",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|SCO|DOMESTIC|league|1",
+          "sm_country": "SCO",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|SCO|DOMESTIC|league|2",
+          "sm_country": "SCO",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|SCO|DOMESTIC|league|3",
+          "sm_country": "SCO",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|SCO|DOMESTIC|league|4",
+          "sm_country": "SCO",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "4"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|TUR|DOMESTIC|charityshield",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|TUR|DOMESTIC|league|1",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|TUR|DOMESTIC|leagueshield|1",
+          "sm_country": "TUR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|UKR|DOMESTIC|charityshield",
+          "sm_country": "UKR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|UKR|DOMESTIC|league|1",
+          "sm_country": "UKR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|UKR|DOMESTIC|leagueshield|1",
+          "sm_country": "UKR",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|USA|DOMESTIC|charityshield",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|USA|DOMESTIC|league|1",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW007",
+          "competition_key": "GW007|USA|DOMESTIC|leagueshield|1",
+          "sm_country": "USA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|CEN|DOMESTIC|charityshield",
+          "sm_country": "CEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|CEN|DOMESTIC|league|1",
+          "sm_country": "CEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|CEN|DOMESTIC|leaguecup",
+          "sm_country": "CEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|CEN|DOMESTIC|leagueshield",
+          "sm_country": "CEN",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ENG|DOMESTIC|charityshield",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ENG|DOMESTIC|league|1",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ENG|DOMESTIC|league|2",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ENG|DOMESTIC|league|3",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "3"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ENG|DOMESTIC|league|4",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "4"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ENG|DOMESTIC|leaguecup",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ENG|DOMESTIC|leagueshield",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ENG|DOMESTIC|leagueshield|2",
+          "sm_country": "ENG",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|FRA|DOMESTIC|charityshield",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|FRA|DOMESTIC|league|1",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|FRA|DOMESTIC|league|2",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|FRA|DOMESTIC|leaguecup",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|FRA|DOMESTIC|leagueshield",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|FRA|DOMESTIC|leagueshield|1",
+          "sm_country": "FRA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|GER|DOMESTIC|charityshield",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|GER|DOMESTIC|league|1",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|GER|DOMESTIC|league|2",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|GER|DOMESTIC|leaguecup",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|GER|DOMESTIC|leagueshield",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|GER|DOMESTIC|leagueshield|1",
+          "sm_country": "GER",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|HNB|DOMESTIC|charityshield",
+          "sm_country": "HNB",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|HNB|DOMESTIC|league|1",
+          "sm_country": "HNB",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|HNB|DOMESTIC|leaguecup",
+          "sm_country": "HNB",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|HNB|DOMESTIC|leagueshield",
+          "sm_country": "HNB",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|Inghilterra|DOMESTIC|leagueshield",
+          "sm_country": "Inghilterra",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|INTERNATIONAL|smfacup",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfacup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|INTERNATIONAL|smfacup",
+          "sm_country": "ENG",
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfacup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|INTERNATIONAL|smfashield",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfashield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|INTERNATIONAL|smfashield",
+          "sm_country": "ENG",
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfashield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|INTERNATIONAL|supercup",
+          "sm_country": null,
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "supercup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|INTERNATIONAL|supercup",
+          "sm_country": "ENG",
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "supercup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ITA|DOMESTIC|charityshield",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ITA|DOMESTIC|league|1",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ITA|DOMESTIC|league|2",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ITA|DOMESTIC|leaguecup",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ITA|DOMESTIC|leagueshield",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|ITA|DOMESTIC|leagueshield|1",
+          "sm_country": "ITA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|LAT|DOMESTIC|charityshield",
+          "sm_country": "LAT",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|LAT|DOMESTIC|league|1",
+          "sm_country": "LAT",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|LAT|DOMESTIC|leaguecup",
+          "sm_country": "LAT",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|LAT|DOMESTIC|leagueshield",
+          "sm_country": "LAT",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|MED|DOMESTIC|charityshield",
+          "sm_country": "MED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|MED|DOMESTIC|league|1",
+          "sm_country": "MED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|MED|DOMESTIC|leaguecup",
+          "sm_country": "MED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|MED|DOMESTIC|leagueshield",
+          "sm_country": "MED",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|NATIONS|interqualifier",
+          "sm_country": null,
+          "competition_group": "NATIONS",
+          "sm_action": "interqualifier",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|NATIONS|worldcup",
+          "sm_country": null,
+          "competition_group": "NATIONS",
+          "sm_action": "worldcup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|RNU|DOMESTIC|charityshield",
+          "sm_country": "RNU",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|RNU|DOMESTIC|league|1",
+          "sm_country": "RNU",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|RNU|DOMESTIC|leaguecup",
+          "sm_country": "RNU",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|RNU|DOMESTIC|leagueshield",
+          "sm_country": "RNU",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SCA|DOMESTIC|charityshield",
+          "sm_country": "SCA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SCA|DOMESTIC|league|1",
+          "sm_country": "SCA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SCA|DOMESTIC|leaguecup",
+          "sm_country": "SCA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SCA|DOMESTIC|leagueshield",
+          "sm_country": "SCA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SCO|DOMESTIC|charityshield",
+          "sm_country": "SCO",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SCO|DOMESTIC|league|1",
+          "sm_country": "SCO",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SCO|DOMESTIC|leaguecup",
+          "sm_country": "SCO",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SCO|DOMESTIC|leagueshield",
+          "sm_country": "SCO",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SPA|DOMESTIC|charityshield",
+          "sm_country": "SPA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "charityshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SPA|DOMESTIC|league|1",
+          "sm_country": "SPA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "1"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SPA|DOMESTIC|league|2",
+          "sm_country": "SPA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_division": "2"
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SPA|DOMESTIC|leaguecup",
+          "sm_country": "SPA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SPA|DOMESTIC|leagueshield",
+          "sm_country": "SPA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": null
+        },
+        {
+          "gw": "GW008",
+          "competition_key": "GW008|SPA|DOMESTIC|leagueshield|1",
+          "sm_country": "SPA",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leagueshield",
+          "sm_division": "1"
+        }
+      ],
+      "returned_rows": 299,
+      "total_rows": 299,
+      "truncated": false,
+      "duration_ms": 10279
+    }
   }
 }
