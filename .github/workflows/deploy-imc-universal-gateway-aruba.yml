@@ -8,6 +8,7 @@ on:
       - '__imc_private_gateway/**'
       - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
       - 'tests/gateway-world-*'
+      - 'tests/playoff-normalizer*.php'
   workflow_dispatch:
 
 permissions:
@@ -20,6 +21,18 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: imc-normalizer-ci-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pimc-normalizer-ci-only"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,10 +41,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.php ingress.php core.php read.php write.php ddl.php minisite.php minisite-site.php; do test -s "imc-universal-gateway/$f"; done
+          for f in index.php ingress.php playoff-normalizer.php core.php read.php write.php ddl.php minisite.php minisite-site.php; do test -s "imc-universal-gateway/$f"; done
           test -s "__imc_private_gateway/config.php"
           test -s "__imc_private_gateway/.htaccess"
           for f in imc-universal-gateway/*.php __imc_private_gateway/config.php; do php -l "$f"; done
+
+      - name: Test playoff normalization
+        run: php tests/playoff-normalizer.php
+
+      - name: Test playoff normalization against isolated MySQL
+        env:
+          IMC_TEST_MYSQL_PASSWORD: imc-normalizer-ci-only
+        run: php tests/playoff-normalizer-mysql.php
 
       - name: Test world routing
         run: php tests/gateway-world-routing.php
@@ -51,7 +72,7 @@ jobs:
           remote_root='/www.italianmastersclub.it'
           uploads=[
               (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
-              for n in ['index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
+              for n in ['playoff-normalizer.php','index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
           ]
           uploads += [
               (Path('__imc_private_gateway/config.php'), f'{remote_root}/__imc_private_gateway'),
@@ -111,3 +132,4 @@ jobs:
 
       - name: Verify GW010 and pending world routing live
         run: python3 tests/gateway-world-live.py
+
