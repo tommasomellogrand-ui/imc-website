@@ -1,9 +1,9 @@
 {
-  "request_id": "verify-nexus-mapping-population-20260919-46",
-  "requested_at": "2026-09-19T10:33:00Z",
-  "purpose": "Verify CORE Nexus competition mapping population by world type and game world",
+  "request_id": "gw008-duplicate-nexus-view-detail-20260919-47",
+  "requested_at": "2026-09-19T10:36:00Z",
+  "purpose": "List GW008 Nexus mapping rows whose nexus_view is shared by multiple competition keys",
   "action": "query",
   "target": "core",
-  "sql": "SELECT world_type,game_world_id,COUNT(*) mappings,COUNT(DISTINCT nexus_view) nexus_views FROM `IMC Competition Nexus Mapping` GROUP BY world_type,game_world_id ORDER BY world_type,game_world_id",
+  "sql": "SELECT m.mapping_id,m.competition_key,m.sm_country,m.competition_group,m.sm_action,m.sm_division,m.nexus_view FROM `IMC Competition Nexus Mapping` m JOIN (SELECT nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id='GW008' GROUP BY nexus_view HAVING COUNT(*)>1) d ON d.nexus_view=m.nexus_view WHERE m.game_world_id='GW008' ORDER BY m.nexus_view,m.competition_key",
   "limit": 100
 }
