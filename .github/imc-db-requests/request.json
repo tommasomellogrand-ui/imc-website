@@ -1,8 +1,8 @@
 {
-  "request_id": "core-create-nexus-competition-mapping-plan-20260919-38",
-  "requested_at": "2026-09-19T10:15:00Z",
-  "purpose": "Create authoritative CORE table for Nexus competition display mapping",
-  "action": "plan_migration",
+  "request_id": "core-create-nexus-competition-mapping-execute-20260919-39",
+  "requested_at": "2026-09-19T10:22:00Z",
+  "purpose": "Execute approved creation of authoritative CORE Nexus competition display mapping table",
+  "action": "execute_migration",
   "target": "core",
   "migration_id": "create-imc-competition-nexus-mapping-20260919",
   "statements": [
