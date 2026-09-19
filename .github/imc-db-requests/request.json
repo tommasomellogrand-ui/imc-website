@@ -1,8 +1,8 @@
 {
-  "request_id": "populate-nexus-multi-plan-20260919-41",
-  "requested_at": "2026-09-19T10:26:00Z",
-  "purpose": "Populate CORE Nexus competition mapping for all current Multi League competition keys",
-  "action": "plan_migration",
+  "request_id": "populate-nexus-multi-execute-20260919-42",
+  "requested_at": "2026-09-19T10:27:00Z",
+  "purpose": "Execute approved CORE Nexus Multi competition mapping population",
+  "action": "execute_migration",
   "target": "core",
   "migration_id": "populate-nexus-multi-mapping-20260919",
   "statements": [
