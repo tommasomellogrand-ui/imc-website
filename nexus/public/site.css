@@ -135,3 +135,50 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 #dataSection[data-competition-view=true] .hub-table tbody tr:nth-child(even){background:var(--tint)}
 .hub-table td strong{font-weight:850}
 @media(max-width:599px){#dataSection[data-competition-view=true] .hub-tabs a{font-size:.62rem;padding:12px 4px}.competition-card-head{gap:10px}.competition-entry{padding:17px 14px}.compact-match{padding:8px 10px}.compact-match .fixture{font-size:.72rem;gap:7px}.compact-match .core-crest{width:25px;height:29px}.compact-match .score{font-size:1.1rem}.hub-table .entity{font-weight:700}.competition-group-card p{max-width:80%}}
+
+/* White surfaces, navy typography and a complete glossy control system. */
+:root{--navy:#102d54;--ivory:#102d54;--steel:#edf3fb;--silver:#62738b;--line:#dce5ef;--gold:#406baa;--accent:#244f88;--tint:#f5f8fd;--edge:#dce5ef;--widget-shadow:0 7px 22px #1637600a,inset 0 1px 0 #fff}
+html,body,.shell,.canvas{background:#fff;color:#102d54}
+.topbar,.rail,.bottomnav,.world-switch-bar,.footer,dialog,.chapter,.ivory,.archive-page{background:#fff;color:#102d54;border-color:var(--line)}
+.card,.titanium,.profile-heading,#filters,.view-filters,.hub-table-wrap{background:#fff;color:#102d54;border-color:var(--line);box-shadow:var(--widget-shadow)}
+.card h3,.fixture .score,.report-link,.brand strong,.rail-brand,.world-switch-current strong,.world-switch-change select{color:#102d54}
+#dataSection[data-competition-view=true] .card{background:linear-gradient(145deg,#fff 65%,var(--tint))}
+#dataSection .competition-group-card{background:radial-gradient(ellipse at 100% 90%,var(--tint),transparent 65%),#fff}
+#dataSection .competition-group-card h3,#rows .competition-entry h3,#dataSection .section-heading h2{color:#102d54}
+#dataSection .competition-group-card p{color:#62738b}
+.home-title,.main-grid .side-column,.section-heading,.chapter,.footer{border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--widget-shadow);background:#fff}
+.home-title p{font-weight:600;color:#62738b}
+.main-grid .side-title{padding-bottom:16px;margin-bottom:10px}
+.main-grid .side-title h2{font-size:clamp(1.2rem,2.5vw,1.65rem);font-weight:850;letter-spacing:-.035em}
+.main-grid #tabs{gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.main-grid #tabs a,.rail nav a,#mobileWorldMenu a{border:1px solid var(--line);border-radius:14px;background:linear-gradient(155deg,#fff 15%,#f1f6fc);padding:12px;gap:10px;color:#163a66;font-weight:700;box-shadow:0 4px 12px #17365e08,inset 0 1px 0 #fff}
+.main-grid #tabs a>span{color:#6c89b0;font-size:.9rem}
+.main-grid #tabs a[aria-current=true],.rail nav a[aria-current=true],#mobileWorldMenu a[aria-current=true]{background:linear-gradient(145deg,#356393,#12365e);color:#fff;border-color:#244f80;box-shadow:0 6px 14px #153b6426,inset 0 1px 0 #ffffff55}
+.main-grid #tabs a[aria-current=true]>span,.rail nav a[aria-current=true]>span{color:#dceaff}
+.rail nav{gap:7px}.rail nav a{padding:10px;font-size:.75rem}.rail nav a[aria-current=true]:after{display:none}
+#mobileWorldMenu{gap:10px}.menu-grid a{margin:0}
+button,.text-link,.report-link,#viewControls>a,.back-link{border:1px solid #d3deed;border-radius:13px;background:linear-gradient(160deg,#fff 5%,#f2f7fe 65%,#e6eef9);color:#173f6e;box-shadow:0 4px 12px #12375e0d,inset 0 1px 0 #fff;min-height:44px;padding:10px 16px;font-weight:750;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+#filters button,.view-filters button,.pagination button{border-color:#244f80;background:linear-gradient(145deg,#3e6ea3,#15395f);color:#fff;font-weight:750;box-shadow:0 5px 13px #153b6420,inset 0 1px 0 #ffffff66}
+#filters .quiet,.view-filters button[type=button],.pagination .quiet{background:linear-gradient(160deg,#fff,#edf4fc);color:#173f6e;border-color:#d3deed;box-shadow:0 4px 12px #12375e0d,inset 0 1px 0 #fff}
+button:hover:not(:disabled),.text-link:hover,.report-link:hover,#viewControls>a:hover,.main-grid #tabs a:hover{filter:brightness(.98);border-color:#9db4d2}
+button:disabled{opacity:.42;box-shadow:none;cursor:default}
+button:active:not(:disabled),.text-link:active,.report-link:active{box-shadow:inset 0 2px 5px #12375e19}
+#viewControls>a{justify-self:start}
+#filters input,.view-filters input,.view-filters select,.world-panel select,.filters input,.filters select{background:#fff;border-color:#d3deed;color:#102d54;box-shadow:inset 0 2px 5px #12375e05}
+.world-switch-change select{padding:8px 10px;background:linear-gradient(150deg,#fff,#f1f6fc);border:1px solid #d3deed;border-radius:12px;min-height:42px}
+.hub-tabs{background:#fff;border-color:var(--line);box-shadow:var(--widget-shadow)}
+.hub-tabs a{background:linear-gradient(150deg,#fff,#f3f7fc);border:1px solid #e1e8f2;color:#173f6e}
+.hub-tabs a.active{background:linear-gradient(145deg,#3e6ea3,#15395f);color:#fff;border-color:#244f80}
+#dataSection[data-competition-view=true] .hub-tabs{background:#fff}
+#dataSection[data-competition-view=true] .section-heading{background:#fff}
+#rows>h3,#rows>section:not(.hub-match-group)>h3{padding:13px 17px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,#fff,#f5f8fd);font-weight:800}
+#status:not(:empty),.view-note,.empty{padding:13px 16px;border:1px solid var(--line);border-radius:15px;background:#fff;color:#62738b}
+.pagination{padding:12px;border:1px solid var(--line);border-radius:19px;background:#fff;box-shadow:var(--widget-shadow)}
+.hub-table tbody tr:nth-child(even){background:#f8faff}
+.ivory p,.ivory small,.ivory .eyebrow,.ivory .meta,.footer{color:#62738b}
+.bottomnav a{border-radius:14px}
+.bottomnav [aria-current=true],.bottomnav [aria-current=page]{background:linear-gradient(145deg,#f6faff,#dfeafa);color:#173f6e;box-shadow:inset 0 1px 0 #fff,0 4px 12px #12375e0d}
+.footer{margin:24px 5% 100px;padding:22px}
+@media(min-width:800px){.footer{margin-bottom:24px}}
+@media(min-width:1200px){.menu-button{display:none}}
+@media(max-width:599px){.home-title,.main-grid .side-column,.section-heading,.chapter{padding:16px;border-radius:20px}.main-grid #tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.main-grid #tabs a{font-size:.72rem;padding:11px 9px}.section-heading .text-link{padding:9px 11px;white-space:nowrap}.card-bottom .report-link{font-size:.65rem;padding:8px 10px}.menu-button{font-size:.75rem;padding:9px 11px}.topbar{gap:9px}.brand{min-width:0}.brand small{letter-spacing:.02em}.chapter{margin-left:0;margin-right:0}.footer{margin:20px 20px 100px}.hub-tabs a{padding:11px 8px}}
