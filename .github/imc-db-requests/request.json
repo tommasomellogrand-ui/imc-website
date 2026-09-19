@@ -1,8 +1,8 @@
 {
-  "request_id": "normalize-all-cup-keys-plan-20260919-48",
+  "request_id": "normalize-single-cup-keys-execute-20260919-49",
   "requested_at": "2026-09-19T10:39:00Z",
-  "purpose": "Normalize all domestic cup competition keys across GW001-GW009 so cups never include division",
-  "action": "plan_migration",
+  "purpose": "Execute Single League domestic cup key normalization without division",
+  "action": "execute_migration",
   "target": "custom",
   "migration_id": "normalize-all-domestic-cup-keys-no-division-20260919",
   "statements": [
