@@ -1,15 +1,15 @@
 {
-  "request_id": "gw008-s1-worldcup-null-20260919-25",
-  "completed_at": "2026-09-19T08:31:46.027036+00:00",
+  "request_id": "gw008-worldcup-all-20260919-26",
+  "completed_at": "2026-09-19T08:32:09.206493+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw008-s1-worldcup-null-20260919-25",
-    "requested_at": "2026-09-19T09:18:00Z",
-    "purpose": "Identify GW008 season 1 World Cup final with missing date",
+    "request_id": "gw008-worldcup-all-20260919-26",
+    "requested_at": "2026-09-19T09:20:00Z",
+    "purpose": "Inspect all GW008 World Cup results to identify season 1 final",
     "action": "query",
     "target": "gold",
-    "sql": "SELECT sm_fixture_id,home_name,away_name,home_score,away_score,penalty_home_score,penalty_away_score,competition_stage,competition_round,match_date FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND competition_key='GW008|NATIONS|worldcup' AND match_date IS NULL ORDER BY sm_fixture_id DESC",
-    "limit": 20
+    "sql": "SELECT sm_fixture_id,match_date,competition_stage,competition_round,home_name,away_name,home_score,away_score,penalty_home_score,penalty_away_score FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND competition_key='GW008|NATIONS|worldcup' ORDER BY match_date,sm_fixture_id",
+    "limit": 100
   },
   "response": {
     "ok": true,
@@ -17,11 +17,216 @@
     "target": "gold",
     "database": "Sql1956795_2",
     "result": {
-      "rows": [],
-      "returned_rows": 0,
-      "total_rows": 0,
+      "rows": [
+        {
+          "sm_fixture_id": "385094068",
+          "match_date": "2026-08-27",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Norway",
+          "away_name": "France",
+          "home_score": "2",
+          "away_score": "3",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385094069",
+          "match_date": "2026-08-27",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Italy",
+          "away_name": "Scotland",
+          "home_score": "3",
+          "away_score": "0",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209831",
+          "match_date": "2026-08-30",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Netherlands",
+          "away_name": "Ukraine",
+          "home_score": "3",
+          "away_score": "0",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209832",
+          "match_date": "2026-08-30",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Ivory Coast",
+          "away_name": "Argentina",
+          "home_score": "1",
+          "away_score": "5",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209833",
+          "match_date": "2026-08-30",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Brazil",
+          "away_name": "Serbia",
+          "home_score": "2",
+          "away_score": "0",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209834",
+          "match_date": "2026-08-30",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Morocco",
+          "away_name": "United States",
+          "home_score": "1",
+          "away_score": "1",
+          "penalty_home_score": "3",
+          "penalty_away_score": "4"
+        },
+        {
+          "sm_fixture_id": "385209835",
+          "match_date": "2026-08-30",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Germany",
+          "away_name": "Senegal",
+          "home_score": "1",
+          "away_score": "1",
+          "penalty_home_score": "5",
+          "penalty_away_score": "3"
+        },
+        {
+          "sm_fixture_id": "385209836",
+          "match_date": "2026-08-30",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Colombia",
+          "away_name": "England",
+          "home_score": "2",
+          "away_score": "1",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209837",
+          "match_date": "2026-08-30",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Spain",
+          "away_name": "France",
+          "home_score": "1",
+          "away_score": "3",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209838",
+          "match_date": "2026-08-30",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Belgium",
+          "away_name": "Norway",
+          "home_score": "2",
+          "away_score": "0",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209871",
+          "match_date": "2026-08-31",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Netherlands",
+          "away_name": "Brazil",
+          "home_score": "2",
+          "away_score": "3",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209872",
+          "match_date": "2026-08-31",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Germany",
+          "away_name": "France",
+          "home_score": "1",
+          "away_score": "2",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209873",
+          "match_date": "2026-08-31",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Argentina",
+          "away_name": "United States",
+          "home_score": "2",
+          "away_score": "1",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385209874",
+          "match_date": "2026-08-31",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Belgium",
+          "away_name": "Colombia",
+          "home_score": "1",
+          "away_score": "1",
+          "penalty_home_score": "1",
+          "penalty_away_score": "3"
+        },
+        {
+          "sm_fixture_id": "385320975",
+          "match_date": "2026-09-01",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Brazil",
+          "away_name": "France",
+          "home_score": "4",
+          "away_score": "2",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385320976",
+          "match_date": "2026-09-01",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Argentina",
+          "away_name": "Colombia",
+          "home_score": "2",
+          "away_score": "1",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        },
+        {
+          "sm_fixture_id": "385365523",
+          "match_date": "2026-09-02",
+          "competition_stage": null,
+          "competition_round": null,
+          "home_name": "Brazil",
+          "away_name": "Argentina",
+          "home_score": "1",
+          "away_score": "0",
+          "penalty_home_score": null,
+          "penalty_away_score": null
+        }
+      ],
+      "returned_rows": 17,
+      "total_rows": 17,
       "truncated": false,
-      "duration_ms": 55
+      "duration_ms": 58
     }
   }
 }
