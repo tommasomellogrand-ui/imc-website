@@ -1,188 +1,42 @@
 {
-  "request_id": "gw001-competition-audit-20260919-03",
-  "completed_at": "2026-09-19T08:27:23.559705+00:00",
+  "request_id": "gw008-season-core-20260919-19",
+  "completed_at": "2026-09-19T08:27:37.596836+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw001-competition-audit-20260919-03",
-    "requested_at": "2026-09-19T08:27:00Z",
-    "purpose": "GW001 counts by actual competition descriptors",
+    "request_id": "gw008-season-core-20260919-19",
+    "requested_at": "2026-09-19T09:02:00Z",
+    "purpose": "Read authoritative GW008 season state from CORE",
     "action": "query",
-    "target": "custom",
-    "sql": "SELECT source,competition_group,sm_action,sm_country,sm_division,SUM(n) AS n FROM (SELECT 'Results' source,competition_group,sm_action,sm_country,sm_division,COUNT(*) n FROM `GW001_IMC Results` GROUP BY competition_group,sm_action,sm_country,sm_division UNION ALL SELECT 'Match Report' source,competition_group,sm_action,sm_country,sm_division,COUNT(*) n FROM `GW001_IMC Match Report` GROUP BY competition_group,sm_action,sm_country,sm_division) x GROUP BY source,competition_group,sm_action,sm_country,sm_division ORDER BY competition_group,sm_action,sm_country,sm_division,source",
-    "limit": 1000
+    "target": "core",
+    "sql": "SELECT * FROM `IMC Game World Season` WHERE game_world_id='GW008' ORDER BY imc_season",
+    "limit": 20
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "custom",
-    "database": "Sql1956795_3",
+    "target": "core",
+    "database": "Sql1956795_1",
     "result": {
       "rows": [
         {
-          "source": "Match Report",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": null,
-          "sm_division": "2",
-          "n": "1"
+          "game_world_id": "GW008",
+          "imc_season": "1",
+          "soccer_manager_season": "48",
+          "imc_season_start_date": "2026-03-30",
+          "imc_season_end_date": "2026-08-29"
         },
         {
-          "source": "Match Report",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": null,
-          "sm_division": "3",
-          "n": "1"
-        },
-        {
-          "source": "Match Report",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": null,
-          "sm_division": "4",
-          "n": "1"
-        },
-        {
-          "source": "Results",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": "CUS",
-          "sm_division": null,
-          "n": "1"
-        },
-        {
-          "source": "Match Report",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": "CUS",
-          "sm_division": "1",
-          "n": "90"
-        },
-        {
-          "source": "Results",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": "CUS",
-          "sm_division": "1",
-          "n": "90"
-        },
-        {
-          "source": "Match Report",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": "CUS",
-          "sm_division": "2",
-          "n": "92"
-        },
-        {
-          "source": "Results",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": "CUS",
-          "sm_division": "2",
-          "n": "93"
-        },
-        {
-          "source": "Match Report",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": "CUS",
-          "sm_division": "3",
-          "n": "92"
-        },
-        {
-          "source": "Results",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": "CUS",
-          "sm_division": "3",
-          "n": "93"
-        },
-        {
-          "source": "Match Report",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": "CUS",
-          "sm_division": "4",
-          "n": "92"
-        },
-        {
-          "source": "Results",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_country": "CUS",
-          "sm_division": "4",
-          "n": "92"
-        },
-        {
-          "source": "Match Report",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leaguecup",
-          "sm_country": "CUS",
-          "sm_division": "4",
-          "n": "39"
-        },
-        {
-          "source": "Results",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leaguecup",
-          "sm_country": "CUS",
-          "sm_division": "4",
-          "n": "39"
-        },
-        {
-          "source": "Results",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leaguecup",
-          "sm_country": "WOR",
-          "sm_division": "2",
-          "n": "4"
-        },
-        {
-          "source": "Match Report",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfacup",
-          "sm_country": null,
-          "sm_division": null,
-          "n": "37"
-        },
-        {
-          "source": "Results",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfacup",
-          "sm_country": null,
-          "sm_division": null,
-          "n": "36"
-        },
-        {
-          "source": "Match Report",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfashield",
-          "sm_country": null,
-          "sm_division": null,
-          "n": "37"
-        },
-        {
-          "source": "Results",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfashield",
-          "sm_country": null,
-          "sm_division": null,
-          "n": "36"
-        },
-        {
-          "source": "Results",
-          "competition_group": "NATIONS",
-          "sm_action": "interqualifier",
-          "sm_country": null,
-          "sm_division": null,
-          "n": "320"
+          "game_world_id": "GW008",
+          "imc_season": "2",
+          "soccer_manager_season": "49",
+          "imc_season_start_date": "2026-08-31",
+          "imc_season_end_date": null
         }
       ],
-      "returned_rows": 20,
-      "total_rows": 20,
+      "returned_rows": 2,
+      "total_rows": 2,
       "truncated": false,
-      "duration_ms": 24
+      "duration_ms": 3
     }
   }
 }
