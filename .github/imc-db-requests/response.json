@@ -1,385 +1,43 @@
 {
-  "request_id": "single-keys-dimensions-for-nexus-20260919-43",
-  "completed_at": "2026-09-19T10:30:10.742094+00:00",
+  "request_id": "populate-nexus-single-plan-20260919-44",
+  "completed_at": "2026-09-19T10:31:17.893500+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "single-keys-dimensions-for-nexus-20260919-43",
-    "requested_at": "2026-09-19T10:29:00Z",
-    "purpose": "Read distinct Single League competition dimensions after normalization for Nexus mapping population",
-    "action": "query",
-    "target": "custom",
-    "sql": "SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM (SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW001_IMC Results` UNION SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW001_IMC Match Report` UNION SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW004_IMC Results` UNION SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW004_IMC Match Report` UNION SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW005_IMC Results` UNION SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW005_IMC Match Report` UNION SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW006_IMC Results` UNION SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW006_IMC Match Report` UNION SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW009_IMC Results` UNION SELECT game_world_id,competition_key,competition_group,sm_action,sm_division FROM `GW009_IMC Match Report`) x WHERE competition_key IS NOT NULL AND competition_key<>'' GROUP BY game_world_id,competition_key,competition_group,sm_action,sm_division ORDER BY game_world_id,competition_key",
-    "limit": 1000
+    "request_id": "populate-nexus-single-plan-20260919-44",
+    "requested_at": "2026-09-19T10:31:00Z",
+    "purpose": "Populate CORE Nexus competition mapping for all current Single League competition keys",
+    "action": "plan_migration",
+    "target": "core",
+    "migration_id": "populate-nexus-single-mapping-20260919",
+    "statements": [
+      "INSERT INTO `IMC Competition Nexus Mapping` (`game_world_id`,`world_type`,`sm_country`,`competition_group`,`sm_action`,`sm_division`,`competition_key`,`nexus_view`) VALUES ('GW001','SINGLE',NULL,'DOMESTIC','league','1','GW001|DOMESTIC|league|1','Div 1'),('GW001','SINGLE',NULL,'DOMESTIC','league','2','GW001|DOMESTIC|league|2','Div 2'),('GW001','SINGLE',NULL,'DOMESTIC','league','3','GW001|DOMESTIC|league|3','Div 3'),('GW001','SINGLE',NULL,'DOMESTIC','league','4','GW001|DOMESTIC|league|4','Div 4'),('GW001','SINGLE',NULL,'DOMESTIC','leaguecup','4','GW001|DOMESTIC|leaguecup|4','National Cup'),('GW001','SINGLE',NULL,'DOMESTIC','playoff','2','GW001|DOMESTIC|playoff|2','Div 2 Playoff'),('GW001','SINGLE',NULL,'DOMESTIC','playoff','3','GW001|DOMESTIC|playoff|3','Div 3 Playoff'),('GW001','SINGLE',NULL,'DOMESTIC','playoff','4','GW001|DOMESTIC|playoff|4','Div 4 Playoff'),('GW001','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW001|INTERNATIONAL|smfacup','SMFA Champions'),('GW001','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW001|INTERNATIONAL|smfashield','SMFA Shield'),('GW001','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW001|NATIONS|interqualifier','World Cup Qualifiers'),('GW004','SINGLE',NULL,'DOMESTIC','charityshield',NULL,'GW004|DOMESTIC|charityshield','Charity Shield'),('GW004','SINGLE',NULL,'DOMESTIC','league','1','GW004|DOMESTIC|league|1','Div 1'),('GW004','SINGLE',NULL,'DOMESTIC','league','2','GW004|DOMESTIC|league|2','Div 2'),('GW004','SINGLE',NULL,'DOMESTIC','league','3','GW004|DOMESTIC|league|3','Div 3'),('GW004','SINGLE',NULL,'DOMESTIC','league','4','GW004|DOMESTIC|league|4','Div 4'),('GW004','SINGLE',NULL,'DOMESTIC','leaguecup','2','GW004|DOMESTIC|leaguecup|2','National Cup'),('GW004','SINGLE',NULL,'DOMESTIC','leagueshield','2','GW004|DOMESTIC|leagueshield|2','League Cup'),('GW004','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW004|INTERNATIONAL|smfacup','SMFA Champions'),('GW004','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW004|INTERNATIONAL|smfashield','SMFA Shield'),('GW004','SINGLE',NULL,'INTERNATIONAL','supercup',NULL,'GW004|INTERNATIONAL|supercup','SMFA Super Cup'),('GW004','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW004|NATIONS|interqualifier','World Cup Qualifiers'),('GW005','SINGLE',NULL,'DOMESTIC','charityshield',NULL,'GW005|DOMESTIC|charityshield','Charity Shield'),('GW005','SINGLE',NULL,'DOMESTIC','league','1','GW005|DOMESTIC|league|1','Div 1'),('GW005','SINGLE',NULL,'DOMESTIC','league','2','GW005|DOMESTIC|league|2','Div 2'),('GW005','SINGLE',NULL,'DOMESTIC','league','3','GW005|DOMESTIC|league|3','Div 3'),('GW005','SINGLE',NULL,'DOMESTIC','leaguecup','1','GW005|DOMESTIC|leaguecup|1','National Cup'),('GW005','SINGLE',NULL,'DOMESTIC','playoff','2','GW005|DOMESTIC|playoff|2','Div 2 Playoff'),('GW005','SINGLE',NULL,'DOMESTIC','playoff','3','GW005|DOMESTIC|playoff|3','Div 3 Playoff'),('GW005','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW005|INTERNATIONAL|smfacup','SMFA Champions'),('GW005','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW005|INTERNATIONAL|smfashield','SMFA Shield'),('GW005','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW005|NATIONS|interqualifier','World Cup Qualifiers'),('GW005','SINGLE',NULL,'NATIONS','worldcup',NULL,'GW005|NATIONS|worldcup','World Cup'),('GW006','SINGLE',NULL,'DOMESTIC','league','1','GW006|DOMESTIC|league|1','Div 1'),('GW006','SINGLE',NULL,'DOMESTIC','league','2','GW006|DOMESTIC|league|2','Div 2'),('GW006','SINGLE',NULL,'DOMESTIC','league','3','GW006|DOMESTIC|league|3','Div 3'),('GW006','SINGLE',NULL,'DOMESTIC','league','4','GW006|DOMESTIC|league|4','Div 4'),('GW006','SINGLE',NULL,'DOMESTIC','leaguecup','1','GW006|DOMESTIC|leaguecup|1','National Cup'),('GW006','SINGLE',NULL,'DOMESTIC','leagueshield','1','GW006|DOMESTIC|leagueshield|1','League Cup'),('GW006','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW006|INTERNATIONAL|smfacup','SMFA Champions'),('GW006','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW006|INTERNATIONAL|smfashield','SMFA Shield'),('GW006','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW006|NATIONS|interqualifier','World Cup Qualifiers'),('GW009','SINGLE',NULL,'DOMESTIC','league','1','GW009|DOMESTIC|league|1','Div 1'),('GW009','SINGLE',NULL,'DOMESTIC','league','2','GW009|DOMESTIC|league|2','Div 2'),('GW009','SINGLE',NULL,'DOMESTIC','league','3','GW009|DOMESTIC|league|3','Div 3'),('GW009','SINGLE',NULL,'DOMESTIC','leaguecup','2','GW009|DOMESTIC|leaguecup|2','National Cup'),('GW009','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW009|INTERNATIONAL|smfacup','SMFA Champions'),('GW009','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW009|INTERNATIONAL|smfashield','SMFA Shield'),('GW009','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW009|NATIONS|interqualifier','World Cup Qualifiers') ON DUPLICATE KEY UPDATE `world_type`=VALUES(`world_type`),`sm_country`=VALUES(`sm_country`),`competition_group`=VALUES(`competition_group`),`sm_action`=VALUES(`sm_action`),`sm_division`=VALUES(`sm_division`),`nexus_view`=VALUES(`nexus_view`)"
+    ],
+    "allow_destructive": false,
+    "data_migration": true
   },
   "response": {
     "ok": true,
-    "action": "query",
-    "target": "custom",
-    "database": "Sql1956795_3",
-    "result": {
-      "rows": [
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|DOMESTIC|league|1",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "1"
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|DOMESTIC|league|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|DOMESTIC|league|3",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "3"
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|DOMESTIC|league|4",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "4"
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|DOMESTIC|leaguecup|4",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leaguecup",
-          "sm_division": "4"
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|DOMESTIC|playoff|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|DOMESTIC|playoff|3",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "3"
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|DOMESTIC|playoff|4",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "4"
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|INTERNATIONAL|smfacup",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfacup",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|INTERNATIONAL|smfashield",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfashield",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW001",
-          "competition_key": "GW001|NATIONS|interqualifier",
-          "competition_group": "NATIONS",
-          "sm_action": "interqualifier",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004",
-          "competition_group": null,
-          "sm_action": null,
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|DOMESTIC|charityshield",
-          "competition_group": "DOMESTIC",
-          "sm_action": "charityshield",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|DOMESTIC|league|1",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "1"
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|DOMESTIC|league|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|DOMESTIC|league|3",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "3"
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|DOMESTIC|league|4",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "4"
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|DOMESTIC|leaguecup|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leaguecup",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|DOMESTIC|leagueshield|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leagueshield",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|INTERNATIONAL|smfacup",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfacup",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|INTERNATIONAL|smfashield",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfashield",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|INTERNATIONAL|supercup",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "supercup",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW004",
-          "competition_key": "GW004|NATIONS|interqualifier",
-          "competition_group": "NATIONS",
-          "sm_action": "interqualifier",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005",
-          "competition_group": null,
-          "sm_action": null,
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|DOMESTIC|charityshield",
-          "competition_group": "DOMESTIC",
-          "sm_action": "charityshield",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|DOMESTIC|league|1",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "1"
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|DOMESTIC|league|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|DOMESTIC|league|3",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "3"
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|DOMESTIC|leaguecup|1",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leaguecup",
-          "sm_division": "1"
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|DOMESTIC|playoff|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|DOMESTIC|playoff|3",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "3"
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|INTERNATIONAL|smfacup",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfacup",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|INTERNATIONAL|smfashield",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfashield",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|NATIONS|interqualifier",
-          "competition_group": "NATIONS",
-          "sm_action": "interqualifier",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW005",
-          "competition_key": "GW005|NATIONS|worldcup",
-          "competition_group": "NATIONS",
-          "sm_action": "worldcup",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW006",
-          "competition_key": "GW006|DOMESTIC|league|1",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "1"
-        },
-        {
-          "game_world_id": "GW006",
-          "competition_key": "GW006|DOMESTIC|league|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW006",
-          "competition_key": "GW006|DOMESTIC|league|3",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "3"
-        },
-        {
-          "game_world_id": "GW006",
-          "competition_key": "GW006|DOMESTIC|league|4",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "4"
-        },
-        {
-          "game_world_id": "GW006",
-          "competition_key": "GW006|DOMESTIC|leaguecup|1",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leaguecup",
-          "sm_division": "1"
-        },
-        {
-          "game_world_id": "GW006",
-          "competition_key": "GW006|DOMESTIC|leagueshield|1",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leagueshield",
-          "sm_division": "1"
-        },
-        {
-          "game_world_id": "GW006",
-          "competition_key": "GW006|INTERNATIONAL|smfacup",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfacup",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW006",
-          "competition_key": "GW006|INTERNATIONAL|smfashield",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfashield",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW006",
-          "competition_key": "GW006|NATIONS|interqualifier",
-          "competition_group": "NATIONS",
-          "sm_action": "interqualifier",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW009",
-          "competition_key": "GW009|DOMESTIC|league|1",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "1"
-        },
-        {
-          "game_world_id": "GW009",
-          "competition_key": "GW009|DOMESTIC|league|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW009",
-          "competition_key": "GW009|DOMESTIC|league|3",
-          "competition_group": "DOMESTIC",
-          "sm_action": "league",
-          "sm_division": "3"
-        },
-        {
-          "game_world_id": "GW009",
-          "competition_key": "GW009|DOMESTIC|leaguecup|2",
-          "competition_group": "DOMESTIC",
-          "sm_action": "leaguecup",
-          "sm_division": "2"
-        },
-        {
-          "game_world_id": "GW009",
-          "competition_key": "GW009|INTERNATIONAL|smfacup",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfacup",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW009",
-          "competition_key": "GW009|INTERNATIONAL|smfashield",
-          "competition_group": "INTERNATIONAL",
-          "sm_action": "smfashield",
-          "sm_division": null
-        },
-        {
-          "game_world_id": "GW009",
-          "competition_key": "GW009|NATIONS|interqualifier",
-          "competition_group": "NATIONS",
-          "sm_action": "interqualifier",
-          "sm_division": null
-        }
-      ],
-      "returned_rows": 51,
-      "total_rows": 51,
-      "truncated": false,
-      "duration_ms": 91
-    }
+    "action": "plan_migration",
+    "plan": {
+      "target": "core",
+      "database": "Sql1956795_1",
+      "migration_id": "populate-nexus-single-mapping-20260919",
+      "allow_destructive": false,
+      "data_migration": true,
+      "statements": [
+        "INSERT INTO `IMC Competition Nexus Mapping` (`game_world_id`,`world_type`,`sm_country`,`competition_group`,`sm_action`,`sm_division`,`competition_key`,`nexus_view`) VALUES ('GW001','SINGLE',NULL,'DOMESTIC','league','1','GW001|DOMESTIC|league|1','Div 1'),('GW001','SINGLE',NULL,'DOMESTIC','league','2','GW001|DOMESTIC|league|2','Div 2'),('GW001','SINGLE',NULL,'DOMESTIC','league','3','GW001|DOMESTIC|league|3','Div 3'),('GW001','SINGLE',NULL,'DOMESTIC','league','4','GW001|DOMESTIC|league|4','Div 4'),('GW001','SINGLE',NULL,'DOMESTIC','leaguecup','4','GW001|DOMESTIC|leaguecup|4','National Cup'),('GW001','SINGLE',NULL,'DOMESTIC','playoff','2','GW001|DOMESTIC|playoff|2','Div 2 Playoff'),('GW001','SINGLE',NULL,'DOMESTIC','playoff','3','GW001|DOMESTIC|playoff|3','Div 3 Playoff'),('GW001','SINGLE',NULL,'DOMESTIC','playoff','4','GW001|DOMESTIC|playoff|4','Div 4 Playoff'),('GW001','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW001|INTERNATIONAL|smfacup','SMFA Champions'),('GW001','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW001|INTERNATIONAL|smfashield','SMFA Shield'),('GW001','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW001|NATIONS|interqualifier','World Cup Qualifiers'),('GW004','SINGLE',NULL,'DOMESTIC','charityshield',NULL,'GW004|DOMESTIC|charityshield','Charity Shield'),('GW004','SINGLE',NULL,'DOMESTIC','league','1','GW004|DOMESTIC|league|1','Div 1'),('GW004','SINGLE',NULL,'DOMESTIC','league','2','GW004|DOMESTIC|league|2','Div 2'),('GW004','SINGLE',NULL,'DOMESTIC','league','3','GW004|DOMESTIC|league|3','Div 3'),('GW004','SINGLE',NULL,'DOMESTIC','league','4','GW004|DOMESTIC|league|4','Div 4'),('GW004','SINGLE',NULL,'DOMESTIC','leaguecup','2','GW004|DOMESTIC|leaguecup|2','National Cup'),('GW004','SINGLE',NULL,'DOMESTIC','leagueshield','2','GW004|DOMESTIC|leagueshield|2','League Cup'),('GW004','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW004|INTERNATIONAL|smfacup','SMFA Champions'),('GW004','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW004|INTERNATIONAL|smfashield','SMFA Shield'),('GW004','SINGLE',NULL,'INTERNATIONAL','supercup',NULL,'GW004|INTERNATIONAL|supercup','SMFA Super Cup'),('GW004','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW004|NATIONS|interqualifier','World Cup Qualifiers'),('GW005','SINGLE',NULL,'DOMESTIC','charityshield',NULL,'GW005|DOMESTIC|charityshield','Charity Shield'),('GW005','SINGLE',NULL,'DOMESTIC','league','1','GW005|DOMESTIC|league|1','Div 1'),('GW005','SINGLE',NULL,'DOMESTIC','league','2','GW005|DOMESTIC|league|2','Div 2'),('GW005','SINGLE',NULL,'DOMESTIC','league','3','GW005|DOMESTIC|league|3','Div 3'),('GW005','SINGLE',NULL,'DOMESTIC','leaguecup','1','GW005|DOMESTIC|leaguecup|1','National Cup'),('GW005','SINGLE',NULL,'DOMESTIC','playoff','2','GW005|DOMESTIC|playoff|2','Div 2 Playoff'),('GW005','SINGLE',NULL,'DOMESTIC','playoff','3','GW005|DOMESTIC|playoff|3','Div 3 Playoff'),('GW005','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW005|INTERNATIONAL|smfacup','SMFA Champions'),('GW005','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW005|INTERNATIONAL|smfashield','SMFA Shield'),('GW005','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW005|NATIONS|interqualifier','World Cup Qualifiers'),('GW005','SINGLE',NULL,'NATIONS','worldcup',NULL,'GW005|NATIONS|worldcup','World Cup'),('GW006','SINGLE',NULL,'DOMESTIC','league','1','GW006|DOMESTIC|league|1','Div 1'),('GW006','SINGLE',NULL,'DOMESTIC','league','2','GW006|DOMESTIC|league|2','Div 2'),('GW006','SINGLE',NULL,'DOMESTIC','league','3','GW006|DOMESTIC|league|3','Div 3'),('GW006','SINGLE',NULL,'DOMESTIC','league','4','GW006|DOMESTIC|league|4','Div 4'),('GW006','SINGLE',NULL,'DOMESTIC','leaguecup','1','GW006|DOMESTIC|leaguecup|1','National Cup'),('GW006','SINGLE',NULL,'DOMESTIC','leagueshield','1','GW006|DOMESTIC|leagueshield|1','League Cup'),('GW006','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW006|INTERNATIONAL|smfacup','SMFA Champions'),('GW006','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW006|INTERNATIONAL|smfashield','SMFA Shield'),('GW006','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW006|NATIONS|interqualifier','World Cup Qualifiers'),('GW009','SINGLE',NULL,'DOMESTIC','league','1','GW009|DOMESTIC|league|1','Div 1'),('GW009','SINGLE',NULL,'DOMESTIC','league','2','GW009|DOMESTIC|league|2','Div 2'),('GW009','SINGLE',NULL,'DOMESTIC','league','3','GW009|DOMESTIC|league|3','Div 3'),('GW009','SINGLE',NULL,'DOMESTIC','leaguecup','2','GW009|DOMESTIC|leaguecup|2','National Cup'),('GW009','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW009|INTERNATIONAL|smfacup','SMFA Champions'),('GW009','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW009|INTERNATIONAL|smfashield','SMFA Shield'),('GW009','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW009|NATIONS|interqualifier','World Cup Qualifiers') ON DUPLICATE KEY UPDATE `world_type`=VALUES(`world_type`),`sm_country`=VALUES(`sm_country`),`competition_group`=VALUES(`competition_group`),`sm_action`=VALUES(`sm_action`),`sm_division`=VALUES(`sm_division`),`nexus_view`=VALUES(`nexus_view`)"
+      ]
+    },
+    "analysis": [
+      {
+        "sql": "INSERT INTO `IMC Competition Nexus Mapping` (`game_world_id`,`world_type`,`sm_country`,`competition_group`,`sm_action`,`sm_division`,`competition_key`,`nexus_view`) VALUES ('GW001','SINGLE',NULL,'DOMESTIC','league','1','GW001|DOMESTIC|league|1','Div 1'),('GW001','SINGLE',NULL,'DOMESTIC','league','2','GW001|DOMESTIC|league|2','Div 2'),('GW001','SINGLE',NULL,'DOMESTIC','league','3','GW001|DOMESTIC|league|3','Div 3'),('GW001','SINGLE',NULL,'DOMESTIC','league','4','GW001|DOMESTIC|league|4','Div 4'),('GW001','SINGLE',NULL,'DOMESTIC','leaguecup','4','GW001|DOMESTIC|leaguecup|4','National Cup'),('GW001','SINGLE',NULL,'DOMESTIC','playoff','2','GW001|DOMESTIC|playoff|2','Div 2 Playoff'),('GW001','SINGLE',NULL,'DOMESTIC','playoff','3','GW001|DOMESTIC|playoff|3','Div 3 Playoff'),('GW001','SINGLE',NULL,'DOMESTIC','playoff','4','GW001|DOMESTIC|playoff|4','Div 4 Playoff'),('GW001','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW001|INTERNATIONAL|smfacup','SMFA Champions'),('GW001','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW001|INTERNATIONAL|smfashield','SMFA Shield'),('GW001','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW001|NATIONS|interqualifier','World Cup Qualifiers'),('GW004','SINGLE',NULL,'DOMESTIC','charityshield',NULL,'GW004|DOMESTIC|charityshield','Charity Shield'),('GW004','SINGLE',NULL,'DOMESTIC','league','1','GW004|DOMESTIC|league|1','Div 1'),('GW004','SINGLE',NULL,'DOMESTIC','league','2','GW004|DOMESTIC|league|2','Div 2'),('GW004','SINGLE',NULL,'DOMESTIC','league','3','GW004|DOMESTIC|league|3','Div 3'),('GW004','SINGLE',NULL,'DOMESTIC','league','4','GW004|DOMESTIC|league|4','Div 4'),('GW004','SINGLE',NULL,'DOMESTIC','leaguecup','2','GW004|DOMESTIC|leaguecup|2','National Cup'),('GW004','SINGLE',NULL,'DOMESTIC','leagueshield','2','GW004|DOMESTIC|leagueshield|2','League Cup'),('GW004','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW004|INTERNATIONAL|smfacup','SMFA Champions'),('GW004','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW004|INTERNATIONAL|smfashield','SMFA Shield'),('GW004','SINGLE',NULL,'INTERNATIONAL','supercup',NULL,'GW004|INTERNATIONAL|supercup','SMFA Super Cup'),('GW004','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW004|NATIONS|interqualifier','World Cup Qualifiers'),('GW005','SINGLE',NULL,'DOMESTIC','charityshield',NULL,'GW005|DOMESTIC|charityshield','Charity Shield'),('GW005','SINGLE',NULL,'DOMESTIC','league','1','GW005|DOMESTIC|league|1','Div 1'),('GW005','SINGLE',NULL,'DOMESTIC','league','2','GW005|DOMESTIC|league|2','Div 2'),('GW005','SINGLE',NULL,'DOMESTIC','league','3','GW005|DOMESTIC|league|3','Div 3'),('GW005','SINGLE',NULL,'DOMESTIC','leaguecup','1','GW005|DOMESTIC|leaguecup|1','National Cup'),('GW005','SINGLE',NULL,'DOMESTIC','playoff','2','GW005|DOMESTIC|playoff|2','Div 2 Playoff'),('GW005','SINGLE',NULL,'DOMESTIC','playoff','3','GW005|DOMESTIC|playoff|3','Div 3 Playoff'),('GW005','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW005|INTERNATIONAL|smfacup','SMFA Champions'),('GW005','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW005|INTERNATIONAL|smfashield','SMFA Shield'),('GW005','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW005|NATIONS|interqualifier','World Cup Qualifiers'),('GW005','SINGLE',NULL,'NATIONS','worldcup',NULL,'GW005|NATIONS|worldcup','World Cup'),('GW006','SINGLE',NULL,'DOMESTIC','league','1','GW006|DOMESTIC|league|1','Div 1'),('GW006','SINGLE',NULL,'DOMESTIC','league','2','GW006|DOMESTIC|league|2','Div 2'),('GW006','SINGLE',NULL,'DOMESTIC','league','3','GW006|DOMESTIC|league|3','Div 3'),('GW006','SINGLE',NULL,'DOMESTIC','league','4','GW006|DOMESTIC|league|4','Div 4'),('GW006','SINGLE',NULL,'DOMESTIC','leaguecup','1','GW006|DOMESTIC|leaguecup|1','National Cup'),('GW006','SINGLE',NULL,'DOMESTIC','leagueshield','1','GW006|DOMESTIC|leagueshield|1','League Cup'),('GW006','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW006|INTERNATIONAL|smfacup','SMFA Champions'),('GW006','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW006|INTERNATIONAL|smfashield','SMFA Shield'),('GW006','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW006|NATIONS|interqualifier','World Cup Qualifiers'),('GW009','SINGLE',NULL,'DOMESTIC','league','1','GW009|DOMESTIC|league|1','Div 1'),('GW009','SINGLE',NULL,'DOMESTIC','league','2','GW009|DOMESTIC|league|2','Div 2'),('GW009','SINGLE',NULL,'DOMESTIC','league','3','GW009|DOMESTIC|league|3','Div 3'),('GW009','SINGLE',NULL,'DOMESTIC','leaguecup','2','GW009|DOMESTIC|leaguecup|2','National Cup'),('GW009','SINGLE',NULL,'INTERNATIONAL','smfacup',NULL,'GW009|INTERNATIONAL|smfacup','SMFA Champions'),('GW009','SINGLE',NULL,'INTERNATIONAL','smfashield',NULL,'GW009|INTERNATIONAL|smfashield','SMFA Shield'),('GW009','SINGLE',NULL,'NATIONS','interqualifier',NULL,'GW009|NATIONS|interqualifier','World Cup Qualifiers') ON DUPLICATE KEY UPDATE `world_type`=VALUES(`world_type`),`sm_country`=VALUES(`sm_country`),`competition_group`=VALUES(`competition_group`),`sm_action`=VALUES(`sm_action`),`sm_division`=VALUES(`sm_division`),`nexus_view`=VALUES(`nexus_view`)",
+        "kind": "INSERT",
+        "destructive": false,
+        "sha256": "4117068e450b9dec4cab07a94204f0aaa8c40b65f270c25ef4d9c85d15c3a115"
+      }
+    ],
+    "plan_sha256": "8115f47316dbbb31e73acc63bc258a87a5ed253617b170435962ef7475014760",
+    "expires_at": "2026-09-19T10:46:17+00:00",
+    "confirmation_token": "1789814777.6bf97c39d93eb57c843cdef3f03b67e3dbf89bf4c8b95aeec31135d32b1bc4e0"
   }
 }
