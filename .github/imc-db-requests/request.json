@@ -1,8 +1,8 @@
 {
-  "request_id": "gw001-fix-playoff-trigger-plan-20260919-27",
+  "request_id": "gw001-fix-playoff-trigger-execute-20260919-28",
   "requested_at": "2026-09-19T09:14:00Z",
-  "purpose": "Fix GW001 Results update trigger so explicit playoff division is preserved, then correct fixture 368726159",
-  "action": "plan_migration",
+  "purpose": "Execute approved GW001 playoff trigger and fixture correction",
+  "action": "execute_migration",
   "target": "custom",
   "migration_id": "gw001-preserve-explicit-playoff-division-update-20260919",
   "statements": [
