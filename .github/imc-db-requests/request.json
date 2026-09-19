@@ -1,9 +1,13 @@
 {
-  "request_id": "gw001-fixture-368726159-livecheck-20260919-20",
-  "requested_at": "2026-09-19T09:02:00Z",
-  "purpose": "Verify current live Result and Match Report state for fixture 368726159",
-  "action": "query",
+  "request_id": "gw001-fix-playoff-d4-plan2-20260919-21",
+  "requested_at": "2026-09-19T09:06:00Z",
+  "purpose": "Plan GW001 fixture 368726159 correction for tokenless approved execution",
+  "action": "plan_migration",
   "target": "custom",
-  "sql": "SELECT 'RESULT' source,sm_fixture_id,sm_division,competition_key,competition_stage,home_name,away_name,home_score,away_score FROM `GW001_IMC Results` WHERE sm_fixture_id=368726159 UNION ALL SELECT 'MATCH_REPORT',sm_fixture_id,sm_division,competition_key,competition_stage,home_name,away_name,home_score,away_score FROM `GW001_IMC Match Report` WHERE sm_fixture_id=368726159",
-  "limit": 10
+  "migration_id": "gw001-fix-playoff-d4-result-368726159-v2",
+  "statements": [
+    "UPDATE `GW001_IMC Results` SET sm_division='4', competition_key='GW001|DOMESTIC|playoff|4' WHERE sm_fixture_id=368726159"
+  ],
+  "allow_destructive": false,
+  "data_migration": true
 }
