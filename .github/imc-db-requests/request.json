@@ -1,9 +1,9 @@
 {
-  "request_id": "gw008-trophy-room-dryrun-20260919-27",
-  "requested_at": "2026-09-19T09:30:00Z",
-  "purpose": "Inspect IMC Trophy Room schema and existing GW008 rows before Season 1 import",
+  "request_id": "trophy-room-schema-20260919-28",
+  "requested_at": "2026-09-19T09:31:00Z",
+  "purpose": "Inspect IMC Trophy Room schema",
   "action": "query",
   "target": "core",
-  "sql": "SHOW COLUMNS FROM `IMC Trophy Room`; SELECT * FROM `IMC Trophy Room` WHERE game_world_id='GW008' ORDER BY imc_season, competition_key, id",
-  "limit": 500
+  "sql": "SHOW COLUMNS FROM `IMC Trophy Room`",
+  "limit": 100
 }
