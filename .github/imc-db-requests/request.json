@@ -1,13 +1,9 @@
 {
-  "request_id": "gw001-fix-playoff-d4-execute2-20260919-22",
-  "requested_at": "2026-09-19T09:05:00Z",
-  "purpose": "Execute previously approved GW001 fixture 368726159 correction",
-  "action": "execute_migration",
+  "request_id": "gw001-total-alignment-recheck-20260919-24",
+  "requested_at": "2026-09-19T09:08:00Z",
+  "purpose": "Full GW001 Results vs Match Report fixture alignment recheck",
+  "action": "query",
   "target": "custom",
-  "migration_id": "gw001-fix-playoff-d4-result-368726159-v2",
-  "statements": [
-    "UPDATE `GW001_IMC Results` SET sm_division='4', competition_key='GW001|DOMESTIC|playoff|4' WHERE sm_fixture_id=368726159"
-  ],
-  "allow_destructive": false,
-  "data_migration": true
+  "sql": "SELECT k.competition_key,COALESCE(r.n,0) results,COALESCE(m.n,0) match_reports,COALESCE(x.same_key,0) fixture_same_key,COALESCE(x.diff_key,0) fixture_different_key,COALESCE(r.n,0)-COALESCE(x.any_match,0) results_without_report,COALESCE(m.n,0)-COALESCE(y.any_match,0) reports_without_result FROM (SELECT competition_key FROM `GW001_IMC Results` UNION SELECT competition_key FROM `GW001_IMC Match Report`) k LEFT JOIN (SELECT competition_key,COUNT(*) n FROM `GW001_IMC Results` GROUP BY competition_key) r ON r.competition_key=k.competition_key LEFT JOIN (SELECT competition_key,COUNT(*) n FROM `GW001_IMC Match Report` GROUP BY competition_key) m ON m.competition_key=k.competition_key LEFT JOIN (SELECT r.competition_key,COUNT(m.sm_fixture_id) any_match,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key=r.competition_key THEN 1 ELSE 0 END) same_key,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key<>r.competition_key THEN 1 ELSE 0 END) diff_key FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id GROUP BY r.competition_key) x ON x.competition_key=k.competition_key LEFT JOIN (SELECT m.competition_key,COUNT(r.sm_fixture_id) any_match FROM `GW001_IMC Match Report` m LEFT JOIN `GW001_IMC Results` r ON r.sm_fixture_id=m.sm_fixture_id GROUP BY m.competition_key) y ON y.competition_key=k.competition_key ORDER BY k.competition_key",
+  "limit": 1000
 }
