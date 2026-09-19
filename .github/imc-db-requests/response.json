@@ -1,15 +1,15 @@
 {
-  "request_id": "gw008-s1-league-winners-20260919-24",
-  "completed_at": "2026-09-19T08:31:22.444138+00:00",
+  "request_id": "gw008-s1-worldcup-null-20260919-25",
+  "completed_at": "2026-09-19T08:31:46.027036+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw008-s1-league-winners-20260919-24",
-    "requested_at": "2026-09-19T09:16:00Z",
-    "purpose": "Derive GW008 season 1 league champions from standings",
+    "request_id": "gw008-s1-worldcup-null-20260919-25",
+    "requested_at": "2026-09-19T09:18:00Z",
+    "purpose": "Identify GW008 season 1 World Cup final with missing date",
     "action": "query",
     "target": "gold",
-    "sql": "SELECT competition_key, team_name, played, points, gd FROM (SELECT competition_key, team_name, COUNT(*) played, SUM(points) points, SUM(CAST(gf AS SIGNED)-CAST(ga AS SIGNED)) gd, ROW_NUMBER() OVER (PARTITION BY competition_key ORDER BY SUM(points) DESC, SUM(CAST(gf AS SIGNED)-CAST(ga AS SIGNED)) DESC, SUM(gf) DESC, team_name) rn FROM (SELECT competition_key, home_name team_name, home_score gf, away_score ga, CASE WHEN home_score>away_score THEN 3 WHEN home_score=away_score THEN 1 ELSE 0 END points FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND sm_action='league' AND match_date BETWEEN '2026-03-30' AND '2026-08-29' UNION ALL SELECT competition_key, away_name team_name, away_score gf, home_score ga, CASE WHEN away_score>home_score THEN 3 WHEN away_score=home_score THEN 1 ELSE 0 END points FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND sm_action='league' AND match_date BETWEEN '2026-03-30' AND '2026-08-29') m GROUP BY competition_key,team_name) s WHERE rn=1 ORDER BY competition_key",
-    "limit": 100
+    "sql": "SELECT sm_fixture_id,home_name,away_name,home_score,away_score,penalty_home_score,penalty_away_score,competition_stage,competition_round,match_date FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND competition_key='GW008|NATIONS|worldcup' AND match_date IS NULL ORDER BY sm_fixture_id DESC",
+    "limit": 20
   },
   "response": {
     "ok": true,
@@ -17,145 +17,11 @@
     "target": "gold",
     "database": "Sql1956795_2",
     "result": {
-      "rows": [
-        {
-          "competition_key": "GW008|CEN|DOMESTIC|league|1",
-          "team_name": "Rapid Bucureşti",
-          "played": "7",
-          "points": "18",
-          "gd": "18"
-        },
-        {
-          "competition_key": "GW008|ENG|DOMESTIC|league|1",
-          "team_name": "Yeovil Town",
-          "played": "38",
-          "points": "87",
-          "gd": "60"
-        },
-        {
-          "competition_key": "GW008|ENG|DOMESTIC|league|2",
-          "team_name": "Manchester United",
-          "played": "38",
-          "points": "87",
-          "gd": "64"
-        },
-        {
-          "competition_key": "GW008|ENG|DOMESTIC|league|3",
-          "team_name": "WATFORD",
-          "played": "38",
-          "points": "91",
-          "gd": "67"
-        },
-        {
-          "competition_key": "GW008|ENG|DOMESTIC|league|4",
-          "team_name": "Doncaster Rovers",
-          "played": "38",
-          "points": "89",
-          "gd": "51"
-        },
-        {
-          "competition_key": "GW008|FRA|DOMESTIC|league|1",
-          "team_name": "AS Saint-Etienne",
-          "played": "38",
-          "points": "92",
-          "gd": "64"
-        },
-        {
-          "competition_key": "GW008|FRA|DOMESTIC|league|2",
-          "team_name": "AS Nancy Lorraine",
-          "played": "38",
-          "points": "102",
-          "gd": "99"
-        },
-        {
-          "competition_key": "GW008|GER|DOMESTIC|league|1",
-          "team_name": "Stuttgarter Kickers",
-          "played": "38",
-          "points": "92",
-          "gd": "63"
-        },
-        {
-          "competition_key": "GW008|GER|DOMESTIC|league|2",
-          "team_name": "1. FC Nürnberg",
-          "played": "47",
-          "points": "110",
-          "gd": "99"
-        },
-        {
-          "competition_key": "GW008|HNB|DOMESTIC|league|1",
-          "team_name": "FC Groningen",
-          "played": "38",
-          "points": "94",
-          "gd": "79"
-        },
-        {
-          "competition_key": "GW008|ITA|DOMESTIC|league|1",
-          "team_name": "SS Arezzo",
-          "played": "38",
-          "points": "92",
-          "gd": "84"
-        },
-        {
-          "competition_key": "GW008|ITA|DOMESTIC|league|2",
-          "team_name": "US Livorno",
-          "played": "38",
-          "points": "104",
-          "gd": "94"
-        },
-        {
-          "competition_key": "GW008|LAT|DOMESTIC|league|1",
-          "team_name": "UNAM Pumas",
-          "played": "38",
-          "points": "92",
-          "gd": "76"
-        },
-        {
-          "competition_key": "GW008|MED|DOMESTIC|league|1",
-          "team_name": "Panathinaikos",
-          "played": "19",
-          "points": "52",
-          "gd": "46"
-        },
-        {
-          "competition_key": "GW008|RNU|DOMESTIC|league|1",
-          "team_name": "FC Rostov",
-          "played": "38",
-          "points": "107",
-          "gd": "105"
-        },
-        {
-          "competition_key": "GW008|SCA|DOMESTIC|league|1",
-          "team_name": "IFK Göteborg",
-          "played": "38",
-          "points": "103",
-          "gd": "102"
-        },
-        {
-          "competition_key": "GW008|SCO|DOMESTIC|league|1",
-          "team_name": "Motherwell",
-          "played": "38",
-          "points": "108",
-          "gd": "131"
-        },
-        {
-          "competition_key": "GW008|SPA|DOMESTIC|league|1",
-          "team_name": "Real Madrid",
-          "played": "38",
-          "points": "100",
-          "gd": "84"
-        },
-        {
-          "competition_key": "GW008|SPA|DOMESTIC|league|2",
-          "team_name": "Salamanca CF",
-          "played": "38",
-          "points": "92",
-          "gd": "76"
-        }
-      ],
-      "returned_rows": 19,
-      "total_rows": 19,
+      "rows": [],
+      "returned_rows": 0,
+      "total_rows": 0,
       "truncated": false,
-      "duration_ms": 184
+      "duration_ms": 55
     }
   }
 }
