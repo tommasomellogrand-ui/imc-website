@@ -1,8 +1,8 @@
 {
-  "request_id": "gw001-fix-playoff-d4-plan2-20260919-21",
-  "requested_at": "2026-09-19T09:06:00Z",
-  "purpose": "Plan GW001 fixture 368726159 correction for tokenless approved execution",
-  "action": "plan_migration",
+  "request_id": "gw001-fix-playoff-d4-execute2-20260919-22",
+  "requested_at": "2026-09-19T09:05:00Z",
+  "purpose": "Execute previously approved GW001 fixture 368726159 correction",
+  "action": "execute_migration",
   "target": "custom",
   "migration_id": "gw001-fix-playoff-d4-result-368726159-v2",
   "statements": [
