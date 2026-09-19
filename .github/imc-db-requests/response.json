@@ -1,27 +1,188 @@
 {
-  "request_id": "gw008-season-dates-20260919-18",
-  "completed_at": "2026-09-19T08:27:13.303692+00:00",
+  "request_id": "gw001-competition-audit-20260919-03",
+  "completed_at": "2026-09-19T08:27:23.559705+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw008-season-dates-20260919-18",
-    "requested_at": "2026-09-19T09:00:00Z",
-    "purpose": "Read authoritative GW008 season 1 start/end dates",
+    "request_id": "gw001-competition-audit-20260919-03",
+    "requested_at": "2026-09-19T08:27:00Z",
+    "purpose": "GW001 counts by actual competition descriptors",
     "action": "query",
-    "target": "gold",
-    "sql": "SELECT * FROM `gw_seasons` WHERE game_world_id='GW008' AND imc_season=1 ORDER BY start_date",
-    "limit": 20
+    "target": "custom",
+    "sql": "SELECT source,competition_group,sm_action,sm_country,sm_division,SUM(n) AS n FROM (SELECT 'Results' source,competition_group,sm_action,sm_country,sm_division,COUNT(*) n FROM `GW001_IMC Results` GROUP BY competition_group,sm_action,sm_country,sm_division UNION ALL SELECT 'Match Report' source,competition_group,sm_action,sm_country,sm_division,COUNT(*) n FROM `GW001_IMC Match Report` GROUP BY competition_group,sm_action,sm_country,sm_division) x GROUP BY source,competition_group,sm_action,sm_country,sm_division ORDER BY competition_group,sm_action,sm_country,sm_division,source",
+    "limit": 1000
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "gold",
-    "database": "Sql1956795_2",
+    "target": "custom",
+    "database": "Sql1956795_3",
     "result": {
-      "rows": [],
-      "returned_rows": 0,
-      "total_rows": 0,
+      "rows": [
+        {
+          "source": "Match Report",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": null,
+          "sm_division": "2",
+          "n": "1"
+        },
+        {
+          "source": "Match Report",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": null,
+          "sm_division": "3",
+          "n": "1"
+        },
+        {
+          "source": "Match Report",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": null,
+          "sm_division": "4",
+          "n": "1"
+        },
+        {
+          "source": "Results",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": "CUS",
+          "sm_division": null,
+          "n": "1"
+        },
+        {
+          "source": "Match Report",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": "CUS",
+          "sm_division": "1",
+          "n": "90"
+        },
+        {
+          "source": "Results",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": "CUS",
+          "sm_division": "1",
+          "n": "90"
+        },
+        {
+          "source": "Match Report",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": "CUS",
+          "sm_division": "2",
+          "n": "92"
+        },
+        {
+          "source": "Results",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": "CUS",
+          "sm_division": "2",
+          "n": "93"
+        },
+        {
+          "source": "Match Report",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": "CUS",
+          "sm_division": "3",
+          "n": "92"
+        },
+        {
+          "source": "Results",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": "CUS",
+          "sm_division": "3",
+          "n": "93"
+        },
+        {
+          "source": "Match Report",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": "CUS",
+          "sm_division": "4",
+          "n": "92"
+        },
+        {
+          "source": "Results",
+          "competition_group": "DOMESTIC",
+          "sm_action": "league",
+          "sm_country": "CUS",
+          "sm_division": "4",
+          "n": "92"
+        },
+        {
+          "source": "Match Report",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_country": "CUS",
+          "sm_division": "4",
+          "n": "39"
+        },
+        {
+          "source": "Results",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_country": "CUS",
+          "sm_division": "4",
+          "n": "39"
+        },
+        {
+          "source": "Results",
+          "competition_group": "DOMESTIC",
+          "sm_action": "leaguecup",
+          "sm_country": "WOR",
+          "sm_division": "2",
+          "n": "4"
+        },
+        {
+          "source": "Match Report",
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfacup",
+          "sm_country": null,
+          "sm_division": null,
+          "n": "37"
+        },
+        {
+          "source": "Results",
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfacup",
+          "sm_country": null,
+          "sm_division": null,
+          "n": "36"
+        },
+        {
+          "source": "Match Report",
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfashield",
+          "sm_country": null,
+          "sm_division": null,
+          "n": "37"
+        },
+        {
+          "source": "Results",
+          "competition_group": "INTERNATIONAL",
+          "sm_action": "smfashield",
+          "sm_country": null,
+          "sm_division": null,
+          "n": "36"
+        },
+        {
+          "source": "Results",
+          "competition_group": "NATIONS",
+          "sm_action": "interqualifier",
+          "sm_country": null,
+          "sm_division": null,
+          "n": "320"
+        }
+      ],
+      "returned_rows": 20,
+      "total_rows": 20,
       "truncated": false,
-      "duration_ms": 8
+      "duration_ms": 24
     }
   }
 }
