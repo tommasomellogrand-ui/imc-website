@@ -68,10 +68,11 @@ function overviewPlayerVisual(p){
  return `<span class="overview-player-visual"><span class="overview-portrait">${image(p.image_url,'overview-player-photo',p.name)||'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" aria-label="Foto non disponibile"><circle cx="20" cy="13" r="7"/><path d="M6 37c0-10 6-15 14-15s14 5 14 15"/></svg>'}</span><span class="overview-player-divider" aria-hidden="true"></span><span class="overview-club">${image(p.club_core?.image_url,'overview-club-logo',p.club_name)||'<span aria-label="Logo non disponibile">—</span>'}</span></span>`;
 }
 
+function playerLeaders(leaders){const names={goals:'Migliori marcatori',assists:'Migliori assist man',mom:'Uomini partita',rating:'Migliore media voto'};return `<div class="overview-leaders">${Object.entries(names).map(([metric,title])=>`<article class="card"><h3>${title}</h3>${leaders[metric].length?`<ol>${leaders[metric].map(p=>`<li>${overviewPlayerVisual(p)}<div class="overview-player-copy"><strong>${esc(p.name)}</strong><small>${esc(p.team)}${metric==='rating'?' · '+p.ratingCount+' voti':''}</small></div><b>${metric==='rating'?p.rating.toFixed(2):p[metric]}</b></li>`).join('')}</ol>`:empty('Nessun dato disponibile.')}</article>`).join('')}</div>`;}
 function overviewStats(summary){
  const labels={matches:'Partite totali',goals:'Gol fatti',total_shots:'Tiri totali',shots_on_target:'Tiri in porta',corners:'Corner',yellow_cards:'Ammonizioni',red_cards:'Espulsioni'};
  const names={goals:'Migliori marcatori',assists:'Migliori assist man',mom:'Uomini partita',rating:'Migliore media voto'};
- return '<h3>Statistiche match report</h3>'+(!summary.totals.matches?empty('Statistiche non ancora disponibili.'):`<div class="overview-stat-grid">${Object.entries(labels).map(([key,label])=>`<article class="card overview-stat"><strong>${summary.totals[key]===null?'—':number(summary.totals[key])}</strong><small>${label}</small></article>`).join('')}</div>`)+`<div class="overview-leaders">${Object.entries(names).map(([metric,title])=>`<article class="card"><h3>${title}</h3>${summary.leaders[metric].length?`<ol>${summary.leaders[metric].map(p=>`<li>${overviewPlayerVisual(p)}<div class="overview-player-copy"><strong>${esc(p.name)}</strong><small>${esc(p.team)}${metric==='rating'?' · '+p.ratingCount+' voti':''}</small></div><b>${metric==='rating'?p.rating.toFixed(2):p[metric]}</b></li>`).join('')}</ol>`:empty('Nessun dato disponibile.')}</article>`).join('')}</div>`;
+ return '<h3>Statistiche match report</h3>'+(!summary.totals.matches?empty('Statistiche non ancora disponibili.'):`<div class="overview-stat-grid">${Object.entries(labels).map(([key,label])=>`<article class="card overview-stat"><strong>${summary.totals[key]===null?'—':number(summary.totals[key])}</strong><small>${label}</small></article>`).join('')}</div>`)+playerLeaders(summary.leaders);
 }
 
 async function competitionView(c,signal){
@@ -129,6 +130,23 @@ async function managersView(c,signal){
  const rows=[...grouped.values()].filter(as=>as.some(a=>[a.full_name,a.manager_id,a.team_name].join(' ').toLocaleLowerCase('it').includes(state.search.toLocaleLowerCase('it'))));
  page(`<div class="team-grid">${rows.slice(state.offset,state.offset+50).map(as=>{const r=as[0];return go({manager:r.manager_id,team:'',teamType:'clubs',offset:0,profileTab:'career',opponent:''},`${managerAvatar}<span class="entity"><span>${esc(r.full_name||r.manager_id)}</span></span>`,'card team-tile')}).join('')}</div>`,rows.length,'manager');
 }
+
+function statTiles(values){return '<div class="overview-stat-grid">'+values.map(([v,label])=>`<article class="card overview-stat"><strong>${v==null?'—':esc(v)}</strong><small>${esc(label)}</small></article>`).join('')+'</div>'}
+function detailedProfileStats(rows,id,withReports=true,withPlayers=true){
+ const s=L.profileStats(rows,id),b=s.basic,avg=(v)=>v==null?'—':v.toLocaleString('it-IT',{maximumFractionDigits:2}),per=v=>b.p?avg(v/b.p):'—',pct=v=>b.p?Math.round(v/b.p*100)+'%':'—';
+ let html=statTiles([[b.p,'Partite'],[b.w,'Vittorie'],[b.d,'Pareggi'],[b.l,'Sconfitte'],[pct(b.w),'Vittorie %'],[b.gf,'Gol fatti'],[b.ga,'Gol subiti'],[per(b.gf),'Gol fatti / partita'],[per(b.ga),'Gol subiti / partita'],[b.gf-b.ga,'Differenza reti'],[b.clean,'Porte inviolate'],[b.p-s.scored,'Senza segnare'],[s.btts,'Entrambe a segno'],[s.over25,'Over 2,5 gol'],[per(s.points),'Punti / partita'],[s.homeGames,'Partite in casa'],[s.homeWins,'Vittorie in casa'],[s.awayGames,'Partite fuori'],[s.awayWins,'Vittorie fuori'],[pct(b.clean),'Porte inviolate %']]);
+ if(withReports){
+ const t=s.totals,a=s.averages,o=s.opponentAverages;
+ html+='<h3>Gioco e disciplina</h3>'+statTiles([[a.possession==null?null:avg(a.possession)+'%','Possesso medio'],[t.total_shots,'Tiri totali'],[avg(a.total_shots),'Tiri / partita'],[t.shots_on_target,'Tiri in porta'],[avg(a.shots_on_target),'In porta / partita'],[t.corners,'Corner'],[avg(a.corners),'Corner / partita'],[t.yellow_cards,'Ammonizioni'],[t.red_cards,'Espulsioni'],[avg(a.yellow_cards),'Gialli / partita'],[avg(o.total_shots),'Tiri subiti / partita'],[avg(o.shots_on_target),'In porta subiti / partita'],[avg(o.corners),'Corner subiti / partita']]);
+ if(withPlayers)html+='<h3>Migliori giocatori</h3>'+playerLeaders(s.leaders);
+ }
+ return html;
+}
+function h2hSummary(group){
+ const s=group.stats,b=s.basic,a=s.averages,fmt=v=>v==null?'—':v.toLocaleString('it-IT',{maximumFractionDigits:2});
+ return `<article class="card h2h-card"><h3>${esc(group.name)}</h3>${statTiles([[b.p,'Partite'],[b.w,'Vittorie'],[b.d,'Pareggi'],[b.l,'Sconfitte'],[b.gf+' – '+b.ga,'Gol fatti / subiti']])}<div class="h2h-detail">${statTiles([[s.totals.shots_on_target,'Tiri in porta'],[fmt(a.shots_on_target),'In porta / partita'],[s.totals.corners,'Corner'],[fmt(a.corners),'Corner / partita'],[a.possession==null?'—':fmt(a.possession)+'%','Possesso medio']])}</div></article>`;
+}
+
 function managerSummary(rows,id){const s=L.managerStats(rows,id);return `<article class="card"><div class="stat-row">${[[s.p,'Partite'],[s.w,'Vittorie'],[s.d,'Pareggi'],[s.l,'Sconfitte'],[s.gf,'Gol fatti'],[s.ga,'Gol subiti'],[s.clean,'Porte inviolate'],[s.p?Math.round(s.w/s.p*100)+'%':'—','Vittorie %']].map(([v,k])=>`<div><strong>${v}</strong><small>${k}</small></div>`).join('')}</div></article>`}
 async function managerProfile(c,signal){
  const assignments=c.managers.filter(a=>sameId(a.manager_id,state.manager));
@@ -143,23 +161,25 @@ async function managerProfile(c,signal){
  const teams=new Set(selected.map(a=>nationalAssignment(a)?a.national_team_id:a.team_id).filter(v=>v!=null));
  const days=L.careerDays(selected,new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'}));
  $('rows').innerHTML=header+`<h3>Carriera nel mondo</h3><article class="card"><div class="stat-row"><div><strong>${selected.length}</strong><small>Incarichi registrati</small></div><div><strong>${days}</strong><small>Giorni di attività</small></div><div><strong>${teams.size}</strong><small>${national?'Nazionali':'Club'}</small></div><div><strong>${selected.filter(a=>assignmentStatus(a)==='In corso').length}</strong><small>In corso</small></div></div></article><div class="career-list">${selected.map(a=>careerCard(c,a)).join('')||empty('Nessun incarico registrato per questa selezione.')}</div>`;return}
- $('viewControls').innerHTML+=form(select('season','Stagione',[['','Tutte le stagioni'],...c.seasons.map(s=>[s.imc_season,'Stagione '+s.imc_season])]));
+ if(state.profileTab==='h2h'&&!state.season&&c.seasons.length){const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'}),current=c.seasons.find(s=>s.imc_season_start_date<=today&&(!s.imc_season_end_date||s.imc_season_end_date>=today))||[...c.seasons].sort((a,b)=>Number(b.imc_season)-Number(a.imc_season))[0];state.season=String(current.imc_season);history.replaceState(null,'',urlState())}
+ $('viewControls').innerHTML+=form(select('season','Stagione',[...(state.profileTab==='h2h'?[]:[['','Tutte le stagioni']]),...c.seasons.map(s=>[s.imc_season,'Stagione '+s.imc_season])]));
  const d=await cached({world:state.world,resource:'manager_profile',manager:state.manager,season:state.season},signal),id=d.manager.sm_manager_id,rows=L.managerRows(d.rows,id,d.assignments,national);
  const note=``;
  $('rows').innerHTML=header+note;
  if(!id){$('rows').innerHTML+=empty('ID Soccer Manager non disponibile: statistiche e trofei non attribuibili.');return}
  if(state.profileTab==='stats'){
- $('rows').innerHTML+=managerSummary(rows,id);
+ $('rows').innerHTML+=detailedProfileStats(rows,id);
  const comps=new Map();for(const r of rows){const key=r.competition_key||'';if(!comps.has(key))comps.set(key,[]);comps.get(key).push(r)}
  $('rows').innerHTML+=`<h3>Per competizione</h3><div class="hub-table-wrap"><table class="hub-table manager-competition-table"><thead><tr><th>Competizione</th><th>PG</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th></tr></thead><tbody>${[...comps].map(([key,rs])=>{const st=L.managerStats(rs,id),r=rs[0],name=compName(r.competition_core||r);return `<tr><td>${key?go({resource:'competitions',competition:key,manager:'',group:compGroup(r.competition_core||r),tab:'overview',offset:0},esc(name)):esc(name)}</td>${['p','w','d','l','gf','ga'].map(k=>`<td>${st[k]}</td>`).join('')}</tr>`}).join('')}</tbody></table></div>`;
  }else if(state.profileTab==='matches'){
  page(header+note+matchGroups(rows.slice(state.offset,state.offset+50)),rows.length,'partite attribuite');
  }else if(state.profileTab==='h2h'){
- const opponents=new Map();for(const r of rows){const side=L.managerSide(r,id)==='home'?'away':'home',oid=r[side+'_sm_manager_id'];if(!oid)continue;const m=r[side+'_manager_core'];opponents.set(String(oid),r[side+'_manager_name']||m?.full_name||'Manager SM '+oid)}
- $('viewControls').innerHTML+=form(select('opponent','Avversario',[['','Scegli un manager'],...[...opponents].sort((a,b)=>a[1].localeCompare(b[1],'it'))]));
- const h2h=state.opponent?rows.filter(r=>String(r[(L.managerSide(r,id)==='home'?'away':'home')+'_sm_manager_id'])===state.opponent):[];
- if(state.opponent)page(header+note+`<h3>Contro ${esc(opponents.get(state.opponent)||'manager non presente nella selezione')}</h3>`+managerSummary(h2h,id)+matchGroups(h2h.slice(state.offset,state.offset+50)),h2h.length,'scontri diretti');
- else $('rows').innerHTML+=empty(opponents.size?'Seleziona un avversario per confrontare risultati e statistiche.':'Nessuna partita con entrambi gli ID manager disponibili.');
+
+ const groups=L.headToHeads(rows,id);
+ $('viewControls').innerHTML+=form(select('opponent','Avversario',[['','Tutti gli avversari'],...groups.map(g=>[g.id,g.name])]));
+ const shown=state.opponent?groups.filter(g=>g.id===state.opponent):groups;
+ $('rows').innerHTML+=shown.length?shown.map(h2hSummary).join(''):empty('Nessuno scontro diretto disponibile per questa stagione.');
+ if(shown.length){const matches=shown.flatMap(g=>g.rows);$('rows').innerHTML+='<h3>Sintesi degli scontri diretti</h3>'+detailedProfileStats(matches,id,true,false);if(state.opponent)$('rows').innerHTML+='<h3>Partite</h3>'+matchGroups(matches);}
  }else if(state.profileTab==='trophy'){
  const candidates=new Map();for(const r of rows){if(!r.competition_key||!r.imc_season)continue;if(/^(finale?|playoff finale?)$/i.test(r.competition_stage||'')||/^(finale?|playoff finale?)$/i.test(r.competition_round||'')||['charityshield','supercup'].includes(r.sm_action))candidates.set(r.competition_key+'|'+r.imc_season,r)}
  const trophies=[];for(const r of candidates.values()){
@@ -183,9 +203,9 @@ async function teamProfile(c,signal){
  const d=await cached({world:state.world,resource:'team_profile',team:state.team,teamType:state.teamType,season:state.season},signal),rows=L.unique(d.rows).filter(L.completed);
  const note='';
  const heading=`<article class="card profile-heading">${entity(team,team.name)}</article>`;
- if(!rows.length){const message=d.mapping_status==='missing'?'ID della squadra nel mondo non ancora presente nel mapping CORE.':d.mapping_status==='ambiguous'?'ID del mondo associato a più squadre: collegamento sospeso per evitare statistiche errate.':'Nessun match report completato disponibile per questa squadra e stagione.';$('rows').innerHTML=heading+note+empty(message);$('status').textContent=state.world+' · 0 report collegati';return}
+ if(!rows.length){const message=d.mapping_status==='missing'?'ID della squadra nel mondo non ancora presente nel mapping CORE.':d.mapping_status==='ambiguous'?'ID del mondo associato a più squadre: collegamento sospeso per evitare statistiche errate.':'Nessuna partita disponibile per questa squadra e stagione.';$('rows').innerHTML=heading+note+empty(message);$('status').textContent=state.world+' · 0 report collegati';return}
  if(state.profileTab==='matches')page(heading+note+matchGroups(rows.slice(state.offset,state.offset+50)),rows.length,'match report');
- else {const adapted=rows.map(r=>({...r,home_sm_manager_id:r.home_sm_club_id,away_sm_manager_id:r.away_sm_club_id}));$('rows').innerHTML=heading+note+managerSummary(adapted,d.team.sm_team_id);$('status').textContent=state.world+' · '+rows.length+' match report';}return;
+ else {const adapted=rows.map(r=>({...r,home_sm_manager_id:r.home_sm_club_id,away_sm_manager_id:r.away_sm_club_id}));$('rows').innerHTML=heading+note+detailedProfileStats(adapted,d.team.sm_team_id,!national);$('status').textContent=state.world+' · '+rows.length+' match report';}return;
  }
 
  const assignments=c.managers.filter(a=>nationalAssignment(a)===national&&sameId(assignedTeam(c,a)?.id,team.id)).sort((a,b)=>String(b.start_date||'').localeCompare(String(a.start_date||'')));

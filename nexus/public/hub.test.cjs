@@ -81,8 +81,12 @@ test('manager statistics use report identities, separate nations and deduplicate
 test('career days merge overlapping assignments and exclude future dates',()=>{
  assert.equal(L.careerDays([{start_date:'2026-01-01',end_date:'2026-01-05'},{start_date:'2026-01-03',end_date:null},{start_date:'2027-01-01'}],'2026-01-10'),10);
 });
-test('profile statistics query match reports, never result projections',()=>{
- const php=fs.readFileSync(__dirname+'/hub.php','utf8').split('// Match identities')[1];assert.ok(php.includes('IMC Site Match Report'));assert.ok(!php.includes('IMC Site Results'));
+test('manager uses reports while national team profiles use results',()=>{
+ const php=fs.readFileSync(__dirname+'/hub.php','utf8');
+ const manager=php.split('function nexus_manager_profile')[1].split('function nexus_team_profile')[0];
+ assert.ok(manager.includes('IMC Site Match Report'));assert.ok(!manager.includes('IMC Site Results'));
+ const team=php.split('function nexus_team_profile')[1].split('function nexus_competition_reports')[0];
+ assert.ok(team.includes("$source=$national?'IMC Site Results':'IMC Site Match Report'"));assert.ok(team.includes('home_sm_club_id=? OR away_sm_club_id=?'));
 });
 
 test('all manager tabs and team statistics are routed through report profile endpoints',async()=>{
@@ -132,4 +136,23 @@ test('Top 3 requires five actual appearances and excludes unused substitutes',()
  ]}));
  const s=L.reportSummary([...rows,rows[0]]);
  for(const metric of ['goals','assists','mom','rating']){assert.equal(s.leaders[metric].length,3);assert.ok(s.leaders[metric].every(p=>p.appearances===5));assert.ok(!s.leaders[metric].some(p=>p.name==='Four appearances'||p.name==='Unused bench'));}
+});
+
+test('profile report statistics use only the managed side and average known values',()=>{
+ const reports=Array.from({length:5},(_,i)=>match(i+1,i===1?2:1,i===1?1:2,i===1?1:2,i===1?2:1,{competition_group:'DOMESTIC',match_date:'2026-06-01',home_sm_manager_id:i===1?456:123,away_sm_manager_id:i===1?123:456,
+ team_stats_json:i===4?null:{home:{possession:i===1?30:60,shots_on_target:i===1?2:5,corners:3},away:{possession:i===1?70:40,shots_on_target:i===1?8:2,corners:4}},
+ players_json:[{sm_player_id:7,team_side:i===1?'away':'home',player_name:'Own player',starter:1,goals:1,rating:8},{sm_player_id:8,team_side:i===1?'home':'away',player_name:'Opponent',starter:1,goals:9,rating:10}]
+ }));
+ const s=L.profileStats([...reports,reports[0]],123);
+ assert.equal(s.basic.p,5);assert.equal(s.basic.w,5);assert.equal(s.totals.shots_on_target,23);assert.equal(s.averages.shots_on_target,5.75);assert.equal(s.averages.possession,62.5);
+ assert.equal(s.leaders.goals[0].name,'Own player');assert.equal(s.leaders.goals.length,1);
+ const groups=L.headToHeads(reports,123);assert.equal(groups.length,1);assert.equal(groups[0].stats.basic.p,5);
+});
+test('H2H automatically lists opponents and requests current season without a filter selection',async()=>{
+ const r=await render('?world=GW003&resource=manager&manager=MNG001&profileTab=h2h');
+ assert.ok(r.html.includes('Opponent Test'));assert.ok(r.html.includes('Possesso medio'));assert.ok(r.requests.some(q=>q.resource==='manager_profile'&&q.season==='1'));
+});
+test('result-only national statistics do not invent report metrics',()=>{
+ const rows=[match(1,10,20,3,1,{home_sm_manager_id:10,away_sm_manager_id:20})];
+ const s=L.profileStats(rows,10);assert.equal(s.basic.gf,3);assert.equal(s.averages.possession,null);assert.equal(s.leaders.goals.length,0);
 });

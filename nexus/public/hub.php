@@ -96,6 +96,16 @@ function nexus_position_pattern(string $role): string {
 }
 
 // Match identities come from imported SM manager IDs, never inferred from club names.
+function nexus_profile_details(PDO $core,array &$rows): void {
+    foreach($rows as &$row)foreach(['team_stats_json','players_json'] as $field)if(isset($row[$field])&&is_string($row[$field]))$row[$field]=json_decode($row[$field],true);unset($row);
+    {
+        $ids=[];foreach($rows as $r)foreach(($r['players_json']??[]) as $p){$id=$p['sm_player_id']??$p['player_id']??null;if($id!==null&&ctype_digit((string)$id)&&(int)$id>0)$ids[(string)$id]=$id;}
+        $photos=[];foreach(array_chunk(array_values($ids),500) as $batch){$ph=implode(',',array_fill(0,count($batch),'?'));foreach(nexus_core_rows($core,"SELECT id,image_url FROM `IMC Player Codex Global` WHERE id IN ($ph)",$batch) as $p)$photos[(string)$p['id']]=$p['image_url'];}
+        foreach($rows as &$r){if(!is_array($r['players_json']??null))continue;foreach($r['players_json'] as &$p){$id=$p['sm_player_id']??$p['player_id']??null;$p['codex_image_url']=$id!==null?($photos[(string)$id]??null):null;}unset($p);}unset($r);
+    }
+
+}
+
 function nexus_manager_profile(PDO $db,PDO $core,string $world): array {
     $id=(string)($_GET['manager']??'');
     if(!preg_match('/^MNG[0-9]{1,10}$/D',$id))respond(['ok'=>false,'error'=>'invalid_manager'],422);
@@ -106,8 +116,8 @@ function nexus_manager_profile(PDO $db,PDO $core,string $world): array {
     if(!empty($person['sm_manager_id'])){
         $params=[$world,$person['sm_manager_id'],$person['sm_manager_id']];
         $dates=nexus_date_where('match_date',nexus_season($core,$world,(string)($_GET['season']??'')),$params);
-        $rows=nexus_core_rows($db,"SELECT site_match_report_id site_id,game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score,home_manager_name,away_manager_name FROM `IMC Site Match Report` WHERE game_world_id=? AND (home_sm_manager_id=? OR away_sm_manager_id=?) $dates ORDER BY match_date DESC,site_match_report_id DESC",$params);
-        nexus_core_enrich($core,$world,'results',$rows);
+        $rows=nexus_core_rows($db,"SELECT site_match_report_id site_id,game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score,home_manager_name,away_manager_name,team_stats_json,players_json FROM `IMC Site Match Report` WHERE game_world_id=? AND (home_sm_manager_id=? OR away_sm_manager_id=?) $dates ORDER BY match_date DESC,site_match_report_id DESC",$params);
+        nexus_core_enrich($core,$world,'match_report',$rows);nexus_profile_details($core,$rows);
     }
     return ['ok'=>true,'world'=>$world,'manager'=>$person,'assignments'=>$assignments,'source'=>'IMC Site Match Report','rows'=>$rows];
 }
@@ -125,10 +135,12 @@ function nexus_team_profile(PDO $db,PDO $core,string $world): array {
         $params=[$world,$team['sm_team_id'],$team['sm_team_id']];
         $dates=nexus_date_where('match_date',nexus_season($core,$world,(string)($_GET['season']??'')),$params);
         $type=$national?"UPPER(competition_group) IN ('NATIONS','NATIONAL')":"UPPER(competition_group) IN ('DOMESTIC','INTERNATIONAL')";
-        $rows=nexus_core_rows($db,"SELECT site_match_report_id site_id,game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id,home_manager_name,away_manager_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score FROM `IMC Site Match Report` WHERE game_world_id=? AND (home_sm_club_id=? OR away_sm_club_id=?) AND $type $dates ORDER BY match_date DESC,site_match_report_id DESC",$params);
-        nexus_core_enrich($core,$world,'match_report',$rows);
+        $source=$national?'IMC Site Results':'IMC Site Match Report';$rowId=$national?'site_result_id':'site_match_report_id';
+        $detail=$national?'result_status':'home_manager_name,away_manager_name,team_stats_json,players_json';
+        $rows=nexus_core_rows($db,"SELECT $rowId site_id,game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id,$detail,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score FROM `$source` WHERE game_world_id=? AND (home_sm_club_id=? OR away_sm_club_id=?) AND $type $dates ORDER BY match_date DESC,$rowId DESC",$params);
+        nexus_core_enrich($core,$world,$national?'results':'match_report',$rows);if(!$national)nexus_profile_details($core,$rows);
     }
-    return ['ok'=>true,'world'=>$world,'team'=>$team,'mapping_status'=>$mapping,'source'=>'IMC Site Match Report','rows'=>$rows];
+    return ['ok'=>true,'world'=>$world,'team'=>$team,'mapping_status'=>$mapping,'source'=>$national?'IMC Site Results':'IMC Site Match Report','rows'=>$rows];
 }
 
 function nexus_competition_reports(PDO $db,PDO $core,string $world): array {
@@ -139,11 +151,7 @@ function nexus_competition_reports(PDO $db,PDO $core,string $world): array {
     foreach($rows as &$row)foreach(['team_stats_json','players_json'] as $field)if(isset($row[$field])&&is_string($row[$field]))$row[$field]=json_decode($row[$field],true);unset($row);
     nexus_core_enrich($core,$world,'match_report',$rows);
 
-    if($detail!==''){
-        $ids=[];foreach($rows as $r)foreach(($r['players_json']??[]) as $p){$id=$p['sm_player_id']??$p['player_id']??null;if($id!==null&&ctype_digit((string)$id)&&(int)$id>0)$ids[(string)$id]=$id;}
-        $photos=[];foreach(array_chunk(array_values($ids),500) as $batch){$ph=implode(',',array_fill(0,count($batch),'?'));foreach(nexus_core_rows($core,"SELECT id,image_url FROM `IMC Player Codex Global` WHERE id IN ($ph)",$batch) as $p)$photos[(string)$p['id']]=$p['image_url'];}
-        foreach($rows as &$r){if(!is_array($r['players_json']??null))continue;foreach($r['players_json'] as &$p){$id=$p['sm_player_id']??$p['player_id']??null;$p['codex_image_url']=$id!==null?($photos[(string)$id]??null):null;}unset($p);}unset($r);
-    }
+    if($detail!=='')nexus_profile_details($core,$rows);
     $schedule=nexus_match_rows($db,$world,$key,$season,'schedule');$played=[];foreach($rows as $r)if($r['home_score']!==null&&$r['away_score']!==null)$played[(string)$r['sm_fixture_id']]=true;
     $schedule=array_values(array_filter($schedule,fn($r)=>!isset($played[(string)$r['sm_fixture_id']])));
     $competition=$rows?($rows[0]['competition_core']??$rows[0]):['sm_action'=>'','competition_key'=>$key];

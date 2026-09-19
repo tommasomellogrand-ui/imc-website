@@ -281,3 +281,5 @@ button:active:not(:disabled),.text-link:active,.report-link:active{box-shadow:in
 /* Three eligible players across; general metrics retain five columns. */
 .overview-leaders ol{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:599px){.overview-leaders li strong{font-size:.8125rem}.overview-leaders li small{font-size:.75rem}.overview-leaders .overview-portrait{width:48px;height:52px}.overview-leaders li>b{font-size:1.125rem}}
+
+.h2h-card>h3{font-size:1rem;line-height:1.4}.h2h-detail{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}#dataSection .h2h-card{padding:14px 10px}#dataSection .h2h-card .overview-stat{box-shadow:none}

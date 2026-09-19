@@ -62,5 +62,34 @@ function reportSummary(reports){
  return {totals,leaders};
 }
 
-const api={competitionRounds,reportSummary,score,completed,unique,group,knockout,standings,winner,managerSide,managerRows,managerStats,careerDays};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NexusLogic=api;
+
+function profileStats(rows,id){
+ const selected=unique(rows).filter(r=>completed(r)&&managerSide(r,id));
+ const basic=managerStats(selected,id),sum={},count={},against={},againstCount={},own=[];
+ const number=v=>v==null||text(v)===''?null:Number.isFinite(Number(v))&&Number(v)>=0?Number(v):null;
+ const json=v=>{try{return typeof v==='string'?JSON.parse(v):v}catch{return null}};
+ const fields=['possession','total_shots','shots_on_target','corners','yellow_cards','red_cards'];
+ let scored=0,btts=0,over25=0,homeWins=0,awayWins=0,homeGames=0,awayGames=0,points=0;
+ for(const r of selected){
+  const side=managerSide(r,id),other=side==='home'?'away':'home',gf=score(r[side+'_score']),ga=score(r[other+'_score']);
+  if(gf>0)scored++;if(gf>0&&ga>0)btts++;if(gf+ga>2)over25++;
+  if(side==='home'){homeGames++;if(gf>ga)homeWins++}else{awayGames++;if(gf>ga)awayWins++}
+  points+=gf>ga?3:gf===ga?1:0;
+  const data=json(r.team_stats_json)||{},team=s=>Array.isArray(data)?data.find(x=>x.team_side===s)||{}:data[s]||{};
+  for(const [s,totals,counts] of [[side,sum,count],[other,against,againstCount]])for(const f of fields){const v=number(team(s)[f]);if(v===null||(f==='possession'&&v>100))continue;totals[f]=(totals[f]||0)+v;counts[f]=(counts[f]||0)+1}
+  const ps=json(r.players_json);own.push({...r,players_json:(Array.isArray(ps)?ps:[]).filter(p=>p.team_side===side)});
+ }
+ const average=(f,opp=false)=>{const totals=opp?against:sum,counts=opp?againstCount:count;return counts[f]?totals[f]/counts[f]:null};
+ const metric=f=>count[f]?sum[f]:null;
+ return {basic,scored,btts,over25,homeGames,awayGames,homeWins,awayWins,points,totals:Object.fromEntries(fields.map(f=>[f,metric(f)])),averages:Object.fromEntries(fields.map(f=>[f,average(f)])),opponentAverages:Object.fromEntries(fields.map(f=>[f,average(f,true)])),leaders:reportSummary(own).leaders};
+}
+function headToHeads(rows,id){
+ const groups=new Map();
+ for(const r of unique(rows)){const side=managerSide(r,id);if(!side||!completed(r))continue;const other=side==='home'?'away':'home',oid=text(r[other+'_sm_manager_id']);if(!oid)continue;
+ if(!groups.has(oid))groups.set(oid,{id:oid,name:r[other+'_manager_core']?.full_name||r[other+'_manager_name']||'Manager SM '+oid,rows:[]});groups.get(oid).rows.push(r);
+ }
+ return [...groups.values()].map(g=>({...g,stats:profileStats(g.rows,id)})).sort((a,b)=>b.rows.length-a.rows.length||a.name.localeCompare(b.name,'it'));
+}
+
+const api={profileStats,headToHeads,competitionRounds,reportSummary,score,completed,unique,group,knockout,standings,winner,managerSide,managerRows,managerStats,careerDays};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NexusLogic=api;
 })(globalThis);
