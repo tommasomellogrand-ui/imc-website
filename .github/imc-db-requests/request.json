@@ -1,9 +1,9 @@
 {
-  "request_id": "gw005-mr-check-new-import-20260919-06",
-  "requested_at": "2026-09-19T08:22:00Z",
-  "purpose": "Verify newest GW005 Match Report import",
+  "request_id": "core-trophy-room-count-20260919-07",
+  "requested_at": "2026-09-19T08:25:00Z",
+  "purpose": "Count current rows in IMC Trophy Room",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT game_world_id, sm_fixture_id, competition_key, competition_group, competition_stage, competition_round, match_date, home_name, away_name, home_score, away_score, penalty_home_score, penalty_away_score, aggregate_home_score, aggregate_away_score, stadium_name, attendance, fingerprint, imported_at FROM `GW005_IMC Match Report` WHERE game_world_id='GW005' ORDER BY imported_at DESC, sm_fixture_id DESC LIMIT 1",
-  "limit": 1
+  "target": "core",
+  "sql": "SELECT COUNT(*) AS total_rows FROM `IMC Trophy Room`",
+  "limit": 10
 }
