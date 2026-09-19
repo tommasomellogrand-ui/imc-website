@@ -1,19 +1,156 @@
 {
-  "request_id": "gw008-trophy-room-dryrun-20260919-27",
-  "completed_at": "2026-09-19T08:39:18.767365+00:00",
-  "http_status": 422,
+  "request_id": "trophy-room-schema-20260919-28",
+  "completed_at": "2026-09-19T08:39:42.290585+00:00",
+  "http_status": 200,
   "request": {
-    "request_id": "gw008-trophy-room-dryrun-20260919-27",
-    "requested_at": "2026-09-19T09:30:00Z",
-    "purpose": "Inspect IMC Trophy Room schema and existing GW008 rows before Season 1 import",
+    "request_id": "trophy-room-schema-20260919-28",
+    "requested_at": "2026-09-19T09:31:00Z",
+    "purpose": "Inspect IMC Trophy Room schema",
     "action": "query",
     "target": "core",
-    "sql": "SHOW COLUMNS FROM `IMC Trophy Room`; SELECT * FROM `IMC Trophy Room` WHERE game_world_id='GW008' ORDER BY imc_season, competition_key, id",
-    "limit": 500
+    "sql": "SHOW COLUMNS FROM `IMC Trophy Room`",
+    "limit": 100
   },
   "response": {
-    "ok": false,
-    "version": "1.5.3",
-    "error": "Each array item must contain exactly one SQL statement."
+    "ok": true,
+    "action": "query",
+    "target": "core",
+    "database": "Sql1956795_1",
+    "result": {
+      "rows": [
+        {
+          "Field": "id",
+          "Type": "bigint unsigned",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "game_world_id",
+          "Type": "varchar(16)",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "imc_season",
+          "Type": "int",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "competition_key",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "competition_group",
+          "Type": "varchar(64)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "trophy_type",
+          "Type": "varchar(64)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "sm_country",
+          "Type": "varchar(128)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "sm_division",
+          "Type": "varchar(128)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "winner_sm_world_club_id",
+          "Type": "bigint unsigned",
+          "Null": "YES",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "winner_name",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "decided_by",
+          "Type": "varchar(32)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "deciding_fixture_id",
+          "Type": "bigint unsigned",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "won_date",
+          "Type": "date",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "date_source",
+          "Type": "varchar(32)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "source_repository",
+          "Type": "varchar(64)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "created_at",
+          "Type": "datetime",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        }
+      ],
+      "returned_rows": 16,
+      "total_rows": 16,
+      "truncated": false,
+      "duration_ms": 5
+    }
   }
 }
