@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-competition-audit-20260919-03",
-  "requested_at": "2026-09-19T08:27:00Z",
-  "purpose": "GW001 counts by actual competition descriptors",
+  "request_id": "gw008-season-core-20260919-19",
+  "requested_at": "2026-09-19T09:02:00Z",
+  "purpose": "Read authoritative GW008 season state from CORE",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT source,competition_group,sm_action,sm_country,sm_division,SUM(n) AS n FROM (SELECT 'Results' source,competition_group,sm_action,sm_country,sm_division,COUNT(*) n FROM `GW001_IMC Results` GROUP BY competition_group,sm_action,sm_country,sm_division UNION ALL SELECT 'Match Report' source,competition_group,sm_action,sm_country,sm_division,COUNT(*) n FROM `GW001_IMC Match Report` GROUP BY competition_group,sm_action,sm_country,sm_division) x GROUP BY source,competition_group,sm_action,sm_country,sm_division ORDER BY competition_group,sm_action,sm_country,sm_division,source",
-  "limit": 1000
+  "target": "core",
+  "sql": "SELECT * FROM `IMC Game World Season` WHERE game_world_id='GW008' ORDER BY imc_season",
+  "limit": 20
 }
