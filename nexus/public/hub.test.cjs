@@ -166,3 +166,14 @@ test('Trophy Room menu and profile shelves use all seasons independently of filt
   if(q==='resource=archive'){assert.ok(r.html.includes('S1')&&r.html.includes('S2'));assert.ok(r.html.includes('National Cup'));assert.ok(r.html.includes('Manager Uno'));}
  }
 });
+
+test('official honours render without inventing dates, scores or runners-up',()=>{
+ const src=fs.readFileSync(__dirname+'/site.js','utf8');
+ const fn=src.slice(src.indexOf('function trophyAward('),src.indexOf('function trophyRank('));
+ const ctx={esc:String,date:()=>{throw Error('No invented date')},extraScore:()=>{throw Error('No invented match')},competitionIcon:()=>'',trophyTeam:()=> 'Watford',trophyManager:()=> 'Tommaso Mello'};
+ vm.createContext(ctx);vm.runInContext(fn,ctx);
+ for(const kind of ['league','cup','playoff']){
+  const html=ctx.trophyAward({kind,season:1,match:null,awarded_at:null,runner_up:null,points:null});
+  assert.match(html,/Watford/);assert.match(html,/Tommaso Mello/);assert.doesNotMatch(html,/null|undefined|Finalista|Finale ↗/);
+ }
+});

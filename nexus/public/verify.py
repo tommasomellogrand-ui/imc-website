@@ -121,6 +121,7 @@ def check_trophies(i):
     awards=data['awards']
     assert len({a['id'] for a in awards})==len(awards)
     assert all(a['season'] is not None and a['winner']['name'] and a['competition']['competition_key'].startswith(world+'|') for a in awards)
-    assert all(a['competition']['sm_action'] not in ['interqualifier','playoff','friendly'] for a in awards)
+    assert all((a['competition']['sm_action'] not in ['interqualifier','playoff','friendly'] or (a.get('source')=='soccer_manager_honours' and a['competition']['sm_action']=='playoff')) for a in awards)
     print('TROPHIES_OK',world,len(awards))
 with ThreadPoolExecutor(max_workers=3) as pool:list(pool.map(check_trophies,range(1,11)))
+

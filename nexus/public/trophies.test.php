@@ -30,3 +30,14 @@ $legacyComp=['teams_count'=>null,'expected_match'=>null,'_season_end'=>'2026-06-
 $a=nexus_trophy_league($legacy,[],$legacyComp);trophy_check($a!==null&&$a['winner_key']==='name:Team 1','Closed legacy seasons recognize a complete home-and-away league');
 trophy_check(nexus_trophy_league(array_slice($legacy,0,11),[],$legacyComp)===null,'Legacy missing fixture prevents title');
 $legacyComp['_season_end']=null;trophy_check(nexus_trophy_league($legacy,[],$legacyComp)===null,'Open seasons need configured expectations');
+
+$official=json_decode(file_get_contents(__DIR__.'/honours-GW008-S1.json'),true,512,JSON_THROW_ON_ERROR);
+trophy_check($official['world']==='GW008'&&$official['season']===1&&$official['soccer_manager_season']===48,'Official source is GW008 IMC1 / SM48');
+$honours=$official['honours'];trophy_check(count($honours)===65&&count(array_unique(array_column($honours,'competition_key')))===65,'65 unique official honours');
+$counts=array_count_values(array_column($honours,'sm_action'));
+trophy_check($counts['league']===19&&$counts['playoff']===7&&$counts['leaguecup']===12&&$counts['leagueshield']===12&&$counts['charityshield']===12,'Official honours category coverage');
+$watford=array_values(array_filter($honours,fn($h)=>$h['competition_key']==='GW008|ENG|DOMESTIC|league|3'))[0];
+trophy_check($watford['winner_sm_club_id']===3109969&&$watford['manager_sm_id']===13051324,'Watford and Tommaso are resolved by source IDs');
+$merged=nexus_trophy_overlay([['id'=>'GW008|ENG|DOMESTIC|league|3::1','season'=>1,'winner'=>'old'],['id'=>'GW008|ENG|DOMESTIC|league|3::2','season'=>2,'winner'=>'current']],[['id'=>'GW008|ENG|DOMESTIC|league|3::1','season'=>1,'winner'=>'official']]);
+trophy_check(count($merged)===2&&$merged[0]['winner']==='current'&&$merged[1]['winner']==='official','Official edition wins without changing another season');
+echo "OFFICIAL_HONOURS_TESTS_OK\n";

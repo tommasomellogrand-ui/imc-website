@@ -78,9 +78,35 @@ function nexus_trophy_editions(array $results,array $schedule,array $catalog,arr
     $awards=[];foreach($buckets as $b){$rs=array_values($b['results']??[]);$ss=array_values($b['schedule']??[]);$c=$b['competition'];$a=$c['sm_action']==='league'?nexus_trophy_league($rs,$ss,$c):nexus_trophy_cup($rs,$ss,$c['sm_action']);if(!$a)continue;unset($c['_season_end']);$a['competition']=$c;$a['season']=$b['season'];$a['id']=$c['competition_key'].'::'.$b['season'];$awards[]=$a;}
     usort($awards,fn($a,$b)=>strcmp($b['awarded_at'],$a['awarded_at'])?:strcmp($a['id'],$b['id']));return $awards;
 }
+// An explicit historical source overrides inference only for its own edition.
+function nexus_trophy_overlay(array $inferred,array $official): array {
+    $indexed=[];foreach($inferred as $a)$indexed[$a['id']]=$a;
+    foreach($official as $a)$indexed[$a['id']]=$a;
+    $out=array_values($indexed);
+    usort($out,fn($a,$b)=>((int)$b['season']<=>(int)$a['season'])?:strcmp($b['awarded_at']??'', $a['awarded_at']??'')?:strcmp($a['id'],$b['id']));
+    return $out;
+}
+function nexus_trophy_official(PDO $core,string $world,array $seasons): array {
+    if($world!=='GW008')return [];
+    $source=json_decode(file_get_contents(__DIR__.'/honours-GW008-S1.json'),true,512,JSON_THROW_ON_ERROR);
+    $valid=false;foreach($seasons as $s)if((int)$s['imc_season']===(int)$source['season']&&(int)$s['soccer_manager_season']===(int)$source['soccer_manager_season'])$valid=true;
+    if(!$valid||$source['world']!==$world)throw new RuntimeException('Historical honours season mismatch');
+    $identities=[];$seen=[];
+    foreach($source['honours'] as $r){
+        $key=$r['competition_key'];if(strpos($key,$world.'|')!==0||isset($seen[$key]))throw new RuntimeException('Invalid historical honour key');$seen[$key]=true;
+        // Identity enrichment only; these are not fabricated match records.
+        $identities[]=['competition_key'=>$key,'sm_action'=>$r['sm_action'],'sm_country'=>$r['sm_country'],'sm_division'=>$r['sm_division'],'competition_group'=>$r['competition_group'],'home_sm_club_id'=>$r['winner_sm_club_id'],'home_sm_manager_id'=>$r['manager_sm_id']];
+    }
+    nexus_core_enrich($core,$world,'results',$identities);$out=[];
+    foreach($source['honours'] as $i=>$r){$identity=$identities[$i];$competition=$identity['competition_core'];
+        if(!$competition)throw new RuntimeException('Missing historical competition mapping');
+        $out[]=['id'=>$r['competition_key'].'::'.$source['season'],'kind'=>$r['sm_action']==='league'?'league':($r['sm_action']==='playoff'?'playoff':'cup'),'season'=>$source['season'],'competition'=>$competition,'source'=>'soccer_manager_honours','source_sm_season'=>$source['soccer_manager_season'],'match'=>null,'awarded_at'=>null,'points'=>null,'runner_points'=>null,'runner_up'=>null,'winner'=>['name'=>$r['winner_name'],'core'=>$identity['home_core']??null],'manager'=>['manager_id'=>$identity['home_manager_core']['manager_id']??null,'sm_manager_id'=>$r['manager_sm_id'],'full_name'=>$r['manager_name']]];
+    }
+    return $out;
+}
 function nexus_trophies(PDO $db,PDO $core,string $world): array {
     $catalog=nexus_catalog($db,$core,$world,null);
-    $seasons=nexus_core_rows($core,'SELECT imc_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season DESC',[$world]);
+    $seasons=nexus_core_rows($core,'SELECT imc_season,soccer_manager_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season DESC',[$world]);
     $common='game_world_id,sm_fixture_id,competition_key,sm_action,competition_group,competition_stage,competition_round,match_date,home_name,away_name,home_sm_manager_id,away_sm_manager_id';
     $results=nexus_core_rows($db,"SELECT $common,competition_group_name,home_sm_club_id,away_sm_club_id,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score,result_status FROM `IMC Site Results` WHERE game_world_id=? ORDER BY site_result_id",[$world]);
     $schedule=nexus_core_rows($db,"SELECT $common,home_sm_team_id,away_sm_team_id FROM `IMC Site Schedule` WHERE game_world_id=? ORDER BY site_schedule_id",[$world]);
@@ -106,5 +132,7 @@ function nexus_trophies(PDO $db,PDO $core,string $world): array {
         }
         unset($a['runner_match'],$a['runner_side'],$a['winner_key'],$a['match']['_trophy_home'],$a['match']['_trophy_away']);
     }unset($a);
+    $awards=nexus_trophy_overlay($awards,nexus_trophy_official($core,$world,$seasons));
     return ['ok'=>true,'world'=>$world,'scope'=>'all_seasons','awards'=>$awards,'seasons'=>$seasons];
 }
+
