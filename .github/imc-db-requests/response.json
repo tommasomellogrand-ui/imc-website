@@ -1,33 +1,19 @@
 {
-  "request_id": "gw008-key-verify-final-20260919-17",
-  "completed_at": "2026-09-19T08:25:34.343041+00:00",
-  "http_status": 200,
+  "request_id": "gw001-competition-audit-20260919-02",
+  "completed_at": "2026-09-19T08:26:03.752840+00:00",
+  "http_status": 500,
   "request": {
-    "request_id": "gw008-key-verify-final-20260919-17",
-    "requested_at": "2026-09-19T08:55:00Z",
-    "purpose": "Final verification GW008 key backfill",
+    "request_id": "gw001-competition-audit-20260919-02",
+    "requested_at": "2026-09-19T08:26:00Z",
+    "purpose": "Audit actual GW001 competition fields in Results and Match Report",
     "action": "query",
-    "target": "gold",
-    "sql": "SELECT COUNT(*) AS total, SUM(CASE WHEN competition_key IS NULL OR TRIM(competition_key)='' THEN 1 ELSE 0 END) AS missing_key, COUNT(DISTINCT competition_key) AS distinct_keys FROM `GW008_IMC Results` WHERE game_world_id='GW008'",
-    "limit": 10
+    "target": "custom",
+    "sql": "SELECT 'results' AS source, competition_key, competition_group, sm_action, sm_country, sm_division, competition_stage, competition_group_name, competition_round, COUNT(*) AS n FROM `GW001_IMC Results` GROUP BY competition_key,competition_group,sm_action,sm_country,sm_division,competition_stage,competition_group_name,competition_round UNION ALL SELECT 'match_report' AS source, competition_key, competition_group, sm_action, sm_country, sm_division, competition_stage, competition_group_name, competition_round, COUNT(*) AS n FROM `GW001_IMC Match Report` GROUP BY competition_key,competition_group,sm_action,sm_country,sm_division,competition_stage,competition_group_name,competition_round ORDER BY competition_key,source",
+    "limit": 1000
   },
   "response": {
-    "ok": true,
-    "action": "query",
-    "target": "gold",
-    "database": "Sql1956795_2",
-    "result": {
-      "rows": [
-        {
-          "total": "9228",
-          "missing_key": "0",
-          "distinct_keys": "66"
-        }
-      ],
-      "returned_rows": 1,
-      "total_rows": 1,
-      "truncated": false,
-      "duration_ms": 54
-    }
+    "ok": false,
+    "version": "1.5.3",
+    "error": "Unknown column 'competition_group_name' in 'field list'"
   }
 }
