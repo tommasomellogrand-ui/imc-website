@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-results-without-report-20260919-06",
-  "requested_at": "2026-09-19T08:35:00Z",
-  "purpose": "List every GW001 Result fixture with no matching Match Report by sm_fixture_id",
+  "request_id": "gw008-trophy-room-dryrun-20260919-27",
+  "requested_at": "2026-09-19T09:30:00Z",
+  "purpose": "Inspect IMC Trophy Room schema and existing GW008 rows before Season 1 import",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT r.* FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE m.sm_fixture_id IS NULL ORDER BY r.competition_key,r.match_date,r.sm_fixture_id",
-  "limit": 1000
+  "target": "core",
+  "sql": "SHOW COLUMNS FROM `IMC Trophy Room`; SELECT * FROM `IMC Trophy Room` WHERE game_world_id='GW008' ORDER BY imc_season, competition_key, id",
+  "limit": 500
 }
