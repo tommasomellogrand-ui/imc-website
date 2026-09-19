@@ -21,6 +21,21 @@ function reportTeamLabel(value,record,teams){const id=record.sm_team_id??record.
 function structured(v,teams=null){if(v==null)return '<p>Non disponibile</p>';if(typeof v!=='object')return esc(v);if(Array.isArray(v))return v.length?v.map(x=>`<div class="detail-item">${structured(x,teams)}</div>`).join(''):'<p>Nessun dato disponibile</p>';return `<dl>${Object.entries(v).map(([k,x])=>`<dt>${teams&&['home','away','home_team','away_team'].includes(k)?entity(teams[k.startsWith('home')?'home_core':'away_core'],teams[k.startsWith('home')?'home_name':'away_name']):esc(label(k))}</dt><dd>${typeof x==='object'?`<div class="nested">${structured(x,teams)}</div>`:teams&&k==='team_side'&&['home','away'].includes(x)?entity(teams[x+'_core'],teams[x+'_name']):teams&&['team_name','club_name'].includes(k)?reportTeamLabel(x,v,teams):esc(x)}</dd>`).join('')}</dl>`}
 function reportURL(id){return 'match.html?'+new URLSearchParams({world:state.world,fixture:String(id),return:location.pathname+location.search+'#dataSection'})}
 
+
+function countryOptions(codes,competitions){
+ const names=new Map();
+ for(const c of competitions){
+  const code=c.sm_country,view=String(c.nexus_view||'').trim();
+  if(!code||!view)continue;
+  const name=view.replace(/\s+(?:(?:League\s+)?Div(?:ision)?\.?\s+\d+(?:\s+Playoffs?)?|National Cup|League Cup|Charity Shield)$/i,'').trim();
+  if(!name||name===view)continue;
+  if(!names.has(code))names.set(code,new Set());
+  names.get(code).add(name);
+ }
+ return codes.map(code=>{const labels=[...(names.get(code)||[])];return [code,labels.length===1?labels[0]:'Paese non configurato'];})
+ .sort((a,b)=>a[1].localeCompare(b[1],'it'));
+}
+
 function worldMenus(){
 const name=worlds[state.world];$('worldTitle').textContent=name;$('menuWorld').textContent=state.world+' · '+name;$('mobileWorldTitle').textContent=state.world+' · '+name;
 const menuEntries=[['01','home'],['02','competitions'],['07','manager'],['08','player'],['09','club'],['11','transfers']];
@@ -89,7 +104,7 @@ async function trophyView(c,signal){
  }
  $('sectionTitle').textContent='Trophy Room';
  const countries=[...new Set(allFiltered.map(a=>a.competition.sm_country).filter(x=>x&&!['CUS','WOR'].includes(x)))].sort();
- $('viewControls').innerHTML=nav+tabs('hall',[['history','Albo d’oro'],['leaders','Più titolati']])+form(input('search','Cerca competizione, squadra o manager')+(countries.length?select('country','Paese',[['','Tutti i paesi'],...countries.map(x=>[x,x])]):''));
+ $('viewControls').innerHTML=nav+tabs('hall',[['history','Albo d’oro'],['leaders','Più titolati']])+form(input('search','Cerca competizione, squadra o manager')+(countries.length?select('country','Paese',[['','Tutti i paesi'],...countryOptions(countries,allFiltered.map(a=>a.competition))]):''));
  const filtered=allFiltered.filter(a=>(!state.country||a.competition.sm_country===state.country)&&[compName(a.competition),a.winner.name,a.manager?.full_name].join(' ').toLocaleLowerCase('it').includes(state.search.toLocaleLowerCase('it')));
  $('rows').innerHTML=`<header class="card honour-intro"><span class="honour-medal">${competitionIcon('domestic')}</span><div><span class="eyebrow">${esc(state.world)} · ${esc(worlds[state.world])}</span><h2>Albo d’oro</h2><p>I vincitori. Tutte le stagioni.</p></div></header>`;
  if(state.hall==='leaders'){$('rows').innerHTML+=trophyRank(filtered,'team')+trophyRank(filtered,'manager');return;}
@@ -102,7 +117,7 @@ async function catalogView(c,signal){
  $('viewControls').innerHTML=form(seasonSelect(c));
  if(!state.group){$('rows').innerHTML=groups.map(([id,title,description])=>{const count=all.filter(x=>compGroup(x)===id).length;return go({group:id,country:'',competition:'',offset:0},`<span class="category-symbol">${competitionIcon(id)}</span><span class="category-art">${competitionIcon(id)}</span><h3>${title}</h3><p>${description}</p><div class="category-foot"><strong><b>${number(count)}</b> ${count===1?'competizione':'competizioni'}</strong><span class="round-arrow" aria-hidden="true">›</span></div>`,'card competition-group-card category-'+id)}).join('');$('status').textContent=`${all.length} competizioni con risultati o calendario · ${state.world}`;return}
  const subset=all.filter(x=>compGroup(x)===state.group),countries=[...new Set(subset.map(x=>x.sm_country).filter(x=>x&&x!=='CUS'))].sort();
- $('viewControls').innerHTML=go({group:'',country:'',competition:''},'← Tutti i gruppi')+tabs('group',groups.map(g=>g.slice(0,2)))+form(seasonSelect(c)+(countries.length?select('country','Paese',[['','Tutti i paesi'],...countries.map(x=>[x,x])]):''));
+ $('viewControls').innerHTML=go({group:'',country:'',competition:''},'← Tutti i gruppi')+tabs('group',groups.map(g=>g.slice(0,2)))+form(seasonSelect(c)+(countries.length?select('country','Paese',[['','Tutti i paesi'],...countryOptions(countries,all)]):''));
  const filtered=subset.filter(x=>!state.country||x.sm_country===state.country).sort((a,b)=>String(a.sm_country||'').localeCompare(String(b.sm_country||''))||actionOrder.indexOf(a.sm_action)-actionOrder.indexOf(b.sm_action)||Number(a.sm_division)-Number(b.sm_division));
  $('rows').innerHTML=filtered.map(x=>go({competition:x.competition_key,round:'',tab:state.resource==='archive'?'trophy':state.resource==='standings'?'competition':'overview',offset:0},`<div class="competition-card-head"><span class="competition-symbol">${x.sm_action==='league'?esc(x.sm_division||''):competitionIcon(compGroup(x))}</span><div><span class="eyebrow">${esc([x.sm_country,x.sm_action_group].filter(Boolean).join(' · '))}</span><h3>${esc(compName(x))}</h3></div><span class="round-arrow" aria-hidden="true">›</span></div><div class="competition-metrics"><div><small>Risultati</small><strong>${number(x.results_count||0)}</strong></div><div><small>Calendario</small><strong>${number(x.schedule_count||0)}</strong></div><div><small>Prossima data</small><strong>${x.next_date?date(x.next_date):'—'}</strong></div></div>`,'card competition-entry')).join('')||empty('Nessuna competizione con dati per questa selezione.');$('status').textContent=`${filtered.length} competizioni · ${state.world}`;
 }
