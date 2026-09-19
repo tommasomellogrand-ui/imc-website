@@ -1,16 +1,17 @@
 {
-  "request_id": "gw001-delete-leaguecup-plan-20260919-07",
-  "completed_at": "2026-09-19T08:45:40.780901+00:00",
+  "request_id": "gw001-delete-leaguecup-both-plan-20260919-09",
+  "completed_at": "2026-09-19T08:46:44.411909+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw001-delete-leaguecup-plan-20260919-07",
-    "requested_at": "2026-09-19T08:36:00Z",
-    "purpose": "Plan deletion of all GW001 League Cup Results explicitly requested by user",
+    "request_id": "gw001-delete-leaguecup-both-plan-20260919-09",
+    "requested_at": "2026-09-19T08:47:00Z",
+    "purpose": "Plan user-requested removal of GW001 League Cup rows from Results and Match Report",
     "action": "plan_migration",
     "target": "custom",
-    "migration_id": "gw001-delete-all-leaguecup-results-20260919",
+    "migration_id": "gw001-remove-leaguecup-results-matchreports-20260919",
     "statements": [
-      "DELETE FROM `GW001_IMC Results` WHERE sm_action='leaguecup'"
+      "DELETE FROM `GW001_IMC Results` WHERE sm_action='leaguecup'",
+      "DELETE FROM `GW001_IMC Match Report` WHERE sm_action='leaguecup'"
     ],
     "allow_destructive": true,
     "data_migration": true
@@ -21,11 +22,12 @@
     "plan": {
       "target": "custom",
       "database": "Sql1956795_3",
-      "migration_id": "gw001-delete-all-leaguecup-results-20260919",
+      "migration_id": "gw001-remove-leaguecup-results-matchreports-20260919",
       "allow_destructive": true,
       "data_migration": true,
       "statements": [
-        "DELETE FROM `GW001_IMC Results` WHERE sm_action='leaguecup'"
+        "DELETE FROM `GW001_IMC Results` WHERE sm_action='leaguecup'",
+        "DELETE FROM `GW001_IMC Match Report` WHERE sm_action='leaguecup'"
       ]
     },
     "analysis": [
@@ -34,10 +36,16 @@
         "kind": "DELETE",
         "destructive": true,
         "sha256": "6ca82fa9e7d99900231af88c51817745d43a67bba06c7bfc64e7d89cbf16eddb"
+      },
+      {
+        "sql": "DELETE FROM `GW001_IMC Match Report` WHERE sm_action='leaguecup'",
+        "kind": "DELETE",
+        "destructive": true,
+        "sha256": "b1069990489a3df175aaf1858b75b14767f0d18298cc2e46d0182841d8e66f73"
       }
     ],
-    "plan_sha256": "0c30ce0e1fdb91e56bc8e69545756d95f9c65578e6abd39af896328346df9be5",
-    "expires_at": "2026-09-19T09:00:40+00:00",
-    "confirmation_token": "1789808440.76b179550f944d4614ef669cb60ca69266ba008139a0973646935ddcfc2ae3a5"
+    "plan_sha256": "2fc8658a4cefdab1f2a16bdcb2ab0e0ab970be7961e169ac3a014df920c62aae",
+    "expires_at": "2026-09-19T09:01:44+00:00",
+    "confirmation_token": "1789808504.a1c29423ed18824bdad54bda6c906d77fb66f4cc353e3f7c1e83ab8afee027b0"
   }
 }
