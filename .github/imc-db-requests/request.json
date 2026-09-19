@@ -1,9 +1,9 @@
 {
-  "request_id": "gw008-s1-league-winners-20260919-24",
-  "requested_at": "2026-09-19T09:16:00Z",
-  "purpose": "Derive GW008 season 1 league champions from standings",
+  "request_id": "gw008-s1-worldcup-null-20260919-25",
+  "requested_at": "2026-09-19T09:18:00Z",
+  "purpose": "Identify GW008 season 1 World Cup final with missing date",
   "action": "query",
   "target": "gold",
-  "sql": "SELECT competition_key, team_name, played, points, gd FROM (SELECT competition_key, team_name, COUNT(*) played, SUM(points) points, SUM(CAST(gf AS SIGNED)-CAST(ga AS SIGNED)) gd, ROW_NUMBER() OVER (PARTITION BY competition_key ORDER BY SUM(points) DESC, SUM(CAST(gf AS SIGNED)-CAST(ga AS SIGNED)) DESC, SUM(gf) DESC, team_name) rn FROM (SELECT competition_key, home_name team_name, home_score gf, away_score ga, CASE WHEN home_score>away_score THEN 3 WHEN home_score=away_score THEN 1 ELSE 0 END points FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND sm_action='league' AND match_date BETWEEN '2026-03-30' AND '2026-08-29' UNION ALL SELECT competition_key, away_name team_name, away_score gf, home_score ga, CASE WHEN away_score>home_score THEN 3 WHEN away_score=home_score THEN 1 ELSE 0 END points FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND sm_action='league' AND match_date BETWEEN '2026-03-30' AND '2026-08-29') m GROUP BY competition_key,team_name) s WHERE rn=1 ORDER BY competition_key",
-  "limit": 100
+  "sql": "SELECT sm_fixture_id,home_name,away_name,home_score,away_score,penalty_home_score,penalty_away_score,competition_stage,competition_round,match_date FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND competition_key='GW008|NATIONS|worldcup' AND match_date IS NULL ORDER BY sm_fixture_id DESC",
+  "limit": 20
 }
