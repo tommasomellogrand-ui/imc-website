@@ -4,6 +4,7 @@ declare(strict_types=1);
 function nexus_trophy_score($v): ?int {return $v!==null&&preg_match('/^\d+$/D',(string)$v)?(int)$v:null;}
 function nexus_trophy_done(array $r): bool {return (empty($r['result_status'])||strtoupper($r['result_status'])==='COMPLETED')&&nexus_trophy_score($r['home_score']??null)!==null&&nexus_trophy_score($r['away_score']??null)!==null;}
 function nexus_trophy_team(array $r,string $side): string {
+    if(isset($r['_trophy_'.$side]))return $r['_trophy_'.$side];
     $id=$r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']??null;
     return $id!==null?'id:'.$id:'name:'.trim((string)($r[$side.'_name']??''));
 }
@@ -48,7 +49,7 @@ function nexus_trophy_league(array $results,array $schedule,array $comp): ?array
     $per=2*$expected/$n;if($per!=floor($per)||$per<1)return null;
     $teams=[];$pairs=[];
     foreach($all as $r){if(!empty($r['competition_group_name']))return null;$h=nexus_trophy_team($r,'home');$a=nexus_trophy_team($r,'away');if($h==='name:'||$a==='name:'||$h===$a)return null;
-        foreach([$h,$a] as $id)if(!isset($teams[$id]))$teams[$id]=['id'=>$id,'p'=>0,'pts'=>0,'plan'=>0];
+        foreach([$h,$a] as $id)if(!isset($teams[$id]))$teams[$id]=['id'=>$id,'p'=>0,'pts'=>0,'gd'=>0,'plan'=>0];
         $teams[$h]['plan']++;$teams[$a]['plan']++;$pair=[$h,$a];sort($pair);$pk=implode('|',$pair);$pairs[$pk]=($pairs[$pk]??0)+1;
     }
     if(count($teams)!==$n||count($pairs)!=$n*($n-1)/2||count(array_unique(array_values($pairs)))!==1)return null;
@@ -56,15 +57,19 @@ function nexus_trophy_league(array $results,array $schedule,array $comp): ?array
     $done=array_values(array_filter($results,'nexus_trophy_done'));usort($done,fn($a,$b)=>strcmp($a['match_date'],$b['match_date']));
     $byDate=[];foreach($done as $r)$byDate[$r['match_date']][]=$r;
     $award=null;
-    foreach($byDate as $date=>$rows){foreach($rows as $r){$h=nexus_trophy_team($r,'home');$a=nexus_trophy_team($r,'away');$hs=(int)$r['home_score'];$as=(int)$r['away_score'];$teams[$h]['p']++;$teams[$a]['p']++;$teams[$h]['pts']+=$hs>$as?3:($hs===$as?1:0);$teams[$a]['pts']+=$as>$hs?3:($hs===$as?1:0);}
-        $rank=array_values($teams);usort($rank,fn($a,$b)=>$b['pts']<=>$a['pts']);$leader=$rank[0];$secure=true;
-        foreach(array_slice($rank,1) as $t)if($leader['pts']<=$t['pts']+3*($per-$t['p']))$secure=false;
+    foreach($byDate as $date=>$rows){foreach($rows as $r){$h=nexus_trophy_team($r,'home');$a=nexus_trophy_team($r,'away');$hs=(int)$r['home_score'];$as=(int)$r['away_score'];$teams[$h]['p']++;$teams[$a]['p']++;$teams[$h]['gd']+=$hs-$as;$teams[$a]['gd']+=$as-$hs;$teams[$h]['pts']+=$hs>$as?3:($hs===$as?1:0);$teams[$a]['pts']+=$as>$hs?3:($hs===$as?1:0);}
+        $rank=array_values($teams);usort($rank,fn($a,$b)=>($b['pts']<=>$a['pts'])?:($b['gd']<=>$a['gd']));$leader=$rank[0];$secure=true;
+        foreach(array_slice($rank,1) as $t){
+            $maximum=$t['pts']+3*($per-$t['p']);
+            // Goal difference settles a tie only after both teams finish their fixtures.
+            if($leader['pts']<$maximum||($leader['pts']==$maximum&&!($leader['p']==(int)$per&&$t['p']==(int)$per&&$leader['gd']>$t['gd'])))$secure=false;
+        }
         if($secure&&!$award){$match=null;$side=null;foreach($done as $r){if($r['match_date']>$date)break;foreach(['home','away'] as $s)if(nexus_trophy_team($r,$s)===$leader['id']){$match=$r;$side=$s;}}if($match)$award=['kind'=>'league','side'=>$side,'match'=>$match,'awarded_at'=>$date,'winner_key'=>$leader['id']];}
     }
     if(!$award)return null;
-    $rank=array_values($teams);usort($rank,fn($a,$b)=>$b['pts']<=>$a['pts']);$runner=$rank[1];$runnerMatch=null;$runnerSide=null;
+    $rank=array_values($teams);usort($rank,fn($a,$b)=>($b['pts']<=>$a['pts'])?:($b['gd']<=>$a['gd']));$runner=$rank[1];$runnerMatch=null;$runnerSide=null;
     foreach($done as $r)foreach(['home','away'] as $s)if(nexus_trophy_team($r,$s)===$runner['id']){$runnerMatch=$r;$runnerSide=$s;}
-    $award['points']=$rank[0]['pts'];$award['runner_points']=$runner['pts'];$award['league_complete']=count($done)===$expected;$award['runner_match']=$runnerMatch;$award['runner_side']=$runnerSide;return $award;
+    $award['points']=$rank[0]['pts'];$award['runner_points']=$runner['pts'];$award['goal_difference']=$rank[0]['gd'];$award['runner_goal_difference']=$runner['gd'];$award['league_complete']=count($done)===$expected;$award['runner_match']=$runnerMatch;$award['runner_side']=$runnerSide;return $award;
 }
 // World Cup edition is independent of the date when its final is played.
 // Explicit edition assignments are confirmed by the competition owner.
@@ -156,5 +161,6 @@ function nexus_trophies(PDO $db,PDO $core,string $world): array {
     $awards=nexus_trophy_overlay($awards,nexus_trophy_official($core,$world,$seasons));
     return ['ok'=>true,'world'=>$world,'scope'=>'all_seasons','awards'=>$awards,'seasons'=>$seasons];
 }
+
 
 

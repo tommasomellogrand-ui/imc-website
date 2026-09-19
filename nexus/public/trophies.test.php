@@ -20,7 +20,7 @@ $comp=['competition_key'=>'league','sm_action'=>'league','teams_count'=>4,'expec
 $a=nexus_trophy_league($rows,[],$comp);trophy_check($a!==null&&$a['winner_key']==='id:1'&&$a['points']===18,'Completed balanced league champion');
 trophy_check(nexus_trophy_league(array_slice($rows,0,3),[],$comp)===null,'Partial imports cannot crown leaders');
 $draws=array_map(function($r){$r['home_score']=1;$r['away_score']=1;return $r;},$rows);
-trophy_check(nexus_trophy_league($draws,[],$comp)===null,'Points tie requires known competition tiebreak rules');
+trophy_check(nexus_trophy_league($draws,[],$comp)===null,'Equal points and goal difference remain unresolved');
 $bad=$rows;$bad[11]=$bad[0];trophy_check(nexus_trophy_league($bad,[],$comp)===null,'Unbalanced fixture coverage cannot crown a champion');
 $played=array_slice($rows,0,10);$scheduled=array_slice($rows,10);$a=nexus_trophy_league($played,$scheduled,$comp);trophy_check($a!==null&&!$a['league_complete'],'Mathematically safe champion with complete remaining fixture plan');
 echo "TROPHY_HISTORY_TESTS_OK\n";
@@ -56,3 +56,23 @@ $other=$wc;$other['game_world_id']='GW007';trophy_check(nexus_trophy_edition_sea
 $other=$wc;$other['sm_fixture_id']=385365524;trophy_check(nexus_trophy_edition_season($other,$wcSeasons)['imc_season']===2,'A new tournament is not shifted blindly');
 $other=$wc;$other['sm_action']='leaguecup';trophy_check(nexus_trophy_edition_season($other,$wcSeasons)['imc_season']===2,'Date exception never changes domestic cups');
 echo "WORLD_CUP_EDITION_TESTS_OK\n";
+
+
+// Teams 1 and 2 finish on 13 points; Team 2 wins on goal difference.
+$tied=[];$id=100;
+foreach([1,2,3,4] as $h)foreach([1,2,3,4] as $away){if($h===$away)continue;
+    $hs=0;$as=0;
+    if($h===1&&$away===2){$hs=1;$as=0;}
+    elseif($h===2&&$away===1){$hs=1;$as=0;}
+    elseif($h<=2&&$away>=3){$hs=$h===2?3:1;}
+    elseif($h>=3&&$away<=2){$as=$away===2?3:1;}
+    // One draw apiece against Team 3 leaves both leaders level.
+    if(($h===1||$h===2)&&$away===3){$hs=0;$as=0;}
+    $tied[]=trophy_fixture($id++,$h,$away,$hs,$as,['competition_stage'=>null,'match_date'=>'2026-06-30']);
+}
+$a=nexus_trophy_league($tied,[],$comp);
+trophy_check($a!==null&&$a['winner_key']==='id:2'&&$a['points']===$a['runner_points']&&$a['goal_difference']>$a['runner_goal_difference'],'Complete table resolves tied points by goal difference');
+$pending=array_shift($tied);trophy_check(nexus_trophy_league($tied,[$pending],$comp)===null,'Goal difference cannot settle tied leaders before their fixtures finish');
+$tied[]=$pending;$mixed=$tied;$mixed[0]['home_sm_club_id']=null;
+$a=nexus_trophy_league($mixed,[],$comp);trophy_check($a!==null&&$a['winner_key']==='name:Team 2','Consistent legacy names keep one team when report IDs are partially available');
+echo "GOAL_DIFFERENCE_TITLE_TESTS_OK\n";
