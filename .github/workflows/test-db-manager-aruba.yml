@@ -1,0 +1,71 @@
+name: Test GitHub to Aruba Database Manager
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-db-manager-aruba.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test Database Manager over HTTPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, pathlib, re, urllib.request, urllib.error
+
+          endpoint = 'https://www.italianmastersclub.it/__imc-sm-master/admin/database-manager/'
+          text = pathlib.Path('__imc-sm-master/admin/database-manager/connector-key.php').read_text(encoding='utf-8')
+          match = re.search(r"return\s+['\"]([^'\"]+)['\"]", text)
+          if not match:
+              raise SystemExit('CONNECTOR_KEY_NOT_FOUND')
+          token = match.group(1)
+
+          def call(payload):
+              body = json.dumps(payload, separators=(',', ':')).encode()
+              req = urllib.request.Request(
+                  endpoint,
+                  data=body,
+                  headers={
+                      'Content-Type': 'application/json',
+                      'X-IMC-Token': token,
+                      'Cache-Control': 'no-cache, no-store',
+                  },
+                  method='POST',
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=60) as res:
+                      return res.status, json.loads(res.read())
+              except urllib.error.HTTPError as e:
+                  raw = e.read()
+                  try: data = json.loads(raw)
+                  except Exception: data = {'raw': raw.decode(errors='replace')}
+                  return e.code, data
+
+          status, health = call({'action':'health'})
+          if status != 200 or not health.get('ok'):
+              raise SystemExit('DBM_HEALTH_FAIL|' + str(status) + '|' + json.dumps(health, ensure_ascii=False))
+          print('DBM_HEALTH_OK|' + json.dumps(health.get('databases', {}), separators=(',', ':')))
+
+          for target in ('core','gold','custom'):
+              status, result = call({
+                  'action':'query',
+                  'target':target,
+                  'sql':'SELECT DATABASE() AS db, VERSION() AS mysql_version',
+                  'limit':10,
+              })
+              if status != 200 or not result.get('ok'):
+                  raise SystemExit('DBM_QUERY_FAIL|' + target + '|' + str(status) + '|' + json.dumps(result, ensure_ascii=False))
+              rows = result.get('result', {}).get('rows', [])
+              print('DBM_QUERY_OK|' + target + '|' + json.dumps(rows, separators=(',', ':')))
+          PY
