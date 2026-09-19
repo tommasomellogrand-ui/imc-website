@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-fixture-live-final-20260919-25",
-  "requested_at": "2026-09-19T09:10:00Z",
-  "purpose": "Final live read of GW001 fixture 368726159 in Results and Match Report",
+  "request_id": "gw001-results-trigger-audit-20260919-26",
+  "requested_at": "2026-09-19T09:13:00Z",
+  "purpose": "Inspect triggers and exact fixture state to explain reverted GW001 update",
   "action": "query",
   "target": "custom",
-  "sql": "SELECT 'RESULT' source,sm_fixture_id,sm_division,competition_key,competition_stage,home_name,away_name,home_score,away_score FROM `GW001_IMC Results` WHERE sm_fixture_id=368726159 UNION ALL SELECT 'MATCH_REPORT',sm_fixture_id,sm_division,competition_key,competition_stage,home_name,away_name,home_score,away_score FROM `GW001_IMC Match Report` WHERE sm_fixture_id=368726159",
-  "limit": 10
+  "sql": "SELECT TRIGGER_NAME,ACTION_TIMING,EVENT_MANIPULATION,ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE='GW001_IMC Results'",
+  "limit": 100
 }
