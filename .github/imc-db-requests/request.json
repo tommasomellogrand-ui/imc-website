@@ -1,9 +1,13 @@
 {
-  "request_id": "gw008-s1-mapping-fields-audit-20260919-28",
-  "requested_at": "2026-09-19T09:35:00Z",
-  "purpose": "Map GW008 Season 1 honor competition names to existing Results sm_action and competition_key and inspect Trophy Room columns",
-  "action": "query",
-  "target": "gold",
-  "sql": "SELECT sm_action, competition_group, competition_key, sm_country, sm_division, COUNT(*) AS n FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND match_date BETWEEN '2026-03-30' AND '2026-08-29' GROUP BY sm_action,competition_group,competition_key,sm_country,sm_division ORDER BY competition_group,sm_action,sm_country,sm_division",
-  "limit": 500
+  "request_id": "gw001-delete-leaguecup-plan-20260919-07",
+  "requested_at": "2026-09-19T08:36:00Z",
+  "purpose": "Plan deletion of all GW001 League Cup Results explicitly requested by user",
+  "action": "plan_migration",
+  "target": "custom",
+  "migration_id": "gw001-delete-all-leaguecup-results-20260919",
+  "statements": [
+    "DELETE FROM `GW001_IMC Results` WHERE sm_action='leaguecup'"
+  ],
+  "allow_destructive": true,
+  "data_migration": true
 }
