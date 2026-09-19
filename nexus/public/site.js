@@ -31,7 +31,7 @@ $('bottomWorldMenu').setAttribute('aria-label','Navigazione mobile · '+state.wo
 $('bottomWorldMenu').innerHTML=[['manager','Manager'],['club','Club'],['home','Home'],['competitions','Competition'],['archive','Trophy Room']].map(([id,title])=>`<a href="?world=${encodeURIComponent(state.world)}&resource=${id}" data-resource="${id}" aria-current="${state.resource===id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">${icons[id]||icons.competitions}</svg><span>${title}</span></a>`).join('');
 }
 const L=window.NexusLogic;
-const defaults={world:'GW001',resource:'home',offset:0,search:'',from:'',to:'',season:'',competition:'',group:'',country:'',tab:'overview',match:'results',metric:'goals',teamType:'clubs',club:'',position:'',rating_min:'',rating_max:'',age_min:'',age_max:'',value_min:'',value_max:'',sort:'rating',player:'',scope:'world',team:'',manager:'',profileTab:'career',opponent:'',round:''};
+const defaults={world:'GW001',resource:'home',offset:0,search:'',from:'',to:'',season:'',competition:'',group:'',country:'',tab:'overview',match:'results',metric:'goals',teamType:'clubs',club:'',position:'',rating_min:'',rating_max:'',age_min:'',age_max:'',value_min:'',value_max:'',sort:'rating',player:'',scope:'world',team:'',manager:'',profileTab:'career',opponent:'',round:'',hall:'history'};
 const viewCache=new Map();
 async function cached(params,signal){const key=JSON.stringify(params),hit=viewCache.get(key);if(hit&&Date.now()-hit.time<60000)return hit.data;const data=await fetchData(params,signal);if(signal?.aborted)throw new DOMException('Aborted','AbortError');viewCache.set(key,{time:Date.now(),data});return data}
 const empty=t=>`<div class="empty">${esc(t)}</div>`;
@@ -52,6 +52,50 @@ function table(rows){const rank=L.standings(rows);return rank.length?`<div class
 function matchCard(r,schedule=false){return `<article class="card">${meta(r)}${fixture(r,schedule)}${r.home_manager_name||r.away_manager_name?`<div class="fixture-managers"><span>${esc(r.home_manager_name||'Manager non disponibile')}</span><span>${esc(r.away_manager_name||'Manager non disponibile')}</span></div>`:''}${schedule?'':`<div class="card-bottom"><span>${esc(extraScore(r))}</span><a class="report-link" href="${esc(reportURL(r.sm_fixture_id))}">Apri match report →</a></div>`}</article>`}
 function compactMatch(r,schedule=false){const content=fixture(r,schedule)+(extraScore(r)?'<small class="compact-decision">'+esc(extraScore(r))+'</small>':'');return schedule?'<div class="compact-match">'+content+'</div>':'<a class="compact-match" href="'+esc(reportURL(r.sm_fixture_id))+'">'+content+'</a>'}
 function matchGroups(rows,schedule=false){const buckets=new Map();for(const r of rows){const key=[r.competition_round||r.competition_stage,L.group(r),date(r.match_date)].filter(Boolean).join(' · ');if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(r)}return [...buckets].map(([key,list])=>`<section class="hub-match-group"><h3>${esc(key)}</h3>${list.map(r=>compactMatch(r,schedule||!L.completed(r))).join('')}</section>`).join('')||empty('Nessuna partita disponibile.')}
+function trophyTeam(a,runner=false){
+ const t=runner?a.runner_up:a.winner,id=t?.core?.national_team_id??t?.core?.club_id;
+ return id!=null?go({resource:'club',team:id,teamType:t.core.national_team_id!=null?'nations':'clubs',manager:'',competition:'',profileTab:'trophy',season:'',offset:0},entity(t.core,t.name),'honour-team-link'):entity(t?.core,t?.name);
+}
+function trophyManager(a){return a.manager?.manager_id?go({resource:'manager',manager:a.manager.manager_id,team:'',competition:'',profileTab:'trophy',teamType:compGroup(a.competition)==='nations'?'nations':'clubs',season:'',offset:0},esc(a.manager.full_name),'honour-manager-link'):esc(a.manager?.full_name||'—')}
+function trophyAward(a,featured=false){
+ const final=a.kind==='cup',extra=extraScore(a.match);
+ return `<article class="card honour-edition ${featured?'honour-featured':''}"><div class="honour-edition-top"><span class="honour-season">Stagione ${esc(a.season)}</span><span class="eyebrow">${featured?'ULTIMO VINCITORE':final?'VINCITORE':'CAMPIONE'}</span><time>${date(a.awarded_at)}</time></div><div class="honour-winner"><span class="honour-medal">${competitionIcon('domestic')}</span><div><h3>${trophyTeam(a)}</h3><div class="honour-manager">${trophyManager(a)}</div></div>${a.points!=null?`<strong class="honour-points">${a.points}<small>PT${a.league_complete?'':' · attuali'}</small></strong>`:''}</div><div class="honour-result"><span>${final?'Finalista':a.league_complete?'Seconda classificata':'Seconda in classifica'}</span>${trophyTeam(a,true)}${final?`<strong>${esc(a.match.home_score)} – ${esc(a.match.away_score)}</strong>`:`<strong>${a.runner_points} PT</strong>`}</div>${final?`<div class="honour-final"><span>${esc(a.match.home_name)} ${esc(a.match.home_score)} – ${esc(a.match.away_score)} ${esc(a.match.away_name)}${extra?' · '+esc(extra):''}</span><a class="report-link" href="${esc(reportURL(a.match.sm_fixture_id))}">Finale ↗</a></div>`:''}</article>`;
+}
+function trophyRank(awards,kind){
+ const ranked=new Map();for(const a of awards){const t=a.winner,identity=kind==='manager'?a.manager?.manager_id:(t.core?.national_team_id!=null?'nation:'+t.core.national_team_id:t.core?.club_id!=null?'club:'+t.core.club_id:null);if(!identity)continue;if(!ranked.has(identity))ranked.set(identity,{a,count:0});ranked.get(identity).count++;}
+ const rows=[...ranked.values()].sort((a,b)=>b.count-a.count||(kind==='manager'?a.a.manager.full_name:a.a.winner.name).localeCompare(kind==='manager'?b.a.manager.full_name:b.a.winner.name,'it'));
+ return `<section class="card honour-ranking"><h3>${kind==='manager'?'Manager più titolati':'Squadre più titolate'}</h3>${rows.length?`<ol>${rows.map((r,i)=>`<li><span class="honour-rank">${i+1}</span><div>${kind==='manager'?trophyManager(r.a):trophyTeam(r.a)}</div><strong>${r.count}<small>${r.count===1?'titolo':'titoli'}</small></strong></li>`).join('')}</ol>`:empty('Nessun titolo ancora attribuito.')}</section>`;
+}
+function trophyShelf(awards){
+ const buckets=new Map();for(const a of awards){const key=a.competition.competition_key;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(a);}
+ return `<div class="honour-shelf">${[...buckets.values()].map(as=>{const a=as[0];return `<article class="card honour-trophy"><span class="honour-medal">${competitionIcon('domestic')}</span><strong class="honour-title-count">${as.length}<small>${as.length===1?'titolo':'titoli'}</small></strong><h3>${go({resource:'archive',competition:a.competition.competition_key,season:'',manager:'',team:'',group:compGroup(a.competition),hall:'history',offset:0},esc(compName(a.competition)),'honour-team-link')}</h3><div class="honour-season-list">${as.map(x=>`<span>Stagione ${esc(x.season)}</span>`).join('')}</div></article>`}).join('')}</div>`+(awards.length?'':empty('Nessun titolo ancora presente nell’albo d’oro.'));
+}
+async function trophyView(c,signal){
+ const d=await cached({world:state.world,resource:'trophies'},signal),all=d.awards;
+ // Trophy Room always represents the whole history, even when entered from a season page.
+ if(state.season||state.from||state.to){state.season=state.from=state.to='';history.replaceState(null,'',urlState());}
+ $('dataSection').setAttribute('data-trophy-view','true');$('status').textContent='';
+ const nav=tabs('group',[['','Tutte'],...groups.map(g=>g.slice(0,2))]);
+ const allFiltered=all.filter(a=>!state.group||compGroup(a.competition)===state.group);
+ if(state.competition){
+  const editions=all.filter(a=>a.competition.competition_key===state.competition),comp=editions[0]?.competition||c.competitions.find(x=>x.competition_key===state.competition);
+  $('sectionTitle').textContent=compName(comp);
+  $('viewControls').innerHTML=go({resource:'archive',competition:'',season:'',hall:'history'},'← Albo d’oro del mondo')+tabs('hall',[['history','Albo d’oro'],['leaders','Più titolati']]);
+  $('rows').innerHTML=`<header class="card honour-intro"><span class="honour-medal">${competitionIcon('domestic')}</span><div><span class="eyebrow">TROPHY ROOM · ${esc(state.world)}</span><h2>${esc(compName(comp))}</h2><p>Tutte le stagioni, una storia.</p></div></header>`;
+  if(state.hall==='leaders')$('rows').innerHTML+=trophyRank(editions,'team')+trophyRank(editions,'manager');
+  else $('rows').innerHTML+=editions.length?trophyAward(editions[0],true)+(editions.length>1?'<h3>Le edizioni precedenti</h3>'+editions.slice(1).map(a=>trophyAward(a)).join(''):''):empty('Il primo vincitore entrerà qui nell’albo d’oro.');
+  return;
+ }
+ $('sectionTitle').textContent='Trophy Room';
+ const countries=[...new Set(allFiltered.map(a=>a.competition.sm_country).filter(Boolean))].sort();
+ $('viewControls').innerHTML=nav+tabs('hall',[['history','Albo d’oro'],['leaders','Più titolati']])+form(input('search','Cerca competizione, squadra o manager')+(countries.length?select('country','Paese',[['','Tutti i paesi'],...countries.map(x=>[x,x])]):''));
+ const filtered=allFiltered.filter(a=>(!state.country||a.competition.sm_country===state.country)&&[compName(a.competition),a.winner.name,a.manager?.full_name].join(' ').toLocaleLowerCase('it').includes(state.search.toLocaleLowerCase('it')));
+ $('rows').innerHTML=`<header class="card honour-intro"><span class="honour-medal">${competitionIcon('domestic')}</span><div><span class="eyebrow">${esc(state.world)} · ${esc(worlds[state.world])}</span><h2>Albo d’oro</h2><p>I vincitori. Tutte le stagioni.</p></div></header>`;
+ if(state.hall==='leaders'){$('rows').innerHTML+=trophyRank(filtered,'team')+trophyRank(filtered,'manager');return;}
+ const buckets=new Map();for(const a of filtered){const k=a.competition.competition_key;if(!buckets.has(k))buckets.set(k,[]);buckets.get(k).push(a);}
+ $('rows').innerHTML+=`<div class="honour-catalog">${[...buckets.values()].map(as=>{const a=as[0],co=a.competition;return `<section class="card honour-competition" data-honour-category="${compGroup(co)}"><div class="honour-competition-head"><span class="honour-medal">${competitionIcon('domestic')}</span><div><span class="eyebrow">${esc([co.sm_country,compGroup(co).toUpperCase()].filter(Boolean).join(' · '))}</span><h3>${go({competition:co.competition_key,season:'',hall:'history'},esc(compName(co)),'honour-team-link')}</h3></div>${go({competition:co.competition_key,season:'',hall:'history'},'<span aria-hidden="true">›</span><span class="sr-only">Apri albo d’oro</span>','round-arrow')}</div><div class="honour-history">${as.map(x=>`<div class="honour-history-row"><span class="honour-season">S${esc(x.season)}</span><div><strong>${trophyTeam(x)}</strong><small>${trophyManager(x)}</small></div><span class="honour-mini-cup">${competitionIcon('domestic')}</span></div>`).join('')}</div></section>`}).join('')}</div>`+(filtered.length?'':empty('Nessun titolo ancora presente per questa selezione.'));
+}
+
 async function catalogView(c,signal){
  const d=await cached({world:state.world,resource:'catalog',season:state.season},signal);const all=d.rows;
  $('viewControls').innerHTML=form(seasonSelect(c));
@@ -76,6 +120,7 @@ function overviewStats(summary){
 }
 
 async function competitionView(c,signal){
+ if(state.tab==='trophy'){await trophyView(c,signal);return;}
  const d=await cached({world:state.world,resource:'competition',competition:state.competition,season:state.season},signal),comp=d.competition;
  const results=L.unique(d.results),schedule=L.unique(d.schedule),done=results.filter(L.completed),gs=[...new Set([...results,...schedule].map(L.group).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it',{numeric:true}));
  const isLeague=comp.sm_action==='league'&&!gs.length;
@@ -104,10 +149,7 @@ async function competitionView(c,signal){
    $('viewControls').innerHTML+=tabs('metric',[['goals','Gol'],['assists','Assist'],['rating','Rating'],['mom','MOM'],['cards','Cartellini']]);
    const stats=await fetchData({world:state.world,resource:'stats',competition:state.competition,metric:state.metric},signal);
    $('rows').innerHTML=''+(stats.rows.length?`<div class="hub-table-wrap"><table class="hub-table"><thead><tr><th>#</th><th>Giocatore</th><th>Squadra</th><th>${esc({goals:'Gol',assists:'Assist',rating:'Rating',mom:'MOM',cards:'Cartellini'}[state.metric]||'Valore')}</th></tr></thead><tbody>${stats.rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.player_name)}</td><td>${entity(r.club_core,r.club_name)}</td><td><strong>${esc(r.metric_value)}</strong></td></tr>`).join('')}</tbody></table></div>`:empty('Questo valore non è presente negli import statistici della competizione.'));
- }else{
-   const oneOff=['charityshield','supercup'].includes(comp.sm_action)&&done.length===1&&schedule.length===0;
-   const winner=L.winner(oneOff?[{...done[0],competition_stage:'Finale'}]:results,schedule);
-   $('rows').innerHTML=winner?`<article class="card trophy-card"><span class="eyebrow">VINCITORE · STAGIONE ${esc(state.season)}</span><h3>${entity(winner.core,winner.name)}</h3><p>Finale del ${date(winner.match.match_date)}</p>${matchCard(winner.match)}</article>`:empty('Vincitore non ancora determinabile con certezza dai dati conclusivi disponibili.');
+
  }
 }
 async function teamsView(c,signal){
@@ -161,6 +203,7 @@ async function managerProfile(c,signal){
  const teams=new Set(selected.map(a=>nationalAssignment(a)?a.national_team_id:a.team_id).filter(v=>v!=null));
  const days=L.careerDays(selected,new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'}));
  $('rows').innerHTML=header+`<h3>Carriera nel mondo</h3><article class="card"><div class="stat-row"><div><strong>${selected.length}</strong><small>Incarichi registrati</small></div><div><strong>${days}</strong><small>Giorni di attività</small></div><div><strong>${teams.size}</strong><small>${national?'Nazionali':'Club'}</small></div><div><strong>${selected.filter(a=>assignmentStatus(a)==='In corso').length}</strong><small>In corso</small></div></div></article><div class="career-list">${selected.map(a=>careerCard(c,a)).join('')||empty('Nessun incarico registrato per questa selezione.')}</div>`;return}
+ if(state.profileTab==='trophy'){const d=await cached({world:state.world,resource:'trophies'},signal);$('rows').innerHTML=header+trophyShelf(d.awards.filter(a=>sameId(a.manager?.manager_id,state.manager)&&(compGroup(a.competition)==='nations')===national));return;}
  if(state.profileTab==='h2h'&&!state.season&&c.seasons.length){const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'}),current=c.seasons.find(s=>s.imc_season_start_date<=today&&(!s.imc_season_end_date||s.imc_season_end_date>=today))||[...c.seasons].sort((a,b)=>Number(b.imc_season)-Number(a.imc_season))[0];state.season=String(current.imc_season);history.replaceState(null,'',urlState())}
  $('viewControls').innerHTML+=form(select('season','Stagione',[...(state.profileTab==='h2h'?[]:[['','Tutte le stagioni']]),...c.seasons.map(s=>[s.imc_season,'Stagione '+s.imc_season])]));
  const d=await cached({world:state.world,resource:'manager_profile',manager:state.manager,season:state.season},signal),id=d.manager.sm_manager_id,rows=L.managerRows(d.rows,id,d.assignments,national);
@@ -180,16 +223,7 @@ async function managerProfile(c,signal){
  const shown=state.opponent?groups.filter(g=>g.id===state.opponent):groups;
  $('rows').innerHTML+=shown.length?shown.map(h2hSummary).join(''):empty('Nessuno scontro diretto disponibile per questa stagione.');
  if(shown.length){const matches=shown.flatMap(g=>g.rows);$('rows').innerHTML+='<h3>Sintesi degli scontri diretti</h3>'+detailedProfileStats(matches,id,true,false);if(state.opponent)$('rows').innerHTML+='<h3>Partite</h3>'+matchGroups(matches);}
- }else if(state.profileTab==='trophy'){
- const candidates=new Map();for(const r of rows){if(!r.competition_key||!r.imc_season)continue;if(/^(finale?|playoff finale?)$/i.test(r.competition_stage||'')||/^(finale?|playoff finale?)$/i.test(r.competition_round||'')||['charityshield','supercup'].includes(r.sm_action))candidates.set(r.competition_key+'|'+r.imc_season,r)}
- const trophies=[];for(const r of candidates.values()){
- const hub=await cached({world:state.world,resource:'competition_reports',competition:r.competition_key,season:r.imc_season},signal);
- const done=L.unique(hub.reports).filter(L.completed),oneOff=['charityshield','supercup'].includes(hub.competition.sm_action)&&done.length===1&&hub.schedule.length===0;
- const w=L.winner(oneOff?[{...done[0],competition_stage:'Finale'}]:hub.reports,hub.schedule);
- const report=w&&rows.find(x=>sameId(x.sm_fixture_id,w.match.sm_fixture_id));
- if(w&&report&&L.managerSide(report,id)===w.side)trophies.push(`<article class="card trophy-card"><span class="eyebrow">VINCITORE · STAGIONE ${esc(r.imc_season)}</span><h3>${go({resource:'competitions',competition:r.competition_key,season:r.imc_season,manager:'',tab:'trophy',offset:0},esc(compName(hub.competition)))}</h3>${entity(w.core,w.name)}<p>${date(w.match.match_date)}</p>${matchCard(w.match)}</article>`);
- }
- $('rows').innerHTML+=``+(trophies.join('')||empty('Nessun trofeo attribuibile con certezza nei dati disponibili.'));
+
  }
 }
 async function teamProfile(c,signal){
@@ -197,7 +231,8 @@ async function teamProfile(c,signal){
  $('viewControls').innerHTML=go({team:'',offset:0},national?'← Tutte le nazionali':'← Tutti i club');
  if(!team){$('rows').innerHTML=empty('Squadra non presente in questo mondo.');$('status').textContent=state.world;return}
  $('sectionTitle').textContent=team.name;
- $('viewControls').innerHTML+=tabs('profileTab',[['career','Manager'],['stats','Statistiche'],['matches','Partite']]);
+ $('viewControls').innerHTML+=tabs('profileTab',[['career','Manager'],['stats','Statistiche'],['matches','Partite'],['trophy','Trophy Room']]);
+ if(state.profileTab==='trophy'){const d=await cached({world:state.world,resource:'trophies'},signal);$('rows').innerHTML=`<article class="card profile-heading">${entity(team,team.name)}</article>`+trophyShelf(d.awards.filter(a=>sameId(a.winner.core?.[national?'national_team_id':'club_id'],team.id)&&(compGroup(a.competition)==='nations')===national));return;}
  if(['stats','matches'].includes(state.profileTab)){
  $('viewControls').innerHTML+=form(select('season','Stagione',[['','Tutte le stagioni'],...c.seasons.map(s=>[s.imc_season,'Stagione '+s.imc_season])]));
  const d=await cached({world:state.world,resource:'team_profile',team:state.team,teamType:state.teamType,season:state.season},signal),rows=L.unique(d.rows).filter(L.completed);
@@ -227,7 +262,8 @@ async function transfersView(c,signal){
 }
 async function directoryView(signal){const d=await cached({world:state.world,resource:'directory'},signal),c=d.core;
  if(c.world?.world_name){worlds[state.world]=c.world.world_name;worldMenus()}
- if(['competitions','archive','standings'].includes(state.resource)){
+ if(state.resource==='archive'){await trophyView(c,signal);
+ }else if(['competitions','standings'].includes(state.resource)){
    if(!state.season&&c.seasons.length){state.season=String(c.seasons[0].imc_season);history.replaceState(null,'',urlState())}
    if(state.competition)await competitionView(c,signal);else await catalogView(c,signal);
  }else if(state.resource==='club')await teamsView(c,signal);
@@ -237,6 +273,7 @@ async function directoryView(signal){const d=await cached({world:state.world,res
  }else{$('rows').innerHTML=`<section class="card"><h3>${esc(c.world?.world_name||state.world)}</h3><div class="stat-row"><div><strong>${number(c.world?.active_clubs||c.clubs.length)}</strong><small>Club del mondo</small></div><div><strong>${number(new Set(c.managers.map(m=>m.manager_id)).size)}</strong><small>Manager IMC con incarichi</small></div><div><strong>${esc(c.seasons[0]?.imc_season||'—')}</strong><small>Stagione IMC più recente</small></div></div><p>Scegli una sezione dal menu di ${esc(state.world)}.</p></section>`;$('status').textContent=state.world+' · '+worlds[state.world]}
 }
 async function load(push=false){
+ $('dataSection').setAttribute('data-trophy-view','false');
  $('dataSection').setAttribute('data-competition-view',['competitions','standings','archive'].includes(state.resource)?'true':'false');$('dataSection').setAttribute('data-category',state.group||'domestic');
  if(controller)controller.abort();controller=new AbortController();const active=controller;
  if(push)history.pushState(null,'',urlState());$('world').value=state.world;worldMenus();
@@ -259,4 +296,5 @@ document.addEventListener('submit',e=>{if(!e.target.matches('[data-view-form]'))
 $('filters').onsubmit=e=>{e.preventDefault();for(const k of ['search','from','to'])state[k]=$(k).value;state.offset=0;load(true)};$('reset').onclick=()=>{for(const k of ['search','from','to'])state[k]=$(k).value='';state.offset=0;load(true)};$('refresh').onclick=()=>{viewCache.clear();load()};$('previous').onclick=()=>{state.offset=Math.max(0,state.offset-50);load(true)};$('next').onclick=()=>{state.offset+=50;load(true)};window.onpopstate=()=>{readURL();load()};document.addEventListener('error',e=>{if(e.target.matches?.('.core-crest'))e.target.hidden=true},true);
 async function boot(){try{const d=await fetchData({resource:'worlds'});for(const w of d.worlds||[])if(w.world_name&&worlds[w.game_world_id]){worlds[w.game_world_id]=w.world_name;for(const o of $('world').options)if(o.value===w.game_world_id)o.textContent=`${w.game_world_id} · ${w.world_name}`;}}catch(e){/* Dataset reads surface CORE failures explicitly. */}readURL();load()}boot();
 })();
+
 

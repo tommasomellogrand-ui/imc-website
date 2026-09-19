@@ -27,7 +27,7 @@ const fs=require('node:fs'),vm=require('node:vm');
 async function render(query){
  const nodes=new Map(),requests=[];
  function node(id){if(!nodes.has(id))nodes.set(id,{value:'',innerHTML:'',textContent:'',options:[],hidden:false,add(o){this.options.push(o)},setAttribute(){},addEventListener(){},scrollIntoView(){}});return nodes.get(id)}
- const c={world:{world_name:'Test World',game_world_id:'GW003',active_clubs:2},seasons:[{imc_season:1,imc_season_start_date:'2026-01-01',imc_season_end_date:'2026-12-31'}],clubs:[{id:1,sm_team_id:10,name:'Club 10'}],nations:[{id:2,sm_team_id:20,name:'Italia'}],managers:[{manager_id:"MNG001",full_name:"Manager Uno",team_id:1,national_team_id:null,team_name:"Club 10",start_date:"2026-01-01",end_date:null},{manager_id:"MNG001",full_name:"Manager Uno",team_id:1,national_team_id:null,team_name:"Club 10",start_date:"2025-01-01",end_date:"2025-12-01"},{manager_id:"MNG002",full_name:"Manager Due",team_id:1,team_name:"Different club",start_date:"2026-01-01"}]};
+ const c={competitions:[],world:{world_name:'Test World',game_world_id:'GW003',active_clubs:2},seasons:[{imc_season:1,imc_season_start_date:'2026-01-01',imc_season_end_date:'2026-12-31'}],clubs:[{id:1,sm_team_id:10,name:'Club 10'}],nations:[{id:2,sm_team_id:20,name:'Italia'}],managers:[{manager_id:"MNG001",full_name:"Manager Uno",team_id:1,national_team_id:null,team_name:"Club 10",start_date:"2026-01-01",end_date:null},{manager_id:"MNG001",full_name:"Manager Uno",team_id:1,national_team_id:null,team_name:"Club 10",start_date:"2025-01-01",end_date:"2025-12-01"},{manager_id:"MNG002",full_name:"Manager Due",team_id:1,team_name:"Different club",start_date:"2026-01-01"}]};
  const cmp={competition_key:'GW003|ARG|DOMESTIC|league|1',sm_action:'league',sm_country:'ARG',sm_action_group:'DOMESTIC',sm_division:1,results_count:1};
  const location={search:query,pathname:'/nexus/'};
  const context={console,URL,URLSearchParams,AbortController,DOMException,Date,Intl,setTimeout,clearTimeout,location,NexusLogic:L,Option:function(text,value){this.textContent=text;this.value=value},history:{replaceState(){},pushState(){}},document:{getElementById:node,querySelector:node,querySelectorAll:()=>[],addEventListener(){}},matchMedia:()=>({matches:true}),fetch:async input=>{
@@ -35,6 +35,7 @@ async function render(query){
    switch(p.get('resource')){
    case 'worlds':data={worlds:[]};break;
    case 'directory':data={core:c};break;
+   case 'trophies':data={awards:[1,2].map(season=>({id:'award'+season,season,kind:'cup',awarded_at:'2026-09-01',competition:{...cmp,nexus_view:'National Cup'},winner:{name:'Club 10',core:{club_id:1,name:'Club 10'}},runner_up:{name:'Club 20'},manager:{manager_id:'MNG001',full_name:'Manager Uno'},match:match(20,10,20,2,1)}))};break;
    case 'catalog':data={rows:[cmp]};break;
    case 'competition':data={competition:cmp,core:c,results:[match(1,10,20,2,1,{match_date:'2026-09-01'})],schedule:[]};break;
    case 'stats':data={rows:[]};break;
@@ -92,9 +93,9 @@ test('manager uses reports while national team profiles use results',()=>{
 test('all manager tabs and team statistics are routed through report profile endpoints',async()=>{
  for(const tab of ['stats','matches','h2h','trophy']){
  const r=await render('?world=GW003&resource=manager&manager=MNG001&profileTab='+tab+'&opponent=456');
- assert.ok(r.requests.some(q=>q.resource==='manager_profile'));assert.ok(!r.requests.some(q=>q.resource==='results'));assert.ok(r.html.includes('profile-heading'));assert.ok(!r.html.includes('class="view-note"'));if(tab==='stats')assert.ok(r.html.includes('Vittorie'));assert.ok(!r.status.includes('non disponibili'));
+ assert.ok(r.requests.some(q=>q.resource===(tab==='trophy'?'trophies':'manager_profile')));assert.ok(!r.requests.some(q=>q.resource==='results'));assert.ok(r.html.includes('profile-heading'));assert.ok(!r.html.includes('class="view-note"'));if(tab==='stats')assert.ok(r.html.includes('Vittorie'));assert.ok(!r.status.includes('non disponibili'));
  if(tab==='h2h')assert.ok(r.html.includes('Opponent Test'));
- if(tab==='trophy'){assert.ok(r.html.includes('VINCITORE'));assert.ok(r.requests.some(q=>q.resource==='competition_reports'));assert.ok(!r.requests.some(q=>q.resource==='competition'));}
+ if(tab==='trophy'){assert.ok(r.html.includes('honour-shelf'));assert.ok(r.html.includes('Stagione 1')&&r.html.includes('Stagione 2'));assert.ok(!r.requests.some(q=>q.resource==='competition'));}
  }
  const t=await render('?world=GW003&resource=club&team=1&profileTab=stats');assert.ok(t.requests.some(q=>q.resource==='team_profile'));assert.ok(t.html.includes('Vittorie'));
 });
@@ -155,4 +156,13 @@ test('H2H automatically lists opponents and requests current season without a fi
 test('result-only national statistics do not invent report metrics',()=>{
  const rows=[match(1,10,20,3,1,{home_sm_manager_id:10,away_sm_manager_id:20})];
  const s=L.profileStats(rows,10);assert.equal(s.basic.gf,3);assert.equal(s.averages.possession,null);assert.equal(s.leaders.goals.length,0);
+});
+
+
+test('Trophy Room menu and profile shelves use all seasons independently of filters',async()=>{
+ for(const q of ['resource=archive','resource=archive&hall=leaders','resource=archive&competition=GW003%7CARG%7CDOMESTIC%7Cleague%7C1','resource=club&team=1&profileTab=trophy','resource=manager&manager=MNG001&profileTab=trophy']){
+  const r=await render('?world=GW003&season=2&'+q);
+  const requests=r.requests.filter(x=>x.resource==='trophies');assert.equal(requests.length,1);assert.equal(requests[0].season,undefined);assert.ok(!r.controls.includes('name="season"'));assert.ok(!r.html.includes('Premi Aggiorna'));assert.ok(!r.requests.some(x=>x.resource==='catalog'));
+  if(q==='resource=archive'){assert.ok(r.html.includes('S1')&&r.html.includes('S2'));assert.ok(r.html.includes('National Cup'));assert.ok(r.html.includes('Manager Uno'));}
+ }
 });

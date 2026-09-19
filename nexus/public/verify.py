@@ -111,3 +111,16 @@ if finals:
     assert all(r['game_world_id']=='GW001' and r['competition_key']==finals[0]['competition_key'] for r in competition['reports'])
     print('MANAGER_TROPHY_REPORT_SOURCE_OK')
 
+
+
+# Permanent honours route is available in every supported world, regardless of season filters.
+def check_trophies(i):
+    world=f'GW{i:03}'
+    data=json.loads(get(f'public/data.php?world={world}&resource=trophies'))
+    assert data['ok'] and data['scope']=='all_seasons' and data['world']==world
+    awards=data['awards']
+    assert len({a['id'] for a in awards})==len(awards)
+    assert all(a['season'] is not None and a['winner']['name'] and a['competition']['competition_key'].startswith(world+'|') for a in awards)
+    assert all(a['competition']['sm_action'] not in ['interqualifier','playoff','friendly'] for a in awards)
+    print('TROPHIES_OK',world,len(awards))
+with ThreadPoolExecutor(max_workers=3) as pool:list(pool.map(check_trophies,range(1,11)))

@@ -9,7 +9,7 @@ ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
 ftp.prot_p()
 ftp.set_pasv(True)
 # Only the public Nexus entry point and its dependencies are published.
-files=['nexus/match.html','nexus/public/match.css','nexus/public/match.js','nexus/public/hub.php','nexus/public/hub-logic.js','nexus/public/core.php','nexus/public/data.php','nexus/public/site.css','nexus/public/site.js','nexus/assets/imc-logo.png','nexus/.htaccess','nexus/index.html']
+files=['nexus/match.html','nexus/public/match.css','nexus/public/match.js','nexus/public/trophies.php','nexus/public/hub.php','nexus/public/hub-logic.js','nexus/public/core.php','nexus/public/data.php','nexus/public/site.css','nexus/public/site.js','nexus/assets/imc-logo.png','nexus/.htaccess','nexus/index.html']
 for name in files:
     p=Path(name)
     ftp.cwd('/')
@@ -23,4 +23,5 @@ for name in files:
     assert check.getvalue()==raw, 'Upload verification failed: '+name
     print('VERIFIED',name,len(raw))
 ftp.quit()
+
 

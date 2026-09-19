@@ -283,3 +283,61 @@ button:active:not(:disabled),.text-link:active,.report-link:active{box-shadow:in
 @media(max-width:599px){.overview-leaders li strong{font-size:.8125rem}.overview-leaders li small{font-size:.75rem}.overview-leaders .overview-portrait{width:48px;height:52px}.overview-leaders li>b{font-size:1.125rem}}
 
 .h2h-card>h3{font-size:1rem;line-height:1.4}.h2h-detail{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}#dataSection .h2h-card{padding:14px 10px}#dataSection .h2h-card .overview-stat{box-shadow:none}
+
+
+/* Permanent honours: a trophy cabinet, independent of season browsing. */
+#dataSection[data-trophy-view=true]{--accent:#8d681d;--tint:#fffaf0;--edge:#e9ddbf}
+#dataSection[data-trophy-view=true] .card{background:linear-gradient(135deg,#fff 60%,#fffcf5);border:1px solid #e6dfcf;border-radius:24px;box-shadow:inset 0 1px 0 #fff,0 10px 30px #142e5310}
+.honour-intro{display:flex;align-items:center;gap:18px;padding:24px!important}
+.honour-intro h2{font-size:clamp(1.4rem,4vw,2rem);line-height:1.2;margin:5px 0;color:#102d54;letter-spacing:-.04em;font-weight:850}
+.honour-intro p{font-size:.85rem;margin:5px 0 0;color:#69778b}
+.honour-medal{display:inline-flex;align-items:center;justify-content:center;flex:0 0 62px;width:62px;height:68px;border-radius:19px;background:linear-gradient(145deg,#fffdf5,#f2dfaa);border:1px solid #e7d29c;box-shadow:inset 0 2px 1px #fff,0 5px 12px #97762815;color:#9b7425}
+.honour-medal svg{width:39px;height:39px}
+.honour-catalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.honour-competition{padding:20px!important;overflow:hidden}
+.honour-competition-head{display:flex;align-items:center;gap:12px;padding-bottom:17px}
+.honour-competition-head>div{flex:1;min-width:0}
+#rows .honour-competition h3,#rows .honour-edition h3,#rows .honour-trophy h3{font-size:1rem;line-height:1.35;margin:5px 0;font-weight:800}
+.honour-competition .eyebrow{font-size:.6rem;letter-spacing:.07em;color:#8d681d}
+.honour-team-link,.honour-manager-link{color:#102d54;border:0;text-decoration:none;font-weight:inherit}
+.honour-team-link:hover,.honour-manager-link:hover{text-decoration:underline;text-underline-offset:4px}
+.honour-history{border-top:1px solid #ebe5d8}
+.honour-history-row{display:grid;grid-template-columns:42px minmax(0,1fr) 24px;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid #eee9de}
+.honour-history-row:last-child{border-bottom:0;padding-bottom:0}
+.honour-history-row small{display:block;padding-top:6px;padding-left:40px;font-size:.75rem;color:#64758b;font-weight:550}
+.honour-season{display:inline-flex;justify-content:center;align-items:center;border:1px solid #e8ddc3;background:linear-gradient(#fffdf8,#f7efdb);border-radius:10px;padding:7px;font-size:.7rem;line-height:1.2;color:#8b6823;font-weight:800;white-space:nowrap}
+.honour-history .entity{font-size:.875rem;font-weight:750;gap:10px}
+.honour-history .core-crest{width:30px;height:34px;object-fit:contain}
+.honour-mini-cup svg{width:22px;height:26px;color:#b28c40}
+.honour-edition-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.honour-edition-top .eyebrow{font-size:.62rem;color:#947329}
+.honour-edition-top time{margin-left:auto;font-size:.75rem;color:#68788d}
+.honour-winner{display:flex;gap:15px;align-items:center;padding:22px 0}
+.honour-winner>div{flex:1;min-width:0}
+.honour-winner .core-crest{width:44px;height:48px;object-fit:contain}
+#rows .honour-featured h3{font-size:1.2rem}
+.honour-manager{margin-top:9px;font-size:.8rem;color:#65758a}
+.honour-points{font-size:1.7rem;line-height:1.1;text-align:right;color:#9b7425}
+.honour-points small{display:block;font-size:.6rem;margin-top:5px}
+.honour-result{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:15px;border-top:1px solid #e8dfcd;font-size:.8rem}
+.honour-result>span:first-child{font-size:.7rem;color:#6c7c90}
+.honour-result .core-crest{width:24px;height:28px;object-fit:contain}
+.honour-result>strong{margin-left:auto;white-space:nowrap}
+.honour-final{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-top:14px;font-size:.7rem;color:#67758b;line-height:1.5}
+.honour-ranking ol{padding:0;margin:0;list-style:none}
+.honour-ranking li{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #e7eaf0;font-size:.9rem}
+.honour-ranking li:last-child{border:0}
+.honour-ranking li>div{flex:1;min-width:0}
+.honour-ranking li>strong{text-align:center;font-size:1.3rem;color:#947329}
+.honour-ranking li small{display:block;font-size:.65rem;font-weight:550}
+.honour-ranking .core-crest{width:32px;height:36px;object-fit:contain}
+.honour-rank{width:30px;text-align:center;color:#8d681d;font-weight:850}
+.honour-shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.honour-trophy{text-align:center;padding:18px 12px!important}
+.honour-trophy .honour-medal{margin-bottom:12px}
+.honour-title-count{display:block;color:#947329;font-size:1.6rem;line-height:1.1}
+.honour-title-count small{display:block;font-size:.7rem;margin:5px}
+.honour-season-list{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.honour-season-list span{border:1px solid #e4dbc4;border-radius:9px;background:#fffcf5;padding:5px 7px;font-size:.68rem;font-weight:650}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:700px){.honour-catalog{grid-template-columns:1fr}.honour-shelf{grid-template-columns:repeat(2,minmax(0,1fr))}.honour-intro{padding:19px!important;gap:12px}.honour-competition{padding:16px!important}.honour-edition{padding:17px!important}.honour-edition-top{gap:7px}.honour-edition-top .eyebrow{font-size:.55rem}.honour-winner{gap:11px}.honour-winner>.honour-medal{width:45px;height:54px;flex-basis:45px}.honour-winner>.honour-medal svg{width:30px;height:30px}.honour-winner .core-crest{width:32px;height:38px}#rows .honour-featured h3{font-size:1.05rem}.honour-final{align-items:flex-start}.honour-final .report-link{white-space:nowrap;font-size:.68rem}.honour-competition .round-arrow{width:38px;height:38px;flex:0 0 38px}}

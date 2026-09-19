@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate public website
         run: |
+          php -l nexus/public/trophies.php
+          php nexus/public/trophies.test.php
           php -l nexus/public/hub.php
           php nexus/public/competition-names.test.php
           php -l nexus/public/core.php
@@ -32,4 +34,5 @@ jobs:
         run: python3 nexus/public/deploy.py
       - name: Verify public website and all forty data routes
         run: python3 nexus/public/verify.py
+
 
