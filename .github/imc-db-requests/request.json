@@ -1,8 +1,8 @@
 {
-  "request_id": "gw008-group-plan-20260919-10",
-  "requested_at": "2026-09-19T08:37:00Z",
-  "purpose": "Plan explicit GW008 competition_group backfill from sm_action",
-  "action": "plan_migration",
+  "request_id": "gw008-group-execute-20260919-11",
+  "requested_at": "2026-09-19T08:38:00Z",
+  "purpose": "Execute explicit GW008 competition_group backfill from sm_action",
+  "action": "execute_migration",
   "target": "gold",
   "migration_id": "gw008-results-competition-group-backfill-20260919",
   "statements": [
@@ -11,5 +11,6 @@
     "UPDATE `GW008_IMC Results` SET competition_group='NATIONS' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('worldcup','interqualifier')"
   ],
   "allow_destructive": false,
-  "data_migration": true
+  "data_migration": true,
+  "confirmation_token": "1789806851.49c4145a94e62b67054ce0906b1394308289ce3ce8c436183fca927344366dd3"
 }
