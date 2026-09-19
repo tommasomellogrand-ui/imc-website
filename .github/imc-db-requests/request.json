@@ -1,9 +1,9 @@
 {
-  "request_id": "gw005-match-report-identify-20260919-01",
-  "requested_at": "2026-09-19T08:15:00Z",
-  "purpose": "Identify latest GW005 Match Report before explicit deletion",
+  "request_id": "gw005-mr-cols-20260919-02",
+  "requested_at": "2026-09-19T08:16:00Z",
+  "purpose": "Inspect columns before requested deletion",
   "action": "query",
   "target": "custom",
-  "sql": "SELECT * FROM `GW005_IMC Match Report` ORDER BY `id` DESC LIMIT 1",
-  "limit": 1
+  "sql": "SHOW COLUMNS FROM `GW005_IMC Match Report`",
+  "limit": 100
 }
