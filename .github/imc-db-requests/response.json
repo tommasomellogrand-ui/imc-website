@@ -1,15 +1,15 @@
 {
-  "request_id": "gw001-total-alignment-recheck-20260919-24",
-  "completed_at": "2026-09-19T09:06:31.482464+00:00",
+  "request_id": "gw001-fixture-live-final-20260919-25",
+  "completed_at": "2026-09-19T09:11:24.182827+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw001-total-alignment-recheck-20260919-24",
-    "requested_at": "2026-09-19T09:08:00Z",
-    "purpose": "Full GW001 Results vs Match Report fixture alignment recheck",
+    "request_id": "gw001-fixture-live-final-20260919-25",
+    "requested_at": "2026-09-19T09:10:00Z",
+    "purpose": "Final live read of GW001 fixture 368726159 in Results and Match Report",
     "action": "query",
     "target": "custom",
-    "sql": "SELECT k.competition_key,COALESCE(r.n,0) results,COALESCE(m.n,0) match_reports,COALESCE(x.same_key,0) fixture_same_key,COALESCE(x.diff_key,0) fixture_different_key,COALESCE(r.n,0)-COALESCE(x.any_match,0) results_without_report,COALESCE(m.n,0)-COALESCE(y.any_match,0) reports_without_result FROM (SELECT competition_key FROM `GW001_IMC Results` UNION SELECT competition_key FROM `GW001_IMC Match Report`) k LEFT JOIN (SELECT competition_key,COUNT(*) n FROM `GW001_IMC Results` GROUP BY competition_key) r ON r.competition_key=k.competition_key LEFT JOIN (SELECT competition_key,COUNT(*) n FROM `GW001_IMC Match Report` GROUP BY competition_key) m ON m.competition_key=k.competition_key LEFT JOIN (SELECT r.competition_key,COUNT(m.sm_fixture_id) any_match,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key=r.competition_key THEN 1 ELSE 0 END) same_key,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key<>r.competition_key THEN 1 ELSE 0 END) diff_key FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id GROUP BY r.competition_key) x ON x.competition_key=k.competition_key LEFT JOIN (SELECT m.competition_key,COUNT(r.sm_fixture_id) any_match FROM `GW001_IMC Match Report` m LEFT JOIN `GW001_IMC Results` r ON r.sm_fixture_id=m.sm_fixture_id GROUP BY m.competition_key) y ON y.competition_key=k.competition_key ORDER BY k.competition_key",
-    "limit": 1000
+    "sql": "SELECT 'RESULT' source,sm_fixture_id,sm_division,competition_key,competition_stage,home_name,away_name,home_score,away_score FROM `GW001_IMC Results` WHERE sm_fixture_id=368726159 UNION ALL SELECT 'MATCH_REPORT',sm_fixture_id,sm_division,competition_key,competition_stage,home_name,away_name,home_score,away_score FROM `GW001_IMC Match Report` WHERE sm_fixture_id=368726159",
+    "limit": 10
   },
   "response": {
     "ok": true,
@@ -19,118 +19,32 @@
     "result": {
       "rows": [
         {
-          "competition_key": "GW001|CUS|DOMESTIC|league|1",
-          "results": "90",
-          "match_reports": "90",
-          "fixture_same_key": "90",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
-          "competition_key": "GW001|CUS|DOMESTIC|league|2",
-          "results": "90",
-          "match_reports": "90",
-          "fixture_same_key": "90",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
-          "competition_key": "GW001|CUS|DOMESTIC|league|3",
-          "results": "90",
-          "match_reports": "90",
-          "fixture_same_key": "90",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
-          "competition_key": "GW001|CUS|DOMESTIC|league|4",
-          "results": "90",
-          "match_reports": "90",
-          "fixture_same_key": "90",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
-          "competition_key": "GW001|CUS|DOMESTIC|leaguecup|4",
-          "results": "39",
-          "match_reports": "39",
-          "fixture_same_key": "39",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
+          "source": "RESULT",
+          "sm_fixture_id": "368726159",
+          "sm_division": null,
           "competition_key": "GW001|DOMESTIC|playoff",
-          "results": "1",
-          "match_reports": "0",
-          "fixture_same_key": "0",
-          "fixture_different_key": "1",
-          "results_without_report": "0",
-          "reports_without_result": "0"
+          "competition_stage": "Playoff Finale",
+          "home_name": "Legia Warszawa",
+          "away_name": "HERTHA BSC",
+          "home_score": "3",
+          "away_score": "2"
         },
         {
-          "competition_key": "GW001|DOMESTIC|playoff|2",
-          "results": "3",
-          "match_reports": "3",
-          "fixture_same_key": "3",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
-          "competition_key": "GW001|DOMESTIC|playoff|3",
-          "results": "3",
-          "match_reports": "3",
-          "fixture_same_key": "3",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
+          "source": "MATCH_REPORT",
+          "sm_fixture_id": "368726159",
+          "sm_division": "4",
           "competition_key": "GW001|DOMESTIC|playoff|4",
-          "results": "2",
-          "match_reports": "3",
-          "fixture_same_key": "2",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
-          "competition_key": "GW001|INTERNATIONAL|smfacup",
-          "results": "37",
-          "match_reports": "37",
-          "fixture_same_key": "37",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
-          "competition_key": "GW001|INTERNATIONAL|smfashield",
-          "results": "37",
-          "match_reports": "37",
-          "fixture_same_key": "37",
-          "fixture_different_key": "0",
-          "results_without_report": "0",
-          "reports_without_result": "0"
-        },
-        {
-          "competition_key": "GW001|NATIONS|interqualifier",
-          "results": "320",
-          "match_reports": "0",
-          "fixture_same_key": "0",
-          "fixture_different_key": "0",
-          "results_without_report": "320",
-          "reports_without_result": "0"
+          "competition_stage": "Playoff Finale",
+          "home_name": "Legia Warszawa",
+          "away_name": "Hertha BSC",
+          "home_score": "3",
+          "away_score": "2"
         }
       ],
-      "returned_rows": 12,
-      "total_rows": 12,
+      "returned_rows": 2,
+      "total_rows": 2,
       "truncated": false,
-      "duration_ms": 52
+      "duration_ms": 9
     }
   }
 }
