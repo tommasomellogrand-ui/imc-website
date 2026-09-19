@@ -1,9 +1,9 @@
 {
-  "request_id": "gw008-season-core-20260919-19",
-  "requested_at": "2026-09-19T09:02:00Z",
-  "purpose": "Read authoritative GW008 season state from CORE",
+  "request_id": "gw001-key-count-final-20260919-04",
+  "requested_at": "2026-09-19T08:28:00Z",
+  "purpose": "GW001 exact competition_key counts Results vs Match Report",
   "action": "query",
-  "target": "core",
-  "sql": "SELECT * FROM `IMC Game World Season` WHERE game_world_id='GW008' ORDER BY imc_season",
-  "limit": 20
+  "target": "custom",
+  "sql": "SELECT competition_key, SUM(results_count) AS results_count, SUM(match_report_count) AS match_report_count FROM (SELECT competition_key,COUNT(*) results_count,0 match_report_count FROM `GW001_IMC Results` GROUP BY competition_key UNION ALL SELECT competition_key,0 results_count,COUNT(*) match_report_count FROM `GW001_IMC Match Report` GROUP BY competition_key) q GROUP BY competition_key ORDER BY competition_key",
+  "limit": 1000
 }
