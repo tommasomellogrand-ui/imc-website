@@ -1,0 +1,90 @@
+name: IMC DB Request Bridge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/imc-db-requests/request.json'
+      - '.github/workflows/imc-db-request-bridge.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: imc-db-request-bridge
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Execute request through Aruba Database Manager
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, pathlib, re, urllib.request, urllib.error, datetime
+
+          request_path=pathlib.Path('.github/imc-db-requests/request.json')
+          response_path=pathlib.Path('.github/imc-db-requests/response.json')
+          req=json.loads(request_path.read_text(encoding='utf-8'))
+
+          allowed={'health','schema','query','delete_one','plan_migration','execute_migration','history'}
+          action=str(req.get('action',''))
+          if action not in allowed:
+              raise SystemExit('REQUEST_ACTION_NOT_ALLOWED:'+action)
+
+          key_text=pathlib.Path('__imc-sm-master/admin/database-manager/connector-key.php').read_text(encoding='utf-8')
+          m=re.search(r"return\s+['\"]([^'\"]+)['\"]",key_text)
+          if not m: raise SystemExit('CONNECTOR_KEY_NOT_FOUND')
+          token=m.group(1)
+
+          payload={k:v for k,v in req.items() if k not in ('request_id','requested_at','purpose')}
+          endpoint='https://www.italianmastersclub.it/__imc-sm-master/admin/database-manager/'
+          body=json.dumps(payload,separators=(',',':')).encode()
+          http=0
+          try:
+              q=urllib.request.Request(endpoint,data=body,headers={
+                  'Content-Type':'application/json',
+                  'X-IMC-Token':token,
+                  'Cache-Control':'no-cache, no-store',
+              },method='POST')
+              with urllib.request.urlopen(q,timeout=120) as r:
+                  http=r.status
+                  data=json.loads(r.read())
+          except urllib.error.HTTPError as e:
+              http=e.code
+              raw=e.read()
+              try: data=json.loads(raw)
+              except Exception: data={'ok':False,'error':raw.decode(errors='replace')}
+          except Exception as e:
+              data={'ok':False,'error':type(e).__name__+': '+str(e)}
+
+          out={
+              'request_id':req.get('request_id'),
+              'completed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'http_status':http,
+              'request':{k:v for k,v in req.items() if k not in ('confirmation_token',)},
+              'response':data,
+          }
+          response_path.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('IMC_DB_BRIDGE_RESULT|'+json.dumps({'request_id':out['request_id'],'http_status':http,'ok':bool(data.get('ok'))},separators=(',',':')))
+          PY
+
+      - name: Commit response
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "IMC Database Bridge"
+          git config user.email "actions@users.noreply.github.com"
+          git add .github/imc-db-requests/response.json
+          if ! git diff --cached --quiet; then
+            git commit -m "db-bridge: record request response"
+            git pull --rebase origin main
+            git push origin main
+          fi
