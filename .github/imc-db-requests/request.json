@@ -1,9 +1,22 @@
 {
-  "request_id": "single-league-country-key-audit-20260919-33",
-  "requested_at": "2026-09-19T09:55:00Z",
-  "purpose": "Audit competition_key values across all Single League worlds for country segments",
-  "action": "query",
+  "request_id": "single-normalize-country-keys-plan-20260919-34",
+  "requested_at": "2026-09-19T09:58:00Z",
+  "purpose": "Normalize all Single League domestic competition keys by removing country segment in Results and Match Report",
+  "action": "plan_migration",
   "target": "custom",
-  "sql": "SELECT 'GW001' game_world_id,'Results' repository,competition_key,COUNT(*) rows_count FROM `GW001_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key UNION ALL SELECT 'GW001' game_world_id,'Match Report' repository,competition_key,COUNT(*) rows_count FROM `GW001_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key UNION ALL SELECT 'GW004' game_world_id,'Results' repository,competition_key,COUNT(*) rows_count FROM `GW004_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key UNION ALL SELECT 'GW004' game_world_id,'Match Report' repository,competition_key,COUNT(*) rows_count FROM `GW004_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key UNION ALL SELECT 'GW005' game_world_id,'Results' repository,competition_key,COUNT(*) rows_count FROM `GW005_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key UNION ALL SELECT 'GW005' game_world_id,'Match Report' repository,competition_key,COUNT(*) rows_count FROM `GW005_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key UNION ALL SELECT 'GW006' game_world_id,'Results' repository,competition_key,COUNT(*) rows_count FROM `GW006_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key UNION ALL SELECT 'GW006' game_world_id,'Match Report' repository,competition_key,COUNT(*) rows_count FROM `GW006_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key UNION ALL SELECT 'GW009' game_world_id,'Results' repository,competition_key,COUNT(*) rows_count FROM `GW009_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key UNION ALL SELECT 'GW009' game_world_id,'Match Report' repository,competition_key,COUNT(*) rows_count FROM `GW009_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' GROUP BY competition_key ORDER BY game_world_id,repository,competition_key",
-  "limit": 1000
+  "migration_id": "normalize-single-league-domestic-competition-keys-20260919",
+  "statements": [
+    "UPDATE `GW001_IMC Results` SET competition_key=CONCAT('GW001|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
+    "UPDATE `GW001_IMC Match Report` SET competition_key=CONCAT('GW001|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
+    "UPDATE `GW004_IMC Results` SET competition_key=CONCAT('GW004|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
+    "UPDATE `GW004_IMC Match Report` SET competition_key=CONCAT('GW004|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
+    "UPDATE `GW005_IMC Results` SET competition_key=CONCAT('GW005|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
+    "UPDATE `GW005_IMC Match Report` SET competition_key=CONCAT('GW005|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
+    "UPDATE `GW006_IMC Results` SET competition_key=CONCAT('GW006|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
+    "UPDATE `GW006_IMC Match Report` SET competition_key=CONCAT('GW006|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
+    "UPDATE `GW009_IMC Results` SET competition_key=CONCAT('GW009|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
+    "UPDATE `GW009_IMC Match Report` SET competition_key=CONCAT('GW009|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|'"
+  ],
+  "allow_destructive": false,
+  "data_migration": true
 }
