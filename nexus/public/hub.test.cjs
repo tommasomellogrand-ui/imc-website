@@ -119,7 +119,17 @@ test('overview rounds count complete matchdays, not fixtures',()=>{
 test('overview report totals and rankings deduplicate fixtures and preserve missing values',()=>{
  const r=match(1,1,2,2,1,{team_stats_json:JSON.stringify({home:{total_shots:10,shots_on_target:5},away:{total_shots:8,shots_on_target:3}}),players_json:[{sm_player_id:7,team_side:'home',player_name:'Player A',goals:2,assists:1,rating:8,man_of_match:1},{sm_player_id:8,team_side:'away',player_name:'Unused',rating:0}]});
  const r2=match(2,1,2,0,0,{players_json:[{sm_player_id:7,team_side:'home',player_name:'Player A',rating:6}]});
- const s=L.reportSummary([r,r,r2]);
- assert.equal(s.totals.matches,2);assert.equal(s.totals.goals,3);assert.equal(s.totals.total_shots,18);assert.equal(s.totals.shots_on_target,8);assert.equal(s.totals.corners,null);
- assert.equal(s.leaders.goals[0].goals,2);assert.equal(s.leaders.assists[0].assists,1);assert.equal(s.leaders.mom[0].mom,1);assert.equal(s.leaders.rating.length,1);assert.equal(s.leaders.rating[0].rating,7);assert.equal(s.leaders.rating[0].ratingCount,2);
+ const s=L.reportSummary([r,r,r2,...[3,4,5].map(id=>({...r2,sm_fixture_id:id}))]);
+ assert.equal(s.totals.matches,5);assert.equal(s.totals.goals,3);assert.equal(s.totals.total_shots,18);assert.equal(s.totals.shots_on_target,8);assert.equal(s.totals.corners,null);
+ assert.equal(s.leaders.goals[0].goals,2);assert.equal(s.leaders.assists[0].assists,1);assert.equal(s.leaders.mom[0].mom,1);assert.equal(s.leaders.rating.length,1);assert.equal(s.leaders.rating[0].rating,6.4);assert.equal(s.leaders.rating[0].ratingCount,5);
+});
+
+test('Top 3 requires five actual appearances and excludes unused substitutes',()=>{
+ const rows=Array.from({length:5},(_,i)=>match(i+1,1,2,1,0,{players_json:[
+ ...[1,2,3,4].map(id=>({sm_player_id:id,team_side:'home',player_name:'Player '+id,starter:1,goals:id,assists:id,man_of_match:1,rating:6+id/2})),
+ ...(i<4?[{sm_player_id:5,team_side:'home',player_name:'Four appearances',starter:1,goals:20,assists:20,rating:10,man_of_match:1}]:[]),
+ {sm_player_id:6,team_side:'away',player_name:'Unused bench',starter:0,rating:0,minutes_played:0}
+ ]}));
+ const s=L.reportSummary([...rows,rows[0]]);
+ for(const metric of ['goals','assists','mom','rating']){assert.equal(s.leaders[metric].length,3);assert.ok(s.leaders[metric].every(p=>p.appearances===5));assert.ok(!s.leaders[metric].some(p=>p.name==='Four appearances'||p.name==='Unused bench'));}
 });
