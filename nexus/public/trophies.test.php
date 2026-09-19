@@ -24,3 +24,9 @@ trophy_check(nexus_trophy_league($draws,[],$comp)===null,'Points tie requires kn
 $bad=$rows;$bad[11]=$bad[0];trophy_check(nexus_trophy_league($bad,[],$comp)===null,'Unbalanced fixture coverage cannot crown a champion');
 $played=array_slice($rows,0,10);$scheduled=array_slice($rows,10);$a=nexus_trophy_league($played,$scheduled,$comp);trophy_check($a!==null&&!$a['league_complete'],'Mathematically safe champion with complete remaining fixture plan');
 echo "TROPHY_HISTORY_TESTS_OK\n";
+
+$legacy=array_map(function($r){$r['home_sm_club_id']=null;$r['away_sm_club_id']=null;return $r;},$rows);
+$legacyComp=['teams_count'=>null,'expected_match'=>null,'_season_end'=>'2026-06-30'];
+$a=nexus_trophy_league($legacy,[],$legacyComp);trophy_check($a!==null&&$a['winner_key']==='name:Team 1','Closed legacy seasons recognize a complete home-and-away league');
+trophy_check(nexus_trophy_league(array_slice($legacy,0,11),[],$legacyComp)===null,'Legacy missing fixture prevents title');
+$legacyComp['_season_end']=null;trophy_check(nexus_trophy_league($legacy,[],$legacyComp)===null,'Open seasons need configured expectations');
