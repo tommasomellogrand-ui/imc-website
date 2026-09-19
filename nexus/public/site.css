@@ -55,3 +55,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .standings tr:first-child td{background:#f5f1e8}
 .stat-row strong{font-weight:650;font-size:clamp(2rem,4vw,3rem)}
 @media(max-width:599px){.brand small{font-size:.5rem}.chapter{grid-template-columns:1fr}.chapter-no{font-size:2rem}.cinema h2{max-width:100%}.section-heading{align-items:center}.bottomnav a{font-size:.65rem}}
+
+/* Compact navigation after removing the shared hero. */
+.main-grid{grid-template-columns:minmax(0,1fr);gap:0}
+.main-grid .side-column{display:block}
+.main-grid #tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:0 22px}
+@media(max-width:599px){.main-grid #tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
