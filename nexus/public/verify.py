@@ -76,6 +76,26 @@ for i in range(1,11):
             assert all(r['game_world_id']==world and tid in [str(r['home_sm_club_id']),str(r['away_sm_club_id'])] for r in profile['rows'])
     print('REPORT_PROFILES_OK',world)
 
+# A populated profile must resolve by world ID, not the global Codex ID.
+hertha=json.loads(get('public/data.php?world=GW001&resource=team_profile&team=404&teamType=clubs'))
+assert hertha['ok'] and hertha['mapping_status']=='verified'
+assert str(hertha['team']['sm_team_id'])=='94079171' and str(hertha['team']['sm_global_team_id'])=='404'
+assert len(hertha['rows'])>=22
+for row in hertha['rows']:
+    side='home' if str(row['home_sm_club_id'])=='94079171' else 'away'
+    assert str(row[side+'_sm_club_id'])=='94079171'
+    assert str(row[side+'_core']['club_id'])=='404'
+print('HERTHA_WORLD_ID_REPORTS_OK',len(hertha['rows']))
+
+directory=json.loads(get('public/data.php?world=GW005&resource=directory'))['core']
+brazil=next(t for t in directory['nations'] if str(t['sm_team_id'])=='2277416')
+national=json.loads(get('public/data.php?'+urlencode(dict(world='GW005',resource='team_profile',teamType='nations',team=brazil['id']))))
+assert national['ok'] and national['mapping_status']=='verified' and national['rows']
+for row in national['rows']:
+    side='home' if str(row['home_sm_club_id'])=='2277416' else 'away'
+    assert str(row[side+'_core']['national_team_id'])==str(brazil['id'])
+print('NATIONAL_WORLD_ID_REPORTS_OK',len(national['rows']))
+
 report_trophy=json.loads(get('public/data.php?'+urlencode(dict(world='GW001',resource='manager_profile',manager='MNG004'))))
 finals=[r for r in report_trophy['rows'] if 'final' in str(r.get('competition_stage','')).lower() and r.get('competition_key')]
 if finals:

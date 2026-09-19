@@ -161,7 +161,7 @@ async function teamProfile(c,signal){
  const d=await cached({world:state.world,resource:'team_profile',team:state.team,teamType:state.teamType,season:state.season},signal),rows=L.unique(d.rows).filter(L.completed);
  const note='<p class="view-note">Statistiche esclusivamente dai match report, collegati tramite ID squadra e mondo. Nessuna integrazione dai risultati.</p>';
  const heading=`<article class="card profile-heading">${entity(team,team.name)}</article>`;
- if(!rows.length){$('rows').innerHTML=heading+note+empty('Nessun match report collegato all’ID di questa squadra. Potrebbero mancare i report o la corrispondenza tra gli ID del mondo e del catalogo.');$('status').textContent=state.world+' · 0 report collegati';return}
+ if(!rows.length){const message=d.mapping_status==='missing'?'ID della squadra nel mondo non ancora presente nel mapping CORE.':d.mapping_status==='ambiguous'?'ID del mondo associato a più squadre: collegamento sospeso per evitare statistiche errate.':'Nessun match report completato disponibile per questa squadra e stagione.';$('rows').innerHTML=heading+note+empty(message);$('status').textContent=state.world+' · 0 report collegati';return}
  if(state.profileTab==='matches')page(heading+note+matchGroups(rows.slice(state.offset,state.offset+50)),rows.length,'match report');
  else {const adapted=rows.map(r=>({...r,home_sm_manager_id:r.home_sm_club_id,away_sm_manager_id:r.away_sm_club_id}));$('rows').innerHTML=heading+note+managerSummary(adapted,d.team.sm_team_id);$('status').textContent=state.world+' · '+rows.length+' match report';}return;
  }

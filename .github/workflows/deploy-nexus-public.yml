@@ -18,6 +18,7 @@ jobs:
         run: |
           php -l nexus/public/hub.php
           php -l nexus/public/core.php
+          php nexus/public/core.test.php
           php -l nexus/public/data.php
           node --check nexus/public/site.js
           node --test nexus/public/hub.test.cjs
