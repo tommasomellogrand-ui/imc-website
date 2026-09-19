@@ -65,7 +65,7 @@ if transfers['clubs']:
     assert all(str(r['from_sm_world_club_id'])==str(club['id']) or str(r['to_sm_world_club_id'])==str(club['id']) or ('name:'+str(r['club_from']))==club['id'] or ('name:'+str(r['club_to']))==club['id'] for r in filtered['rows'])
     print('TRANSFER_TEAM_FILTER_OK',club['name'],filtered['total'])
 
-# Profiles must use report identities and retain the requested world.
+# Managers/clubs use report identities; national teams use results in the requested world.
 for i in range(1,11):
     world=f'GW{i:03}'
     directory=json.loads(get('public/data.php?'+urlencode(dict(world=world,resource='directory'))))['core']
@@ -78,7 +78,7 @@ for i in range(1,11):
     for kind in ['clubs','nations']:
         if directory[kind]:
             profile=json.loads(get('public/data.php?'+urlencode(dict(world=world,resource='team_profile',teamType=kind,team=directory[kind][0]['id']))))
-            assert profile['ok'] and profile['source']=='IMC Site Match Report' and profile['world']==world
+            assert profile['ok'] and profile['source']==('IMC Site Results' if kind=='nations' else 'IMC Site Match Report') and profile['world']==world
             tid=str(profile['team']['sm_team_id'])
             assert all(r['game_world_id']==world and tid in [str(r['home_sm_club_id']),str(r['away_sm_club_id'])] for r in profile['rows'])
     print('REPORT_PROFILES_OK',world)
@@ -97,11 +97,11 @@ print('HERTHA_WORLD_ID_REPORTS_OK',len(hertha['rows']))
 directory=json.loads(get('public/data.php?world=GW005&resource=directory'))['core']
 brazil=next(t for t in directory['nations'] if str(t['sm_team_id'])=='2277416')
 national=json.loads(get('public/data.php?'+urlencode(dict(world='GW005',resource='team_profile',teamType='nations',team=brazil['id']))))
-assert national['ok'] and national['mapping_status']=='verified' and national['rows']
+assert national['ok'] and national['source']=='IMC Site Results' and national['mapping_status']=='verified' and national['rows']
 for row in national['rows']:
     side='home' if str(row['home_sm_club_id'])=='2277416' else 'away'
     assert str(row[side+'_core']['national_team_id'])==str(brazil['id'])
-print('NATIONAL_WORLD_ID_REPORTS_OK',len(national['rows']))
+print('NATIONAL_WORLD_ID_RESULTS_OK',len(national['rows']))
 
 report_trophy=json.loads(get('public/data.php?'+urlencode(dict(world='GW001',resource='manager_profile',manager='MNG004'))))
 finals=[r for r in report_trophy['rows'] if 'final' in str(r.get('competition_stage','')).lower() and r.get('competition_key')]
