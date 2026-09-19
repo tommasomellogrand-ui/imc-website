@@ -200,7 +200,6 @@ async function directoryView(signal){const d=await cached({world:state.world,res
  }else{$('rows').innerHTML=`<section class="card"><h3>${esc(c.world?.world_name||state.world)}</h3><div class="stat-row"><div><strong>${number(c.world?.active_clubs||c.clubs.length)}</strong><small>Club del mondo</small></div><div><strong>${number(new Set(c.managers.map(m=>m.manager_id)).size)}</strong><small>Manager IMC con incarichi</small></div><div><strong>${esc(c.seasons[0]?.imc_season||'—')}</strong><small>Stagione IMC più recente</small></div></div><p>Scegli una sezione dal menu di ${esc(state.world)}.</p></section>`;$('status').textContent=state.world+' · '+worlds[state.world]}
 }
 async function load(push=false){
- $('dataSection').setAttribute('data-profile-view',((state.resource==='manager'&&state.manager)||(state.resource==='club'&&state.team)||(state.resource==='player'&&state.player))?'true':'false');
  $('dataSection').setAttribute('data-competition-view',['competitions','standings','archive'].includes(state.resource)?'true':'false');$('dataSection').setAttribute('data-category',state.group||'domestic');
  if(controller)controller.abort();controller=new AbortController();const active=controller;
  if(push)history.pushState(null,'',urlState());$('world').value=state.world;worldMenus();
@@ -209,7 +208,7 @@ async function load(push=false){
  $('worldLabel').textContent=`${state.world} · ${worlds[state.world]}`;$('sectionTitle').textContent=state.resource==='archive'?'Trophy Room':sections[state.resource];
  $('status').textContent='Caricamento…';$('rows').innerHTML='';$('page').textContent='';$('previous').disabled=$('next').disabled=true;
  try{
-   if(isDirectory){await directoryView(active.signal);if($('dataSection').getAttribute('data-profile-view')==='true')$('status').textContent='';return}
+   if(isDirectory){await directoryView(active.signal);if(((state.resource==='manager'&&state.manager)||(state.resource==='club'&&state.team)||(state.resource==='player'&&state.player)))$('status').textContent='';return}
    const d=await fetchData({...state,limit:50},active.signal);page(d.rows.map(card).join(''),d.total,'partite');
  }catch(e){if(e.name!=='AbortError'){$('status').textContent=e.message;$('rows').innerHTML=empty('Premi Aggiorna per riprovare.')}}
 }

@@ -88,7 +88,7 @@ test('profile statistics query match reports, never result projections',()=>{
 test('all manager tabs and team statistics are routed through report profile endpoints',async()=>{
  for(const tab of ['stats','matches','h2h','trophy']){
  const r=await render('?world=GW003&resource=manager&manager=MNG001&profileTab='+tab+'&opponent=456');
- assert.ok(r.requests.some(q=>q.resource==='manager_profile'));assert.ok(!r.requests.some(q=>q.resource==='results'));assert.ok(r.html.includes('match report'));assert.ok(!r.status.includes('non disponibili'));
+ assert.ok(r.requests.some(q=>q.resource==='manager_profile'));assert.ok(!r.requests.some(q=>q.resource==='results'));assert.ok(r.html.includes('profile-heading'));assert.ok(!r.html.includes('class="view-note"'));if(tab==='stats')assert.ok(r.html.includes('Vittorie'));assert.ok(!r.status.includes('non disponibili'));
  if(tab==='h2h')assert.ok(r.html.includes('Opponent Test'));
  if(tab==='trophy'){assert.ok(r.html.includes('VINCITORE'));assert.ok(r.requests.some(q=>q.resource==='competition_reports'));assert.ok(!r.requests.some(q=>q.resource==='competition'));}
  }
