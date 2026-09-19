@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-results-matchreport-by-key-20260919-01",
-  "requested_at": "2026-09-19T08:31:00Z",
-  "purpose": "GW001 counts by competition_key for Results and Match Report",
+  "request_id": "gw008-key-verify-final-20260919-17",
+  "requested_at": "2026-09-19T08:55:00Z",
+  "purpose": "Final verification GW008 key backfill",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT competition_key, SUM(results_count) AS results_count, SUM(match_report_count) AS match_report_count FROM (SELECT competition_key, COUNT(*) AS results_count, 0 AS match_report_count FROM `GW001_IMC Results` GROUP BY competition_key UNION ALL SELECT competition_key, 0 AS results_count, COUNT(*) AS match_report_count FROM `GW001_IMC Match Report` GROUP BY competition_key) x GROUP BY competition_key ORDER BY competition_key",
-  "limit": 1000
+  "target": "gold",
+  "sql": "SELECT COUNT(*) AS total, SUM(CASE WHEN competition_key IS NULL OR TRIM(competition_key)='' THEN 1 ELSE 0 END) AS missing_key, COUNT(DISTINCT competition_key) AS distinct_keys FROM `GW008_IMC Results` WHERE game_world_id='GW008'",
+  "limit": 10
 }
