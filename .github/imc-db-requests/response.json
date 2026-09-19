@@ -1,15 +1,15 @@
 {
-  "request_id": "gw001-delete-leaguecup-verify-20260919-11",
-  "completed_at": "2026-09-19T08:47:37.532225+00:00",
+  "request_id": "gw001-postcleanup-key-check-20260919-12",
+  "completed_at": "2026-09-19T08:51:04.334462+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw001-delete-leaguecup-verify-20260919-11",
-    "requested_at": "2026-09-19T08:48:00Z",
-    "purpose": "Verify no GW001 League Cup rows remain in Results or Match Report",
+    "request_id": "gw001-postcleanup-key-check-20260919-12",
+    "requested_at": "2026-09-19T08:49:00Z",
+    "purpose": "Post-cleanup GW001 competition_key counts Results vs Match Report",
     "action": "query",
     "target": "custom",
-    "sql": "SELECT (SELECT COUNT(*) FROM `GW001_IMC Results` WHERE sm_action='leaguecup') AS results_remaining, (SELECT COUNT(*) FROM `GW001_IMC Match Report` WHERE sm_action='leaguecup') AS match_reports_remaining",
-    "limit": 10
+    "sql": "SELECT competition_key,SUM(results_count) AS results_count,SUM(match_report_count) AS match_report_count FROM (SELECT competition_key,COUNT(*) results_count,0 match_report_count FROM `GW001_IMC Results` GROUP BY competition_key UNION ALL SELECT competition_key,0 results_count,COUNT(*) match_report_count FROM `GW001_IMC Match Report` GROUP BY competition_key) q GROUP BY competition_key ORDER BY competition_key",
+    "limit": 1000
   },
   "response": {
     "ok": true,
@@ -19,14 +19,70 @@
     "result": {
       "rows": [
         {
-          "results_remaining": "0",
-          "match_reports_remaining": "0"
+          "competition_key": "GW001|CUS|DOMESTIC|league|1",
+          "results_count": "90",
+          "match_report_count": "90"
+        },
+        {
+          "competition_key": "GW001|CUS|DOMESTIC|league|2",
+          "results_count": "90",
+          "match_report_count": "90"
+        },
+        {
+          "competition_key": "GW001|CUS|DOMESTIC|league|3",
+          "results_count": "90",
+          "match_report_count": "90"
+        },
+        {
+          "competition_key": "GW001|CUS|DOMESTIC|league|4",
+          "results_count": "90",
+          "match_report_count": "90"
+        },
+        {
+          "competition_key": "GW001|CUS|DOMESTIC|leaguecup|4",
+          "results_count": "39",
+          "match_report_count": "39"
+        },
+        {
+          "competition_key": "GW001|DOMESTIC|playoff",
+          "results_count": "1",
+          "match_report_count": "0"
+        },
+        {
+          "competition_key": "GW001|DOMESTIC|playoff|2",
+          "results_count": "3",
+          "match_report_count": "3"
+        },
+        {
+          "competition_key": "GW001|DOMESTIC|playoff|3",
+          "results_count": "3",
+          "match_report_count": "3"
+        },
+        {
+          "competition_key": "GW001|DOMESTIC|playoff|4",
+          "results_count": "2",
+          "match_report_count": "3"
+        },
+        {
+          "competition_key": "GW001|INTERNATIONAL|smfacup",
+          "results_count": "36",
+          "match_report_count": "37"
+        },
+        {
+          "competition_key": "GW001|INTERNATIONAL|smfashield",
+          "results_count": "36",
+          "match_report_count": "37"
+        },
+        {
+          "competition_key": "GW001|NATIONS|interqualifier",
+          "results_count": "320",
+          "match_report_count": "0"
         }
       ],
-      "returned_rows": 1,
-      "total_rows": 1,
+      "returned_rows": 12,
+      "total_rows": 12,
       "truncated": false,
-      "duration_ms": 6
+      "duration_ms": 15
     }
   }
 }
