@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-smfa-finals-recheck-20260919-16",
-  "requested_at": "2026-09-19T08:56:00Z",
-  "purpose": "Recheck SMFA Cup and Shield final Results and Match Report fixture IDs",
+  "request_id": "gw001-playoff-full-fixture-map-20260919-17",
+  "requested_at": "2026-09-19T08:58:00Z",
+  "purpose": "List every GW001 playoff Result with matching Match Report by fixture ID and expose key/division/stage differences",
   "action": "query",
   "target": "custom",
-  "sql": "SELECT 'smfacup' competition,r.sm_fixture_id result_fixture,m.sm_fixture_id report_fixture,r.competition_key result_key,m.competition_key report_key,r.match_date result_date,m.match_date report_date,r.home_name result_home,m.home_name report_home,r.away_name result_away,m.away_name report_away,r.home_score result_home_score,m.home_score report_home_score,r.away_score result_away_score,m.away_score report_away_score FROM `GW001_IMC Results` r JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.sm_fixture_id=368667458 UNION ALL SELECT 'smfashield',r.sm_fixture_id,m.sm_fixture_id,r.competition_key,m.competition_key,r.match_date,m.match_date,r.home_name,m.home_name,r.away_name,m.away_name,r.home_score,m.home_score,r.away_score,m.away_score FROM `GW001_IMC Results` r JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.sm_fixture_id=368667459",
-  "limit": 10
+  "sql": "SELECT r.sm_fixture_id,r.match_date,r.home_name,r.away_name,r.home_score,r.away_score,r.competition_key result_key,r.sm_division result_division,r.competition_stage result_stage,m.sm_fixture_id report_fixture_id,m.competition_key report_key,m.sm_division report_division,m.competition_stage report_stage,m.home_name report_home,m.away_name report_away,m.home_score report_home_score,m.away_score report_away_score FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.competition_key LIKE 'GW001|DOMESTIC|playoff%' OR m.competition_key LIKE 'GW001|DOMESTIC|playoff%' ORDER BY r.match_date,r.sm_fixture_id",
+  "limit": 100
 }
