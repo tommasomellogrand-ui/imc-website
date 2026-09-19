@@ -86,7 +86,7 @@
     appendScript("js/imc-gw001-page-standard-size-fix.js?v=1.0.3");
     appendScript("js/imc-gw001-transfer-inline.js?v=1.0.0");
     appendScript("js/imc-nexus-client-bridge.js?v=1.0.0",function(){
-      appendScript("js/imc-trophy-room-all-worlds.js?v=2.1.0",loadFeatureModules);
+      appendScript("js/imc-trophy-room-all-worlds.js?v=2.2.0",loadFeatureModules);
     });
   }
 
