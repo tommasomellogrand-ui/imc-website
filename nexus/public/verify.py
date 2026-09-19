@@ -12,7 +12,7 @@ def get(path):
         except Exception:
             if attempt==2: raise
             time.sleep(2)
-for path in ['index.html','public/site.js','public/site.css','public/hub-logic.js']:
+for path in ['index.html','public/site.js','public/site.css','public/hub-logic.js','match.html','public/match.js','public/match.css']:
     assert get(path)==Path('nexus/'+path).read_bytes(), 'Live file mismatch: '+path
 print('PUBLIC_SITE_BYTES_OK')
 def check(route):
@@ -105,3 +105,4 @@ if finals:
     assert competition['ok'] and competition['source']=='IMC Site Match Report'
     assert all(r['game_world_id']=='GW001' and r['competition_key']==finals[0]['competition_key'] for r in competition['reports'])
     print('MANAGER_TROPHY_REPORT_SOURCE_OK')
+

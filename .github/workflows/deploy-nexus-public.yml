@@ -22,6 +22,7 @@ jobs:
           php nexus/public/core.test.php
           php -l nexus/public/data.php
           node --check nexus/public/site.js
+          node --check nexus/public/match.js
           node --test nexus/public/hub.test.cjs
           ! grep -Eiq 'supabase|v1/app|password|loginView' nexus/index.html nexus/public/site.js
       - name: Publish Nexus to Aruba
@@ -31,3 +32,4 @@ jobs:
         run: python3 nexus/public/deploy.py
       - name: Verify public website and all forty data routes
         run: python3 nexus/public/verify.py
+
