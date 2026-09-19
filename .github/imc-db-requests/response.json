@@ -1,33 +1,67 @@
 {
-  "request_id": "gw008-key-buildability-20260919-13",
-  "completed_at": "2026-09-19T08:21:59.069569+00:00",
+  "request_id": "gw008-key-plan-20260919-14",
+  "completed_at": "2026-09-19T08:23:46.688743+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw008-key-buildability-20260919-13",
-    "requested_at": "2026-09-19T08:45:00Z",
-    "purpose": "Count GW008 Results missing competition_key that are deterministically buildable",
-    "action": "query",
+    "request_id": "gw008-key-plan-20260919-14",
+    "requested_at": "2026-09-19T08:50:00Z",
+    "purpose": "Plan explicit GW008 competition_key backfill from existing row data",
+    "action": "plan_migration",
     "target": "gold",
-    "sql": "SELECT COUNT(*) AS missing_total, SUM(CASE WHEN competition_group='DOMESTIC' AND sm_action='league' AND sm_country IS NOT NULL AND TRIM(sm_country)<>'' AND sm_division IS NOT NULL AND TRIM(sm_division)<>'' THEN 1 WHEN competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_country IS NOT NULL AND TRIM(sm_country)<>'' THEN 1 WHEN competition_group='INTERNATIONAL' AND sm_action IN ('smfacup','smfashield','supercup') THEN 1 WHEN competition_group='NATIONS' AND sm_action IN ('worldcup','interqualifier') THEN 1 ELSE 0 END) AS buildable, SUM(CASE WHEN NOT ((competition_group='DOMESTIC' AND sm_action='league' AND sm_country IS NOT NULL AND TRIM(sm_country)<>'' AND sm_division IS NOT NULL AND TRIM(sm_division)<>'') OR (competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_country IS NOT NULL AND TRIM(sm_country)<>'') OR (competition_group='INTERNATIONAL' AND sm_action IN ('smfacup','smfashield','supercup')) OR (competition_group='NATIONS' AND sm_action IN ('worldcup','interqualifier'))) THEN 1 ELSE 0 END) AS unresolved FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='')",
-    "limit": 10
+    "migration_id": "gw008-results-competition-key-backfill-20260919",
+    "statements": [
+      "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|',sm_country,'|DOMESTIC|league|',sm_division) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='DOMESTIC' AND sm_action='league' AND sm_country IS NOT NULL AND TRIM(sm_country)<>'' AND sm_division IS NOT NULL AND TRIM(sm_division)<>''",
+      "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|',sm_country,'|DOMESTIC|',sm_action) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_country IS NOT NULL AND TRIM(sm_country)<>''",
+      "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|INTERNATIONAL|',sm_action) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='INTERNATIONAL' AND sm_action IN ('smfacup','smfashield','supercup')",
+      "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|NATIONS|',sm_action) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='NATIONS' AND sm_action IN ('worldcup','interqualifier')"
+    ],
+    "allow_destructive": false,
+    "data_migration": true
   },
   "response": {
     "ok": true,
-    "action": "query",
-    "target": "gold",
-    "database": "Sql1956795_2",
-    "result": {
-      "rows": [
-        {
-          "missing_total": "8327",
-          "buildable": "8327",
-          "unresolved": "0"
-        }
-      ],
-      "returned_rows": 1,
-      "total_rows": 1,
-      "truncated": false,
-      "duration_ms": 100
-    }
+    "action": "plan_migration",
+    "plan": {
+      "target": "gold",
+      "database": "Sql1956795_2",
+      "migration_id": "gw008-results-competition-key-backfill-20260919",
+      "allow_destructive": false,
+      "data_migration": true,
+      "statements": [
+        "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|',sm_country,'|DOMESTIC|league|',sm_division) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='DOMESTIC' AND sm_action='league' AND sm_country IS NOT NULL AND TRIM(sm_country)<>'' AND sm_division IS NOT NULL AND TRIM(sm_division)<>''",
+        "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|',sm_country,'|DOMESTIC|',sm_action) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_country IS NOT NULL AND TRIM(sm_country)<>''",
+        "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|INTERNATIONAL|',sm_action) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='INTERNATIONAL' AND sm_action IN ('smfacup','smfashield','supercup')",
+        "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|NATIONS|',sm_action) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='NATIONS' AND sm_action IN ('worldcup','interqualifier')"
+      ]
+    },
+    "analysis": [
+      {
+        "sql": "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|',sm_country,'|DOMESTIC|league|',sm_division) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='DOMESTIC' AND sm_action='league' AND sm_country IS NOT NULL AND TRIM(sm_country)<>'' AND sm_division IS NOT NULL AND TRIM(sm_division)<>''",
+        "kind": "UPDATE",
+        "destructive": false,
+        "sha256": "c36370d29111559fc0055f2186830978659890fdf0c0ac308cd03d3ce4b321c5"
+      },
+      {
+        "sql": "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|',sm_country,'|DOMESTIC|',sm_action) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_country IS NOT NULL AND TRIM(sm_country)<>''",
+        "kind": "UPDATE",
+        "destructive": false,
+        "sha256": "ac4a0bf2d4a46174fa71c5cd6d63392ce7ccc41c568cdce93e24695d8b4662b5"
+      },
+      {
+        "sql": "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|INTERNATIONAL|',sm_action) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='INTERNATIONAL' AND sm_action IN ('smfacup','smfashield','supercup')",
+        "kind": "UPDATE",
+        "destructive": false,
+        "sha256": "56ff7a092e06947bb37f9c773a00261b1f2f70b4afc8097d1524447ec06cfb5c"
+      },
+      {
+        "sql": "UPDATE `GW008_IMC Results` SET competition_key=CONCAT('GW008|NATIONS|',sm_action) WHERE game_world_id='GW008' AND (competition_key IS NULL OR TRIM(competition_key)='') AND competition_group='NATIONS' AND sm_action IN ('worldcup','interqualifier')",
+        "kind": "UPDATE",
+        "destructive": false,
+        "sha256": "cd01c4b7fac089a989918876e5376b159b7d78564c5b059aafc69aafe6b5e2e2"
+      }
+    ],
+    "plan_sha256": "c003ae0ff8a0346bef906f9b94977c0aa4d2e619b3735a41d2bac105f98af40e",
+    "expires_at": "2026-09-19T08:38:46+00:00",
+    "confirmation_token": "1789807126.1e5f5d38f5c8c2e1215b67b490812f320d12a2c3957617d6addc665b3639f658"
   }
 }
