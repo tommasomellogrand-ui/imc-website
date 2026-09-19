@@ -1,8 +1,8 @@
 {
-  "request_id": "gw001-delete-leaguecup-both-plan-20260919-09",
+  "request_id": "gw001-delete-leaguecup-both-execute-20260919-10",
   "requested_at": "2026-09-19T08:47:00Z",
-  "purpose": "Plan user-requested removal of GW001 League Cup rows from Results and Match Report",
-  "action": "plan_migration",
+  "purpose": "Execute approved user-requested GW001 League Cup cleanup",
+  "action": "execute_migration",
   "target": "custom",
   "migration_id": "gw001-remove-leaguecup-results-matchreports-20260919",
   "statements": [
@@ -10,5 +10,6 @@
     "DELETE FROM `GW001_IMC Match Report` WHERE sm_action='leaguecup'"
   ],
   "allow_destructive": true,
-  "data_migration": true
+  "data_migration": true,
+  "confirmation_token": "1789808504.a1c29423ed18824bdad54bda6c906d77fb66f4cc353e3f7c1e83ab8afee027b0"
 }
