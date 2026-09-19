@@ -1,12 +1,12 @@
 {
-  "request_id": "gw001-fix-playoff-trigger-plan-20260919-27",
-  "completed_at": "2026-09-19T09:12:51.286565+00:00",
+  "request_id": "gw001-fix-playoff-trigger-execute-20260919-28",
+  "completed_at": "2026-09-19T09:13:15.358943+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw001-fix-playoff-trigger-plan-20260919-27",
+    "request_id": "gw001-fix-playoff-trigger-execute-20260919-28",
     "requested_at": "2026-09-19T09:14:00Z",
-    "purpose": "Fix GW001 Results update trigger so explicit playoff division is preserved, then correct fixture 368726159",
-    "action": "plan_migration",
+    "purpose": "Execute approved GW001 playoff trigger and fixture correction",
+    "action": "execute_migration",
     "target": "custom",
     "migration_id": "gw001-preserve-explicit-playoff-division-update-20260919",
     "statements": [
@@ -19,41 +19,45 @@
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "custom",
-      "database": "Sql1956795_3",
-      "migration_id": "gw001-preserve-explicit-playoff-division-update-20260919",
-      "allow_destructive": true,
-      "data_migration": true,
-      "statements": [
-        "DROP TRIGGER `trg_GW001_results_playoff_div_bu`",
-        "CREATE TRIGGER `trg_GW001_results_playoff_div_bu` BEFORE UPDATE ON `GW001_IMC Results` FOR EACH ROW SET NEW.sm_division=CASE WHEN NULLIF(TRIM(COALESCE(NEW.sm_division,'')),'') IS NOT NULL THEN NEW.sm_division WHEN NEW.game_world_id='GW001' AND (REGEXP_LIKE(TRIM(COALESCE(NEW.sm_action,'')), '^play[[:space:]-]*offs?$', 'i') OR REGEXP_LIKE(TRIM(COALESCE(NEW.competition_stage,'')), '^play[[:space:]-]*offs?([[:space:]:-]|$)', 'i') OR REGEXP_LIKE(TRIM(COALESCE(NEW.competition_group_name,'')), '^play[[:space:]-]*offs?([[:space:]:-]|$)', 'i') OR REGEXP_LIKE(TRIM(COALESCE(NEW.competition_round,'')), '^play[[:space:]-]*offs?([[:space:]:-]|$)', 'i')) THEN (SELECT CASE WHEN h.division_value IN ('2','3','4') AND h.division_value=a.division_value AND h.club_division=h.division_value AND a.club_division=a.division_value THEN h.division_value ELSE NULL END FROM gw_world_clubs h JOIN gw_world_clubs a ON a.game_world_id=h.game_world_id JOIN gw_source_captures hc ON hc.capture_id=h.capture_id AND hc.game_world_id=h.game_world_id AND hc.capture_status='complete' JOIN gw_source_captures ac ON ac.capture_id=a.capture_id AND ac.game_world_id=a.game_world_id AND ac.capture_status='complete' WHERE h.game_world_id='GW001' AND h.world_club_id=NEW.home_sm_club_id AND a.world_club_id=NEW.away_sm_club_id AND hc.generated_at < DATE_ADD(NEW.match_date,INTERVAL 1 DAY) AND ac.generated_at < DATE_ADD(NEW.match_date,INTERVAL 1 DAY)) ELSE NEW.sm_division END",
-        "UPDATE `GW001_IMC Results` SET sm_division='4', competition_key='GW001|DOMESTIC|playoff|4' WHERE sm_fixture_id=368726159"
-      ]
-    },
-    "analysis": [
-      {
-        "sql": "DROP TRIGGER `trg_GW001_results_playoff_div_bu`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "ce8619e860f7c9aac88d5655cb513f95aa2abd03e9b1d505eeaa9dfc0accbd89"
-      },
-      {
-        "sql": "CREATE TRIGGER `trg_GW001_results_playoff_div_bu` BEFORE UPDATE ON `GW001_IMC Results` FOR EACH ROW SET NEW.sm_division=CASE WHEN NULLIF(TRIM(COALESCE(NEW.sm_division,'')),'') IS NOT NULL THEN NEW.sm_division WHEN NEW.game_world_id='GW001' AND (REGEXP_LIKE(TRIM(COALESCE(NEW.sm_action,'')), '^play[[:space:]-]*offs?$', 'i') OR REGEXP_LIKE(TRIM(COALESCE(NEW.competition_stage,'')), '^play[[:space:]-]*offs?([[:space:]:-]|$)', 'i') OR REGEXP_LIKE(TRIM(COALESCE(NEW.competition_group_name,'')), '^play[[:space:]-]*offs?([[:space:]:-]|$)', 'i') OR REGEXP_LIKE(TRIM(COALESCE(NEW.competition_round,'')), '^play[[:space:]-]*offs?([[:space:]:-]|$)', 'i')) THEN (SELECT CASE WHEN h.division_value IN ('2','3','4') AND h.division_value=a.division_value AND h.club_division=h.division_value AND a.club_division=a.division_value THEN h.division_value ELSE NULL END FROM gw_world_clubs h JOIN gw_world_clubs a ON a.game_world_id=h.game_world_id JOIN gw_source_captures hc ON hc.capture_id=h.capture_id AND hc.game_world_id=h.game_world_id AND hc.capture_status='complete' JOIN gw_source_captures ac ON ac.capture_id=a.capture_id AND ac.game_world_id=a.game_world_id AND ac.capture_status='complete' WHERE h.game_world_id='GW001' AND h.world_club_id=NEW.home_sm_club_id AND a.world_club_id=NEW.away_sm_club_id AND hc.generated_at < DATE_ADD(NEW.match_date,INTERVAL 1 DAY) AND ac.generated_at < DATE_ADD(NEW.match_date,INTERVAL 1 DAY)) ELSE NEW.sm_division END",
-        "kind": "CREATE",
-        "destructive": false,
-        "sha256": "b176e8609c31b1df3b9fa9620befb420f146bdd7af8c91bffa724595453d48d4"
-      },
-      {
-        "sql": "UPDATE `GW001_IMC Results` SET sm_division='4', competition_key='GW001|DOMESTIC|playoff|4' WHERE sm_fixture_id=368726159",
-        "kind": "UPDATE",
-        "destructive": false,
-        "sha256": "f47d088ab948a2694769d49bb514f53fe87ab210cdd20db5e6f4ae1893e5e85d"
-      }
-    ],
+    "action": "execute_migration",
+    "target": "custom",
+    "database": "Sql1956795_3",
+    "migration_id": "gw001-preserve-explicit-playoff-division-update-20260919",
+    "data_migration": true,
     "plan_sha256": "7d48fd1e0cd43386f20c36e79ef15c4d98bb54f7d7835a7c7b07451f977547f5",
-    "expires_at": "2026-09-19T09:27:51+00:00",
-    "confirmation_token": "1789810071.348399b2000025d68c494afc73787ccb0915c5b2030cdd667ff7bc82cd422eac"
+    "status": "success",
+    "statement_count": 3,
+    "duration_ms": 330,
+    "before": {
+      "tables": 320,
+      "columns": 5566
+    },
+    "after": {
+      "tables": 320,
+      "columns": 5566
+    },
+    "results": [
+      {
+        "statement": 1,
+        "sha256": "ce8619e860f7c9aac88d5655cb513f95aa2abd03e9b1d505eeaa9dfc0accbd89",
+        "affected_rows": 0,
+        "insert_id": 0,
+        "duration_ms": 47
+      },
+      {
+        "statement": 2,
+        "sha256": "b176e8609c31b1df3b9fa9620befb420f146bdd7af8c91bffa724595453d48d4",
+        "affected_rows": 0,
+        "insert_id": 0,
+        "duration_ms": 12
+      },
+      {
+        "statement": 3,
+        "sha256": "f47d088ab948a2694769d49bb514f53fe87ab210cdd20db5e6f4ae1893e5e85d",
+        "affected_rows": 1,
+        "insert_id": 0,
+        "duration_ms": 10
+      }
+    ]
   }
 }
