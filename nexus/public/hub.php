@@ -138,6 +138,12 @@ function nexus_competition_reports(PDO $db,PDO $core,string $world): array {
     $rows=nexus_core_rows($db,"SELECT site_match_report_id site_id,game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id,home_manager_name,away_manager_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score $detail FROM `IMC Site Match Report` WHERE game_world_id=? AND competition_key=? $where ORDER BY match_date,site_match_report_id",$params);
     foreach($rows as &$row)foreach(['team_stats_json','players_json'] as $field)if(isset($row[$field])&&is_string($row[$field]))$row[$field]=json_decode($row[$field],true);unset($row);
     nexus_core_enrich($core,$world,'match_report',$rows);
+
+    if($detail!==''){
+        $ids=[];foreach($rows as $r)foreach(($r['players_json']??[]) as $p){$id=$p['sm_player_id']??$p['player_id']??null;if($id!==null&&ctype_digit((string)$id)&&(int)$id>0)$ids[(string)$id]=$id;}
+        $photos=[];foreach(array_chunk(array_values($ids),500) as $batch){$ph=implode(',',array_fill(0,count($batch),'?'));foreach(nexus_core_rows($core,"SELECT id,image_url FROM `IMC Player Codex Global` WHERE id IN ($ph)",$batch) as $p)$photos[(string)$p['id']]=$p['image_url'];}
+        foreach($rows as &$r){if(!is_array($r['players_json']??null))continue;foreach($r['players_json'] as &$p){$id=$p['sm_player_id']??$p['player_id']??null;$p['codex_image_url']=$id!==null?($photos[(string)$id]??null):null;}unset($p);}unset($r);
+    }
     $schedule=nexus_match_rows($db,$world,$key,$season,'schedule');$played=[];foreach($rows as $r)if($r['home_score']!==null&&$r['away_score']!==null)$played[(string)$r['sm_fixture_id']]=true;
     $schedule=array_values(array_filter($schedule,fn($r)=>!isset($played[(string)$r['sm_fixture_id']])));
     $competition=$rows?($rows[0]['competition_core']??$rows[0]):['sm_action'=>'','competition_key'=>$key];

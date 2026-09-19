@@ -236,3 +236,20 @@ button:active:not(:disabled),.text-link:active,.report-link:active{box-shadow:in
 .overview-leaders li small{display:block;font-size:.8125rem;line-height:1.4;margin-top:3px}
 .overview-leaders li>b{font-size:1.125rem;white-space:nowrap;font-variant-numeric:tabular-nums}
 @media(max-width:599px){.overview-leaders{grid-template-columns:1fr}}
+
+/* Overview: individual glossy metrics and stacked player/club identities. */
+.overview-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.overview-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#dataSection .overview-stat{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:8px;padding:18px 10px;min-height:106px;background:linear-gradient(155deg,#fff 40%,#f1f6fc);border-color:#dce5ef;border-radius:20px}
+.overview-stat>strong{font-size:clamp(1.4rem,4.7vw,2rem);font-weight:800;line-height:1.15;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.overview-stat>small{font-size:.8125rem;line-height:1.35;overflow-wrap:anywhere}
+.overview-leaders li{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px}
+.overview-player-visual{display:flex;flex-direction:column;align-items:center;gap:6px}
+.overview-portrait{display:grid;place-items:center;width:48px;height:52px;background:linear-gradient(145deg,#fff,#edf3fb);border:1px solid var(--line);border-radius:12px;overflow:hidden;color:#7b91ab}
+.overview-portrait svg{width:36px;height:40px}
+.overview-portrait .overview-player-photo{width:100%;height:100%;object-fit:contain}
+.overview-player-divider{width:20px;height:1px;background:#a8b8ce}
+.overview-club{display:grid;place-items:center;min-height:27px}
+.overview-club .overview-club-logo{width:26px;height:27px;object-fit:contain}
+.overview-player-copy{min-width:0}
+@media(max-width:599px){.overview-stat-grid{gap:8px}.overview-summary-grid{gap:8px}#dataSection .overview-stat{padding:15px 7px;border-radius:17px;min-height:100px}.overview-stat>small{font-size:.75rem}.overview-summary-grid .overview-stat>strong{font-size:1.6rem}.overview-leaders li{gap:10px}}

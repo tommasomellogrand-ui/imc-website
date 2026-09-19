@@ -50,7 +50,7 @@ function reportSummary(reports){
    const key=id?'id:'+id:'name:'+team+'|'+text(p.player_name);
    if(seen.has(key))continue;seen.add(key);
    if(!players.has(key))players.set(key,{name:p.player_name,teams:new Set(),goals:0,assists:0,mom:0,ratingSum:0,ratingCount:0});
-   const x=players.get(key);x.teams.add(team);x.goals+=number(p.goals)||0;x.assists+=number(p.assists)||0;x.mom+=flag(p.man_of_match)?1:0;
+   const x=players.get(key);x.teams.add(team);if(p.codex_image_url)x.image_url=p.codex_image_url;x.club_core=r[p.team_side+'_core']||null;x.club_name=team;x.goals+=number(p.goals)||0;x.assists+=number(p.assists)||0;x.mom+=flag(p.man_of_match)?1:0;
    const rating=number(p.rating);if(rating!==null&&rating>0&&rating<=10){x.ratingSum+=rating;x.ratingCount++}
   }
  }
