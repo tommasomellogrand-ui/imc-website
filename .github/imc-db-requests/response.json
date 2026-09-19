@@ -1,11 +1,11 @@
 {
-  "request_id": "gw004-total-alignment-check-20260919-31",
-  "completed_at": "2026-09-19T09:47:51.383422+00:00",
+  "request_id": "gw004-refresh-alignment-20260919-32",
+  "completed_at": "2026-09-19T09:51:46.497976+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw004-total-alignment-check-20260919-31",
-    "requested_at": "2026-09-19T09:49:00Z",
-    "purpose": "Full GW004 Results vs Match Report fixture alignment by competition key",
+    "request_id": "gw004-refresh-alignment-20260919-32",
+    "requested_at": "2026-09-19T09:51:00Z",
+    "purpose": "Refresh GW004 Results vs Match Report alignment after new Match Report imports",
     "action": "query",
     "target": "custom",
     "sql": "SELECT k.competition_key,COALESCE(r.n,0) results,COALESCE(m.n,0) match_reports,COALESCE(x.same_key,0) fixture_same_key,COALESCE(x.diff_key,0) fixture_different_key,COALESCE(r.n,0)-COALESCE(x.any_match,0) results_without_report,COALESCE(m.n,0)-COALESCE(y.any_match,0) reports_without_result FROM (SELECT competition_key FROM `GW004_IMC Results` UNION SELECT competition_key FROM `GW004_IMC Match Report`) k LEFT JOIN (SELECT competition_key,COUNT(*) n FROM `GW004_IMC Results` GROUP BY competition_key) r ON r.competition_key=k.competition_key LEFT JOIN (SELECT competition_key,COUNT(*) n FROM `GW004_IMC Match Report` GROUP BY competition_key) m ON m.competition_key=k.competition_key LEFT JOIN (SELECT r.competition_key,COUNT(m.sm_fixture_id) any_match,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key=r.competition_key THEN 1 ELSE 0 END) same_key,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key<>r.competition_key THEN 1 ELSE 0 END) diff_key FROM `GW004_IMC Results` r LEFT JOIN `GW004_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id GROUP BY r.competition_key) x ON x.competition_key=k.competition_key LEFT JOIN (SELECT m.competition_key,COUNT(r.sm_fixture_id) any_match FROM `GW004_IMC Match Report` m LEFT JOIN `GW004_IMC Results` r ON r.sm_fixture_id=m.sm_fixture_id GROUP BY m.competition_key) y ON y.competition_key=k.competition_key ORDER BY k.competition_key",
@@ -33,6 +33,42 @@
           "match_reports": "0",
           "fixture_same_key": "0",
           "fixture_different_key": "1",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW004|DOMESTIC|league|1",
+          "results": "0",
+          "match_reports": "10",
+          "fixture_same_key": "0",
+          "fixture_different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW004|DOMESTIC|league|2",
+          "results": "0",
+          "match_reports": "10",
+          "fixture_same_key": "0",
+          "fixture_different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW004|DOMESTIC|league|3",
+          "results": "0",
+          "match_reports": "10",
+          "fixture_same_key": "0",
+          "fixture_different_key": "0",
+          "results_without_report": "0",
+          "reports_without_result": "0"
+        },
+        {
+          "competition_key": "GW004|DOMESTIC|league|4",
+          "results": "0",
+          "match_reports": "10",
+          "fixture_same_key": "0",
+          "fixture_different_key": "0",
           "results_without_report": "0",
           "reports_without_result": "0"
         },
@@ -95,8 +131,8 @@
           "results": "240",
           "match_reports": "230",
           "fixture_same_key": "230",
-          "fixture_different_key": "0",
-          "results_without_report": "10",
+          "fixture_different_key": "10",
+          "results_without_report": "0",
           "reports_without_result": "0"
         },
         {
@@ -104,8 +140,8 @@
           "results": "240",
           "match_reports": "230",
           "fixture_same_key": "230",
-          "fixture_different_key": "0",
-          "results_without_report": "10",
+          "fixture_different_key": "10",
+          "results_without_report": "0",
           "reports_without_result": "0"
         },
         {
@@ -113,8 +149,8 @@
           "results": "240",
           "match_reports": "230",
           "fixture_same_key": "230",
-          "fixture_different_key": "0",
-          "results_without_report": "10",
+          "fixture_different_key": "10",
+          "results_without_report": "0",
           "reports_without_result": "0"
         },
         {
@@ -122,8 +158,8 @@
           "results": "240",
           "match_reports": "230",
           "fixture_same_key": "230",
-          "fixture_different_key": "0",
-          "results_without_report": "10",
+          "fixture_different_key": "10",
+          "results_without_report": "0",
           "reports_without_result": "0"
         },
         {
@@ -136,10 +172,10 @@
           "reports_without_result": "0"
         }
       ],
-      "returned_rows": 13,
-      "total_rows": 13,
+      "returned_rows": 17,
+      "total_rows": 17,
       "truncated": false,
-      "duration_ms": 1156
+      "duration_ms": 72
     }
   }
 }
