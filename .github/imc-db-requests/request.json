@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-postcleanup-key-check-20260919-12",
-  "requested_at": "2026-09-19T08:49:00Z",
-  "purpose": "Post-cleanup GW001 competition_key counts Results vs Match Report",
+  "request_id": "gw001-leagues-fixture-alignment-20260919-13",
+  "requested_at": "2026-09-19T08:52:00Z",
+  "purpose": "Check fixture ID alignment for the four 90-row GW001 league competition keys",
   "action": "query",
   "target": "custom",
-  "sql": "SELECT competition_key,SUM(results_count) AS results_count,SUM(match_report_count) AS match_report_count FROM (SELECT competition_key,COUNT(*) results_count,0 match_report_count FROM `GW001_IMC Results` GROUP BY competition_key UNION ALL SELECT competition_key,0 results_count,COUNT(*) match_report_count FROM `GW001_IMC Match Report` GROUP BY competition_key) q GROUP BY competition_key ORDER BY competition_key",
-  "limit": 1000
+  "sql": "SELECT r.competition_key, COUNT(*) AS results_rows, SUM(CASE WHEN m.sm_fixture_id IS NOT NULL THEN 1 ELSE 0 END) AS matched_fixture_ids, SUM(CASE WHEN m.sm_fixture_id IS NULL THEN 1 ELSE 0 END) AS results_without_report, SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key=r.competition_key THEN 1 ELSE 0 END) AS same_key, SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key<>r.competition_key THEN 1 ELSE 0 END) AS different_key FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.competition_key IN ('GW001|CUS|DOMESTIC|league|1','GW001|CUS|DOMESTIC|league|2','GW001|CUS|DOMESTIC|league|3','GW001|CUS|DOMESTIC|league|4') GROUP BY r.competition_key ORDER BY r.competition_key",
+  "limit": 100
 }
