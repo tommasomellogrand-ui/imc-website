@@ -1,9 +1,9 @@
 {
-  "request_id": "gw008-worldcup-all-20260919-26",
-  "requested_at": "2026-09-19T09:20:00Z",
-  "purpose": "Inspect all GW008 World Cup results to identify season 1 final",
+  "request_id": "gw001-results-without-report-20260919-06",
+  "requested_at": "2026-09-19T08:35:00Z",
+  "purpose": "List every GW001 Result fixture with no matching Match Report by sm_fixture_id",
   "action": "query",
-  "target": "gold",
-  "sql": "SELECT sm_fixture_id,match_date,competition_stage,competition_round,home_name,away_name,home_score,away_score,penalty_home_score,penalty_away_score FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND competition_key='GW008|NATIONS|worldcup' ORDER BY match_date,sm_fixture_id",
-  "limit": 100
+  "target": "custom",
+  "sql": "SELECT r.* FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE m.sm_fixture_id IS NULL ORDER BY r.competition_key,r.match_date,r.sm_fixture_id",
+  "limit": 1000
 }
