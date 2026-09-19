@@ -1,9 +1,13 @@
 {
-  "request_id": "gw005-mr-latest-20260919-03",
-  "requested_at": "2026-09-19T08:18:00Z",
-  "purpose": "Identify latest GW005 Match Report before requested deletion",
-  "action": "query",
+  "request_id": "gw005-mr-delete-20260919-04",
+  "requested_at": "2026-09-19T08:20:00Z",
+  "purpose": "Explicit user-requested deletion of latest GW005 Match Report",
+  "action": "delete_one",
   "target": "custom",
-  "sql": "SELECT game_world_id, sm_fixture_id, competition_key, competition_group, competition_stage, competition_round, match_date, home_name, away_name, home_score, away_score, fingerprint, imported_at FROM `GW005_IMC Match Report` WHERE game_world_id='GW005' ORDER BY imported_at DESC, match_date DESC, sm_fixture_id DESC LIMIT 1",
-  "limit": 1
+  "table": "GW005_IMC Match Report",
+  "where": {
+    "game_world_id": "GW005",
+    "sm_fixture_id": 312954797,
+    "fingerprint": "b1b2679479656b57ebb3d246057220427efde29e41e8b6bd407b5b099cdc4bfd"
+  }
 }
