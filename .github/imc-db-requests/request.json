@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-competition-audit-20260919-02",
-  "requested_at": "2026-09-19T08:26:00Z",
-  "purpose": "Audit actual GW001 competition fields in Results and Match Report",
+  "request_id": "gw008-season-dates-20260919-18",
+  "requested_at": "2026-09-19T09:00:00Z",
+  "purpose": "Read authoritative GW008 season 1 start/end dates",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT 'results' AS source, competition_key, competition_group, sm_action, sm_country, sm_division, competition_stage, competition_group_name, competition_round, COUNT(*) AS n FROM `GW001_IMC Results` GROUP BY competition_key,competition_group,sm_action,sm_country,sm_division,competition_stage,competition_group_name,competition_round UNION ALL SELECT 'match_report' AS source, competition_key, competition_group, sm_action, sm_country, sm_division, competition_stage, competition_group_name, competition_round, COUNT(*) AS n FROM `GW001_IMC Match Report` GROUP BY competition_key,competition_group,sm_action,sm_country,sm_division,competition_stage,competition_group_name,competition_round ORDER BY competition_key,source",
-  "limit": 1000
+  "target": "gold",
+  "sql": "SELECT * FROM `gw_seasons` WHERE game_world_id='GW008' AND imc_season=1 ORDER BY start_date",
+  "limit": 20
 }
