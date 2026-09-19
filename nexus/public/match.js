@@ -52,7 +52,7 @@ async function boot(){
  const [data,catalog]=await Promise.all([fetchJSON({world,resource:'match_report',fixture}),fetchJSON({world,resource:'catalog'}).catch(()=>null)]);
  record=data.rows?.[0];if(!record){$('status').textContent='Il report di questa partita non è ancora disponibile.';return}
  players=array(record.players_json);events=array(record.events_json).sort((a,b)=>(num(a.event_sequence)??0)-(num(b.event_sequence)??0));tactics=array(record.tactics_json);
- const comp=catalog?.rows?.find(c=>c.competition_key===record.competition_key);$('competition').textContent=comp?.nexus_view||comp?.custom_competition||'Match Report';
+ const comp=catalog?.rows?.find(c=>c.competition_key===record.competition_key);$('competition').textContent=record.competition_core?.nexus_view||comp?.nexus_view||'Nome competizione non configurato';
  $('status').hidden=true;renderHero();render();
  }catch(e){$('status').textContent=e.message;$('panel').innerHTML='<button class="retry" type="button">Riprova</button>';$('panel').querySelector('button').onclick=()=>{ $('panel').innerHTML='';boot()};}
 }

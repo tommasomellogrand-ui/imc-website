@@ -25,6 +25,11 @@ def check(route):
     assert d['ok'] and d['version']=='nexus-public-2' and d['world']==world and d['resource']==resource
     assert d['core']['source']=='MYSQL_ARUBA_CORE' and d['core']['world']['game_world_id']==world
     assert all(r['game_world_id']==world for r in d['rows'])
+    for row in d['rows']:
+        if row.get('competition_key'):
+            comp=row.get('competition_core')
+            assert comp and 'nexus_view' in comp and 'name_mapping_status' in comp, (world,resource,'missing Nexus mapping')
+            assert comp['custom_competition']==(comp['nexus_view'] or 'Nome competizione non configurato')
     if resource=='match_report' and d['rows']:
         report=json.loads(get(f"public/data.php?world={world}&resource=match_report&fixture={d['rows'][0]['sm_fixture_id']}"))
         assert report['ok'] and report['rows'] and 'players_json' in report['rows'][0]

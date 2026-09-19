@@ -20,39 +20,6 @@ function nexus_match_rows(PDO $db,string $world,string $key,?array $season,strin
     nexus_report_logo_ids($db,$world,$rows);return $rows;
 }
 
-/** Resolve display labels exclusively from the CORE Nexus mapping.
- * Legacy country/division tokens are normalized for lookup only.
- * Imported competition keys and fixture data remain untouched.
- */
-function nexus_apply_catalog_names(array &$catalog,array $mapping,string $world): void {
-    $types=[];
-    foreach($mapping as $m)if(($m['game_world_id']??'')===$world)$types[(string)$m['world_type']]=true;
-    $single=count($types)===1&&isset($types['SINGLE']);
-    $key=static function(string $value) use($single): string {
-        $parts=explode('|',$value);
-        $at=null;
-        foreach($parts as $i=>$part)if(in_array($part,['DOMESTIC','INTERNATIONAL','NATIONS'],true)){$at=$i;break;}
-        if($at===null||!isset($parts[$at+1]))return $value;
-        $group=$parts[$at];$action=$parts[$at+1];$out=[$parts[0]];
-        if(!$single&&$group==='DOMESTIC'&&$at>1)$out[]=$parts[1];
-        $out[]=$group;$out[]=$action;
-        if(in_array($action,['league','playoff'],true)&&isset($parts[$at+2]))$out[]=$parts[$at+2];
-        return implode('|',$out);
-    };
-    $labels=[];
-    foreach($mapping as $m){
-        if(($m['game_world_id']??'')!==$world||trim((string)($m['nexus_view']??''))==='')continue;
-        $labels[$key((string)$m['competition_key'])][(string)$m['nexus_view']]=true;
-    }
-    foreach($catalog as &$c){
-        $names=array_keys($labels[$key((string)($c['competition_key']??''))]??[]);
-        $c['nexus_view']=count($names)===1?$names[0]:null;
-        $c['name_mapping_status']=count($names)===1?'matched':(count($names)>1?'ambiguous':'missing');
-        $c['custom_competition']=$c['nexus_view']??'Nome competizione non configurato';
-    }
-    unset($c);
-}
-
 function nexus_catalog(PDO $db,PDO $core,string $world,?array $season): array {
     $catalog=nexus_core_rows($core,'SELECT id,competition_key,custom_competition,sm_action,sm_action_group,sm_country,sm_division,teams_count,expected_match,is_sm_action FROM `IMC Competition Codex Global` WHERE game_world_id=?',[$world]);
     $byKey=[];foreach($catalog as $c)if($c['competition_key'])$byKey[$c['competition_key']]=$c;
@@ -174,3 +141,4 @@ function nexus_competition_reports(PDO $db,PDO $core,string $world): array {
     $competition=$rows?($rows[0]['competition_core']??$rows[0]):['sm_action'=>'','competition_key'=>$key];
     return ['ok'=>true,'world'=>$world,'source'=>'IMC Site Match Report','competition'=>$competition,'reports'=>$rows,'schedule'=>$schedule];
 }
+

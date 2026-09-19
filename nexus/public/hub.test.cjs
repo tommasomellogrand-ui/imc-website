@@ -99,3 +99,13 @@ test('team crests render in fixtures, standings and player club summaries',async
  for(const tab of ['overview','competition','matches']){const r=await render('?world=GW003&resource=competitions&competition=GW003%7CARG%7CDOMESTIC%7Cleague%7C1&tab='+tab);assert.ok(r.html.includes('https://example.test/home.png'));assert.ok(r.html.includes('class="core-crest"'));}
  const p=await render('?world=GW003&resource=player');assert.ok(p.html.includes('https://example.test/club.png'));assert.ok(p.html.includes('team-context'));
 });
+
+
+test('every competition label uses Nexus View exclusively',()=>{
+ const source=fs.readFileSync(__dirname+'/site.js','utf8');
+ const declaration=source.match(/const compName=[^;]+;/)[0];
+ const label=vm.runInNewContext(declaration+'compName');
+ assert.equal(label({nexus_view:'National Cup',custom_competition:'Coppa di Lega',sm_action:'leaguecup'}),'National Cup');
+ assert.equal(label({custom_competition:'Campionato',sm_action:'league'}),'Nome competizione non configurato');
+ assert.equal(label(null),'Nome competizione non configurato');
+});

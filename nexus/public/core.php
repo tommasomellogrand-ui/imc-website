@@ -1,5 +1,38 @@
 <?php
 declare(strict_types=1);
+/** Resolve display labels exclusively from the CORE Nexus mapping.
+ * Legacy country/division tokens are normalized for lookup only.
+ * Imported competition keys and fixture data remain untouched.
+ */
+function nexus_apply_catalog_names(array &$catalog,array $mapping,string $world): void {
+    $types=[];
+    foreach($mapping as $m)if(($m['game_world_id']??'')===$world)$types[(string)$m['world_type']]=true;
+    $single=count($types)===1&&isset($types['SINGLE']);
+    $key=static function(string $value) use($single): string {
+        $parts=explode('|',$value);
+        $at=null;
+        foreach($parts as $i=>$part)if(in_array($part,['DOMESTIC','INTERNATIONAL','NATIONS'],true)){$at=$i;break;}
+        if($at===null||!isset($parts[$at+1]))return $value;
+        $group=$parts[$at];$action=$parts[$at+1];$out=[$parts[0]];
+        if(!$single&&$group==='DOMESTIC'&&$at>1)$out[]=$parts[1];
+        $out[]=$group;$out[]=$action;
+        if(in_array($action,['league','playoff'],true)&&isset($parts[$at+2]))$out[]=$parts[$at+2];
+        return implode('|',$out);
+    };
+    $labels=[];
+    foreach($mapping as $m){
+        if(($m['game_world_id']??'')!==$world||trim((string)($m['nexus_view']??''))==='')continue;
+        $labels[$key((string)$m['competition_key'])][(string)$m['nexus_view']]=true;
+    }
+    foreach($catalog as &$c){
+        $names=array_keys($labels[$key((string)($c['competition_key']??''))]??[]);
+        $c['nexus_view']=count($names)===1?$names[0]:null;
+        $c['name_mapping_status']=count($names)===1?'matched':(count($names)>1?'ambiguous':'missing');
+        $c['custom_competition']=$c['nexus_view']??'Nome competizione non configurato';
+    }
+    unset($c);
+}
+
 // Read-only presentation hints: never modify result/schedule IDs or infer by name.
 function nexus_report_logo_ids(PDO $db,string $world,array &$rows): void {
     $ids=[];foreach($rows as $r)if(!empty($r['sm_fixture_id'])&&(empty($r['home_sm_club_id']??$r['home_sm_team_id']??null)||empty($r['away_sm_club_id']??$r['away_sm_team_id']??null)))$ids[(string)$r['sm_fixture_id']]=$r['sm_fixture_id'];
@@ -33,6 +66,11 @@ $clubs=nexus_core_rows($db,'SELECT m.`SM World Club ID` sm_team_id,m.`SM Club ID
 $nations=nexus_core_rows($db,'SELECT m.`SM World National Club ID` sm_team_id,m.`SM National Team ID` sm_global_team_id,m.`National Team ID` national_team_id,c.name,c.image_url FROM `IMC Game World National Team Mapping` m LEFT JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`=?',[$world]);
 $clubIndex=nexus_team_index($clubs);$nationIndex=nexus_team_index($nations);
 $competitions=nexus_core_rows($db,'SELECT id,competition_key,custom_competition,sm_action,sm_action_group,sm_country,sm_division FROM `IMC Competition Codex Global` WHERE game_world_id=?',[$world]);$compIndex=[];foreach($competitions as $c)if($c['competition_key'])$compIndex[$c['competition_key']]=$c;
+// One display-name source for every response, including reports and profiles.
+$mapping=nexus_core_rows($db,'SELECT game_world_id,world_type,competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$world]);
+$display=[];foreach($rows as $r){$key=(string)($r['competition_key']??'');if($key!==''&&!isset($display[$key]))$display[$key]=$compIndex[$key]??['competition_key'=>$key,'sm_action'=>$r['sm_action']??null,'sm_action_group'=>$r['competition_group']??null,'sm_country'=>$r['sm_country']??null,'sm_division'=>$r['sm_division']??null];}
+$display=array_values($display);nexus_apply_catalog_names($display,$mapping,$world);
+$compIndex=[];foreach($display as $c)$compIndex[$c['competition_key']]=$c;
 $countries=[];foreach(nexus_core_rows($db,'SELECT id,name FROM `IMC Country Codex Global`') as $c)$countries[(string)$c['id']]=$c['name'];
 $managerIds=[];$playerIds=[];foreach($rows as $r){foreach(['home_sm_manager_id','away_sm_manager_id'] as $f)if(!empty($r[$f]))$managerIds[(string)$r[$f]]=$r[$f];if(!empty($r['player_id']))$playerIds[(string)$r['player_id']]=$r['player_id'];}
 $managers=[];if($managerIds){$ph=implode(',',array_fill(0,count($managerIds),'?'));foreach(nexus_core_rows($db,"SELECT manager_id,full_name,sm_manager_id FROM `IMC Manager Codex Global` WHERE sm_manager_id IN ($ph)",array_values($managerIds)) as $m)$managers[(string)$m['sm_manager_id']]=$m;}
@@ -45,4 +83,7 @@ $empty=[];$context=nexus_core_enrich($db,$world,'results',$empty);
 $context['clubs']=nexus_core_rows($db,'SELECT m.`Club ID` id,COALESCE(c.name,m.`Club Name`) name,c.image_url,m.`SM World Club ID` sm_team_id,m.`SM Club ID` sm_global_team_id FROM `IMC Game World Club Mapping` m LEFT JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=? ORDER BY name',[$world]);
 $context['managers']=nexus_core_rows($db,"SELECT a.manager_id,COALESCE(gcm.`Club ID`,a.team_id) team_id,a.national_team_id,COALESCE(mc.full_name,a.full_name) full_name,COALESCE(cc.name,gcm.`Club Name`,nc.name,a.team_name) team_name,a.assignment_type,a.start_date,a.end_date FROM `IMC Manager Assignment Global` a LEFT JOIN `IMC Manager Codex Global` mc ON mc.manager_id=a.manager_id LEFT JOIN `IMC Game World Club Mapping` gcm ON gcm.`Game World`=a.game_world_id AND (CAST(gcm.`Club ID` AS CHAR)=CAST(a.team_id AS CHAR) OR CAST(gcm.`SM Club ID` AS CHAR)=CAST(a.team_id AS CHAR) OR LOWER(TRIM(gcm.`Club Name`))=LOWER(TRIM(a.team_name))) LEFT JOIN `IMC Club Codex Global` cc ON cc.id=gcm.`Club ID` LEFT JOIN `IMC Game World National Team Mapping` gnm ON gnm.`Game World`=a.game_world_id AND gnm.`National Team ID`=a.national_team_id LEFT JOIN `IMC National Team Codex Global` nc ON nc.id=gnm.`National Team ID` WHERE a.game_world_id=? ORDER BY full_name,a.start_date DESC",[$world]);
 $context['competitions']=nexus_core_rows($db,'SELECT id,competition_key,custom_competition,sm_action,sm_action_group,sm_country,sm_division FROM `IMC Competition Codex Global` WHERE game_world_id=? ORDER BY sm_action_group,sm_country,sm_division,sm_action',[$world]);
+$mapping=nexus_core_rows($db,'SELECT game_world_id,world_type,competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$world]);
+nexus_apply_catalog_names($context['competitions'],$mapping,$world);
 $context['nations']=nexus_core_rows($db,'SELECT m.`National Team ID` id,c.name,c.image_url,m.`SM World National Club ID` sm_team_id,m.`SM National Team ID` sm_global_team_id FROM `IMC Game World National Team Mapping` m LEFT JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`=? ORDER BY c.name',[$world]);return $context;}
+

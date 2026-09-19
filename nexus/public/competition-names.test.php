@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__.'/hub.php';
+require_once __DIR__.'/core.php';
 function label_check(bool $ok,string $why): void {if(!$ok)throw new RuntimeException($why);}
 $mapping=[
  ['game_world_id'=>'GW001','world_type'=>'SINGLE','competition_key'=>'GW001|DOMESTIC|league|1','nexus_view'=>'Div 1'],
