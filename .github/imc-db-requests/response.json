@@ -1,12 +1,12 @@
 {
-  "request_id": "gw008-group-plan-20260919-10",
-  "completed_at": "2026-09-19T08:19:11.884997+00:00",
+  "request_id": "gw008-group-execute-20260919-11",
+  "completed_at": "2026-09-19T08:19:45.940924+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw008-group-plan-20260919-10",
-    "requested_at": "2026-09-19T08:37:00Z",
-    "purpose": "Plan explicit GW008 competition_group backfill from sm_action",
-    "action": "plan_migration",
+    "request_id": "gw008-group-execute-20260919-11",
+    "requested_at": "2026-09-19T08:38:00Z",
+    "purpose": "Execute explicit GW008 competition_group backfill from sm_action",
+    "action": "execute_migration",
     "target": "gold",
     "migration_id": "gw008-results-competition-group-backfill-20260919",
     "statements": [
@@ -19,41 +19,45 @@
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "gold",
-      "database": "Sql1956795_2",
-      "migration_id": "gw008-results-competition-group-backfill-20260919",
-      "allow_destructive": false,
-      "data_migration": true,
-      "statements": [
-        "UPDATE `GW008_IMC Results` SET competition_group='DOMESTIC' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('league','leaguecup','leagueshield','charityshield')",
-        "UPDATE `GW008_IMC Results` SET competition_group='INTERNATIONAL' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('smfacup','smfashield','supercup')",
-        "UPDATE `GW008_IMC Results` SET competition_group='NATIONS' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('worldcup','interqualifier')"
-      ]
-    },
-    "analysis": [
-      {
-        "sql": "UPDATE `GW008_IMC Results` SET competition_group='DOMESTIC' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('league','leaguecup','leagueshield','charityshield')",
-        "kind": "UPDATE",
-        "destructive": false,
-        "sha256": "2bcb4329dd441824ef1a6deef2b616b9cfb41ab0e54bec60c1d6c0b8214d4c10"
-      },
-      {
-        "sql": "UPDATE `GW008_IMC Results` SET competition_group='INTERNATIONAL' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('smfacup','smfashield','supercup')",
-        "kind": "UPDATE",
-        "destructive": false,
-        "sha256": "03f2c27730462be991ee438e56fc344856442e0e6341b7bfc80be8adb75bf186"
-      },
-      {
-        "sql": "UPDATE `GW008_IMC Results` SET competition_group='NATIONS' WHERE game_world_id='GW008' AND (competition_group IS NULL OR TRIM(competition_group)='') AND sm_action IN ('worldcup','interqualifier')",
-        "kind": "UPDATE",
-        "destructive": false,
-        "sha256": "a8638cb8a07e0eef950a5a039e9d9fef19c04976d3126784a4b2628cbe0f880b"
-      }
-    ],
+    "action": "execute_migration",
+    "target": "gold",
+    "database": "Sql1956795_2",
+    "migration_id": "gw008-results-competition-group-backfill-20260919",
+    "data_migration": true,
     "plan_sha256": "c3e570c7143a4761ac6799ca083daabd0f902068580d59ea8745fc42c19c45c3",
-    "expires_at": "2026-09-19T08:34:11+00:00",
-    "confirmation_token": "1789806851.49c4145a94e62b67054ce0906b1394308289ce3ce8c436183fca927344366dd3"
+    "status": "success",
+    "statement_count": 3,
+    "duration_ms": 12051,
+    "before": {
+      "tables": 299,
+      "columns": 5269
+    },
+    "after": {
+      "tables": 299,
+      "columns": 5269
+    },
+    "results": [
+      {
+        "statement": 1,
+        "sha256": "2bcb4329dd441824ef1a6deef2b616b9cfb41ab0e54bec60c1d6c0b8214d4c10",
+        "affected_rows": 7592,
+        "insert_id": 0,
+        "duration_ms": 10690
+      },
+      {
+        "statement": 2,
+        "sha256": "03f2c27730462be991ee438e56fc344856442e0e6341b7bfc80be8adb75bf186",
+        "affected_rows": 398,
+        "insert_id": 0,
+        "duration_ms": 607
+      },
+      {
+        "statement": 3,
+        "sha256": "a8638cb8a07e0eef950a5a039e9d9fef19c04976d3126784a4b2628cbe0f880b",
+        "affected_rows": 337,
+        "insert_id": 0,
+        "duration_ms": 505
+      }
+    ]
   }
 }
