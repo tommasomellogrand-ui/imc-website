@@ -1,8 +1,8 @@
 {
-  "request_id": "normalize-multi-cup-keys-plan-20260919-50",
+  "request_id": "normalize-multi-cup-keys-execute-20260919-51",
   "requested_at": "2026-09-19T10:40:00Z",
-  "purpose": "Normalize all Multi League domestic cup competition keys so cups never include division",
-  "action": "plan_migration",
+  "purpose": "Execute approved Multi League domestic cup key normalization without division",
+  "action": "execute_migration",
   "target": "gold",
   "migration_id": "normalize-multi-domestic-cup-keys-no-division-20260919",
   "statements": [
