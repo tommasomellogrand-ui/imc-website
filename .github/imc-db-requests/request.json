@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-all-fixture-alignment-20260919-14",
-  "requested_at": "2026-09-19T08:54:00Z",
-  "purpose": "Check fixture ID alignment for every GW001 competition key in Results and Match Report",
+  "request_id": "gw001-anomaly-detail-20260919-15",
+  "requested_at": "2026-09-19T08:55:00Z",
+  "purpose": "Inspect exact GW001 anomalous playoff and orphan Match Report fixtures",
   "action": "query",
   "target": "custom",
-  "sql": "SELECT k.competition_key, COALESCE(r.results_rows,0) results_rows, COALESCE(m.report_rows,0) report_rows, COALESCE(x.matched,0) matched_fixture_ids, COALESCE(x.same_key,0) same_key, COALESCE(x.different_key,0) different_key, COALESCE(r.results_rows,0)-COALESCE(x.matched,0) results_without_report, COALESCE(m.report_rows,0)-COALESCE(y.matched,0) reports_without_result FROM (SELECT competition_key FROM `GW001_IMC Results` UNION SELECT competition_key FROM `GW001_IMC Match Report`) k LEFT JOIN (SELECT competition_key,COUNT(*) results_rows FROM `GW001_IMC Results` GROUP BY competition_key) r ON r.competition_key=k.competition_key LEFT JOIN (SELECT competition_key,COUNT(*) report_rows FROM `GW001_IMC Match Report` GROUP BY competition_key) m ON m.competition_key=k.competition_key LEFT JOIN (SELECT r.competition_key,COUNT(m.sm_fixture_id) matched,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key=r.competition_key THEN 1 ELSE 0 END) same_key,SUM(CASE WHEN m.sm_fixture_id IS NOT NULL AND m.competition_key<>r.competition_key THEN 1 ELSE 0 END) different_key FROM `GW001_IMC Results` r LEFT JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id GROUP BY r.competition_key) x ON x.competition_key=k.competition_key LEFT JOIN (SELECT m.competition_key,COUNT(r.sm_fixture_id) matched FROM `GW001_IMC Match Report` m LEFT JOIN `GW001_IMC Results` r ON r.sm_fixture_id=m.sm_fixture_id GROUP BY m.competition_key) y ON y.competition_key=k.competition_key ORDER BY k.competition_key",
-  "limit": 1000
+  "sql": "SELECT 'PLAYOFF_RESULT_MISMATCH' anomaly,r.sm_fixture_id,r.competition_key result_key,m.competition_key report_key,r.match_date,r.home_name,r.away_name,r.home_score,r.away_score,r.sm_action,r.sm_division,r.competition_stage FROM `GW001_IMC Results` r JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.competition_key='GW001|DOMESTIC|playoff' AND m.competition_key<>r.competition_key UNION ALL SELECT 'ORPHAN_REPORT' anomaly,m.sm_fixture_id,NULL result_key,m.competition_key report_key,m.match_date,m.home_name,m.away_name,m.home_score,m.away_score,m.sm_action,m.sm_division,m.competition_stage FROM `GW001_IMC Match Report` m LEFT JOIN `GW001_IMC Results` r ON r.sm_fixture_id=m.sm_fixture_id WHERE r.sm_fixture_id IS NULL AND m.competition_key IN ('GW001|DOMESTIC|playoff|4','GW001|INTERNATIONAL|smfacup','GW001|INTERNATIONAL|smfashield') ORDER BY anomaly,report_key,sm_fixture_id",
+  "limit": 100
 }
