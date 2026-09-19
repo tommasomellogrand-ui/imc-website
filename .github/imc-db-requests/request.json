@@ -1,22 +1,9 @@
 {
-  "request_id": "single-normalize-country-keys-execute-20260919-35",
-  "requested_at": "2026-09-19T09:57:00Z",
-  "purpose": "Execute approved normalization of Single League domestic competition keys",
-  "action": "execute_migration",
+  "request_id": "single-normalize-country-keys-verify-20260919-36",
+  "requested_at": "2026-09-19T09:59:00Z",
+  "purpose": "Verify no country segment remains in domestic competition keys for Single League worlds",
+  "action": "query",
   "target": "custom",
-  "migration_id": "normalize-single-league-domestic-competition-keys-20260919",
-  "statements": [
-    "UPDATE `GW001_IMC Results` SET competition_key=CONCAT('GW001|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-    "UPDATE `GW001_IMC Match Report` SET competition_key=CONCAT('GW001|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-    "UPDATE `GW004_IMC Results` SET competition_key=CONCAT('GW004|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-    "UPDATE `GW004_IMC Match Report` SET competition_key=CONCAT('GW004|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-    "UPDATE `GW005_IMC Results` SET competition_key=CONCAT('GW005|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-    "UPDATE `GW005_IMC Match Report` SET competition_key=CONCAT('GW005|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-    "UPDATE `GW006_IMC Results` SET competition_key=CONCAT('GW006|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-    "UPDATE `GW006_IMC Match Report` SET competition_key=CONCAT('GW006|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-    "UPDATE `GW009_IMC Results` SET competition_key=CONCAT('GW009|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|'",
-    "UPDATE `GW009_IMC Match Report` SET competition_key=CONCAT('GW009|',SUBSTRING_INDEX(competition_key,'|',-3)) WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|'"
-  ],
-  "allow_destructive": false,
-  "data_migration": true
+  "sql": "SELECT 'GW001' gw,(SELECT COUNT(*) FROM `GW001_IMC Results` WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW001_IMC Match Report` WHERE competition_key REGEXP '^GW001\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW004' gw,(SELECT COUNT(*) FROM `GW004_IMC Results` WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW004_IMC Match Report` WHERE competition_key REGEXP '^GW004\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW005' gw,(SELECT COUNT(*) FROM `GW005_IMC Results` WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW005_IMC Match Report` WHERE competition_key REGEXP '^GW005\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW006' gw,(SELECT COUNT(*) FROM `GW006_IMC Results` WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW006_IMC Match Report` WHERE competition_key REGEXP '^GW006\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country UNION ALL SELECT 'GW009' gw,(SELECT COUNT(*) FROM `GW009_IMC Results` WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|') results_with_country,(SELECT COUNT(*) FROM `GW009_IMC Match Report` WHERE competition_key REGEXP '^GW009\\\\|[^|]+\\\\|DOMESTIC\\\\|') reports_with_country",
+  "limit": 100
 }
