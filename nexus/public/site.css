@@ -182,3 +182,47 @@ button:active:not(:disabled),.text-link:active,.report-link:active{box-shadow:in
 @media(min-width:800px){.footer{margin-bottom:24px}}
 @media(min-width:1200px){.menu-button{display:none}}
 @media(max-width:599px){.home-title,.main-grid .side-column,.section-heading,.chapter{padding:16px;border-radius:20px}.main-grid #tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.main-grid #tabs a{font-size:.72rem;padding:11px 9px}.section-heading .text-link{padding:9px 11px;white-space:nowrap}.card-bottom .report-link{font-size:.65rem;padding:8px 10px}.menu-button{font-size:.75rem;padding:9px 11px}.topbar{gap:9px}.brand{min-width:0}.brand small{letter-spacing:.02em}.chapter{margin-left:0;margin-right:0}.footer{margin:20px 20px 100px}.hub-tabs a{padding:11px 8px}}
+
+/* Readable internal-page typography: one scale for titles, metrics and labels. */
+#dataSection{font-size:.9375rem;line-height:1.5}
+#dataSection .section-heading h2{font-size:clamp(1.375rem,3vw,2rem);line-height:1.2;text-transform:none;letter-spacing:-.025em;overflow-wrap:anywhere}
+#dataSection .section-heading>div{min-width:0}
+#rows>h3,#rows>section:not(.hub-match-group)>h3{font-size:1.125rem;line-height:1.35;letter-spacing:-.02em}
+#rows .profile-heading h3{font-size:1.125rem;line-height:1.35;margin:4px 0 0;overflow-wrap:anywhere}
+.profile-heading>div{min-width:0;flex:1}
+.profile-heading .entity{font-size:1.125rem;line-height:1.35;font-weight:700}
+#rows .career-card h3{font-size:1rem;line-height:1.4;margin:9px 0}
+.career-card p{font-size:.875rem;line-height:1.5}
+#dataSection .eyebrow{font-size:.75rem;line-height:1.45;letter-spacing:.05em}
+#dataSection .stat-row{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px;margin:0;padding:4px 0}
+#dataSection .stat-row>div{min-width:0;border:0;padding:6px}
+#dataSection .stat-row strong{font-size:clamp(1.75rem,3vw,2.25rem);font-weight:800;line-height:1.15;letter-spacing:-.025em;overflow-wrap:anywhere}
+#dataSection .stat-row small{font-size:.8125rem;line-height:1.4;margin-top:6px}
+#dataSection .hub-tabs a{font-size:.8125rem;line-height:1.35;min-height:44px}
+#dataSection .view-filters label,#filters label{font-size:.8125rem;line-height:1.4}
+#dataSection .view-filters input,#dataSection .view-filters select,#filters input{font-size:1rem;line-height:1.4}
+#dataSection .view-filters button,#dataSection .text-link,#viewControls>a,.pagination button{font-size:.875rem;line-height:1.35}
+#dataSection .empty{font-size:.875rem;line-height:1.5}
+.manager-competition-table{table-layout:auto}
+.manager-competition-table td:first-child,.manager-competition-table th:first-child{text-align:left;white-space:normal;min-width:120px;max-width:220px;line-height:1.4}
+.manager-competition-table td:nth-child(2),.manager-competition-table th:nth-child(2){min-width:0;max-width:none;text-align:center;white-space:nowrap}
+.manager-competition-table td:first-child a{display:inline-block;font-size:inherit;line-height:1.4}
+@media(max-width:599px){
+ #dataSection .section-heading{gap:12px;flex-wrap:wrap}
+ #dataSection .section-heading h2{font-size:1.375rem}
+ #dataSection .section-heading .eyebrow{font-size:.75rem}
+ #dataSection .stat-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ #dataSection .stat-row strong{font-size:1.75rem}
+ #dataSection .stat-row small{font-size:.8125rem}
+ #dataSection .profile-heading{gap:12px;flex-wrap:nowrap;padding:14px}
+ #dataSection .profile-heading .core-crest,#dataSection .profile-heading .manager-avatar{width:44px;height:44px;flex-shrink:0}
+ #dataSection .hub-tabs{gap:5px}
+ #dataSection .hub-tabs a{flex:1 1 auto;padding:10px 12px;font-size:.8125rem}
+ #dataSection .hub-table{font-size:.8125rem}
+ #dataSection .hub-table th{font-size:.75rem;line-height:1.4}
+ #dataSection .hub-table td,#dataSection .hub-table th{padding:12px 6px}
+ #dataSection .manager-competition-table td:nth-child(2),#dataSection .manager-competition-table th:nth-child(2){min-width:0;max-width:none}
+ #dataSection .card .meta,#dataSection .card-bottom{font-size:.75rem;line-height:1.4}
+ #dataSection .fixture-managers{font-size:.75rem;line-height:1.4}
+ #dataSection .compact-match .fixture{font-size:.8125rem;line-height:1.4}
+}
