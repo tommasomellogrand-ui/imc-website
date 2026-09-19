@@ -93,7 +93,7 @@ async function teamsView(c,signal){
  if(state.team){await teamProfile(c,signal);return}
  $('viewControls').innerHTML=tabs('teamType',[['clubs','Club'],['nations','Nazionali']])+form(input('search','Cerca squadra'));
  const all=state.teamType==='nations'?c.nations:c.clubs;const filtered=all.filter(t=>String(t.name||'').toLocaleLowerCase('it').includes(state.search.toLocaleLowerCase('it')));
- page(`<div class="team-grid">${filtered.slice(state.offset,state.offset+50).map(r=>go({team:r.id,manager:'',offset:0,profileTab:'career'},`${entity(r,r.name)}<p class="eyebrow">${esc(state.world)}</p><span class="text-link">Apri profilo ↗</span>`,'card team-tile')).join('')}</div>`,filtered.length,state.teamType==='nations'?'nazionali':'club');
+ page(`<div class="team-grid">${filtered.slice(state.offset,state.offset+50).map(r=>go({team:r.id,manager:'',offset:0,profileTab:'career'},`${entity(r,r.name)}`,'card team-tile')).join('')}</div>`,filtered.length,state.teamType==='nations'?'nazionali':'club');
 }
 // Profiles use CORE identifiers and assignments scoped to the selected world.
 const managerAvatar='<svg class="manager-avatar" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="32" cy="21" r="12"/><path d="M10 59c0-14 9-22 22-22s22 8 22 22"/></svg>';
@@ -107,7 +107,7 @@ async function managersView(c,signal){
  $('viewControls').innerHTML=form(input('search','Cerca manager o squadra'));
  const grouped=new Map();for(const a of c.managers){if(!a.manager_id)continue;if(!grouped.has(a.manager_id))grouped.set(a.manager_id,[]);grouped.get(a.manager_id).push(a)}
  const rows=[...grouped.values()].filter(as=>as.some(a=>[a.full_name,a.manager_id,a.team_name].join(' ').toLocaleLowerCase('it').includes(state.search.toLocaleLowerCase('it'))));
- page(`<div class="team-grid">${rows.slice(state.offset,state.offset+50).map(as=>{const r=as[0];return go({manager:r.manager_id,team:'',teamType:'clubs',offset:0,profileTab:'career',opponent:''},`${managerAvatar}<span class="entity"><span>${esc(r.full_name||r.manager_id)}</span></span><p class="eyebrow">${esc(r.manager_id)} · ${esc(state.world)}</p><span class="text-link">Apri profilo ↗</span>`,'card team-tile')}).join('')}</div>`,rows.length,'manager');
+ page(`<div class="team-grid">${rows.slice(state.offset,state.offset+50).map(as=>{const r=as[0];return go({manager:r.manager_id,team:'',teamType:'clubs',offset:0,profileTab:'career',opponent:''},`${managerAvatar}<span class="entity"><span>${esc(r.full_name||r.manager_id)}</span></span>`,'card team-tile')}).join('')}</div>`,rows.length,'manager');
 }
 function managerSummary(rows,id){const s=L.managerStats(rows,id);return `<article class="card"><div class="stat-row">${[[s.p,'Partite'],[s.w,'Vittorie'],[s.d,'Pareggi'],[s.l,'Sconfitte'],[s.gf,'Gol fatti'],[s.ga,'Gol subiti'],[s.clean,'Porte inviolate'],[s.p?Math.round(s.w/s.p*100)+'%':'—','Vittorie %']].map(([v,k])=>`<div><strong>${v}</strong><small>${k}</small></div>`).join('')}</div></article>`}
 async function managerProfile(c,signal){
