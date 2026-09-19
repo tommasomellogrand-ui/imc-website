@@ -1,232 +1,43 @@
 {
-  "request_id": "single-canonical-keys-after-normalization-20260919-37",
-  "completed_at": "2026-09-19T10:14:24.946968+00:00",
+  "request_id": "core-create-nexus-competition-mapping-plan-20260919-38",
+  "completed_at": "2026-09-19T10:21:10.805599+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "single-canonical-keys-after-normalization-20260919-37",
-    "requested_at": "2026-09-19T10:12:00Z",
-    "purpose": "Extract exact current competition keys for all Single League worlds after normalization",
-    "action": "query",
-    "target": "custom",
-    "sql": "SELECT gw,competition_key FROM (SELECT 'GW001' gw,competition_key FROM `GW001_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW001' gw,competition_key FROM `GW001_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW004' gw,competition_key FROM `GW004_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW004' gw,competition_key FROM `GW004_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW005' gw,competition_key FROM `GW005_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW005' gw,competition_key FROM `GW005_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW006' gw,competition_key FROM `GW006_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW006' gw,competition_key FROM `GW006_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW009' gw,competition_key FROM `GW009_IMC Results` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'' UNION SELECT 'GW009' gw,competition_key FROM `GW009_IMC Match Report` WHERE competition_key IS NOT NULL AND TRIM(competition_key)<>'') x GROUP BY gw,competition_key ORDER BY gw,competition_key",
-    "limit": 1000
+    "request_id": "core-create-nexus-competition-mapping-plan-20260919-38",
+    "requested_at": "2026-09-19T10:15:00Z",
+    "purpose": "Create authoritative CORE table for Nexus competition display mapping",
+    "action": "plan_migration",
+    "target": "core",
+    "migration_id": "create-imc-competition-nexus-mapping-20260919",
+    "statements": [
+      "CREATE TABLE `IMC Competition Nexus Mapping` (`mapping_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,`game_world_id` VARCHAR(10) NOT NULL,`world_type` ENUM('SINGLE','MULTI') NOT NULL,`sm_country` VARCHAR(100) NULL,`competition_group` VARCHAR(32) NOT NULL,`sm_action` VARCHAR(64) NOT NULL,`sm_division` VARCHAR(16) NULL,`competition_key` VARCHAR(255) NOT NULL,`nexus_view` VARCHAR(255) NOT NULL,`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`mapping_id`),UNIQUE KEY `uq_competition_key` (`competition_key`),KEY `idx_lookup` (`game_world_id`,`competition_group`,`sm_action`,`sm_division`),KEY `idx_country` (`game_world_id`,`sm_country`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    ],
+    "allow_destructive": false,
+    "data_migration": false
   },
   "response": {
     "ok": true,
-    "action": "query",
-    "target": "custom",
-    "database": "Sql1956795_3",
-    "result": {
-      "rows": [
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|DOMESTIC|league|1"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|DOMESTIC|league|2"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|DOMESTIC|league|3"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|DOMESTIC|league|4"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|DOMESTIC|leaguecup|4"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|DOMESTIC|playoff|2"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|DOMESTIC|playoff|3"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|DOMESTIC|playoff|4"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|INTERNATIONAL|smfacup"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|INTERNATIONAL|smfashield"
-        },
-        {
-          "gw": "GW001",
-          "competition_key": "GW001|NATIONS|interqualifier"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|DOMESTIC|charityshield"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|DOMESTIC|league|1"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|DOMESTIC|league|2"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|DOMESTIC|league|3"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|DOMESTIC|league|4"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|DOMESTIC|leaguecup|2"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|DOMESTIC|leagueshield|2"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|INTERNATIONAL|smfacup"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|INTERNATIONAL|smfashield"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|INTERNATIONAL|supercup"
-        },
-        {
-          "gw": "GW004",
-          "competition_key": "GW004|NATIONS|interqualifier"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|DOMESTIC|charityshield"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|DOMESTIC|league|1"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|DOMESTIC|league|2"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|DOMESTIC|league|3"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|DOMESTIC|leaguecup|1"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|DOMESTIC|playoff|2"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|DOMESTIC|playoff|3"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|INTERNATIONAL|smfacup"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|INTERNATIONAL|smfashield"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|NATIONS|interqualifier"
-        },
-        {
-          "gw": "GW005",
-          "competition_key": "GW005|NATIONS|worldcup"
-        },
-        {
-          "gw": "GW006",
-          "competition_key": "GW006|DOMESTIC|league|1"
-        },
-        {
-          "gw": "GW006",
-          "competition_key": "GW006|DOMESTIC|league|2"
-        },
-        {
-          "gw": "GW006",
-          "competition_key": "GW006|DOMESTIC|league|3"
-        },
-        {
-          "gw": "GW006",
-          "competition_key": "GW006|DOMESTIC|league|4"
-        },
-        {
-          "gw": "GW006",
-          "competition_key": "GW006|DOMESTIC|leaguecup|1"
-        },
-        {
-          "gw": "GW006",
-          "competition_key": "GW006|DOMESTIC|leagueshield|1"
-        },
-        {
-          "gw": "GW006",
-          "competition_key": "GW006|INTERNATIONAL|smfacup"
-        },
-        {
-          "gw": "GW006",
-          "competition_key": "GW006|INTERNATIONAL|smfashield"
-        },
-        {
-          "gw": "GW006",
-          "competition_key": "GW006|NATIONS|interqualifier"
-        },
-        {
-          "gw": "GW009",
-          "competition_key": "GW009|DOMESTIC|league|1"
-        },
-        {
-          "gw": "GW009",
-          "competition_key": "GW009|DOMESTIC|league|2"
-        },
-        {
-          "gw": "GW009",
-          "competition_key": "GW009|DOMESTIC|league|3"
-        },
-        {
-          "gw": "GW009",
-          "competition_key": "GW009|DOMESTIC|leaguecup|2"
-        },
-        {
-          "gw": "GW009",
-          "competition_key": "GW009|INTERNATIONAL|smfacup"
-        },
-        {
-          "gw": "GW009",
-          "competition_key": "GW009|INTERNATIONAL|smfashield"
-        },
-        {
-          "gw": "GW009",
-          "competition_key": "GW009|NATIONS|interqualifier"
-        }
-      ],
-      "returned_rows": 51,
-      "total_rows": 51,
-      "truncated": false,
-      "duration_ms": 82
-    }
+    "action": "plan_migration",
+    "plan": {
+      "target": "core",
+      "database": "Sql1956795_1",
+      "migration_id": "create-imc-competition-nexus-mapping-20260919",
+      "allow_destructive": false,
+      "data_migration": false,
+      "statements": [
+        "CREATE TABLE `IMC Competition Nexus Mapping` (`mapping_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,`game_world_id` VARCHAR(10) NOT NULL,`world_type` ENUM('SINGLE','MULTI') NOT NULL,`sm_country` VARCHAR(100) NULL,`competition_group` VARCHAR(32) NOT NULL,`sm_action` VARCHAR(64) NOT NULL,`sm_division` VARCHAR(16) NULL,`competition_key` VARCHAR(255) NOT NULL,`nexus_view` VARCHAR(255) NOT NULL,`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`mapping_id`),UNIQUE KEY `uq_competition_key` (`competition_key`),KEY `idx_lookup` (`game_world_id`,`competition_group`,`sm_action`,`sm_division`),KEY `idx_country` (`game_world_id`,`sm_country`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+      ]
+    },
+    "analysis": [
+      {
+        "sql": "CREATE TABLE `IMC Competition Nexus Mapping` (`mapping_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,`game_world_id` VARCHAR(10) NOT NULL,`world_type` ENUM('SINGLE','MULTI') NOT NULL,`sm_country` VARCHAR(100) NULL,`competition_group` VARCHAR(32) NOT NULL,`sm_action` VARCHAR(64) NOT NULL,`sm_division` VARCHAR(16) NULL,`competition_key` VARCHAR(255) NOT NULL,`nexus_view` VARCHAR(255) NOT NULL,`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`mapping_id`),UNIQUE KEY `uq_competition_key` (`competition_key`),KEY `idx_lookup` (`game_world_id`,`competition_group`,`sm_action`,`sm_division`),KEY `idx_country` (`game_world_id`,`sm_country`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+        "kind": "CREATE",
+        "destructive": false,
+        "sha256": "9b7c6de79c6a19b7f0d010e80a8d5e353e711f79c2fc49114bb3aec4fec0638e"
+      }
+    ],
+    "plan_sha256": "5bdf910cbfd19383c85c7564658fcc3f3a29b0eeb91c11aa1d7be68338ec7a78",
+    "expires_at": "2026-09-19T10:36:10+00:00",
+    "confirmation_token": "1789814170.72f2a9a0ac84afb097cb80abeecaf826c3428e2ba314729e7f63871c338d700b"
   }
 }
