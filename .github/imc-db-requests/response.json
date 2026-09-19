@@ -1,12 +1,12 @@
 {
-  "request_id": "core-create-nexus-competition-mapping-plan-20260919-38",
-  "completed_at": "2026-09-19T10:21:10.805599+00:00",
+  "request_id": "core-create-nexus-competition-mapping-execute-20260919-39",
+  "completed_at": "2026-09-19T10:21:32.139481+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "core-create-nexus-competition-mapping-plan-20260919-38",
-    "requested_at": "2026-09-19T10:15:00Z",
-    "purpose": "Create authoritative CORE table for Nexus competition display mapping",
-    "action": "plan_migration",
+    "request_id": "core-create-nexus-competition-mapping-execute-20260919-39",
+    "requested_at": "2026-09-19T10:22:00Z",
+    "purpose": "Execute approved creation of authoritative CORE Nexus competition display mapping table",
+    "action": "execute_migration",
     "target": "core",
     "migration_id": "create-imc-competition-nexus-mapping-20260919",
     "statements": [
@@ -17,27 +17,31 @@
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "core",
-      "database": "Sql1956795_1",
-      "migration_id": "create-imc-competition-nexus-mapping-20260919",
-      "allow_destructive": false,
-      "data_migration": false,
-      "statements": [
-        "CREATE TABLE `IMC Competition Nexus Mapping` (`mapping_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,`game_world_id` VARCHAR(10) NOT NULL,`world_type` ENUM('SINGLE','MULTI') NOT NULL,`sm_country` VARCHAR(100) NULL,`competition_group` VARCHAR(32) NOT NULL,`sm_action` VARCHAR(64) NOT NULL,`sm_division` VARCHAR(16) NULL,`competition_key` VARCHAR(255) NOT NULL,`nexus_view` VARCHAR(255) NOT NULL,`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`mapping_id`),UNIQUE KEY `uq_competition_key` (`competition_key`),KEY `idx_lookup` (`game_world_id`,`competition_group`,`sm_action`,`sm_division`),KEY `idx_country` (`game_world_id`,`sm_country`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-      ]
-    },
-    "analysis": [
-      {
-        "sql": "CREATE TABLE `IMC Competition Nexus Mapping` (`mapping_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,`game_world_id` VARCHAR(10) NOT NULL,`world_type` ENUM('SINGLE','MULTI') NOT NULL,`sm_country` VARCHAR(100) NULL,`competition_group` VARCHAR(32) NOT NULL,`sm_action` VARCHAR(64) NOT NULL,`sm_division` VARCHAR(16) NULL,`competition_key` VARCHAR(255) NOT NULL,`nexus_view` VARCHAR(255) NOT NULL,`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`mapping_id`),UNIQUE KEY `uq_competition_key` (`competition_key`),KEY `idx_lookup` (`game_world_id`,`competition_group`,`sm_action`,`sm_division`),KEY `idx_country` (`game_world_id`,`sm_country`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-        "kind": "CREATE",
-        "destructive": false,
-        "sha256": "9b7c6de79c6a19b7f0d010e80a8d5e353e711f79c2fc49114bb3aec4fec0638e"
-      }
-    ],
+    "action": "execute_migration",
+    "target": "core",
+    "database": "Sql1956795_1",
+    "migration_id": "create-imc-competition-nexus-mapping-20260919",
+    "data_migration": false,
     "plan_sha256": "5bdf910cbfd19383c85c7564658fcc3f3a29b0eeb91c11aa1d7be68338ec7a78",
-    "expires_at": "2026-09-19T10:36:10+00:00",
-    "confirmation_token": "1789814170.72f2a9a0ac84afb097cb80abeecaf826c3428e2ba314729e7f63871c338d700b"
+    "status": "success",
+    "statement_count": 1,
+    "duration_ms": 48,
+    "before": {
+      "tables": 14,
+      "columns": 97
+    },
+    "after": {
+      "tables": 15,
+      "columns": 107
+    },
+    "results": [
+      {
+        "statement": 1,
+        "sha256": "9b7c6de79c6a19b7f0d010e80a8d5e353e711f79c2fc49114bb3aec4fec0638e",
+        "affected_rows": 0,
+        "insert_id": 0,
+        "duration_ms": 26
+      }
+    ]
   }
 }
