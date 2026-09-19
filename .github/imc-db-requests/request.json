@@ -1,9 +1,22 @@
 {
-  "request_id": "gw008-duplicate-nexus-view-detail-20260919-47",
-  "requested_at": "2026-09-19T10:36:00Z",
-  "purpose": "List GW008 Nexus mapping rows whose nexus_view is shared by multiple competition keys",
-  "action": "query",
-  "target": "core",
-  "sql": "SELECT m.mapping_id,m.competition_key,m.sm_country,m.competition_group,m.sm_action,m.sm_division,m.nexus_view FROM `IMC Competition Nexus Mapping` m JOIN (SELECT nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id='GW008' GROUP BY nexus_view HAVING COUNT(*)>1) d ON d.nexus_view=m.nexus_view WHERE m.game_world_id='GW008' ORDER BY m.nexus_view,m.competition_key",
-  "limit": 100
+  "request_id": "normalize-all-cup-keys-plan-20260919-48",
+  "requested_at": "2026-09-19T10:39:00Z",
+  "purpose": "Normalize all domestic cup competition keys across GW001-GW009 so cups never include division",
+  "action": "plan_migration",
+  "target": "custom",
+  "migration_id": "normalize-all-domestic-cup-keys-no-division-20260919",
+  "statements": [
+    "UPDATE `GW001_IMC Results` SET competition_key=CONCAT('GW001|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW001|',competition_group,'|',sm_action)",
+    "UPDATE `GW001_IMC Match Report` SET competition_key=CONCAT('GW001|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW001|',competition_group,'|',sm_action)",
+    "UPDATE `GW004_IMC Results` SET competition_key=CONCAT('GW004|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW004|',competition_group,'|',sm_action)",
+    "UPDATE `GW004_IMC Match Report` SET competition_key=CONCAT('GW004|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW004|',competition_group,'|',sm_action)",
+    "UPDATE `GW005_IMC Results` SET competition_key=CONCAT('GW005|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW005|',competition_group,'|',sm_action)",
+    "UPDATE `GW005_IMC Match Report` SET competition_key=CONCAT('GW005|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW005|',competition_group,'|',sm_action)",
+    "UPDATE `GW006_IMC Results` SET competition_key=CONCAT('GW006|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW006|',competition_group,'|',sm_action)",
+    "UPDATE `GW006_IMC Match Report` SET competition_key=CONCAT('GW006|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW006|',competition_group,'|',sm_action)",
+    "UPDATE `GW009_IMC Results` SET competition_key=CONCAT('GW009|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW009|',competition_group,'|',sm_action)",
+    "UPDATE `GW009_IMC Match Report` SET competition_key=CONCAT('GW009|',competition_group,'|',sm_action) WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND competition_key<>CONCAT('GW009|',competition_group,'|',sm_action)"
+  ],
+  "allow_destructive": false,
+  "data_migration": true
 }
