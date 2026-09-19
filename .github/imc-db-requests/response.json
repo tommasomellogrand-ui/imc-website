@@ -1,12 +1,12 @@
 {
-  "request_id": "gw001-delete-leaguecup-both-plan-20260919-09",
-  "completed_at": "2026-09-19T08:46:44.411909+00:00",
+  "request_id": "gw001-delete-leaguecup-both-execute-20260919-10",
+  "completed_at": "2026-09-19T08:47:06.438016+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw001-delete-leaguecup-both-plan-20260919-09",
+    "request_id": "gw001-delete-leaguecup-both-execute-20260919-10",
     "requested_at": "2026-09-19T08:47:00Z",
-    "purpose": "Plan user-requested removal of GW001 League Cup rows from Results and Match Report",
-    "action": "plan_migration",
+    "purpose": "Execute approved user-requested GW001 League Cup cleanup",
+    "action": "execute_migration",
     "target": "custom",
     "migration_id": "gw001-remove-leaguecup-results-matchreports-20260919",
     "statements": [
@@ -18,34 +18,38 @@
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "custom",
-      "database": "Sql1956795_3",
-      "migration_id": "gw001-remove-leaguecup-results-matchreports-20260919",
-      "allow_destructive": true,
-      "data_migration": true,
-      "statements": [
-        "DELETE FROM `GW001_IMC Results` WHERE sm_action='leaguecup'",
-        "DELETE FROM `GW001_IMC Match Report` WHERE sm_action='leaguecup'"
-      ]
+    "action": "execute_migration",
+    "target": "custom",
+    "database": "Sql1956795_3",
+    "migration_id": "gw001-remove-leaguecup-results-matchreports-20260919",
+    "data_migration": true,
+    "plan_sha256": "2fc8658a4cefdab1f2a16bdcb2ab0e0ab970be7961e169ac3a014df920c62aae",
+    "status": "success",
+    "statement_count": 2,
+    "duration_ms": 2055,
+    "before": {
+      "tables": 320,
+      "columns": 5566
     },
-    "analysis": [
+    "after": {
+      "tables": 320,
+      "columns": 5566
+    },
+    "results": [
       {
-        "sql": "DELETE FROM `GW001_IMC Results` WHERE sm_action='leaguecup'",
-        "kind": "DELETE",
-        "destructive": true,
-        "sha256": "6ca82fa9e7d99900231af88c51817745d43a67bba06c7bfc64e7d89cbf16eddb"
+        "statement": 1,
+        "sha256": "6ca82fa9e7d99900231af88c51817745d43a67bba06c7bfc64e7d89cbf16eddb",
+        "affected_rows": 43,
+        "insert_id": 0,
+        "duration_ms": 94
       },
       {
-        "sql": "DELETE FROM `GW001_IMC Match Report` WHERE sm_action='leaguecup'",
-        "kind": "DELETE",
-        "destructive": true,
-        "sha256": "b1069990489a3df175aaf1858b75b14767f0d18298cc2e46d0182841d8e66f73"
+        "statement": 2,
+        "sha256": "b1069990489a3df175aaf1858b75b14767f0d18298cc2e46d0182841d8e66f73",
+        "affected_rows": 39,
+        "insert_id": 0,
+        "duration_ms": 1591
       }
-    ],
-    "plan_sha256": "2fc8658a4cefdab1f2a16bdcb2ab0e0ab970be7961e169ac3a014df920c62aae",
-    "expires_at": "2026-09-19T09:01:44+00:00",
-    "confirmation_token": "1789808504.a1c29423ed18824bdad54bda6c906d77fb66f4cc353e3f7c1e83ab8afee027b0"
+    ]
   }
 }
