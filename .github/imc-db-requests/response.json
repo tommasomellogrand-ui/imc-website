@@ -1,156 +1,508 @@
 {
-  "request_id": "trophy-room-schema-20260919-28",
-  "completed_at": "2026-09-19T08:39:42.290585+00:00",
+  "request_id": "gw008-s1-mapping-fields-audit-20260919-28",
+  "completed_at": "2026-09-19T08:44:12.303074+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "trophy-room-schema-20260919-28",
-    "requested_at": "2026-09-19T09:31:00Z",
-    "purpose": "Inspect IMC Trophy Room schema",
+    "request_id": "gw008-s1-mapping-fields-audit-20260919-28",
+    "requested_at": "2026-09-19T09:35:00Z",
+    "purpose": "Map GW008 Season 1 honor competition names to existing Results sm_action and competition_key and inspect Trophy Room columns",
     "action": "query",
-    "target": "core",
-    "sql": "SHOW COLUMNS FROM `IMC Trophy Room`",
-    "limit": 100
+    "target": "gold",
+    "sql": "SELECT sm_action, competition_group, competition_key, sm_country, sm_division, COUNT(*) AS n FROM `GW008_IMC Results` WHERE game_world_id='GW008' AND match_date BETWEEN '2026-03-30' AND '2026-08-29' GROUP BY sm_action,competition_group,competition_key,sm_country,sm_division ORDER BY competition_group,sm_action,sm_country,sm_division",
+    "limit": 500
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "core",
-    "database": "Sql1956795_1",
+    "target": "gold",
+    "database": "Sql1956795_2",
     "result": {
       "rows": [
         {
-          "Field": "id",
-          "Type": "bigint unsigned",
-          "Null": "NO",
-          "Key": "PRI",
-          "Default": null,
-          "Extra": "auto_increment"
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|CEN|DOMESTIC|charityshield",
+          "sm_country": "CEN",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "game_world_id",
-          "Type": "varchar(16)",
-          "Null": "NO",
-          "Key": "MUL",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ENG|DOMESTIC|charityshield",
+          "sm_country": "ENG",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "imc_season",
-          "Type": "int",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|FRA|DOMESTIC|charityshield",
+          "sm_country": "FRA",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "competition_key",
-          "Type": "varchar(255)",
-          "Null": "NO",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|GER|DOMESTIC|charityshield",
+          "sm_country": "GER",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "competition_group",
-          "Type": "varchar(64)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|HNB|DOMESTIC|charityshield",
+          "sm_country": "HNB",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "trophy_type",
-          "Type": "varchar(64)",
-          "Null": "NO",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ITA|DOMESTIC|charityshield",
+          "sm_country": "ITA",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "sm_country",
-          "Type": "varchar(128)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|LAT|DOMESTIC|charityshield",
+          "sm_country": "LAT",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "sm_division",
-          "Type": "varchar(128)",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|MED|DOMESTIC|charityshield",
+          "sm_country": "MED",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "winner_sm_world_club_id",
-          "Type": "bigint unsigned",
-          "Null": "YES",
-          "Key": "MUL",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|RNU|DOMESTIC|charityshield",
+          "sm_country": "RNU",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "winner_name",
-          "Type": "varchar(255)",
-          "Null": "NO",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SCA|DOMESTIC|charityshield",
+          "sm_country": "SCA",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "decided_by",
-          "Type": "varchar(32)",
-          "Null": "NO",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SCO|DOMESTIC|charityshield",
+          "sm_country": "SCO",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "deciding_fixture_id",
-          "Type": "bigint unsigned",
-          "Null": "YES",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "charityshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SPA|DOMESTIC|charityshield",
+          "sm_country": "SPA",
+          "sm_division": null,
+          "n": "2"
         },
         {
-          "Field": "won_date",
-          "Type": "date",
-          "Null": "NO",
-          "Key": "MUL",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|CEN|DOMESTIC|league|1",
+          "sm_country": "CEN",
+          "sm_division": "1",
+          "n": "69"
         },
         {
-          "Field": "date_source",
-          "Type": "varchar(32)",
-          "Null": "NO",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ENG|DOMESTIC|league|1",
+          "sm_country": "ENG",
+          "sm_division": "1",
+          "n": "380"
         },
         {
-          "Field": "source_repository",
-          "Type": "varchar(64)",
-          "Null": "NO",
-          "Key": "",
-          "Default": null,
-          "Extra": ""
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ENG|DOMESTIC|league|2",
+          "sm_country": "ENG",
+          "sm_division": "2",
+          "n": "380"
         },
         {
-          "Field": "created_at",
-          "Type": "datetime",
-          "Null": "NO",
-          "Key": "",
-          "Default": "CURRENT_TIMESTAMP",
-          "Extra": "DEFAULT_GENERATED"
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ENG|DOMESTIC|league|3",
+          "sm_country": "ENG",
+          "sm_division": "3",
+          "n": "389"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ENG|DOMESTIC|league|4",
+          "sm_country": "ENG",
+          "sm_division": "4",
+          "n": "380"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|FRA|DOMESTIC|league|1",
+          "sm_country": "FRA",
+          "sm_division": "1",
+          "n": "383"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|FRA|DOMESTIC|league|2",
+          "sm_country": "FRA",
+          "sm_division": "2",
+          "n": "380"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|GER|DOMESTIC|league|1",
+          "sm_country": "GER",
+          "sm_division": "1",
+          "n": "383"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|GER|DOMESTIC|league|2",
+          "sm_country": "GER",
+          "sm_division": "2",
+          "n": "471"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|HNB|DOMESTIC|league|1",
+          "sm_country": "HNB",
+          "sm_division": "1",
+          "n": "380"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ITA|DOMESTIC|league|1",
+          "sm_country": "ITA",
+          "sm_division": "1",
+          "n": "383"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ITA|DOMESTIC|league|2",
+          "sm_country": "ITA",
+          "sm_division": "2",
+          "n": "380"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|LAT|DOMESTIC|league|1",
+          "sm_country": "LAT",
+          "sm_division": "1",
+          "n": "380"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|MED|DOMESTIC|league|1",
+          "sm_country": "MED",
+          "sm_division": "1",
+          "n": "191"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|RNU|DOMESTIC|league|1",
+          "sm_country": "RNU",
+          "sm_division": "1",
+          "n": "380"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SCA|DOMESTIC|league|1",
+          "sm_country": "SCA",
+          "sm_division": "1",
+          "n": "380"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SCO|DOMESTIC|league|1",
+          "sm_country": "SCO",
+          "sm_division": "1",
+          "n": "380"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SPA|DOMESTIC|league|1",
+          "sm_country": "SPA",
+          "sm_division": "1",
+          "n": "383"
+        },
+        {
+          "sm_action": "league",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SPA|DOMESTIC|league|2",
+          "sm_country": "SPA",
+          "sm_division": "2",
+          "n": "380"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|CEN|DOMESTIC|leaguecup",
+          "sm_country": "CEN",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ENG|DOMESTIC|leaguecup",
+          "sm_country": "ENG",
+          "sm_division": null,
+          "n": "79"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|FRA|DOMESTIC|leaguecup",
+          "sm_country": "FRA",
+          "sm_division": null,
+          "n": "39"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|GER|DOMESTIC|leaguecup",
+          "sm_country": "GER",
+          "sm_division": null,
+          "n": "39"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|HNB|DOMESTIC|leaguecup",
+          "sm_country": "HNB",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ITA|DOMESTIC|leaguecup",
+          "sm_country": "ITA",
+          "sm_division": null,
+          "n": "39"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|LAT|DOMESTIC|leaguecup",
+          "sm_country": "LAT",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|MED|DOMESTIC|leaguecup",
+          "sm_country": "MED",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|RNU|DOMESTIC|leaguecup",
+          "sm_country": "RNU",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SCA|DOMESTIC|leaguecup",
+          "sm_country": "SCA",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SCO|DOMESTIC|leaguecup",
+          "sm_country": "SCO",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leaguecup",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SPA|DOMESTIC|leaguecup",
+          "sm_country": "SPA",
+          "sm_division": null,
+          "n": "39"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|CEN|DOMESTIC|leagueshield",
+          "sm_country": "CEN",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ENG|DOMESTIC|leagueshield",
+          "sm_country": "ENG",
+          "sm_division": null,
+          "n": "79"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|FRA|DOMESTIC|leagueshield",
+          "sm_country": "FRA",
+          "sm_division": null,
+          "n": "39"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|GER|DOMESTIC|leagueshield",
+          "sm_country": "GER",
+          "sm_division": null,
+          "n": "39"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|HNB|DOMESTIC|leagueshield",
+          "sm_country": "HNB",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|ITA|DOMESTIC|leagueshield",
+          "sm_country": "ITA",
+          "sm_division": null,
+          "n": "39"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|LAT|DOMESTIC|leagueshield",
+          "sm_country": "LAT",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|MED|DOMESTIC|leagueshield",
+          "sm_country": "MED",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|RNU|DOMESTIC|leagueshield",
+          "sm_country": "RNU",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SCA|DOMESTIC|leagueshield",
+          "sm_country": "SCA",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SCO|DOMESTIC|leagueshield",
+          "sm_country": "SCO",
+          "sm_division": null,
+          "n": "19"
+        },
+        {
+          "sm_action": "leagueshield",
+          "competition_group": "DOMESTIC",
+          "competition_key": "GW008|SPA|DOMESTIC|leagueshield",
+          "sm_country": "SPA",
+          "sm_division": null,
+          "n": "39"
+        },
+        {
+          "sm_action": "smfacup",
+          "competition_group": "INTERNATIONAL",
+          "competition_key": "GW008|INTERNATIONAL|smfacup",
+          "sm_country": "ENG",
+          "sm_division": null,
+          "n": "250"
+        },
+        {
+          "sm_action": "smfashield",
+          "competition_group": "INTERNATIONAL",
+          "competition_key": "GW008|INTERNATIONAL|smfashield",
+          "sm_country": "ENG",
+          "sm_division": null,
+          "n": "146"
+        },
+        {
+          "sm_action": "supercup",
+          "competition_group": "INTERNATIONAL",
+          "competition_key": "GW008|INTERNATIONAL|supercup",
+          "sm_country": "ENG",
+          "sm_division": null,
+          "n": "2"
+        },
+        {
+          "sm_action": "interqualifier",
+          "competition_group": "NATIONS",
+          "competition_key": "GW008|NATIONS|interqualifier",
+          "sm_country": null,
+          "sm_division": null,
+          "n": "320"
+        },
+        {
+          "sm_action": "worldcup",
+          "competition_group": "NATIONS",
+          "competition_key": "GW008|NATIONS|worldcup",
+          "sm_country": null,
+          "sm_division": null,
+          "n": "2"
         }
       ],
-      "returned_rows": 16,
-      "total_rows": 16,
+      "returned_rows": 60,
+      "total_rows": 60,
       "truncated": false,
-      "duration_ms": 5
+      "duration_ms": 76
     }
   }
 }
