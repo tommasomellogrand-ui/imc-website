@@ -1,9 +1,9 @@
 {
-  "request_id": "gw001-anomaly-detail-20260919-15",
-  "requested_at": "2026-09-19T08:55:00Z",
-  "purpose": "Inspect exact GW001 anomalous playoff and orphan Match Report fixtures",
+  "request_id": "gw001-smfa-finals-recheck-20260919-16",
+  "requested_at": "2026-09-19T08:56:00Z",
+  "purpose": "Recheck SMFA Cup and Shield final Results and Match Report fixture IDs",
   "action": "query",
   "target": "custom",
-  "sql": "SELECT 'PLAYOFF_RESULT_MISMATCH' anomaly,r.sm_fixture_id,r.competition_key result_key,m.competition_key report_key,r.match_date,r.home_name,r.away_name,r.home_score,r.away_score,r.sm_action,r.sm_division,r.competition_stage FROM `GW001_IMC Results` r JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.competition_key='GW001|DOMESTIC|playoff' AND m.competition_key<>r.competition_key UNION ALL SELECT 'ORPHAN_REPORT' anomaly,m.sm_fixture_id,NULL result_key,m.competition_key report_key,m.match_date,m.home_name,m.away_name,m.home_score,m.away_score,m.sm_action,m.sm_division,m.competition_stage FROM `GW001_IMC Match Report` m LEFT JOIN `GW001_IMC Results` r ON r.sm_fixture_id=m.sm_fixture_id WHERE r.sm_fixture_id IS NULL AND m.competition_key IN ('GW001|DOMESTIC|playoff|4','GW001|INTERNATIONAL|smfacup','GW001|INTERNATIONAL|smfashield') ORDER BY anomaly,report_key,sm_fixture_id",
-  "limit": 100
+  "sql": "SELECT 'smfacup' competition,r.sm_fixture_id result_fixture,m.sm_fixture_id report_fixture,r.competition_key result_key,m.competition_key report_key,r.match_date result_date,m.match_date report_date,r.home_name result_home,m.home_name report_home,r.away_name result_away,m.away_name report_away,r.home_score result_home_score,m.home_score report_home_score,r.away_score result_away_score,m.away_score report_away_score FROM `GW001_IMC Results` r JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.sm_fixture_id=368667458 UNION ALL SELECT 'smfashield',r.sm_fixture_id,m.sm_fixture_id,r.competition_key,m.competition_key,r.match_date,m.match_date,r.home_name,m.home_name,r.away_name,m.away_name,r.home_score,m.home_score,r.away_score,m.away_score FROM `GW001_IMC Results` r JOIN `GW001_IMC Match Report` m ON m.sm_fixture_id=r.sm_fixture_id WHERE r.sm_fixture_id=368667459",
+  "limit": 10
 }
