@@ -1,8 +1,8 @@
 {
-  "request_id": "single-normalize-country-keys-plan-20260919-34",
-  "requested_at": "2026-09-19T09:58:00Z",
-  "purpose": "Normalize all Single League domestic competition keys by removing country segment in Results and Match Report",
-  "action": "plan_migration",
+  "request_id": "single-normalize-country-keys-execute-20260919-35",
+  "requested_at": "2026-09-19T09:57:00Z",
+  "purpose": "Execute approved normalization of Single League domestic competition keys",
+  "action": "execute_migration",
   "target": "custom",
   "migration_id": "normalize-single-league-domestic-competition-keys-20260919",
   "statements": [
