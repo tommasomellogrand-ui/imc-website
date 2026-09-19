@@ -66,14 +66,33 @@ function nexus_trophy_league(array $results,array $schedule,array $comp): ?array
     foreach($done as $r)foreach(['home','away'] as $s)if(nexus_trophy_team($r,$s)===$runner['id']){$runnerMatch=$r;$runnerSide=$s;}
     $award['points']=$rank[0]['pts'];$award['runner_points']=$runner['pts'];$award['league_complete']=count($done)===$expected;$award['runner_match']=$runnerMatch;$award['runner_side']=$runnerSide;return $award;
 }
+// World Cup edition is independent of the date when its final is played.
+// Explicit edition assignments are confirmed by the competition owner.
+function nexus_trophy_edition_season(array $r,array $seasons): ?array {
+    $confirmed=['GW008|385365523'=>1];
+    $edition=($r['sm_action']??'')==='worldcup'?($confirmed[($r['game_world_id']??'').'|'.($r['sm_fixture_id']??'')]??null):null;
+    if($edition!==null){foreach($seasons as $s)if((int)$s['imc_season']===$edition)return $s;return null;}
+    $date=$r['match_date']??'';if(!$date)return null;
+    $matches=array_values(array_filter($seasons,fn($s)=>!empty($s['imc_season_start_date'])&&$date>=$s['imc_season_start_date']&&(empty($s['imc_season_end_date'])||$date<=$s['imc_season_end_date'])));
+    return count($matches)===1?$matches[0]:null;
+}
+function nexus_trophy_report_finals(array $results,array $reports): array {
+    $byId=[];foreach($reports as $r)$byId[(string)$r['sm_fixture_id']][]=$r;
+    foreach($results as &$r){$matches=$byId[(string)$r['sm_fixture_id']]??[];if(count($matches)!==1)continue;$report=$matches[0];
+        if(($r['sm_action']??'')!=='worldcup'||($report['sm_action']??'')!=='worldcup'||$report['competition_key']!==$r['competition_key']||$report['game_world_id']!==$r['game_world_id']||!nexus_trophy_final($report)||!nexus_trophy_done($report))continue;
+        // Conflicting scores must be reviewed, never silently crowned.
+        foreach(['home_score','away_score'] as $field)if(nexus_trophy_score($r[$field]??null)!==nexus_trophy_score($report[$field]??null))continue 2;
+        foreach(['competition_stage','competition_round','home_sm_club_id','away_sm_club_id','home_sm_manager_id','away_sm_manager_id','home_manager_name','away_manager_name','penalty_home_score','penalty_away_score','aggregate_home_score','aggregate_away_score'] as $field)if(($report[$field]??null)!==null)$r[$field]=$report[$field];
+    }unset($r);return $results;
+}
 function nexus_trophy_editions(array $results,array $schedule,array $catalog,array $seasons): array {
     $catalogByKey=[];foreach($catalog as $c)$catalogByKey[$c['competition_key']]=$c;
     $buckets=[];$played=[];foreach($results as $r)if(nexus_trophy_done($r))$played[(string)$r['sm_fixture_id']]=true;
     foreach(['results'=>$results,'schedule'=>$schedule] as $kind=>$rows)foreach($rows as $r){
         if($kind==='schedule'&&isset($played[(string)$r['sm_fixture_id']]))continue;
         $key=$r['competition_key']??'';$date=$r['match_date']??'';if(!$date||!isset($catalogByKey[$key]))continue;
-        $matches=array_values(array_filter($seasons,fn($s)=>!empty($s['imc_season_start_date'])&&$date>=$s['imc_season_start_date']&&(empty($s['imc_season_end_date'])||$date<=$s['imc_season_end_date'])));if(count($matches)!==1)continue;
-        $season=$matches[0]['imc_season'];$bucket=$key.'::'.$season;$buckets[$bucket]['competition']=$catalogByKey[$key];$buckets[$bucket]['season']=$season;$buckets[$bucket]['competition']['_season_end']=$matches[0]['imc_season_end_date']??null;$buckets[$bucket][$kind][(string)$r['sm_fixture_id']]=$r;
+        $edition=nexus_trophy_edition_season($r,$seasons);if(!$edition)continue;
+        $season=$edition['imc_season'];$bucket=$key.'::'.$season;$buckets[$bucket]['competition']=$catalogByKey[$key];$buckets[$bucket]['season']=$season;$buckets[$bucket]['competition']['_season_end']=$edition['imc_season_end_date']??null;$buckets[$bucket][$kind][(string)$r['sm_fixture_id']]=$r;
     }
     $awards=[];foreach($buckets as $b){$rs=array_values($b['results']??[]);$ss=array_values($b['schedule']??[]);$c=$b['competition'];$a=$c['sm_action']==='league'?nexus_trophy_league($rs,$ss,$c):nexus_trophy_cup($rs,$ss,$c['sm_action']);if(!$a)continue;unset($c['_season_end']);$a['competition']=$c;$a['season']=$b['season'];$a['id']=$c['competition_key'].'::'.$b['season'];$awards[]=$a;}
     usort($awards,fn($a,$b)=>strcmp($b['awarded_at'],$a['awarded_at'])?:strcmp($a['id'],$b['id']));return $awards;
@@ -112,6 +131,8 @@ function nexus_trophies(PDO $db,PDO $core,string $world): array {
     $schedule=nexus_core_rows($db,"SELECT $common,home_sm_team_id,away_sm_team_id FROM `IMC Site Schedule` WHERE game_world_id=? ORDER BY site_schedule_id",[$world]);
     // Reconcile missing team IDs only through the same fixture's report.
     nexus_report_logo_ids($db,$world,$results);foreach($results as &$r)foreach(['home','away'] as $side)if(empty($r[$side.'_sm_club_id'])&&!empty($r[$side.'_logo_team_id']))$r[$side.'_sm_club_id']=$r[$side.'_logo_team_id'];unset($r);
+    $finalReports=nexus_core_rows($db,"SELECT $common,home_sm_club_id,away_sm_club_id,home_manager_name,away_manager_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score FROM `IMC Site Match Report` WHERE game_world_id=? AND sm_action='worldcup'",[$world]);
+    $results=nexus_trophy_report_finals($results,$finalReports);
     $awards=nexus_trophy_editions($results,$schedule,$catalog,$seasons);
     $matches=[];foreach($awards as $a){$matches[]=$a['match'];if(!empty($a['runner_match']))$matches[]=$a['runner_match'];}
     if($matches){$ids=array_values(array_unique(array_column($matches,'sm_fixture_id')));$ph=implode(',',array_fill(0,count($ids),'?'));
@@ -135,4 +156,5 @@ function nexus_trophies(PDO $db,PDO $core,string $world): array {
     $awards=nexus_trophy_overlay($awards,nexus_trophy_official($core,$world,$seasons));
     return ['ok'=>true,'world'=>$world,'scope'=>'all_seasons','awards'=>$awards,'seasons'=>$seasons];
 }
+
 

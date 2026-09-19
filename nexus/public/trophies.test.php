@@ -41,3 +41,18 @@ trophy_check($watford['winner_sm_club_id']===3109969&&$watford['manager_sm_id']=
 $merged=nexus_trophy_overlay([['id'=>'GW008|ENG|DOMESTIC|league|3::1','season'=>1,'winner'=>'old'],['id'=>'GW008|ENG|DOMESTIC|league|3::2','season'=>2,'winner'=>'current']],[['id'=>'GW008|ENG|DOMESTIC|league|3::1','season'=>1,'winner'=>'official']]);
 trophy_check(count($merged)===2&&$merged[0]['winner']==='current'&&$merged[1]['winner']==='official','Official edition wins without changing another season');
 echo "OFFICIAL_HONOURS_TESTS_OK\n";
+
+
+$wcSeasons=[['imc_season'=>1,'imc_season_start_date'=>'2026-03-30','imc_season_end_date'=>'2026-08-29'],['imc_season'=>2,'imc_season_start_date'=>'2026-08-31','imc_season_end_date'=>null]];
+$wc=trophy_fixture(385365523,40,39,1,0,['game_world_id'=>'GW008','competition_key'=>'GW008|NATIONS|worldcup','sm_action'=>'worldcup','competition_group'=>'NATIONS','match_date'=>'2026-09-02','competition_stage'=>null,'home_name'=>'Brazil','away_name'=>'Argentina']);
+$report=array_merge($wc,['competition_stage'=>'Finale','competition_round'=>'Finale','match_date'=>null,'home_manager_name'=>'Jonny Utah']);
+$merged=nexus_trophy_report_finals([$wc],[$report]);
+$wcAwards=nexus_trophy_editions($merged,[],[['competition_key'=>$wc['competition_key'],'sm_action'=>'worldcup']],$wcSeasons);
+trophy_check(count($wcAwards)===1&&$wcAwards[0]['season']===1&&$wcAwards[0]['awarded_at']==='2026-09-02'&&$wcAwards[0]['side']==='home','World Cup keeps actual date and confirmed previous-season edition');
+trophy_check($merged[0]['home_manager_name']==='Jonny Utah','Winner manager comes from same fixture report');
+$conflict=$report;$conflict['away_score']=2;trophy_check(nexus_trophy_report_finals([$wc],[$conflict])[0]['competition_stage']===null,'Conflicting report cannot award title');
+trophy_check(nexus_trophy_report_finals([$wc],[$report,$report])[0]['competition_stage']===null,'Ambiguous duplicate report cannot award title');
+$other=$wc;$other['game_world_id']='GW007';trophy_check(nexus_trophy_edition_season($other,$wcSeasons)['imc_season']===2,'Exception is scoped to confirmed world');
+$other=$wc;$other['sm_fixture_id']=385365524;trophy_check(nexus_trophy_edition_season($other,$wcSeasons)['imc_season']===2,'A new tournament is not shifted blindly');
+$other=$wc;$other['sm_action']='leaguecup';trophy_check(nexus_trophy_edition_season($other,$wcSeasons)['imc_season']===2,'Date exception never changes domestic cups');
+echo "WORLD_CUP_EDITION_TESTS_OK\n";
