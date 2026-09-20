@@ -1,9 +1,9 @@
 {
-  "request_id": "gw003-mr-check-20260920",
-  "requested_at": "2026-09-20T05:42:00Z",
-  "purpose": "Check GW003 Match Report destination",
+  "request_id": "gw003-vs-gw007-mr-diff-20260920-02",
+  "requested_at": "2026-09-20T06:02:00Z",
+  "purpose": "Compare GW003 vs GW007 Match Report table metadata and triggers to diagnose importer HTTP 500",
   "action": "query",
   "target": "gold",
-  "sql": "SHOW COLUMNS FROM `GW003_IMC Match Report`",
-  "limit": 100
+  "sql": "SELECT 'COLUMN' kind,TABLE_NAME object_name,COLUMN_NAME item,CONCAT(COLUMN_TYPE,'|NULL=',IS_NULLABLE,'|DEFAULT=',COALESCE(CAST(COLUMN_DEFAULT AS CHAR),'NULL'),'|EXTRA=',EXTRA) detail FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('GW003_IMC Match Report','GW007_IMC Match Report') UNION ALL SELECT 'TRIGGER',EVENT_OBJECT_TABLE,TRIGGER_NAME,CONCAT(ACTION_TIMING,' ',EVENT_MANIPULATION,'|',ACTION_STATEMENT) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE IN ('GW003_IMC Match Report','GW007_IMC Match Report') ORDER BY kind,object_name,item",
+  "limit": 500
 }
