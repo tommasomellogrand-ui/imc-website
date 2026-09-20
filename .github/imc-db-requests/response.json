@@ -1,11 +1,11 @@
 {
-  "request_id": "gw010-saopaulo-id-plan-20260920",
-  "completed_at": "2026-09-20T06:12:43.161263+00:00",
+  "request_id": "gw010-saopaulo-id-execute-20260920",
+  "completed_at": "2026-09-20T06:13:21.528785+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw010-saopaulo-id-plan-20260920",
+    "request_id": "gw010-saopaulo-id-execute-20260920",
     "purpose": "Fill confirmed DOM world club ID only for missing Sao Paulo GW010 mapping",
-    "action": "plan_migration",
+    "action": "execute_migration",
     "target": "core",
     "migration_id": "gw010-saopaulo-world-id-20260920",
     "data_migration": true,
@@ -15,27 +15,31 @@
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "core",
-      "database": "Sql1956795_1",
-      "migration_id": "gw010-saopaulo-world-id-20260920",
-      "allow_destructive": false,
-      "data_migration": true,
-      "statements": [
-        "UPDATE `IMC Game World Club Mapping` SET `SM World Club ID`=92317315 WHERE `Game World`='GW010' AND `Club ID`=306 AND `SM Club ID`=306 AND `Club Name`='São Paulo FC' AND `SM World Club ID` IS NULL"
-      ]
-    },
-    "analysis": [
-      {
-        "sql": "UPDATE `IMC Game World Club Mapping` SET `SM World Club ID`=92317315 WHERE `Game World`='GW010' AND `Club ID`=306 AND `SM Club ID`=306 AND `Club Name`='São Paulo FC' AND `SM World Club ID` IS NULL",
-        "kind": "UPDATE",
-        "destructive": false,
-        "sha256": "a86506bf2748debd30bcb56f1d3828d624a1b2d74f3bda731dd49dbe73fd273f"
-      }
-    ],
+    "action": "execute_migration",
+    "target": "core",
+    "database": "Sql1956795_1",
+    "migration_id": "gw010-saopaulo-world-id-20260920",
+    "data_migration": true,
     "plan_sha256": "940b0ebc8abf082f927acb6c500c94c58640d4f969fa068916abf8662b7d802e",
-    "expires_at": "2026-09-20T06:27:43+00:00",
-    "confirmation_token": "1789885663.9ec6fe39c026d72ef7d401e525c1270c66e78389199f9e969c502f9b29b6b109"
+    "status": "success",
+    "statement_count": 1,
+    "duration_ms": 23,
+    "before": {
+      "tables": 15,
+      "columns": 107
+    },
+    "after": {
+      "tables": 15,
+      "columns": 107
+    },
+    "results": [
+      {
+        "statement": 1,
+        "sha256": "a86506bf2748debd30bcb56f1d3828d624a1b2d74f3bda731dd49dbe73fd273f",
+        "affected_rows": 1,
+        "insert_id": 0,
+        "duration_ms": 1
+      }
+    ]
   }
 }
