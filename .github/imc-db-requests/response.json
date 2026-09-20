@@ -1,25 +1,25 @@
 {
-  "request_id": "sql2-drop-next10-gw-plan-20260920",
-  "completed_at": "2026-09-20T08:30:11.446823+00:00",
+  "request_id": "sql2-drop-next10b-gw-plan-20260920",
+  "completed_at": "2026-09-20T08:38:50.830170+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "sql2-drop-next10-gw-plan-20260920",
-    "requested_at": "2026-09-20T08:20:00Z",
-    "purpose": "Remove next 10 legacy lowercase gw_ tables from SQL2, selected by prior storage audit largest remaining first",
+    "request_id": "sql2-drop-next10b-gw-plan-20260920",
+    "requested_at": "2026-09-20T08:23:00Z",
+    "purpose": "Remove next 10 legacy lowercase gw_ tables from SQL2",
     "action": "plan_migration",
     "target": "gold",
-    "migration_id": "drop-next10-legacy-gw-sql2-20260920",
+    "migration_id": "drop-next10b-legacy-gw-sql2-20260920",
     "statements": [
-      "DROP TABLE IF EXISTS `gw_source_captures`",
-      "DROP TABLE IF EXISTS `gw_fixtures`",
-      "DROP TABLE IF EXISTS `gw_source_dom_nodes`",
-      "DROP TABLE IF EXISTS `gw_match_lineups`",
-      "DROP TABLE IF EXISTS `gw_transfers`",
-      "DROP TABLE IF EXISTS `gw_match_reports`",
-      "DROP TABLE IF EXISTS `gw_fixture_results`",
-      "DROP TABLE IF EXISTS `gw_match_commentary`",
-      "DROP TABLE IF EXISTS `gw_match_tactics_snapshots`",
-      "DROP TABLE IF EXISTS `gw_match_lineup_players`"
+      "DROP TABLE IF EXISTS `gw_players`",
+      "DROP TABLE IF EXISTS `gw_world_clubs`",
+      "DROP TABLE IF EXISTS `gw_match_events`",
+      "DROP TABLE IF EXISTS `gw_player_profile_snapshots`",
+      "DROP TABLE IF EXISTS `gw_sm_user_assignments`",
+      "DROP TABLE IF EXISTS `gw_competitions`",
+      "DROP TABLE IF EXISTS `gw_national_teams`",
+      "DROP TABLE IF EXISTS `gw_sm_users`",
+      "DROP TABLE IF EXISTS `gw_transfer_summary_snapshots`",
+      "DROP TABLE IF EXISTS `gw_import_runs`"
     ],
     "allow_destructive": true,
     "data_migration": false
@@ -30,86 +30,86 @@
     "plan": {
       "target": "gold",
       "database": "Sql1956795_2",
-      "migration_id": "drop-next10-legacy-gw-sql2-20260920",
+      "migration_id": "drop-next10b-legacy-gw-sql2-20260920",
       "allow_destructive": true,
       "data_migration": false,
       "statements": [
-        "DROP TABLE IF EXISTS `gw_source_captures`",
-        "DROP TABLE IF EXISTS `gw_fixtures`",
-        "DROP TABLE IF EXISTS `gw_source_dom_nodes`",
-        "DROP TABLE IF EXISTS `gw_match_lineups`",
-        "DROP TABLE IF EXISTS `gw_transfers`",
-        "DROP TABLE IF EXISTS `gw_match_reports`",
-        "DROP TABLE IF EXISTS `gw_fixture_results`",
-        "DROP TABLE IF EXISTS `gw_match_commentary`",
-        "DROP TABLE IF EXISTS `gw_match_tactics_snapshots`",
-        "DROP TABLE IF EXISTS `gw_match_lineup_players`"
+        "DROP TABLE IF EXISTS `gw_players`",
+        "DROP TABLE IF EXISTS `gw_world_clubs`",
+        "DROP TABLE IF EXISTS `gw_match_events`",
+        "DROP TABLE IF EXISTS `gw_player_profile_snapshots`",
+        "DROP TABLE IF EXISTS `gw_sm_user_assignments`",
+        "DROP TABLE IF EXISTS `gw_competitions`",
+        "DROP TABLE IF EXISTS `gw_national_teams`",
+        "DROP TABLE IF EXISTS `gw_sm_users`",
+        "DROP TABLE IF EXISTS `gw_transfer_summary_snapshots`",
+        "DROP TABLE IF EXISTS `gw_import_runs`"
       ]
     },
     "analysis": [
       {
-        "sql": "DROP TABLE IF EXISTS `gw_source_captures`",
+        "sql": "DROP TABLE IF EXISTS `gw_players`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "44e45a5c741c4854b7ae3ae58aa2fe98c138d398a640b6c385ec40434467b66e"
+        "sha256": "9b402bbe1f83d74edad278b429e93238a58dd3cce99c904754753502e7260fe4"
       },
       {
-        "sql": "DROP TABLE IF EXISTS `gw_fixtures`",
+        "sql": "DROP TABLE IF EXISTS `gw_world_clubs`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "cea7b39e2506b1e9a6b0aefb3792ec3ce800c1c5a0365ab62b785e2bb3e46a01"
+        "sha256": "580fa5bd84f224124469993c486907fe50bc8342a255b55a674b36dc0c00045a"
       },
       {
-        "sql": "DROP TABLE IF EXISTS `gw_source_dom_nodes`",
+        "sql": "DROP TABLE IF EXISTS `gw_match_events`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "c5319e30f6c3a373714a7a1aa4bf9fb7022a9bba3c1394b6c5513f2f86dd6a03"
+        "sha256": "07a67be29ad1dcf0082431c37cad21eb0cc70b1eea9c61bf609b7d8cb6b57509"
       },
       {
-        "sql": "DROP TABLE IF EXISTS `gw_match_lineups`",
+        "sql": "DROP TABLE IF EXISTS `gw_player_profile_snapshots`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "c66971184da7f8249fbe62d9d3a9030adf9157a318473cd6073ccd731dcd1098"
+        "sha256": "2e73baacdba32452f51cb37922a48cbae0af5911b84d974f825f2270b01b7d2a"
       },
       {
-        "sql": "DROP TABLE IF EXISTS `gw_transfers`",
+        "sql": "DROP TABLE IF EXISTS `gw_sm_user_assignments`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "eef2db3eab30a3930970e95b4216a65ab8b22e8c6629fb104931e47bc5675732"
+        "sha256": "3bd2915991c514c9a18b1feb3ab21e6ecf617b664330e037121e115e9cbf2e81"
       },
       {
-        "sql": "DROP TABLE IF EXISTS `gw_match_reports`",
+        "sql": "DROP TABLE IF EXISTS `gw_competitions`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "47e4f96cd546684d20cb0ac0058b81920d5d3521e6f514b723dc2ba3be1cbc6d"
+        "sha256": "f531e7a84fed2d670b4a914615b578cb1f83b0ddf61bd7dce3fb1587f01d1900"
       },
       {
-        "sql": "DROP TABLE IF EXISTS `gw_fixture_results`",
+        "sql": "DROP TABLE IF EXISTS `gw_national_teams`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "22e76163b59f3bcab3978ec8ac2da3ca8482eb5f5a2323e1d4b8a1e1a0a94d41"
+        "sha256": "c1c2ed31798bd53771da57f1284d0635e2d6126fc6e6f4b70598cd6dc8f3bf39"
       },
       {
-        "sql": "DROP TABLE IF EXISTS `gw_match_commentary`",
+        "sql": "DROP TABLE IF EXISTS `gw_sm_users`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "e968e00200698b9141701fe467ac0b38274bc08f3bceb73f678763b48103207f"
+        "sha256": "32688ba75bd91d6e7d7cfdf9bd79bcf9e24f23e65222c4b547991a73ee914de0"
       },
       {
-        "sql": "DROP TABLE IF EXISTS `gw_match_tactics_snapshots`",
+        "sql": "DROP TABLE IF EXISTS `gw_transfer_summary_snapshots`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "fd760770d1d594e25a6da6858bacdad544e68c5acbca0da9e35538a30541bd46"
+        "sha256": "77628f33836445de79a430058b55848d8b67f28c3fa1bec20ca27c50719beb8f"
       },
       {
-        "sql": "DROP TABLE IF EXISTS `gw_match_lineup_players`",
+        "sql": "DROP TABLE IF EXISTS `gw_import_runs`",
         "kind": "DROP",
         "destructive": true,
-        "sha256": "81abdf4000d1872694cca12aa43cb5889d297070812f4bb5ef00659c6bd88e0e"
+        "sha256": "5619a56d718acb67027ba7f4aab4e470ea67b6ed89ae2da3188eafd792949ce6"
       }
     ],
-    "plan_sha256": "27483787c2b7abe76ee2f8cf2f0361a85097019dacb0a2f164eebf5d17e781c3",
-    "expires_at": "2026-09-20T08:45:11+00:00",
-    "confirmation_token": "1789893911.6f3052178959dcd4257e13717b1124a5399f4acc54a10f8565baec45c6187ee6"
+    "plan_sha256": "74f476a6ead6aebe875ff32cce3063c2a0bf6122c5d5494cef47f92895912944",
+    "expires_at": "2026-09-20T08:53:50+00:00",
+    "confirmation_token": "1789894430.544902bb316654117e6b278a63a61b58de5621934856b387664a360ba7ed2333"
   }
 }
