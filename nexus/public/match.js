@@ -17,10 +17,24 @@ const date=v=>/^\d{4}-\d{2}-\d{2}/.test(v||'')?new Date(v.slice(0,10)+'T12:00:00
 function href(patch){return '?'+new URLSearchParams({...Object.fromEntries(params),world,fixture,tab,side,...patch})}
 function stateURL(){const p=new URLSearchParams(location.search);tab=tabs.some(t=>t[0]===p.get('tab'))?p.get('tab'):'overview';side=p.get('side')==='away'?'away':'home'}
 function crest(s){const src=imageURL(record[s+'_core']?.image_url);return src?`<img class="crest" src="${esc(src)}" alt="" width="105" height="105">`:`<span class="crest crest-fallback" aria-hidden="true">${esc(initials(name(s)))}</span>`}
+function goalScorers(teamSide){
+ const goalEvents=events.filter(e=>e.team_side===teamSide&&e.event_type==='goal'&&!/annullat|disallow|no goal/i.test(e.event_text||e.commentary_text||''));
+ const fromEvents=goalEvents.map(e=>{
+  const who=e.player_name||e.scorer_name||e.player||e.actor_name||e.event_player_name||'';
+  const min=minute(e.minute);
+  return who&&min!==null?{name:who,minute:min}:null;
+ }).filter(Boolean);
+ if(fromEvents.length)return fromEvents;
+ return players.filter(p=>p.team_side===teamSide&&num(p.goals)>0).flatMap(p=>Array.from({length:num(p.goals)},()=>({name:p.player_name||'Marcatore',minute:null})));
+}
+function scorersHTML(teamSide){
+ const list=goalScorers(teamSide);
+ return list.length?list.map(g=>`<span><b>⚽</b> ${esc(g.name)}${g.minute!==null?' '+esc(g.minute)+'′':''}</span>`).join(''):'';
+}
 function renderHero(){
  const r=record,stage=[r.competition_stage,r.competition_round].filter(Boolean).join(' · ')||'Match report';
  const decisions=[];if(r.penalty_home_score!=null&&r.penalty_away_score!=null)decisions.push(`Rigori ${r.penalty_home_score}–${r.penalty_away_score}`);if(r.aggregate_home_score!=null&&r.aggregate_away_score!=null)decisions.push(`Aggregato ${r.aggregate_home_score}–${r.aggregate_away_score}`);
- $('hero').innerHTML=`<p class="stage"><span>${esc(stage)}</span></p><section class="scoreboard" aria-label="Risultato della partita"><div class="score-grid"><div class="team">${crest('home')}<strong>${esc(name('home'))}</strong><small>${esc(r.home_manager_name||'')}</small></div><div class="score">${esc(r.home_score??'—')}–${esc(r.away_score??'—')}</div><div class="team">${crest('away')}<strong>${esc(name('away'))}</strong><small>${esc(r.away_manager_name||'')}</small></div></div><p class="match-info"><strong>${esc(date(r.match_date))}${r.imc_season?' · Stagione '+esc(r.imc_season):''}</strong>${esc([r.stadium_name,r.attendance!=null?Number(r.attendance).toLocaleString('it-IT')+' spettatori':''].filter(Boolean).join(' · '))}</p>${decisions.length?`<p class="decision">${esc(decisions.join(' · '))}</p>`:''}</section>`;
+ $('hero').innerHTML=`<p class="stage"><span>${esc(stage)}</span></p><section class="scoreboard" aria-label="Risultato della partita"><div class="score-grid"><div class="team">${crest('home')}<strong>${esc(name('home'))}</strong><small>${esc(r.home_manager_name||'Senza allenatore')}</small></div><div class="score">${esc(r.home_score??'—')}–${esc(r.away_score??'—')}</div><div class="team">${crest('away')}<strong>${esc(name('away'))}</strong><small>${esc(r.away_manager_name||'Senza allenatore')}</small></div></div><div class="hero-scorers"><div>${scorersHTML('home')}</div><div>${scorersHTML('away')}</div></div><p class="match-info"><strong>${esc(r.competition_core?.nexus_view||r._nexus_view||'Competizione')} · ${r.imc_season?'STAGIONE '+esc(r.imc_season)+' · ':''}${esc(date(r.match_date))}</strong>${esc([r.stadium_name,r.attendance!=null?Number(r.attendance).toLocaleString('it-IT')+' spettatori':''].filter(Boolean).join(' · '))}</p>${decisions.length?`<p class="decision">${esc(decisions.join(' · '))}</p>`:''}</section>`;
  document.title=`${name('home')} ${r.home_score??'—'}–${r.away_score??'—'} ${name('away')} · Nexus`;
 }
 function rating(p){const n=num(p.rating);return `<span class="rating ${n===null?'none':n<6?'low':n<7?'mid':''}" aria-label="${n===null?'Voto non disponibile':'Voto '+n}">${n===null?'—':n.toFixed(1)}</span>`}
@@ -52,7 +66,7 @@ async function boot(){
  const [data,catalog]=await Promise.all([fetchJSON({world,resource:'match_report',fixture}),fetchJSON({world,resource:'catalog'}).catch(()=>null)]);
  record=data.rows?.[0];if(!record){$('status').textContent='Il report di questa partita non è ancora disponibile.';return}
  players=array(record.players_json);events=array(record.events_json).sort((a,b)=>(num(a.event_sequence)??0)-(num(b.event_sequence)??0));tactics=array(record.tactics_json);
- const comp=catalog?.rows?.find(c=>c.competition_key===record.competition_key);$('competition').textContent=record.competition_core?.nexus_view||comp?.nexus_view||'Nome competizione non configurato';
+ const comp=catalog?.rows?.find(c=>c.competition_key===record.competition_key);record._nexus_view=record.competition_core?.nexus_view||comp?.nexus_view||record.competition_key||'Competizione';$('competition').textContent=record._nexus_view;
  $('status').hidden=true;renderHero();render();
  }catch(e){$('status').textContent=e.message;$('panel').innerHTML='<button class="retry" type="button">Riprova</button>';$('panel').querySelector('button').onclick=()=>{ $('panel').innerHTML='';boot()};}
 }
