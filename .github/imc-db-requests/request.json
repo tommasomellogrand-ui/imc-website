@@ -1,9 +1,9 @@
 {
-  "request_id": "mysql-storage-custom-20260920",
-  "requested_at": "2026-09-20T06:46:00Z",
-  "purpose": "Measure current MySQL storage usage for CUSTOM database",
+  "request_id": "storage-audit-core-tables-20260920",
+  "requested_at": "2026-09-20T06:55:00Z",
+  "purpose": "Audit storage by table in CORE MySQL",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT DATABASE() database_name,ROUND(SUM(DATA_LENGTH)/1024/1024,2) data_mb,ROUND(SUM(INDEX_LENGTH)/1024/1024,2) index_mb,ROUND(SUM(DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb,COUNT(*) tables FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()",
-  "limit": 10
+  "target": "core",
+  "sql": "SELECT TABLE_NAME, TABLE_ROWS, ROUND(DATA_LENGTH/1024/1024,2) data_mb, ROUND(INDEX_LENGTH/1024/1024,2) index_mb, ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb, ROUND(AVG_ROW_LENGTH/1024,2) avg_row_kb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() ORDER BY (DATA_LENGTH+INDEX_LENGTH) DESC",
+  "limit": 500
 }
