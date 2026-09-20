@@ -1,13 +1,8 @@
 {
-  "request_id": "sql2-drop-gw-source-payloads-execute-20260920",
-  "requested_at": "2026-09-20T08:17:00Z",
-  "purpose": "Execute approved removal of only legacy SQL2 gw_source_payloads table",
-  "action": "execute_migration",
-  "target": "gold",
-  "migration_id": "drop-gw-source-payloads-sql2-20260920",
-  "statements": [
-    "DROP TABLE IF EXISTS `gw_source_payloads`"
-  ],
-  "allow_destructive": true,
-  "data_migration": false
+  "request_id": "ext-manager-codex-extract-20260920",
+  "requested_at": "2026-09-20T08:30:00Z",
+  "purpose": "Extract all rows and count from CORE EXT Manager Codex Global",
+  "action": "query",
+  "target": "core",
+  "sql": "SELECT sm_manager_id, manager_name, (SELECT COUNT(*) FROM `EXT Manager Codex Global`) AS total_managers FROM `EXT Manager Codex Global` ORDER BY sm_manager_id"
 }
