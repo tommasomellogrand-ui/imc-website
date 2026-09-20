@@ -1,7 +1,7 @@
 {
-  "request_id": "gw010-saopaulo-id-plan-20260920",
+  "request_id": "gw010-saopaulo-id-execute-20260920",
   "purpose": "Fill confirmed DOM world club ID only for missing Sao Paulo GW010 mapping",
-  "action": "plan_migration",
+  "action": "execute_migration",
   "target": "core",
   "migration_id": "gw010-saopaulo-world-id-20260920",
   "data_migration": true,
