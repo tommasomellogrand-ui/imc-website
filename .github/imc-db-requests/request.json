@@ -1,22 +1,9 @@
 {
-  "request_id": "sql2-drop-next10c-gw-plan-20260920",
-  "requested_at": "2026-09-20T08:25:00Z",
-  "purpose": "Remove third batch of 10 legacy lowercase gw_ tables from SQL2",
-  "action": "plan_migration",
+  "request_id": "sql2-remaining-lowercase-gw-20260920",
+  "requested_at": "2026-09-20T08:27:00Z",
+  "purpose": "List exact lowercase gw_ tables currently remaining in SQL2",
+  "action": "query",
   "target": "gold",
-  "migration_id": "drop-next10c-legacy-gw-sql2-20260920",
-  "statements": [
-    "DROP TABLE IF EXISTS `gw_game_worlds`",
-    "DROP TABLE IF EXISTS `gw_seasons`",
-    "DROP TABLE IF EXISTS `gw_source_page_types`",
-    "DROP TABLE IF EXISTS `gw_countries`",
-    "DROP TABLE IF EXISTS `gw_world_rules`",
-    "DROP TABLE IF EXISTS `gw_manager_ranking_snapshots`",
-    "DROP TABLE IF EXISTS `gw_player_stat_snapshots`",
-    "DROP TABLE IF EXISTS `gw_player_state_snapshots`",
-    "DROP TABLE IF EXISTS `gw_squads`",
-    "DROP TABLE IF EXISTS `gw_player_leaderboard_snapshots`"
-  ],
-  "allow_destructive": true,
-  "data_migration": false
+  "sql": "SELECT TABLE_NAME,ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND BINARY TABLE_NAME LIKE 'gw\\_%' ORDER BY (DATA_LENGTH+INDEX_LENGTH) DESC,TABLE_NAME",
+  "limit": 200
 }
