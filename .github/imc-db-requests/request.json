@@ -1,8 +1,11 @@
 {
-  "request_id": "gw010-saopaulo-id-audit-20260920",
-  "purpose": "Verify exact GW010 Sao Paulo mapping before null-only ID update",
-  "action": "query",
+  "request_id": "gw010-saopaulo-id-plan-20260920",
+  "purpose": "Fill confirmed DOM world club ID only for missing Sao Paulo GW010 mapping",
+  "action": "plan_migration",
   "target": "core",
-  "sql": "SELECT * FROM `IMC Game World Club Mapping` WHERE `Game World`='GW010' AND (`Club ID`=306 OR `SM World Club ID`=92317315)",
-  "limit": 20
+  "migration_id": "gw010-saopaulo-world-id-20260920",
+  "data_migration": true,
+  "statements": [
+    "UPDATE `IMC Game World Club Mapping` SET `SM World Club ID`=92317315 WHERE `Game World`='GW010' AND `Club ID`=306 AND `SM Club ID`=306 AND `Club Name`='São Paulo FC' AND `SM World Club ID` IS NULL"
+  ]
 }
