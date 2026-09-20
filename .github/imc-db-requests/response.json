@@ -1,12 +1,12 @@
 {
-  "request_id": "sql2-drop-gw-source-payloads-plan-20260920",
-  "completed_at": "2026-09-20T08:15:34.912168+00:00",
+  "request_id": "sql2-drop-gw-source-payloads-execute-20260920",
+  "completed_at": "2026-09-20T08:18:15.268247+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "sql2-drop-gw-source-payloads-plan-20260920",
-    "requested_at": "2026-09-20T08:16:00Z",
-    "purpose": "Remove only legacy SQL2 gw_source_payloads table, the largest lowercase gw_ table",
-    "action": "plan_migration",
+    "request_id": "sql2-drop-gw-source-payloads-execute-20260920",
+    "requested_at": "2026-09-20T08:17:00Z",
+    "purpose": "Execute approved removal of only legacy SQL2 gw_source_payloads table",
+    "action": "execute_migration",
     "target": "gold",
     "migration_id": "drop-gw-source-payloads-sql2-20260920",
     "statements": [
@@ -17,27 +17,31 @@
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "gold",
-      "database": "Sql1956795_2",
-      "migration_id": "drop-gw-source-payloads-sql2-20260920",
-      "allow_destructive": true,
-      "data_migration": false,
-      "statements": [
-        "DROP TABLE IF EXISTS `gw_source_payloads`"
-      ]
-    },
-    "analysis": [
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_source_payloads`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "f01883178806bdf4d3e97ff742426f96d6c5727fdb86fe3e42a713d9c54e0004"
-      }
-    ],
+    "action": "execute_migration",
+    "target": "gold",
+    "database": "Sql1956795_2",
+    "migration_id": "drop-gw-source-payloads-sql2-20260920",
+    "data_migration": false,
     "plan_sha256": "6f182bb1e14a0cf376ec3189c1a0c5322babd4553f124dbd097aff58c58b2c3b",
-    "expires_at": "2026-09-20T08:30:34+00:00",
-    "confirmation_token": "1789893034.0b440f98dc1b85b5eef92855fd54a23dc87563dd46ec9bdf17a63d599fb9a4ca"
+    "status": "success",
+    "statement_count": 1,
+    "duration_ms": 850,
+    "before": {
+      "tables": 299,
+      "columns": 5269
+    },
+    "after": {
+      "tables": 298,
+      "columns": 5260
+    },
+    "results": [
+      {
+        "statement": 1,
+        "sha256": "f01883178806bdf4d3e97ff742426f96d6c5727fdb86fe3e42a713d9c54e0004",
+        "affected_rows": 0,
+        "insert_id": 0,
+        "duration_ms": 598
+      }
+    ]
   }
 }
