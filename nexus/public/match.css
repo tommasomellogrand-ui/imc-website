@@ -33,3 +33,14 @@ body{background:#fff;color:var(--ink)}
 details summary{margin:8px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(150deg,#fff,#edf4fc);color:var(--navy)}
 
 .hero-scorers{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;margin:18px auto 0;padding:14px 8px 0;border-top:1px solid var(--line);max-width:680px}.hero-scorers>div{display:flex;flex-direction:column;gap:5px;font-size:11px;line-height:1.35}.hero-scorers>div:first-child{text-align:left}.hero-scorers>div:last-child{text-align:right}.hero-scorers span{display:block}.hero-scorers b{font-size:10px}.match-info strong{text-transform:uppercase}@media(min-width:650px){.hero-scorers{font-size:12px;padding-inline:18px}.hero-scorers>div{font-size:12px}}
+
+/* Match hero scorer layout: two team columns, same Nexus typography. */
+.hero-scorers{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;margin:14px 0 0;padding:0 12px;border:0;color:var(--muted);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:10px;font-weight:500;line-height:1.45}
+.hero-scorers>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.hero-scorers>div:first-child{text-align:left;align-items:flex-start}
+.hero-scorers>div:last-child{text-align:right;align-items:flex-end}
+.hero-scorers span{display:block;max-width:100%;overflow-wrap:anywhere}
+.hero-divider{height:1px;background:var(--line);margin:14px 12px 0}
+.match-info{margin-top:13px}
+.match-info strong{font-size:11px;font-weight:800;letter-spacing:0;text-transform:uppercase}
+@media(min-width:650px){.hero-scorers{padding:0 30px;font-size:11px}.hero-divider{margin-inline:30px}.match-info strong{font-size:12px}}
