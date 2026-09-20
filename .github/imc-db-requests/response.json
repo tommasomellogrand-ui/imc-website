@@ -1,470 +1,518 @@
 {
-  "request_id": "storage-audit-gold-tables-20260920",
-  "completed_at": "2026-09-20T06:50:59.735648+00:00",
+  "request_id": "storage-audit-custom-tables-20260920",
+  "completed_at": "2026-09-20T06:51:20.788833+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "storage-audit-gold-tables-20260920",
-    "requested_at": "2026-09-20T06:56:00Z",
-    "purpose": "Audit storage by table in GOLD MySQL",
+    "request_id": "storage-audit-custom-tables-20260920",
+    "requested_at": "2026-09-20T06:57:00Z",
+    "purpose": "Audit storage by table in CUSTOM MySQL",
     "action": "query",
-    "target": "gold",
+    "target": "custom",
     "sql": "SELECT TABLE_NAME, TABLE_ROWS, ROUND(DATA_LENGTH/1024/1024,2) data_mb, ROUND(INDEX_LENGTH/1024/1024,2) index_mb, ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb, ROUND(AVG_ROW_LENGTH/1024,2) avg_row_kb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() ORDER BY (DATA_LENGTH+INDEX_LENGTH) DESC",
     "limit": 500
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "gold",
-    "database": "Sql1956795_2",
+    "target": "custom",
+    "database": "Sql1956795_3",
     "result": {
       "rows": [
         {
           "TABLE_NAME": "gw_source_payloads",
-          "TABLE_ROWS": "5721",
-          "data_mb": "8786.52",
+          "TABLE_ROWS": "6749",
+          "data_mb": "14186.52",
           "index_mb": "1.52",
-          "total_mb": "8788.03",
-          "avg_row_kb": "1572.70"
-        },
-        {
-          "TABLE_NAME": "IMC Site Match Report",
-          "TABLE_ROWS": "8623",
-          "data_mb": "892.69",
-          "index_mb": "6.55",
-          "total_mb": "899.23",
-          "avg_row_kb": "106.01"
-        },
-        {
-          "TABLE_NAME": "GW003_IMC Match Report",
-          "TABLE_ROWS": "4560",
-          "data_mb": "455.61",
-          "index_mb": "0.00",
-          "total_mb": "455.61",
-          "avg_row_kb": "102.31"
-        },
-        {
-          "TABLE_NAME": "GW002_IMC Match Report",
-          "TABLE_ROWS": "3057",
-          "data_mb": "283.58",
-          "index_mb": "0.00",
-          "total_mb": "283.58",
-          "avg_row_kb": "94.99"
-        },
-        {
-          "TABLE_NAME": "GW007_IMC Match Report",
-          "TABLE_ROWS": "1602",
-          "data_mb": "151.56",
-          "index_mb": "0.00",
-          "total_mb": "151.56",
-          "avg_row_kb": "96.88"
+          "total_mb": "14188.03",
+          "avg_row_kb": "2152.47"
         },
         {
           "TABLE_NAME": "gw_source_captures",
-          "TABLE_ROWS": "2257",
-          "data_mb": "32.52",
-          "index_mb": "0.70",
-          "total_mb": "33.22",
-          "avg_row_kb": "14.75"
-        },
-        {
-          "TABLE_NAME": "GW008_IMC Match Report",
-          "TABLE_ROWS": "295",
-          "data_mb": "29.52",
-          "index_mb": "0.00",
-          "total_mb": "29.52",
-          "avg_row_kb": "102.45"
-        },
-        {
-          "TABLE_NAME": "gw_fixtures",
-          "TABLE_ROWS": "19338",
-          "data_mb": "23.56",
-          "index_mb": "4.55",
-          "total_mb": "28.11",
-          "avg_row_kb": "1.25"
-        },
-        {
-          "TABLE_NAME": "IMC Site Results",
-          "TABLE_ROWS": "29419",
-          "data_mb": "12.02",
-          "index_mb": "13.14",
-          "total_mb": "25.16",
-          "avg_row_kb": "0.42"
-        },
-        {
-          "TABLE_NAME": "gw_source_dom_nodes",
-          "TABLE_ROWS": "34569",
-          "data_mb": "16.55",
-          "index_mb": "8.08",
-          "total_mb": "24.63",
-          "avg_row_kb": "0.49"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "TABLE_ROWS": "18964",
-          "data_mb": "6.52",
-          "index_mb": "8.06",
-          "total_mb": "14.58",
-          "avg_row_kb": "0.35"
-        },
-        {
-          "TABLE_NAME": "IMC Site Transfers",
-          "TABLE_ROWS": "25943",
-          "data_mb": "5.02",
-          "index_mb": "8.13",
-          "total_mb": "13.14",
-          "avg_row_kb": "0.20"
+          "TABLE_ROWS": "2245",
+          "data_mb": "490.52",
+          "index_mb": "0.69",
+          "total_mb": "491.20",
+          "avg_row_kb": "223.74"
         },
         {
           "TABLE_NAME": "gw_match_lineups",
-          "TABLE_ROWS": "104",
-          "data_mb": "11.52",
-          "index_mb": "0.03",
-          "total_mb": "11.55",
-          "avg_row_kb": "113.38"
-        },
-        {
-          "TABLE_NAME": "gw_transfers",
-          "TABLE_ROWS": "2656",
-          "data_mb": "10.52",
-          "index_mb": "0.58",
-          "total_mb": "11.09",
-          "avg_row_kb": "4.05"
+          "TABLE_ROWS": "2342",
+          "data_mb": "211.56",
+          "index_mb": "0.23",
+          "total_mb": "211.80",
+          "avg_row_kb": "92.50"
         },
         {
           "TABLE_NAME": "gw_match_reports",
-          "TABLE_ROWS": "89",
-          "data_mb": "10.52",
-          "index_mb": "0.03",
-          "total_mb": "10.55",
-          "avg_row_kb": "120.99"
+          "TABLE_ROWS": "1800",
+          "data_mb": "198.52",
+          "index_mb": "0.19",
+          "total_mb": "198.70",
+          "avg_row_kb": "112.93"
         },
         {
-          "TABLE_NAME": "IMC Site SM Player Stats",
-          "TABLE_ROWS": "3746",
-          "data_mb": "1.52",
-          "index_mb": "2.34",
-          "total_mb": "3.86",
-          "avg_row_kb": "0.41"
+          "TABLE_NAME": "IMC Site Match Report",
+          "TABLE_ROWS": "1765",
+          "data_mb": "166.56",
+          "index_mb": "0.86",
+          "total_mb": "167.42",
+          "avg_row_kb": "96.63"
         },
         {
-          "TABLE_NAME": "GW003_results",
-          "TABLE_ROWS": "8812",
-          "data_mb": "2.52",
-          "index_mb": "1.05",
-          "total_mb": "3.56",
-          "avg_row_kb": "0.29"
-        },
-        {
-          "TABLE_NAME": "gw_fixture_results",
-          "TABLE_ROWS": "15012",
-          "data_mb": "1.52",
-          "index_mb": "1.86",
-          "total_mb": "3.38",
-          "avg_row_kb": "0.10"
-        },
-        {
-          "TABLE_NAME": "GW002_schedule",
-          "TABLE_ROWS": "6278",
-          "data_mb": "2.52",
+          "TABLE_NAME": "GW006_IMC Match Report",
+          "TABLE_ROWS": "877",
+          "data_mb": "66.52",
           "index_mb": "0.00",
-          "total_mb": "2.52",
-          "avg_row_kb": "0.41"
+          "total_mb": "66.52",
+          "avg_row_kb": "77.66"
         },
         {
-          "TABLE_NAME": "GW003_IMC Results",
-          "TABLE_ROWS": "9164",
-          "data_mb": "2.52",
+          "TABLE_NAME": "GW004_IMC Match Report",
+          "TABLE_ROWS": "644",
+          "data_mb": "64.52",
           "index_mb": "0.00",
-          "total_mb": "2.52",
-          "avg_row_kb": "0.28"
-        },
-        {
-          "TABLE_NAME": "GW003_transfers",
-          "TABLE_ROWS": "15067",
-          "data_mb": "2.52",
-          "index_mb": "0.00",
-          "total_mb": "2.52",
-          "avg_row_kb": "0.17"
-        },
-        {
-          "TABLE_NAME": "GW007_IMC Schedule",
-          "TABLE_ROWS": "8437",
-          "data_mb": "2.52",
-          "index_mb": "0.00",
-          "total_mb": "2.52",
-          "avg_row_kb": "0.30"
-        },
-        {
-          "TABLE_NAME": "GW008_IMC Schedule",
-          "TABLE_ROWS": "6530",
-          "data_mb": "2.52",
-          "index_mb": "0.00",
-          "total_mb": "2.52",
-          "avg_row_kb": "0.39"
-        },
-        {
-          "TABLE_NAME": "GW008_schedule",
-          "TABLE_ROWS": "7410",
-          "data_mb": "2.52",
-          "index_mb": "0.00",
-          "total_mb": "2.52",
-          "avg_row_kb": "0.35"
-        },
-        {
-          "TABLE_NAME": "GW002_results",
-          "TABLE_ROWS": "5533",
-          "data_mb": "1.52",
-          "index_mb": "0.69",
-          "total_mb": "2.20",
-          "avg_row_kb": "0.28"
+          "total_mb": "64.52",
+          "avg_row_kb": "102.58"
         },
         {
           "TABLE_NAME": "gw_match_commentary",
-          "TABLE_ROWS": "1545",
-          "data_mb": "1.52",
-          "index_mb": "0.13",
-          "total_mb": "1.64",
-          "avg_row_kb": "1.00"
+          "TABLE_ROWS": "30419",
+          "data_mb": "25.56",
+          "index_mb": "3.03",
+          "total_mb": "28.59",
+          "avg_row_kb": "0.86"
+        },
+        {
+          "TABLE_NAME": "GW001_IMC Match Report",
+          "TABLE_ROWS": "298",
+          "data_mb": "27.52",
+          "index_mb": "0.00",
+          "total_mb": "27.52",
+          "avg_row_kb": "94.55"
         },
         {
           "TABLE_NAME": "gw_match_tactics_snapshots",
-          "TABLE_ROWS": "653",
-          "data_mb": "1.52",
-          "index_mb": "0.11",
-          "total_mb": "1.63",
-          "avg_row_kb": "2.38"
-        },
-        {
-          "TABLE_NAME": "GW002_IMC Results",
-          "TABLE_ROWS": "6070",
-          "data_mb": "1.52",
-          "index_mb": "0.00",
-          "total_mb": "1.52",
-          "avg_row_kb": "0.25"
-        },
-        {
-          "TABLE_NAME": "GW002_IMC Transfers",
-          "TABLE_ROWS": "7411",
-          "data_mb": "1.52",
-          "index_mb": "0.00",
-          "total_mb": "1.52",
-          "avg_row_kb": "0.21"
-        },
-        {
-          "TABLE_NAME": "GW002_transfers",
-          "TABLE_ROWS": "6982",
-          "data_mb": "1.52",
-          "index_mb": "0.00",
-          "total_mb": "1.52",
-          "avg_row_kb": "0.22"
-        },
-        {
-          "TABLE_NAME": "GW003_IMC Schedule",
-          "TABLE_ROWS": "2896",
-          "data_mb": "1.52",
-          "index_mb": "0.00",
-          "total_mb": "1.52",
-          "avg_row_kb": "0.54"
-        },
-        {
-          "TABLE_NAME": "GW003_IMC Transfers",
-          "TABLE_ROWS": "11876",
-          "data_mb": "1.52",
-          "index_mb": "0.00",
-          "total_mb": "1.52",
-          "avg_row_kb": "0.13"
-        },
-        {
-          "TABLE_NAME": "GW007_IMC Results",
-          "TABLE_ROWS": "3177",
-          "data_mb": "1.52",
-          "index_mb": "0.00",
-          "total_mb": "1.52",
-          "avg_row_kb": "0.49"
-        },
-        {
-          "TABLE_NAME": "GW008_IMC Results",
-          "TABLE_ROWS": "9224",
-          "data_mb": "1.52",
-          "index_mb": "0.00",
-          "total_mb": "1.52",
-          "avg_row_kb": "0.17"
+          "TABLE_ROWS": "12384",
+          "data_mb": "20.55",
+          "index_mb": "3.13",
+          "total_mb": "23.67",
+          "avg_row_kb": "1.70"
         },
         {
           "TABLE_NAME": "gw_match_lineup_players",
-          "TABLE_ROWS": "3046",
-          "data_mb": "0.44",
-          "index_mb": "0.53",
-          "total_mb": "0.97",
+          "TABLE_ROWS": "59622",
+          "data_mb": "8.52",
+          "index_mb": "11.61",
+          "total_mb": "20.13",
           "avg_row_kb": "0.15"
         },
         {
-          "TABLE_NAME": "GW007_results",
-          "TABLE_ROWS": "2028",
-          "data_mb": "0.52",
-          "index_mb": "0.33",
-          "total_mb": "0.84",
-          "avg_row_kb": "0.26"
+          "TABLE_NAME": "gw_transfers",
+          "TABLE_ROWS": "3496",
+          "data_mb": "14.55",
+          "index_mb": "1.73",
+          "total_mb": "16.28",
+          "avg_row_kb": "4.26"
         },
         {
-          "TABLE_NAME": "gw_players",
-          "TABLE_ROWS": "4827",
-          "data_mb": "0.38",
-          "index_mb": "0.44",
-          "total_mb": "0.81",
-          "avg_row_kb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_world_clubs",
-          "TABLE_ROWS": "2449",
-          "data_mb": "0.39",
-          "index_mb": "0.23",
-          "total_mb": "0.63",
-          "avg_row_kb": "0.16"
-        },
-        {
-          "TABLE_NAME": "gw_match_events",
-          "TABLE_ROWS": "1200",
-          "data_mb": "0.34",
-          "index_mb": "0.25",
-          "total_mb": "0.59",
-          "avg_row_kb": "0.29"
+          "TABLE_NAME": "GW005_IMC Match Report",
+          "TABLE_ROWS": "138",
+          "data_mb": "15.52",
+          "index_mb": "0.00",
+          "total_mb": "15.52",
+          "avg_row_kb": "115.13"
         },
         {
           "TABLE_NAME": "gw_player_profile_snapshots",
-          "TABLE_ROWS": "3024",
-          "data_mb": "0.28",
-          "index_mb": "0.23",
-          "total_mb": "0.52",
+          "TABLE_ROWS": "64993",
+          "data_mb": "5.52",
+          "index_mb": "5.03",
+          "total_mb": "10.55",
           "avg_row_kb": "0.09"
         },
         {
-          "TABLE_NAME": "gw_sm_user_assignments",
-          "TABLE_ROWS": "979",
-          "data_mb": "0.22",
-          "index_mb": "0.28",
+          "TABLE_NAME": "gw_match_events",
+          "TABLE_ROWS": "19637",
+          "data_mb": "5.52",
+          "index_mb": "3.39",
+          "total_mb": "8.91",
+          "avg_row_kb": "0.29"
+        },
+        {
+          "TABLE_NAME": "GW009_IMC Match Report",
+          "TABLE_ROWS": "67",
+          "data_mb": "8.52",
+          "index_mb": "0.00",
+          "total_mb": "8.52",
+          "avg_row_kb": "130.15"
+        },
+        {
+          "TABLE_NAME": "gw_source_dom_nodes",
+          "TABLE_ROWS": "5902",
+          "data_mb": "3.52",
+          "index_mb": "1.63",
+          "total_mb": "5.14",
+          "avg_row_kb": "0.61"
+        },
+        {
+          "TABLE_NAME": "gw_fixtures",
+          "TABLE_ROWS": "6227",
+          "data_mb": "4.52",
+          "index_mb": "0.61",
+          "total_mb": "5.13",
+          "avg_row_kb": "0.74"
+        },
+        {
+          "TABLE_NAME": "IMC Site Results",
+          "TABLE_ROWS": "4173",
+          "data_mb": "2.02",
+          "index_mb": "2.02",
+          "total_mb": "4.03",
+          "avg_row_kb": "0.49"
+        },
+        {
+          "TABLE_NAME": "IMC Site Transfers",
+          "TABLE_ROWS": "6555",
+          "data_mb": "2.02",
+          "index_mb": "1.75",
+          "total_mb": "3.77",
+          "avg_row_kb": "0.31"
+        },
+        {
+          "TABLE_NAME": "gw_players",
+          "TABLE_ROWS": "8870",
+          "data_mb": "1.52",
+          "index_mb": "0.89",
+          "total_mb": "2.41",
+          "avg_row_kb": "0.17"
+        },
+        {
+          "TABLE_NAME": "GW001_match_report_events",
+          "TABLE_ROWS": "0",
+          "data_mb": "1.52",
+          "index_mb": "0.70",
+          "total_mb": "2.22",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "TABLE_ROWS": "2167",
+          "data_mb": "1.52",
+          "index_mb": "0.67",
+          "total_mb": "2.19",
+          "avg_row_kb": "0.72"
+        },
+        {
+          "TABLE_NAME": "GW001_player_codex",
+          "TABLE_ROWS": "1409",
+          "data_mb": "1.52",
+          "index_mb": "0.00",
+          "total_mb": "1.52",
+          "avg_row_kb": "1.10"
+        },
+        {
+          "TABLE_NAME": "GW001_match_report_tactics",
+          "TABLE_ROWS": "0",
+          "data_mb": "1.11",
+          "index_mb": "0.19",
+          "total_mb": "1.30",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "IMC Site Player Codex",
+          "TABLE_ROWS": "689",
+          "data_mb": "0.52",
+          "index_mb": "0.22",
+          "total_mb": "0.73",
+          "avg_row_kb": "0.77"
+        },
+        {
+          "TABLE_NAME": "gw_match_team_stats",
+          "TABLE_ROWS": "3690",
+          "data_mb": "0.38",
+          "index_mb": "0.34",
+          "total_mb": "0.72",
+          "avg_row_kb": "0.10"
+        },
+        {
+          "TABLE_NAME": "IMC Site SM Player Stats",
+          "TABLE_ROWS": "1394",
+          "data_mb": "0.25",
+          "index_mb": "0.42",
+          "total_mb": "0.67",
+          "avg_row_kb": "0.18"
+        },
+        {
+          "TABLE_NAME": "gw_fixture_results",
+          "TABLE_ROWS": "3042",
+          "data_mb": "0.31",
+          "index_mb": "0.33",
+          "total_mb": "0.64",
+          "avg_row_kb": "0.10"
+        },
+        {
+          "TABLE_NAME": "GW004_results",
+          "TABLE_ROWS": "1350",
+          "data_mb": "0.33",
+          "index_mb": "0.23",
+          "total_mb": "0.56",
+          "avg_row_kb": "0.25"
+        },
+        {
+          "TABLE_NAME": "GW006_results",
+          "TABLE_ROWS": "1308",
+          "data_mb": "0.33",
+          "index_mb": "0.23",
+          "total_mb": "0.56",
+          "avg_row_kb": "0.26"
+        },
+        {
+          "TABLE_NAME": "gw_squad_members",
+          "TABLE_ROWS": "55",
+          "data_mb": "0.50",
+          "index_mb": "0.03",
+          "total_mb": "0.53",
+          "avg_row_kb": "9.31"
+        },
+        {
+          "TABLE_NAME": "GW005_player_codex",
+          "TABLE_ROWS": "676",
+          "data_mb": "0.52",
+          "index_mb": "0.00",
+          "total_mb": "0.52",
+          "avg_row_kb": "0.78"
+        },
+        {
+          "TABLE_NAME": "GW009_player_codex",
+          "TABLE_ROWS": "866",
+          "data_mb": "0.50",
+          "index_mb": "0.00",
           "total_mb": "0.50",
-          "avg_row_kb": "0.23"
+          "avg_row_kb": "0.59"
         },
         {
-          "TABLE_NAME": "GW007_IMC Transfers",
-          "TABLE_ROWS": "3868",
-          "data_mb": "0.48",
+          "TABLE_NAME": "GW005_IMC Player Codex",
+          "TABLE_ROWS": "620",
+          "data_mb": "0.42",
           "index_mb": "0.00",
-          "total_mb": "0.48",
-          "avg_row_kb": "0.13"
+          "total_mb": "0.42",
+          "avg_row_kb": "0.70"
         },
         {
-          "TABLE_NAME": "GW007_transfers",
-          "TABLE_ROWS": "3450",
-          "data_mb": "0.44",
+          "TABLE_NAME": "GW004_IMC Results",
+          "TABLE_ROWS": "1422",
+          "data_mb": "0.38",
           "index_mb": "0.00",
-          "total_mb": "0.44",
-          "avg_row_kb": "0.13"
+          "total_mb": "0.38",
+          "avg_row_kb": "0.27"
         },
         {
-          "TABLE_NAME": "GW002_IMC SM Player Stats",
-          "TABLE_ROWS": "1146",
-          "data_mb": "0.14",
-          "index_mb": "0.25",
-          "total_mb": "0.39",
-          "avg_row_kb": "0.13"
-        },
-        {
-          "TABLE_NAME": "GW008_IMC Transfers",
-          "TABLE_ROWS": "2988",
-          "data_mb": "0.36",
+          "TABLE_NAME": "GW006_IMC Results",
+          "TABLE_ROWS": "1442",
+          "data_mb": "0.38",
           "index_mb": "0.00",
+          "total_mb": "0.38",
+          "avg_row_kb": "0.27"
+        },
+        {
+          "TABLE_NAME": "GW001_results",
+          "TABLE_ROWS": "747",
+          "data_mb": "0.20",
+          "index_mb": "0.16",
           "total_mb": "0.36",
-          "avg_row_kb": "0.12"
+          "avg_row_kb": "0.28"
         },
         {
-          "TABLE_NAME": "GW003_IMC SM Player Stats",
-          "TABLE_ROWS": "933",
-          "data_mb": "0.13",
-          "index_mb": "0.17",
-          "total_mb": "0.30",
-          "avg_row_kb": "0.14"
+          "TABLE_NAME": "GW004_IMC Schedule",
+          "TABLE_ROWS": "828",
+          "data_mb": "0.34",
+          "index_mb": "0.00",
+          "total_mb": "0.34",
+          "avg_row_kb": "0.42"
         },
         {
-          "TABLE_NAME": "GW007_IMC SM Player Stats",
-          "TABLE_ROWS": "992",
-          "data_mb": "0.13",
-          "index_mb": "0.17",
-          "total_mb": "0.30",
+          "TABLE_NAME": "GW006_IMC Schedule",
+          "TABLE_ROWS": "812",
+          "data_mb": "0.34",
+          "index_mb": "0.00",
+          "total_mb": "0.34",
+          "avg_row_kb": "0.43"
+        },
+        {
+          "TABLE_NAME": "gw_world_clubs",
+          "TABLE_ROWS": "1684",
+          "data_mb": "0.17",
+          "index_mb": "0.14",
+          "total_mb": "0.31",
+          "avg_row_kb": "0.10"
+        },
+        {
+          "TABLE_NAME": "GW004_IMC Transfers",
+          "TABLE_ROWS": "2075",
+          "data_mb": "0.27",
+          "index_mb": "0.00",
+          "total_mb": "0.27",
           "avg_row_kb": "0.13"
         },
         {
-          "TABLE_NAME": "GW008_IMC SM Player Stats",
-          "TABLE_ROWS": "708",
-          "data_mb": "0.11",
-          "index_mb": "0.13",
-          "total_mb": "0.23",
-          "avg_row_kb": "0.16"
+          "TABLE_NAME": "GW001_IMC Transfers",
+          "TABLE_ROWS": "1947",
+          "data_mb": "0.25",
+          "index_mb": "0.00",
+          "total_mb": "0.25",
+          "avg_row_kb": "0.13"
         },
         {
-          "TABLE_NAME": "IMC Results Report",
-          "TABLE_ROWS": "1618",
+          "TABLE_NAME": "GW004_transfers",
+          "TABLE_ROWS": "1916",
+          "data_mb": "0.25",
+          "index_mb": "0.00",
+          "total_mb": "0.25",
+          "avg_row_kb": "0.13"
+        },
+        {
+          "TABLE_NAME": "GW005_results",
+          "TABLE_ROWS": "583",
+          "data_mb": "0.16",
+          "index_mb": "0.09",
+          "total_mb": "0.25",
+          "avg_row_kb": "0.27"
+        },
+        {
+          "TABLE_NAME": "GW001_IMC Results",
+          "TABLE_ROWS": "802",
           "data_mb": "0.23",
           "index_mb": "0.00",
           "total_mb": "0.23",
-          "avg_row_kb": "0.15"
+          "avg_row_kb": "0.30"
         },
         {
-          "TABLE_NAME": "GW008_transfers",
-          "TABLE_ROWS": "1685",
+          "TABLE_NAME": "GW001_transfers",
+          "TABLE_ROWS": "1677",
           "data_mb": "0.22",
           "index_mb": "0.00",
           "total_mb": "0.22",
           "avg_row_kb": "0.13"
         },
         {
-          "TABLE_NAME": "GW002_IMC Schedule",
-          "TABLE_ROWS": "430",
+          "TABLE_NAME": "GW009_IMC Schedule",
+          "TABLE_ROWS": "443",
+          "data_mb": "0.20",
+          "index_mb": "0.00",
+          "total_mb": "0.20",
+          "avg_row_kb": "0.47"
+        },
+        {
+          "TABLE_NAME": "GW006_IMC Transfers",
+          "TABLE_ROWS": "1324",
           "data_mb": "0.19",
           "index_mb": "0.00",
           "total_mb": "0.19",
-          "avg_row_kb": "0.45"
+          "avg_row_kb": "0.14"
         },
         {
-          "TABLE_NAME": "gw_competitions",
-          "TABLE_ROWS": "343",
-          "data_mb": "0.11",
-          "index_mb": "0.08",
+          "TABLE_NAME": "GW006_transfers",
+          "TABLE_ROWS": "1280",
+          "data_mb": "0.19",
+          "index_mb": "0.00",
           "total_mb": "0.19",
-          "avg_row_kb": "0.33"
+          "avg_row_kb": "0.15"
         },
         {
-          "TABLE_NAME": "gw_sm_users",
-          "TABLE_ROWS": "523",
-          "data_mb": "0.13",
-          "index_mb": "0.05",
+          "TABLE_NAME": "GW005_IMC Results",
+          "TABLE_ROWS": "587",
+          "data_mb": "0.17",
+          "index_mb": "0.00",
           "total_mb": "0.17",
-          "avg_row_kb": "0.24"
+          "avg_row_kb": "0.30"
         },
         {
-          "TABLE_NAME": "GW008_results",
-          "TABLE_ROWS": "193",
-          "data_mb": "0.08",
-          "index_mb": "0.06",
+          "TABLE_NAME": "GW009_IMC Transfers",
+          "TABLE_ROWS": "992",
+          "data_mb": "0.14",
+          "index_mb": "0.00",
           "total_mb": "0.14",
-          "avg_row_kb": "0.41"
+          "avg_row_kb": "0.14"
+        },
+        {
+          "TABLE_NAME": "GW009_transfers",
+          "TABLE_ROWS": "969",
+          "data_mb": "0.14",
+          "index_mb": "0.00",
+          "total_mb": "0.14",
+          "avg_row_kb": "0.15"
         },
         {
           "TABLE_NAME": "gw_national_teams",
-          "TABLE_ROWS": "320",
-          "data_mb": "0.08",
+          "TABLE_ROWS": "400",
+          "data_mb": "0.09",
           "index_mb": "0.05",
-          "total_mb": "0.13",
-          "avg_row_kb": "0.25"
+          "total_mb": "0.14",
+          "avg_row_kb": "0.24"
         },
         {
-          "TABLE_NAME": "IMC Schedule Report",
-          "TABLE_ROWS": "650",
+          "TABLE_NAME": "gw_sm_user_assignments",
+          "TABLE_ROWS": "163",
+          "data_mb": "0.06",
+          "index_mb": "0.06",
+          "total_mb": "0.13",
+          "avg_row_kb": "0.39"
+        },
+        {
+          "TABLE_NAME": "GW004_IMC SM Player Stats",
+          "TABLE_ROWS": "305",
+          "data_mb": "0.06",
+          "index_mb": "0.05",
+          "total_mb": "0.11",
+          "avg_row_kb": "0.21"
+        },
+        {
+          "TABLE_NAME": "GW005_IMC Transfers",
+          "TABLE_ROWS": "716",
+          "data_mb": "0.11",
+          "index_mb": "0.00",
+          "total_mb": "0.11",
+          "avg_row_kb": "0.16"
+        },
+        {
+          "TABLE_NAME": "GW005_transfers",
+          "TABLE_ROWS": "671",
           "data_mb": "0.11",
           "index_mb": "0.00",
           "total_mb": "0.11",
           "avg_row_kb": "0.17"
+        },
+        {
+          "TABLE_NAME": "GW006_IMC SM Player Stats",
+          "TABLE_ROWS": "295",
+          "data_mb": "0.06",
+          "index_mb": "0.05",
+          "total_mb": "0.11",
+          "avg_row_kb": "0.22"
+        },
+        {
+          "TABLE_NAME": "GW009_IMC Results",
+          "TABLE_ROWS": "288",
+          "data_mb": "0.11",
+          "index_mb": "0.00",
+          "total_mb": "0.11",
+          "avg_row_kb": "0.39"
+        },
+        {
+          "TABLE_NAME": "GW009_IMC SM Player Stats",
+          "TABLE_ROWS": "247",
+          "data_mb": "0.06",
+          "index_mb": "0.05",
+          "total_mb": "0.11",
+          "avg_row_kb": "0.26"
+        },
+        {
+          "TABLE_NAME": "GW009_results",
+          "TABLE_ROWS": "106",
+          "data_mb": "0.05",
+          "index_mb": "0.06",
+          "total_mb": "0.11",
+          "avg_row_kb": "0.45"
         },
         {
           "TABLE_NAME": "gw_expected_matches",
@@ -475,20 +523,60 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "gw_match_team_stats",
-          "TABLE_ROWS": "168",
+          "TABLE_NAME": "gw_player_stat_snapshots",
+          "TABLE_ROWS": "81",
+          "data_mb": "0.05",
+          "index_mb": "0.06",
+          "total_mb": "0.11",
+          "avg_row_kb": "0.59"
+        },
+        {
+          "TABLE_NAME": "GW001_IMC SM Player Stats",
+          "TABLE_ROWS": "235",
           "data_mb": "0.05",
           "index_mb": "0.05",
           "total_mb": "0.09",
-          "avg_row_kb": "0.29"
+          "avg_row_kb": "0.20"
         },
         {
-          "TABLE_NAME": "IMC Site Player Codex",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.06",
+          "TABLE_NAME": "GW005_IMC SM Player Stats",
+          "TABLE_ROWS": "245",
+          "data_mb": "0.05",
+          "index_mb": "0.05",
+          "total_mb": "0.09",
+          "avg_row_kb": "0.20"
+        },
+        {
+          "TABLE_NAME": "GW010_IMC Transfers",
+          "TABLE_ROWS": "562",
+          "data_mb": "0.09",
+          "index_mb": "0.00",
+          "total_mb": "0.09",
+          "avg_row_kb": "0.17"
+        },
+        {
+          "TABLE_NAME": "gw_identity_matches",
+          "TABLE_ROWS": "80",
+          "data_mb": "0.05",
+          "index_mb": "0.05",
+          "total_mb": "0.09",
+          "avg_row_kb": "0.60"
+        },
+        {
+          "TABLE_NAME": "gw_player_state_snapshots",
+          "TABLE_ROWS": "119",
+          "data_mb": "0.05",
+          "index_mb": "0.05",
+          "total_mb": "0.09",
+          "avg_row_kb": "0.40"
+        },
+        {
+          "TABLE_NAME": "GW009_schedule",
+          "TABLE_ROWS": "210",
+          "data_mb": "0.08",
+          "index_mb": "0.00",
           "total_mb": "0.08",
-          "avg_row_kb": "0.00"
+          "avg_row_kb": "0.38"
         },
         {
           "TABLE_NAME": "gw_attendance_snapshots",
@@ -500,14 +588,6 @@
         },
         {
           "TABLE_NAME": "gw_competition_editions",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.06",
-          "total_mb": "0.08",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "gw_divisions",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.06",
@@ -547,28 +627,20 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "gw_player_stat_snapshots",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.06",
-          "total_mb": "0.08",
-          "avg_row_kb": "0.00"
-        },
-        {
           "TABLE_NAME": "gw_seasons",
-          "TABLE_ROWS": "4",
+          "TABLE_ROWS": "5",
           "data_mb": "0.02",
           "index_mb": "0.06",
           "total_mb": "0.08",
-          "avg_row_kb": "4.00"
+          "avg_row_kb": "3.20"
         },
         {
           "TABLE_NAME": "gw_squads",
-          "TABLE_ROWS": "0",
+          "TABLE_ROWS": "3",
           "data_mb": "0.02",
           "index_mb": "0.06",
           "total_mb": "0.08",
-          "avg_row_kb": "0.00"
+          "avg_row_kb": "5.33"
         },
         {
           "TABLE_NAME": "gw_standings_snapshots",
@@ -588,14 +660,14 @@
         },
         {
           "TABLE_NAME": "gw_transfer_summary_snapshots",
-          "TABLE_ROWS": "6",
+          "TABLE_ROWS": "52",
           "data_mb": "0.02",
           "index_mb": "0.06",
           "total_mb": "0.08",
-          "avg_row_kb": "2.67"
+          "avg_row_kb": "0.31"
         },
         {
-          "TABLE_NAME": "GW002_match_report_commentary",
+          "TABLE_NAME": "GW001_match_report_commentary",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.05",
@@ -603,7 +675,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_match_report_events",
+          "TABLE_NAME": "GW004_match_report_commentary",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.05",
@@ -611,7 +683,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_match_report_commentary",
+          "TABLE_NAME": "GW004_match_report_events",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.05",
@@ -619,7 +691,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_match_report_events",
+          "TABLE_NAME": "GW005_match_report_commentary",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.05",
@@ -627,7 +699,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_match_report_commentary",
+          "TABLE_NAME": "GW005_match_report_events",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.05",
@@ -635,7 +707,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_match_report_events",
+          "TABLE_NAME": "GW006_match_report_commentary",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.05",
@@ -643,7 +715,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_match_report_commentary",
+          "TABLE_NAME": "GW006_match_report_events",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.05",
@@ -651,7 +723,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_match_report_events",
+          "TABLE_NAME": "GW009_match_report_commentary",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.05",
@@ -659,7 +731,23 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "gw_identity_matches",
+          "TABLE_NAME": "GW009_match_report_events",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.05",
+          "total_mb": "0.06",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "gw_competitions",
+          "TABLE_ROWS": "89",
+          "data_mb": "0.02",
+          "index_mb": "0.05",
+          "total_mb": "0.06",
+          "avg_row_kb": "0.18"
+        },
+        {
+          "TABLE_NAME": "gw_divisions",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.05",
@@ -683,12 +771,12 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "gw_player_state_snapshots",
-          "TABLE_ROWS": "0",
+          "TABLE_NAME": "gw_sm_users",
+          "TABLE_ROWS": "65",
           "data_mb": "0.02",
           "index_mb": "0.05",
           "total_mb": "0.06",
-          "avg_row_kb": "0.00"
+          "avg_row_kb": "0.25"
         },
         {
           "TABLE_NAME": "gw_standings_rows",
@@ -723,7 +811,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_match_report_players",
+          "TABLE_NAME": "GW001_match_report_players",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.03",
@@ -731,7 +819,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_match_report_tactics",
+          "TABLE_NAME": "GW004_match_report_players",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.03",
@@ -739,7 +827,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_match_report_players",
+          "TABLE_NAME": "GW004_match_report_tactics",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.03",
@@ -747,23 +835,15 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_match_report_tactics",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.03",
-          "total_mb": "0.05",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW003_schedule",
-          "TABLE_ROWS": "72",
+          "TABLE_NAME": "GW005_IMC Schedule",
+          "TABLE_ROWS": "88",
           "data_mb": "0.05",
           "index_mb": "0.00",
           "total_mb": "0.05",
-          "avg_row_kb": "0.67"
+          "avg_row_kb": "0.54"
         },
         {
-          "TABLE_NAME": "GW007_match_report_players",
+          "TABLE_NAME": "GW005_match_report_players",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.03",
@@ -771,7 +851,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_match_report_tactics",
+          "TABLE_NAME": "GW005_match_report_tactics",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.03",
@@ -779,7 +859,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_match_report_players",
+          "TABLE_NAME": "GW006_match_report_players",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.03",
@@ -787,7 +867,23 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_match_report_tactics",
+          "TABLE_NAME": "GW006_match_report_tactics",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.03",
+          "total_mb": "0.05",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_match_report_players",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.03",
+          "total_mb": "0.05",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_match_report_tactics",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.03",
@@ -819,20 +915,12 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "gw_countries",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.03",
-          "total_mb": "0.05",
-          "avg_row_kb": "0.00"
-        },
-        {
           "TABLE_NAME": "gw_import_runs",
-          "TABLE_ROWS": "8",
+          "TABLE_ROWS": "22",
           "data_mb": "0.02",
           "index_mb": "0.03",
           "total_mb": "0.05",
-          "avg_row_kb": "2.00"
+          "avg_row_kb": "0.73"
         },
         {
           "TABLE_NAME": "gw_news_items",
@@ -859,14 +947,6 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "gw_squad_members",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.03",
-          "total_mb": "0.05",
-          "avg_row_kb": "0.00"
-        },
-        {
           "TABLE_NAME": "gw_stadiums",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
@@ -883,7 +963,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_match_report",
+          "TABLE_NAME": "GW001_match_report",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.02",
@@ -891,7 +971,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_match_report_team_stats",
+          "TABLE_NAME": "GW001_match_report_team_stats",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.02",
@@ -899,7 +979,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_match_report",
+          "TABLE_NAME": "GW004_match_report",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.02",
@@ -907,7 +987,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_match_report_team_stats",
+          "TABLE_NAME": "GW004_match_report_team_stats",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.02",
@@ -915,7 +995,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_match_report",
+          "TABLE_NAME": "GW005_match_report",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.02",
@@ -923,7 +1003,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_match_report_team_stats",
+          "TABLE_NAME": "GW005_match_report_team_stats",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.02",
@@ -931,7 +1011,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_match_report",
+          "TABLE_NAME": "GW006_match_report",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.02",
@@ -939,7 +1019,23 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_match_report_team_stats",
+          "TABLE_NAME": "GW006_match_report_team_stats",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.02",
+          "total_mb": "0.03",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_match_report",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.02",
+          "total_mb": "0.03",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_match_report_team_stats",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.02",
@@ -948,11 +1044,11 @@
         },
         {
           "TABLE_NAME": "gw_game_worlds",
-          "TABLE_ROWS": "4",
+          "TABLE_ROWS": "5",
           "data_mb": "0.02",
           "index_mb": "0.02",
           "total_mb": "0.03",
-          "avg_row_kb": "4.00"
+          "avg_row_kb": "3.20"
         },
         {
           "TABLE_NAME": "gw_source_fragments",
@@ -964,19 +1060,11 @@
         },
         {
           "TABLE_NAME": "gw_source_page_types",
-          "TABLE_ROWS": "4",
+          "TABLE_ROWS": "5",
           "data_mb": "0.02",
           "index_mb": "0.02",
           "total_mb": "0.03",
-          "avg_row_kb": "4.00"
-        },
-        {
-          "TABLE_NAME": "GW001_IMC Match Report",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
+          "avg_row_kb": "3.20"
         },
         {
           "TABLE_NAME": "GW001_IMC Player Codex",
@@ -987,15 +1075,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW001_IMC Results",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW001_IMC SM Player Stats",
+          "TABLE_NAME": "GW001_IMC Results Report",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1004,6 +1084,14 @@
         },
         {
           "TABLE_NAME": "GW001_IMC Schedule",
+          "TABLE_ROWS": "20",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.80"
+        },
+        {
+          "TABLE_NAME": "GW001_clubs",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1011,7 +1099,95 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW001_IMC Transfers",
+          "TABLE_NAME": "GW001_competition",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW001_managers",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW001_news_feed",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW001_player_codex_injury_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW001_player_codex_rating_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW001_player_codex_roster",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW001_player_codex_snapshots",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW001_player_codex_stats",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW001_player_codex_transfer_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW001_schedule",
+          "TABLE_ROWS": "4",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "4.00"
+        },
+        {
+          "TABLE_NAME": "GW001_trophy_room",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW002_IMC Match Report",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1027,7 +1203,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_clubs",
+          "TABLE_NAME": "GW002_IMC Results",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1035,7 +1211,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_competition",
+          "TABLE_NAME": "GW002_IMC SM Player Stats",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1043,7 +1219,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_managers",
+          "TABLE_NAME": "GW002_IMC Schedule",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1051,7 +1227,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_news_feed",
+          "TABLE_NAME": "GW002_IMC Transfers",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1059,63 +1235,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW002_player_codex",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW002_player_codex_injury_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW002_player_codex_rating_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW002_player_codex_roster",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW002_player_codex_snapshots",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW002_player_codex_stats",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW002_player_codex_transfer_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW002_trophy_room",
+          "TABLE_NAME": "GW003_IMC Match Report",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1131,7 +1251,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_clubs",
+          "TABLE_NAME": "GW003_IMC Results",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1139,7 +1259,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_competition",
+          "TABLE_NAME": "GW003_IMC SM Player Stats",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1147,7 +1267,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_managers",
+          "TABLE_NAME": "GW003_IMC Schedule",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1155,79 +1275,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW003_news_feed",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW003_player_codex",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW003_player_codex_injury_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW003_player_codex_rating_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW003_player_codex_roster",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW003_player_codex_snapshots",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW003_player_codex_stats",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW003_player_codex_transfer_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW003_trophy_room",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW004_IMC Match Report",
+          "TABLE_NAME": "GW003_IMC Transfers",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1243,7 +1291,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW004_IMC Results",
+          "TABLE_NAME": "GW004_clubs",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1251,7 +1299,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW004_IMC SM Player Stats",
+          "TABLE_NAME": "GW004_competition",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1259,7 +1307,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW004_IMC Schedule",
+          "TABLE_NAME": "GW004_managers",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1267,7 +1315,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW004_IMC Transfers",
+          "TABLE_NAME": "GW004_news_feed",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1275,7 +1323,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW005_IMC Match Report",
+          "TABLE_NAME": "GW004_player_codex",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1283,7 +1331,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW005_IMC Player Codex",
+          "TABLE_NAME": "GW004_player_codex_injury_history",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1291,7 +1339,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW005_IMC Results",
+          "TABLE_NAME": "GW004_player_codex_rating_history",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1299,7 +1347,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW005_IMC SM Player Stats",
+          "TABLE_NAME": "GW004_player_codex_roster",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1307,7 +1355,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW005_IMC Schedule",
+          "TABLE_NAME": "GW004_player_codex_snapshots",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1315,7 +1363,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW005_IMC Transfers",
+          "TABLE_NAME": "GW004_player_codex_stats",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1323,7 +1371,119 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW006_IMC Match Report",
+          "TABLE_NAME": "GW004_player_codex_transfer_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW004_schedule",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW004_trophy_room",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_clubs",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_competition",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_managers",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_news_feed",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_player_codex_injury_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_player_codex_rating_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_player_codex_roster",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_player_codex_snapshots",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_player_codex_stats",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_player_codex_transfer_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_schedule",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW005_trophy_room",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1339,7 +1499,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW006_IMC Results",
+          "TABLE_NAME": "GW006_clubs",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1347,7 +1507,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW006_IMC SM Player Stats",
+          "TABLE_NAME": "GW006_competition",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1355,7 +1515,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW006_IMC Schedule",
+          "TABLE_NAME": "GW006_managers",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1363,7 +1523,87 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW006_IMC Transfers",
+          "TABLE_NAME": "GW006_news_feed",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW006_player_codex",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW006_player_codex_injury_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW006_player_codex_rating_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW006_player_codex_roster",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW006_player_codex_snapshots",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW006_player_codex_stats",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW006_player_codex_transfer_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW006_schedule",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW006_trophy_room",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW007_IMC Match Report",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1379,7 +1619,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_clubs",
+          "TABLE_NAME": "GW007_IMC Results",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1387,7 +1627,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_competition",
+          "TABLE_NAME": "GW007_IMC SM Player Stats",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1395,7 +1635,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_managers",
+          "TABLE_NAME": "GW007_IMC Schedule",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1403,7 +1643,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_news_feed",
+          "TABLE_NAME": "GW007_IMC Transfers",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1411,71 +1651,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW007_player_codex",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW007_player_codex_injury_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW007_player_codex_rating_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW007_player_codex_roster",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW007_player_codex_snapshots",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW007_player_codex_stats",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW007_player_codex_transfer_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW007_schedule",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW007_trophy_room",
+          "TABLE_NAME": "GW008_IMC Match Report",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1491,7 +1667,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_clubs",
+          "TABLE_NAME": "GW008_IMC Results",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1499,7 +1675,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_competition",
+          "TABLE_NAME": "GW008_IMC SM Player Stats",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1507,7 +1683,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_managers",
+          "TABLE_NAME": "GW008_IMC Schedule",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1515,79 +1691,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW008_news_feed",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW008_player_codex",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW008_player_codex_injury_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW008_player_codex_rating_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW008_player_codex_roster",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW008_player_codex_snapshots",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW008_player_codex_stats",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW008_player_codex_transfer_history",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW008_trophy_room",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW009_IMC Match Report",
+          "TABLE_NAME": "GW008_IMC Transfers",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1603,7 +1707,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW009_IMC Results",
+          "TABLE_NAME": "GW009_clubs",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1611,7 +1715,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW009_IMC SM Player Stats",
+          "TABLE_NAME": "GW009_competition",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1619,7 +1723,7 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW009_IMC Schedule",
+          "TABLE_NAME": "GW009_managers",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1627,7 +1731,63 @@
           "avg_row_kb": "0.00"
         },
         {
-          "TABLE_NAME": "GW009_IMC Transfers",
+          "TABLE_NAME": "GW009_news_feed",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_player_codex_injury_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_player_codex_rating_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_player_codex_roster",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_player_codex_snapshots",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_player_codex_stats",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_player_codex_transfer_history",
+          "TABLE_ROWS": "0",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.00"
+        },
+        {
+          "TABLE_NAME": "GW009_trophy_room",
           "TABLE_ROWS": "0",
           "data_mb": "0.02",
           "index_mb": "0.00",
@@ -1668,19 +1828,11 @@
         },
         {
           "TABLE_NAME": "GW010_IMC Schedule",
-          "TABLE_ROWS": "0",
+          "TABLE_ROWS": "68",
           "data_mb": "0.02",
           "index_mb": "0.00",
           "total_mb": "0.02",
-          "avg_row_kb": "0.00"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Transfers",
-          "TABLE_ROWS": "0",
-          "data_mb": "0.02",
-          "index_mb": "0.00",
-          "total_mb": "0.02",
-          "avg_row_kb": "0.00"
+          "avg_row_kb": "0.23"
         },
         {
           "TABLE_NAME": "GW011_IMC Match Report",
@@ -2404,17 +2556,33 @@
         },
         {
           "TABLE_NAME": "IMC Repository Report",
-          "TABLE_ROWS": "24",
+          "TABLE_ROWS": "30",
           "data_mb": "0.02",
           "index_mb": "0.00",
           "total_mb": "0.02",
-          "avg_row_kb": "0.67"
+          "avg_row_kb": "0.53"
+        },
+        {
+          "TABLE_NAME": "IMC Results Report",
+          "TABLE_ROWS": "171",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.09"
+        },
+        {
+          "TABLE_NAME": "IMC Schedule Report",
+          "TABLE_ROWS": "102",
+          "data_mb": "0.02",
+          "index_mb": "0.00",
+          "total_mb": "0.02",
+          "avg_row_kb": "0.16"
         }
       ],
-      "returned_rows": 299,
-      "total_rows": 299,
+      "returned_rows": 320,
+      "total_rows": 320,
       "truncated": false,
-      "duration_ms": 43
+      "duration_ms": 40
     }
   }
 }
