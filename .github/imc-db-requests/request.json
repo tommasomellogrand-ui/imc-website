@@ -1,13 +1,9 @@
 {
-  "request_id": "core-clean-cup-division-mappings-plan-20260919-52",
-  "requested_at": "2026-09-19T10:48:00Z",
-  "purpose": "Normalize CORE Nexus mapping so domestic cups never carry division and remove obsolete duplicate cup mappings",
-  "action": "plan_migration",
-  "target": "core",
-  "migration_id": "normalize-core-nexus-cup-mappings-no-division-20260919",
-  "statements": [
-    "DELETE FROM `IMC Competition Nexus Mapping` WHERE competition_group='DOMESTIC' AND sm_action IN ('leaguecup','leagueshield','charityshield') AND sm_division IS NOT NULL"
-  ],
-  "allow_destructive": true,
-  "data_migration": true
+  "request_id": "gw003-http500-diagnose-20260920-01",
+  "requested_at": "2026-09-20T05:41:00Z",
+  "purpose": "Diagnose GW003 Match Report importer HTTP 500 by checking table triggers",
+  "action": "query",
+  "target": "gold",
+  "sql": "SELECT TRIGGER_NAME,ACTION_TIMING,EVENT_MANIPULATION,ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE='GW003_IMC Match Report' ORDER BY EVENT_MANIPULATION,ACTION_TIMING,TRIGGER_NAME",
+  "limit": 100
 }
