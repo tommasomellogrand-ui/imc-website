@@ -1,7 +1,7 @@
 {
-  "request_id": "schedule-normalizer-core-audit-20260920",
+  "request_id": "schedule-normalizer-site-schema-20260920",
   "action": "query",
-  "target": "core",
-  "sql": "SELECT a.*,m.sm_manager_id,c.`Club Name` mapping_name,c.`SM World Club ID` world_club_id FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id LEFT JOIN `IMC Game World Club Mapping` c ON c.`Game World`=a.game_world_id AND c.`Club ID`=a.team_id WHERE m.sm_manager_id=13051324 ORDER BY a.game_world_id,a.start_date",
+  "target": "custom",
+  "sql": "SELECT TABLE_NAME,COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('GW010_IMC Schedule','IMC Site Schedule') ORDER BY TABLE_NAME,ORDINAL_POSITION",
   "limit": 100
 }

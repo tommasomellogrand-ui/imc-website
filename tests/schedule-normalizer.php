@@ -1,0 +1,35 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/../imc-universal-gateway/schedule-normalizer.php';
+function expect(bool $condition,string $message):void {if(!$condition)throw new RuntimeException($message);}
+$mapping=[['game_world_id'=>'GW010','club_id'=>306,'global_id'=>306,'world_id'=>92317315,'mapping_name'=>'São Paulo FC','canonical_name'=>'São Paulo FC']];
+$assignments=[['game_world_id'=>'GW010','sm_manager_id'=>13051324,'team_id'=>306,'assignment_type'=>'club','national_team_id'=>null,'start_date'=>'2026-09-13','end_date'=>null]];
+$row=['game_world_id'=>'GW010','sm_fixture_id'=>1,'match_date'=>'2026-09-27','home_name'=>'SÃO PAULO FC','away_name'=>'West Ham United','home_sm_team_id'=>null,'away_sm_team_id'=>92317094,'logged_manager_id'=>13051324,'competition_group'=>'DOMESTIC','sm_action'=>'league'];
+$resolve=fn($r,$m=null,$a=null)=>imc_schedule_resolve($r,'home',$m??$mapping,$a??$assignments);
+expect($resolve($row)['id']===92317315,'global assignment resolves');
+$worldAssignment=$assignments;$worldAssignment[0]['team_id']=92317315;
+expect($resolve($row,null,$worldAssignment)['id']===92317315,'world assignment resolves');
+expect($resolve(array_replace($row,['home_sm_team_id'=>999]))['reason']==='present','existing ID unchanged');
+expect($resolve(array_replace($row,['game_world_id'=>'GW009']))['id']===null,'world isolation');
+expect($resolve(array_replace($row,['match_date'=>'2026-09-01']))['id']===null,'before appointment');
+expect($resolve(array_replace($row,['match_date'=>'2026-02-30']))['id']===null,'invalid calendar date');
+expect($resolve(array_replace($row,['match_date'=>null]))['id']===null,'missing date');
+expect($resolve(array_replace($row,['home_name'=>'Sao Paolo']))['id']===null,'no fuzzy matching');
+expect($resolve(array_replace($row,['logged_manager_id'=>null]))['id']===null,'missing manager');
+expect($resolve(array_replace($row,['home_sm_manager_id'=>99]))['id']===null,'explicit side manager takes priority');
+expect($resolve(array_replace($row,['competition_group'=>'NATIONS']))['id']===null,'national namespace excluded');
+expect($resolve(array_replace($row,['sm_action'=>'worldcup']))['id']===null,'national action excluded');
+expect($resolve(array_replace($row,['away_sm_team_id'=>92317315]))['id']===null,'opponent conflict');
+$closed=$assignments;$closed[0]['end_date']='2026-09-20';
+expect($resolve($row,null,$closed)['id']===null,'closed appointment');
+$duplicate=$mapping;$duplicate[]=array_replace($mapping[0],['world_id'=>123,'club_id'=>500,'global_id'=>500]);
+expect($resolve($row,$duplicate)['id']===null,'duplicate names rejected');
+$ambiguous=$mapping;$ambiguous[]=array_replace($mapping[0],['world_id'=>306,'club_id'=>500,'global_id'=>500]);
+expect($resolve($row,$ambiguous)['id']===null,'mixed identifier namespaces rejected');
+$next=$assignments;$next[]=array_replace($assignments[0],['team_id'=>500,'start_date'=>'2026-09-21']);
+$newMapping=$duplicate;$newMapping[1]['mapping_name']='New Club';$newMapping[1]['canonical_name']='New Club';
+expect($resolve(array_replace($row,['home_name'=>'New Club']),$newMapping,$next)['id']===123,'new appointment supersedes open old one');
+$overlap=$closed;$overlap[0]['end_date']='2026-10-01';$overlap[]=$next[1];
+expect($resolve($row,$duplicate,$overlap)['id']===null,'overlapping different appointments rejected');
+expect($resolve($row,$mapping,array_merge($assignments,$assignments))['id']===92317315,'duplicate same appointment stable');
+echo "Schedule resolver: 19 assertions passed\n";

@@ -9,6 +9,7 @@ on:
       - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
       - 'tests/gateway-world-*'
       - 'tests/playoff-normalizer*.php'
+      - 'tests/schedule-normalizer*.php'
   workflow_dispatch:
 
 permissions:
@@ -41,7 +42,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.php ingress.php playoff-normalizer.php core.php read.php write.php ddl.php minisite.php minisite-site.php; do test -s "imc-universal-gateway/$f"; done
+          for f in index.php ingress.php playoff-normalizer.php schedule-normalizer.php core.php read.php write.php ddl.php minisite.php minisite-site.php; do test -s "imc-universal-gateway/$f"; done
           test -s "__imc_private_gateway/config.php"
           test -s "__imc_private_gateway/.htaccess"
           for f in imc-universal-gateway/*.php __imc_private_gateway/config.php; do php -l "$f"; done
@@ -56,6 +57,14 @@ jobs:
 
       - name: Test world routing
         run: php tests/gateway-world-routing.php
+
+      - name: Test schedule normalizer
+        run: php tests/schedule-normalizer.php
+
+      - name: Test schedule normalizer against isolated MySQL
+        env:
+          IMC_TEST_MYSQL_PASSWORD: imc-normalizer-ci-only
+        run: php tests/schedule-normalizer-mysql.php
 
       - name: Deploy complete IMC Universal Gateway
         env:
@@ -72,7 +81,7 @@ jobs:
           remote_root='/www.italianmastersclub.it'
           uploads=[
               (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
-              for n in ['playoff-normalizer.php','index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
+              for n in ['schedule-normalizer.php','playoff-normalizer.php','index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
           ]
           uploads += [
               (Path('__imc_private_gateway/config.php'), f'{remote_root}/__imc_private_gateway'),
