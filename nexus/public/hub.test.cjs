@@ -52,7 +52,7 @@ async function render(query){
 }
 test('world scoped routing, all competition tabs and section rendering',async()=>{
  for(const q of ['resource=competitions','resource=competitions&group=domestic','resource=club&teamType=nations','resource=player','resource=player&scope=global','resource=transfers',...['overview','competition','matches','stats','trophy'].map(t=>'resource=competitions&competition=GW003%7CARG%7CDOMESTIC%7Cleague%7C1&tab='+t)]){
-   const r=await render('?world=GW003&'+q);assert.ok(!r.status.includes('non disponibili'),q);assert.ok(r.html.length>0,q);assert.ok(r.requests.filter(x=>x.resource!=='worlds').every(x=>x.world==='GW003'),q);assert.equal((r.bottom.match(/world=GW003/g)||[]).length,5);
+   const r=await render('?world=GW003&'+q);assert.ok(!r.status.includes('non disponibili'),q);assert.ok(r.html.length>0,q);assert.ok(r.requests.filter(x=>x.resource!=='worlds').every(x=>x.world==='GW003'),q);assert.equal((r.bottom.match(/world=GW003/g)||[]).length,4);assert.ok(r.bottom.includes('href="/nexus/clubhouse.html"'));assert.ok(r.bottom.includes('<span>Clubhouse</span>'));
    if(q.includes('teamType=nations'))assert.ok(r.html.includes('Italia'));
    if(q==='resource=player')assert.ok(r.html.includes('Player Test'));
    if(q.includes('tab=competition'))assert.ok(r.html.includes('hub-table'));
