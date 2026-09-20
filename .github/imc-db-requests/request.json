@@ -1,9 +1,9 @@
 {
-  "request_id": "storage-audit-custom-tables-20260920",
-  "requested_at": "2026-09-20T06:57:00Z",
-  "purpose": "Audit storage by table in CUSTOM MySQL",
+  "request_id": "audit-source-payloads-gold-20260920",
+  "requested_at": "2026-09-20T06:59:00Z",
+  "purpose": "Understand what gw_source_payloads contains in GOLD without modifying data",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT TABLE_NAME, TABLE_ROWS, ROUND(DATA_LENGTH/1024/1024,2) data_mb, ROUND(INDEX_LENGTH/1024/1024,2) index_mb, ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb, ROUND(AVG_ROW_LENGTH/1024,2) avg_row_kb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() ORDER BY (DATA_LENGTH+INDEX_LENGTH) DESC",
-  "limit": 500
+  "target": "gold",
+  "sql": "SHOW COLUMNS FROM `gw_source_payloads`",
+  "limit": 200
 }
