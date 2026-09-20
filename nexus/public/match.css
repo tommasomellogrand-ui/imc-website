@@ -46,3 +46,12 @@ details summary{margin:8px;border:1px solid var(--line);border-radius:13px;backg
 @media(min-width:650px){.hero-scorers{padding:0 30px;font-size:11px}.hero-divider{margin-inline:30px}.match-info strong{font-size:12px}}
 
 .tabs:has(a:nth-child(3):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}
+
+
+/* Compact, accessible event markers: icon and minute stay together. */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.badges{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:5px;min-width:0}
+.match-marker{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:800;padding:4px 5px;border-radius:6px;background:#f2f5fa;font-size:11px;line-height:1.1}
+.match-marker.up{color:#13703b;background:#eaf7ef}.match-marker.down{color:#b52f38;background:#fff0f1}.match-marker b{font-size:17px;line-height:1}
+.match-marker .card-icon{display:inline-block;flex:none;width:10px;height:14px;border-radius:2px;background:#efc52d;border:1px solid #b48d0e}
+.match-marker .card-icon.red{background:#d73c43;border-color:#a32329}

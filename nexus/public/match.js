@@ -52,37 +52,10 @@ function renderHero(){
 }
 function rating(p){const n=num(p.rating);return `<span class="rating ${n===null?'none':n<6?'low':n<7?'mid':''}" aria-label="${n===null?'Voto non disponibile':'Voto '+n}">${n===null?'—':n.toFixed(1)}</span>`}
 function normName(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim()}
-function substitutions(){
- const out=[];
- for(const c of array(record.commentary_json)){
-  const m=minute(c.minute),txt=String(c.commentary_text||'');if(m===null)continue;
-  const patterns=[
-   /([^.!]+?)\s+(?:sta|stanno) uscendo dal campo\.\s*(?:Sarà|Saranno) sostituit[oi] da\s+([^.!]+)/gi,
-   /([^.!]+?)\s+(?:sta|stanno) uscendo dal campo\.\s*(?:Sarà|Saranno)\s+([^.!]+?)\s+a sostituirl[oi]/gi,
-   /([^.!]+?)\s+(?:are|is) leaving the action\.\s*It will be\s+([^.!]+?)\s+to replace (?:them|him)/gi
-  ];
-  for(const re of patterns)for(const match of txt.matchAll(re)){
-   for(const [i,kind] of [[1,'off'],[2,'on']]){
-    for(const raw of match[i].split(/\s+(?:e|and)\s+|\s*,\s*/)){
-     const n=normName(raw.replace(/^\d+\s*/,''));
-     const candidates=players.filter(p=>{const pn=normName(p.player_name);return n&&(pn===n||pn.endsWith(' '+n))});
-     if(candidates.length!==1)continue;
-     const p=candidates[0];
-     out.push({id:String(p.sm_player_id),side:p.team_side,kind,minute:m});
-    }
-   }
-  }
- }
- return out;
-}
-function subMinute(p,kind){
- const direct=minute(p[kind==='on'?'sub_on_minute':'sub_off_minute']);if(direct!==null)return direct;
- const matches=substitutions().filter(s=>s.id===String(p.sm_player_id)&&s.side===p.team_side&&s.kind===kind);
- const mins=[...new Set(matches.map(s=>s.minute))];return mins.length===1?mins[0]:null;
-}
+function subMinute(p,kind){return minute(p[kind==='on'?'sub_on_minute':'sub_off_minute'])}
 function matchEnd(){const mins=array(record.commentary_json).filter(x=>/fine secondo tempo|fine partita|full.?time|fine.*supplementar/i.test(x.commentary_text||'')).map(x=>minute(x.minute)).filter(x=>x!==null).map(elapsed);return mins.length?Math.max(...mins):null}
 function elapsed(m){return String(m).split('+').map(Number).reduce((a,b)=>a+b,0)}
-function playerMinutes(p){const on=subMinute(p,'on'),off=subMinute(p,'off'),red=minute(p.red_card_minute),end=matchEnd();const stops=[off,red].filter(x=>x!==null).map(elapsed);const stop=stops.length?Math.min(...stops):end;if(stop===null)return '—';if(flag(p.starter))return Math.max(0,stop)+'′';if(on!==null)return Math.max(0,stop-elapsed(on))+'′';return '—'}
+function playerMinutes(p){const on=subMinute(p,'on'),off=subMinute(p,'off'),red=minute(p.red_card_minute),end=matchEnd();const stops=[off,red].filter(x=>x!==null).map(elapsed);const stop=stops.length?Math.min(...stops):end;if(stop===null)return '—';if(flag(p.starter)){if(off===null&&red===null&&players.some(q=>q.team_side===p.team_side&&flag(q.sub_on)&&subMinute(q,'on')===null))return '—';return Math.max(0,stop)+'′';}if(on!==null)return Math.max(0,stop-elapsed(on))+'′';return '—'}
 function badges(p){
  const out=[];
  if(num(p.goals)>0)out.push(`<span class="badge" title="Gol">⚽${num(p.goals)>1?num(p.goals):''}</span>`);
@@ -91,14 +64,14 @@ function badges(p){
  if(flag(p.man_of_match))out.push('<span class="badge gold" title="Migliore in campo">★</span>');
  for(const [field,label,cls] of [['yellow_card','Ammonito',''],['red_card','Espulso','red']]){
   const m=minute(p[field+'_minute']);
-  if(flag(p[field]))out.push(`<span class="badge" title="${label}${m===null?' · minuto non disponibile':' al '+m+'′'}"><i class="card-icon ${cls}" aria-hidden="true"></i><span class="sr-only">${label}</span>${m===null?'':esc(m)+'′'}</span>`);
+  if(flag(p[field]))out.push(`<span class="badge match-marker" aria-label="${label}${m===null?' · minuto non disponibile':' al '+m+'′'}" title="${label}${m===null?' · minuto non disponibile':' al '+m+'′'}"><i class="card-icon ${cls}" aria-hidden="true"></i>${m===null?'?′':esc(m)+'′'}</span>`);
  }
- for(const [kind,cls,icon] of [['on','up','↑'],['off','down','↓']]){const m=subMinute(p,kind);if(m!==null)out.push(`<span class="badge ${cls}" title="${kind==='on'?'Entrato':'Uscito'}">${icon}${esc(m)}′</span>`)}
+ for(const [kind,cls,icon] of [['on','up','↑'],['off','down','↓']]){const m=subMinute(p,kind);if(m!==null||flag(p['sub_'+kind]))out.push(`<span class="badge match-marker ${cls}" aria-label="${kind==='on'?'Entrato':'Uscito'} · ${m===null?'minuto non disponibile':esc(m)+'′'}" title="${kind==='on'?'Entrato':'Uscito'} · ${m===null?'minuto non disponibile':esc(m)+'′'}"><b aria-hidden="true">${icon}</b>${m===null?'?':esc(m)}′</span>`)}
  return out.join('');
 }
 function playerRow(p){const src=imageURL(p.image_url||p.player_core?.image_url);return `<div class="player"><span class="slot">${esc(p.squad_slot??'—')}</span><div class="player-name">${src?`<img class="avatar" src="${esc(src)}" alt="" loading="lazy">`:`<span class="avatar" aria-hidden="true">${esc(initials(p.player_name))}</span>`}<strong>${esc(p.player_name||'Giocatore')}</strong></div><span class="minutes">${playerMinutes(p)}</span>${rating(p)}<div class="badges">${badges(p)}</div></div>`}
 function switcher(){return `<nav class="switch" aria-label="Squadra">${['home','away'].map(s=>`<a data-view href="${esc(href({side:s}))}" ${side===s?'aria-current="page"':''}>${esc(name(s))}</a>`).join('')}</nav>`}
-function playerTable(lineup=false){const list=players.filter(p=>p.team_side===side).sort((a,b)=>(num(a.squad_slot)??999)-(num(b.squad_slot)??999)),starters=list.filter(p=>flag(p.starter)),subs=list.filter(p=>!flag(p.starter));return `<section class="box"><div class="section-head"><h2>${esc(name(side))}</h2></div>${list.length?`<div class="rating-head"><span>#</span><span>GIOCATORE</span><span>MIN</span><span>VOTO</span><span>EVENTI</span></div>${starters.map(playerRow).join('')}${subs.length?'<div class="bench">Panchina e sostituti</div>'+subs.map(playerRow).join(''):''}<p class="note">— indica un dato non disponibile.</p>`:empty('Formazione non disponibile per questa squadra.')}</section>`}
+function playerTable(lineup=false){const list=players.filter(p=>p.team_side===side).sort((a,b)=>(num(a.squad_slot)??999)-(num(b.squad_slot)??999)),starters=list.filter(p=>flag(p.starter)),subs=list.filter(p=>!flag(p.starter));return `<section class="box"><div class="section-head"><h2>${esc(name(side))}</h2></div>${list.length?`<div class="rating-head"><span>#</span><span>GIOCATORE</span><span>MIN</span><span>VOTO</span><span>EVENTI</span></div>${starters.map(playerRow).join('')}${subs.length?'<div class="bench">Panchina e sostituti</div>'+subs.map(playerRow).join(''):''}<p class="note">↑ ingresso · ↓ uscita · cartellino + minuto. ?′ indica un minuto non salvato nel report.</p>`:empty('Formazione non disponibile per questa squadra.')}</section>`}
 function stats(){const source=record.team_stats_json||{},h=source.home||array(source).find(x=>x.team_side==='home')||{},a=source.away||array(source).find(x=>x.team_side==='away')||{};const fields=[['possession','Possesso palla',true],['total_shots','Tiri totali'],['shots_on_target','Tiri in porta'],['corners','Corner'],['yellow_cards','Gialli'],['red_cards','Rossi']];const rows=fields.filter(([k])=>num(h[k])!==null||num(a[k])!==null);return `<section class="box box-pad"><h2>Statistiche partita</h2><div class="stat-teams"><span>${esc(name('home'))}</span><span>${esc(name('away'))}</span></div>${rows.length?rows.map(([k,label,pct])=>{const x=num(h[k]),y=num(a[k]),valid=x!==null&&y!==null&&x>=0&&y>=0,sum=valid?x+y:0,width=sum?x/sum*100:0;return `<div class="stat"><strong>${x===null?'—':x+(pct?'%':'')}</strong><div><span class="stat-label">${label}</span><div class="bar" aria-hidden="true"><i style="width:${width}%"></i><i style="width:${sum?100-width:0}%"></i></div></div><strong>${y===null?'—':y+(pct?'%':'')}</strong></div>`}).join(''):empty('Statistiche non ancora disponibili.')}</section>`}
 function overview(){const scorers=players.filter(p=>num(p.goals)>0||num(p.assists)>0),mvp=players.filter(p=>flag(p.man_of_match));return stats()+scorers.map(p=>`<article class="highlight"><span class="symbol" aria-hidden="true">${num(p.goals)>0?'⚽':'A'}</span><div><strong>${esc(p.player_name)}${num(p.goals)>1?' · '+num(p.goals)+' gol':''}</strong><small>${esc(name(p.team_side))}${num(p.assists)>0?' · '+num(p.assists)+' assist':''}</small></div></article>`).join('')+mvp.map(p=>`<article class="highlight"><span class="symbol" aria-hidden="true">★</span><div><small>MIGLIORE IN CAMPO · ${esc(name(p.team_side))}</small><strong>${esc(p.player_name)}</strong></div>${rating(p)}</article>`).join('')}
 const tacticLabels={formation:'Modulo',mentality:'Mentalità',passing_style:'Passaggi',pressing:'Pressing',tempo:'Ritmo',width:'Ampiezza',tackling_style:'Contrasti',defensive_line:'Linea difensiva',attacking_style:'Attacco',wide_play:'Gioco sulle fasce',counter_attack:'Contropiede',tight_marking:'Marcatura stretta',captain_name:'Capitano',penalty_taker_name:'Rigorista',free_kick_taker_name:'Punizioni',corner_taker_name:'Corner'};
@@ -111,7 +84,7 @@ function reportEvents(){
  const out=[];
  for(const p of players){
   for(const [field,type,label] of [['yellow_card','yellow_card','Ammonizione'],['red_card','red_card','Espulsione']])if(flag(p[field]))out.push({minute:p[field+'_minute'],team_side:p.team_side,event_type:type,event_text:label+' · '+p.player_name});
-  for(const [kind,label] of [['on','Entrato'],['off','Uscito']]){const m=subMinute(p,kind);if(m!==null)out.push({minute:m,team_side:p.team_side,event_type:'substitution',event_text:label+' · '+p.player_name});}
+  for(const [kind,label] of [['on','Entrato'],['off','Uscito']]){const m=subMinute(p,kind);if(m!==null||flag(p['sub_'+kind]))out.push({minute:m,team_side:p.team_side,event_type:'substitution',event_text:label+' · '+p.player_name});}
  }
  for(const side of ['home','away'])for(const g of goalScorers(side))out.push({minute:g.minute,team_side:side,event_type:'goal',event_text:'Gol · '+g.name});
  return out.sort((a,b)=>(minute(a.minute)===null?999:elapsed(a.minute))-(minute(b.minute)===null?999:elapsed(b.minute)));
@@ -137,4 +110,5 @@ async function boot(){
 }
 boot();
 })();
+
 

@@ -1,0 +1,12 @@
+CREATE TRIGGER imc_report_normalize_gw001_bi BEFORE INSERT ON `GW001_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw001_bu BEFORE UPDATE ON `GW001_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw004_bi BEFORE INSERT ON `GW004_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw004_bu BEFORE UPDATE ON `GW004_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw005_bi BEFORE INSERT ON `GW005_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw005_bu BEFORE UPDATE ON `GW005_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw006_bi BEFORE INSERT ON `GW006_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw006_bu BEFORE UPDATE ON `GW006_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw009_bi BEFORE INSERT ON `GW009_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw009_bu BEFORE UPDATE ON `GW009_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw010_bi BEFORE INSERT ON `GW010_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
+CREATE TRIGGER imc_report_normalize_gw010_bu BEFORE UPDATE ON `GW010_IMC Match Report` FOR EACH ROW SET NEW.players_json = imc_report_players_v2(NEW.players_json,NEW.commentary_json);
