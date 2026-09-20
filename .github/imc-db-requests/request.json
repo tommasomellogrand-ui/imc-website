@@ -1,9 +1,9 @@
 {
-  "request_id": "source-payloads-latest-date-custom-20260920",
-  "requested_at": "2026-09-20T07:16:00Z",
-  "purpose": "Read latest and earliest created_at dates in CUSTOM gw_source_payloads only",
+  "request_id": "sql2-stale-tables-metadata-20260920",
+  "requested_at": "2026-09-20T07:20:00Z",
+  "purpose": "Audit SQL2 tables for last metadata update and size to identify tables not updated in at least one week",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT MIN(created_at) first_created_at,MAX(created_at) latest_created_at,COUNT(*) rows_count FROM `gw_source_payloads`",
-  "limit": 10
+  "target": "gold",
+  "sql": "SELECT TABLE_NAME,ENGINE,TABLE_ROWS,CREATE_TIME,UPDATE_TIME,ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() ORDER BY COALESCE(UPDATE_TIME,CREATE_TIME),TABLE_NAME",
+  "limit": 500
 }
