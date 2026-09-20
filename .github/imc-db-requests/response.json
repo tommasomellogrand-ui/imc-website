@@ -1,115 +1,248 @@
 {
-  "request_id": "sql2-drop-next10c-gw-plan-20260920",
-  "completed_at": "2026-09-20T08:57:49.540207+00:00",
+  "request_id": "sql2-remaining-lowercase-gw-20260920",
+  "completed_at": "2026-09-20T09:13:56.063420+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "sql2-drop-next10c-gw-plan-20260920",
-    "requested_at": "2026-09-20T08:25:00Z",
-    "purpose": "Remove third batch of 10 legacy lowercase gw_ tables from SQL2",
-    "action": "plan_migration",
+    "request_id": "sql2-remaining-lowercase-gw-20260920",
+    "requested_at": "2026-09-20T08:27:00Z",
+    "purpose": "List exact lowercase gw_ tables currently remaining in SQL2",
+    "action": "query",
     "target": "gold",
-    "migration_id": "drop-next10c-legacy-gw-sql2-20260920",
-    "statements": [
-      "DROP TABLE IF EXISTS `gw_game_worlds`",
-      "DROP TABLE IF EXISTS `gw_seasons`",
-      "DROP TABLE IF EXISTS `gw_source_page_types`",
-      "DROP TABLE IF EXISTS `gw_countries`",
-      "DROP TABLE IF EXISTS `gw_world_rules`",
-      "DROP TABLE IF EXISTS `gw_manager_ranking_snapshots`",
-      "DROP TABLE IF EXISTS `gw_player_stat_snapshots`",
-      "DROP TABLE IF EXISTS `gw_player_state_snapshots`",
-      "DROP TABLE IF EXISTS `gw_squads`",
-      "DROP TABLE IF EXISTS `gw_player_leaderboard_snapshots`"
-    ],
-    "allow_destructive": true,
-    "data_migration": false
+    "sql": "SELECT TABLE_NAME,ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND BINARY TABLE_NAME LIKE 'gw\\_%' ORDER BY (DATA_LENGTH+INDEX_LENGTH) DESC,TABLE_NAME",
+    "limit": 200
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "gold",
-      "database": "Sql1956795_2",
-      "migration_id": "drop-next10c-legacy-gw-sql2-20260920",
-      "allow_destructive": true,
-      "data_migration": false,
-      "statements": [
-        "DROP TABLE IF EXISTS `gw_game_worlds`",
-        "DROP TABLE IF EXISTS `gw_seasons`",
-        "DROP TABLE IF EXISTS `gw_source_page_types`",
-        "DROP TABLE IF EXISTS `gw_countries`",
-        "DROP TABLE IF EXISTS `gw_world_rules`",
-        "DROP TABLE IF EXISTS `gw_manager_ranking_snapshots`",
-        "DROP TABLE IF EXISTS `gw_player_stat_snapshots`",
-        "DROP TABLE IF EXISTS `gw_player_state_snapshots`",
-        "DROP TABLE IF EXISTS `gw_squads`",
-        "DROP TABLE IF EXISTS `gw_player_leaderboard_snapshots`"
-      ]
-    },
-    "analysis": [
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_game_worlds`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "dd68ad873a4850b0613838077371e824e657ac5a4a96926b9b75cf7e123ed24a"
-      },
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_seasons`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "6dc1fa6b1ebdad1a56e7a1ba19d594f11a86292dbf819dcc2724525242bea4f9"
-      },
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_source_page_types`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "db79a21033e209eb95478d1e0b6ff210c57ca6d0ba451e3310e93f9fd81a9304"
-      },
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_countries`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "d3ae2fb26bcd5d2409a143af910897eaf0aa140e413e45f22257e2a78dafd11b"
-      },
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_world_rules`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "f548a047b6ec801ba5a3684c02501552658b9d5b21d80d17600ec34f039e8353"
-      },
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_manager_ranking_snapshots`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "4fbdba0d3ec363d5e4fed40d21c644bb2d1b96b329707dd941a4f027bdc657cd"
-      },
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_player_stat_snapshots`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "3b5f86cbbcb260ef4e022ef337d9735c0ca97d1ba22c7421b2881249f49facad"
-      },
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_player_state_snapshots`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "3b016a7aa8d7e949f27a3c49b83d4a89f37f5ec06b878228f5b6a91c50b2f2c0"
-      },
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_squads`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "f1753a071d2c7cee84a558f187b48929cdeff221465a09759d24a4fa4a0346bb"
-      },
-      {
-        "sql": "DROP TABLE IF EXISTS `gw_player_leaderboard_snapshots`",
-        "kind": "DROP",
-        "destructive": true,
-        "sha256": "c5b9aed81dad8d9af40fac7a552276dac65f6b22c4418cb1dd59dde91f8ef27a"
-      }
-    ],
-    "plan_sha256": "a14c5a2a7453254716b2257ad3ef609ea45a5616d38fcce44aa97fda145743f0",
-    "expires_at": "2026-09-20T09:12:49+00:00",
-    "confirmation_token": "1789895569.8572a6b3b07e8c4ade16feeafbd20e9e572c0171aa8b058c64a0be04f7974e84"
+    "action": "query",
+    "target": "gold",
+    "database": "Sql1956795_2",
+    "result": {
+      "rows": [
+        {
+          "TABLE_NAME": "gw_source_captures",
+          "total_mb": "33.22"
+        },
+        {
+          "TABLE_NAME": "gw_fixtures",
+          "total_mb": "28.11"
+        },
+        {
+          "TABLE_NAME": "gw_source_dom_nodes",
+          "total_mb": "24.63"
+        },
+        {
+          "TABLE_NAME": "gw_match_lineups",
+          "total_mb": "11.55"
+        },
+        {
+          "TABLE_NAME": "gw_transfers",
+          "total_mb": "11.09"
+        },
+        {
+          "TABLE_NAME": "gw_match_reports",
+          "total_mb": "10.55"
+        },
+        {
+          "TABLE_NAME": "gw_fixture_results",
+          "total_mb": "3.38"
+        },
+        {
+          "TABLE_NAME": "gw_match_commentary",
+          "total_mb": "1.64"
+        },
+        {
+          "TABLE_NAME": "gw_match_tactics_snapshots",
+          "total_mb": "1.63"
+        },
+        {
+          "TABLE_NAME": "gw_match_lineup_players",
+          "total_mb": "0.97"
+        },
+        {
+          "TABLE_NAME": "gw_players",
+          "total_mb": "0.81"
+        },
+        {
+          "TABLE_NAME": "gw_world_clubs",
+          "total_mb": "0.63"
+        },
+        {
+          "TABLE_NAME": "gw_match_events",
+          "total_mb": "0.59"
+        },
+        {
+          "TABLE_NAME": "gw_player_profile_snapshots",
+          "total_mb": "0.52"
+        },
+        {
+          "TABLE_NAME": "gw_sm_user_assignments",
+          "total_mb": "0.50"
+        },
+        {
+          "TABLE_NAME": "gw_competitions",
+          "total_mb": "0.19"
+        },
+        {
+          "TABLE_NAME": "gw_sm_users",
+          "total_mb": "0.17"
+        },
+        {
+          "TABLE_NAME": "gw_national_teams",
+          "total_mb": "0.13"
+        },
+        {
+          "TABLE_NAME": "gw_expected_matches",
+          "total_mb": "0.11"
+        },
+        {
+          "TABLE_NAME": "gw_match_team_stats",
+          "total_mb": "0.09"
+        },
+        {
+          "TABLE_NAME": "gw_attendance_snapshots",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_competition_editions",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_divisions",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_history_snapshots",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_honours",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_manager_ranking_snapshots",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_player_leaderboard_snapshots",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_player_stat_snapshots",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_seasons",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_squads",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_standings_snapshots",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_snapshots",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_transfer_summary_snapshots",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_identity_matches",
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_import_issues",
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_player_db_updates",
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_player_state_snapshots",
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_standings_rows",
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_instructions",
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_slots",
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_substitutions",
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_competition_groups",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_competition_rounds",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_competition_stages",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_countries",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_import_runs",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_news_items",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_player_db_update_batches",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_player_leaderboard_rows",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_squad_members",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_stadiums",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_world_rules",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_game_worlds",
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "gw_source_fragments",
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "gw_source_page_types",
+          "total_mb": "0.03"
+        }
+      ],
+      "returned_rows": 55,
+      "total_rows": 55,
+      "truncated": false,
+      "duration_ms": 5
+    }
   }
 }
