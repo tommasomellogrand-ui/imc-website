@@ -1,9 +1,9 @@
 {
-  "request_id": "gw003-http500-diagnose-20260920-01",
-  "requested_at": "2026-09-20T05:41:00Z",
-  "purpose": "Diagnose GW003 Match Report importer HTTP 500 by checking table triggers",
+  "request_id": "gw003-mr-check-20260920",
+  "requested_at": "2026-09-20T05:42:00Z",
+  "purpose": "Check GW003 Match Report destination",
   "action": "query",
   "target": "gold",
-  "sql": "SELECT TRIGGER_NAME,ACTION_TIMING,EVENT_MANIPULATION,ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE='GW003_IMC Match Report' ORDER BY EVENT_MANIPULATION,ACTION_TIMING,TRIGGER_NAME",
+  "sql": "SHOW COLUMNS FROM `GW003_IMC Match Report`",
   "limit": 100
 }
