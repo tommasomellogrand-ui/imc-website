@@ -1,229 +1,33 @@
 {
-  "request_id": "schedule-normalizer-site-schema-20260920",
-  "completed_at": "2026-09-20T06:22:33.880591+00:00",
+  "request_id": "mysql-storage-sql1-20260920",
+  "completed_at": "2026-09-20T06:46:02.074894+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "schedule-normalizer-site-schema-20260920",
+    "request_id": "mysql-storage-sql1-20260920",
+    "requested_at": "2026-09-20T06:44:00Z",
+    "purpose": "Measure current MySQL storage usage for CORE database",
     "action": "query",
-    "target": "custom",
-    "sql": "SELECT TABLE_NAME,COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('GW010_IMC Schedule','IMC Site Schedule') ORDER BY TABLE_NAME,ORDINAL_POSITION",
-    "limit": 100
+    "target": "core",
+    "sql": "SELECT DATABASE() database_name,ROUND(SUM(DATA_LENGTH)/1024/1024,2) data_mb,ROUND(SUM(INDEX_LENGTH)/1024/1024,2) index_mb,ROUND(SUM(DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb,COUNT(*) tables FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()",
+    "limit": 10
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "custom",
-    "database": "Sql1956795_3",
+    "target": "core",
+    "database": "Sql1956795_1",
     "result": {
       "rows": [
         {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "game_world_id",
-          "COLUMN_TYPE": "varchar(16)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "sm_fixture_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "competition_key",
-          "COLUMN_TYPE": "varchar(255)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "sm_action",
-          "COLUMN_TYPE": "varchar(64)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "sm_country",
-          "COLUMN_TYPE": "varchar(128)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "sm_division",
-          "COLUMN_TYPE": "varchar(128)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "competition_group",
-          "COLUMN_TYPE": "varchar(64)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "competition_stage",
-          "COLUMN_TYPE": "varchar(128)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "competition_round",
-          "COLUMN_TYPE": "varchar(128)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "match_date",
-          "COLUMN_TYPE": "date"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "match_time",
-          "COLUMN_TYPE": "time"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "home_sm_team_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "home_name",
-          "COLUMN_TYPE": "varchar(255)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "away_sm_team_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "away_name",
-          "COLUMN_TYPE": "varchar(255)"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "home_sm_manager_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "away_sm_manager_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "logged_manager_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "GW010_IMC Schedule",
-          "COLUMN_NAME": "fingerprint",
-          "COLUMN_TYPE": "char(64)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "site_schedule_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "game_world_id",
-          "COLUMN_TYPE": "varchar(16)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "sm_fixture_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "competition_key",
-          "COLUMN_TYPE": "varchar(255)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "sm_action",
-          "COLUMN_TYPE": "varchar(64)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "sm_country",
-          "COLUMN_TYPE": "varchar(128)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "sm_division",
-          "COLUMN_TYPE": "varchar(128)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "competition_group",
-          "COLUMN_TYPE": "varchar(64)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "competition_stage",
-          "COLUMN_TYPE": "varchar(128)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "competition_round",
-          "COLUMN_TYPE": "varchar(128)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "match_date",
-          "COLUMN_TYPE": "date"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "match_time",
-          "COLUMN_TYPE": "time"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "home_sm_team_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "home_name",
-          "COLUMN_TYPE": "varchar(255)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "away_sm_team_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "away_name",
-          "COLUMN_TYPE": "varchar(255)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "home_sm_manager_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "away_sm_manager_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "logged_manager_id",
-          "COLUMN_TYPE": "bigint unsigned"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "fingerprint",
-          "COLUMN_TYPE": "char(64)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "source_key",
-          "COLUMN_TYPE": "char(64)"
-        },
-        {
-          "TABLE_NAME": "IMC Site Schedule",
-          "COLUMN_NAME": "synced_at",
-          "COLUMN_TYPE": "timestamp"
+          "database_name": "Sql1956795_1",
+          "data_mb": "18.50",
+          "index_mb": "0.73",
+          "total_mb": "19.23",
+          "tables": "15"
         }
       ],
-      "returned_rows": 41,
-      "total_rows": 41,
+      "returned_rows": 1,
+      "total_rows": 1,
       "truncated": false,
       "duration_ms": 4
     }
