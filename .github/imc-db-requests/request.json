@@ -1,11 +1,9 @@
 {
-  "request_id": "gw010-saopaulo-id-execute-20260920",
-  "purpose": "Fill confirmed DOM world club ID only for missing Sao Paulo GW010 mapping",
-  "action": "execute_migration",
-  "target": "core",
-  "migration_id": "gw010-saopaulo-world-id-20260920",
-  "data_migration": true,
-  "statements": [
-    "UPDATE `IMC Game World Club Mapping` SET `SM World Club ID`=92317315 WHERE `Game World`='GW010' AND `Club ID`=306 AND `SM Club ID`=306 AND `Club Name`='São Paulo FC' AND `SM World Club ID` IS NULL"
-  ]
+  "request_id": "gw003-vs-gw007-mr-diff-rerun-20260920",
+  "requested_at": "2026-09-20T06:10:00Z",
+  "purpose": "Re-run GW003 vs GW007 Match Report schema and trigger diff because shared response was overwritten",
+  "action": "query",
+  "target": "gold",
+  "sql": "SELECT 'COLUMN' kind,TABLE_NAME object_name,COLUMN_NAME item,CONCAT(COLUMN_TYPE,'|NULL=',IS_NULLABLE,'|DEFAULT=',COALESCE(CAST(COLUMN_DEFAULT AS CHAR),'NULL'),'|EXTRA=',EXTRA) detail FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('GW003_IMC Match Report','GW007_IMC Match Report') UNION ALL SELECT 'TRIGGER',EVENT_OBJECT_TABLE,TRIGGER_NAME,CONCAT(ACTION_TIMING,' ',EVENT_MANIPULATION,'|',ACTION_STATEMENT) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE IN ('GW003_IMC Match Report','GW007_IMC Match Report') ORDER BY kind,object_name,item",
+  "limit": 500
 }
