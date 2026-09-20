@@ -1,9 +1,9 @@
 {
-  "request_id": "audit-source-payloads-gold-20260920",
-  "requested_at": "2026-09-20T06:59:00Z",
-  "purpose": "Understand what gw_source_payloads contains in GOLD without modifying data",
+  "request_id": "audit-source-payloads-gold-content-20260920",
+  "requested_at": "2026-09-20T07:00:00Z",
+  "purpose": "Profile GOLD gw_source_payloads content and relation to captures without returning full payload bodies",
   "action": "query",
   "target": "gold",
-  "sql": "SHOW COLUMNS FROM `gw_source_payloads`",
+  "sql": "SELECT p.payload_type,COUNT(*) rows_count,ROUND(SUM(COALESCE(OCTET_LENGTH(p.payload_text),0)+COALESCE(OCTET_LENGTH(CAST(p.payload_json AS CHAR)),0))/1024/1024,2) logical_mb,ROUND(AVG(COALESCE(OCTET_LENGTH(p.payload_text),0)+COALESCE(OCTET_LENGTH(CAST(p.payload_json AS CHAR)),0))/1024,2) avg_kb,ROUND(MAX(COALESCE(OCTET_LENGTH(p.payload_text),0)+COALESCE(OCTET_LENGTH(CAST(p.payload_json AS CHAR)),0))/1024,2) max_kb,SUM(p.payload_text IS NOT NULL) text_rows,SUM(p.payload_json IS NOT NULL) json_rows,COUNT(DISTINCT p.payload_hash) distinct_hashes FROM gw_source_payloads p GROUP BY p.payload_type ORDER BY logical_mb DESC",
   "limit": 200
 }
