@@ -497,6 +497,44 @@ try {
         dbm_reply(['ok'=>true,'action'=>$action,'target'=>$target,'database'=>$database,'table'=>$table,'affected_rows'=>$affected]);
     }
 
+    if ($action === 'ext_manager_write') {
+        $target = trim((string)($payload['target'] ?? 'core'));
+        if ($target !== 'core') throw new InvalidArgumentException('EXT manager writes are CORE-only.');
+        $table = trim((string)($payload['table'] ?? ''));
+        $allowedTables = ['EXT Manager Codex Global', 'EXT Manager Assignment Global'];
+        if (!in_array($table, $allowedTables, true)) throw new InvalidArgumentException('Table not allowed for EXT manager write.');
+        $rows = $payload['rows'] ?? null;
+        if (!is_array($rows) || $rows === [] || count($rows) > 500) throw new InvalidArgumentException('rows must contain 1 to 500 items.');
+        [$database, $db] = dbm_storage('core');
+        $affected = 0;
+        if ($table === 'EXT Manager Codex Global') {
+            $stmt = $db->prepare('INSERT INTO `EXT Manager Codex Global` (`sm_manager_id`,`manager_name`) VALUES (?,?) ON DUPLICATE KEY UPDATE `manager_name`=VALUES(`manager_name`)');
+            foreach ($rows as $row) {
+                if (!is_array($row)) throw new InvalidArgumentException('Invalid row.');
+                $id = (int)($row['sm_manager_id'] ?? 0);
+                $name = trim((string)($row['manager_name'] ?? ''));
+                if ($id <= 0 || $name === '') throw new InvalidArgumentException('sm_manager_id and manager_name are required.');
+                $stmt->bind_param('is', $id, $name); $stmt->execute(); $affected += max(0, $stmt->affected_rows);
+            }
+            $stmt->close();
+        } else {
+            $stmt = $db->prepare('INSERT INTO `EXT Manager Assignment Global` (`sm_manager_id`,`game_world_id`,`assignment_type`,`sm_world_team_id`,`team_name`) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE `sm_world_team_id`=VALUES(`sm_world_team_id`),`team_name`=VALUES(`team_name`)');
+            foreach ($rows as $row) {
+                if (!is_array($row)) throw new InvalidArgumentException('Invalid row.');
+                $id = (int)($row['sm_manager_id'] ?? 0);
+                $gw = trim((string)($row['game_world_id'] ?? ''));
+                $type = trim((string)($row['assignment_type'] ?? ''));
+                $teamId = (int)($row['sm_world_team_id'] ?? 0);
+                $teamName = trim((string)($row['team_name'] ?? ''));
+                if ($id <= 0 || !preg_match('/^GW[0-9]{3}$/', $gw) || !in_array($type, ['CLUB','NATIONAL_TEAM'], true) || $teamId <= 0 || $teamName === '') throw new InvalidArgumentException('Invalid EXT assignment row.');
+                $stmt->bind_param('issis', $id, $gw, $type, $teamId, $teamName); $stmt->execute(); $affected += max(0, $stmt->affected_rows);
+            }
+            $stmt->close();
+        }
+        dbm_audit(['action'=>$action,'target'=>'core','database'=>$database,'table'=>$table,'row_count'=>count($rows),'affected_rows'=>$affected,'status'=>'success']);
+        dbm_reply(['ok'=>true,'action'=>$action,'target'=>'core','database'=>$database,'table'=>$table,'row_count'=>count($rows),'affected_rows'=>$affected]);
+    }
+
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
     throw new InvalidArgumentException('Unknown action.');
 } catch (Throwable $e) {
