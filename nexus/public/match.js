@@ -38,8 +38,29 @@ function renderHero(){
  document.title=`${name('home')} ${r.home_score??'—'}–${r.away_score??'—'} ${name('away')} · Nexus`;
 }
 function rating(p){const n=num(p.rating);return `<span class="rating ${n===null?'none':n<6?'low':n<7?'mid':''}" aria-label="${n===null?'Voto non disponibile':'Voto '+n}">${n===null?'—':n.toFixed(1)}</span>`}
-function playerMinutes(p){const n=num(p.minutes_played??p.minutes);return n!==null&&n>=0&&n<=150?n+'′':'—'}
-function badges(p){const out=[];if(num(p.goals)>0)out.push(`<span class="badge" title="Gol">⚽${num(p.goals)>1?num(p.goals):''}</span>`);if(num(p.assists)>0)out.push(`<span class="badge" title="Assist">A${num(p.assists)>1?num(p.assists):''}</span>`);if(flag(p.captain))out.push('<span class="badge" title="Capitano">C</span>');if(flag(p.man_of_match))out.push('<span class="badge gold" title="Migliore in campo">★</span>');for(const [field,label,cls] of [['yellow_card','Ammonito',''],['red_card','Espulso','red']])if(flag(p[field]))out.push(`<span class="badge" title="${label}"><i class="card-icon ${cls}" aria-hidden="true"></i><span class="sr-only" hidden>${label}</span></span>`);for(const [field,cls,icon] of [['sub_on_minute','up','↑'],['sub_off_minute','down','↓']])if(minute(p[field])!==null)out.push(`<span class="badge ${cls}" title="${cls==='up'?'Entrato':'Uscito'}">${icon}${time(p[field])}</span>`);return out.join('')}
+function normName(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim()}
+function substitutions(){
+ const out=[];
+ for(const c of array(record.commentary_json)){
+  const m=minute(c.minute),txt=String(c.commentary_text||'');
+  if(m===null||!/sostituz|uscendo dal campo|sostituit/i.test(txt))continue;
+  let a=txt.match(/(.+?)\s+(?:sta|stanno) uscendo dal campo\.\s*(?:Sarà|Saranno) sostituit[oi] da\s+(.+?)(?:\.|$)/i);
+  if(!a)continue;
+  const clean=v=>v.replace(/^.*?sostituzioni?\./i,'').trim();
+  const split=v=>clean(v).split(/\s+e\s+|\s*,\s*/).map(x=>x.trim()).filter(Boolean);
+  const offs=split(a[1]),ons=split(a[2]);
+  for(let i=0;i<Math.max(offs.length,ons.length);i++)out.push({minute:m,off:offs[i]||'',on:ons[i]||''});
+ }
+ return out;
+}
+function subMinute(p,kind){
+ const direct=minute(p[kind==='on'?'sub_on_minute':'sub_off_minute']);if(direct!==null)return direct;
+ const n=normName(p.player_name),sub=substitutions().find(x=>{const q=normName(x[kind]);return q&&(n===q||n.endsWith(' '+q)||q.endsWith(' '+n)||n.split(' ').at(-1)===q.split(' ').at(-1))});
+ return sub?sub.minute:null;
+}
+function matchEnd(){const mins=array(record.commentary_json).filter(x=>/fine secondo tempo|fine partita|full.?time/i.test(x.commentary_text||'')).map(x=>num(x.minute)).filter(x=>x!==null);return mins.length?Math.max(...mins):90}
+function playerMinutes(p){const on=subMinute(p,'on'),off=subMinute(p,'off'),red=minute(p.red_card_minute),end=matchEnd();if(flag(p.starter)){const stop=off!==null?off:red!==null?red:end;return Math.max(0,stop)+'′'}if(on!==null){const stop=off!==null?off:red!==null?red:end;return Math.max(0,stop-on)+'′'}return '—'}
+function badges(p){const out=[];if(num(p.goals)>0)out.push(`<span class="badge" title="Gol">⚽${num(p.goals)>1?num(p.goals):''}</span>`);if(num(p.assists)>0)out.push(`<span class="badge" title="Assist">A${num(p.assists)>1?num(p.assists):''}</span>`);if(flag(p.captain))out.push('<span class="badge" title="Capitano">C</span>');if(flag(p.man_of_match))out.push('<span class="badge gold" title="Migliore in campo">★</span>');for(const [field,label,cls] of [['yellow_card','Ammonito',''],['red_card','Espulso','red']])if(flag(p[field]))out.push(`<span class="badge" title="${label}"><i class="card-icon ${cls}" aria-hidden="true"></i><span class="sr-only" hidden>${label}</span></span>`);for(const [kind,cls,icon] of [['on','up','↑'],['off','down','↓']]){const m=subMinute(p,kind);if(m!==null)out.push(`<span class="badge ${cls}" title="${cls==='up'?'Entrato':'Uscito'}">${icon}${m}′</span>`)}return out.join('')}
 function playerRow(p){const src=imageURL(p.image_url||p.player_core?.image_url);return `<div class="player"><span class="slot">${esc(p.squad_slot??'—')}</span><div class="player-name">${src?`<img class="avatar" src="${esc(src)}" alt="" loading="lazy">`:`<span class="avatar" aria-hidden="true">${esc(initials(p.player_name))}</span>`}<strong>${esc(p.player_name||'Giocatore')}</strong></div><span class="minutes">${playerMinutes(p)}</span>${rating(p)}<div class="badges">${badges(p)}</div></div>`}
 function switcher(){return `<nav class="switch" aria-label="Squadra">${['home','away'].map(s=>`<a data-view href="${esc(href({side:s}))}" ${side===s?'aria-current="page"':''}>${esc(name(s))}</a>`).join('')}</nav>`}
 function playerTable(lineup=false){const list=players.filter(p=>p.team_side===side).sort((a,b)=>(num(a.squad_slot)??999)-(num(b.squad_slot)??999)),starters=list.filter(p=>flag(p.starter)),subs=list.filter(p=>!flag(p.starter));return `<section class="box"><div class="section-head"><h2>${esc(name(side))}</h2></div>${list.length?`<div class="rating-head"><span>#</span><span>GIOCATORE</span><span>MIN</span><span>VOTO</span><span>EVENTI</span></div>${starters.map(playerRow).join('')}${subs.length?'<div class="bench">Panchina e sostituti</div>'+subs.map(playerRow).join(''):''}<p class="note">— indica un dato non disponibile.</p>`:empty('Formazione non disponibile per questa squadra.')}</section>`}
