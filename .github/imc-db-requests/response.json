@@ -1,102 +1,115 @@
 {
-  "request_id": "ext-manager-codex-extract-20260920",
-  "completed_at": "2026-09-20T08:20:45.633661+00:00",
+  "request_id": "sql2-drop-next10-gw-plan-20260920",
+  "completed_at": "2026-09-20T08:30:11.446823+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "ext-manager-codex-extract-20260920",
-    "requested_at": "2026-09-20T08:30:00Z",
-    "purpose": "Extract all rows and count from CORE EXT Manager Codex Global",
-    "action": "query",
-    "target": "core",
-    "sql": "SELECT sm_manager_id, manager_name, (SELECT COUNT(*) FROM `EXT Manager Codex Global`) AS total_managers FROM `EXT Manager Codex Global` ORDER BY sm_manager_id"
+    "request_id": "sql2-drop-next10-gw-plan-20260920",
+    "requested_at": "2026-09-20T08:20:00Z",
+    "purpose": "Remove next 10 legacy lowercase gw_ tables from SQL2, selected by prior storage audit largest remaining first",
+    "action": "plan_migration",
+    "target": "gold",
+    "migration_id": "drop-next10-legacy-gw-sql2-20260920",
+    "statements": [
+      "DROP TABLE IF EXISTS `gw_source_captures`",
+      "DROP TABLE IF EXISTS `gw_fixtures`",
+      "DROP TABLE IF EXISTS `gw_source_dom_nodes`",
+      "DROP TABLE IF EXISTS `gw_match_lineups`",
+      "DROP TABLE IF EXISTS `gw_transfers`",
+      "DROP TABLE IF EXISTS `gw_match_reports`",
+      "DROP TABLE IF EXISTS `gw_fixture_results`",
+      "DROP TABLE IF EXISTS `gw_match_commentary`",
+      "DROP TABLE IF EXISTS `gw_match_tactics_snapshots`",
+      "DROP TABLE IF EXISTS `gw_match_lineup_players`"
+    ],
+    "allow_destructive": true,
+    "data_migration": false
   },
   "response": {
     "ok": true,
-    "action": "query",
-    "target": "core",
-    "database": "Sql1956795_1",
-    "result": {
-      "rows": [
-        {
-          "sm_manager_id": "4868",
-          "manager_name": "Chris Chappell",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "32486",
-          "manager_name": "Josh Smith",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "40669",
-          "manager_name": "Matt Furtek",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "64773",
-          "manager_name": "Tom Wharton",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "84974",
-          "manager_name": "Glen Pine",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "138784",
-          "manager_name": "stop complaining so much",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "157619",
-          "manager_name": "Anton I",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "172041",
-          "manager_name": "Steve Wild",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "172638",
-          "manager_name": "Simon Allwood",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "173887",
-          "manager_name": "Markkö Srçë",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "2363592",
-          "manager_name": "marcello Partenopeo",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "4478199",
-          "manager_name": "MAX inter",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "21638325",
-          "manager_name": "Half-Blood Prince",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "22959444",
-          "manager_name": "Melvin Udall 6️⃣0️⃣",
-          "total_managers": "15"
-        },
-        {
-          "sm_manager_id": "23131282",
-          "manager_name": "Kubanito Silvestri",
-          "total_managers": "15"
-        }
-      ],
-      "returned_rows": 15,
-      "total_rows": 15,
-      "truncated": false,
-      "duration_ms": 2
-    }
+    "action": "plan_migration",
+    "plan": {
+      "target": "gold",
+      "database": "Sql1956795_2",
+      "migration_id": "drop-next10-legacy-gw-sql2-20260920",
+      "allow_destructive": true,
+      "data_migration": false,
+      "statements": [
+        "DROP TABLE IF EXISTS `gw_source_captures`",
+        "DROP TABLE IF EXISTS `gw_fixtures`",
+        "DROP TABLE IF EXISTS `gw_source_dom_nodes`",
+        "DROP TABLE IF EXISTS `gw_match_lineups`",
+        "DROP TABLE IF EXISTS `gw_transfers`",
+        "DROP TABLE IF EXISTS `gw_match_reports`",
+        "DROP TABLE IF EXISTS `gw_fixture_results`",
+        "DROP TABLE IF EXISTS `gw_match_commentary`",
+        "DROP TABLE IF EXISTS `gw_match_tactics_snapshots`",
+        "DROP TABLE IF EXISTS `gw_match_lineup_players`"
+      ]
+    },
+    "analysis": [
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_source_captures`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "44e45a5c741c4854b7ae3ae58aa2fe98c138d398a640b6c385ec40434467b66e"
+      },
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_fixtures`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "cea7b39e2506b1e9a6b0aefb3792ec3ce800c1c5a0365ab62b785e2bb3e46a01"
+      },
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_source_dom_nodes`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "c5319e30f6c3a373714a7a1aa4bf9fb7022a9bba3c1394b6c5513f2f86dd6a03"
+      },
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_match_lineups`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "c66971184da7f8249fbe62d9d3a9030adf9157a318473cd6073ccd731dcd1098"
+      },
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_transfers`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "eef2db3eab30a3930970e95b4216a65ab8b22e8c6629fb104931e47bc5675732"
+      },
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_match_reports`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "47e4f96cd546684d20cb0ac0058b81920d5d3521e6f514b723dc2ba3be1cbc6d"
+      },
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_fixture_results`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "22e76163b59f3bcab3978ec8ac2da3ca8482eb5f5a2323e1d4b8a1e1a0a94d41"
+      },
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_match_commentary`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "e968e00200698b9141701fe467ac0b38274bc08f3bceb73f678763b48103207f"
+      },
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_match_tactics_snapshots`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "fd760770d1d594e25a6da6858bacdad544e68c5acbca0da9e35538a30541bd46"
+      },
+      {
+        "sql": "DROP TABLE IF EXISTS `gw_match_lineup_players`",
+        "kind": "DROP",
+        "destructive": true,
+        "sha256": "81abdf4000d1872694cca12aa43cb5889d297070812f4bb5ef00659c6bd88e0e"
+      }
+    ],
+    "plan_sha256": "27483787c2b7abe76ee2f8cf2f0361a85097019dacb0a2f164eebf5d17e781c3",
+    "expires_at": "2026-09-20T08:45:11+00:00",
+    "confirmation_token": "1789893911.6f3052178959dcd4257e13717b1124a5399f4acc54a10f8565baec45c6187ee6"
   }
 }
