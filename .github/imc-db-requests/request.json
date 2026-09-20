@@ -1,9 +1,9 @@
 {
-  "request_id": "source-payloads-latest-date-gold-20260920",
-  "requested_at": "2026-09-20T07:15:00Z",
-  "purpose": "Read latest and earliest created_at dates in GOLD gw_source_payloads only",
+  "request_id": "source-payloads-latest-date-custom-20260920",
+  "requested_at": "2026-09-20T07:16:00Z",
+  "purpose": "Read latest and earliest created_at dates in CUSTOM gw_source_payloads only",
   "action": "query",
-  "target": "gold",
+  "target": "custom",
   "sql": "SELECT MIN(created_at) first_created_at,MAX(created_at) latest_created_at,COUNT(*) rows_count FROM `gw_source_payloads`",
   "limit": 10
 }
