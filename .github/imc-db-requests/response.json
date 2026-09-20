@@ -1,35 +1,35 @@
 {
-  "request_id": "mysql-storage-sql1-20260920",
-  "completed_at": "2026-09-20T06:46:02.074894+00:00",
+  "request_id": "mysql-storage-gold-20260920",
+  "completed_at": "2026-09-20T06:46:20.382807+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "mysql-storage-sql1-20260920",
-    "requested_at": "2026-09-20T06:44:00Z",
-    "purpose": "Measure current MySQL storage usage for CORE database",
+    "request_id": "mysql-storage-gold-20260920",
+    "requested_at": "2026-09-20T06:45:00Z",
+    "purpose": "Measure current MySQL storage usage for GOLD database",
     "action": "query",
-    "target": "core",
+    "target": "gold",
     "sql": "SELECT DATABASE() database_name,ROUND(SUM(DATA_LENGTH)/1024/1024,2) data_mb,ROUND(SUM(INDEX_LENGTH)/1024/1024,2) index_mb,ROUND(SUM(DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb,COUNT(*) tables FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()",
     "limit": 10
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "core",
-    "database": "Sql1956795_1",
+    "target": "gold",
+    "database": "Sql1956795_2",
     "result": {
       "rows": [
         {
-          "database_name": "Sql1956795_1",
-          "data_mb": "18.50",
-          "index_mb": "0.73",
-          "total_mb": "19.23",
-          "tables": "15"
+          "database_name": "Sql1956795_2",
+          "data_mb": "10773.33",
+          "index_mb": "63.31",
+          "total_mb": "10836.64",
+          "tables": "299"
         }
       ],
       "returned_rows": 1,
       "total_rows": 1,
       "truncated": false,
-      "duration_ms": 4
+      "duration_ms": 25
     }
   }
 }
