@@ -1,8 +1,22 @@
 {
-  "request_id": "ext-manager-codex-extract-20260920",
-  "requested_at": "2026-09-20T08:30:00Z",
-  "purpose": "Extract all rows and count from CORE EXT Manager Codex Global",
-  "action": "query",
-  "target": "core",
-  "sql": "SELECT sm_manager_id, manager_name, (SELECT COUNT(*) FROM `EXT Manager Codex Global`) AS total_managers FROM `EXT Manager Codex Global` ORDER BY sm_manager_id"
+  "request_id": "sql2-drop-next10-gw-plan-20260920",
+  "requested_at": "2026-09-20T08:20:00Z",
+  "purpose": "Remove next 10 legacy lowercase gw_ tables from SQL2, selected by prior storage audit largest remaining first",
+  "action": "plan_migration",
+  "target": "gold",
+  "migration_id": "drop-next10-legacy-gw-sql2-20260920",
+  "statements": [
+    "DROP TABLE IF EXISTS `gw_source_captures`",
+    "DROP TABLE IF EXISTS `gw_fixtures`",
+    "DROP TABLE IF EXISTS `gw_source_dom_nodes`",
+    "DROP TABLE IF EXISTS `gw_match_lineups`",
+    "DROP TABLE IF EXISTS `gw_transfers`",
+    "DROP TABLE IF EXISTS `gw_match_reports`",
+    "DROP TABLE IF EXISTS `gw_fixture_results`",
+    "DROP TABLE IF EXISTS `gw_match_commentary`",
+    "DROP TABLE IF EXISTS `gw_match_tactics_snapshots`",
+    "DROP TABLE IF EXISTS `gw_match_lineup_players`"
+  ],
+  "allow_destructive": true,
+  "data_migration": false
 }
