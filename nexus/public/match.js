@@ -20,7 +20,7 @@ function crest(s){const src=imageURL(record[s+'_core']?.image_url);return src?`<
 function goalScorers(teamSide){
  const goalEvents=events.filter(e=>e.team_side===teamSide&&e.event_type==='goal'&&!/annullat|disallow|no goal/i.test(e.event_text||e.commentary_text||''));
  const fromEvents=goalEvents.map(e=>{
-  const who=e.player_name||e.scorer_name||e.player||e.actor_name||e.event_player_name||'';
+  const who=e.scorer_name||e.secondary_player_name||e.primary_player_name||e.player_name||e.player||e.actor_name||e.event_player_name||'';
   const min=minute(e.minute);
   return who&&min!==null?{name:who,minute:min}:null;
  }).filter(Boolean);
@@ -53,13 +53,10 @@ function substitutions(){
  }
  return out;
 }
-function firstAppearance(p){const id=num(p.sm_player_id);if(id===null)return null;const hits=array(record.commentary_json).filter(c=>array(c.player_ids).some(x=>num(x)===id)).map(c=>minute(c.minute)).filter(x=>x!==null);return hits.length?Math.min(...hits):null}
 function subMinute(p,kind){
  const direct=minute(p[kind==='on'?'sub_on_minute':'sub_off_minute']);if(direct!==null)return direct;
  const n=normName(p.player_name),sub=substitutions().find(x=>{const q=normName(x[kind]);return q&&(n===q||n.endsWith(' '+q)||q.endsWith(' '+n)||n.split(' ').at(-1)===q.split(' ').at(-1))});
- if(sub)return sub.minute;
- if(kind==='on'&&!flag(p.starter)&&num(p.rating)!==null)return firstAppearance(p);
- return null;
+ return sub?sub.minute:null;
 }
 function matchEnd(){const mins=array(record.commentary_json).filter(x=>/fine secondo tempo|fine partita|full.?time/i.test(x.commentary_text||'')).map(x=>num(x.minute)).filter(x=>x!==null);return mins.length?Math.max(...mins):90}
 function playerMinutes(p){const on=subMinute(p,'on'),off=subMinute(p,'off'),red=minute(p.red_card_minute),end=matchEnd();if(flag(p.starter)){const stop=off!==null?off:red!==null?red:end;return Math.max(0,stop)+'′'}if(on!==null){const stop=off!==null?off:red!==null?red:end;return Math.max(0,stop-on)+'′'}return '—'}
