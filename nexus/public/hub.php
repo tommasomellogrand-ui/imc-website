@@ -113,6 +113,10 @@ function nexus_manager_profile(PDO $db,PDO $core,string $world): array {
     if(!$assignments)respond(['ok'=>false,'error'=>'manager_not_in_world'],404);
     $people=nexus_core_rows($core,'SELECT manager_id,full_name,sm_manager_id FROM `IMC Manager Codex Global` WHERE manager_id=?',[$id]);
     $person=$people[0]??['manager_id'=>$id,'sm_manager_id'=>null];$rows=[];
+    if(($_GET['summary']??'')==='1'){
+        if(!empty($person['sm_manager_id']))$rows=nexus_core_rows($db,'SELECT sm_fixture_id,match_date,competition_group,home_sm_manager_id,away_sm_manager_id,home_score,away_score FROM `IMC Site Match Report` WHERE game_world_id=? AND (home_sm_manager_id=? OR away_sm_manager_id=?) AND home_score IS NOT NULL AND away_score IS NOT NULL',[$world,$person['sm_manager_id'],$person['sm_manager_id']]);
+        return ['ok'=>true,'world'=>$world,'manager'=>$person,'assignments'=>$assignments,'source'=>'IMC Site Match Report','rows'=>$rows];
+    }
     if(!empty($person['sm_manager_id'])){
         $params=[$world,$person['sm_manager_id'],$person['sm_manager_id']];
         $dates=nexus_date_where('match_date',nexus_season($core,$world,(string)($_GET['season']??'')),$params);

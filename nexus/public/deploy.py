@@ -10,6 +10,7 @@ ftp.prot_p()
 ftp.set_pasv(True)
 # Only the public Nexus entry point and its dependencies are published.
 files=['nexus/match.html','nexus/public/match.css','nexus/public/match.js','nexus/public/trophies.php','nexus/public/honours-GW008-S1.json','nexus/public/hub.php','nexus/public/hub-logic.js','nexus/public/core.php','nexus/public/data.php','nexus/public/site.css','nexus/public/site.js','nexus/assets/imc-logo.png','nexus/.htaccess','nexus/index.html']
+files += ['nexus/clubhouse.html','nexus/public/clubhouse.css','nexus/public/clubhouse.js']
 for name in files:
     p=Path(name)
     ftp.cwd('/')

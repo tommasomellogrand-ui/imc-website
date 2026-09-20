@@ -35,6 +35,19 @@ try {
     if($resource==='team_profile')respond(nexus_team_profile($pdo,$coreDb,$world));
     [$table,$id,$date]=$resources[$resource];
     $where='game_world_id=?'; $params=[$world];
+    if(in_array($resource,['results','schedule'],true)&&($_GET['team_id']??'')!==''){
+        $teamId=(string)$_GET['team_id'];
+        if(!ctype_digit($teamId)||strlen($teamId)>20)respond(['ok'=>false,'error'=>'invalid_team_id'],422);
+        $home=$resource==='schedule'?'home_sm_team_id':'home_sm_club_id';
+        $away=$resource==='schedule'?'away_sm_team_id':'away_sm_club_id';
+        $where.=" AND ($home=? OR $away=?";$params[]=$teamId;$params[]=$teamId;
+        if($resource==='results'){
+            $where.=' OR EXISTS (SELECT 1 FROM `IMC Site Match Report` mr WHERE mr.game_world_id=`IMC Site Results`.game_world_id AND mr.sm_fixture_id=`IMC Site Results`.sm_fixture_id AND (mr.home_sm_club_id=? OR mr.away_sm_club_id=?))';
+            $params[]=$teamId;$params[]=$teamId;
+        }
+        $where.=')';
+        if($resource==='schedule')$where.=' AND NOT EXISTS (SELECT 1 FROM `IMC Site Results` played WHERE played.game_world_id=`IMC Site Schedule`.game_world_id AND played.sm_fixture_id=`IMC Site Schedule`.sm_fixture_id AND played.home_score IS NOT NULL AND played.away_score IS NOT NULL)';
+    }
     $where.=nexus_date_where("`$date`",nexus_season($coreDb,$world,(string)($_GET['season']??'')),$params);
     if(($_GET['competition']??'')!==''){$where.=' AND competition_key=?';$params[]=(string)$_GET['competition'];}
     if($resource==='transfers'&&($_GET['club']??'')!==''){
