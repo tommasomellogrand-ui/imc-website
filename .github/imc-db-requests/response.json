@@ -1,33 +1,2420 @@
 {
-  "request_id": "source-payloads-latest-date-custom-20260920",
-  "completed_at": "2026-09-20T07:15:29.831432+00:00",
+  "request_id": "sql2-stale-tables-metadata-20260920",
+  "completed_at": "2026-09-20T07:18:47.150594+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "source-payloads-latest-date-custom-20260920",
-    "requested_at": "2026-09-20T07:16:00Z",
-    "purpose": "Read latest and earliest created_at dates in CUSTOM gw_source_payloads only",
+    "request_id": "sql2-stale-tables-metadata-20260920",
+    "requested_at": "2026-09-20T07:20:00Z",
+    "purpose": "Audit SQL2 tables for last metadata update and size to identify tables not updated in at least one week",
     "action": "query",
-    "target": "custom",
-    "sql": "SELECT MIN(created_at) first_created_at,MAX(created_at) latest_created_at,COUNT(*) rows_count FROM `gw_source_payloads`",
-    "limit": 10
+    "target": "gold",
+    "sql": "SELECT TABLE_NAME,ENGINE,TABLE_ROWS,CREATE_TIME,UPDATE_TIME,ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() ORDER BY COALESCE(UPDATE_TIME,CREATE_TIME),TABLE_NAME",
+    "limit": 500
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "custom",
-    "database": "Sql1956795_3",
+    "target": "gold",
+    "database": "Sql1956795_2",
     "result": {
       "rows": [
         {
-          "first_created_at": "2026-09-03 23:17:07.789916",
-          "latest_created_at": "2026-09-05 06:57:12.027958",
-          "rows_count": "7342"
+          "TABLE_NAME": "gw_countries",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:18",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_source_page_types",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "4",
+          "CREATE_TIME": "2026-09-03 18:07:18",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "gw_world_rules",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:18",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_manager_ranking_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:19",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_player_stat_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:19",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_player_state_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:19",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_squads",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:19",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_player_leaderboard_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:20",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_stadiums",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:20",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_standings_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:20",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_attendance_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:21",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_history_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:21",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_honours",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:21",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_news_items",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:21",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_player_db_update_batches",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:21",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:07:21",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_competition_editions",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_competition_groups",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_competition_rounds",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_competition_stages",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_divisions",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_identity_matches",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_player_leaderboard_rows",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_source_fragments",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "gw_squad_members",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_import_issues",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:37",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_player_db_updates",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:37",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_standings_rows",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:37",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_instructions",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:37",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_slots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:37",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_substitutions",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-03 18:18:37",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "gw_expected_matches",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-04 09:58:46",
+          "UPDATE_TIME": null,
+          "total_mb": "0.11"
+        },
+        {
+          "TABLE_NAME": "gw_competitions",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "343",
+          "CREATE_TIME": "2026-09-04 12:07:20",
+          "UPDATE_TIME": "2026-09-04 12:16:47",
+          "total_mb": "0.19"
+        },
+        {
+          "TABLE_NAME": "gw_fixture_results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "15012",
+          "CREATE_TIME": "2026-09-03 18:07:20",
+          "UPDATE_TIME": "2026-09-04 12:16:47",
+          "total_mb": "3.38"
+        },
+        {
+          "TABLE_NAME": "gw_transfer_summary_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "6",
+          "CREATE_TIME": "2026-09-03 18:07:21",
+          "UPDATE_TIME": "2026-09-04 19:34:30",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "gw_transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "2656",
+          "CREATE_TIME": "2026-09-03 18:07:21",
+          "UPDATE_TIME": "2026-09-04 19:34:30",
+          "total_mb": "11.09"
+        },
+        {
+          "TABLE_NAME": "gw_import_runs",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "8",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": "2026-09-04 20:00:21",
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "gw_national_teams",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "320",
+          "CREATE_TIME": "2026-09-03 18:07:18",
+          "UPDATE_TIME": "2026-09-04 20:00:21",
+          "total_mb": "0.13"
+        },
+        {
+          "TABLE_NAME": "gw_sm_user_assignments",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "979",
+          "CREATE_TIME": "2026-09-03 18:07:19",
+          "UPDATE_TIME": "2026-09-04 20:00:21",
+          "total_mb": "0.50"
+        },
+        {
+          "TABLE_NAME": "gw_match_commentary",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "1545",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "1.64"
+        },
+        {
+          "TABLE_NAME": "gw_match_events",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "1200",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "0.59"
+        },
+        {
+          "TABLE_NAME": "gw_match_lineup_players",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "3046",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "0.97"
+        },
+        {
+          "TABLE_NAME": "gw_match_lineups",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "104",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "11.55"
+        },
+        {
+          "TABLE_NAME": "gw_match_reports",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "89",
+          "CREATE_TIME": "2026-09-03 18:07:20",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "10.55"
+        },
+        {
+          "TABLE_NAME": "gw_match_tactics_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "653",
+          "CREATE_TIME": "2026-09-03 18:18:37",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "1.63"
+        },
+        {
+          "TABLE_NAME": "gw_match_team_stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "168",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "0.09"
+        },
+        {
+          "TABLE_NAME": "gw_player_profile_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "3024",
+          "CREATE_TIME": "2026-09-03 18:07:19",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "0.52"
+        },
+        {
+          "TABLE_NAME": "gw_players",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "4827",
+          "CREATE_TIME": "2026-09-03 18:07:19",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "0.81"
+        },
+        {
+          "TABLE_NAME": "gw_sm_users",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "523",
+          "CREATE_TIME": "2026-09-03 18:07:19",
+          "UPDATE_TIME": "2026-09-04 20:45:37",
+          "total_mb": "0.17"
+        },
+        {
+          "TABLE_NAME": "gw_world_clubs",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "2449",
+          "CREATE_TIME": "2026-09-03 18:07:19",
+          "UPDATE_TIME": "2026-09-05 06:23:58",
+          "total_mb": "0.63"
+        },
+        {
+          "TABLE_NAME": "gw_fixtures",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "19338",
+          "CREATE_TIME": "2026-09-03 18:07:20",
+          "UPDATE_TIME": "2026-09-05 06:24:21",
+          "total_mb": "28.11"
+        },
+        {
+          "TABLE_NAME": "gw_source_captures",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "2257",
+          "CREATE_TIME": "2026-09-03 18:18:35",
+          "UPDATE_TIME": "2026-09-05 06:24:21",
+          "total_mb": "33.22"
+        },
+        {
+          "TABLE_NAME": "gw_source_dom_nodes",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "34569",
+          "CREATE_TIME": "2026-09-03 18:18:37",
+          "UPDATE_TIME": "2026-09-05 06:24:21",
+          "total_mb": "24.63"
+        },
+        {
+          "TABLE_NAME": "gw_source_payloads",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "5721",
+          "CREATE_TIME": "2026-09-03 18:18:36",
+          "UPDATE_TIME": "2026-09-05 06:24:21",
+          "total_mb": "8788.03"
+        },
+        {
+          "TABLE_NAME": "gw_game_worlds",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "4",
+          "CREATE_TIME": "2026-09-03 18:07:17",
+          "UPDATE_TIME": "2026-09-05 06:44:04",
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "gw_seasons",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "4",
+          "CREATE_TIME": "2026-09-03 18:07:18",
+          "UPDATE_TIME": "2026-09-05 06:44:04",
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "GW002_clubs",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:31:28",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_managers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:31:28",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_clubs",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:31:28",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_managers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:31:28",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_clubs",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:31:28",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_managers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:31:28",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_clubs",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:31:28",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_managers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:31:28",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_competition",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:32:29",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_trophy_room",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:32:29",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_competition",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:32:29",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_trophy_room",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:32:29",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_competition",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:32:29",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_trophy_room",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:32:29",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_competition",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:32:29",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_trophy_room",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:32:29",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_news_feed",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:33:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_news_feed",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:33:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_news_feed",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:33:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_news_feed",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 07:33:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_match_report_commentary",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "GW002_match_report_events",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "GW002_match_report_tactics",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "GW003_match_report_commentary",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "GW003_match_report_events",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "GW003_match_report_tactics",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "GW007_match_report_commentary",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "GW007_match_report_events",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "GW007_match_report_tactics",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "GW008_match_report_commentary",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "GW008_match_report_events",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.06"
+        },
+        {
+          "TABLE_NAME": "GW008_match_report_tactics",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 13:15:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "GW002_player_codex_injury_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_player_codex_rating_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_player_codex_roster",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_player_codex_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_player_codex_stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_player_codex_transfer_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_player_codex_injury_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_player_codex_rating_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_player_codex_roster",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_player_codex_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_player_codex_stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_player_codex_transfer_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_player_codex_injury_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_player_codex_rating_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_player_codex_roster",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_player_codex_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_player_codex_stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_player_codex_transfer_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_player_codex_injury_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_player_codex_rating_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_player_codex_roster",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_player_codex_snapshots",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_player_codex_stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_player_codex_transfer_history",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-05 14:56:24",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "6982",
+          "CREATE_TIME": "2026-09-06 08:02:34",
+          "UPDATE_TIME": null,
+          "total_mb": "1.52"
+        },
+        {
+          "TABLE_NAME": "GW003_transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "15067",
+          "CREATE_TIME": "2026-09-06 08:02:34",
+          "UPDATE_TIME": null,
+          "total_mb": "2.52"
+        },
+        {
+          "TABLE_NAME": "GW007_transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "3450",
+          "CREATE_TIME": "2026-09-06 08:02:35",
+          "UPDATE_TIME": null,
+          "total_mb": "0.44"
+        },
+        {
+          "TABLE_NAME": "GW008_transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "1685",
+          "CREATE_TIME": "2026-09-06 08:02:35",
+          "UPDATE_TIME": null,
+          "total_mb": "0.22"
+        },
+        {
+          "TABLE_NAME": "GW002_player_codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-06 09:26:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_player_codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-06 09:26:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_player_codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-06 09:26:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_player_codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-06 09:26:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_match_report_team_stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 06:47:34",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "GW002_match_report_team_stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 06:47:59",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "GW007_match_report_team_stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 06:48:05",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "GW008_match_report_team_stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 06:48:05",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "GW002_match_report_players",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 06:49:54",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "GW003_match_report_players",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 06:49:54",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "GW007_match_report_players",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 06:49:54",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "GW008_match_report_players",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 06:49:54",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "GW002_match_report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 10:27:02",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "GW002_results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "5533",
+          "CREATE_TIME": "2026-09-07 10:27:02",
+          "UPDATE_TIME": null,
+          "total_mb": "2.20"
+        },
+        {
+          "TABLE_NAME": "GW002_schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "6278",
+          "CREATE_TIME": "2026-09-07 10:27:02",
+          "UPDATE_TIME": null,
+          "total_mb": "2.52"
+        },
+        {
+          "TABLE_NAME": "GW003_match_report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 10:27:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "GW003_results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "8812",
+          "CREATE_TIME": "2026-09-07 10:27:03",
+          "UPDATE_TIME": null,
+          "total_mb": "3.56"
+        },
+        {
+          "TABLE_NAME": "GW003_schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "72",
+          "CREATE_TIME": "2026-09-07 10:27:04",
+          "UPDATE_TIME": null,
+          "total_mb": "0.05"
+        },
+        {
+          "TABLE_NAME": "GW007_match_report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 10:27:05",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "GW007_results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "2028",
+          "CREATE_TIME": "2026-09-07 10:27:05",
+          "UPDATE_TIME": null,
+          "total_mb": "0.84"
+        },
+        {
+          "TABLE_NAME": "GW007_schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 10:27:05",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_match_report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 10:27:06",
+          "UPDATE_TIME": null,
+          "total_mb": "0.03"
+        },
+        {
+          "TABLE_NAME": "GW008_results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "193",
+          "CREATE_TIME": "2026-09-07 10:27:06",
+          "UPDATE_TIME": null,
+          "total_mb": "0.14"
+        },
+        {
+          "TABLE_NAME": "GW008_schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "7410",
+          "CREATE_TIME": "2026-09-07 10:27:06",
+          "UPDATE_TIME": null,
+          "total_mb": "2.52"
+        },
+        {
+          "TABLE_NAME": "GW001_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW001_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "6070",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "1.52"
+        },
+        {
+          "TABLE_NAME": "GW004_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW004_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW005_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW005_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW006_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW006_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "3177",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "1.52"
+        },
+        {
+          "TABLE_NAME": "GW009_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW009_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW010_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW010_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW011_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW011_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW012_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW012_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW013_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW013_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW014_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW014_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW015_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW015_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW016_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW016_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW017_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW017_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW018_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW018_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW019_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW019_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW020_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW020_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW021_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW021_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW022_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW022_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW023_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW023_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW024_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW024_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW025_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW025_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 21:21:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "1146",
+          "CREATE_TIME": "2026-09-07 21:24:14",
+          "UPDATE_TIME": null,
+          "total_mb": "0.39"
+        },
+        {
+          "TABLE_NAME": "GW003_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "933",
+          "CREATE_TIME": "2026-09-07 21:24:14",
+          "UPDATE_TIME": null,
+          "total_mb": "0.30"
+        },
+        {
+          "TABLE_NAME": "GW007_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "992",
+          "CREATE_TIME": "2026-09-07 21:24:14",
+          "UPDATE_TIME": null,
+          "total_mb": "0.30"
+        },
+        {
+          "TABLE_NAME": "GW008_IMC SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "708",
+          "CREATE_TIME": "2026-09-07 21:24:14",
+          "UPDATE_TIME": null,
+          "total_mb": "0.23"
+        },
+        {
+          "TABLE_NAME": "GW001_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW004_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW005_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW006_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW009_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW011_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW012_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW013_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW014_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW015_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW016_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW017_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW018_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW019_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW020_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW021_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW022_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW023_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW024_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW025_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:08:44",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW001_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "7411",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "1.52"
+        },
+        {
+          "TABLE_NAME": "GW003_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "11876",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "1.52"
+        },
+        {
+          "TABLE_NAME": "GW004_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW005_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW006_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "3868",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.48"
+        },
+        {
+          "TABLE_NAME": "GW008_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "2988",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.36"
+        },
+        {
+          "TABLE_NAME": "GW009_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW010_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:42",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW011_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW012_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW013_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW014_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW015_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW016_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW017_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW018_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW019_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW020_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW021_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW022_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW023_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW024_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW025_IMC Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:18:43",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW001_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "3057",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "283.58"
+        },
+        {
+          "TABLE_NAME": "GW003_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "4560",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "455.61"
+        },
+        {
+          "TABLE_NAME": "GW004_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW005_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW006_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "1602",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "151.56"
+        },
+        {
+          "TABLE_NAME": "GW008_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "295",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "29.52"
+        },
+        {
+          "TABLE_NAME": "GW009_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW010_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW011_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW012_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW013_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW014_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW015_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW016_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:25",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW017_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW018_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW019_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW020_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW021_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW022_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW023_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW024_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW025_IMC Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 22:30:26",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW001_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:02",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW002_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:02",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW003_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:02",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW004_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:02",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW005_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:02",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW006_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:02",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW007_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:02",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW009_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW010_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW011_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW012_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW013_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW014_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW015_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW016_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW017_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW018_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW019_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW020_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW021_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW022_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW023_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW024_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW025_IMC Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-07 23:09:03",
+          "UPDATE_TIME": null,
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "IMC Schedule Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "650",
+          "CREATE_TIME": "2026-09-08 06:47:49",
+          "UPDATE_TIME": null,
+          "total_mb": "0.11"
+        },
+        {
+          "TABLE_NAME": "IMC Site Match Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "8623",
+          "CREATE_TIME": "2026-09-08 07:27:49",
+          "UPDATE_TIME": null,
+          "total_mb": "899.23"
+        },
+        {
+          "TABLE_NAME": "IMC Site Transfers",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "25943",
+          "CREATE_TIME": "2026-09-08 07:27:49",
+          "UPDATE_TIME": null,
+          "total_mb": "13.14"
+        },
+        {
+          "TABLE_NAME": "IMC Site Player Codex",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "0",
+          "CREATE_TIME": "2026-09-08 07:27:50",
+          "UPDATE_TIME": null,
+          "total_mb": "0.08"
+        },
+        {
+          "TABLE_NAME": "IMC Site SM Player Stats",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "3746",
+          "CREATE_TIME": "2026-09-08 07:30:30",
+          "UPDATE_TIME": null,
+          "total_mb": "3.86"
+        },
+        {
+          "TABLE_NAME": "GW002_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "430",
+          "CREATE_TIME": "2026-09-08 10:22:54",
+          "UPDATE_TIME": null,
+          "total_mb": "0.19"
+        },
+        {
+          "TABLE_NAME": "GW003_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "2896",
+          "CREATE_TIME": "2026-09-08 10:22:54",
+          "UPDATE_TIME": null,
+          "total_mb": "1.52"
+        },
+        {
+          "TABLE_NAME": "GW007_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "8437",
+          "CREATE_TIME": "2026-09-08 10:22:54",
+          "UPDATE_TIME": null,
+          "total_mb": "2.52"
+        },
+        {
+          "TABLE_NAME": "GW008_IMC Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "6530",
+          "CREATE_TIME": "2026-09-08 10:22:54",
+          "UPDATE_TIME": null,
+          "total_mb": "2.52"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "18964",
+          "CREATE_TIME": "2026-09-08 10:22:54",
+          "UPDATE_TIME": null,
+          "total_mb": "14.58"
+        },
+        {
+          "TABLE_NAME": "GW003_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "9164",
+          "CREATE_TIME": "2026-09-08 10:54:30",
+          "UPDATE_TIME": null,
+          "total_mb": "2.52"
+        },
+        {
+          "TABLE_NAME": "IMC Repository Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "24",
+          "CREATE_TIME": "2026-09-08 06:52:57",
+          "UPDATE_TIME": "2026-09-19 08:00:46",
+          "total_mb": "0.02"
+        },
+        {
+          "TABLE_NAME": "GW008_IMC Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "9224",
+          "CREATE_TIME": "2026-09-07 21:21:41",
+          "UPDATE_TIME": "2026-09-19 10:24:25",
+          "total_mb": "1.52"
+        },
+        {
+          "TABLE_NAME": "IMC Results Report",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "1618",
+          "CREATE_TIME": "2026-09-08 06:35:31",
+          "UPDATE_TIME": "2026-09-19 10:24:25",
+          "total_mb": "0.23"
+        },
+        {
+          "TABLE_NAME": "IMC Site Results",
+          "ENGINE": "InnoDB",
+          "TABLE_ROWS": "29419",
+          "CREATE_TIME": "2026-09-08 07:07:33",
+          "UPDATE_TIME": "2026-09-19 10:24:25",
+          "total_mb": "25.16"
         }
       ],
-      "returned_rows": 1,
-      "total_rows": 1,
+      "returned_rows": 299,
+      "total_rows": 299,
       "truncated": false,
-      "duration_ms": 24
+      "duration_ms": 38
     }
   }
 }
