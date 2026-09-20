@@ -1,8 +1,8 @@
 {
-  "request_id": "sql2-drop-gw-source-payloads-plan-20260920",
-  "requested_at": "2026-09-20T08:16:00Z",
-  "purpose": "Remove only legacy SQL2 gw_source_payloads table, the largest lowercase gw_ table",
-  "action": "plan_migration",
+  "request_id": "sql2-drop-gw-source-payloads-execute-20260920",
+  "requested_at": "2026-09-20T08:17:00Z",
+  "purpose": "Execute approved removal of only legacy SQL2 gw_source_payloads table",
+  "action": "execute_migration",
   "target": "gold",
   "migration_id": "drop-gw-source-payloads-sql2-20260920",
   "statements": [
