@@ -1,33 +1,33 @@
 {
-  "request_id": "source-payloads-latest-date-gold-20260920",
-  "completed_at": "2026-09-20T07:15:09.765754+00:00",
+  "request_id": "source-payloads-latest-date-custom-20260920",
+  "completed_at": "2026-09-20T07:15:29.831432+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "source-payloads-latest-date-gold-20260920",
-    "requested_at": "2026-09-20T07:15:00Z",
-    "purpose": "Read latest and earliest created_at dates in GOLD gw_source_payloads only",
+    "request_id": "source-payloads-latest-date-custom-20260920",
+    "requested_at": "2026-09-20T07:16:00Z",
+    "purpose": "Read latest and earliest created_at dates in CUSTOM gw_source_payloads only",
     "action": "query",
-    "target": "gold",
+    "target": "custom",
     "sql": "SELECT MIN(created_at) first_created_at,MAX(created_at) latest_created_at,COUNT(*) rows_count FROM `gw_source_payloads`",
     "limit": 10
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "gold",
-    "database": "Sql1956795_2",
+    "target": "custom",
+    "database": "Sql1956795_3",
     "result": {
       "rows": [
         {
-          "first_created_at": "2026-09-04 00:08:58.318633",
-          "latest_created_at": "2026-09-05 06:24:21.489048",
-          "rows_count": "6396"
+          "first_created_at": "2026-09-03 23:17:07.789916",
+          "latest_created_at": "2026-09-05 06:57:12.027958",
+          "rows_count": "7342"
         }
       ],
       "returned_rows": 1,
       "total_rows": 1,
       "truncated": false,
-      "duration_ms": 20
+      "duration_ms": 24
     }
   }
 }
