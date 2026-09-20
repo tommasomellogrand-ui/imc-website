@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const $=id=>document.getElementById(id), worlds={GW001:'Road To History',GW002:'Gold 558',GW003:'Gold 557',GW004:'World League',GW005:'Hall Of Famers',GW006:'Master League World',GW007:'The Four Kingdoms',GW008:'Gold 1',GW009:'Kick Off',GW010:'Game World 010'}, sections={home:'Il Mondo',competitions:'Competizioni',results:'Risultati',schedule:'Calendario',match_report:'Match Center',standings:'Classifiche',manager:'Manager',player:'Player',club:'Club',archive:'Archivio',transfers:'Trasferimenti'};
+const $=id=>document.getElementById(id), worlds={GW001:'Road To History',GW002:'Gold 558',GW003:'Gold 557',GW004:'World League',GW005:'Hall Of Famers',GW006:'Master League World',GW007:'The Four Kingdoms',GW008:'Gold 1',GW009:'Kick Off',GW010:'Game World 010'}, sections={home:'Il Mondo',news:'News feed',competitions:'Competizioni',results:'Risultati',schedule:'Calendario',match_report:'Match Center',standings:'Classifiche',manager:'Manager',player:'Player',club:'Club',archive:'Archivio',transfers:'Trasferimenti'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=v=>v?String(v).slice(0,10).split('-').reverse().join('/'):'Data non disponibile';
 const number=v=>Number(v).toLocaleString('it-IT');
@@ -38,7 +38,7 @@ function countryOptions(codes,competitions){
 
 function worldMenus(){
 const name=worlds[state.world];$('worldTitle').textContent=name;$('menuWorld').textContent=state.world+' · '+name;$('mobileWorldTitle').textContent=state.world+' · '+name;
-const menuEntries=[['01','home'],['02','competitions'],['07','manager'],['08','player'],['09','club'],['11','transfers']];
+const menuEntries=[['01','home'],['12','news'],['02','competitions'],['07','manager'],['08','player'],['09','club'],['11','transfers']];
 const links=menuEntries.map(([n,id])=>`<a href="?world=${encodeURIComponent(state.world)}&resource=${id}" data-resource="${id}" ${state.resource===id?'aria-current="true"':''}><span>${n}</span>${esc(sections[id])}</a>`).join('');
 $('worldMenu').innerHTML=links;$('tabs').innerHTML=links;$('mobileWorldMenu').innerHTML=links;
 const icons={manager:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-5 4-7 8-7s6.8 2 8 7"/>',club:'<path d="M12 3 4 7v5c0 5 3.2 8 8 9 4.8-1 8-4 8-9V7Z"/><path d="M8 10h8M9 14h6"/>',home:'<path d="M3 10 12 3l9 7v11H3Z"/><path d="M9 21v-8h6v8"/>',competitions:'<path d="M8 4h8v4c0 3-1.8 5-4 5s-4-2-4-5Z"/><path d="M6 5H4v2c0 2 1.3 3 3 3M18 5h2v2c0 2-1.3 3-3 3M12 13v4M8 21h8M9 17h6v4"/>'};
@@ -46,7 +46,7 @@ $('bottomWorldMenu').setAttribute('aria-label','Navigazione mobile · '+state.wo
 $('bottomWorldMenu').innerHTML=[['manager','Manager'],['club','Club'],['home','Clubhouse'],['competitions','Competition'],['archive','Trophy Room']].map(([id,title])=>`<a href="${id==='home'?'/nexus/clubhouse.html':'?world='+encodeURIComponent(state.world)+'&resource='+id}" ${id==='home'?'':`data-resource="${id}" aria-current="${state.resource===id}"`}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">${icons[id]||icons.competitions}</svg><span>${title}</span></a>`).join('');
 }
 const L=window.NexusLogic;
-const defaults={world:'GW001',resource:'home',offset:0,search:'',from:'',to:'',season:'',competition:'',group:'',country:'',tab:'overview',match:'results',metric:'goals',teamType:'clubs',club:'',position:'',rating_min:'',rating_max:'',age_min:'',age_max:'',value_min:'',value_max:'',sort:'rating',player:'',scope:'world',team:'',manager:'',profileTab:'career',opponent:'',round:'',hall:'history'};
+const defaults={world:'GW001',resource:'home',offset:0,search:'',from:'',to:'',season:'',competition:'',group:'',country:'',tab:'overview',match:'results',metric:'goals',teamType:'clubs',club:'',position:'',rating_min:'',rating_max:'',age_min:'',age_max:'',value_min:'',value_max:'',sort:'rating',player:'',scope:'world',team:'',manager:'',profileTab:'career',opponent:'',round:'',hall:'history',newsType:''};
 const viewCache=new Map();
 async function cached(params,signal){const key=JSON.stringify(params),hit=viewCache.get(key);if(hit&&Date.now()-hit.time<60000)return hit.data;const data=await fetchData(params,signal);if(signal?.aborted)throw new DOMException('Aborted','AbortError');viewCache.set(key,{time:Date.now(),data});return data}
 const empty=t=>`<div class="empty">${esc(t)}</div>`;
@@ -276,6 +276,20 @@ async function transfersView(c,signal){
  $('viewControls').innerHTML=form(select('club','Squadra',[['','Tutte le squadre'],...(d.clubs||[]).map(r=>[r.id,r.name])])+select('season','Stagione',[['','Tutte le stagioni'],...c.seasons.map(s=>[s.imc_season,'Stagione '+s.imc_season])])+input('search','Cerca giocatore o squadra')+input('from','Dal','date')+input('to','Al','date'));
  page(d.rows.map((r,i)=>transferCard(r,state.offset===0&&i===0)).join(''),d.total,'trasferimenti');$('status').textContent+=d.updated_at?' · Aggiornato al '+date(d.updated_at)+' '+d.updated_at.slice(11,16):'';
 }
+async function newsView(c,signal){
+ const full=state.resource==='news';let awards=[],warning='';
+ try{awards=(await cached({world:state.world,resource:'trophies'},signal)).awards||[];}
+ catch(e){if(e.name==='AbortError')throw e;warning='Trofei e finali momentaneamente non disponibili. Premi Aggiorna per riprovare.';}
+ if(signal.aborted)return;
+ const all=window.NexusNews.build(state.world,c,awards);
+ const filtered=full&&state.newsType?all.filter(e=>e.type===state.newsType):all;
+ const offset=full?state.offset:0,limit=full?50:5;
+ if(full)$('viewControls').innerHTML=tabs('newsType',[['','Tutte'],['appointment','Nuovi incarichi'],['departure','Fine incarico'],['trophy','Trofei'],['final','Finali']]);
+ const heading=`<div class="nexus-news-heading"><h3>${full?'Tutte le notizie':'News feed'}</h3>${full?go({resource:'home',offset:0,newsType:''},'Il Mondo ←'):go({resource:'news',offset:0,newsType:''},'Tutte le notizie →')}</div>`;
+ const content=`<section class="nexus-news" aria-label="Notizie del Game World">${heading}${warning?`<p class="nexus-news-message" role="status">${esc(warning)}</p>`:''}${filtered.slice(offset,offset+limit).map(e=>window.NexusNews.render(e)).join('')||empty('Nessuna notizia disponibile per questa selezione.')}</section>`;
+ if(full)page(content,filtered.length,'notizie');
+ else{$('rows').innerHTML=content+`<section class="card nexus-news-world-summary"><h3>${esc(c.world?.world_name||state.world)}</h3><div class="stat-row"><div><strong>${number(c.world?.active_clubs||c.clubs.length)}</strong><small>Club del mondo</small></div><div><strong>${number(new Set(c.managers.map(m=>m.manager_id)).size)}</strong><small>Manager IMC con incarichi</small></div><div><strong>${esc(c.seasons[0]?.imc_season||'—')}</strong><small>Stagione IMC più recente</small></div></div></section>`;$('status').textContent=state.world+' · '+all.length+' notizie';}
+}
 async function directoryView(signal){const d=await cached({world:state.world,resource:'directory'},signal),c=d.core;
  if(c.world?.world_name){worlds[state.world]=c.world.world_name;worldMenus()}
  if(state.resource==='archive'){await trophyView(c,signal);
@@ -286,14 +300,14 @@ async function directoryView(signal){const d=await cached({world:state.world,res
  else if(state.resource==='player')await playersView(c,signal);
  else if(state.resource==='transfers')await transfersView(c,signal);
  else if(state.resource==='manager'){await managersView(c,signal);
- }else{$('rows').innerHTML=`<section class="card"><h3>${esc(c.world?.world_name||state.world)}</h3><div class="stat-row"><div><strong>${number(c.world?.active_clubs||c.clubs.length)}</strong><small>Club del mondo</small></div><div><strong>${number(new Set(c.managers.map(m=>m.manager_id)).size)}</strong><small>Manager IMC con incarichi</small></div><div><strong>${esc(c.seasons[0]?.imc_season||'—')}</strong><small>Stagione IMC più recente</small></div></div><p>Scegli una sezione dal menu di ${esc(state.world)}.</p></section>`;$('status').textContent=state.world+' · '+worlds[state.world]}
+ }else await newsView(c,signal);
 }
 async function load(push=false){
  $('dataSection').setAttribute('data-trophy-view','false');
  $('dataSection').setAttribute('data-competition-view',['competitions','standings','archive'].includes(state.resource)?'true':'false');$('dataSection').setAttribute('data-category',state.group||'domestic');
  if(controller)controller.abort();controller=new AbortController();const active=controller;
  if(push)history.pushState(null,'',urlState());$('world').value=state.world;worldMenus();
- const isDirectory=['home','competitions','manager','club','standings','archive','player','transfers'].includes(state.resource);
+ const isDirectory=['home','news','competitions','manager','club','standings','archive','player','transfers'].includes(state.resource);
  $('filters').hidden=isDirectory;document.querySelector('.pagination').hidden=true;$('viewControls').innerHTML='';
  $('worldLabel').textContent=`${state.world} · ${worlds[state.world]}`;$('sectionTitle').textContent=state.resource==='archive'?'Trophy Room':sections[state.resource];
  $('status').textContent='Caricamento…';$('rows').innerHTML='';$('page').textContent='';$('previous').disabled=$('next').disabled=true;
@@ -312,6 +326,7 @@ document.addEventListener('submit',e=>{if(!e.target.matches('[data-view-form]'))
 $('filters').onsubmit=e=>{e.preventDefault();for(const k of ['search','from','to'])state[k]=$(k).value;state.offset=0;load(true)};$('reset').onclick=()=>{for(const k of ['search','from','to'])state[k]=$(k).value='';state.offset=0;load(true)};$('refresh').onclick=()=>{viewCache.clear();load()};$('previous').onclick=()=>{state.offset=Math.max(0,state.offset-50);load(true)};$('next').onclick=()=>{state.offset+=50;load(true)};window.onpopstate=()=>{readURL();load()};document.addEventListener('error',e=>{if(e.target.matches?.('.core-crest'))e.target.hidden=true},true);
 async function boot(){try{const d=await fetchData({resource:'worlds'});for(const w of d.worlds||[])if(w.world_name&&worlds[w.game_world_id]){worlds[w.game_world_id]=w.world_name;for(const o of $('world').options)if(o.value===w.game_world_id)o.textContent=`${w.game_world_id} · ${w.world_name}`;}}catch(e){/* Dataset reads surface CORE failures explicitly. */}readURL();load()}boot();
 })();
+
 
 
 

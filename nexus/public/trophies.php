@@ -142,7 +142,7 @@ function nexus_trophies(PDO $db,PDO $core,string $world): array {
     $matches=[];foreach($awards as $a){$matches[]=$a['match'];if(!empty($a['runner_match']))$matches[]=$a['runner_match'];}
     if($matches){$ids=array_values(array_unique(array_column($matches,'sm_fixture_id')));$ph=implode(',',array_fill(0,count($ids),'?'));
         $reports=nexus_core_rows($db,"SELECT sm_fixture_id,home_sm_manager_id,away_sm_manager_id,home_manager_name,away_manager_name FROM `IMC Site Match Report` WHERE game_world_id=? AND sm_fixture_id IN ($ph)",array_merge([$world],$ids));$byId=[];foreach($reports as $r)$byId[(string)$r['sm_fixture_id']][]=$r;
-        foreach($matches as &$m){$rs=$byId[(string)$m['sm_fixture_id']]??[];if(count($rs)===1)foreach(['home','away'] as $s)foreach(['sm_manager_id','manager_name'] as $f)if(empty($m[$s.'_'.$f]))$m[$s.'_'.$f]=$rs[0][$s.'_'.$f];}unset($m);
+        foreach($matches as &$m){$rs=$byId[(string)$m['sm_fixture_id']]??[];if(count($rs)===1)foreach(['home','away'] as $s){if(!empty($rs[0][$s.'_sm_manager_id'])){$m[$s.'_sm_manager_id']=$rs[0][$s.'_sm_manager_id'];$m[$s.'_manager_name']=$rs[0][$s.'_manager_name']??null;}elseif(empty($m[$s.'_manager_name'])&&!empty($rs[0][$s.'_manager_name']))$m[$s.'_manager_name']=$rs[0][$s.'_manager_name'];}}unset($m);
         nexus_core_enrich($core,$world,'results',$matches);
     }
     $directory=nexus_world_directory($core,$world);$index=0;
@@ -161,6 +161,7 @@ function nexus_trophies(PDO $db,PDO $core,string $world): array {
     $awards=nexus_trophy_overlay($awards,nexus_trophy_official($core,$world,$seasons));
     return ['ok'=>true,'world'=>$world,'scope'=>'all_seasons','awards'=>$awards,'seasons'=>$seasons];
 }
+
 
 
 
