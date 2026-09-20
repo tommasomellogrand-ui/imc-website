@@ -82,7 +82,7 @@ return ['source'=>'MYSQL_ARUBA_CORE','world'=>$worldData,'seasons'=>$seasons,'as
 function nexus_normalize_national_assignments(array &$assignments,array $nations): void {
     foreach($assignments as &$a){
         $raw=$a['national_team_id']??null;if($raw===null||$raw==='')continue;
-        $matches=[];foreach($nations as $n)foreach(['id','sm_team_id','sm_global_team_id'] as $field){
+        $matches=[];foreach($nations as $n)foreach(['sm_team_id'] as $field){
             if(isset($n[$field])&&(string)$n[$field]===(string)$raw){$matches[(string)$n['id']]=$n;break;}
         }
         if(count($matches)!==1)continue;
@@ -93,7 +93,7 @@ function nexus_normalize_national_assignments(array &$assignments,array $nations
 function nexus_world_directory(PDO $db,string $world): array {
 $empty=[];$context=nexus_core_enrich($db,$world,'results',$empty);
 $context['clubs']=nexus_core_rows($db,'SELECT m.`Club ID` id,COALESCE(c.name,m.`Club Name`) name,c.image_url,m.`SM World Club ID` sm_team_id,m.`SM Club ID` sm_global_team_id FROM `IMC Game World Club Mapping` m LEFT JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=? ORDER BY name',[$world]);
-$context['managers']=nexus_core_rows($db,"SELECT a.manager_id,COALESCE(gcm.`Club ID`,a.team_id) team_id,a.national_team_id,COALESCE(mc.full_name,a.full_name) full_name,COALESCE(cc.name,gcm.`Club Name`,nc.name,a.team_name) team_name,a.assignment_type,a.start_date,a.end_date FROM `IMC Manager Assignment Global` a LEFT JOIN `IMC Manager Codex Global` mc ON mc.manager_id=a.manager_id LEFT JOIN `IMC Game World Club Mapping` gcm ON gcm.`Game World`=a.game_world_id AND a.national_team_id IS NULL AND (CAST(gcm.`Club ID` AS CHAR)=CAST(a.team_id AS CHAR) OR CAST(gcm.`SM Club ID` AS CHAR)=CAST(a.team_id AS CHAR) OR LOWER(TRIM(gcm.`Club Name`))=LOWER(TRIM(a.team_name))) LEFT JOIN `IMC Club Codex Global` cc ON cc.id=gcm.`Club ID` LEFT JOIN `IMC Game World National Team Mapping` gnm ON gnm.`Game World`=a.game_world_id AND gnm.`National Team ID`=a.national_team_id LEFT JOIN `IMC National Team Codex Global` nc ON nc.id=gnm.`National Team ID` WHERE a.game_world_id=? ORDER BY full_name,a.start_date DESC",[$world]);
+$context['managers']=nexus_core_rows($db,"SELECT a.manager_id,COALESCE(gcm.`Club ID`,a.team_id) team_id,a.national_team_id,COALESCE(mc.full_name,a.full_name) full_name,COALESCE(cc.name,gcm.`Club Name`,nc.name,a.team_name) team_name,a.assignment_type,a.start_date,a.end_date FROM `IMC Manager Assignment Global` a LEFT JOIN `IMC Manager Codex Global` mc ON mc.manager_id=a.manager_id LEFT JOIN `IMC Game World Club Mapping` gcm ON gcm.`Game World`=a.game_world_id AND a.national_team_id IS NULL AND gcm.`SM World Club ID`=a.team_id LEFT JOIN `IMC Club Codex Global` cc ON cc.id=gcm.`Club ID` LEFT JOIN `IMC Game World National Team Mapping` gnm ON gnm.`Game World`=a.game_world_id AND gnm.`SM World National Club ID`=a.national_team_id LEFT JOIN `IMC National Team Codex Global` nc ON nc.id=gnm.`National Team ID` WHERE a.game_world_id=? ORDER BY full_name,a.start_date DESC",[$world]);
 $context['competitions']=nexus_core_rows($db,'SELECT id,competition_key,custom_competition,sm_action,sm_action_group,sm_country,sm_division FROM `IMC Competition Codex Global` WHERE game_world_id=? ORDER BY sm_action_group,sm_country,sm_division,sm_action',[$world]);
 $mapping=nexus_core_rows($db,'SELECT game_world_id,world_type,competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$world]);
 nexus_apply_catalog_names($context['competitions'],$mapping,$world);

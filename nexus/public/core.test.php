@@ -29,10 +29,15 @@ $assignments=[
 ];
 $original=$assignments;
 nexus_normalize_national_assignments($assignments,$nations);
-foreach([0,1,2] as $i)check($assignments[$i]['national_team_id']===1&&$assignments[$i]['team_name']==='England'&&$assignments[$i]['team_id']===null,'All mapped national ID namespaces must resolve to the Codex');
+foreach([0] as $i)check($assignments[$i]['national_team_id']===1&&$assignments[$i]['team_name']==='England'&&$assignments[$i]['team_id']===null,'Only the mapped world national ID resolves to the Codex');
 check($assignments[0]['source_national_team_id']===646508&&$assignments[0]['manager_id']==='MNG001'&&$assignments[0]['start_date']==='2026-07-01','Preserve source ID, manager and assignment dates');
+check($assignments[1]===$original[1]&&$assignments[2]===$original[2],'Internal and global IDs must not resolve as world IDs');
 check($assignments[3]===$original[3]&&$assignments[4]===$original[4],'Club and unknown assignments must remain unchanged');
 $ambiguous=[['national_team_id'=>646508]];
 nexus_normalize_national_assignments($ambiguous,[...$nations,['id'=>2,'name'=>'Other','sm_team_id'=>646508]]);
 check($ambiguous===[['national_team_id'=>646508]],'Conflicting national mappings must not be guessed');
 echo "NATIONAL_ASSIGNMENT_TESTS_OK\n";
+
+$collision=[['national_team_id'=>73]];
+nexus_normalize_national_assignments($collision,[['id'=>73,'name'=>'Guinea','sm_team_id'=>91],['id'=>30,'name'=>'Latvia','sm_team_id'=>73]]);
+check($collision[0]['national_team_id']===30&&$collision[0]['team_name']==='Latvia','GW008 world ID must win over an unrelated internal ID');
