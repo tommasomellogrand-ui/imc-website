@@ -1,9 +1,9 @@
 {
-  "request_id": "mysql-storage-sql1-20260920",
-  "requested_at": "2026-09-20T06:44:00Z",
-  "purpose": "Measure current MySQL storage usage for CORE database",
+  "request_id": "mysql-storage-gold-20260920",
+  "requested_at": "2026-09-20T06:45:00Z",
+  "purpose": "Measure current MySQL storage usage for GOLD database",
   "action": "query",
-  "target": "core",
+  "target": "gold",
   "sql": "SELECT DATABASE() database_name,ROUND(SUM(DATA_LENGTH)/1024/1024,2) data_mb,ROUND(SUM(INDEX_LENGTH)/1024/1024,2) index_mb,ROUND(SUM(DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb,COUNT(*) tables FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()",
   "limit": 10
 }
