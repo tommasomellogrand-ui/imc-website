@@ -1,311 +1,231 @@
 {
-  "request_id": "schedule-normalizer-core-audit-20260920",
-  "completed_at": "2026-09-20T06:17:53.461710+00:00",
+  "request_id": "schedule-normalizer-site-schema-20260920",
+  "completed_at": "2026-09-20T06:22:33.880591+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "schedule-normalizer-core-audit-20260920",
+    "request_id": "schedule-normalizer-site-schema-20260920",
     "action": "query",
-    "target": "core",
-    "sql": "SELECT a.*,m.sm_manager_id,c.`Club Name` mapping_name,c.`SM World Club ID` world_club_id FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id LEFT JOIN `IMC Game World Club Mapping` c ON c.`Game World`=a.game_world_id AND c.`Club ID`=a.team_id WHERE m.sm_manager_id=13051324 ORDER BY a.game_world_id,a.start_date",
+    "target": "custom",
+    "sql": "SELECT TABLE_NAME,COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('GW010_IMC Schedule','IMC Site Schedule') ORDER BY TABLE_NAME,ORDINAL_POSITION",
     "limit": 100
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "core",
-    "database": "Sql1956795_1",
+    "target": "custom",
+    "database": "Sql1956795_3",
     "result": {
       "rows": [
         {
-          "id": "22",
-          "game_world_id": "GW001",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": null,
-          "team_name": null,
-          "assignment_type": "national_team",
-          "start_date": "2026-06-30",
-          "end_date": null,
-          "national_team_id": "1869096",
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "game_world_id",
+          "COLUMN_TYPE": "varchar(16)"
         },
         {
-          "id": "21",
-          "game_world_id": "GW001",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "94079171",
-          "team_name": "Hertha Berlino",
-          "assignment_type": "club",
-          "start_date": "2026-06-30",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "sm_fixture_id",
+          "COLUMN_TYPE": "bigint unsigned"
         },
         {
-          "id": "130",
-          "game_world_id": "GW002",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "92288437",
-          "team_name": "Lazio",
-          "assignment_type": "club",
-          "start_date": "2026-01-30",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "competition_key",
+          "COLUMN_TYPE": "varchar(255)"
         },
         {
-          "id": "153",
-          "game_world_id": "GW002",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": null,
-          "team_name": null,
-          "assignment_type": "national_team",
-          "start_date": "2026-04-18",
-          "end_date": null,
-          "national_team_id": "1842058",
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "sm_action",
+          "COLUMN_TYPE": "varchar(64)"
         },
         {
-          "id": "157",
-          "game_world_id": "GW003",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "93457957",
-          "team_name": "Club América",
-          "assignment_type": "club",
-          "start_date": "2025-12-20",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "sm_country",
+          "COLUMN_TYPE": "varchar(128)"
         },
         {
-          "id": "177",
-          "game_world_id": "GW003",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": null,
-          "team_name": null,
-          "assignment_type": "national_team",
-          "start_date": "2026-05-25",
-          "end_date": null,
-          "national_team_id": "1863783",
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "sm_division",
+          "COLUMN_TYPE": "varchar(128)"
         },
         {
-          "id": "6",
-          "game_world_id": "GW004",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "21145254",
-          "team_name": "Ajax",
-          "assignment_type": "club",
-          "start_date": "2026-01-07",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "competition_group",
+          "COLUMN_TYPE": "varchar(64)"
         },
         {
-          "id": "11",
-          "game_world_id": "GW004",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": null,
-          "team_name": null,
-          "assignment_type": "national_team",
-          "start_date": "2026-01-07",
-          "end_date": null,
-          "national_team_id": "74986",
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "competition_stage",
+          "COLUMN_TYPE": "varchar(128)"
         },
         {
-          "id": "259",
-          "game_world_id": "GW005",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": null,
-          "team_name": null,
-          "assignment_type": "national_team",
-          "start_date": "2026-07-04",
-          "end_date": null,
-          "national_team_id": "2277431",
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "competition_round",
+          "COLUMN_TYPE": "varchar(128)"
         },
         {
-          "id": "35",
-          "game_world_id": "GW005",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "96537571",
-          "team_name": "Orlando Pirates",
-          "assignment_type": "club",
-          "start_date": "2026-07-06",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "match_date",
+          "COLUMN_TYPE": "date"
         },
         {
-          "id": "50",
-          "game_world_id": "GW006",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "94061609",
-          "team_name": "Juventus",
-          "assignment_type": "club",
-          "start_date": "2026-06-22",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "match_time",
+          "COLUMN_TYPE": "time"
         },
         {
-          "id": "51",
-          "game_world_id": "GW006",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": null,
-          "team_name": null,
-          "assignment_type": "national_team",
-          "start_date": "2026-06-22",
-          "end_date": null,
-          "national_team_id": "1868936",
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "home_sm_team_id",
+          "COLUMN_TYPE": "bigint unsigned"
         },
         {
-          "id": "246",
-          "game_world_id": "GW007",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "34608387",
-          "team_name": "Real Betis",
-          "assignment_type": "club",
-          "start_date": "2026-08-18",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "home_name",
+          "COLUMN_TYPE": "varchar(255)"
         },
         {
-          "id": "250",
-          "game_world_id": "GW007",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": null,
-          "team_name": null,
-          "assignment_type": "national_team",
-          "start_date": "2026-08-18",
-          "end_date": null,
-          "national_team_id": "646508",
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "away_sm_team_id",
+          "COLUMN_TYPE": "bigint unsigned"
         },
         {
-          "id": "114",
-          "game_world_id": "GW008",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "3109969",
-          "team_name": "Watford",
-          "assignment_type": "club",
-          "start_date": "2026-01-03",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "away_name",
+          "COLUMN_TYPE": "varchar(255)"
         },
         {
-          "id": "272",
-          "game_world_id": "GW008",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": null,
-          "team_name": null,
-          "assignment_type": "national_team",
-          "start_date": "2026-08-31",
-          "end_date": null,
-          "national_team_id": "73",
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "home_sm_manager_id",
+          "COLUMN_TYPE": "bigint unsigned"
         },
         {
-          "id": "181",
-          "game_world_id": "GW009",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": null,
-          "team_name": null,
-          "assignment_type": "national_team",
-          "start_date": "2026-08-06",
-          "end_date": null,
-          "national_team_id": "2226721",
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "away_sm_manager_id",
+          "COLUMN_TYPE": "bigint unsigned"
         },
         {
-          "id": "182",
-          "game_world_id": "GW009",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "94014787",
-          "team_name": "Alcione Milano",
-          "assignment_type": "club",
-          "start_date": "2026-08-06",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": null,
-          "world_club_id": null
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "logged_manager_id",
+          "COLUMN_TYPE": "bigint unsigned"
         },
         {
-          "id": "276",
-          "game_world_id": "GW010",
-          "manager_id": "MNG001",
-          "full_name": "Tommaso Mello",
-          "team_id": "306",
-          "team_name": "São Paulo FC",
-          "assignment_type": "club",
-          "start_date": "2026-09-13",
-          "end_date": null,
-          "national_team_id": null,
-          "sm_manager_id": "13051324",
-          "mapping_name": "São Paulo FC",
-          "world_club_id": "92317315"
+          "TABLE_NAME": "GW010_IMC Schedule",
+          "COLUMN_NAME": "fingerprint",
+          "COLUMN_TYPE": "char(64)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "site_schedule_id",
+          "COLUMN_TYPE": "bigint unsigned"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "game_world_id",
+          "COLUMN_TYPE": "varchar(16)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "sm_fixture_id",
+          "COLUMN_TYPE": "bigint unsigned"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "competition_key",
+          "COLUMN_TYPE": "varchar(255)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "sm_action",
+          "COLUMN_TYPE": "varchar(64)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "sm_country",
+          "COLUMN_TYPE": "varchar(128)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "sm_division",
+          "COLUMN_TYPE": "varchar(128)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "competition_group",
+          "COLUMN_TYPE": "varchar(64)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "competition_stage",
+          "COLUMN_TYPE": "varchar(128)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "competition_round",
+          "COLUMN_TYPE": "varchar(128)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "match_date",
+          "COLUMN_TYPE": "date"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "match_time",
+          "COLUMN_TYPE": "time"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "home_sm_team_id",
+          "COLUMN_TYPE": "bigint unsigned"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "home_name",
+          "COLUMN_TYPE": "varchar(255)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "away_sm_team_id",
+          "COLUMN_TYPE": "bigint unsigned"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "away_name",
+          "COLUMN_TYPE": "varchar(255)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "home_sm_manager_id",
+          "COLUMN_TYPE": "bigint unsigned"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "away_sm_manager_id",
+          "COLUMN_TYPE": "bigint unsigned"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "logged_manager_id",
+          "COLUMN_TYPE": "bigint unsigned"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "fingerprint",
+          "COLUMN_TYPE": "char(64)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "source_key",
+          "COLUMN_TYPE": "char(64)"
+        },
+        {
+          "TABLE_NAME": "IMC Site Schedule",
+          "COLUMN_NAME": "synced_at",
+          "COLUMN_TYPE": "timestamp"
         }
       ],
-      "returned_rows": 19,
-      "total_rows": 19,
+      "returned_rows": 41,
+      "total_rows": 41,
       "truncated": false,
-      "duration_ms": 38
+      "duration_ms": 4
     }
   }
 }
