@@ -1,28 +1,196 @@
 {
-  "request_id": "sql2-drop-lowercase-gw-tables-plan-20260920",
-  "completed_at": "2026-09-20T07:37:25.904285+00:00",
-  "http_status": 422,
+  "request_id": "sql2-list-lowercase-gw-for-drop-20260920",
+  "completed_at": "2026-09-20T07:37:48.000732+00:00",
+  "http_status": 200,
   "request": {
-    "request_id": "sql2-drop-lowercase-gw-tables-plan-20260920",
-    "requested_at": "2026-09-20T07:30:00Z",
-    "purpose": "Remove legacy lowercase gw_ table family from GOLD SQL2 only; preserve all uppercase GWXXX and IMC tables",
-    "action": "plan_migration",
+    "request_id": "sql2-list-lowercase-gw-for-drop-20260920",
+    "requested_at": "2026-09-20T07:31:00Z",
+    "purpose": "Get exact legacy lowercase gw_ table names in SQL2 for explicit destructive migration",
+    "action": "query",
     "target": "gold",
-    "migration_id": "drop-legacy-lowercase-gw-tables-sql2-20260920",
-    "statements": [
-      "SET FOREIGN_KEY_CHECKS=0",
-      "SET @drop_sql=(SELECT CONCAT('DROP TABLE IF EXISTS ',GROUP_CONCAT(CONCAT('`',TABLE_NAME,'`') ORDER BY TABLE_NAME SEPARATOR ',')) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND BINARY TABLE_NAME LIKE 'gw\\_%')",
-      "PREPARE stmt FROM @drop_sql",
-      "EXECUTE stmt",
-      "DEALLOCATE PREPARE stmt",
-      "SET FOREIGN_KEY_CHECKS=1"
-    ],
-    "allow_destructive": true,
-    "data_migration": false
+    "sql": "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND BINARY TABLE_NAME LIKE 'gw\\_%' ORDER BY TABLE_NAME",
+    "limit": 500
   },
   "response": {
-    "ok": false,
-    "version": "1.5.3",
-    "error": "SQL kind SET is not allowed for migrations."
+    "ok": true,
+    "action": "query",
+    "target": "gold",
+    "database": "Sql1956795_2",
+    "result": {
+      "rows": [
+        {
+          "TABLE_NAME": "gw_attendance_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_competition_editions"
+        },
+        {
+          "TABLE_NAME": "gw_competition_groups"
+        },
+        {
+          "TABLE_NAME": "gw_competition_rounds"
+        },
+        {
+          "TABLE_NAME": "gw_competition_stages"
+        },
+        {
+          "TABLE_NAME": "gw_competitions"
+        },
+        {
+          "TABLE_NAME": "gw_countries"
+        },
+        {
+          "TABLE_NAME": "gw_divisions"
+        },
+        {
+          "TABLE_NAME": "gw_expected_matches"
+        },
+        {
+          "TABLE_NAME": "gw_fixture_results"
+        },
+        {
+          "TABLE_NAME": "gw_fixtures"
+        },
+        {
+          "TABLE_NAME": "gw_game_worlds"
+        },
+        {
+          "TABLE_NAME": "gw_history_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_honours"
+        },
+        {
+          "TABLE_NAME": "gw_identity_matches"
+        },
+        {
+          "TABLE_NAME": "gw_import_issues"
+        },
+        {
+          "TABLE_NAME": "gw_import_runs"
+        },
+        {
+          "TABLE_NAME": "gw_manager_ranking_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_match_commentary"
+        },
+        {
+          "TABLE_NAME": "gw_match_events"
+        },
+        {
+          "TABLE_NAME": "gw_match_lineup_players"
+        },
+        {
+          "TABLE_NAME": "gw_match_lineups"
+        },
+        {
+          "TABLE_NAME": "gw_match_reports"
+        },
+        {
+          "TABLE_NAME": "gw_match_tactics_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_match_team_stats"
+        },
+        {
+          "TABLE_NAME": "gw_national_teams"
+        },
+        {
+          "TABLE_NAME": "gw_news_items"
+        },
+        {
+          "TABLE_NAME": "gw_player_db_update_batches"
+        },
+        {
+          "TABLE_NAME": "gw_player_db_updates"
+        },
+        {
+          "TABLE_NAME": "gw_player_leaderboard_rows"
+        },
+        {
+          "TABLE_NAME": "gw_player_leaderboard_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_player_profile_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_player_stat_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_player_state_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_players"
+        },
+        {
+          "TABLE_NAME": "gw_seasons"
+        },
+        {
+          "TABLE_NAME": "gw_sm_user_assignments"
+        },
+        {
+          "TABLE_NAME": "gw_sm_users"
+        },
+        {
+          "TABLE_NAME": "gw_source_captures"
+        },
+        {
+          "TABLE_NAME": "gw_source_dom_nodes"
+        },
+        {
+          "TABLE_NAME": "gw_source_fragments"
+        },
+        {
+          "TABLE_NAME": "gw_source_page_types"
+        },
+        {
+          "TABLE_NAME": "gw_source_payloads"
+        },
+        {
+          "TABLE_NAME": "gw_squad_members"
+        },
+        {
+          "TABLE_NAME": "gw_squads"
+        },
+        {
+          "TABLE_NAME": "gw_stadiums"
+        },
+        {
+          "TABLE_NAME": "gw_standings_rows"
+        },
+        {
+          "TABLE_NAME": "gw_standings_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_instructions"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_slots"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_tactic_substitutions"
+        },
+        {
+          "TABLE_NAME": "gw_transfer_summary_snapshots"
+        },
+        {
+          "TABLE_NAME": "gw_transfers"
+        },
+        {
+          "TABLE_NAME": "gw_world_clubs"
+        },
+        {
+          "TABLE_NAME": "gw_world_rules"
+        }
+      ],
+      "returned_rows": 56,
+      "total_rows": 56,
+      "truncated": false,
+      "duration_ms": 9
+    }
   }
 }
