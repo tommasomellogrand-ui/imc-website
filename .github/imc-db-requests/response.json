@@ -1,45 +1,460 @@
 {
-  "request_id": "gw010-saopaulo-id-execute-20260920",
-  "completed_at": "2026-09-20T06:13:21.528785+00:00",
+  "request_id": "gw003-vs-gw007-mr-diff-rerun-20260920",
+  "completed_at": "2026-09-20T06:15:05.845610+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw010-saopaulo-id-execute-20260920",
-    "purpose": "Fill confirmed DOM world club ID only for missing Sao Paulo GW010 mapping",
-    "action": "execute_migration",
-    "target": "core",
-    "migration_id": "gw010-saopaulo-world-id-20260920",
-    "data_migration": true,
-    "statements": [
-      "UPDATE `IMC Game World Club Mapping` SET `SM World Club ID`=92317315 WHERE `Game World`='GW010' AND `Club ID`=306 AND `SM Club ID`=306 AND `Club Name`='São Paulo FC' AND `SM World Club ID` IS NULL"
-    ]
+    "request_id": "gw003-vs-gw007-mr-diff-rerun-20260920",
+    "requested_at": "2026-09-20T06:10:00Z",
+    "purpose": "Re-run GW003 vs GW007 Match Report schema and trigger diff because shared response was overwritten",
+    "action": "query",
+    "target": "gold",
+    "sql": "SELECT 'COLUMN' kind,TABLE_NAME object_name,COLUMN_NAME item,CONCAT(COLUMN_TYPE,'|NULL=',IS_NULLABLE,'|DEFAULT=',COALESCE(CAST(COLUMN_DEFAULT AS CHAR),'NULL'),'|EXTRA=',EXTRA) detail FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('GW003_IMC Match Report','GW007_IMC Match Report') UNION ALL SELECT 'TRIGGER',EVENT_OBJECT_TABLE,TRIGGER_NAME,CONCAT(ACTION_TIMING,' ',EVENT_MANIPULATION,'|',ACTION_STATEMENT) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE IN ('GW003_IMC Match Report','GW007_IMC Match Report') ORDER BY kind,object_name,item",
+    "limit": 500
   },
   "response": {
     "ok": true,
-    "action": "execute_migration",
-    "target": "core",
-    "database": "Sql1956795_1",
-    "migration_id": "gw010-saopaulo-world-id-20260920",
-    "data_migration": true,
-    "plan_sha256": "940b0ebc8abf082f927acb6c500c94c58640d4f969fa068916abf8662b7d802e",
-    "status": "success",
-    "statement_count": 1,
-    "duration_ms": 23,
-    "before": {
-      "tables": 15,
-      "columns": 107
-    },
-    "after": {
-      "tables": 15,
-      "columns": 107
-    },
-    "results": [
-      {
-        "statement": 1,
-        "sha256": "a86506bf2748debd30bcb56f1d3828d624a1b2d74f3bda731dd49dbe73fd273f",
-        "affected_rows": 1,
-        "insert_id": 0,
-        "duration_ms": 1
-      }
-    ]
+    "action": "query",
+    "target": "gold",
+    "database": "Sql1956795_2",
+    "result": {
+      "rows": [
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "aggregate_away_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "aggregate_home_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "attendance",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "away_manager_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "away_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "away_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "away_sm_club_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "away_sm_manager_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "commentary_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "competition_group",
+          "detail": "varchar(64)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "competition_key",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "competition_round",
+          "detail": "varchar(128)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "competition_stage",
+          "detail": "varchar(128)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "events_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "fingerprint",
+          "detail": "char(64)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "game_world_id",
+          "detail": "varchar(16)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "home_manager_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "home_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "home_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "home_sm_club_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "home_sm_manager_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "imported_at",
+          "detail": "datetime|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "match_date",
+          "detail": "date|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "penalty_away_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "penalty_home_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "players_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "sm_action",
+          "detail": "varchar(64)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "sm_country",
+          "detail": "varchar(128)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "sm_division",
+          "detail": "varchar(128)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "sm_fixture_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "stadium_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "tactics_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW003_IMC Match Report",
+          "item": "team_stats_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "aggregate_away_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "aggregate_home_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "attendance",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "away_manager_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "away_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "away_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "away_sm_club_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "away_sm_manager_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "commentary_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "competition_group",
+          "detail": "varchar(64)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "competition_key",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "competition_round",
+          "detail": "varchar(128)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "competition_stage",
+          "detail": "varchar(128)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "events_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "fingerprint",
+          "detail": "char(64)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "game_world_id",
+          "detail": "varchar(16)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "home_manager_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "home_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "home_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "home_sm_club_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "home_sm_manager_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "imported_at",
+          "detail": "datetime|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "match_date",
+          "detail": "date|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "penalty_away_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "penalty_home_score",
+          "detail": "int unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "players_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "sm_action",
+          "detail": "varchar(64)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "sm_country",
+          "detail": "varchar(128)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "sm_division",
+          "detail": "varchar(128)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "sm_fixture_id",
+          "detail": "bigint unsigned|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "stadium_name",
+          "detail": "varchar(255)|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "tactics_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "COLUMN",
+          "object_name": "GW007_IMC Match Report",
+          "item": "team_stats_json",
+          "detail": "json|NULL=YES|DEFAULT=NULL|EXTRA="
+        },
+        {
+          "kind": "TRIGGER",
+          "object_name": "GW003_IMC Match Report",
+          "item": "imc_nexus_mr_gw003_ad",
+          "detail": "AFTER DELETE|DELETE FROM `IMC Site Match Report` WHERE game_world_id <=> OLD.game_world_id AND sm_fixture_id <=> OLD.sm_fixture_id"
+        },
+        {
+          "kind": "TRIGGER",
+          "object_name": "GW003_IMC Match Report",
+          "item": "imc_nexus_mr_gw003_ai",
+          "detail": "AFTER INSERT|INSERT INTO `IMC Site Match Report` (`game_world_id`,`sm_fixture_id`,`competition_key`,`sm_action`,`sm_country`,`sm_division`,`competition_group`,`competition_stage`,`competition_round`,`match_date`,`home_sm_club_id`,`home_name`,`away_sm_club_id`,`away_name`,`home_sm_manager_id`,`home_manager_name`,`away_sm_manager_id`,`away_manager_name`,`home_score`,`away_score`,`penalty_home_score`,`penalty_away_score`,`aggregate_home_score`,`aggregate_away_score`,`stadium_name`,`attendance`,`team_stats_json`,`players_json`,`events_json`,`tactics_json`,`commentary_json`,`fingerprint`,`imported_at`,source_key,synced_at) VALUES (NEW.`game_world_id`,NEW.`sm_fixture_id`,NEW.`competition_key`,NEW.`sm_action`,NEW.`sm_country`,NEW.`sm_division`,NEW.`competition_group`,NEW.`competition_stage`,NEW.`competition_round`,COALESCE(NEW.`match_date`,(SELECT MIN(r.match_date) FROM `GW003_IMC Results` r WHERE r.game_world_id=NEW.game_world_id AND r.sm_fixture_id=NEW.sm_fixture_id HAVING COUNT(DISTINCT r.match_date)=1)),NEW.`home_sm_club_id`,NEW.`home_name`,NEW.`away_sm_club_id`,NEW.`away_name`,NEW.`home_sm_manager_id`,NEW.`home_manager_name`,NEW.`away_sm_manager_id`,NEW.`away_manager_name`,NEW.`home_score`,NEW.`away_score`,NEW.`penalty_home_score`,NEW.`penalty_away_score`,NEW.`aggregate_home_score`,NEW.`aggregate_away_score`,NEW.`stadium_name`,NEW.`attendance`,NEW.`team_stats_json`,NEW.`players_json`,NEW.`events_json`,NEW.`tactics_json`,NEW.`commentary_json`,NEW.`fingerprint`,NEW.`imported_at`,SHA2(CONCAT('IMC Match Report|',NEW.`game_world_id`,'|',NEW.`sm_fixture_id`),256),CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE `game_world_id`=VALUES(`game_world_id`),`sm_fixture_id`=VALUES(`sm_fixture_id`),`competition_key`=VALUES(`competition_key`),`sm_action`=VALUES(`sm_action`),`sm_country`=VALUES(`sm_country`),`sm_division`=VALUES(`sm_division`),`competition_group`=VALUES(`competition_group`),`competition_stage`=VALUES(`competition_stage`),`competition_round`=VALUES(`competition_round`),`match_date`=VALUES(`match_date`),`home_sm_club_id`=VALUES(`home_sm_club_id`),`home_name`=VALUES(`home_name`),`away_sm_club_id`=VALUES(`away_sm_club_id`),`away_name`=VALUES(`away_name`),`home_sm_manager_id`=VALUES(`home_sm_manager_id`),`home_manager_name`=VALUES(`home_manager_name`),`away_sm_manager_id`=VALUES(`away_sm_manager_id`),`away_manager_name`=VALUES(`away_manager_name`),`home_score`=VALUES(`home_score`),`away_score`=VALUES(`away_score`),`penalty_home_score`=VALUES(`penalty_home_score`),`penalty_away_score`=VALUES(`penalty_away_score`),`aggregate_home_score`=VALUES(`aggregate_home_score`),`aggregate_away_score`=VALUES(`aggregate_away_score`),`stadium_name`=VALUES(`stadium_name`),`attendance`=VALUES(`attendance`),`team_stats_json`=VALUES(`team_stats_json`),`players_json`=VALUES(`players_json`),`events_json`=VALUES(`events_json`),`tactics_json`=VALUES(`tactics_json`),`commentary_json`=VALUES(`commentary_json`),`fingerprint`=VALUES(`fingerprint`),`imported_at`=VALUES(`imported_at`),synced_at=CURRENT_TIMESTAMP"
+        },
+        {
+          "kind": "TRIGGER",
+          "object_name": "GW003_IMC Match Report",
+          "item": "imc_nexus_mr_gw003_au",
+          "detail": "AFTER UPDATE|UPDATE `IMC Site Match Report` SET `game_world_id`=NEW.`game_world_id`,`sm_fixture_id`=NEW.`sm_fixture_id`,`competition_key`=NEW.`competition_key`,`sm_action`=NEW.`sm_action`,`sm_country`=NEW.`sm_country`,`sm_division`=NEW.`sm_division`,`competition_group`=NEW.`competition_group`,`competition_stage`=NEW.`competition_stage`,`competition_round`=NEW.`competition_round`,`match_date`=COALESCE(NEW.`match_date`,(SELECT MIN(r.match_date) FROM `GW003_IMC Results` r WHERE r.game_world_id=NEW.game_world_id AND r.sm_fixture_id=NEW.sm_fixture_id HAVING COUNT(DISTINCT r.match_date)=1)),`home_sm_club_id`=NEW.`home_sm_club_id`,`home_name`=NEW.`home_name`,`away_sm_club_id`=NEW.`away_sm_club_id`,`away_name`=NEW.`away_name`,`home_sm_manager_id`=NEW.`home_sm_manager_id`,`home_manager_name`=NEW.`home_manager_name`,`away_sm_manager_id`=NEW.`away_sm_manager_id`,`away_manager_name`=NEW.`away_manager_name`,`home_score`=NEW.`home_score`,`away_score`=NEW.`away_score`,`penalty_home_score`=NEW.`penalty_home_score`,`penalty_away_score`=NEW.`penalty_away_score`,`aggregate_home_score`=NEW.`aggregate_home_score`,`aggregate_away_score`=NEW.`aggregate_away_score`,`stadium_name`=NEW.`stadium_name`,`attendance`=NEW.`attendance`,`team_stats_json`=NEW.`team_stats_json`,`players_json`=NEW.`players_json`,`events_json`=NEW.`events_json`,`tactics_json`=NEW.`tactics_json`,`commentary_json`=NEW.`commentary_json`,`fingerprint`=NEW.`fingerprint`,`imported_at`=NEW.`imported_at`,source_key=SHA2(CONCAT('IMC Match Report|',NEW.`game_world_id`,'|',NEW.`sm_fixture_id`),256),synced_at=CURRENT_TIMESTAMP WHERE game_world_id <=> OLD.game_world_id AND sm_fixture_id <=> OLD.sm_fixture_id"
+        },
+        {
+          "kind": "TRIGGER",
+          "object_name": "GW007_IMC Match Report",
+          "item": "imc_nexus_mr_gw007_ad",
+          "detail": "AFTER DELETE|DELETE FROM `IMC Site Match Report` WHERE game_world_id <=> OLD.game_world_id AND sm_fixture_id <=> OLD.sm_fixture_id"
+        },
+        {
+          "kind": "TRIGGER",
+          "object_name": "GW007_IMC Match Report",
+          "item": "imc_nexus_mr_gw007_ai",
+          "detail": "AFTER INSERT|INSERT INTO `IMC Site Match Report` (`game_world_id`,`sm_fixture_id`,`competition_key`,`sm_action`,`sm_country`,`sm_division`,`competition_group`,`competition_stage`,`competition_round`,`match_date`,`home_sm_club_id`,`home_name`,`away_sm_club_id`,`away_name`,`home_sm_manager_id`,`home_manager_name`,`away_sm_manager_id`,`away_manager_name`,`home_score`,`away_score`,`penalty_home_score`,`penalty_away_score`,`aggregate_home_score`,`aggregate_away_score`,`stadium_name`,`attendance`,`team_stats_json`,`players_json`,`events_json`,`tactics_json`,`commentary_json`,`fingerprint`,`imported_at`,source_key,synced_at) VALUES (NEW.`game_world_id`,NEW.`sm_fixture_id`,NEW.`competition_key`,NEW.`sm_action`,NEW.`sm_country`,NEW.`sm_division`,NEW.`competition_group`,NEW.`competition_stage`,NEW.`competition_round`,COALESCE(NEW.`match_date`,(SELECT MIN(r.match_date) FROM `GW007_IMC Results` r WHERE r.game_world_id=NEW.game_world_id AND r.sm_fixture_id=NEW.sm_fixture_id HAVING COUNT(DISTINCT r.match_date)=1)),NEW.`home_sm_club_id`,NEW.`home_name`,NEW.`away_sm_club_id`,NEW.`away_name`,NEW.`home_sm_manager_id`,NEW.`home_manager_name`,NEW.`away_sm_manager_id`,NEW.`away_manager_name`,NEW.`home_score`,NEW.`away_score`,NEW.`penalty_home_score`,NEW.`penalty_away_score`,NEW.`aggregate_home_score`,NEW.`aggregate_away_score`,NEW.`stadium_name`,NEW.`attendance`,NEW.`team_stats_json`,NEW.`players_json`,NEW.`events_json`,NEW.`tactics_json`,NEW.`commentary_json`,NEW.`fingerprint`,NEW.`imported_at`,SHA2(CONCAT('IMC Match Report|',NEW.`game_world_id`,'|',NEW.`sm_fixture_id`),256),CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE `game_world_id`=VALUES(`game_world_id`),`sm_fixture_id`=VALUES(`sm_fixture_id`),`competition_key`=VALUES(`competition_key`),`sm_action`=VALUES(`sm_action`),`sm_country`=VALUES(`sm_country`),`sm_division`=VALUES(`sm_division`),`competition_group`=VALUES(`competition_group`),`competition_stage`=VALUES(`competition_stage`),`competition_round`=VALUES(`competition_round`),`match_date`=VALUES(`match_date`),`home_sm_club_id`=VALUES(`home_sm_club_id`),`home_name`=VALUES(`home_name`),`away_sm_club_id`=VALUES(`away_sm_club_id`),`away_name`=VALUES(`away_name`),`home_sm_manager_id`=VALUES(`home_sm_manager_id`),`home_manager_name`=VALUES(`home_manager_name`),`away_sm_manager_id`=VALUES(`away_sm_manager_id`),`away_manager_name`=VALUES(`away_manager_name`),`home_score`=VALUES(`home_score`),`away_score`=VALUES(`away_score`),`penalty_home_score`=VALUES(`penalty_home_score`),`penalty_away_score`=VALUES(`penalty_away_score`),`aggregate_home_score`=VALUES(`aggregate_home_score`),`aggregate_away_score`=VALUES(`aggregate_away_score`),`stadium_name`=VALUES(`stadium_name`),`attendance`=VALUES(`attendance`),`team_stats_json`=VALUES(`team_stats_json`),`players_json`=VALUES(`players_json`),`events_json`=VALUES(`events_json`),`tactics_json`=VALUES(`tactics_json`),`commentary_json`=VALUES(`commentary_json`),`fingerprint`=VALUES(`fingerprint`),`imported_at`=VALUES(`imported_at`),synced_at=CURRENT_TIMESTAMP"
+        },
+        {
+          "kind": "TRIGGER",
+          "object_name": "GW007_IMC Match Report",
+          "item": "imc_nexus_mr_gw007_au",
+          "detail": "AFTER UPDATE|UPDATE `IMC Site Match Report` SET `game_world_id`=NEW.`game_world_id`,`sm_fixture_id`=NEW.`sm_fixture_id`,`competition_key`=NEW.`competition_key`,`sm_action`=NEW.`sm_action`,`sm_country`=NEW.`sm_country`,`sm_division`=NEW.`sm_division`,`competition_group`=NEW.`competition_group`,`competition_stage`=NEW.`competition_stage`,`competition_round`=NEW.`competition_round`,`match_date`=COALESCE(NEW.`match_date`,(SELECT MIN(r.match_date) FROM `GW007_IMC Results` r WHERE r.game_world_id=NEW.game_world_id AND r.sm_fixture_id=NEW.sm_fixture_id HAVING COUNT(DISTINCT r.match_date)=1)),`home_sm_club_id`=NEW.`home_sm_club_id`,`home_name`=NEW.`home_name`,`away_sm_club_id`=NEW.`away_sm_club_id`,`away_name`=NEW.`away_name`,`home_sm_manager_id`=NEW.`home_sm_manager_id`,`home_manager_name`=NEW.`home_manager_name`,`away_sm_manager_id`=NEW.`away_sm_manager_id`,`away_manager_name`=NEW.`away_manager_name`,`home_score`=NEW.`home_score`,`away_score`=NEW.`away_score`,`penalty_home_score`=NEW.`penalty_home_score`,`penalty_away_score`=NEW.`penalty_away_score`,`aggregate_home_score`=NEW.`aggregate_home_score`,`aggregate_away_score`=NEW.`aggregate_away_score`,`stadium_name`=NEW.`stadium_name`,`attendance`=NEW.`attendance`,`team_stats_json`=NEW.`team_stats_json`,`players_json`=NEW.`players_json`,`events_json`=NEW.`events_json`,`tactics_json`=NEW.`tactics_json`,`commentary_json`=NEW.`commentary_json`,`fingerprint`=NEW.`fingerprint`,`imported_at`=NEW.`imported_at`,source_key=SHA2(CONCAT('IMC Match Report|',NEW.`game_world_id`,'|',NEW.`sm_fixture_id`),256),synced_at=CURRENT_TIMESTAMP WHERE game_world_id <=> OLD.game_world_id AND sm_fixture_id <=> OLD.sm_fixture_id"
+        }
+      ],
+      "returned_rows": 72,
+      "total_rows": 72,
+      "truncated": false,
+      "duration_ms": 19
+    }
   }
 }
