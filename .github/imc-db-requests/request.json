@@ -1,9 +1,9 @@
 {
-  "request_id": "sql2-stale-tables-metadata-20260920",
-  "requested_at": "2026-09-20T07:20:00Z",
-  "purpose": "Audit SQL2 tables for last metadata update and size to identify tables not updated in at least one week",
+  "request_id": "sql2-stale-summary-20260920",
+  "requested_at": "2026-09-20T07:25:00Z",
+  "purpose": "Summarize all SQL2 tables whose metadata shows no update since 2026-09-13, separating empty tables",
   "action": "query",
   "target": "gold",
-  "sql": "SELECT TABLE_NAME,ENGINE,TABLE_ROWS,CREATE_TIME,UPDATE_TIME,ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() ORDER BY COALESCE(UPDATE_TIME,CREATE_TIME),TABLE_NAME",
-  "limit": 500
+  "sql": "SELECT CASE WHEN TABLE_ROWS=0 THEN 'EMPTY' ELSE 'WITH_DATA' END category,COUNT(*) table_count,ROUND(SUM(DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb,GROUP_CONCAT(TABLE_NAME ORDER BY (DATA_LENGTH+INDEX_LENGTH) DESC SEPARATOR ' | ') tables_list FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND COALESCE(UPDATE_TIME,CREATE_TIME) < '2026-09-13 00:00:00' GROUP BY category",
+  "limit": 10
 }
