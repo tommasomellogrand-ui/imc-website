@@ -31,3 +31,5 @@ body{background:#fff;color:var(--ink)}
 .bar i{background:#285e98}.bar i+i{background:#bbcee7}
 .note,.empty,#status:not(:empty){border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
 details summary{margin:8px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(150deg,#fff,#edf4fc);color:var(--navy)}
+
+.hero-scorers{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;margin:18px auto 0;padding:14px 8px 0;border-top:1px solid var(--line);max-width:680px}.hero-scorers>div{display:flex;flex-direction:column;gap:5px;font-size:11px;line-height:1.35}.hero-scorers>div:first-child{text-align:left}.hero-scorers>div:last-child{text-align:right}.hero-scorers span{display:block}.hero-scorers b{font-size:10px}.match-info strong{text-transform:uppercase}@media(min-width:650px){.hero-scorers{font-size:12px;padding-inline:18px}.hero-scorers>div{font-size:12px}}
