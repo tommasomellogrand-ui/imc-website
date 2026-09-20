@@ -1,9 +1,7 @@
 {
-  "request_id": "gw003-vs-gw007-mr-diff-rerun-20260920",
-  "requested_at": "2026-09-20T06:10:00Z",
-  "purpose": "Re-run GW003 vs GW007 Match Report schema and trigger diff because shared response was overwritten",
+  "request_id": "schedule-normalizer-core-audit-20260920",
   "action": "query",
-  "target": "gold",
-  "sql": "SELECT 'COLUMN' kind,TABLE_NAME object_name,COLUMN_NAME item,CONCAT(COLUMN_TYPE,'|NULL=',IS_NULLABLE,'|DEFAULT=',COALESCE(CAST(COLUMN_DEFAULT AS CHAR),'NULL'),'|EXTRA=',EXTRA) detail FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('GW003_IMC Match Report','GW007_IMC Match Report') UNION ALL SELECT 'TRIGGER',EVENT_OBJECT_TABLE,TRIGGER_NAME,CONCAT(ACTION_TIMING,' ',EVENT_MANIPULATION,'|',ACTION_STATEMENT) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE IN ('GW003_IMC Match Report','GW007_IMC Match Report') ORDER BY kind,object_name,item",
-  "limit": 500
+  "target": "core",
+  "sql": "SELECT a.*,m.sm_manager_id,c.`Club Name` mapping_name,c.`SM World Club ID` world_club_id FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id LEFT JOIN `IMC Game World Club Mapping` c ON c.`Game World`=a.game_world_id AND c.`Club ID`=a.team_id WHERE m.sm_manager_id=13051324 ORDER BY a.game_world_id,a.start_date",
+  "limit": 100
 }
