@@ -1,34 +1,41 @@
 {
-  "request_id": "gw010-saopaulo-id-audit-20260920",
-  "completed_at": "2026-09-20T06:11:54.575508+00:00",
+  "request_id": "gw010-saopaulo-id-plan-20260920",
+  "completed_at": "2026-09-20T06:12:43.161263+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "gw010-saopaulo-id-audit-20260920",
-    "purpose": "Verify exact GW010 Sao Paulo mapping before null-only ID update",
-    "action": "query",
+    "request_id": "gw010-saopaulo-id-plan-20260920",
+    "purpose": "Fill confirmed DOM world club ID only for missing Sao Paulo GW010 mapping",
+    "action": "plan_migration",
     "target": "core",
-    "sql": "SELECT * FROM `IMC Game World Club Mapping` WHERE `Game World`='GW010' AND (`Club ID`=306 OR `SM World Club ID`=92317315)",
-    "limit": 20
+    "migration_id": "gw010-saopaulo-world-id-20260920",
+    "data_migration": true,
+    "statements": [
+      "UPDATE `IMC Game World Club Mapping` SET `SM World Club ID`=92317315 WHERE `Game World`='GW010' AND `Club ID`=306 AND `SM Club ID`=306 AND `Club Name`='São Paulo FC' AND `SM World Club ID` IS NULL"
+    ]
   },
   "response": {
     "ok": true,
-    "action": "query",
-    "target": "core",
-    "database": "Sql1956795_1",
-    "result": {
-      "rows": [
-        {
-          "Club ID": "306",
-          "Club Name": "São Paulo FC",
-          "Game World": "GW010",
-          "SM Club ID": "306",
-          "SM World Club ID": null
-        }
-      ],
-      "returned_rows": 1,
-      "total_rows": 1,
-      "truncated": false,
-      "duration_ms": 1
-    }
+    "action": "plan_migration",
+    "plan": {
+      "target": "core",
+      "database": "Sql1956795_1",
+      "migration_id": "gw010-saopaulo-world-id-20260920",
+      "allow_destructive": false,
+      "data_migration": true,
+      "statements": [
+        "UPDATE `IMC Game World Club Mapping` SET `SM World Club ID`=92317315 WHERE `Game World`='GW010' AND `Club ID`=306 AND `SM Club ID`=306 AND `Club Name`='São Paulo FC' AND `SM World Club ID` IS NULL"
+      ]
+    },
+    "analysis": [
+      {
+        "sql": "UPDATE `IMC Game World Club Mapping` SET `SM World Club ID`=92317315 WHERE `Game World`='GW010' AND `Club ID`=306 AND `SM Club ID`=306 AND `Club Name`='São Paulo FC' AND `SM World Club ID` IS NULL",
+        "kind": "UPDATE",
+        "destructive": false,
+        "sha256": "a86506bf2748debd30bcb56f1d3828d624a1b2d74f3bda731dd49dbe73fd273f"
+      }
+    ],
+    "plan_sha256": "940b0ebc8abf082f927acb6c500c94c58640d4f969fa068916abf8662b7d802e",
+    "expires_at": "2026-09-20T06:27:43+00:00",
+    "confirmation_token": "1789885663.9ec6fe39c026d72ef7d401e525c1270c66e78389199f9e969c502f9b29b6b109"
   }
 }
