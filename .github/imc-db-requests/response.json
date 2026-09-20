@@ -1,47 +1,102 @@
 {
-  "request_id": "sql2-drop-gw-source-payloads-execute-20260920",
-  "completed_at": "2026-09-20T08:18:15.268247+00:00",
+  "request_id": "ext-manager-codex-extract-20260920",
+  "completed_at": "2026-09-20T08:20:45.633661+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "sql2-drop-gw-source-payloads-execute-20260920",
-    "requested_at": "2026-09-20T08:17:00Z",
-    "purpose": "Execute approved removal of only legacy SQL2 gw_source_payloads table",
-    "action": "execute_migration",
-    "target": "gold",
-    "migration_id": "drop-gw-source-payloads-sql2-20260920",
-    "statements": [
-      "DROP TABLE IF EXISTS `gw_source_payloads`"
-    ],
-    "allow_destructive": true,
-    "data_migration": false
+    "request_id": "ext-manager-codex-extract-20260920",
+    "requested_at": "2026-09-20T08:30:00Z",
+    "purpose": "Extract all rows and count from CORE EXT Manager Codex Global",
+    "action": "query",
+    "target": "core",
+    "sql": "SELECT sm_manager_id, manager_name, (SELECT COUNT(*) FROM `EXT Manager Codex Global`) AS total_managers FROM `EXT Manager Codex Global` ORDER BY sm_manager_id"
   },
   "response": {
     "ok": true,
-    "action": "execute_migration",
-    "target": "gold",
-    "database": "Sql1956795_2",
-    "migration_id": "drop-gw-source-payloads-sql2-20260920",
-    "data_migration": false,
-    "plan_sha256": "6f182bb1e14a0cf376ec3189c1a0c5322babd4553f124dbd097aff58c58b2c3b",
-    "status": "success",
-    "statement_count": 1,
-    "duration_ms": 850,
-    "before": {
-      "tables": 299,
-      "columns": 5269
-    },
-    "after": {
-      "tables": 298,
-      "columns": 5260
-    },
-    "results": [
-      {
-        "statement": 1,
-        "sha256": "f01883178806bdf4d3e97ff742426f96d6c5727fdb86fe3e42a713d9c54e0004",
-        "affected_rows": 0,
-        "insert_id": 0,
-        "duration_ms": 598
-      }
-    ]
+    "action": "query",
+    "target": "core",
+    "database": "Sql1956795_1",
+    "result": {
+      "rows": [
+        {
+          "sm_manager_id": "4868",
+          "manager_name": "Chris Chappell",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "32486",
+          "manager_name": "Josh Smith",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "40669",
+          "manager_name": "Matt Furtek",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "64773",
+          "manager_name": "Tom Wharton",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "84974",
+          "manager_name": "Glen Pine",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "138784",
+          "manager_name": "stop complaining so much",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "157619",
+          "manager_name": "Anton I",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "172041",
+          "manager_name": "Steve Wild",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "172638",
+          "manager_name": "Simon Allwood",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "173887",
+          "manager_name": "Markkö Srçë",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "2363592",
+          "manager_name": "marcello Partenopeo",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "4478199",
+          "manager_name": "MAX inter",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "21638325",
+          "manager_name": "Half-Blood Prince",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "22959444",
+          "manager_name": "Melvin Udall 6️⃣0️⃣",
+          "total_managers": "15"
+        },
+        {
+          "sm_manager_id": "23131282",
+          "manager_name": "Kubanito Silvestri",
+          "total_managers": "15"
+        }
+      ],
+      "returned_rows": 15,
+      "total_rows": 15,
+      "truncated": false,
+      "duration_ms": 2
+    }
   }
 }
