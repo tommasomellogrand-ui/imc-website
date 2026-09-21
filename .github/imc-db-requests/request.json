@@ -1,8 +1,13 @@
 {
-  "request_id": "read-core-seasons-20260921",
-  "requested_at": "2026-09-21T07:42:00Z",
-  "purpose": "Read season start and end dates from CORE",
-  "action": "query",
-  "target": "core",
-  "sql": "SELECT * FROM `IMC Game World Season` ORDER BY game_world_id, imc_season"
+  "request_id": "clear-gw009-transfers-20260921",
+  "requested_at": "2026-09-21T21:17:00Z",
+  "purpose": "Delete all rows from GW009_IMC Transfers",
+  "action": "plan_migration",
+  "target": "custom",
+  "migration_id": "clear_gw009_transfers_20260921",
+  "statements": [
+    "DELETE FROM `GW009_IMC Transfers`"
+  ],
+  "allow_destructive": true,
+  "data_migration": true
 }
