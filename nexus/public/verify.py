@@ -22,7 +22,7 @@ def check(route):
         assert directory['ok'] and directory['core']['world']['game_world_id']==world
         assert all(k in directory['core'] for k in ['clubs','managers','competitions'])
     d=json.loads(get(f'public/data.php?world={world}&resource={resource}&limit=1'))
-    assert d['ok'] and d['version']=='nexus-public-2' and d['world']==world and d['resource']==resource
+    assert d['ok'] and d['version'] in ('nexus-public-2','nexus-public-3') and d['world']==world and d['resource']==resource
     assert d['core']['source']=='MYSQL_ARUBA_CORE' and d['core']['world']['game_world_id']==world
     assert all(r['game_world_id']==world for r in d['rows'])
     for row in d['rows']:
