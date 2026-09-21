@@ -1,47 +1,31 @@
 {
-  "request_id": "clear-gw009-transfers-20260921-exec",
-  "completed_at": "2026-09-21T21:18:46.635486+00:00",
+  "request_id": "verify-gw009-transfers-empty-20260921",
+  "completed_at": "2026-09-21T21:19:06.871565+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "clear-gw009-transfers-20260921-exec",
+    "request_id": "verify-gw009-transfers-empty-20260921",
     "requested_at": "2026-09-21T21:19:00Z",
-    "purpose": "Delete all rows from GW009_IMC Transfers",
-    "action": "execute_migration",
+    "purpose": "Verify GW009_IMC Transfers is empty after deletion",
+    "action": "query",
     "target": "custom",
-    "migration_id": "clear_gw009_transfers_20260921",
-    "statements": [
-      "DELETE FROM `GW009_IMC Transfers`"
-    ],
-    "allow_destructive": true,
-    "data_migration": true
+    "sql": "SELECT COUNT(*) AS total FROM `GW009_IMC Transfers`",
+    "limit": 10
   },
   "response": {
     "ok": true,
-    "action": "execute_migration",
+    "action": "query",
     "target": "custom",
     "database": "Sql1956795_3",
-    "migration_id": "clear_gw009_transfers_20260921",
-    "data_migration": true,
-    "plan_sha256": "6d5e1282e98d6751ed8e538bfec3c3919aed958130919d5c9994a54bda95e9a5",
-    "status": "success",
-    "statement_count": 1,
-    "duration_ms": 269,
-    "before": {
-      "tables": 320,
-      "columns": 5603
-    },
-    "after": {
-      "tables": 320,
-      "columns": 5603
-    },
-    "results": [
-      {
-        "statement": 1,
-        "sha256": "16c67286555afb4bbfb29df842f59cb20642d95eb2250d6025b7803e6cde73ac",
-        "affected_rows": 992,
-        "insert_id": 0,
-        "duration_ms": 9
-      }
-    ]
+    "result": {
+      "rows": [
+        {
+          "total": "0"
+        }
+      ],
+      "returned_rows": 1,
+      "total_rows": 1,
+      "truncated": false,
+      "duration_ms": 3
+    }
   }
 }
