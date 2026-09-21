@@ -130,8 +130,8 @@ test('overview report totals and rankings deduplicate fixtures and preserve miss
 });
 
 test('Top 3 requires five actual appearances and excludes unused substitutes',()=>{
- const rows=Array.from({length:5},(_,i)=>match(i+1,1,2,1,0,{players_json:[
- ...[1,2,3,4].map(id=>({sm_player_id:id,team_side:'home',player_name:'Player '+id,starter:1,goals:id,assists:id,man_of_match:1,rating:6+id/2})),
+ const rows=Array.from({length:5},(_,i)=>match(i+1,1,2,1,0,{team_stats_json:{scorers:[1,2,3,4].flatMap(id=>Array.from({length:id},(_,n)=>({sm_player_id:id,team_side:'home',player_name:'Player '+id,minute:10+n,own_goal:0})))},players_json:[
+ ...[1,2,3,4].map(id=>({sm_player_id:id,team_side:'home',player_name:'Player '+id,starter:1,assists:id,man_of_match:1,rating:6+id/2})),
  ...(i<4?[{sm_player_id:5,team_side:'home',player_name:'Four appearances',starter:1,assists:20,rating:10,man_of_match:1}]:[]),
  {sm_player_id:6,team_side:'away',player_name:'Unused bench',starter:0,rating:0,minutes_played:0}
  ]}));
@@ -141,8 +141,8 @@ test('Top 3 requires five actual appearances and excludes unused substitutes',()
 
 test('profile report statistics use only the managed side and average known values',()=>{
  const reports=Array.from({length:5},(_,i)=>match(i+1,i===1?2:1,i===1?1:2,i===1?1:2,i===1?2:1,{competition_group:'DOMESTIC',match_date:'2026-06-01',home_sm_manager_id:i===1?456:123,away_sm_manager_id:i===1?123:456,
- team_stats_json:i===4?null:{home:{possession:i===1?30:60,shots_on_target:i===1?2:5,corners:3},away:{possession:i===1?70:40,shots_on_target:i===1?8:2,corners:4}},
- players_json:[{sm_player_id:7,team_side:i===1?'away':'home',player_name:'Own player',starter:1,goals:1,rating:8},{sm_player_id:8,team_side:i===1?'home':'away',player_name:'Opponent',starter:1,goals:9,rating:10}]
+ team_stats_json:i===4?{scorers:[{sm_player_id:7,team_side:i===1?'away':'home',player_name:'Own player',minute:20,own_goal:0}]}:{home:{possession:i===1?30:60,shots_on_target:i===1?2:5,corners:3},away:{possession:i===1?70:40,shots_on_target:i===1?8:2,corners:4},scorers:[{sm_player_id:7,team_side:i===1?'away':'home',player_name:'Own player',minute:20,own_goal:0},{sm_player_id:8,team_side:i===1?'home':'away',player_name:'Opponent',minute:30,own_goal:0}]},
+ players_json:[{sm_player_id:7,team_side:i===1?'away':'home',player_name:'Own player',starter:1,rating:8},{sm_player_id:8,team_side:i===1?'home':'away',player_name:'Opponent',starter:1,rating:10}]
  }));
  const s=L.profileStats([...reports,reports[0]],123);
  assert.equal(s.basic.p,5);assert.equal(s.basic.w,5);assert.equal(s.totals.shots_on_target,23);assert.equal(s.averages.shots_on_target,5.75);assert.equal(s.averages.possession,62.5);
