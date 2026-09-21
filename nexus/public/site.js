@@ -247,7 +247,18 @@ async function teamProfile(c,signal){
  $('viewControls').innerHTML=go({team:'',offset:0},national?'← Tutte le nazionali':'← Tutti i club');
  if(!team){$('rows').innerHTML=empty('Squadra non presente in questo mondo.');$('status').textContent=state.world;return}
  $('sectionTitle').textContent=team.name;
- $('viewControls').innerHTML+=tabs('profileTab',[['career','Manager'],['teamhub','Team Hub'],['stats','Statistiche'],['matches','Partite'],['trophy','Trophy Room']]);
+ $('viewControls').innerHTML+=tabs('profileTab',[['career','Manager'],['teamhub','Team Hub'],['stats','Statistiche'],['matches','Partite'],['transfers','Transfer'],['trophy','Trophy Room']]);
+ if(state.profileTab==='transfers'){
+  const teamWorldId=team.sm_team_id||team.sm_world_club_id||team.world_team_id;
+  const clubFilter=teamWorldId?String(teamWorldId):'name:'+team.name;
+  const d=await cached({world:state.world,resource:'transfers',club:clubFilter,limit:5000,offset:0},signal),all=d.rows||[];
+  const same=(a,b)=>a!=null&&b!=null&&String(a)===String(b),norm=v=>String(v||'').trim().toLocaleLowerCase('it');
+  const incoming=all.filter(r=>teamWorldId?same(r.to_sm_world_club_id,teamWorldId):norm(r.club_to)===norm(team.name));
+  const outgoing=all.filter(r=>teamWorldId?same(r.from_sm_world_club_id,teamWorldId):norm(r.club_from)===norm(team.name));
+  const transferCard=(r,dir)=>`<article class="card club-transfer"><div class="meta"><span>${esc(date(r.transfer_date))}</span><span>${dir==='in'?'TRANSFER IN':'TRANSFER OUT'}</span></div><div class="transfer-head"><strong>${esc(r.player_name||'Giocatore')}</strong><strong>${esc(r.amount_text||'—')}</strong></div><div class="transfer-route"><span>${esc(r.club_from||'—')}</span><b aria-hidden="true">→</b><span>${esc(r.club_to||'—')}</span></div>${Array.isArray(r.exchange_players)&&r.exchange_players.length?`<small>Scambio: ${esc(r.exchange_players.join(', '))}</small>`:''}</article>`;
+  $('rows').innerHTML=`<article class="card profile-heading">${entity(team,team.name)}</article><div class="transfer-summary">${statTiles([[incoming.length,'Transfer in'],[outgoing.length,'Transfer out'],[all.length,'Movimenti totali']])}</div><div class="club-transfer-columns"><section><h3>Transfer In</h3>${incoming.length?incoming.map(r=>transferCard(r,'in')).join(''):empty('Nessun trasferimento in entrata.')}</section><section><h3>Transfer Out</h3>${outgoing.length?outgoing.map(r=>transferCard(r,'out')).join(''):empty('Nessun trasferimento in uscita.')}</section></div>`;
+  $('status').textContent=state.world+' · '+all.length+' trasferimenti del club';return;
+ }
  if(state.profileTab==='trophy'){const d=await cached({world:state.world,resource:'trophies'},signal);$('rows').innerHTML=`<article class="card profile-heading">${entity(team,team.name)}</article>`+trophyShelf(d.awards.filter(a=>sameId(a.winner.core?.[national?'national_team_id':'club_id'],team.id)&&(compGroup(a.competition)==='nations')===national));return;}
  if(['teamhub','stats','matches'].includes(state.profileTab)){
  $('viewControls').innerHTML+=form(select('season','Stagione',[['','Tutte le stagioni'],...c.seasons.map(s=>[s.imc_season,'Stagione '+s.imc_season])]));
