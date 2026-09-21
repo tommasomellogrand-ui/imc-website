@@ -90,6 +90,7 @@ try {
     $pdo->commit();
     foreach($rows as &$row)foreach($row as $key=>&$value)if(str_ends_with($key,'_json')||$key==='exchange_players')$value=$value===null?null:json_decode($value,true); unset($row,$value);
     require_once __DIR__.'/core.php';
+    if($resource==='match_report'&&$detail)nexus_profile_details($coreDb,$rows);
     if(in_array($resource,['results','schedule'],true))nexus_report_logo_ids($pdo,$world,$rows);
     $core=nexus_core_enrich(nexus_core_db($cfg),$world,$resource,$rows);
     $facets=[];
