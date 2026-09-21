@@ -33,6 +33,25 @@ try {
     if($resource==='competition_reports')respond(nexus_competition_reports($pdo,$coreDb,$world));
     if($resource==='manager_profile')respond(nexus_manager_profile($pdo,$coreDb,$world));
     if($resource==='team_profile')respond(nexus_team_profile($pdo,$coreDb,$world));
+    // Transfers are read directly from the authoritative per-world RAW repository.
+    if($resource==='transfers'){
+        $table=$world.'_IMC Transfers';
+        $club=(string)($_GET['club']??'');$search=trim((string)($_GET['search']??''));
+        if(strlen($search)>200)respond(['ok'=>false,'error'=>'invalid_search'],422);
+        $where='game_world_id=?';$params=[$world];
+        if($club!==''){
+            $byName=str_starts_with($club,'name:');$value=$byName?substr($club,5):$club;
+            $where.=$byName?' AND (club_from=? OR club_to=?)':' AND (from_sm_world_club_id=? OR to_sm_world_club_id=?)';
+            $params[]=$value;$params[]=$value;
+        }
+        if($search!==''){$where.=' AND (player_name LIKE ? OR club_from LIKE ? OR club_to LIKE ?)';for($i=0;$i<3;$i++)$params[]='%'.$search.'%';}
+        $limit=min(5000,max(1,(int)($_GET['limit']??50)));$offset=max(0,(int)($_GET['offset']??0));
+        $stmt=$pdo->prepare("SELECT COUNT(*) total,MAX(imported_at) updated_at FROM `$table` WHERE $where");$stmt->execute($params);$meta=$stmt->fetch();
+        $stmt=$pdo->prepare("SELECT imc_transfer_number AS site_id,game_world_id,imc_transfer_number,player_id,player_name,club_from,from_sm_world_club_id,club_to,to_sm_world_club_id,transfer_date,amount_text,exchange_players,imported_at FROM `$table` WHERE $where ORDER BY imc_transfer_number DESC LIMIT $limit OFFSET $offset");$stmt->execute($params);$rows=$stmt->fetchAll();
+        foreach($rows as &$row)$row['exchange_players']=$row['exchange_players']===null?null:json_decode($row['exchange_players'],true);unset($row);
+        $core=nexus_core_enrich($coreDb,$world,'transfers',$rows);
+        respond(['ok'=>true,'clubs'=>[],'core'=>$core,'version'=>'nexus-public-3','world'=>$world,'resource'=>'transfers','source'=>$table,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset,'limit'=>$limit,'rows'=>$rows]);
+    }
     [$table,$id,$date]=$resources[$resource];
     $where='game_world_id=?'; $params=[$world];
     if(in_array($resource,['results','schedule'],true)&&($_GET['team_id']??'')!==''){
