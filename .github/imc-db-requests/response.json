@@ -1,104 +1,43 @@
 {
-  "request_id": "read-core-seasons-20260921",
-  "completed_at": "2026-09-21T07:43:56.346175+00:00",
+  "request_id": "clear-gw009-transfers-20260921",
+  "completed_at": "2026-09-21T21:18:19.793744+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "read-core-seasons-20260921",
-    "requested_at": "2026-09-21T07:42:00Z",
-    "purpose": "Read season start and end dates from CORE",
-    "action": "query",
-    "target": "core",
-    "sql": "SELECT * FROM `IMC Game World Season` ORDER BY game_world_id, imc_season"
+    "request_id": "clear-gw009-transfers-20260921",
+    "requested_at": "2026-09-21T21:17:00Z",
+    "purpose": "Delete all rows from GW009_IMC Transfers",
+    "action": "plan_migration",
+    "target": "custom",
+    "migration_id": "clear_gw009_transfers_20260921",
+    "statements": [
+      "DELETE FROM `GW009_IMC Transfers`"
+    ],
+    "allow_destructive": true,
+    "data_migration": true
   },
   "response": {
     "ok": true,
-    "action": "query",
-    "target": "core",
-    "database": "Sql1956795_1",
-    "result": {
-      "rows": [
-        {
-          "game_world_id": "GW001",
-          "imc_season": "1",
-          "soccer_manager_season": null,
-          "imc_season_start_date": "2026-07-12",
-          "imc_season_end_date": "2026-09-20"
-        },
-        {
-          "game_world_id": "GW002",
-          "imc_season": "1",
-          "soccer_manager_season": null,
-          "imc_season_start_date": "2026-07-06",
-          "imc_season_end_date": "2026-12-05"
-        },
-        {
-          "game_world_id": "GW003",
-          "imc_season": "1",
-          "soccer_manager_season": null,
-          "imc_season_start_date": "2026-05-25",
-          "imc_season_end_date": "2026-10-17"
-        },
-        {
-          "game_world_id": "GW004",
-          "imc_season": "1",
-          "soccer_manager_season": null,
-          "imc_season_start_date": "2026-06-22",
-          "imc_season_end_date": "2026-11-14"
-        },
-        {
-          "game_world_id": "GW005",
-          "imc_season": "1",
-          "soccer_manager_season": null,
-          "imc_season_start_date": "2026-07-19",
-          "imc_season_end_date": "2026-09-13"
-        },
-        {
-          "game_world_id": "GW005",
-          "imc_season": "2",
-          "soccer_manager_season": null,
-          "imc_season_start_date": "2026-09-15",
-          "imc_season_end_date": null
-        },
-        {
-          "game_world_id": "GW006",
-          "imc_season": "1",
-          "soccer_manager_season": null,
-          "imc_season_start_date": "2026-06-22",
-          "imc_season_end_date": "2026-11-15"
-        },
-        {
-          "game_world_id": "GW007",
-          "imc_season": "1",
-          "soccer_manager_season": null,
-          "imc_season_start_date": "2026-08-10",
-          "imc_season_end_date": "2027-01-09"
-        },
-        {
-          "game_world_id": "GW008",
-          "imc_season": "1",
-          "soccer_manager_season": "48",
-          "imc_season_start_date": "2026-03-30",
-          "imc_season_end_date": "2026-08-29"
-        },
-        {
-          "game_world_id": "GW008",
-          "imc_season": "2",
-          "soccer_manager_season": "49",
-          "imc_season_start_date": "2026-08-31",
-          "imc_season_end_date": null
-        },
-        {
-          "game_world_id": "GW009",
-          "imc_season": "1",
-          "soccer_manager_season": null,
-          "imc_season_start_date": "2026-08-23",
-          "imc_season_end_date": "2026-11-01"
-        }
-      ],
-      "returned_rows": 11,
-      "total_rows": 11,
-      "truncated": false,
-      "duration_ms": 1
-    }
+    "action": "plan_migration",
+    "plan": {
+      "target": "custom",
+      "database": "Sql1956795_3",
+      "migration_id": "clear_gw009_transfers_20260921",
+      "allow_destructive": true,
+      "data_migration": true,
+      "statements": [
+        "DELETE FROM `GW009_IMC Transfers`"
+      ]
+    },
+    "analysis": [
+      {
+        "sql": "DELETE FROM `GW009_IMC Transfers`",
+        "kind": "DELETE",
+        "destructive": true,
+        "sha256": "16c67286555afb4bbfb29df842f59cb20642d95eb2250d6025b7803e6cde73ac"
+      }
+    ],
+    "plan_sha256": "6d5e1282e98d6751ed8e538bfec3c3919aed958130919d5c9994a54bda95e9a5",
+    "expires_at": "2026-09-21T21:33:19+00:00",
+    "confirmation_token": "1790026399.029215a2bac2d55b3c20208409448c39fbdd9b614cf1a22a718534c2a2eecccc"
   }
 }
