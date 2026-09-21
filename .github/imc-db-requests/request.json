@@ -1,9 +1,15 @@
 {
-  "request_id": "sql2-remaining-lowercase-gw-20260920",
-  "requested_at": "2026-09-20T08:27:00Z",
-  "purpose": "List exact lowercase gw_ tables currently remaining in SQL2",
-  "action": "query",
-  "target": "gold",
-  "sql": "SELECT TABLE_NAME,ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND BINARY TABLE_NAME LIKE 'gw\\_%' ORDER BY (DATA_LENGTH+INDEX_LENGTH) DESC,TABLE_NAME",
-  "limit": 200
+  "request_id": "clear-mr-custom-20260921",
+  "requested_at": "2026-09-21T07:30:00Z",
+  "purpose": "Clear all Match Report rows for GW004 GW006 GW009",
+  "action": "plan_migration",
+  "target": "custom",
+  "migration_id": "clear_match_report_gw004_gw006_gw009_20260921",
+  "statements": [
+    "DELETE FROM `GW004_IMC Match Report`",
+    "DELETE FROM `GW006_IMC Match Report`",
+    "DELETE FROM `GW009_IMC Match Report`"
+  ],
+  "allow_destructive": true,
+  "data_migration": true
 }
