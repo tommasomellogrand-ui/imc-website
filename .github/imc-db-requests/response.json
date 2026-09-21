@@ -1,59 +1,104 @@
 {
-  "request_id": "clear-mr-custom-20260921",
-  "completed_at": "2026-09-21T07:40:51.942901+00:00",
+  "request_id": "read-core-seasons-20260921",
+  "completed_at": "2026-09-21T07:43:56.346175+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "clear-mr-custom-20260921",
-    "requested_at": "2026-09-21T07:30:00Z",
-    "purpose": "Clear all Match Report rows for GW004 GW006 GW009",
-    "action": "plan_migration",
-    "target": "custom",
-    "migration_id": "clear_match_report_gw004_gw006_gw009_20260921",
-    "statements": [
-      "DELETE FROM `GW004_IMC Match Report`",
-      "DELETE FROM `GW006_IMC Match Report`",
-      "DELETE FROM `GW009_IMC Match Report`"
-    ],
-    "allow_destructive": true,
-    "data_migration": true
+    "request_id": "read-core-seasons-20260921",
+    "requested_at": "2026-09-21T07:42:00Z",
+    "purpose": "Read season start and end dates from CORE",
+    "action": "query",
+    "target": "core",
+    "sql": "SELECT * FROM `IMC Game World Season` ORDER BY game_world_id, imc_season"
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "custom",
-      "database": "Sql1956795_3",
-      "migration_id": "clear_match_report_gw004_gw006_gw009_20260921",
-      "allow_destructive": true,
-      "data_migration": true,
-      "statements": [
-        "DELETE FROM `GW004_IMC Match Report`",
-        "DELETE FROM `GW006_IMC Match Report`",
-        "DELETE FROM `GW009_IMC Match Report`"
-      ]
-    },
-    "analysis": [
-      {
-        "sql": "DELETE FROM `GW004_IMC Match Report`",
-        "kind": "DELETE",
-        "destructive": true,
-        "sha256": "9a7cef577ab88543e737eee536c1e38704a3784cf26de536113edd876c3a8ae4"
-      },
-      {
-        "sql": "DELETE FROM `GW006_IMC Match Report`",
-        "kind": "DELETE",
-        "destructive": true,
-        "sha256": "d2838af7f9cf7bdba6dd1e1af19b0674cc3d7d1696ce15f39c7c69bd16d540c4"
-      },
-      {
-        "sql": "DELETE FROM `GW009_IMC Match Report`",
-        "kind": "DELETE",
-        "destructive": true,
-        "sha256": "8c7bcfc0f246fcc3f3b7a9d88fce3ad8de26df6cb465506ace5eeaa7a50b1bc8"
-      }
-    ],
-    "plan_sha256": "12f57fe53900af454ba9a42c8b99f0ae9e8d80bb49904f1c2ce4142edc33f4fa",
-    "expires_at": "2026-09-21T07:55:51+00:00",
-    "confirmation_token": "1789977351.648822459ce366e3ec5935b298c4adaa1cd340bbb7133fd56fe386585b4887d5"
+    "action": "query",
+    "target": "core",
+    "database": "Sql1956795_1",
+    "result": {
+      "rows": [
+        {
+          "game_world_id": "GW001",
+          "imc_season": "1",
+          "soccer_manager_season": null,
+          "imc_season_start_date": "2026-07-12",
+          "imc_season_end_date": "2026-09-20"
+        },
+        {
+          "game_world_id": "GW002",
+          "imc_season": "1",
+          "soccer_manager_season": null,
+          "imc_season_start_date": "2026-07-06",
+          "imc_season_end_date": "2026-12-05"
+        },
+        {
+          "game_world_id": "GW003",
+          "imc_season": "1",
+          "soccer_manager_season": null,
+          "imc_season_start_date": "2026-05-25",
+          "imc_season_end_date": "2026-10-17"
+        },
+        {
+          "game_world_id": "GW004",
+          "imc_season": "1",
+          "soccer_manager_season": null,
+          "imc_season_start_date": "2026-06-22",
+          "imc_season_end_date": "2026-11-14"
+        },
+        {
+          "game_world_id": "GW005",
+          "imc_season": "1",
+          "soccer_manager_season": null,
+          "imc_season_start_date": "2026-07-19",
+          "imc_season_end_date": "2026-09-13"
+        },
+        {
+          "game_world_id": "GW005",
+          "imc_season": "2",
+          "soccer_manager_season": null,
+          "imc_season_start_date": "2026-09-15",
+          "imc_season_end_date": null
+        },
+        {
+          "game_world_id": "GW006",
+          "imc_season": "1",
+          "soccer_manager_season": null,
+          "imc_season_start_date": "2026-06-22",
+          "imc_season_end_date": "2026-11-15"
+        },
+        {
+          "game_world_id": "GW007",
+          "imc_season": "1",
+          "soccer_manager_season": null,
+          "imc_season_start_date": "2026-08-10",
+          "imc_season_end_date": "2027-01-09"
+        },
+        {
+          "game_world_id": "GW008",
+          "imc_season": "1",
+          "soccer_manager_season": "48",
+          "imc_season_start_date": "2026-03-30",
+          "imc_season_end_date": "2026-08-29"
+        },
+        {
+          "game_world_id": "GW008",
+          "imc_season": "2",
+          "soccer_manager_season": "49",
+          "imc_season_start_date": "2026-08-31",
+          "imc_season_end_date": null
+        },
+        {
+          "game_world_id": "GW009",
+          "imc_season": "1",
+          "soccer_manager_season": null,
+          "imc_season_start_date": "2026-08-23",
+          "imc_season_end_date": "2026-11-01"
+        }
+      ],
+      "returned_rows": 11,
+      "total_rows": 11,
+      "truncated": false,
+      "duration_ms": 1
+    }
   }
 }
