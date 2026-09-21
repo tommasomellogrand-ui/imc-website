@@ -17,16 +17,18 @@ const date=v=>/^\d{4}-\d{2}-\d{2}/.test(v||'')?new Date(v.slice(0,10)+'T12:00:00
 function href(patch){return '?'+new URLSearchParams({...Object.fromEntries(params),world,fixture,tab,side,...patch})}
 function stateURL(){const p=new URLSearchParams(location.search);tab=tabs.some(t=>t[0]===p.get('tab'))?p.get('tab'):'overview';side=p.get('side')==='away'?'away':'home'}
 function crest(s){const src=imageURL(record[s+'_core']?.image_url);return src?`<img class="crest" src="${esc(src)}" alt="" width="105" height="105">`:`<span class="crest crest-fallback" aria-hidden="true">${esc(initials(name(s)))}</span>`}
-// Scorers come only from player fields. Legacy event roles are not scorer IDs.
+// Canonical scorers come directly from team_stats_json.scorers imported from the Match Report DOM.
 function goalScorers(teamSide){
- return players.filter(p=>p.team_side===teamSide&&num(p.goals)>0).flatMap(p=>{
-  const goals=num(p.goals)||0,minutes=array(p.goal_minutes);
-  return Array.from({length:goals},(_,i)=>({name:p.player_name||'Marcatore',minute:minute(minutes[i])}));
- });
+ const source=record?.team_stats_json||{};
+ return array(source.scorers).filter(g=>g&&g.team_side===teamSide).map(g=>({
+  name:g.player_name||'Marcatore',
+  minute:minute(g.minute),
+  own_goal:flag(g.own_goal)
+ }));
 }
 function scorersHTML(teamSide){
  const list=goalScorers(teamSide);
- return list.length?list.map(g=>`<span>${esc(g.name)}${g.minute!==null?' '+esc(g.minute)+'′':''}</span>`).join(''):'';
+ return list.length?list.map(g=>`<span>${esc(g.name)}${g.minute!==null?' '+esc(g.minute)+'′':''}${g.own_goal?' (AG)':''}</span>`).join(''):'';
 }
 function renderHero(){
  const r=record,stage=[r.competition_stage,r.competition_round].filter(Boolean).join(' · ')||'Match report';
@@ -83,7 +85,7 @@ function reportEvents(){
   for(const [field,type,label] of [['yellow_card','yellow_card','Ammonizione'],['red_card','red_card','Espulsione']])if(flag(p[field]))out.push({minute:p[field+'_minute'],team_side:p.team_side,event_type:type,event_text:label+' · '+p.player_name});
   for(const [kind,label] of [['on','Entrato'],['off','Uscito']]){const m=subMinute(p,kind);if(m!==null||flag(p['sub_'+kind]))out.push({minute:m,team_side:p.team_side,event_type:'substitution',event_text:label+' · '+p.player_name});}
  }
- for(const side of ['home','away'])for(const g of goalScorers(side))out.push({minute:g.minute,team_side:side,event_type:'goal',event_text:'Gol · '+g.name});
+ for(const side of ['home','away'])for(const g of goalScorers(side))out.push({minute:g.minute,team_side:side,event_type:'goal',event_text:(g.own_goal?'Autogol':'Gol')+' · '+g.name});
  return out.sort((a,b)=>(minute(a.minute)===null?999:elapsed(a.minute))-(minute(b.minute)===null?999:elapsed(b.minute)));
 }
 function eventView(){return `<section class="box"><div class="section-head"><h2>Gol, cartellini e cambi</h2></div>${timeline(reportEvents())}<p class="note">— indica un minuto non disponibile nei campi del report. Assist, capitano e migliore in campo sono indicati nelle formazioni.</p></section>`}
