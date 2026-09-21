@@ -86,7 +86,9 @@ try {
     $pdo->beginTransaction();
     $stmt=$pdo->prepare("SELECT COUNT(*) total,MAX(synced_at) updated_at FROM `$table` WHERE $where"); $stmt->execute($params); $meta=$stmt->fetch();
     $direction=$resource==='schedule'?'ASC':'DESC';
-    $stmt=$pdo->prepare("SELECT `$id` AS site_id,$fields FROM `$table` WHERE $where ORDER BY `$date` $direction,`$id` $direction LIMIT $limit OFFSET $offset"); $stmt->execute($params); $rows=$stmt->fetchAll();
+    $selectId=$resource==='transfers'?"`imc_transfer_number` AS site_id":"`$id` AS site_id";
+    $order=$resource==='transfers'?"`imc_transfer_number` DESC":"`$date` $direction,`$id` $direction";
+    $stmt=$pdo->prepare("SELECT $selectId,$fields FROM `$table` WHERE $where ORDER BY $order LIMIT $limit OFFSET $offset"); $stmt->execute($params); $rows=$stmt->fetchAll();
     $pdo->commit();
     foreach($rows as &$row)foreach($row as $key=>&$value)if(str_ends_with($key,'_json')||$key==='exchange_players')$value=$value===null?null:json_decode($value,true); unset($row,$value);
     require_once __DIR__.'/core.php';
