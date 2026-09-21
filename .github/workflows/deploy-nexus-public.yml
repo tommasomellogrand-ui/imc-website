@@ -1,8 +1,5 @@
 name: Deploy Nexus public runtime
 on:
-  push:
-    branches: [main]
-    paths: ['nexus/**', '.github/workflows/deploy-nexus-public.yml']
   workflow_dispatch:
 permissions:
   contents: read
