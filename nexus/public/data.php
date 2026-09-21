@@ -74,7 +74,7 @@ try {
         if($resource!=='match_report'||!ctype_digit((string)$_GET['fixture'])) respond(['ok'=>false,'error'=>'invalid_fixture'],422);
         $where.=' AND sm_fixture_id=?'; $params[]=$_GET['fixture'];
     }
-    $limit=min(100,max(1,(int)($_GET['limit']??50))); $offset=max(0,(int)($_GET['offset']??0));
+    $limit=min($resource==='transfers'?5000:100,max(1,(int)($_GET['limit']??50))); $offset=max(0,(int)($_GET['offset']??0));
     $common='game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,synced_at';
     $score='home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score';
     $fields=match($resource){
