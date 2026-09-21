@@ -1,15 +1,8 @@
 {
-  "request_id": "clear-mr-custom-20260921",
-  "requested_at": "2026-09-21T07:30:00Z",
-  "purpose": "Clear all Match Report rows for GW004 GW006 GW009",
-  "action": "plan_migration",
-  "target": "custom",
-  "migration_id": "clear_match_report_gw004_gw006_gw009_20260921",
-  "statements": [
-    "DELETE FROM `GW004_IMC Match Report`",
-    "DELETE FROM `GW006_IMC Match Report`",
-    "DELETE FROM `GW009_IMC Match Report`"
-  ],
-  "allow_destructive": true,
-  "data_migration": true
+  "request_id": "read-core-seasons-20260921",
+  "requested_at": "2026-09-21T07:42:00Z",
+  "purpose": "Read season start and end dates from CORE",
+  "action": "query",
+  "target": "core",
+  "sql": "SELECT * FROM `IMC Game World Season` ORDER BY game_world_id, imc_season"
 }
