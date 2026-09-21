@@ -49,12 +49,30 @@ function reportSummary(reports){
    const id=text(p.sm_player_id??p.player_id);
    const key=id?'id:'+id:'name:'+team+'|'+text(p.player_name);
    if(seen.has(key))continue;seen.add(key);
-   if(!players.has(key))players.set(key,{name:p.player_name,teams:new Set(),goals:0,assists:0,mom:0,appearances:0,ratingSum:0,ratingCount:0});
-   const x=players.get(key);x.teams.add(team);if(p.codex_image_url)x.image_url=p.codex_image_url;x.club_core=r[p.team_side+'_core']||null;x.club_name=team;x.goals+=number(p.goals)||0;x.assists+=number(p.assists)||0;x.mom+=flag(p.man_of_match)?1:0;
+   if(!players.has(key))players.set(key,{name:p.player_name,teams:new Set(),goals:0,own_goals:0,assists:0,mom:0,appearances:0,ratingSum:0,ratingCount:0});
+   const x=players.get(key);x.teams.add(team);if(p.codex_image_url)x.image_url=p.codex_image_url;x.club_core=r[p.team_side+'_core']||null;x.club_name=team;x.assists+=number(p.assists)||0;x.mom+=flag(p.man_of_match)?1:0;
    const rating=number(p.rating),minutes=number(p.minutes_played??p.minutes),sub=number(p.sub_on_minute);
    const appeared=flag(p.starter)||(minutes!==null&&minutes>0&&minutes<=150)||(sub!==null&&sub<=150)||(rating!==null&&rating>0&&rating<=10)||(number(p.goals)||0)>0||(number(p.assists)||0)>0;
    if(appeared)x.appearances++;
    if(rating!==null&&rating>0&&rating<=10){x.ratingSum+=rating;x.ratingCount++}
+  }
+  const scorerList=Array.isArray(stats.scorers)?stats.scorers:[];
+  for(const g of scorerList){
+   if(!g||!['home','away'].includes(g.team_side)||!text(g.player_name))continue;
+   const team=r[g.team_side+'_core']?.name||r[g.team_side+'_name']||'';
+   const id=text(g.sm_player_id??g.player_id);
+   let key=id?'id:'+id:'name:'+team+'|'+text(g.player_name);
+   let x=players.get(key);
+   if(!x){
+    const normalized=text(g.player_name).toUpperCase();
+    const candidates=[...players.entries()].filter(([,p])=>p.teams.has(team)&&text(p.name).toUpperCase()===normalized);
+    if(candidates.length===1){key=candidates[0][0];x=candidates[0][1]}
+   }
+   if(!x){
+    x={name:g.player_name,teams:new Set(team?[team]:[]),goals:0,own_goals:0,assists:0,mom:0,appearances:0,ratingSum:0,ratingCount:0,club_core:r[g.team_side+'_core']||null,club_name:team};
+    players.set(key,x);
+   }
+   if(flag(g.own_goal))x.own_goals++;else x.goals++;
   }
  }
  const list=[...players.values()].map(p=>({...p,team:[...p.teams].filter(Boolean).join(' / '),rating:p.ratingCount?p.ratingSum/p.ratingCount:null}));
