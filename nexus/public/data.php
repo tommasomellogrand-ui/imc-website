@@ -8,7 +8,7 @@ try {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') respond(['ok'=>false,'error'=>'method_not_allowed'],405);
     $world = (string)($_GET['world'] ?? 'GW001');
     if (!preg_match('/^GW00[1-9]$|^GW010$/D',$world)) respond(['ok'=>false,'error'=>'invalid_world'],422);
-    $resources = ['results'=>['IMC Site Results','site_result_id','match_date'],'schedule'=>['IMC Site Schedule','site_schedule_id','match_date'],'match_report'=>['IMC Site Match Report','site_match_report_id','match_date'],'transfers'=>['IMC Site Transfers','site_transfer_id','transfer_date']];
+    $resources = ['results'=>['IMC Site Results','site_result_id','match_date'],'schedule'=>['IMC Site Schedule','site_schedule_id','match_date'],'match_report'=>['IMC Site Match Report','site_match_report_id','match_date'],'transfers'=>[$world.'_IMC Transfers','imc_transfer_number','transfer_date']];
     $resource=(string)($_GET['resource'] ?? 'results');
     if ($resource==='worlds'||$resource==='directory') {
         require_once __DIR__.'/core.php';
@@ -97,7 +97,7 @@ try {
     if($resource==='transfers'){
         $teams=[];
         foreach(['from'=>'club_from','to'=>'club_to'] as $side=>$nameField){
-            foreach(nexus_core_rows($pdo,"SELECT DISTINCT `{$side}_sm_world_club_id` id,`$nameField` name FROM `IMC Site Transfers` WHERE game_world_id=?",[$world]) as $team){
+            foreach(nexus_core_rows($pdo,"SELECT DISTINCT `{$side}_sm_world_club_id` id,`$nameField` name FROM `{$world}_IMC Transfers` WHERE game_world_id=?",[$world]) as $team){
                 if(!$team['name'])continue;
                 $key=$team['id']===null?'name:'.$team['name']:(string)$team['id'];
                 $teams[$key]=['id'=>$key,'name'=>$team['name']];
