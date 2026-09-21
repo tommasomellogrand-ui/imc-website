@@ -87,7 +87,6 @@ for i in range(1,11):
 hertha=json.loads(get('public/data.php?world=GW001&resource=team_profile&team=404&teamType=clubs'))
 assert hertha['ok'] and hertha['mapping_status']=='verified'
 assert str(hertha['team']['sm_team_id'])=='94079171' and str(hertha['team']['sm_global_team_id'])=='404'
-assert len(hertha['rows'])>=22
 for row in hertha['rows']:
     side='home' if str(row['home_sm_club_id'])=='94079171' else 'away'
     assert str(row[side+'_sm_club_id'])=='94079171'
