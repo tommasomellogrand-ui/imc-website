@@ -38,7 +38,21 @@ function rating(p){const n=num(p.rating);return `<span class="rating ${n===null?
 function normName(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim()}
 function subMinute(p,kind){return minute(p[kind==='on'?'sub_on_minute':'sub_off_minute'])}
 function elapsed(m){return String(m).split('+').map(Number).reduce((a,b)=>a+b,0)}
-function playerMinutes(p){return time(p.minutes_played??p.minutes)}
+function playerMinutes(p){
+ const direct=minute(p.minutes_played??p.minutes);
+ if(direct!==null)return direct+'′';
+ const red=minute(p.red_card_minute),on=subMinute(p,'on'),off=subMinute(p,'off');
+ let played;
+ if(flag(p.starter)){
+  const end=[off,red].filter(v=>v!==null).map(elapsed);
+  played=end.length?Math.min(...end):90;
+ }else{
+  if(on===null)return '0′';
+  const start=elapsed(on),end=[off,red].filter(v=>v!==null).map(elapsed).filter(v=>v>=start);
+  played=(end.length?Math.min(...end):90)-start;
+ }
+ return Math.max(0,Math.min(90,played))+'′';
+}
 function badges(p){
  const out=[];
  if(num(p.goals)>0){const gm=array(p.goal_minutes).map(minute).filter(v=>v!==null);out.push(`<span class="badge" title="Gol${gm.length?' · '+gm.join('′, ')+'′':''}">⚽${num(p.goals)>1?num(p.goals):''}${gm.length?' '+gm.map(v=>esc(v)+'′').join(', '):''}</span>`);}
