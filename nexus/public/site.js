@@ -247,15 +247,22 @@ async function teamProfile(c,signal){
  $('viewControls').innerHTML=go({team:'',offset:0},national?'← Tutte le nazionali':'← Tutti i club');
  if(!team){$('rows').innerHTML=empty('Squadra non presente in questo mondo.');$('status').textContent=state.world;return}
  $('sectionTitle').textContent=team.name;
- $('viewControls').innerHTML+=tabs('profileTab',[['career','Manager'],['stats','Statistiche'],['matches','Partite'],['trophy','Trophy Room']]);
+ $('viewControls').innerHTML+=tabs('profileTab',[['career','Manager'],['teamhub','Team Hub'],['stats','Statistiche'],['matches','Partite'],['trophy','Trophy Room']]);
  if(state.profileTab==='trophy'){const d=await cached({world:state.world,resource:'trophies'},signal);$('rows').innerHTML=`<article class="card profile-heading">${entity(team,team.name)}</article>`+trophyShelf(d.awards.filter(a=>sameId(a.winner.core?.[national?'national_team_id':'club_id'],team.id)&&(compGroup(a.competition)==='nations')===national));return;}
- if(['stats','matches'].includes(state.profileTab)){
+ if(['teamhub','stats','matches'].includes(state.profileTab)){
  $('viewControls').innerHTML+=form(select('season','Stagione',[['','Tutte le stagioni'],...c.seasons.map(s=>[s.imc_season,'Stagione '+s.imc_season])]));
  const d=await cached({world:state.world,resource:'team_profile',team:state.team,teamType:state.teamType,season:state.season},signal),rows=L.unique(d.rows).filter(L.completed);
  const note='';
  const heading=`<article class="card profile-heading">${entity(team,team.name)}</article>`;
  if(!rows.length){const message=d.mapping_status==='missing'?'ID della squadra nel mondo non ancora presente nel mapping CORE.':d.mapping_status==='ambiguous'?'ID del mondo associato a più squadre: collegamento sospeso per evitare statistiche errate.':'Nessuna partita disponibile per questa squadra e stagione.';$('rows').innerHTML=heading+note+empty(message);$('status').textContent=state.world+' · 0 report collegati';return}
  if(state.profileTab==='matches')page(heading+note+matchGroups(rows.slice(state.offset,state.offset+50)),rows.length,'match report');
+ else if(state.profileTab==='teamhub'){
+  const roster=L.teamPlayerStats(rows,d.team.sm_team_id),fmt=v=>v==null?'—':Number(v).toLocaleString('it-IT',{maximumFractionDigits:2});
+  const totals={players:roster.length,apps:roster.reduce((s,p)=>s+p.appearances,0),minutes:roster.reduce((s,p)=>s+p.minutes,0),goals:roster.reduce((s,p)=>s+p.goals,0),assists:roster.reduce((s,p)=>s+p.assists,0),own:roster.reduce((s,p)=>s+p.own_goals,0)};
+  const cards=roster.map(p=>`<article class="card teamhub-player">${overviewPlayerVisual({...p,club_core:team,club_name:team.name})}<div class="teamhub-copy"><h3>${esc(p.name)}</h3><div class="teamhub-primary"><strong>${p.appearances}</strong><small>Pres.</small><strong>${number(p.minutes)}</strong><small>Min.</small><strong>${p.goals}</strong><small>Gol</small><strong>${p.assists}</strong><small>Assist</small></div><div class="teamhub-secondary"><span>${p.starts} titolare</span><span>${p.sub_apps} subentrato</span><span>${p.rating==null?'—':p.rating.toFixed(2)} voto</span><span>${p.yellow} 🟨</span><span>${p.red} 🟥</span><span>${p.mom} MVP</span><span>${p.own_goals} AG</span><span>${p.goal_assists} G+A</span><span>${fmt(p.ga90)} G+A/90</span></div></div></article>`).join('');
+  $('rows').innerHTML=heading+note+'<h3>Team Hub</h3>'+statTiles([[totals.players,'Giocatori utilizzati'],[totals.goals,'Gol'],[totals.assists,'Assist'],[totals.own,'Autogol'],[number(totals.minutes),'Minuti complessivi']])+`<div class="teamhub-roster">${cards}</div>`;
+  $('status').textContent=state.world+' · '+rows.length+' match report · '+roster.length+' giocatori utilizzati';
+ }
  else {const adapted=rows.map(r=>({...r,home_sm_manager_id:r.home_sm_club_id,away_sm_manager_id:r.away_sm_club_id}));$('rows').innerHTML=heading+note+detailedProfileStats(adapted,d.team.sm_team_id,!national);$('status').textContent=state.world+' · '+rows.length+' match report';}return;
  }
 
