@@ -81,6 +81,41 @@ function reportSummary(reports){
 }
 
 
+function teamPlayerStats(rows,teamId){
+ const text=v=>String(v??'').trim(),number=v=>v==null||text(v)===''?null:Number.isFinite(Number(v))&&Number(v)>=0?Number(v):null;
+ const flag=v=>v===true||v===1||v==='1',json=v=>{try{return typeof v==='string'?JSON.parse(v):v}catch{return null}};
+ const elapsed=v=>{const s=text(v);if(!/^\d{1,3}(?:\+\d{1,2})?$/.test(s))return null;return s.split('+').map(Number).reduce((a,b)=>a+b,0)};
+ const map=new Map();
+ for(const r of unique(rows).filter(completed)){
+  const side=text(r.home_sm_club_id)===text(teamId)?'home':text(r.away_sm_club_id)===text(teamId)?'away':null;if(!side)continue;
+  const ps=json(r.players_json),stats=json(r.team_stats_json)||{},seen=new Set();
+  for(const p of Array.isArray(ps)?ps:[]){
+   if(p.team_side!==side||!text(p.player_name))continue;
+   const id=text(p.sm_player_id??p.player_id),key=id?'id:'+id:'name:'+text(p.player_name).toUpperCase();if(seen.has(key))continue;seen.add(key);
+   if(!map.has(key))map.set(key,{id,name:p.player_name,image_url:p.codex_image_url||p.image_url||null,appearances:0,starts:0,sub_apps:0,minutes:0,goals:0,own_goals:0,assists:0,yellow:0,red:0,mom:0,ratingSum:0,ratingCount:0});
+   const x=map.get(key);if(!x.image_url&&(p.codex_image_url||p.image_url))x.image_url=p.codex_image_url||p.image_url;
+   const rating=number(p.rating),on=elapsed(p.sub_on_minute),off=elapsed(p.sub_off_minute),red=elapsed(p.red_card_minute),direct=number(p.minutes_played??p.minutes);
+   const appeared=flag(p.starter)||(direct!==null&&direct>0)||(on!==null)||(rating!==null&&rating>0&&rating<=10)||number(p.assists)>0||flag(p.yellow_card)||flag(p.red_card)||flag(p.man_of_match);
+   if(appeared){x.appearances++;if(flag(p.starter))x.starts++;else x.sub_apps++}
+   let mins=direct;
+   if(mins===null&&appeared){if(flag(p.starter)){const ends=[off,red].filter(v=>v!==null);mins=ends.length?Math.min(...ends):90}else if(on!==null){const ends=[off,red].filter(v=>v!==null&&v>=on);mins=(ends.length?Math.min(...ends):90)-on}else mins=0}
+   if(mins!==null)x.minutes+=Math.max(0,Math.min(90,mins));
+   x.assists+=number(p.assists)||0;x.yellow+=flag(p.yellow_card)?1:0;x.red+=flag(p.red_card)?1:0;x.mom+=flag(p.man_of_match)?1:0;
+   if(rating!==null&&rating>0&&rating<=10){x.ratingSum+=rating;x.ratingCount++}
+  }
+  const scorers=Array.isArray(stats.scorers)?stats.scorers:[];
+  for(const g of scorers){
+   if(!g||g.team_side!==side||!text(g.player_name))continue;
+   const id=text(g.sm_player_id??g.player_id),key=id?'id:'+id:'name:'+text(g.player_name).toUpperCase();
+   let x=map.get(key);
+   if(!x){x={id,name:g.player_name,image_url:null,appearances:0,starts:0,sub_apps:0,minutes:0,goals:0,own_goals:0,assists:0,yellow:0,red:0,mom:0,ratingSum:0,ratingCount:0};map.set(key,x)}
+   if(flag(g.own_goal))x.own_goals++;else x.goals++;
+  }
+ }
+ return [...map.values()].map(x=>({...x,rating:x.ratingCount?x.ratingSum/x.ratingCount:null,goal_assists:x.goals+x.assists,goals90:x.minutes?x.goals*90/x.minutes:null,assists90:x.minutes?x.assists*90/x.minutes:null,ga90:x.minutes?(x.goals+x.assists)*90/x.minutes:null})).filter(x=>x.appearances>0).sort((a,b)=>b.appearances-a.appearances||b.minutes-a.minutes||a.name.localeCompare(b.name,'it'));
+}
+
+
 function profileStats(rows,id){
  const selected=unique(rows).filter(r=>completed(r)&&managerSide(r,id));
  const basic=managerStats(selected,id),sum={},count={},against={},againstCount={},own=[];
@@ -109,5 +144,5 @@ function headToHeads(rows,id){
  return [...groups.values()].map(g=>({...g,stats:profileStats(g.rows,id)})).sort((a,b)=>b.rows.length-a.rows.length||a.name.localeCompare(b.name,'it'));
 }
 
-const api={profileStats,headToHeads,competitionRounds,reportSummary,score,completed,unique,group,knockout,standings,winner,managerSide,managerRows,managerStats,careerDays};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NexusLogic=api;
+const api={teamPlayerStats,profileStats,headToHeads,competitionRounds,reportSummary,score,completed,unique,group,knockout,standings,winner,managerSide,managerRows,managerStats,careerDays};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NexusLogic=api;
 })(globalThis);
