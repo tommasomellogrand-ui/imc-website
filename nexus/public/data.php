@@ -80,7 +80,7 @@ try {
     $fields=match($resource){
         'results'=>"$common,$score,result_status,competition_group_name,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id",
         'schedule'=>"$common,match_time,home_sm_team_id,away_sm_team_id,home_sm_manager_id,away_sm_manager_id",
-        'match_report'=>"$common,$score,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id,home_manager_name,away_manager_name,stadium_name,attendance".($detail?',team_stats_json,players_json,events_json,tactics_json,commentary_json':''),
+        'match_report'=>"$common,$score,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id,home_manager_name,away_manager_name,stadium_name,attendance".($detail?',team_stats_json,players_json,tactics_json':''),
         'transfers'=>'game_world_id,imc_transfer_number,player_id,player_name,club_from,club_to,from_sm_world_club_id,to_sm_world_club_id,transfer_date,amount_text,exchange_players,synced_at'
     };
     $pdo->beginTransaction();

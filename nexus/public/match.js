@@ -2,7 +2,7 @@
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search);
 const world=/^GW00[1-9]$|^GW010$/.test(params.get('world'))?params.get('world'):'GW001';
 const fixture=params.get('fixture')||'',tabs=[['overview','MATCH DATA'],['home','HOME'],['away','AWAY']];
-let record=null,players=[],events=[],tactics=[],tab='overview',side='home';
+let record=null,players=[],tactics=[],tab='overview',side='home';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const array=v=>{if(typeof v==='string'){try{v=JSON.parse(v)}catch{return []}}return Array.isArray(v)?v:[]};
 const num=v=>v===null||v===undefined||String(v).trim()===''?null:Number.isFinite(Number(v))?Number(v):null;
@@ -17,29 +17,11 @@ const date=v=>/^\d{4}-\d{2}-\d{2}/.test(v||'')?new Date(v.slice(0,10)+'T12:00:00
 function href(patch){return '?'+new URLSearchParams({...Object.fromEntries(params),world,fixture,tab,side,...patch})}
 function stateURL(){const p=new URLSearchParams(location.search);tab=tabs.some(t=>t[0]===p.get('tab'))?p.get('tab'):'overview';side=p.get('side')==='away'?'away':'home'}
 function crest(s){const src=imageURL(record[s+'_core']?.image_url);return src?`<img class="crest" src="${esc(src)}" alt="" width="105" height="105">`:`<span class="crest crest-fallback" aria-hidden="true">${esc(initials(name(s)))}</span>`}
-// REPORT_FACTS_START: authoritative player fields; event roles are not reliable.
+// Scorers come only from player fields. Legacy event roles are not scorer IDs.
 function goalScorers(teamSide){
- const eligible=players.filter(p=>p.team_side===teamSide&&num(p.goals)>0);
- const assigned=new Map(eligible.map(p=>[String(p.sm_player_id),[]]));
- const seen=new Set();
- for(const e of events){
-  const text=String(e.event_text||e.commentary_text||'');
-  if(!/\bGOL!+/i.test(text)||/annullat|disallow|no goal|lotteria dei rigori|calcerà il rigore successivo/i.test(text))continue;
-  const m=minute(e.minute);if(m===null)continue;
-  const ids=[e.primary_sm_player_id,e.secondary_sm_player_id].map(String);
-  const candidates=eligible.filter(p=>ids.includes(String(p.sm_player_id)));
-  if(candidates.length!==1)continue;
-  const p=candidates[0],key=p.sm_player_id+'|'+m;
-  if(seen.has(key))continue;seen.add(key);
-  assigned.get(String(p.sm_player_id)).push(m);
- }
- return eligible.flatMap(p=>{
-  const mins=assigned.get(String(p.sm_player_id));
-  // Inconsistent event totals must not invent or misattribute scoring minutes.
-  return Array.from({length:num(p.goals)},(_,i)=>({name:p.player_name||'Marcatore',minute:mins.length===num(p.goals)?mins[i]:null}));
- });
+ return players.filter(p=>p.team_side===teamSide&&num(p.goals)>0).flatMap(p=>
+  Array.from({length:num(p.goals)},()=>({name:p.player_name||'Marcatore',minute:null})));
 }
-// REPORT_FACTS_END
 function scorersHTML(teamSide){
  const list=goalScorers(teamSide);
  return list.length?list.map(g=>`<span>${esc(g.name)}${g.minute!==null?' '+esc(g.minute)+'′':''}</span>`).join(''):'';
@@ -53,9 +35,8 @@ function renderHero(){
 function rating(p){const n=num(p.rating);return `<span class="rating ${n===null?'none':n<6?'low':n<7?'mid':''}" aria-label="${n===null?'Voto non disponibile':'Voto '+n}">${n===null?'—':n.toFixed(1)}</span>`}
 function normName(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim()}
 function subMinute(p,kind){return minute(p[kind==='on'?'sub_on_minute':'sub_off_minute'])}
-function matchEnd(){const mins=array(record.commentary_json).filter(x=>/fine secondo tempo|fine partita|full.?time|fine.*supplementar/i.test(x.commentary_text||'')).map(x=>minute(x.minute)).filter(x=>x!==null).map(elapsed);return mins.length?Math.max(...mins):null}
 function elapsed(m){return String(m).split('+').map(Number).reduce((a,b)=>a+b,0)}
-function playerMinutes(p){const on=subMinute(p,'on'),off=subMinute(p,'off'),red=minute(p.red_card_minute),end=matchEnd();const stops=[off,red].filter(x=>x!==null).map(elapsed);const stop=stops.length?Math.min(...stops):end;if(stop===null)return '—';if(flag(p.starter)){if(off===null&&red===null&&players.some(q=>q.team_side===p.team_side&&flag(q.sub_on)&&subMinute(q,'on')===null))return '—';return Math.max(0,stop)+'′';}if(on!==null)return Math.max(0,stop-elapsed(on))+'′';return '—'}
+function playerMinutes(p){return time(p.minutes_played??p.minutes)}
 function badges(p){
  const out=[];
  if(num(p.goals)>0)out.push(`<span class="badge" title="Gol">⚽${num(p.goals)>1?num(p.goals):''}</span>`);
@@ -77,8 +58,8 @@ function overview(){const scorers=players.filter(p=>num(p.goals)>0||num(p.assist
 const tacticLabels={formation:'Modulo',mentality:'Mentalità',passing_style:'Passaggi',pressing:'Pressing',tempo:'Ritmo',width:'Ampiezza',tackling_style:'Contrasti',defensive_line:'Linea difensiva',attacking_style:'Attacco',wide_play:'Gioco sulle fasce',counter_attack:'Contropiede',tight_marking:'Marcatura stretta',captain_name:'Capitano',penalty_taker_name:'Rigorista',free_kick_taker_name:'Punizioni',corner_taker_name:'Corner'};
 function formation(){const snapshots=tactics.filter(t=>t.team_side===side).sort((a,b)=>(num(a.snapshot_minute)??999)-(num(b.snapshot_minute)??999));return playerTable(true)+(snapshots.length?`<section class="box box-pad"><h2>Assetto tattico</h2>${snapshots.map((t,i)=>`<details ${i===0?'open':''}><summary>${minute(t.snapshot_minute)==='0'?'Al calcio d’inizio':minute(t.snapshot_minute)!==null?time(t.snapshot_minute):'Assetto importato'} · ${esc(t.formation||'Modulo non disponibile')}</summary><div class="tactics">${Object.entries(tacticLabels).filter(([k])=>t[k]!=null&&t[k]!=='').map(([k,label])=>`<div class="tactic"><small>${label}</small><strong>${esc(t[k])}</strong></div>`).join('')}</div></details>`).join('')}</section>`:'')}
 const eventNames={goal:'Gol',yellow_card:'Ammonizione',red_card:'Espulsione',substitution:'Sostituzione',save:'Parata',kickoff:'Calcio d’inizio',halftime:'Intervallo',fulltime:'Fine partita',penalty:'Rigore',injury:'Infortunio'};
-function eventText(e){const raw=String(e.event_text??e.commentary_text??'');const m=minute(e.minute);return m!==null&&raw.startsWith(m)?raw.slice(m.length).replace(/^\s*['′:]?\s*/,''):raw}
-function eventTitle(e){if(e.event_type==='goal'&&/annullat|disallow|no goal/i.test(e.event_text||''))return 'Gol annullato';return eventNames[e.event_type]||'Azione'}
+function eventText(e){return String(e.event_text??'')}
+function eventTitle(e){return eventNames[e.event_type]||'Azione'}
 function timeline(list){return list.length?list.map(e=>`<article class="event"><time>${time(e.minute)}</time><div><strong>${esc(eventTitle(e))}</strong>${['home','away'].includes(e.team_side)?`<small>${esc(name(e.team_side))}</small>`:''}<p>${esc(eventText(e))}</p></div></article>`).join(''):empty('Nessun evento disponibile.')}
 function reportEvents(){
  const out=[];
@@ -89,7 +70,7 @@ function reportEvents(){
  for(const side of ['home','away'])for(const g of goalScorers(side))out.push({minute:g.minute,team_side:side,event_type:'goal',event_text:'Gol · '+g.name});
  return out.sort((a,b)=>(minute(a.minute)===null?999:elapsed(a.minute))-(minute(b.minute)===null?999:elapsed(b.minute)));
 }
-function eventView(){const seen=new Set(),commentary=array(record.commentary_json).filter(c=>{const key=String(c.minute)+'|'+String(c.commentary_text||'').replace(/\s+/g,'');if(seen.has(key))return false;seen.add(key);return true});return `<section class="box"><div class="section-head"><h2>Gol, cartellini e cambi</h2></div>${timeline(reportEvents())}<p class="note">— indica un minuto non disponibile nel report. Assist, capitano e migliore in campo sono indicati nelle formazioni.</p></section>${commentary.length?`<details class="box"><summary>Cronaca completa · ${commentary.length} azioni</summary>${timeline(commentary)}</details>`:''}`}
+function eventView(){return `<section class="box"><div class="section-head"><h2>Gol, cartellini e cambi</h2></div>${timeline(reportEvents())}<p class="note">— indica un minuto non disponibile nei campi del report. Assist, capitano e migliore in campo sono indicati nelle formazioni.</p></section>`}
 function render(){stateURL();$('tabs').hidden=false;$('tabs').innerHTML=tabs.map(([key,label])=>`<a data-view href="${esc(href({tab:key}))}" ${tab===key?'aria-current="page"':''}>${label}</a>`).join('');if(tab==='home'||tab==='away'){side=tab;$('panel').innerHTML=formation()}else $('panel').innerHTML=overview()+eventView()}
 document.addEventListener('click',e=>{const a=e.target.closest('a[data-view]');if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;e.preventDefault();history.pushState(null,'',a.href);render()});
 window.addEventListener('popstate',()=>{if(record)render()});
@@ -103,7 +84,7 @@ async function boot(){
  try{
  const [data,catalog]=await Promise.all([fetchJSON({world,resource:'match_report',fixture}),fetchJSON({world,resource:'catalog'}).catch(()=>null)]);
  record=data.rows?.[0];if(!record){$('status').textContent='Il report di questa partita non è ancora disponibile.';return}
- players=array(record.players_json);events=array(record.events_json).sort((a,b)=>(num(a.event_sequence)??0)-(num(b.event_sequence)??0));tactics=array(record.tactics_json);
+ players=array(record.players_json);tactics=array(record.tactics_json);
  const comp=catalog?.rows?.find(c=>c.competition_key===record.competition_key);record._nexus_view=record.competition_core?.nexus_view||comp?.nexus_view||record.competition_key||'Competizione';$('competition').textContent=record._nexus_view;
  $('status').hidden=true;renderHero();render();
  }catch(e){$('status').textContent=e.message;$('panel').innerHTML='<button class="retry" type="button">Riprova</button>';$('panel').querySelector('button').onclick=()=>{ $('panel').innerHTML='';boot()};}
