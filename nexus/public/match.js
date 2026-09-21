@@ -19,8 +19,10 @@ function stateURL(){const p=new URLSearchParams(location.search);tab=tabs.some(t
 function crest(s){const src=imageURL(record[s+'_core']?.image_url);return src?`<img class="crest" src="${esc(src)}" alt="" width="105" height="105">`:`<span class="crest crest-fallback" aria-hidden="true">${esc(initials(name(s)))}</span>`}
 // Scorers come only from player fields. Legacy event roles are not scorer IDs.
 function goalScorers(teamSide){
- return players.filter(p=>p.team_side===teamSide&&num(p.goals)>0).flatMap(p=>
-  Array.from({length:num(p.goals)},()=>({name:p.player_name||'Marcatore',minute:null})));
+ return players.filter(p=>p.team_side===teamSide&&num(p.goals)>0).flatMap(p=>{
+  const goals=num(p.goals)||0,minutes=array(p.goal_minutes);
+  return Array.from({length:goals},(_,i)=>({name:p.player_name||'Marcatore',minute:minute(minutes[i])}));
+ });
 }
 function scorersHTML(teamSide){
  const list=goalScorers(teamSide);
@@ -39,7 +41,7 @@ function elapsed(m){return String(m).split('+').map(Number).reduce((a,b)=>a+b,0)
 function playerMinutes(p){return time(p.minutes_played??p.minutes)}
 function badges(p){
  const out=[];
- if(num(p.goals)>0)out.push(`<span class="badge" title="Gol">⚽${num(p.goals)>1?num(p.goals):''}</span>`);
+ if(num(p.goals)>0){const gm=array(p.goal_minutes).map(minute).filter(v=>v!==null);out.push(`<span class="badge" title="Gol${gm.length?' · '+gm.join('′, ')+'′':''}">⚽${num(p.goals)>1?num(p.goals):''}${gm.length?' '+gm.map(v=>esc(v)+'′').join(', '):''}</span>`);}
  if(num(p.assists)>0)out.push(`<span class="badge" title="Assist">A${num(p.assists)>1?num(p.assists):''}</span>`);
  if(flag(p.captain))out.push('<span class="badge" title="Capitano">C</span>');
  if(flag(p.man_of_match))out.push('<span class="badge gold" title="Migliore in campo">★</span>');
