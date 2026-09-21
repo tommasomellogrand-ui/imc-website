@@ -1,248 +1,59 @@
 {
-  "request_id": "sql2-remaining-lowercase-gw-20260920",
-  "completed_at": "2026-09-20T09:13:56.063420+00:00",
+  "request_id": "clear-mr-custom-20260921",
+  "completed_at": "2026-09-21T07:40:51.942901+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "sql2-remaining-lowercase-gw-20260920",
-    "requested_at": "2026-09-20T08:27:00Z",
-    "purpose": "List exact lowercase gw_ tables currently remaining in SQL2",
-    "action": "query",
-    "target": "gold",
-    "sql": "SELECT TABLE_NAME,ROUND((DATA_LENGTH+INDEX_LENGTH)/1024/1024,2) total_mb FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND BINARY TABLE_NAME LIKE 'gw\\_%' ORDER BY (DATA_LENGTH+INDEX_LENGTH) DESC,TABLE_NAME",
-    "limit": 200
+    "request_id": "clear-mr-custom-20260921",
+    "requested_at": "2026-09-21T07:30:00Z",
+    "purpose": "Clear all Match Report rows for GW004 GW006 GW009",
+    "action": "plan_migration",
+    "target": "custom",
+    "migration_id": "clear_match_report_gw004_gw006_gw009_20260921",
+    "statements": [
+      "DELETE FROM `GW004_IMC Match Report`",
+      "DELETE FROM `GW006_IMC Match Report`",
+      "DELETE FROM `GW009_IMC Match Report`"
+    ],
+    "allow_destructive": true,
+    "data_migration": true
   },
   "response": {
     "ok": true,
-    "action": "query",
-    "target": "gold",
-    "database": "Sql1956795_2",
-    "result": {
-      "rows": [
-        {
-          "TABLE_NAME": "gw_source_captures",
-          "total_mb": "33.22"
-        },
-        {
-          "TABLE_NAME": "gw_fixtures",
-          "total_mb": "28.11"
-        },
-        {
-          "TABLE_NAME": "gw_source_dom_nodes",
-          "total_mb": "24.63"
-        },
-        {
-          "TABLE_NAME": "gw_match_lineups",
-          "total_mb": "11.55"
-        },
-        {
-          "TABLE_NAME": "gw_transfers",
-          "total_mb": "11.09"
-        },
-        {
-          "TABLE_NAME": "gw_match_reports",
-          "total_mb": "10.55"
-        },
-        {
-          "TABLE_NAME": "gw_fixture_results",
-          "total_mb": "3.38"
-        },
-        {
-          "TABLE_NAME": "gw_match_commentary",
-          "total_mb": "1.64"
-        },
-        {
-          "TABLE_NAME": "gw_match_tactics_snapshots",
-          "total_mb": "1.63"
-        },
-        {
-          "TABLE_NAME": "gw_match_lineup_players",
-          "total_mb": "0.97"
-        },
-        {
-          "TABLE_NAME": "gw_players",
-          "total_mb": "0.81"
-        },
-        {
-          "TABLE_NAME": "gw_world_clubs",
-          "total_mb": "0.63"
-        },
-        {
-          "TABLE_NAME": "gw_match_events",
-          "total_mb": "0.59"
-        },
-        {
-          "TABLE_NAME": "gw_player_profile_snapshots",
-          "total_mb": "0.52"
-        },
-        {
-          "TABLE_NAME": "gw_sm_user_assignments",
-          "total_mb": "0.50"
-        },
-        {
-          "TABLE_NAME": "gw_competitions",
-          "total_mb": "0.19"
-        },
-        {
-          "TABLE_NAME": "gw_sm_users",
-          "total_mb": "0.17"
-        },
-        {
-          "TABLE_NAME": "gw_national_teams",
-          "total_mb": "0.13"
-        },
-        {
-          "TABLE_NAME": "gw_expected_matches",
-          "total_mb": "0.11"
-        },
-        {
-          "TABLE_NAME": "gw_match_team_stats",
-          "total_mb": "0.09"
-        },
-        {
-          "TABLE_NAME": "gw_attendance_snapshots",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_competition_editions",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_divisions",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_history_snapshots",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_honours",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_manager_ranking_snapshots",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_player_leaderboard_snapshots",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_player_stat_snapshots",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_seasons",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_squads",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_standings_snapshots",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_tactic_snapshots",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_transfer_summary_snapshots",
-          "total_mb": "0.08"
-        },
-        {
-          "TABLE_NAME": "gw_identity_matches",
-          "total_mb": "0.06"
-        },
-        {
-          "TABLE_NAME": "gw_import_issues",
-          "total_mb": "0.06"
-        },
-        {
-          "TABLE_NAME": "gw_player_db_updates",
-          "total_mb": "0.06"
-        },
-        {
-          "TABLE_NAME": "gw_player_state_snapshots",
-          "total_mb": "0.06"
-        },
-        {
-          "TABLE_NAME": "gw_standings_rows",
-          "total_mb": "0.06"
-        },
-        {
-          "TABLE_NAME": "gw_tactic_instructions",
-          "total_mb": "0.06"
-        },
-        {
-          "TABLE_NAME": "gw_tactic_slots",
-          "total_mb": "0.06"
-        },
-        {
-          "TABLE_NAME": "gw_tactic_substitutions",
-          "total_mb": "0.06"
-        },
-        {
-          "TABLE_NAME": "gw_competition_groups",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_competition_rounds",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_competition_stages",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_countries",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_import_runs",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_news_items",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_player_db_update_batches",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_player_leaderboard_rows",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_squad_members",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_stadiums",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_world_rules",
-          "total_mb": "0.05"
-        },
-        {
-          "TABLE_NAME": "gw_game_worlds",
-          "total_mb": "0.03"
-        },
-        {
-          "TABLE_NAME": "gw_source_fragments",
-          "total_mb": "0.03"
-        },
-        {
-          "TABLE_NAME": "gw_source_page_types",
-          "total_mb": "0.03"
-        }
-      ],
-      "returned_rows": 55,
-      "total_rows": 55,
-      "truncated": false,
-      "duration_ms": 5
-    }
+    "action": "plan_migration",
+    "plan": {
+      "target": "custom",
+      "database": "Sql1956795_3",
+      "migration_id": "clear_match_report_gw004_gw006_gw009_20260921",
+      "allow_destructive": true,
+      "data_migration": true,
+      "statements": [
+        "DELETE FROM `GW004_IMC Match Report`",
+        "DELETE FROM `GW006_IMC Match Report`",
+        "DELETE FROM `GW009_IMC Match Report`"
+      ]
+    },
+    "analysis": [
+      {
+        "sql": "DELETE FROM `GW004_IMC Match Report`",
+        "kind": "DELETE",
+        "destructive": true,
+        "sha256": "9a7cef577ab88543e737eee536c1e38704a3784cf26de536113edd876c3a8ae4"
+      },
+      {
+        "sql": "DELETE FROM `GW006_IMC Match Report`",
+        "kind": "DELETE",
+        "destructive": true,
+        "sha256": "d2838af7f9cf7bdba6dd1e1af19b0674cc3d7d1696ce15f39c7c69bd16d540c4"
+      },
+      {
+        "sql": "DELETE FROM `GW009_IMC Match Report`",
+        "kind": "DELETE",
+        "destructive": true,
+        "sha256": "8c7bcfc0f246fcc3f3b7a9d88fce3ad8de26df6cb465506ace5eeaa7a50b1bc8"
+      }
+    ],
+    "plan_sha256": "12f57fe53900af454ba9a42c8b99f0ae9e8d80bb49904f1c2ce4142edc33f4fa",
+    "expires_at": "2026-09-21T07:55:51+00:00",
+    "confirmation_token": "1789977351.648822459ce366e3ec5935b298c4adaa1cd340bbb7133fd56fe386585b4887d5"
   }
 }
