@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.5.3';
+const IMC_DBM_VERSION = '1.6.0';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -358,8 +358,173 @@ function dbm_mcp_result(mixed $id, array $data): never {
     ]);
 }
 
+
+/* Direct, authenticated data operations for conversational clients. */
+function dbm_data_actions(): array {
+    return ['read','count','insert','update','delete','delete_one','clear_repository'];
+}
+
+function dbm_data_ident(string $name): string {
+    if (!preg_match('/^[A-Za-z_][A-Za-z0-9_ ]{0,63}$/D', $name)) throw new InvalidArgumentException('Invalid identifier.');
+    return chr(96) . $name . chr(96);
+}
+
+function dbm_data_route(array $p): array {
+    $gw = strtoupper(trim((string)($p['game_world_id'] ?? '')));
+    $table = trim((string)($p['table'] ?? ''));
+    if (preg_match('/^(GW[0-9]{3})_/', $table, $m)) {
+        if ($gw !== '' && $gw !== $m[1]) throw new InvalidArgumentException('game_world_id/table mismatch.');
+        $gw = $m[1];
+    }
+    $target = trim((string)($p['target'] ?? ''));
+    if ($gw !== '') {
+        $routes = ['GW001'=>'custom','GW002'=>'gold','GW003'=>'gold','GW004'=>'custom','GW005'=>'custom','GW006'=>'custom','GW007'=>'gold','GW008'=>'gold','GW009'=>'custom','GW010'=>'custom'];
+        if (!isset($routes[$gw])) throw new InvalidArgumentException('Unknown game_world_id.');
+        if ($target !== '' && $target !== $routes[$gw]) throw new InvalidArgumentException('game_world_id/target mismatch.');
+        $target = $routes[$gw];
+    }
+    if ($table === '') {
+        $repo = trim((string)($p['repository'] ?? ''));
+        if ($repo === 'IMC Transfer') $repo = 'IMC Transfers';
+        if ($repo === '') throw new InvalidArgumentException('table or repository required.');
+        $table = $gw !== '' ? $gw . '_' . $repo : $repo;
+    }
+    dbm_data_ident($table);
+    if (!in_array($target, ['core','gold','custom'], true)) throw new InvalidArgumentException('target or known game_world_id required.');
+    return [$target, $table, $gw];
+}
+
+function dbm_data_statement(mysqli $db, string $sql, array $values = []): mysqli_stmt {
+    $s = $db->prepare($sql);
+    if ($values !== []) {
+        $types = '';
+        foreach ($values as $value) {
+            if (!is_scalar($value) && $value !== null) throw new InvalidArgumentException('Values must be scalar or null; encode JSON columns as strings.');
+            $types .= is_int($value) ? 'i' : (is_float($value) ? 'd' : 's');
+        }
+        $s->bind_param($types, ...$values);
+    }
+    $s->execute();
+    return $s;
+}
+
+function dbm_data_predicate(array $where, array $columns, array &$values): string {
+    $parts = [];
+    foreach ($where as $column => $value) {
+        if (!isset($columns[$column])) throw new InvalidArgumentException('Unknown column: ' . $column);
+        $parts[] = dbm_data_ident((string)$column) . ' <=> ?';
+        $values[] = $value;
+    }
+    return $parts === [] ? '1=1' : implode(' AND ', $parts);
+}
+
+function dbm_data_operation(array $p): array {
+    $action = (string)($p['action'] ?? '');
+    if (!in_array($action, dbm_data_actions(), true)) throw new InvalidArgumentException('Unknown data action.');
+    [$target, $table, $gw] = dbm_data_route($p);
+    [$database, $db] = dbm_storage($target);
+    $qt = dbm_data_ident($table);
+    $columns = [];
+    $cr = $db->query('SHOW COLUMNS FROM ' . $qt);
+    while ($c = $cr->fetch_assoc()) $columns[$c['Field']] = $c;
+    $cr->free();
+    $where = $p['where'] ?? [];
+    if (!is_array($where)) throw new InvalidArgumentException('where must be an object.');
+    if (in_array($action, ['update','delete','delete_one'], true) && $where === []) throw new InvalidArgumentException('where required; use clear_repository to remove all rows.');
+    if ($action === 'clear_repository' && $where !== []) throw new InvalidArgumentException('clear_repository removes the whole table; use delete for filtered removal.');
+    if ($action === 'insert' && $where !== []) throw new InvalidArgumentException('insert does not accept where.');
+    $values = [];
+    $predicate = dbm_data_predicate($where, $columns, $values);
+    $base = ['ok'=>true,'action'=>$action,'target'=>$target,'database'=>$database,'table'=>$table,'game_world_id'=>$gw !== '' ? $gw : null];
+    if ($action === 'read') {
+        $limit = min(500, max(1, (int)($p['limit'] ?? 100)));
+        $s = dbm_data_statement($db, 'SELECT * FROM ' . $qt . ' WHERE ' . $predicate . ' LIMIT ' . ($limit + 1), $values);
+        $rows = $s->get_result()->fetch_all(MYSQLI_ASSOC); $s->close();
+        $truncated = count($rows) > $limit;
+        return $base + ['rows'=>array_slice($rows,0,$limit),'truncated'=>$truncated];
+    }
+    $count = static function () use ($db,$qt,$predicate,$values): int {
+        $s = dbm_data_statement($db, 'SELECT COUNT(*) n FROM ' . $qt . ' WHERE ' . $predicate, $values);
+        $n = (int)$s->get_result()->fetch_assoc()['n']; $s->close(); return $n;
+    };
+    if ($action === 'count') return $base + ['count'=>$count()];
+    $record = ['action'=>$action,'target'=>$target,'database'=>$database,'table'=>$table,'request_sha256'=>hash('sha256',dbm_canonical($p))];
+    // Serialize operations through this entrypoint on the same table.
+    $lock = 'dbm-data-' . substr(hash('sha256',$database . '.' . $table),0,48);
+    $ls = dbm_data_statement($db, 'SELECT GET_LOCK(?, 5) acquired', [$lock]);
+    $acquired = (int)$ls->get_result()->fetch_assoc()['acquired']; $ls->close();
+    if ($acquired !== 1) throw new RuntimeException('Repository busy; no operation executed.',409);
+    $begun = false; $committed = false; $affected = 0;
+    try {
+        dbm_audit($record + ['status'=>'started']);
+        $db->begin_transaction(); $begun = true;
+        $before = $count();
+        if ($action === 'delete_one' && $before > 1) throw new InvalidArgumentException('Multiple rows matched; specify a unique record.');
+        $insertId = null;
+        if ($action === 'insert' || $action === 'update') {
+            $data = $p[$action === 'insert' ? 'row' : 'set'] ?? null;
+            if (!is_array($data) || $data === []) throw new InvalidArgumentException('Nonempty row/set required.');
+            $names = []; $writeValues = [];
+            foreach ($data as $column => $value) {
+                if (!isset($columns[$column])) throw new InvalidArgumentException('Unknown column: ' . $column);
+                if ($column === 'game_world_id' && $gw !== '' && $value !== $gw) throw new InvalidArgumentException('game_world_id mismatch.');
+                $names[] = dbm_data_ident((string)$column); $writeValues[] = $value;
+            }
+            if ($action === 'insert') {
+                $sql = 'INSERT INTO ' . $qt . ' (' . implode(',',$names) . ') VALUES (' . implode(',',array_fill(0,count($names),'?')) . ')';
+            } else {
+                $sql = 'UPDATE ' . $qt . ' SET ' . implode(',',array_map(static fn($n) => $n . '=?',$names)) . ' WHERE ' . $predicate;
+                $writeValues = array_merge($writeValues,$values);
+            }
+            $s = dbm_data_statement($db,$sql,$writeValues);
+            $affected = $s->affected_rows; $insertId = $s->insert_id; $s->close();
+        } else {
+            $s = dbm_data_statement($db,'DELETE FROM ' . $qt . ' WHERE ' . $predicate . ($action === 'delete_one' ? ' LIMIT 1' : ''),$values);
+            $affected = $s->affected_rows; $s->close();
+        }
+        $after = $count();
+        if (in_array($action,['delete','delete_one','clear_repository'],true) && $after !== 0) throw new RuntimeException('Delete verification failed.');
+        $db->commit(); $committed = true; $begun = false;
+        dbm_audit($record + ['status'=>'success','before_count'=>$before,'after_count'=>$after,'affected_rows'=>$affected]);
+        return $base + ['before_count'=>$before,'after_count'=>$after,'affected_rows'=>$affected,'insert_id'=>$insertId,'committed'=>true];
+    } catch (Throwable $e) {
+        if ($begun) $db->rollback();
+        dbm_audit($record + ['status'=>$committed ? 'committed_with_error' : 'failed','affected_rows'=>$affected,'error'=>$e->getMessage()]);
+        if ($committed) throw new RuntimeException('Operation committed, but post-commit reporting failed: ' . $e->getMessage(), 500);
+        throw $e;
+    } finally {
+        $s = dbm_data_statement($db,'SELECT RELEASE_LOCK(?)',[$lock]); $s->close();
+    }
+}
+
+function dbm_data_tools(): array {
+    $tools = [];
+    $descriptions = [
+        'read'=>'Read rows from authoritative IMC MySQL. where is an equality filter.',
+        'count'=>'Count matching rows in authoritative IMC MySQL.',
+        'insert'=>'Insert one explicitly requested row into IMC MySQL.',
+        'update'=>'Update rows matching the nonempty equality filter where.',
+        'delete'=>'Delete all rows matching the nonempty equality filter where.',
+        'delete_one'=>'Delete one uniquely identified row; fail if multiple rows match.',
+        'clear_repository'=>'Delete ALL rows in the selected repository, preserving its table and triggers. Use only for an explicit request to empty that repository.'
+    ];
+    foreach ($descriptions as $name=>$description) {
+        $properties = ['target'=>['type'=>'string','enum'=>['core','gold','custom']],'game_world_id'=>['type'=>'string'],'table'=>['type'=>'string'],'repository'=>['type'=>'string']];
+        $required = [];
+        if (in_array($name,['read','count','update','delete','delete_one'],true)) $properties['where']=['type'=>'object','additionalProperties'=>true];
+        if (in_array($name,['update','delete','delete_one'],true)) $required[]='where';
+        if ($name==='read') $properties['limit']=['type'=>'integer','minimum'=>1,'maximum'=>500];
+        if ($name==='insert') { $properties['row']=['type'=>'object','additionalProperties'=>true]; $required[]='row'; }
+        if ($name==='update') { $properties['set']=['type'=>'object','additionalProperties'=>true]; $required[]='set'; }
+        $readOnly = in_array($name,['read','count'],true);
+        $tools[]=['name'=>$name,'description'=>$description . ' Supply target+table, or game_world_id+repository for automatic routing.','inputSchema'=>['type'=>'object','properties'=>$properties,'required'=>$required,'additionalProperties'=>false],'annotations'=>['readOnlyHint'=>$readOnly,'destructiveHint'=>!$readOnly && $name!=='insert','openWorldHint'=>false]];
+    }
+    return $tools;
+}
+
+
 function dbm_mcp_tools(): array {
-    return [
+    return array_merge(dbm_data_tools(), [
         ['name'=>'health','description'=>'Read-only connectivity check for the three authorized IMC MySQL databases.','inputSchema'=>['type'=>'object','properties'=>(object)[],'additionalProperties'=>false]],
         ['name'=>'schema','description'=>'Read the authoritative MySQL structure of one authorized database, including tables, columns, keys, indexes, foreign keys, triggers and optional table DDL.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'include_ddl'=>['type'=>'boolean','default'=>false]],'required'=>['target'],'additionalProperties'=>false]],
         ['name'=>'schema_diff','description'=>'Read-only structural comparison between MySQL schemas/tables or an explicitly supplied reference schema. Reports IDENTICAL, MISSING, EXTRA and DIFFERENT without applying corrections.','inputSchema'=>['type'=>'object','properties'=>['left_target'=>['type'=>'string','enum'=>['core','gold','custom']],'left_table'=>['type'=>'string'],'right_target'=>['type'=>'string','enum'=>['core','gold','custom']],'right_table'=>['type'=>'string'],'reference_schema'=>['type'=>'object']], 'required'=>['left_target'],'additionalProperties'=>false]],
@@ -368,7 +533,7 @@ function dbm_mcp_tools(): array {
         ['name'=>'plan_migration','description'=>'Validate a controlled MySQL migration and return a short-lived confirmation token. Does not modify the database. INSERT, UPDATE and DELETE require data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false]],'required'=>['target','migration_id','statements'],'additionalProperties'=>false]],
         ['name'=>'execute_migration','description'=>'Execute the exact previously planned migration. This modifies MySQL and requires its confirmation token. DML plans must preserve data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false],'confirmation_token'=>['type'=>'string']],'required'=>['target','migration_id','statements','confirmation_token'],'additionalProperties'=>false]],
         ['name'=>'history','description'=>'Read the protected Database Manager audit history.','inputSchema'=>['type'=>'object','properties'=>['limit'=>['type'=>'integer','minimum'=>1,'maximum'=>200]],'additionalProperties'=>false]],
-    ];
+    ]);
 }
 
 function dbm_health_data(): array {
@@ -415,6 +580,7 @@ function dbm_handle_mcp(array $request): never {
     if ($method !== 'tools/call') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'error'=>['code'=>-32601,'message'=>'Method not found']],200);
     $params = is_array($request['params'] ?? null) ? $request['params'] : [];
     $name = (string)($params['name'] ?? ''); $args = is_array($params['arguments'] ?? null) ? $params['arguments'] : [];
+    if (in_array($name, dbm_data_actions(), true)) dbm_mcp_result($id, dbm_data_operation(array_merge($args,['action'=>$name])));
     if ($name === 'health') dbm_mcp_result($id, dbm_health_data());
     if ($name === 'schema') { [$database,$db]=dbm_storage((string)($args['target']??'')); $data=dbm_schema($db,$database,($args['include_ddl']??false)===true); dbm_audit(['action'=>'schema','target'=>$args['target'],'database'=>$database,'status'=>'success']); dbm_mcp_result($id,['ok'=>true,'schema'=>$data]); }
     if ($name === 'schema_diff') { $data=dbm_schema_diff($args); dbm_audit(['action'=>'schema_diff','left_target'=>$args['left_target']??null,'left_table'=>$args['left_table']??null,'right_target'=>$args['right_target']??null,'right_table'=>$args['right_table']??null,'status'=>'success','difference_count'=>$data['difference_count']??null]); dbm_mcp_result($id,['ok'=>true,'diff'=>$data]); }
@@ -431,6 +597,7 @@ try {
     $payload = dbm_payload();
     if (($payload['jsonrpc'] ?? null) === '2.0') dbm_handle_mcp($payload);
     $action = trim((string)($payload['action'] ?? 'health'));
+    if (in_array($action, dbm_data_actions(), true)) dbm_reply(dbm_data_operation($payload));
 
     if ($action === 'health') {
         dbm_reply(['action'=>$action]+dbm_health_data());
@@ -474,27 +641,6 @@ try {
 
     if ($action === 'execute_migration') {
         dbm_reply(dbm_execute_plan($payload));
-    }
-
-    if ($action === 'delete_one') {
-        $target = trim((string)($payload['target'] ?? ''));
-        $table = trim((string)($payload['table'] ?? ''));
-        $where = $payload['where'] ?? null;
-        if (!preg_match('/^[A-Za-z0-9_ ]{1,128}$/', $table)) throw new InvalidArgumentException('Invalid table.');
-        if (!is_array($where) || $where === [] || count($where) > 8) throw new InvalidArgumentException('where must contain 1 to 8 fields.');
-        [$database, $db] = dbm_storage($target);
-        $parts = []; $values = []; $types = '';
-        foreach ($where as $column => $value) {
-            if (!is_string($column) || !preg_match('/^[A-Za-z_][A-Za-z0-9_]{0,63}$/', $column)) throw new InvalidArgumentException('Invalid where column.');
-            if (!is_scalar($value) && $value !== null) throw new InvalidArgumentException('Invalid where value.');
-            $parts[] = '`' . $column . '` <=> ?'; $values[] = $value; $types .= is_int($value) ? 'i' : (is_float($value) ? 'd' : 's');
-        }
-        $escapedTable = str_replace('`', '``', $table);
-        $stmt = $db->prepare('DELETE FROM `' . $escapedTable . '` WHERE ' . implode(' AND ', $parts) . ' LIMIT 1');
-        if ($values !== []) $stmt->bind_param($types, ...$values);
-        $stmt->execute(); $affected = $stmt->affected_rows; $stmt->close();
-        dbm_audit(['action'=>$action,'target'=>$target,'database'=>$database,'table'=>$table,'where_sha256'=>hash('sha256',dbm_canonical($where)),'affected_rows'=>$affected,'status'=>'success']);
-        dbm_reply(['ok'=>true,'action'=>$action,'target'=>$target,'database'=>$database,'table'=>$table,'affected_rows'=>$affected]);
     }
 
     if ($action === 'ext_manager_write') {
