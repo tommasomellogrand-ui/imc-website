@@ -1,13 +1,9 @@
 {
-  "request_id": "clear-gw009-transfers-20260921-exec",
+  "request_id": "verify-gw009-transfers-empty-20260921",
   "requested_at": "2026-09-21T21:19:00Z",
-  "purpose": "Delete all rows from GW009_IMC Transfers",
-  "action": "execute_migration",
+  "purpose": "Verify GW009_IMC Transfers is empty after deletion",
+  "action": "query",
   "target": "custom",
-  "migration_id": "clear_gw009_transfers_20260921",
-  "statements": [
-    "DELETE FROM `GW009_IMC Transfers`"
-  ],
-  "allow_destructive": true,
-  "data_migration": true
+  "sql": "SELECT COUNT(*) AS total FROM `GW009_IMC Transfers`",
+  "limit": 10
 }
