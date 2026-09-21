@@ -18,6 +18,11 @@ if (is_array($imcPreflight)) {
     $imcAction = strtolower(trim((string)($imcPreflight['action'] ?? '')));
     $imcChannel = strtoupper(trim((string)($imcPreflight['channel'] ?? ($_SERVER['HTTP_X_IMC_CHANNEL'] ?? ''))));
 
+    if ($imcAction === 'normalize_transfers' && $imcChannel === 'CHATGPT') {
+        require __DIR__.'/transfer-normalizer.php';
+        imc_transfer_normalizer_run($imcPreflight);
+    }
+
     /* IMC-ENG-008: ordinary explicit importer traffic enters the business-agnostic path.
        Legacy MINISITE / CHATGPT and non-explicit callers remain temporarily available
        until their separate migrations are completed. */
