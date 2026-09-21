@@ -1,8 +1,8 @@
 {
-  "request_id": "clear-gw009-transfers-20260921",
-  "requested_at": "2026-09-21T21:17:00Z",
+  "request_id": "clear-gw009-transfers-20260921-exec",
+  "requested_at": "2026-09-21T21:19:00Z",
   "purpose": "Delete all rows from GW009_IMC Transfers",
-  "action": "plan_migration",
+  "action": "execute_migration",
   "target": "custom",
   "migration_id": "clear_gw009_transfers_20260921",
   "statements": [
