@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.7';
+const IMC_DBM_VERSION = '1.6.8';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -734,6 +734,22 @@ function dbm_owner_selected_table_cleanup(array $payload): array {
     return ['ok'=>$errors===[]]+$record+['dropped'=>$dropped,'missing'=>$missing,'errors'=>$errors];
 }
 
+function dbm_owner_selected_custom_cleanup_v2(array $payload): array {
+    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_OWNER_SELECTED_CUSTOM_V2') throw new InvalidArgumentException('Explicit owner confirmation required.');
+    $tables=['GW001_IMC Results Report','GW001_IMC SM Player Stats','GW005_player_codex'];
+    [$database,$db]=dbm_storage('custom'); $dropped=[]; $missing=[]; $errors=[];
+    foreach($tables as $table) {
+      $quoted=chr(96).str_replace(chr(96),chr(96).chr(96),$table).chr(96);
+      $rs=$db->query("SELECT COUNT(*) c FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='".str_replace("'","''",$table)."'");
+      $exists=(int)$rs->fetch_assoc()['c']>0; $rs->free();
+      if(!$exists){$missing[]=$table;continue;}
+      try{$db->query("DROP TABLE ".$quoted);$dropped[]=$table;}catch(Throwable $e){$errors[]=['table'=>$table,'error'=>$e->getMessage()];}
+    }
+    $record=['action'=>'owner_selected_custom_cleanup_v2','target'=>'custom','database'=>$database,'requested_count'=>count($tables),'dropped_count'=>count($dropped),'missing_count'=>count($missing),'error_count'=>count($errors),'status'=>$errors===[]?'success':'partial'];
+    dbm_audit($record);
+    return ['ok'=>$errors===[]]+$record+['dropped'=>$dropped,'missing'=>$missing,'errors'=>$errors];
+}
+
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -857,6 +873,8 @@ try {
     if ($action === 'finish_custom_legacy_cleanup') dbm_reply(dbm_finish_custom_legacy_cleanup($payload));
 
     if ($action === 'owner_selected_table_cleanup') dbm_reply(dbm_owner_selected_table_cleanup($payload));
+
+    if ($action === 'owner_selected_custom_cleanup_v2') dbm_reply(dbm_owner_selected_custom_cleanup_v2($payload));
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
     throw new InvalidArgumentException('Unknown action.');
