@@ -1,0 +1,41 @@
+name: Deploy Hall Of Famers Pick
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sensible-soccer-academy/hall-of-famers-pick/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path
+          root='/www.italianmastersclub.it/sensible-soccer-academy/hall-of-famers-pick'
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60);ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p();ftp.set_pasv(True)
+          def cd(path):
+            ftp.cwd('/')
+            for p in path.strip('/').split('/'):
+              try: ftp.cwd(p)
+              except error_perm: ftp.mkd(p);ftp.cwd(p)
+          base=Path('sensible-soccer-academy/hall-of-famers-pick')
+          for rel in ['index.html','api.php','live/index.html']:
+            p=base/rel;cd(root+'/'+str(Path(rel).parent));ftp.storbinary('STOR '+p.name,io.BytesIO(p.read_bytes()))
+          cd(root)
+          try: ftp.size('state.json')
+          except Exception: ftp.storbinary('STOR state.json',io.BytesIO(b'{}\n'))
+          try: ftp.sendcmd('SITE CHMOD 666 state.json')
+          except Exception: pass
+          ftp.quit()
+          PY
