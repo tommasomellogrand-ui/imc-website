@@ -6,7 +6,7 @@ require __DIR__.'/../imc-universal-gateway/write.php';
 function check(bool $ok): void { if (!$ok) throw new RuntimeException('routing assertion failed'); }
 function rejects(callable $fn): void { try { $fn(); } catch (InvalidArgumentException $e) { return; } throw new RuntimeException('invalid route accepted'); }
 // Synthetic configurations test both families; these are not production assignments.
-$repos=['IMC Results'=>'IMC Results','IMC Schedule'=>'IMC Schedule','IMC Match Report'=>'IMC Match Report','IMC Transfer'=>'IMC Transfers','IMC Player Codex'=>'IMC Player Codex','IMC SM Player Stats'=>'IMC SM Player Stats'];
+$repos=['IMC Results'=>'IMC_Results','IMC Schedule'=>'IMC_Schedule','IMC Match Report'=>'IMC_Match_Report','IMC Transfer'=>'IMC_Transfers','IMC Player Codex'=>'IMC_Player_Codex','IMC SM Player Stats'=>'IMC_SM_Player_Stats'];
 foreach (['gold','custom'] as $family) {
   $cfg=['db'=>['core'=>'core','gold'=>'gold','custom'=>'custom'],'gold_worlds'=>[],'custom_worlds'=>[]];
   for ($n=1;$n<=15;$n++) $cfg[$family.'_worlds'][]=sprintf('GW%03d',$n);
@@ -24,10 +24,10 @@ foreach (['gold','custom'] as $family) {
       rejects(fn()=>imc_explicit_import_route($bad,$cfg));
       rejects(fn()=>imc_ingress_route($bad,$cfg));
     }
-    check(imc_transfer_table($gw.'_IMC Transfers'));
+    check(imc_transfer_table($gw.'_IMC_Transfers'));
   }
   foreach (['GW000','GW016','GW025','GW15','GW015x'] as $gw) {
-    $body=['game_world_id'=>$gw,'repository'=>'IMC Transfer','target_database'=>$family,'target_table'=>$gw.'_IMC Transfers'];
+    $body=['game_world_id'=>$gw,'repository'=>'IMC Transfer','target_database'=>$family,'target_table'=>$gw.'_IMC_Transfers'];
     rejects(fn()=>imc_route($body,$cfg));
     rejects(fn()=>imc_explicit_import_route($body,$cfg));
     rejects(fn()=>imc_ingress_route($body,$cfg));
@@ -42,7 +42,7 @@ check(imc_route(['game_world_id'=>'GW010'],$production)['database']==='Sql195679
 foreach (range(11,15) as $n) {
   $gw=sprintf('GW%03d',$n);
   rejects(fn()=>imc_route(['game_world_id'=>$gw],$production));
-  rejects(fn()=>imc_explicit_import_route(['game_world_id'=>$gw,'repository'=>'IMC Transfer','target_database'=>'Sql1956795_3','target_table'=>$gw.'_IMC Transfers'],$production));
-  rejects(fn()=>imc_ingress_route(['game_world_id'=>$gw,'target_database'=>'Sql1956795_3','target_table'=>$gw.'_IMC Transfers'],$production));
+  rejects(fn()=>imc_explicit_import_route(['game_world_id'=>$gw,'repository'=>'IMC Transfer','target_database'=>'Sql1956795_3','target_table'=>$gw.'_IMC_Transfers'],$production));
+  rejects(fn()=>imc_ingress_route(['game_world_id'=>$gw,'target_database'=>'Sql1956795_3','target_table'=>$gw.'_IMC_Transfers'],$production));
 }
 echo "PASS: production GW010 Custom; GW011-GW015 pending.\n";
