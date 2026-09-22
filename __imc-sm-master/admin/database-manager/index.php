@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.0';
+const IMC_DBM_VERSION = '1.6.1';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -571,6 +571,35 @@ function dbm_execute_plan(array $payload): array {
     }
 }
 
+function dbm_cleanup_unused_gw_tables(array $payload): array {
+    $target = trim((string)($payload['target'] ?? ''));
+    if (!in_array($target, ['gold','custom'], true)) throw new InvalidArgumentException('Cleanup target must be gold or custom.');
+    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_EMPTY_GW_CLEANUP') throw new InvalidArgumentException('Explicit cleanup confirmation required.');
+    $protected = $target === 'gold' ? ['GW002','GW003','GW007','GW008'] : ['GW001','GW004','GW005','GW006','GW009','GW010'];
+    [$database, $db] = dbm_storage($target);
+    $result = $db->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'");
+    $candidates = [];
+    while ($row = $result->fetch_assoc()) {
+        $table = (string)$row['TABLE_NAME'];
+        if (!preg_match('/^(GW[0-9]{3})_IMC (Results|Schedule|Match Report|Transfers|Player Codex|SM Player Stats)$/', $table, $m)) continue;
+        if (in_array($m[1], $protected, true)) continue;
+        $candidates[] = $table;
+    }
+    $result->free(); sort($candidates, SORT_STRING);
+    $dropped=[]; $skipped=[]; $errors=[];
+    foreach ($candidates as $table) {
+        $quoted = chr(96) . str_replace(chr(96), chr(96).chr(96), $table) . chr(96);
+        try {
+            $cr=$db->query("SELECT COUNT(*) AS c FROM ".$quoted); $count=(int)$cr->fetch_assoc()['c']; $cr->free();
+            if ($count !== 0) { $skipped[]=['table'=>$table,'rows'=>$count]; continue; }
+            $db->query("DROP TABLE ".$quoted); $dropped[]=$table;
+        } catch (Throwable $e) { $errors[]=['table'=>$table,'error'=>$e->getMessage()]; }
+    }
+    $record=['action'=>'cleanup_unused_gw_tables','target'=>$target,'database'=>$database,'protected_gws'=>$protected,'candidate_count'=>count($candidates),'dropped_count'=>count($dropped),'skipped_nonempty_count'=>count($skipped),'error_count'=>count($errors),'status'=>$errors===[]?'success':'partial'];
+    dbm_audit($record);
+    return ['ok'=>$errors===[]]+$record+['dropped'=>$dropped,'skipped_nonempty'=>$skipped,'errors'=>$errors];
+}
+
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -680,6 +709,8 @@ try {
         dbm_audit(['action'=>$action,'target'=>'core','database'=>$database,'table'=>$table,'row_count'=>count($rows),'affected_rows'=>$affected,'status'=>'success']);
         dbm_reply(['ok'=>true,'action'=>$action,'target'=>'core','database'=>$database,'table'=>$table,'row_count'=>count($rows),'affected_rows'=>$affected]);
     }
+
+    if ($action === 'cleanup_unused_gw_tables') dbm_reply(dbm_cleanup_unused_gw_tables($payload));
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
     throw new InvalidArgumentException('Unknown action.');
