@@ -1,9 +1,16 @@
 {
-  "request_id": "count-transfers-gold-20260922",
-  "requested_at": "2026-09-22T07:46:00Z",
-  "purpose": "Count Transfers rows per GOLD GW",
-  "action": "query",
-  "target": "gold",
-  "sql": "SELECT 'GW002' gw,COUNT(*) total FROM `GW002_IMC Transfers` UNION ALL SELECT 'GW003',COUNT(*) FROM `GW003_IMC Transfers` UNION ALL SELECT 'GW007',COUNT(*) FROM `GW007_IMC Transfers` UNION ALL SELECT 'GW008',COUNT(*) FROM `GW008_IMC Transfers`",
-  "limit": 20
+  "request_id": "clear-transfers-004-006-009-010-20260922",
+  "requested_at": "2026-09-22T07:50:00Z",
+  "purpose": "Clear all Transfers rows for GW004 GW006 GW009 GW010",
+  "action": "plan_migration",
+  "target": "custom",
+  "migration_id": "clear_transfers_004_006_009_010_20260922",
+  "statements": [
+    "DELETE FROM `GW004_IMC Transfers`",
+    "DELETE FROM `GW006_IMC Transfers`",
+    "DELETE FROM `GW009_IMC Transfers`",
+    "DELETE FROM `GW010_IMC Transfers`"
+  ],
+  "allow_destructive": true,
+  "data_migration": true
 }
