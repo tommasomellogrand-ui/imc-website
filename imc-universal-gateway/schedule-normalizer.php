@@ -54,7 +54,7 @@ function imc_schedule_resolve(array $row, string $side, array $mapping, array $a
 
 function imc_schedule_reconcile(PDO $pdo, string $gw): array {
     if (!preg_match('/^GW(?:00[1-9]|010)$/D',$gw)) throw new InvalidArgumentException('invalid_game_world');
-    $read=$pdo->prepare("SELECT * FROM `{$gw}_IMC Schedule` WHERE game_world_id=? AND (home_sm_team_id IS NULL OR away_sm_team_id IS NULL)");
+    $read=$pdo->prepare("SELECT * FROM `{$gw}_IMC_Schedule` WHERE game_world_id=? AND (home_sm_team_id IS NULL OR away_sm_team_id IS NULL)");
     $read->execute([$gw]); $rows=$read->fetchAll(PDO::FETCH_ASSOC);
     $report=['version'=>'1.0','checked'=>count($rows),'updated_ids'=>0,'site_updated_ids'=>0,'unresolved'=>0,'pending'=>[]];
     if (!$rows) return $report;
@@ -64,7 +64,7 @@ function imc_schedule_reconcile(PDO $pdo, string $gw): array {
     $q->execute([$gw]); $mapping=$q->fetchAll();
     $q=$core->prepare('SELECT a.game_world_id,a.team_id,a.assignment_type,a.national_team_id,a.start_date,a.end_date,m.sm_manager_id FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id WHERE a.game_world_id=?');
     $q->execute([$gw]); $assignments=$q->fetchAll();
-    $q=$pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='IMC Site Schedule'");
+    $q=$pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='IMC_Site_Schedule'");
     $site=(bool)$q->fetchColumn();
     foreach ($rows as $row) foreach (['home','away'] as $side) {
         $value=imc_schedule_resolve($row,$side,$mapping,$assignments);
@@ -75,11 +75,11 @@ function imc_schedule_reconcile(PDO $pdo, string $gw): array {
             continue;
         }
         $field=$side.'_sm_team_id'; $name=$side.'_name';
-        $q=$pdo->prepare("UPDATE `{$gw}_IMC Schedule` SET `{$field}`=? WHERE game_world_id=? AND sm_fixture_id=? AND `{$field}` IS NULL AND `{$name}` <=> ? AND match_date <=> ? AND logged_manager_id <=> ?");
+        $q=$pdo->prepare("UPDATE `{$gw}_IMC_Schedule` SET `{$field}`=? WHERE game_world_id=? AND sm_fixture_id=? AND `{$field}` IS NULL AND `{$name}` <=> ? AND match_date <=> ? AND logged_manager_id <=> ?");
         $args=[$value['id'],$gw,$row['sm_fixture_id'],$row[$name],$row['match_date'],$row['logged_manager_id']];
         $q->execute($args); $changed=$q->rowCount(); $report['updated_ids']+=$changed;
         if ($changed && $site) {
-            $q=$pdo->prepare("UPDATE `IMC Site Schedule` SET `{$field}`=? WHERE game_world_id=? AND sm_fixture_id=? AND `{$field}` IS NULL AND `{$name}` <=> ? AND match_date <=> ? AND logged_manager_id <=> ?");
+            $q=$pdo->prepare("UPDATE `IMC_Site_Schedule` SET `{$field}`=? WHERE game_world_id=? AND sm_fixture_id=? AND `{$field}` IS NULL AND `{$name}` <=> ? AND match_date <=> ? AND logged_manager_id <=> ?");
             $q->execute($args); $report['site_updated_ids']+=$q->rowCount();
         }
         $row[$field]=$value['id'];
@@ -89,7 +89,7 @@ function imc_schedule_reconcile(PDO $pdo, string $gw): array {
 
 /** Runs after persistence and before commit, on both import routes. */
 function imc_schedule_import(PDO $pdo,string $table,bool $atomic,callable $write): array {
-    if (!preg_match('/^GW(?:00[1-9]|010)_IMC Schedule$/D',$table)) return imc_playoff_import($pdo,$table,$atomic,$write);
+    if (!preg_match('/^GW(?:00[1-9]|010)_IMC_Schedule$/D',$table)) return imc_playoff_import($pdo,$table,$atomic,$write);
     $gw=substr($table,0,5);$lock='imc_schedule_'.$gw;
     $q=$pdo->prepare('SELECT GET_LOCK(?,15)');$q->execute([$lock]);
     if ((int)$q->fetchColumn()!==1) throw new RuntimeException('schedule_normalization_busy_retry');
