@@ -1,12 +1,12 @@
 (function(){
 "use strict";
 if(window.IMC_TRANSFERS)return;
-const VERSION="1.3.0";
+const VERSION="1.3.1";
 let s={container:null,client:null,worldId:"",clubWorldId:null,mode:"world",rows:[],incoming:[],outgoing:[],activeRows:[]};
 const c=v=>String(v==null?"":v).trim();
 const e=v=>c(v).replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]));
-async function load(){const args={gameWorld:s.worldId};if(s.mode==="club")args.clubWorldId=s.clubWorldId;const r=await s.client.rpc("imc_nexus_gateway",{p_action:"transfers",p_args:args});if(r.error)throw r.error;const d=r.data||{};await window.IMC_PLAYER_GLOBAL.enrich(s.client,d);s.rows=Array.isArray(d.rows)?d.rows:[];s.incoming=Array.isArray(d.incoming)?d.incoming:[];s.outgoing=Array.isArray(d.outgoing)?d.outgoing:[]}
-function row(x,label,index){return `<button type="button" class="tf-row" data-tf-index="${index}"><small>${e(x.transfer_date_text||"")} ${x.imc_season?"· S"+e(x.imc_season):""}</small><div class="tf-player-line">${window.IMC_PLAYER_GLOBAL.view(x,"tf-player")}</div><p>${e(x.club_from||"-")} → ${e(x.club_to||"-")}</p>${x.amount_text?`<b>${e(x.amount_text)}</b>`:""}${label?`<em>${label}</em>`:""}</button>`}
+async function load(){const args={gameWorld:s.worldId};if(s.mode==="club")args.clubWorldId=s.clubWorldId;const r=await s.client.rpc("imc_nexus_gateway",{p_action:"transfers",p_args:args});if(r.error)throw r.error;const d=r.data||{};await window.IMC_PLAYER_GLOBAL.enrich(s.client,d);const sortNewest=a=>(Array.isArray(a)?a:[]).slice().sort((x,y)=>{const dx=c(x.normalized_transfer_date||x.transfer_date_text),dy=c(y.normalized_transfer_date||y.transfer_date_text);return dy.localeCompare(dx)||Number(y.transfer_id||0)-Number(x.transfer_id||0)});s.rows=sortNewest(d.rows);s.incoming=sortNewest(d.incoming);s.outgoing=sortNewest(d.outgoing)}
+function row(x,label,index){return `<button type="button" class="tf-row" data-tf-index="${index}"><small>${e(x.normalized_transfer_date||x.transfer_date_text||"")} ${x.imc_season?"· S"+e(x.imc_season):""}</small><div class="tf-player-line">${window.IMC_PLAYER_GLOBAL.view(x,"tf-player")}</div><p>${e(x.club_from||"-")} → ${e(x.club_to||"-")}</p>${x.amount_text?`<b>${e(x.amount_text)}</b>`:""}${label?`<em>${label}</em>`:""}</button>`}
 function renderRows(list,label){s.activeRows=list;return list.map((x,i)=>row(x,label,i)).join("")}
 function renderWorld(){s.container.innerHTML=`<section class="tf" data-transfers-version="${VERSION}"><header><h2>Trasferimenti</h2><b>${s.rows.length}</b></header><div class="tf-list">${renderRows(s.rows,"")||'<div class="tf-empty">Nessun trasferimento.</div>'}</div></section>`}
 function renderClub(){s.container.innerHTML=`<section class="tf" data-transfers-version="${VERSION}"><header><h2>Trasferimenti</h2><b>${s.incoming.length+s.outgoing.length}</b></header><div class="tf-tabs"><button data-tf-tab="in" class="active">ENTRATE</button><button data-tf-tab="out">USCITE</button></div><div data-tf-body>${renderRows(s.incoming,"ENTRATA")||'<div class="tf-empty">Nessuna entrata.</div>'}</div></section>`}
