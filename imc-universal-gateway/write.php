@@ -2,9 +2,9 @@
 declare(strict_types=1);
 require_once __DIR__ . "/schedule-normalizer.php";
 
-function imc_transfer_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-5])_IMC Transfers$/',$t)===1;}
-function imc_match_report_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Match Report$/',$t)===1;}
-function imc_player_codex_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC Player Codex$/',$t)===1;}
+function imc_transfer_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-5])_IMC_Transfers$/',$t)===1;}
+function imc_match_report_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC_Match_Report$/',$t)===1;}
+function imc_player_codex_table(string $t):bool{return preg_match('/^GW(?:00[1-9]|01[0-9]|02[0-5])_IMC_Player_Codex$/',$t)===1;}
 
 function imc_validate_transfer_row(PDO $p,string $t,array $r):array{
     $expected=['game_world_id','imc_transfer_number','player_id','player_name','club_from','from_sm_world_club_id','club_to','to_sm_world_club_id','transfer_date','amount_text','exchange_players','imported_at'];
