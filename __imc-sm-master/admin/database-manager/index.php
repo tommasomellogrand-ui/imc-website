@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.8';
+const IMC_DBM_VERSION = '1.6.9';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -750,6 +750,17 @@ function dbm_owner_selected_custom_cleanup_v2(array $payload): array {
     return ['ok'=>$errors===[]]+$record+['dropped'=>$dropped,'missing'=>$missing,'errors'=>$errors];
 }
 
+function dbm_remove_gw001_obsolete_tables(array $payload): array {
+    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_GW001_OBSOLETE_CLEANUP') throw new InvalidArgumentException('Explicit owner confirmation required.');
+    $tables=['GW001_IMC Results Report','GW001_IMC SM Player Stats'];
+    [$database,$db]=dbm_storage('custom'); $dropped=[]; $errors=[];
+    foreach($tables as $table) {
+      try{$db->query("DROP TABLE ".chr(96).$table.chr(96));$dropped[]=$table;}catch(Throwable $e){$errors[]=['table'=>$table,'error'=>$e->getMessage()];}
+    }
+    $record=['action'=>'remove_gw001_obsolete_tables','target'=>'custom','database'=>$database,'dropped_count'=>count($dropped),'error_count'=>count($errors),'status'=>$errors===[]?'success':'partial'];
+    dbm_audit($record); return ['ok'=>$errors===[]]+$record+['dropped'=>$dropped,'errors'=>$errors];
+}
+
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -875,6 +886,8 @@ try {
     if ($action === 'owner_selected_table_cleanup') dbm_reply(dbm_owner_selected_table_cleanup($payload));
 
     if ($action === 'owner_selected_custom_cleanup_v2') dbm_reply(dbm_owner_selected_custom_cleanup_v2($payload));
+
+    if ($action === 'remove_gw001_obsolete_tables') dbm_reply(dbm_remove_gw001_obsolete_tables($payload));
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
     throw new InvalidArgumentException('Unknown action.');
