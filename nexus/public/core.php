@@ -38,7 +38,7 @@ function nexus_report_logo_ids(PDO $db,string $world,array &$rows): void {
     $ids=[];foreach($rows as $r)if(!empty($r['sm_fixture_id'])&&(empty($r['home_sm_club_id']??$r['home_sm_team_id']??null)||empty($r['away_sm_club_id']??$r['away_sm_team_id']??null)))$ids[(string)$r['sm_fixture_id']]=$r['sm_fixture_id'];
     if(!$ids)return;
     $ph=implode(',',array_fill(0,count($ids),'?'));
-    $reports=nexus_core_rows($db,"SELECT sm_fixture_id,home_sm_club_id,away_sm_club_id FROM `IMC Site Match Report` WHERE game_world_id=? AND sm_fixture_id IN ($ph)",array_merge([$world],array_values($ids)));
+    $reports=nexus_core_rows($db,"SELECT sm_fixture_id,home_sm_club_id,away_sm_club_id FROM `IMC_Site_Match_Report` WHERE game_world_id=? AND sm_fixture_id IN ($ph)",array_merge([$world],array_values($ids)));
     nexus_apply_logo_hints($rows,$reports);
 }
 function nexus_apply_logo_hints(array &$rows,array $reports): void {
