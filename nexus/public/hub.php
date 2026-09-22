@@ -50,19 +50,32 @@ function nexus_hub(PDO $db,PDO $core,string $world): array {
     return ['ok'=>true,'world'=>$world,'competition'=>$competition,'core'=>$context,'results'=>$results,'schedule'=>$schedule];
 }
 function nexus_players(PDO $db,PDO $core,string $world): array {
-    $params=[$world];$where='s.game_world_id=? AND NOT EXISTS (SELECT 1 FROM `IMC Site Player Codex` newer WHERE newer.game_world_id=s.game_world_id AND newer.player_id=s.player_id AND (COALESCE(newer.imported_at,\'1000-01-01\')>COALESCE(s.imported_at,\'1000-01-01\') OR (newer.imported_at<=>s.imported_at AND newer.site_player_codex_id>s.site_player_codex_id)))';
-    foreach(['search'=>'full_name','club'=>'current_sm_club_id','position'=>'position','player'=>'player_id'] as $key=>$col)if(($_GET[$key]??'')!==''){$value=substr((string)$_GET[$key],0,200);$like=$key==='search';$role=$key==='position';$where.=" AND s.`$col` ".($role?'REGEXP ?':($like?'LIKE ?':'= ?'));$params[]=$role?nexus_position_pattern($value):($like?'%'.$value.'%':$value);}
-    $value="(CASE WHEN TRIM(s.market_value) REGEXP '^[€£$]?[0-9]+([.,][0-9]+)?[[:space:]]*[MKmk]?$' THEN CAST(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(s.market_value),'€',''),'£',''),'$',''),'M',''),'K',''),',','.') AS DECIMAL(18,3))*CASE WHEN UPPER(TRIM(s.market_value)) LIKE '%M' THEN 1000000 WHEN UPPER(TRIM(s.market_value)) LIKE '%K' THEN 1000 ELSE 1 END ELSE NULL END)";
-    foreach(['rating'=>'s.rating','age'=>'s.age','value'=>$value] as $prefix=>$column)foreach(['min'=>'>=','max'=>'<='] as $suffix=>$op){$input=$_GET[$prefix.'_'.$suffix]??'';if($input!==''){if(!is_numeric($input)||(float)$input<0)respond(['ok'=>false,'error'=>'invalid_filter'],422);$where.=" AND $column $op ?";$params[]=(float)$input*($prefix==='value'?1000000:1);}}
-    $orders=['rating'=>'s.rating DESC','age'=>'s.age ASC','value'=>"$value DESC",'name'=>'s.full_name ASC'];$sort=$orders[$_GET['sort']??'rating']??$orders['rating'];
-    $meta=nexus_core_rows($db,"SELECT COUNT(*) total,MAX(s.synced_at) updated_at FROM `IMC Site Player Codex` s WHERE $where",$params)[0];
-    $offset=max(0,(int)($_GET['offset']??0));$fields='s.game_world_id,s.player_id,s.full_name,s.nationality,s.position,s.rating,s.market_value,s.age,s.current_club,s.current_sm_club_id,s.image_url,s.imported_at';
-    if(!empty($_GET['player']))$fields.=',s.height_cm,s.weight_kg,s.foot,s.salary,s.contract_seasons,s.real_club,s.rating_history,s.transfer_history';
-    $rows=nexus_core_rows($db,"SELECT $fields FROM `IMC Site Player Codex` s WHERE $where ORDER BY $sort,s.player_id LIMIT 50 OFFSET $offset",$params);
+    // Authoritative source: per-world MySQL Aruba Player Codex repository.
+    $table=$world.'_IMC Player Codex';
+    $params=[];$where='1=1';
+    foreach(['search'=>'full_name','club'=>'current_sm_club_id','position'=>'position','player'=>'player_id'] as $key=>$col)if(($_GET[$key]??'')!==''){
+        $input=substr((string)$_GET[$key],0,200);$like=$key==='search';$role=$key==='position';
+        $where.=" AND `$col` ".($role?'REGEXP ?':($like?'LIKE ?':'= ?'));
+        $params[]=$role?nexus_position_pattern($input):($like?'%'.$input.'%':$input);
+    }
+    $value="(CASE WHEN TRIM(market_value) REGEXP '^[€£$]?[0-9]+([.,][0-9]+)?[[:space:]]*[MKmk]?$' THEN CAST(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(market_value),'€',''),'£',''),'$',''),'M',''),'K',''),',','.') AS DECIMAL(18,3))*CASE WHEN UPPER(TRIM(market_value)) LIKE '%M' THEN 1000000 WHEN UPPER(TRIM(market_value)) LIKE '%K' THEN 1000 ELSE 1 END ELSE NULL END)";
+    foreach(['rating'=>'rating','age'=>'age','value'=>$value] as $prefix=>$column)foreach(['min'=>'>=','max'=>'<='] as $suffix=>$op){
+        $input=$_GET[$prefix.'_'.$suffix]??'';
+        if($input!==''){if(!is_numeric($input)||(float)$input<0)respond(['ok'=>false,'error'=>'invalid_filter'],422);$where.=" AND $column $op ?";$params[]=(float)$input*($prefix==='value'?1000000:1);}
+    }
+    $orders=['rating'=>'rating DESC','age'=>'age ASC','value'=>"$value DESC",'name'=>'full_name ASC'];$sort=$orders[$_GET['sort']??'rating']??$orders['rating'];
+    $meta=nexus_core_rows($db,"SELECT COUNT(*) total,MAX(imported_at) updated_at FROM `$table` WHERE $where",$params)[0];
+    $offset=max(0,(int)($_GET['offset']??0));
+    $fields='game_world_id,player_id,full_name,nationality,position,rating,market_value,age,current_club,current_sm_club_id,image_url,imported_at';
+    if(!empty($_GET['player']))$fields.=',date_of_birth,height_cm,weight_kg,foot,real_club,salary,contract_seasons,rating_history,transfer_history';
+    $rows=nexus_core_rows($db,"SELECT $fields FROM `$table` WHERE $where ORDER BY $sort,player_id LIMIT 50 OFFSET $offset",$params);
     $context=nexus_core_enrich($core,$world,'players',$rows);
-    foreach($rows as &$r){$r['image_url']=($r['player_core']['image_url']??null)?:$r['image_url'];foreach(['rating_history','transfer_history'] as $f)if(isset($r[$f]))$r[$f]=json_decode($r[$f],true);}unset($r);
-    $clubs=nexus_core_rows($db,'SELECT DISTINCT current_sm_club_id id,current_club name FROM `IMC Site Player Codex` WHERE game_world_id=? AND current_sm_club_id IS NOT NULL ORDER BY current_club',[$world]);
-    return ['ok'=>true,'world'=>$world,'rows'=>$rows,'core'=>$context,'clubs'=>$clubs,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset];
+    foreach($rows as &$r){
+        $r['image_url']=($r['player_core']['image_url']??null)?:$r['image_url'];
+        foreach(['rating_history','transfer_history'] as $field)if(isset($r[$field]))$r[$field]=$r[$field]===null?[]:(json_decode($r[$field],true)?:[]);
+    }unset($r);
+    $clubs=nexus_core_rows($db,"SELECT DISTINCT current_sm_club_id id,current_club name FROM `$table` WHERE current_sm_club_id IS NOT NULL ORDER BY current_club");
+    return ['ok'=>true,'world'=>$world,'source'=>$table,'rows'=>$rows,'core'=>$context,'clubs'=>$clubs,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset];
 }
 function nexus_stats(PDO $db,string $world,PDO $core): array {
     $key=(string)($_GET['competition']??'');if($key==='')respond(['ok'=>false,'error'=>'invalid_competition'],422);
