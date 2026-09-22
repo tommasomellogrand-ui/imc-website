@@ -144,9 +144,9 @@ function dbm_validate_write_sql(string $sql, string $database, bool $allowDestru
     }
     if ($kind === 'DROP') {
         $dropTrigger = (bool)preg_match('/^\s*DROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\s*$/i', $sql);
-        $dropTable = preg_match('/^\s*DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?`?([A-Za-z_][A-Za-z0-9_]{0,63})`?\s*$/i', $sql, $dropTableMatch) === 1;
+        $dropTable = preg_match('/^\s*DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:`([^`]{1,64})`|([A-Za-z_][A-Za-z0-9_]{0,63}))\s*$/i', $sql, $dropTableMatch) === 1;
         if (!$dropTrigger && !$dropTable) throw new InvalidArgumentException('Only single DROP TRIGGER or DROP TABLE statements are allowed as DROP migration SQL.');
-        if ($dropTable && str_starts_with((string)$dropTableMatch[1], 'IMC_')) throw new InvalidArgumentException('DROP TABLE is forbidden for protected IMC_ identifiers.');
+        if ($dropTable && str_starts_with((string)($dropTableMatch[1] !== '' ? $dropTableMatch[1] : $dropTableMatch[2]), 'IMC_')) throw new InvalidArgumentException('DROP TABLE is forbidden for protected IMC_ identifiers.');
     }
     $destructive = (bool)preg_match('/^\s*(DELETE\b|RENAME\b|DROP\s+TRIGGER\b)|\b(DROP\s+(?:COLUMN|INDEX|KEY|FOREIGN\s+KEY|TABLE)|RENAME\s+(?:COLUMN|INDEX|TABLE))\b/i', $sql);
     if ($destructive && !$allowDestructive) throw new InvalidArgumentException('Destructive SQL requires allow_destructive=true.');
