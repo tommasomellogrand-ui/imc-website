@@ -132,16 +132,16 @@ function nexus_trophies(PDO $db,PDO $core,string $world): array {
     $catalog=nexus_catalog($db,$core,$world,null);
     $seasons=nexus_core_rows($core,'SELECT imc_season,soccer_manager_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season DESC',[$world]);
     $common='game_world_id,sm_fixture_id,competition_key,sm_action,competition_group,competition_stage,competition_round,match_date,home_name,away_name,home_sm_manager_id,away_sm_manager_id';
-    $results=nexus_core_rows($db,"SELECT $common,competition_group_name,home_sm_club_id,away_sm_club_id,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score,result_status FROM `IMC Site Results` WHERE game_world_id=? ORDER BY site_result_id",[$world]);
-    $schedule=nexus_core_rows($db,"SELECT $common,home_sm_team_id,away_sm_team_id FROM `IMC Site Schedule` WHERE game_world_id=? ORDER BY site_schedule_id",[$world]);
+    $results=nexus_core_rows($db,"SELECT $common,competition_group_name,home_sm_club_id,away_sm_club_id,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score,result_status FROM `IMC_Site_Results` WHERE game_world_id=? ORDER BY site_result_id",[$world]);
+    $schedule=nexus_core_rows($db,"SELECT $common,home_sm_team_id,away_sm_team_id FROM `IMC_Site_Schedule` WHERE game_world_id=? ORDER BY site_schedule_id",[$world]);
     // Reconcile missing team IDs only through the same fixture's report.
     nexus_report_logo_ids($db,$world,$results);foreach($results as &$r)foreach(['home','away'] as $side)if(empty($r[$side.'_sm_club_id'])&&!empty($r[$side.'_logo_team_id']))$r[$side.'_sm_club_id']=$r[$side.'_logo_team_id'];unset($r);
-    $finalReports=nexus_core_rows($db,"SELECT $common,home_sm_club_id,away_sm_club_id,home_manager_name,away_manager_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score FROM `IMC Site Match Report` WHERE game_world_id=? AND sm_action='worldcup'",[$world]);
+    $finalReports=nexus_core_rows($db,"SELECT $common,home_sm_club_id,away_sm_club_id,home_manager_name,away_manager_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score FROM `IMC_Site_Match_Report` WHERE game_world_id=? AND sm_action='worldcup'",[$world]);
     $results=nexus_trophy_report_finals($results,$finalReports);
     $awards=nexus_trophy_editions($results,$schedule,$catalog,$seasons);
     $matches=[];foreach($awards as $a){$matches[]=$a['match'];if(!empty($a['runner_match']))$matches[]=$a['runner_match'];}
     if($matches){$ids=array_values(array_unique(array_column($matches,'sm_fixture_id')));$ph=implode(',',array_fill(0,count($ids),'?'));
-        $reports=nexus_core_rows($db,"SELECT sm_fixture_id,home_sm_manager_id,away_sm_manager_id,home_manager_name,away_manager_name FROM `IMC Site Match Report` WHERE game_world_id=? AND sm_fixture_id IN ($ph)",array_merge([$world],$ids));$byId=[];foreach($reports as $r)$byId[(string)$r['sm_fixture_id']][]=$r;
+        $reports=nexus_core_rows($db,"SELECT sm_fixture_id,home_sm_manager_id,away_sm_manager_id,home_manager_name,away_manager_name FROM `IMC_Site_Match_Report` WHERE game_world_id=? AND sm_fixture_id IN ($ph)",array_merge([$world],$ids));$byId=[];foreach($reports as $r)$byId[(string)$r['sm_fixture_id']][]=$r;
         foreach($matches as &$m){$rs=$byId[(string)$m['sm_fixture_id']]??[];if(count($rs)===1)foreach(['home','away'] as $s){if(!empty($rs[0][$s.'_sm_manager_id'])){$m[$s.'_sm_manager_id']=$rs[0][$s.'_sm_manager_id'];$m[$s.'_manager_name']=$rs[0][$s.'_manager_name']??null;}elseif(empty($m[$s.'_manager_name'])&&!empty($rs[0][$s.'_manager_name']))$m[$s.'_manager_name']=$rs[0][$s.'_manager_name'];}}unset($m);
         nexus_core_enrich($core,$world,'results',$matches);
     }
