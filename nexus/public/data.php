@@ -8,7 +8,7 @@ try {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') respond(['ok'=>false,'error'=>'method_not_allowed'],405);
     $world = (string)($_GET['world'] ?? 'GW001');
     if (!preg_match('/^GW00[1-9]$|^GW010$/D',$world)) respond(['ok'=>false,'error'=>'invalid_world'],422);
-    $resources = ['results'=>[$world.'_IMC Results','sm_fixture_id','match_date'],'schedule'=>['IMC Site Schedule','site_schedule_id','match_date'],'match_report'=>['IMC Site Match Report','site_match_report_id','match_date'],'transfers'=>[$world.'_IMC Transfers','imc_transfer_number','transfer_date']];
+    $resources = ['results'=>[$world.'_IMC_Results','sm_fixture_id','match_date'],'schedule'=>['IMC_Site_Schedule','site_schedule_id','match_date'],'match_report'=>['IMC_Site_Match_Report','site_match_report_id','match_date'],'transfers'=>[$world.'_IMC_Transfers','imc_transfer_number','transfer_date']];
     $resource=(string)($_GET['resource'] ?? 'results');
     if ($resource==='worlds'||$resource==='directory') {
         require_once __DIR__.'/core.php';
@@ -30,7 +30,7 @@ try {
     if($resource==='competition')respond(nexus_hub($pdo,$coreDb,$world));
     if($resource==='players'){
         if(($_GET['scope']??'world')==='global')respond(nexus_global_players($coreDb,$world));
-        $table=$world.'_IMC Player Codex';
+        $table=$world.'_IMC_Player_Codex';
         $params=[];$where='1=1';
         foreach(['search'=>'full_name','club'=>'current_sm_club_id','position'=>'position','player'=>'player_id'] as $key=>$col){
             if(($_GET[$key]??'')==='')continue;
@@ -63,7 +63,7 @@ try {
     if($resource==='team_profile')respond(nexus_team_profile($pdo,$coreDb,$world));
     // Transfers are read directly from the authoritative per-world RAW repository.
     if($resource==='transfers'){
-        $table=$world.'_IMC Transfers';
+        $table=$world.'_IMC_Transfers';
         $club=(string)($_GET['club']??'');$search=trim((string)($_GET['search']??''));
         if(strlen($search)>200)respond(['ok'=>false,'error'=>'invalid_search'],422);
         $where='game_world_id=?';$params=[$world];
@@ -89,11 +89,11 @@ try {
         $away=$resource==='schedule'?'away_sm_team_id':'away_sm_club_id';
         $where.=" AND ($home=? OR $away=?";$params[]=$teamId;$params[]=$teamId;
         if($resource==='results'){
-            $where.=' OR EXISTS (SELECT 1 FROM `IMC Site Match Report` mr WHERE mr.game_world_id=`IMC Site Results`.game_world_id AND mr.sm_fixture_id=`IMC Site Results`.sm_fixture_id AND (mr.home_sm_club_id=? OR mr.away_sm_club_id=?))';
+            $where.=' OR EXISTS (SELECT 1 FROM `IMC_Site_Match_Report` mr WHERE mr.game_world_id=`IMC_Site_Results`.game_world_id AND mr.sm_fixture_id=`IMC_Site_Results`.sm_fixture_id AND (mr.home_sm_club_id=? OR mr.away_sm_club_id=?))';
             $params[]=$teamId;$params[]=$teamId;
         }
         $where.=')';
-        if($resource==='schedule')$where.=' AND NOT EXISTS (SELECT 1 FROM `IMC Site Results` played WHERE played.game_world_id=`IMC Site Schedule`.game_world_id AND played.sm_fixture_id=`IMC Site Schedule`.sm_fixture_id AND played.home_score IS NOT NULL AND played.away_score IS NOT NULL)';
+        if($resource==='schedule')$where.=' AND NOT EXISTS (SELECT 1 FROM `IMC_Site_Results` played WHERE played.game_world_id=`IMC_Site_Schedule`.game_world_id AND played.sm_fixture_id=`IMC_Site_Schedule`.sm_fixture_id AND played.home_score IS NOT NULL AND played.away_score IS NOT NULL)';
     }
     $where.=nexus_date_where("`$date`",nexus_season($coreDb,$world,(string)($_GET['season']??'')),$params);
     if(($_GET['competition']??'')!==''){$where.=' AND competition_key=?';$params[]=(string)$_GET['competition'];}
@@ -147,7 +147,7 @@ try {
     if($resource==='transfers'){
         $teams=[];
         foreach(['from'=>'club_from','to'=>'club_to'] as $side=>$nameField){
-            foreach(nexus_core_rows($pdo,"SELECT DISTINCT `{$side}_sm_world_club_id` id,`$nameField` name FROM `{$world}_IMC Transfers` WHERE game_world_id=?",[$world]) as $team){
+            foreach(nexus_core_rows($pdo,"SELECT DISTINCT `{$side}_sm_world_club_id` id,`$nameField` name FROM `{$world}_IMC_Transfers` WHERE game_world_id=?",[$world]) as $team){
                 if(!$team['name'])continue;
                 $key=$team['id']===null?'name:'.$team['name']:(string)$team['id'];
                 $teams[$key]=['id'=>$key,'name'=>$team['name']];
