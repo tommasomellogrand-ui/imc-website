@@ -49,7 +49,7 @@ try {
         $orders=['rating'=>'rating DESC','age'=>'age ASC','value'=>$value.' DESC','name'=>'full_name ASC'];
         $sort=$orders[$_GET['sort']??'rating']??$orders['rating'];$offset=max(0,(int)($_GET['offset']??0));
         $stmt=$pdo->prepare('SELECT COUNT(*) total,MAX(imported_at) updated_at FROM `'.$table.'` WHERE '.$where);$stmt->execute($params);$meta=$stmt->fetch();
-        $fields='game_world_id,player_id,full_name,nationality,position,rating,market_value,age,current_club,current_sm_club_id,image_url,imported_at';
+        $fields='player_id,full_name,nationality,position,rating,market_value,age,current_club,current_sm_club_id,image_url,imported_at';
         if(!empty($_GET['player']))$fields.=',date_of_birth,height_cm,weight_kg,foot,real_club,salary,contract_seasons,rating_history,transfer_history';
         $stmt=$pdo->prepare('SELECT '.$fields.' FROM `'.$table.'` WHERE '.$where.' ORDER BY '.$sort.',player_id LIMIT 50 OFFSET '.$offset);$stmt->execute($params);$rows=$stmt->fetchAll();
         nexus_core_enrich($coreDb,$world,'players',$rows);
