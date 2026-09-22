@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.9';
+const IMC_DBM_VERSION = '1.6.10';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -761,6 +761,13 @@ function dbm_remove_gw001_obsolete_tables(array $payload): array {
     dbm_audit($record); return ['ok'=>$errors===[]]+$record+['dropped'=>$dropped,'errors'=>$errors];
 }
 
+function dbm_remove_gw005_legacy_player_codex(array $payload): array {
+    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_GW005_LEGACY_CODEX_CLEANUP') throw new InvalidArgumentException('Explicit owner confirmation required.');
+    [$database,$db]=dbm_storage('custom'); $table='GW005_player_codex';
+    try { $db->query("DROP TABLE ".chr(96).$table.chr(96)); $record=['action'=>'remove_gw005_legacy_player_codex','target'=>'custom','database'=>$database,'status'=>'success']; dbm_audit($record); return ['ok'=>true]+$record+['dropped'=>$table]; }
+    catch(Throwable $e) { $record=['action'=>'remove_gw005_legacy_player_codex','target'=>'custom','database'=>$database,'status'=>'error']; dbm_audit($record); return ['ok'=>false]+$record+['error'=>$e->getMessage()]; }
+}
+
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -888,6 +895,8 @@ try {
     if ($action === 'owner_selected_custom_cleanup_v2') dbm_reply(dbm_owner_selected_custom_cleanup_v2($payload));
 
     if ($action === 'remove_gw001_obsolete_tables') dbm_reply(dbm_remove_gw001_obsolete_tables($payload));
+
+    if ($action === 'remove_gw005_legacy_player_codex') dbm_reply(dbm_remove_gw005_legacy_player_codex($payload));
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
     throw new InvalidArgumentException('Unknown action.');
