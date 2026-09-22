@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.5';
+const IMC_DBM_VERSION = '1.6.6';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -688,6 +688,31 @@ function dbm_cleanup_custom_legacy_gw_tables(array $payload): array {
     return ['ok'=>$errors===[]]+$record+['dropped'=>$dropped,'missing'=>$missing,'errors'=>$errors];
 }
 
+function dbm_finish_custom_legacy_cleanup(array $payload): array {
+    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_CUSTOM_LEGACY_FK_CLEANUP') throw new InvalidArgumentException('Explicit cleanup confirmation required.');
+    [$database,$db]=dbm_storage('custom');
+    $tables=['gw_match_reports','gw_seasons','gw_source_captures','gw_game_worlds'];
+    $tableSet=array_fill_keys($tables,true);
+    $constraints=[];
+    $rs=$db->query("SELECT TABLE_NAME,CONSTRAINT_NAME,REFERENCED_TABLE_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=DATABASE() AND REFERENCED_TABLE_NAME IS NOT NULL");
+    while($row=$rs->fetch_assoc()) {
+        if(isset($tableSet[(string)$row['REFERENCED_TABLE_NAME']])) $constraints[]=[(string)$row['TABLE_NAME'],(string)$row['CONSTRAINT_NAME']];
+    }
+    $rs->free();
+    $droppedFk=[]; $droppedTables=[]; $errors=[];
+    foreach($constraints as [$table,$fk]) {
+        try { $db->query("ALTER TABLE ".chr(96).$table.chr(96)." DROP FOREIGN KEY ".chr(96).$fk.chr(96)); $droppedFk[]=$fk; }
+        catch(Throwable $e) { $errors[]=['object'=>$fk,'error'=>$e->getMessage()]; }
+    }
+    foreach($tables as $table) {
+        try { $db->query("DROP TABLE ".chr(96).$table.chr(96)); $droppedTables[]=$table; }
+        catch(Throwable $e) { $errors[]=['object'=>$table,'error'=>$e->getMessage()]; }
+    }
+    $record=['action'=>'finish_custom_legacy_cleanup','target'=>'custom','database'=>$database,'dropped_fk_count'=>count($droppedFk),'dropped_table_count'=>count($droppedTables),'error_count'=>count($errors),'status'=>$errors===[]?'success':'partial'];
+    dbm_audit($record);
+    return ['ok'=>$errors===[]]+$record+['dropped_foreign_keys'=>$droppedFk,'dropped_tables'=>$droppedTables,'errors'=>$errors];
+}
+
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -807,6 +832,8 @@ try {
     if ($action === 'finish_gold_legacy_cleanup') dbm_reply(dbm_finish_gold_legacy_cleanup($payload));
 
     if ($action === 'cleanup_custom_legacy_gw_tables') dbm_reply(dbm_cleanup_custom_legacy_gw_tables($payload));
+
+    if ($action === 'finish_custom_legacy_cleanup') dbm_reply(dbm_finish_custom_legacy_cleanup($payload));
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
     throw new InvalidArgumentException('Unknown action.');
