@@ -3,6 +3,7 @@ header('Content-Type: application/json; charset=utf-8');header('Cache-Control: n
 $file=__DIR__.'/state.json';
 function base(){return ['event'=>'waiting','phase'=>'idle','manager'=>null,'slot'=>null,'assignments'=>[],'updated_at'=>gmdate('c')];}
 $fp=fopen($file,'c+');if(!$fp){http_response_code(500);echo json_encode(['ok'=>false]);exit;}flock($fp,LOCK_EX);rewind($fp);$raw=stream_get_contents($fp);$s=$raw?json_decode($raw,true):base();if(!is_array($s))$s=base();$s=array_merge(base(),$s);
+if($_SERVER['REQUEST_METHOD']!=='POST'){flock($fp,LOCK_UN);fclose($fp);echo json_encode(array_merge(['ok'=>true],$s),JSON_UNESCAPED_UNICODE);exit;}
 if($_SERVER['REQUEST_METHOD']==='POST'){$in=json_decode(file_get_contents('php://input'),true)?:[];$a=$in['action']??'';
  if($a==='host_reset'){$s=base();}
  elseif($a==='host_start'){$s=base();$s['event']='live';$s['phase']='manager_spinning';}
