@@ -1,52 +1,44 @@
 {
-  "request_id": "count-transfers-custom-20260922",
-  "completed_at": "2026-09-22T07:45:47.537799+00:00",
+  "request_id": "count-transfers-gold-20260922",
+  "completed_at": "2026-09-22T07:46:10.781249+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "count-transfers-custom-20260922",
-    "requested_at": "2026-09-22T07:43:00Z",
-    "purpose": "Count Transfers rows per active CUSTOM GW",
+    "request_id": "count-transfers-gold-20260922",
+    "requested_at": "2026-09-22T07:46:00Z",
+    "purpose": "Count Transfers rows per GOLD GW",
     "action": "query",
-    "target": "custom",
-    "sql": "SELECT 'GW001' gw,COUNT(*) total FROM `GW001_IMC Transfers` UNION ALL SELECT 'GW004',COUNT(*) FROM `GW004_IMC Transfers` UNION ALL SELECT 'GW005',COUNT(*) FROM `GW005_IMC Transfers` UNION ALL SELECT 'GW006',COUNT(*) FROM `GW006_IMC Transfers` UNION ALL SELECT 'GW009',COUNT(*) FROM `GW009_IMC Transfers` UNION ALL SELECT 'GW010',COUNT(*) FROM `GW010_IMC Transfers`",
+    "target": "gold",
+    "sql": "SELECT 'GW002' gw,COUNT(*) total FROM `GW002_IMC Transfers` UNION ALL SELECT 'GW003',COUNT(*) FROM `GW003_IMC Transfers` UNION ALL SELECT 'GW007',COUNT(*) FROM `GW007_IMC Transfers` UNION ALL SELECT 'GW008',COUNT(*) FROM `GW008_IMC Transfers`",
     "limit": 20
   },
   "response": {
     "ok": true,
     "action": "query",
-    "target": "custom",
-    "database": "Sql1956795_3",
+    "target": "gold",
+    "database": "Sql1956795_2",
     "result": {
       "rows": [
         {
-          "gw": "GW001",
-          "total": "2213"
+          "gw": "GW002",
+          "total": "7965"
         },
         {
-          "gw": "GW004",
-          "total": "2075"
+          "gw": "GW003",
+          "total": "11841"
         },
         {
-          "gw": "GW005",
-          "total": "723"
+          "gw": "GW007",
+          "total": "4306"
         },
         {
-          "gw": "GW006",
-          "total": "1324"
-        },
-        {
-          "gw": "GW009",
-          "total": "1071"
-        },
-        {
-          "gw": "GW010",
-          "total": "562"
+          "gw": "GW008",
+          "total": "2905"
         }
       ],
-      "returned_rows": 6,
-      "total_rows": 6,
+      "returned_rows": 4,
+      "total_rows": 4,
       "truncated": false,
-      "duration_ms": 176
+      "duration_ms": 754
     }
   }
 }
