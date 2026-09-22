@@ -1,9 +1,9 @@
 {
-  "request_id": "count-transfers-custom-20260922",
-  "requested_at": "2026-09-22T07:43:00Z",
-  "purpose": "Count Transfers rows per active CUSTOM GW",
+  "request_id": "count-transfers-gold-20260922",
+  "requested_at": "2026-09-22T07:46:00Z",
+  "purpose": "Count Transfers rows per GOLD GW",
   "action": "query",
-  "target": "custom",
-  "sql": "SELECT 'GW001' gw,COUNT(*) total FROM `GW001_IMC Transfers` UNION ALL SELECT 'GW004',COUNT(*) FROM `GW004_IMC Transfers` UNION ALL SELECT 'GW005',COUNT(*) FROM `GW005_IMC Transfers` UNION ALL SELECT 'GW006',COUNT(*) FROM `GW006_IMC Transfers` UNION ALL SELECT 'GW009',COUNT(*) FROM `GW009_IMC Transfers` UNION ALL SELECT 'GW010',COUNT(*) FROM `GW010_IMC Transfers`",
+  "target": "gold",
+  "sql": "SELECT 'GW002' gw,COUNT(*) total FROM `GW002_IMC Transfers` UNION ALL SELECT 'GW003',COUNT(*) FROM `GW003_IMC Transfers` UNION ALL SELECT 'GW007',COUNT(*) FROM `GW007_IMC Transfers` UNION ALL SELECT 'GW008',COUNT(*) FROM `GW008_IMC Transfers`",
   "limit": 20
 }
