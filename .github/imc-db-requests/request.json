@@ -1,8 +1,8 @@
 {
-  "request_id": "clear-transfers-004-006-009-010-20260922",
-  "requested_at": "2026-09-22T07:50:00Z",
+  "request_id": "clear-transfers-004-006-009-010-20260922-exec",
+  "requested_at": "2026-09-22T07:48:00Z",
   "purpose": "Clear all Transfers rows for GW004 GW006 GW009 GW010",
-  "action": "plan_migration",
+  "action": "execute_migration",
   "target": "custom",
   "migration_id": "clear_transfers_004_006_009_010_20260922",
   "statements": [
