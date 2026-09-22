@@ -12,7 +12,7 @@ function imc_transfer_normalizer_run(array $b):never{
   $gold=array_map('strtoupper',(array)($c['gold_worlds']??[]));$custom=array_map('strtoupper',(array)($c['custom_worlds']??[]));
   if(in_array($gw,$gold,true))$db=(string)$c['db']['gold'];elseif(in_array($gw,$custom,true))$db=(string)$c['db']['custom'];else throw new InvalidArgumentException('unsupported_game_world');
   $pdo=new PDO(sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',$c['db']['host'],$c['db']['port'],$db),$c['db']['user'],$c['db']['pass'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]);
-  $tick=chr(96);$tt=$gw.'_IMC Transfers';$ct=$gw.'_IMC Player Codex';$qt=$tick.$tt.$tick;$qc=$tick.$ct.$tick;
+  $tick=chr(96);$tt=$gw.'_IMC_Transfers';$ct=$gw.'_IMC_Player_Codex';$qt=$tick.$tt.$tick;$qc=$tick.$ct.$tick;
   $raw=$pdo->query("SELECT imc_transfer_number,player_id,player_name,club_from,club_to,amount_text,transfer_date,season,status,exchange_players FROM ".$qt." ORDER BY imc_transfer_number")->fetchAll();
   $codex=$pdo->query("SELECT player_id,transfer_history FROM ".$qc)->fetchAll();
   $rg=[];foreach($raw as $r){$pid=(int)($r['player_id']??0);if($pid<=0)continue;$k=imc_tn_key($pid,$r['club_from']??null,$r['club_to']??null,$r['amount_text']??null);$rg[$k][]=$r;}
