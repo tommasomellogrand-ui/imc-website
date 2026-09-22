@@ -1,7 +1,5 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . "/schedule-normalizer.php";
-
 /* IMC Universal Gateway · ingress-only path
  * Technical boundary only: envelope, target namespace, transport/persistence.
  * Payload row fields are intentionally opaque to the Gateway.
@@ -84,7 +82,8 @@ function imc_ingress_insert_many(PDO $pdo, string $table, string $gw, array $row
     if (!$rows || count($rows) > 500) throw new InvalidArgumentException('invalid_batch');
     $tableSql = imc_ingress_table_ident($table, $gw);
     $written = 0;
-    $outcome = imc_schedule_import($pdo, $table, $atomic, function () use ($rows, $pdo, $tableSql, &$written): int {
+    if ($atomic) $pdo->beginTransaction();
+    try {
         foreach ($rows as $row) {
             if (!is_array($row) || !$row) throw new InvalidArgumentException('invalid_row');
             $columns = array_keys($row);
@@ -95,9 +94,12 @@ function imc_ingress_insert_many(PDO $pdo, string $table, string $gw, array $row
             $stmt->execute(array_map('imc_ingress_scalar', array_values($row)));
             $written += $stmt->rowCount();
         }
-        return $written;
-    });
-    return ['normalization' => $outcome['normalization'], 'received' => count($rows), 'inserted' => $written, 'written_rows' => $written, 'skipped_rows' => 0, 'failed' => 0, 'rolled_back' => false, 'errors' => []];
+        if ($atomic) $pdo->commit();
+    } catch (Throwable $e) {
+        if ($atomic && $pdo->inTransaction()) $pdo->rollBack();
+        throw $e;
+    }
+    return ['received' => count($rows), 'inserted' => $written, 'written_rows' => $written, 'skipped_rows' => 0, 'failed' => 0, 'rolled_back' => false, 'errors' => []];
 }
 
 function imc_ingress_read(PDO $pdo, string $table, string $gw, array $body): array {
