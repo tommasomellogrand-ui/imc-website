@@ -8,8 +8,6 @@ on:
       - '__imc_private_gateway/**'
       - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
       - 'tests/gateway-world-*'
-      - 'tests/playoff-normalizer*.php'
-      - 'tests/schedule-normalizer*.php'
   workflow_dispatch:
 
 permissions:
@@ -42,29 +40,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.php ingress.php playoff-normalizer.php schedule-normalizer.php core.php read.php write.php ddl.php minisite.php minisite-site.php; do test -s "imc-universal-gateway/$f"; done
+          for f in index.php ingress.php core.php read.php write.php ddl.php minisite.php minisite-site.php; do test -s "imc-universal-gateway/$f"; done
           test -s "__imc_private_gateway/config.php"
           test -s "__imc_private_gateway/.htaccess"
           for f in imc-universal-gateway/*.php __imc_private_gateway/config.php; do php -l "$f"; done
 
-      - name: Test playoff normalization
-        run: php tests/playoff-normalizer.php
-
-      - name: Test playoff normalization against isolated MySQL
-        env:
-          IMC_TEST_MYSQL_PASSWORD: imc-normalizer-ci-only
-        run: php tests/playoff-normalizer-mysql.php
-
       - name: Test world routing
         run: php tests/gateway-world-routing.php
 
-      - name: Test schedule normalizer
-        run: php tests/schedule-normalizer.php
-
-      - name: Test schedule normalizer against isolated MySQL
-        env:
-          IMC_TEST_MYSQL_PASSWORD: imc-normalizer-ci-only
-        run: php tests/schedule-normalizer-mysql.php
 
       - name: Deploy complete IMC Universal Gateway
         env:
@@ -81,7 +64,7 @@ jobs:
           remote_root='/www.italianmastersclub.it'
           uploads=[
               (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
-              for n in ['schedule-normalizer.php','playoff-normalizer.php','index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
+              for n in ['index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
           ]
           uploads += [
               (Path('__imc_private_gateway/config.php'), f'{remote_root}/__imc_private_gateway'),
@@ -118,7 +101,7 @@ jobs:
           set -euo pipefail
           ingress="$(curl -fsS --retry 3 --retry-delay 2 \
             -H 'Content-Type: application/json' \
-            --data '{"channel":"IMPORT","action":"read","route_mode":"explicit","game_world_id":"GW005","repository":"IMC Results","target_database":"Sql1956795_3","target_table":"GW005_IMC Results","limit":1,"future_business_field":{"ignored_by_gateway":true}}' \
+            --data '{"channel":"IMPORT","action":"read","route_mode":"explicit","game_world_id":"GW005","repository":"IMC Results","target_database":"Sql1956795_3","target_table":"GW005_IMC_Results","limit":1,"future_business_field":{"ignored_by_gateway":true}}' \
             'https://www.italianmastersclub.it/imc-universal-gateway/')"
           RESPONSE="$ingress" python3 - <<'PY'
           import json,os
