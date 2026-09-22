@@ -88,7 +88,7 @@ function imc_playoff_reconcile(PDO $pdo, string $gw): array {
     $seasons = $stmt->fetchAll();
     $multi = in_array($gw, ['GW002','GW003','GW007','GW008'], true);
     $fields = 'game_world_id,sm_fixture_id,sm_action,sm_country,sm_division,competition_group,competition_key,competition_stage,competition_round,match_date,home_sm_club_id,away_sm_club_id';
-    $read = $pdo->prepare("SELECT {$fields} FROM `{$gw}_IMC Results` WHERE game_world_id=?");
+    $read = $pdo->prepare("SELECT {$fields} FROM `{$gw}_IMC_Results` WHERE game_world_id=?");
     $read->execute([$gw]);
     $results = $read->fetchAll(PDO::FETCH_ASSOC);
     $index = imc_playoff_index($gw, $multi, $results, $seasons);
@@ -98,13 +98,13 @@ function imc_playoff_reconcile(PDO $pdo, string $gw): array {
         $rows = $results;
         if ($repository !== 'Results') {
             $exists = $pdo->prepare('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name=?');
-            $exists->execute([$gw . '_IMC Match Report']);
+            $exists->execute([$gw . '_IMC_Match_Report']);
             if (!(int)$exists->fetchColumn()) continue;
-            $read = $pdo->prepare("SELECT {$fields} FROM `{$gw}_IMC Match Report` WHERE game_world_id=? AND (LOWER(TRIM(sm_action))='playoff' OR LOWER(competition_key) LIKE '%|playoff|%' OR LOWER(competition_stage) REGEXP 'play[ -]*off' OR LOWER(competition_round) REGEXP 'play[ -]*off')");
+            $read = $pdo->prepare("SELECT {$fields} FROM `{$gw}_IMC_Match_Report` WHERE game_world_id=? AND (LOWER(TRIM(sm_action))='playoff' OR LOWER(competition_key) LIKE '%|playoff|%' OR LOWER(competition_stage) REGEXP 'play[ -]*off' OR LOWER(competition_round) REGEXP 'play[ -]*off')");
             $read->execute([$gw]);
             $rows = $read->fetchAll(PDO::FETCH_ASSOC);
         }
-        $update = $pdo->prepare("UPDATE `{$gw}_IMC {$repository}` SET sm_action=?,competition_group=?,sm_country=?,sm_division=?,competition_key=? WHERE game_world_id=? AND sm_fixture_id=? AND match_date <=> ? AND home_sm_club_id <=> ? AND away_sm_club_id <=> ? AND sm_action <=> ? AND competition_group <=> ? AND sm_country <=> ? AND sm_division <=> ? AND competition_key <=> ?");
+        $update = $pdo->prepare("UPDATE `{$gw}_IMC_{$repository}` SET sm_action=?,competition_group=?,sm_country=?,sm_division=?,competition_key=? WHERE game_world_id=? AND sm_fixture_id=? AND match_date <=> ? AND home_sm_club_id <=> ? AND away_sm_club_id <=> ? AND sm_action <=> ? AND competition_group <=> ? AND sm_country <=> ? AND sm_division <=> ? AND competition_key <=> ?");
         foreach ($rows as $row) {
             if (!imc_playoff_marker($row)) continue;
             $report['checked']++;
