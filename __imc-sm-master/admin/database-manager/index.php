@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.11';
+const IMC_DBM_VERSION = '1.6.12';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -797,6 +797,36 @@ function dbm_sync_game_world_seasons(array $payload): array {
     dbm_audit($record); return ['ok'=>true]+$record;
 }
 
+function dbm_standardize_imc_table_names(array $payload): array {
+    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_IMC_UNDERSCORE_STANDARDIZATION') throw new InvalidArgumentException('Explicit owner confirmation required.');
+    $routing=['gold'=>['GW002','GW003','GW007','GW008'],'custom'=>['GW001','GW004','GW005','GW006','GW009','GW010']];
+    $repoMap=['IMC Match Report'=>'IMC_Match_Report','IMC Player Codex'=>'IMC_Player_Codex','IMC Results'=>'IMC_Results','IMC Schedule'=>'IMC_Schedule','IMC Transfers'=>'IMC_Transfers'];
+    $globalMap=['IMC Repository Report'=>'IMC_Repository_Report','IMC Results Report'=>'IMC_Results_Report','IMC Schedule Report'=>'IMC_Schedule_Report','IMC Site Match Report'=>'IMC_Site_Match_Report','IMC Site Player Codex'=>'IMC_Site_Player_Codex','IMC Site Results'=>'IMC_Site_Results','IMC Site SM Player Stats'=>'IMC_Site_SM_Player_Stats','IMC Site Schedule'=>'IMC_Site_Schedule','IMC Site Transfers'=>'IMC_Site_Transfers'];
+    $summary=[];
+    foreach($routing as $target=>$gws) {
+      [$database,$db]=dbm_storage($target); $renamed=[]; $droppedTriggers=[]; $errors=[];
+      $triggerRs=$db->query("SELECT TRIGGER_NAME,EVENT_OBJECT_TABLE FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE()");
+      $triggers=[]; while($row=$triggerRs->fetch_assoc()) $triggers[]=$row; $triggerRs->free();
+      foreach($triggers as $tr) {
+        $table=(string)$tr['EVENT_OBJECT_TABLE'];
+        if(preg_match('/^GW\\d{3}_IMC (Results|Schedule|Match Report)$/',$table)) {
+          try{$db->query("DROP TRIGGER ".chr(96).str_replace(chr(96),chr(96).chr(96),(string)$tr['TRIGGER_NAME']).chr(96));$droppedTriggers[]=(string)$tr['TRIGGER_NAME'];}
+          catch(Throwable $e){$errors[]=['object'=>$tr['TRIGGER_NAME'],'error'=>$e->getMessage()];}
+        }
+      }
+      $map=$globalMap;
+      foreach($gws as $gw) foreach($repoMap as $old=>$new) $map[$gw.'_'.$old]=$gw.'_'.$new;
+      foreach($map as $old=>$new) {
+        $safeOld=str_replace("'","''",$old); $rs=$db->query("SELECT COUNT(*) c FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='".$safeOld."'"); $exists=(int)$rs->fetch_assoc()['c']>0; $rs->free();
+        if(!$exists) continue;
+        try{$db->query("RENAME TABLE ".chr(96).str_replace(chr(96),chr(96).chr(96),$old).chr(96)." TO ".chr(96).$new.chr(96));$renamed[]=['from'=>$old,'to'=>$new];}
+        catch(Throwable $e){$errors[]=['object'=>$old,'error'=>$e->getMessage()];}
+      }
+      $summary[$target]=['database'=>$database,'dropped_trigger_count'=>count($droppedTriggers),'renamed_count'=>count($renamed),'errors'=>$errors,'dropped_triggers'=>$droppedTriggers,'renamed'=>$renamed];
+    }
+    $record=['action'=>'standardize_imc_table_names','status'=>'success','targets'=>$summary]; dbm_audit($record); return ['ok'=>true]+$record;
+}
+
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -928,6 +958,8 @@ try {
     if ($action === 'remove_gw005_legacy_player_codex') dbm_reply(dbm_remove_gw005_legacy_player_codex($payload));
 
     if ($action === 'sync_game_world_seasons') dbm_reply(dbm_sync_game_world_seasons($payload));
+
+    if ($action === 'standardize_imc_table_names') dbm_reply(dbm_standardize_imc_table_names($payload));
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
     throw new InvalidArgumentException('Unknown action.');
