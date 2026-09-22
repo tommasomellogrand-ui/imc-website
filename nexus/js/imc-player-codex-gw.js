@@ -1,16 +1,12 @@
 (function(){
 "use strict";
 
-const VERSION="1.0.2-build56-gw";
-const URL="https://toanuzojdkfjgucztpze.supabase.co";
-const KEY="sb_publishable_DYmVU7yEavK_ddsdNMUjcg_a7HesB-l";
+const VERSION="1.1.0-aruba-player-codex";
+const GATEWAY="https://www.italianmastersclub.it/imc-universal-gateway/";
 const OID="imcPlayerCodexGw";
 const PAGE_SIZE=500;
 const STEP=60;
 
-if(!window.supabase)return;
-let cfg=null;try{cfg=JSON.parse(localStorage.getItem("imc_nexus_config")||"null");}catch(_){}
-const db=window.supabase.createClient(cfg&&cfg.url?cfg.url:URL,cfg&&cfg.key?cfg.key:KEY);
 const cache=new Map();
 const ui={world:"",name:"",rows:[],q:"",sort:"rating_desc",limit:STEP};
 
@@ -18,7 +14,8 @@ const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const norm=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const img=v=>{const x=String(v||"").trim();return x.startsWith("//")?"https:"+x:x;};
 const valid=id=>/^GW(?:00[1-9]|010)$/.test(String(id||""));
-const tableOf=id=>String(id).toLowerCase()+"_player_codex";
+const tableOf=id=>String(id)+"_IMC Player Codex";
+const dbOf=id=>["GW002","GW003","GW007","GW008"].includes(id)?"Sql1956795_2":"Sql1956795_3";
 
 function currentWorld(){
   const guard=window.IMC_WORLD_CONTEXT_FIX;
@@ -58,13 +55,30 @@ function css(){
 
 async function loadRows(id,force){
   if(cache.has(id)&&!force)return cache.get(id);
-  const out=[];let from=0;const table=tableOf(id);
+  const out=[];let offset=0;const table=tableOf(id);
   while(true){
-    const r=await db.from(table).select("player_id,player_name,full_name,age,nationality,position,foot,rating,market_value,image_url,date_of_birth,height_cm,weight_kg").order("player_id",{ascending:true}).range(from,from+PAGE_SIZE-1);
-    if(r.error)throw r.error;
-    const page=r.data||[];out.push(...page);
+    const r=await fetch(GATEWAY,{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Accept":"application/json","X-IMC-Channel":"IMPORT"},
+      body:JSON.stringify({
+        action:"read",
+        channel:"IMPORT",
+        repository:"IMC Player Codex",
+        game_world_id:id,
+        target_database:dbOf(id),
+        target_table:table,
+        route_mode:"explicit",
+        limit:PAGE_SIZE,
+        offset
+      })
+    });
+    const raw=await r.text();let j;
+    try{j=JSON.parse(raw)}catch(_){throw Error("Player Codex gateway non JSON")}
+    if(!r.ok||j?.ok!==true)throw Error(j?.message||j?.error||raw);
+    const page=Array.isArray(j.rows)?j.rows:Array.isArray(j.data)?j.data:Array.isArray(j.result?.rows)?j.result.rows:[];
+    out.push(...page);
     if(page.length<PAGE_SIZE)break;
-    from+=PAGE_SIZE;
+    offset+=PAGE_SIZE;
   }
   cache.set(id,out);return out;
 }
