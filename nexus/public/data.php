@@ -8,7 +8,7 @@ try {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') respond(['ok'=>false,'error'=>'method_not_allowed'],405);
     $world = (string)($_GET['world'] ?? 'GW001');
     if (!preg_match('/^GW00[1-9]$|^GW010$/D',$world)) respond(['ok'=>false,'error'=>'invalid_world'],422);
-    $resources = ['results'=>[$world.'_IMC_Results','sm_fixture_id','match_date'],'schedule'=>['IMC_Site_Schedule','site_schedule_id','match_date'],'match_report'=>['IMC_Site_Match_Report','site_match_report_id','match_date'],'transfers'=>[$world.'_IMC_Transfers','imc_transfer_number','transfer_date']];
+    $resources = ['results'=>[$world.'_IMC_Results','sm_fixture_id','match_date'],'schedule'=>['IMC_Site_Schedule','site_schedule_id','match_date'],'match_report'=>['IMC_Site_Match_Report','site_match_report_id','match_date'],'transfers'=>[$world.'_IMC_Transfers','imc_transfer_number','normalized_transfer_date']];
     $resource=(string)($_GET['resource'] ?? 'results');
     if ($resource==='worlds'||$resource==='directory') {
         require_once __DIR__.'/core.php';
@@ -75,7 +75,7 @@ try {
         if($search!==''){$where.=' AND (player_name LIKE ? OR club_from LIKE ? OR club_to LIKE ?)';for($i=0;$i<3;$i++)$params[]='%'.$search.'%';}
         $limit=min(5000,max(1,(int)($_GET['limit']??50)));$offset=max(0,(int)($_GET['offset']??0));
         $stmt=$pdo->prepare("SELECT COUNT(*) total,MAX(imported_at) updated_at FROM `$table` WHERE $where");$stmt->execute($params);$meta=$stmt->fetch();
-        $stmt=$pdo->prepare("SELECT imc_transfer_number AS site_id,game_world_id,imc_transfer_number,player_id,player_name,club_from,from_sm_world_club_id,club_to,to_sm_world_club_id,transfer_date,amount_text,exchange_players,imported_at FROM `$table` WHERE $where ORDER BY imc_transfer_number DESC LIMIT $limit OFFSET $offset");$stmt->execute($params);$rows=$stmt->fetchAll();
+        $stmt=$pdo->prepare("SELECT imc_transfer_number AS site_id,game_world_id,imc_transfer_number,player_id,player_name,club_from,from_sm_world_club_id,club_to,to_sm_world_club_id,normalized_transfer_date,transfer_date,amount_text,exchange_players,imported_at FROM `$table` WHERE $where ORDER BY normalized_transfer_date DESC, imc_transfer_number DESC LIMIT $limit OFFSET $offset");$stmt->execute($params);$rows=$stmt->fetchAll();
         foreach($rows as &$row)$row['exchange_players']=$row['exchange_players']===null?null:json_decode($row['exchange_players'],true);unset($row);
         $core=nexus_core_enrich($coreDb,$world,'transfers',$rows);
         respond(['ok'=>true,'clubs'=>[],'core'=>$core,'version'=>'nexus-public-3','world'=>$world,'resource'=>'transfers','source'=>$table,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset,'limit'=>$limit,'rows'=>$rows]);
