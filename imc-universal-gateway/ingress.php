@@ -27,6 +27,7 @@ function imc_ingress_ident(string $value): string {
 }
 
 function imc_ingress_table_ident(string $value, string $gw): string {
+    if ($value === 'IMC_Game_World_Season') return '`IMC_Game_World_Season`';
     if (!preg_match('/^GW(?:00[1-9]|01[0-5])_IMC_[A-Za-z0-9_-]{1,80}$/', $value) || !str_starts_with($value, $gw . '_IMC_')) {
         throw new InvalidArgumentException('target_not_allowed');
     }
@@ -47,6 +48,8 @@ function imc_ingress_route(array $body, array $cfg): array {
 
     if ($database === '' || !hash_equals($expected, $database)) throw new InvalidArgumentException('target_not_allowed');
     imc_ingress_table_ident($table, $gw);
+    $action = strtolower(trim((string)($body['action'] ?? '')));
+    if ($table === 'IMC_Game_World_Season' && $action !== 'read') throw new InvalidArgumentException('target_not_allowed');
     return ['game_world_id' => $gw, 'database' => $database, 'table' => $table];
 }
 
