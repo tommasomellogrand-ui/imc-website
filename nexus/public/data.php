@@ -30,17 +30,33 @@ try {
     if($resource==='competition')respond(nexus_hub($pdo,$coreDb,$world));
     if($resource==='players'){
         if(($_GET['scope']??'world')==='global')respond(nexus_global_players($coreDb,$world));
-        // PLAYER CODEX: direct authoritative per-world repository, exactly like Transfers.
         $table=$world.'_IMC Player Codex';
         $params=[];$where='1=1';
         foreach(['search'=>'full_name','club'=>'current_sm_club_id','position'=>'position','player'=>'player_id'] as $key=>$col){
             if(($_GET[$key]??'')==='')continue;
             $input=substr((string)$_GET[$key],0,200);
-            if($key==='search'){$where.=" AND \`$col\` LIKE ?";$params[]='%'.$input.'%';}
-            elseif($key==='position'){$where.=" AND \`$col\` REGEXP ?";$params[]=nexus_position_pattern($input);}
-            else{$where.=" AND \`$col\` = ?";$params[]=$input;}
+            if($key==='search'){$where.=' AND `'.$col.'` LIKE ?';$params[]='%'.$input.'%';}
+            elseif($key==='position'){$where.=' AND `'.$col.'` REGEXP ?';$params[]=nexus_position_pattern($input);}
+            else{$where.=' AND `'.$col.'` = ?';$params[]=$input;}
         }
-        $value="(CASE WHEN TRIM(market_value) REGEXP '^[€£$]?[0-9]+([.,][0-9]+)?[[:space:]]*[MKmk]?
+        $value="(CASE WHEN TRIM(market_value) REGEXP '^[€£$]?[0-9]+([.,][0-9]+)?[[:space:]]*[MKmk]?$' THEN CAST(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(market_value),'€',''),'£',''),'$',''),'M',''),'K',''),',','.') AS DECIMAL(18,3))*CASE WHEN UPPER(TRIM(market_value)) LIKE '%M' THEN 1000000 WHEN UPPER(TRIM(market_value)) LIKE '%K' THEN 1000 ELSE 1 END ELSE NULL END)";
+        foreach(['rating'=>'rating','age'=>'age','value'=>$value] as $prefix=>$column)foreach(['min'=>'>=','max'=>'<='] as $suffix=>$op){
+            $input=$_GET[$prefix.'_'.$suffix]??'';
+            if($input==='')continue;
+            if(!is_numeric($input)||(float)$input<0)respond(['ok'=>false,'error'=>'invalid_filter'],422);
+            $where.=" AND $column $op ?";$params[]=(float)$input*($prefix==='value'?1000000:1);
+        }
+        $orders=['rating'=>'rating DESC','age'=>'age ASC','value'=>$value.' DESC','name'=>'full_name ASC'];
+        $sort=$orders[$_GET['sort']??'rating']??$orders['rating'];$offset=max(0,(int)($_GET['offset']??0));
+        $stmt=$pdo->prepare('SELECT COUNT(*) total,MAX(imported_at) updated_at FROM `'.$table.'` WHERE '.$where);$stmt->execute($params);$meta=$stmt->fetch();
+        $fields='game_world_id,player_id,full_name,nationality,position,rating,market_value,age,current_club,current_sm_club_id,image_url,imported_at';
+        if(!empty($_GET['player']))$fields.=',date_of_birth,height_cm,weight_kg,foot,real_club,salary,contract_seasons,rating_history,transfer_history';
+        $stmt=$pdo->prepare('SELECT '.$fields.' FROM `'.$table.'` WHERE '.$where.' ORDER BY '.$sort.',player_id LIMIT 50 OFFSET '.$offset);$stmt->execute($params);$rows=$stmt->fetchAll();
+        nexus_core_enrich($coreDb,$world,'players',$rows);
+        foreach($rows as &$row){$row['image_url']=($row['player_core']['image_url']??null)?:$row['image_url'];foreach(['rating_history','transfer_history'] as $field)if(array_key_exists($field,$row))$row[$field]=$row[$field]===null?[]:(json_decode($row[$field],true)?:[]);}unset($row);
+        $stmt=$pdo->query('SELECT DISTINCT current_sm_club_id id,current_club name FROM `'.$table.'` WHERE current_sm_club_id IS NOT NULL ORDER BY current_club');$clubs=$stmt->fetchAll();
+        respond(['ok'=>true,'world'=>$world,'resource'=>'players','source'=>$table,'rows'=>$rows,'clubs'=>$clubs,'total'=>(int)$meta['total'],'updated_at'=>$meta['updated_at'],'offset'=>$offset]);
+    }
     if($resource==='stats')respond(nexus_stats($pdo,$world,$coreDb));
     if($resource==='competition_reports')respond(nexus_competition_reports($pdo,$coreDb,$world));
     if($resource==='manager_profile')respond(nexus_manager_profile($pdo,$coreDb,$world));
