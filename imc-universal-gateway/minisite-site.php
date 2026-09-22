@@ -21,11 +21,11 @@ function imc_minisite_site_read(array $body): never {
 
     $resource = strtolower(trim((string)($body['resource'] ?? '')));
     $resources = [
-        'results' => ['table' => 'IMC Site Results', 'gw_column' => 'game_world_id', 'order' => '`match_date` DESC, `site_result_id` DESC'],
-        'schedule' => ['table' => 'IMC Site Schedule', 'gw_column' => 'game_world_id', 'order' => '`match_date` ASC, `match_time` ASC, `site_schedule_id` ASC'],
-        'match_report' => ['table' => 'IMC Site Match Report', 'gw_column' => 'game_world_id', 'order' => '`match_date` DESC, `site_match_report_id` DESC'],
-        'transfers' => ['table' => 'IMC Site Transfers', 'gw_column' => 'game_world_id', 'order' => '`transfer_date` DESC, `imc_transfer_number` DESC, `site_transfer_id` DESC'],
-        'sm_player_stats' => ['table' => 'IMC Site SM Player Stats', 'gw_column' => 'source_game_world_id', 'order' => '`competition_key` ASC, `site_player_stats_id` ASC'],
+        'results' => ['table' => 'IMC_Site_Results', 'gw_column' => 'game_world_id', 'order' => '`match_date` DESC, `site_result_id` DESC'],
+        'schedule' => ['table' => 'IMC_Site_Schedule', 'gw_column' => 'game_world_id', 'order' => '`match_date` ASC, `match_time` ASC, `site_schedule_id` ASC'],
+        'match_report' => ['table' => 'IMC_Site_Match_Report', 'gw_column' => 'game_world_id', 'order' => '`match_date` DESC, `site_match_report_id` DESC'],
+        'transfers' => ['table' => 'IMC_Site_Transfers', 'gw_column' => 'game_world_id', 'order' => '`transfer_date` DESC, `imc_transfer_number` DESC, `site_transfer_id` DESC'],
+        'sm_player_stats' => ['table' => 'IMC_Site_SM_Player_Stats', 'gw_column' => 'source_game_world_id', 'order' => '`competition_key` ASC, `site_player_stats_id` ASC'],
     ];
     if (!isset($resources[$resource])) {
         imc_minisite_out(['ok' => false, 'error' => 'invalid_resource'], 422);
