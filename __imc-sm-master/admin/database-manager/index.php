@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.10';
+const IMC_DBM_VERSION = '1.6.11';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -768,6 +768,35 @@ function dbm_remove_gw005_legacy_player_codex(array $payload): array {
     catch(Throwable $e) { $record=['action'=>'remove_gw005_legacy_player_codex','target'=>'custom','database'=>$database,'status'=>'error']; dbm_audit($record); return ['ok'=>false]+$record+['error'=>$e->getMessage()]; }
 }
 
+function dbm_sync_game_world_seasons(array $payload): array {
+    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_SEASON_SYNC') throw new InvalidArgumentException('Explicit season sync confirmation required.');
+    [, $core] = dbm_storage('core');
+    $rs=$core->query("SELECT game_world_id,imc_season,soccer_manager_season,imc_season_start_date,imc_season_end_date FROM ".chr(96)."IMC Game World Season".chr(96)." ORDER BY game_world_id,imc_season");
+    $rows=[]; while($row=$rs->fetch_assoc()) $rows[]=$row; $rs->free();
+    $routing=['gold'=>['GW002','GW003','GW007','GW008'],'custom'=>['GW001','GW004','GW005','GW006','GW009','GW010']];
+    $summary=[];
+    foreach($routing as $target=>$gws) {
+        [$database,$db]=dbm_storage($target);
+        $allowed=array_fill_keys($gws,true); $wanted=[];
+        foreach($rows as $row) if(isset($allowed[$row['game_world_id']])) $wanted[]=$row;
+        $db->begin_transaction();
+        try {
+            $db->query("DELETE FROM ".chr(96)."IMC_Game_World_Season".chr(96));
+            $stmt=$db->prepare("INSERT INTO ".chr(96)."IMC_Game_World_Season".chr(96)." (game_world_id,imc_season,soccer_manager_season,imc_season_start_date,imc_season_end_date) VALUES (?,?,?,?,?)");
+            foreach($wanted as $row) {
+                $gw=(string)$row['game_world_id']; $season=(int)$row['imc_season'];
+                $sm=$row['soccer_manager_season']===null?null:(int)$row['soccer_manager_season'];
+                $start=$row['imc_season_start_date']; $end=$row['imc_season_end_date'];
+                $stmt->bind_param('siiss',$gw,$season,$sm,$start,$end); $stmt->execute();
+            }
+            $stmt->close(); $db->commit();
+            $summary[$target]=['database'=>$database,'rows'=>count($wanted),'game_worlds'=>$gws];
+        } catch(Throwable $e) { $db->rollback(); throw $e; }
+    }
+    $record=['action'=>'sync_game_world_seasons','status'=>'success','core_rows'=>count($rows),'targets'=>$summary];
+    dbm_audit($record); return ['ok'=>true]+$record;
+}
+
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -897,6 +926,8 @@ try {
     if ($action === 'remove_gw001_obsolete_tables') dbm_reply(dbm_remove_gw001_obsolete_tables($payload));
 
     if ($action === 'remove_gw005_legacy_player_codex') dbm_reply(dbm_remove_gw005_legacy_player_codex($payload));
+
+    if ($action === 'sync_game_world_seasons') dbm_reply(dbm_sync_game_world_seasons($payload));
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
     throw new InvalidArgumentException('Unknown action.');
