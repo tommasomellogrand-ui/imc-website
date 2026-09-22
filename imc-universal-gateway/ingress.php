@@ -29,7 +29,7 @@ function imc_ingress_ident(string $value): string {
 }
 
 function imc_ingress_table_ident(string $value, string $gw): string {
-    if (!preg_match('/^GW(?:00[1-9]|01[0-5])_IMC [A-Za-z0-9 _-]{1,80}$/', $value) || !str_starts_with($value, $gw . '_IMC ')) {
+    if (!preg_match('/^GW(?:00[1-9]|01[0-5])_IMC_[A-Za-z0-9_-]{1,80}$/', $value) || !str_starts_with($value, $gw . '_IMC_')) {
         throw new InvalidArgumentException('target_not_allowed');
     }
     return '`' . str_replace('`', '', $value) . '`';
