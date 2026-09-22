@@ -85,9 +85,9 @@ test('career days merge overlapping assignments and exclude future dates',()=>{
 test('manager uses reports while national team profiles use results',()=>{
  const php=fs.readFileSync(__dirname+'/hub.php','utf8');
  const manager=php.split('function nexus_manager_profile')[1].split('function nexus_team_profile')[0];
- assert.ok(manager.includes('IMC Site Match Report'));assert.ok(!manager.includes('IMC Site Results'));
+ assert.ok(manager.includes('IMC_Site_Match_Report'));assert.ok(!manager.includes('IMC_Site_Results'));
  const team=php.split('function nexus_team_profile')[1].split('function nexus_competition_reports')[0];
- assert.ok(team.includes("$source=$national?'IMC Site Results':'IMC Site Match Report'"));assert.ok(team.includes('home_sm_club_id=? OR away_sm_club_id=?'));
+ assert.ok(team.includes("$source=$national?'IMC_Site_Results':'IMC_Site_Match_Report'"));assert.ok(team.includes('home_sm_club_id=? OR away_sm_club_id=?'));
 });
 
 test('all manager tabs and team statistics are routed through report profile endpoints',async()=>{
