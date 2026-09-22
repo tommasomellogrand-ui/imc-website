@@ -1,12 +1,12 @@
 {
-  "request_id": "clear-transfers-004-006-009-010-20260922",
-  "completed_at": "2026-09-22T07:47:23.724183+00:00",
+  "request_id": "clear-transfers-004-006-009-010-20260922-exec",
+  "completed_at": "2026-09-22T07:47:51.389005+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "clear-transfers-004-006-009-010-20260922",
-    "requested_at": "2026-09-22T07:50:00Z",
+    "request_id": "clear-transfers-004-006-009-010-20260922-exec",
+    "requested_at": "2026-09-22T07:48:00Z",
     "purpose": "Clear all Transfers rows for GW004 GW006 GW009 GW010",
-    "action": "plan_migration",
+    "action": "execute_migration",
     "target": "custom",
     "migration_id": "clear_transfers_004_006_009_010_20260922",
     "statements": [
@@ -20,48 +20,52 @@
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "custom",
-      "database": "Sql1956795_3",
-      "migration_id": "clear_transfers_004_006_009_010_20260922",
-      "allow_destructive": true,
-      "data_migration": true,
-      "statements": [
-        "DELETE FROM `GW004_IMC Transfers`",
-        "DELETE FROM `GW006_IMC Transfers`",
-        "DELETE FROM `GW009_IMC Transfers`",
-        "DELETE FROM `GW010_IMC Transfers`"
-      ]
-    },
-    "analysis": [
-      {
-        "sql": "DELETE FROM `GW004_IMC Transfers`",
-        "kind": "DELETE",
-        "destructive": true,
-        "sha256": "d15a55d19cccc6380456cf3cff0cf35dcf92260fc419d79f30a721942f1f15c8"
-      },
-      {
-        "sql": "DELETE FROM `GW006_IMC Transfers`",
-        "kind": "DELETE",
-        "destructive": true,
-        "sha256": "57cb60b0d19fdd58bf1cdd2d57eacf97db80ac4a0e3bd9f12ca1d92231a73291"
-      },
-      {
-        "sql": "DELETE FROM `GW009_IMC Transfers`",
-        "kind": "DELETE",
-        "destructive": true,
-        "sha256": "16c67286555afb4bbfb29df842f59cb20642d95eb2250d6025b7803e6cde73ac"
-      },
-      {
-        "sql": "DELETE FROM `GW010_IMC Transfers`",
-        "kind": "DELETE",
-        "destructive": true,
-        "sha256": "bc9e6939b4ca2493dee5821e99e4ec15f9f6a81625f8b69301dfc2e683bd435f"
-      }
-    ],
+    "action": "execute_migration",
+    "target": "custom",
+    "database": "Sql1956795_3",
+    "migration_id": "clear_transfers_004_006_009_010_20260922",
+    "data_migration": true,
     "plan_sha256": "3c7e7444dc6cb0209989f6bfb092ca694f90e9267f7bbeb721d444743205b0ca",
-    "expires_at": "2026-09-22T08:02:23+00:00",
-    "confirmation_token": "1790064143.74b112fec2b0d0a15765d4b3270b2375aab4768a45cc567812e483ac37bb4a94"
+    "status": "success",
+    "statement_count": 4,
+    "duration_ms": 346,
+    "before": {
+      "tables": 320,
+      "columns": 5628
+    },
+    "after": {
+      "tables": 320,
+      "columns": 5628
+    },
+    "results": [
+      {
+        "statement": 1,
+        "sha256": "d15a55d19cccc6380456cf3cff0cf35dcf92260fc419d79f30a721942f1f15c8",
+        "affected_rows": 2075,
+        "insert_id": 0,
+        "duration_ms": 18
+      },
+      {
+        "statement": 2,
+        "sha256": "57cb60b0d19fdd58bf1cdd2d57eacf97db80ac4a0e3bd9f12ca1d92231a73291",
+        "affected_rows": 1324,
+        "insert_id": 0,
+        "duration_ms": 12
+      },
+      {
+        "statement": 3,
+        "sha256": "16c67286555afb4bbfb29df842f59cb20642d95eb2250d6025b7803e6cde73ac",
+        "affected_rows": 1071,
+        "insert_id": 0,
+        "duration_ms": 11
+      },
+      {
+        "statement": 4,
+        "sha256": "bc9e6939b4ca2493dee5821e99e4ec15f9f6a81625f8b69301dfc2e683bd435f",
+        "affected_rows": 562,
+        "insert_id": 0,
+        "duration_ms": 5
+      }
+    ]
   }
 }
