@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.4';
+const IMC_DBM_VERSION = '1.6.5';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -671,6 +671,23 @@ function dbm_finish_gold_legacy_cleanup(array $payload): array {
     return ['ok'=>$errors===[]]+$record+['dropped_foreign_keys'=>$droppedFk,'dropped_tables'=>$droppedTables,'errors'=>$errors];
 }
 
+function dbm_cleanup_custom_legacy_gw_tables(array $payload): array {
+    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_CUSTOM_LEGACY_GW_CLEANUP') throw new InvalidArgumentException('Explicit cleanup confirmation required.');
+    $tables=['gw_competition_editions','gw_competitions','gw_fixture_results','gw_fixtures','gw_game_worlds','gw_identity_matches','gw_import_runs','gw_match_commentary','gw_match_events','gw_match_lineup_players','gw_match_lineups','gw_match_reports','gw_match_tactics_snapshots','gw_match_team_stats','gw_national_teams','gw_player_db_update_batches','gw_player_profile_snapshots','gw_player_stat_snapshots','gw_player_state_snapshots','gw_players','gw_seasons','gw_sm_user_assignments','gw_sm_users','gw_source_captures','gw_source_dom_nodes','gw_source_fragments','gw_source_page_types','gw_source_payloads','gw_squad_members','gw_squads','gw_tactic_snapshots','gw_transfer_summary_snapshots','gw_transfers','gw_world_clubs'];
+    [$database,$db]=dbm_storage('custom');
+    $existing=[]; $rs=$db->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'");
+    while($row=$rs->fetch_assoc()) $existing[(string)$row['TABLE_NAME']]=true; $rs->free();
+    $dropped=[]; $missing=[]; $errors=[];
+    foreach($tables as $table) {
+        if(!isset($existing[$table])) { $missing[]=$table; continue; }
+        try { $db->query("DROP TABLE ".chr(96).$table.chr(96)); $dropped[]=$table; }
+        catch(Throwable $e) { $errors[]=['table'=>$table,'error'=>$e->getMessage()]; }
+    }
+    $record=['action'=>'cleanup_custom_legacy_gw_tables','target'=>'custom','database'=>$database,'requested_count'=>count($tables),'dropped_count'=>count($dropped),'missing_count'=>count($missing),'error_count'=>count($errors),'status'=>$errors===[]?'success':'partial'];
+    dbm_audit($record);
+    return ['ok'=>$errors===[]]+$record+['dropped'=>$dropped,'missing'=>$missing,'errors'=>$errors];
+}
+
 function dbm_handle_mcp(array $request): never {
     $id = $request['id'] ?? null; $method = (string)($request['method'] ?? '');
     if ($method === 'initialize') dbm_reply(['jsonrpc'=>'2.0','id'=>$id,'result'=>['protocolVersion'=>'2025-06-18','capabilities'=>['tools'=>(object)[]],'serverInfo'=>['name'=>'imc-database-manager','version'=>IMC_DBM_VERSION]]]);
@@ -788,6 +805,8 @@ try {
     if ($action === 'cleanup_gold_legacy_gw_tables') dbm_reply(dbm_cleanup_gold_legacy_gw_tables($payload));
 
     if ($action === 'finish_gold_legacy_cleanup') dbm_reply(dbm_finish_gold_legacy_cleanup($payload));
+
+    if ($action === 'cleanup_custom_legacy_gw_tables') dbm_reply(dbm_cleanup_custom_legacy_gw_tables($payload));
 
     if ($action === 'history') dbm_reply(['ok' => true, 'action' => $action, 'history' => dbm_history((int)($payload['limit'] ?? 50))]);
     throw new InvalidArgumentException('Unknown action.');
