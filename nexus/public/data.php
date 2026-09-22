@@ -8,7 +8,7 @@ try {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') respond(['ok'=>false,'error'=>'method_not_allowed'],405);
     $world = (string)($_GET['world'] ?? 'GW001');
     if (!preg_match('/^GW00[1-9]$|^GW010$/D',$world)) respond(['ok'=>false,'error'=>'invalid_world'],422);
-    $resources = ['results'=>['IMC Site Results','site_result_id','match_date'],'schedule'=>['IMC Site Schedule','site_schedule_id','match_date'],'match_report'=>['IMC Site Match Report','site_match_report_id','match_date'],'transfers'=>[$world.'_IMC Transfers','imc_transfer_number','transfer_date']];
+    $resources = ['results'=>[$world.'_IMC Results','sm_fixture_id','match_date'],'schedule'=>['IMC Site Schedule','site_schedule_id','match_date'],'match_report'=>['IMC Site Match Report','site_match_report_id','match_date'],'transfers'=>[$world.'_IMC Transfers','imc_transfer_number','transfer_date']];
     $resource=(string)($_GET['resource'] ?? 'results');
     if ($resource==='worlds'||$resource==='directory') {
         require_once __DIR__.'/core.php';
@@ -122,7 +122,7 @@ try {
         $where.=' AND sm_fixture_id=?'; $params[]=$_GET['fixture'];
     }
     $limit=min($resource==='transfers'?5000:100,max(1,(int)($_GET['limit']??50))); $offset=max(0,(int)($_GET['offset']??0));
-    $common='game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,synced_at';
+    $common='game_world_id,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,imported_at';
     $score='home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score';
     $fields=match($resource){
         'results'=>"$common,$score,result_status,competition_group_name,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id",
@@ -131,9 +131,10 @@ try {
         'transfers'=>'game_world_id,imc_transfer_number,player_id,player_name,club_from,club_to,from_sm_world_club_id,to_sm_world_club_id,transfer_date,amount_text,exchange_players,synced_at'
     };
     $pdo->beginTransaction();
-    $stmt=$pdo->prepare("SELECT COUNT(*) total,MAX(synced_at) updated_at FROM `$table` WHERE $where"); $stmt->execute($params); $meta=$stmt->fetch();
+    $updatedColumn=$resource==='results'?'imported_at':'synced_at';
+    $stmt=$pdo->prepare("SELECT COUNT(*) total,MAX(`$updatedColumn`) updated_at FROM `$table` WHERE $where"); $stmt->execute($params); $meta=$stmt->fetch();
     $direction=$resource==='schedule'?'ASC':'DESC';
-    $selectId=$resource==='transfers'?"`imc_transfer_number` AS site_id":"`$id` AS site_id";
+    $selectId=$resource==='transfers'?"`imc_transfer_number` AS site_id":($resource==='results'?"`sm_fixture_id` AS site_id":"`$id` AS site_id");
     $order=$resource==='transfers'?"`imc_transfer_number` DESC":"`$date` $direction,`$id` $direction";
     $stmt=$pdo->prepare("SELECT $selectId,$fields FROM `$table` WHERE $where ORDER BY $order LIMIT $limit OFFSET $offset"); $stmt->execute($params); $rows=$stmt->fetchAll();
     $pdo->commit();
