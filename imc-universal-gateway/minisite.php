@@ -101,6 +101,7 @@ function imc_minisite_read(array $body): never {
         'player_codex',
         'player_data',
         'rating_history',
+        'game_world_seasons',
     ];
     if (!in_array($resource, $allowed, true)) {
         imc_minisite_out(['ok' => false, 'error' => 'invalid_resource'], 422);
@@ -111,6 +112,16 @@ function imc_minisite_read(array $body): never {
     $meta = [];
 
     switch ($resource) {
+        case 'game_world_seasons': {
+            $gw = imc_minisite_gw($body);
+            $rows = imc_minisite_rows(
+                $pdo,
+                'SELECT game_world_id, imc_season, soccer_manager_season, imc_season_start_date, imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season',
+                [$gw]
+            );
+            break;
+        }
+
         case 'game_world_codex': {
             $gw = imc_minisite_gw($body);
             $rows = imc_minisite_rows(
