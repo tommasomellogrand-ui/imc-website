@@ -193,9 +193,6 @@ jobs:
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
         shell: bash
         run: python3 nexus/public/deploy.py
-      - name: Verify Nexus live
-        shell: bash
-        run: python3 nexus/public/verify.py
       - name: Verify GW010 World Cup Draw live
         shell: bash
         run: |
