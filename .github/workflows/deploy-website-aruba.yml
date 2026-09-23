@@ -4,8 +4,6 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - 'nexus-next/**'
-      - '.github/workflows/deploy-nexus-next-aruba.yml'
       - 'minisite/GW001/**'
       - 'minisite/GW007/**'
       - 'minisite/api/results-schedule.php'
@@ -45,23 +43,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Validate Nexus before publish
-        shell: bash
-        run: |
-          set -euo pipefail
-          php -l nexus/public/trophies.php
-          php nexus/public/trophies.test.php
-          php -l nexus/public/hub.php
-          php nexus/public/competition-names.test.php
-          php -l nexus/public/core.php
-          php nexus/public/core.test.php
-          php -l nexus/public/data.php
-          node --check nexus/public/site.js
-          node --check nexus/public/clubhouse.js
-          node --test nexus/public/news.test.cjs
-          node --check nexus/public/match.js
-          node --test nexus/public/hub.test.cjs
-          ! grep -Eiq 'supabase|v1/app|password|loginView' nexus/index.html nexus/public/site.js
       - name: Inject Game World build IDs
         shell: bash
         run: |
@@ -189,12 +170,6 @@ jobs:
           if check.getvalue()!=runtime_data:raise SystemExit('Verifica upload fallita: Draft Matrix runtime bundle')
           ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; World Cup Draw incluso')
           PY
-      - name: Publish Nexus to Aruba
-        env:
-          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
-          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
-        shell: bash
-        run: python3 nexus/public/deploy.py
       - name: Verify GW010 World Cup Draw live
         shell: bash
         run: |
