@@ -1,0 +1,86 @@
+name: Audit Aruba Full
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan italianmastersclub.it on Aruba
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+
+          host='ftp.italianmastersclub.it'
+          root='/www.italianmastersclub.it'
+          out=Path('aruba-full-inventory.txt')
+
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect(host,21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p()
+          ftp.set_pasv(True)
+
+          rows=[]
+          def scan(path):
+              try:
+                  entries=list(ftp.mlsd(path))
+              except Exception:
+                  try:
+                      names=ftp.nlst(path)
+                  except error_perm as e:
+                      rows.append(f'ERROR\t{path}\t{e}')
+                      return
+                  for full in names:
+                      if full.rstrip('/')==path.rstrip('/'):
+                          continue
+                      try:
+                          size=ftp.size(full)
+                          rows.append(f'FILE\t{full}\t{size if size is not None else ""}')
+                      except Exception:
+                          rows.append(f'DIR\t{full}')
+                          scan(full)
+                  return
+              for name,facts in sorted(entries,key=lambda x:x[0].lower()):
+                  if name in ('.','..'):
+                      continue
+                  full=path.rstrip('/')+'/'+name
+                  typ=facts.get('type','')
+                  if typ=='dir':
+                      rows.append(f'DIR\t{full}')
+                      scan(full)
+                  elif typ=='file':
+                      rows.append(f'FILE\t{full}\t{facts.get("size","")}\t{facts.get("modify","")}')
+                  else:
+                      rows.append(f'{typ.upper() or "OTHER"}\t{full}')
+
+          scan(root)
+          ftp.quit()
+          out.write_text(
+              'ARUBA FULL INVENTORY\n'
+              f'ROOT\t{root}\n'
+              f'TOTAL\t{len(rows)}\n\n'
+              +'\n'.join(rows)+'\n',
+              encoding='utf-8'
+          )
+          print(out.read_text(encoding='utf-8'))
+          PY
+
+      - name: Upload inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: aruba-full-inventory
+          path: aruba-full-inventory.txt
+          if-no-files-found: error
+          retention-days: 30
