@@ -1,13 +1,62 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nexus</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IMC Nexus</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0a0b0d;color:#f5f5f2;font-family:Arial,Helvetica,sans-serif}button,select{font:inherit}
+.shell{max-width:1180px;margin:auto;padding:28px 18px 70px}.top{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:10px 0 28px;border-bottom:1px solid #292b30}.brand small,.eyebrow{font-size:11px;letter-spacing:.18em;color:#999;text-transform:uppercase}.brand h1{margin:5px 0 0;font-size:34px;letter-spacing:.08em}.context{display:flex;gap:8px}.context select{background:#15171b;color:#fff;border:1px solid #34373d;border-radius:8px;padding:10px 12px}
+.hero{padding:48px 0 34px}.hero h2{font-size:clamp(38px,7vw,76px);line-height:.94;margin:10px 0 18px;max-width:850px}.hero p{color:#aaa;max-width:650px;line-height:1.55}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{appearance:none;text-align:left;background:#111318;color:#fff;border:1px solid #292c32;border-radius:14px;padding:22px;min-height:155px;cursor:pointer}.card:hover,.card.active{border-color:#eee;background:#17191e}.card b{display:block;font-size:22px;margin:10px 0}.card span{color:#8f939b;font-size:13px;line-height:1.4}.panel{margin-top:24px;border:1px solid #292c32;border-radius:14px;background:#101216;padding:22px;min-height:180px}.panel-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.panel h3{margin:0;font-size:24px}.status{font-size:12px;color:#999}.rows{display:grid;gap:8px}.row{padding:12px 0;border-bottom:1px solid #23262b;display:flex;justify-content:space-between;gap:14px}.muted{color:#8f939b}.error{color:#ff8e8e}
+@media(max-width:760px){.top{align-items:flex-start;flex-direction:column}.context{width:100%}.context select{flex:1;min-width:0}.grid{grid-template-columns:1fr 1fr}.hero{padding-top:34px}.card{min-height:130px}}
+</style>
 </head>
 <body>
-  <main>
-    <h1>NEXUS</h1>
-  </main>
+<main class="shell">
+<header class="top">
+  <div class="brand"><small>Italian Masters Club</small><h1>NEXUS</h1></div>
+  <div class="context"><select id="world"></select><select id="season"><option value="">Season</option></select></div>
+</header>
+<section class="hero"><div class="eyebrow">Game World Intelligence</div><h2 id="worldTitle">Seleziona un Game World.</h2><p>Nexus organizza ogni area in un motore autonomo. Seleziona un modulo per vedere i dati letti direttamente dalle fonti IMC.</p></section>
+<section class="grid">
+<button class="card" data-module="competitions"><small>01</small><b>Competitions</b><span>Results · Schedule · Standings · Match Report</span></button>
+<button class="card" data-module="teams"><small>02</small><b>Teams</b><span>Club · Matches · Stats</span></button>
+<button class="card" data-module="managers"><small>03</small><b>Managers</b><span>Codex · Assignments · Stats</span></button>
+<button class="card" data-module="players"><small>04</small><b>Players</b><span>Codex · World · Rating History</span></button>
+<button class="card" data-module="transfers"><small>05</small><b>Transfers</b><span>Movimenti per Game World e stagione</span></button>
+<button class="card" data-module="trophies"><small>06</small><b>Trophy Room</b><span>Trofei dal CORE</span></button>
+</section>
+<section class="panel">
+ <div class="panel-head"><h3 id="panelTitle">Nexus</h3><span class="status" id="status">Pronto</span></div>
+ <div id="content" class="rows"><div class="muted">Scegli un modulo.</div></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id), world=$('world'), season=$('season'), content=$('content'), status=$('status');
+for(let i=1;i<=10;i++){const gw='GW'+String(i).padStart(3,'0');world.add(new Option(gw,gw))}
+world.value='GW001';
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+async function get(url){status.textContent='Caricamento…';const r=await fetch(url,{cache:'no-store'});const j=await r.json();if(!r.ok||j.ok===false)throw new Error(j.error||'Errore');status.textContent='Aggiornato';return j}
+async function context(){
+ try{const j=await get('core/context.php?world='+world.value);$('worldTitle').textContent=(j.world?.game_world_name||world.value)+' · '+world.value;season.innerHTML='<option value="">Season</option>';(j.seasons||[]).forEach(s=>season.add(new Option('Season '+s.imc_season,s.imc_season)));if(j.seasons?.length)season.value=j.seasons[j.seasons.length-1].imc_season}
+ catch(e){$('worldTitle').textContent=world.value;status.textContent=e.message}
+}
+function rows(items,render){content.innerHTML=items?.length?items.slice(0,100).map(render).join(''):'<div class="muted">Nessun dato.</div>'}
+async function openModule(name){
+ document.querySelectorAll('.card').forEach(x=>x.classList.toggle('active',x.dataset.module===name));$('panelTitle').textContent=name[0].toUpperCase()+name.slice(1);
+ try{
+  let j;
+  if(name==='competitions'){j=await get('competitions/catalog.php?world='+world.value);rows(j.rows,r=>'<div class="row"><b>'+esc(r.nexus_view)+'</b><span class="muted">'+esc(r.competition_key)+'</span></div>')}
+  if(name==='managers'){j=await get('managers/index.php?world='+world.value);rows(j.rows,r=>'<div class="row"><b>'+esc(r.full_name)+'</b><span class="muted">'+esc(r.manager_id)+'</span></div>')}
+  if(name==='players'){j=await get('players/index.php');rows(j.rows,r=>'<div class="row"><b>'+esc((r.forename||'')+' '+(r.surname||''))+'</b><span class="muted">#'+esc(r.id)+'</span></div>')}
+  if(name==='transfers'){j=await get('transfers/index.php?world='+world.value+(season.value?'&season='+season.value:''));rows(j.rows,r=>'<div class="row"><b>'+esc(r.player_name||r.player||'Transfer')+'</b><span class="muted">'+esc(r.club_from_name||r.from_club||'')+' → '+esc(r.club_to_name||r.to_club||'')+'</span></div>')}
+  if(name==='trophies'){j=await get('trophies/index.php?world='+world.value+(season.value?'&season='+season.value:''));rows(j.rows,r=>'<div class="row"><b>'+esc(r.nexus_view||r.competition_name||r.competition_key||'Trofeo')+'</b><span class="muted">'+esc(r.winner_name||r.club_name||r.manager_name||'')+'</span></div>')}
+  if(name==='teams'){content.innerHTML='<div class="muted">Il motore Teams richiede la selezione di un club. La home non inventa una selezione automatica.</div>';status.textContent='Pronto'}
+ }catch(e){status.textContent='Errore';content.innerHTML='<div class="error">'+esc(e.message)+'</div>'}
+}
+document.querySelectorAll('.card').forEach(b=>b.onclick=()=>openModule(b.dataset.module));world.onchange=async()=>{await context();content.innerHTML='<div class="muted">Scegli un modulo.</div>'};season.onchange=()=>{const a=document.querySelector('.card.active');if(a)openModule(a.dataset.module)};
+context();
+</script>
 </body>
 </html>
