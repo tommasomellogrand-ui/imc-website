@@ -1,0 +1,76 @@
+name: Deploy Nexus Next to Aruba
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nexus-next/**'
+      - '.github/workflows/deploy-nexus-next-aruba.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: imc-nexus-next-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Nexus Next
+        run: |
+          set -euo pipefail
+          test -s nexus-next/index.html
+          test -s nexus-next/app.css
+          test -s nexus-next/app.js
+          test -s nexus-next/api.php
+          node --check nexus-next/app.js
+          php -l nexus-next/api.php
+      - name: Deploy Nexus Next only
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path
+          root='/www.italianmastersclub.it/nexus-next'
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60);ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p();ftp.set_pasv(True)
+          ftp.cwd('/')
+          for part in [p for p in root.split('/') if p]:
+              try: ftp.cwd(part)
+              except error_perm: ftp.mkd(part);ftp.cwd(part)
+          for p in sorted(Path('nexus-next').rglob('*')):
+              if not p.is_file(): continue
+              rel=p.relative_to('nexus-next');ftp.cwd('/')
+              dest=root+'/'+str(rel.parent)
+              for part in [x for x in dest.split('/') if x]:
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part);ftp.cwd(part)
+              raw=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(raw));check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              if check.getvalue()!=raw: raise SystemExit('Upload verification failed: '+str(p))
+          ftp.quit()
+          PY
+      - name: Verify Nexus Next live
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import urllib.request,time
+          url='https://www.italianmastersclub.it/nexus-next/'
+          last=None
+          for _ in range(8):
+              try:
+                  req=urllib.request.Request(url,headers={'User-Agent':'IMC-Nexus-Next-Verify/1.0','Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      body=r.read().decode('utf-8','replace')
+                      if r.status==200 and 'Nexus Next' in body:
+                          print('NEXUS NEXT LIVE OK');break
+              except Exception as e:last=e
+              time.sleep(5)
+          else: raise SystemExit('Nexus Next live verification failed: '+str(last))
+          PY
