@@ -2,7 +2,7 @@
 
 Source: Aruba CORE (`Sql1956795_1`), `IMC Game World Season`, restricted to `game_world_id = 'GW001'`.
 
-Operational source verification uses IMC Nexus (`toanuzojdkfjgucztpze`) → `private.imc_aruba_request` (`action=query`, `target=core`) → Database Manager Aruba. The deployed site uses its existing private server configuration and `imc_minisite_db()` CORE connection for the fixed SELECT in `api.php`. No credentials reach the frontend.
+Operational source verification uses Supabase project (`toanuzojdkfjgucztpze`) → `private.imc_aruba_request` (`action=query`, `target=core`) → Database Manager Aruba. The deployed site uses its existing private server configuration and `imc_minisite_db()` CORE connection for the fixed SELECT in `api.php`. No credentials reach the frontend.
 
 `POST /minisite/GW001/api.php` with `{"game_world_id":"GW001","resource":"seasons"}` reads every available season on each request. It does not use the versioned dossier snapshot, fixture dates, or a stored season number. Adding a row needs no rebuild or deploy.
 
