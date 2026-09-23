@@ -495,7 +495,7 @@
 
   function competitionStats() {
     const tabs = [['goals', 'GOALS'], ['assists', 'ASSISTS'], ['rating', 'RATING'], ['mom', 'MOM'], ['cards', 'CARDS']];
-    return `<nav class="competition-subtabs competition-stat-tabs">${tabs.map(([key, label]) => `<button type="button" data-stats-subtab="${key}" class="${state.statsSubTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav><div class="empty-state"><strong>${esc(state.statsSubTab.toUpperCase())}</strong><span>Tab Nexus replicata. Il dataset statistiche giocatori verrà collegato separatamente.</span></div>`;
+    return `<nav class="competition-subtabs competition-stat-tabs">${tabs.map(([key, label]) => `<button type="button" data-stats-subtab="${key}" class="${state.statsSubTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav><div class="empty-state"><strong>${esc(state.statsSubTab.toUpperCase())}</strong><span>Il dataset statistiche giocatori verrà collegato separatamente.</span></div>`;
   }
 
   function competitionDetailPage(groupKey) {
