@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus-next/**'
+      - '.github/workflows/deploy-nexus-next-aruba.yml'
       - 'minisite/GW001/**'
       - 'minisite/GW007/**'
       - 'minisite/api/results-schedule.php'
