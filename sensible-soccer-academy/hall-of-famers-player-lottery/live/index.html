@@ -19,4 +19,30 @@
  .stat{padding:9px}.stat b{font-size:21px}
  .history{padding:10px}.row{font-size:14px}
 }
+
+@media (max-width:700px){
+ html,body{width:100%;max-width:100%;overflow-x:hidden}
+ .shell{width:100%;padding:4px;overflow:hidden}
+ .temple{width:100%;max-width:100%;margin:0;border-width:4px;overflow:hidden}
+ .head{padding:12px 6px}
+ .head h1{font-size:30px;line-height:1.05}
+ .head small{font-size:9px;letter-spacing:.16em}
+ .head b{font-size:10px;letter-spacing:.08em}
+ .hall{width:100%;padding:12px 14px;background:linear-gradient(90deg,#c7bca8 0 6%,#1b140d 6% 94%,#c7bca8 94%)}
+ .stage{width:100%;min-width:0;min-height:340px;padding:12px;overflow:hidden}
+ .ring{box-sizing:border-box;width:280px!important;height:280px!important;min-width:280px!important;max-width:280px!important;min-height:280px!important;max-height:280px!important;margin:0 auto!important;padding:18px!important;border-width:7px!important;border-radius:50%!important;transform:none!important}
+ .ring>div{width:100%;max-width:240px;margin:0 auto}
+ .meta{font-size:10px;letter-spacing:.10em}
+ .manager{font-size:23px;line-height:1.05;max-width:240px;margin:5px auto;overflow-wrap:anywhere}
+ .player{font-size:34px;line-height:1;max-width:240px;margin:5px auto;overflow-wrap:anywhere}
+ .details{font-size:13px;line-height:1.25;max-width:230px;margin:7px auto 0}
+ .links,.controls,.stats,.rows{grid-template-columns:1fr!important}
+ .links a,button{width:100%;min-height:50px;margin:0;font-size:14px}
+ .stats{gap:6px}.stat{padding:8px}.stat b{font-size:20px}
+ .history{padding:9px}.row{font-size:13px}
+}
+@media (max-width:360px){
+ .ring{width:250px!important;height:250px!important;min-width:250px!important;max-width:250px!important;min-height:250px!important;max-height:250px!important}
+ .ring>div{max-width:215px}.player{font-size:30px}.manager{font-size:20px}
+}
 </style></head><body><div class="shell"><main class="temple"><header class="head"><small>ITALIAN MASTERS CLUB</small><h1>HALL OF FAMERS</h1><b>PLAYER LOTTERY · LIVE</b></header><section class="hall"><div class="stage"><div class="ring"><div><div class="meta" id="meta">WAITING FOR HOST</div><div class="manager" id="manager">—</div><div class="player" id="player">84 PLAYERS</div><div class="details" id="details">64 estrazioni · 4 round</div></div></div></div><div class="stats"><div class="stat"><b id="call">0/64</b>CALL</div><div class="stat"><b id="round">—</b>ROUND</div><div class="stat"><b id="pick">—</b>PICK</div><div class="stat"><b id="remaining">84</b>AVAILABLE</div></div><div class="history"><b>THE DRAFT</b><div class="rows" id="rows"></div></div></section></main></div><script>(()=>{const $=id=>document.getElementById(id);async function load(){try{const r=await fetch('../api.php?t='+Date.now(),{cache:'no-store'}),s=await r.json();if(!s.ok)return;const n=s.draws.length;$('call').textContent=n+'/64';$('round').textContent=s.completed?'4':s.round;$('pick').textContent=s.completed?'16':s.pick+'/16';$('remaining').textContent=s.remaining.length;$('manager').textContent=s.completed?'CEREMONY COMPLETE':(s.started?s.manager:'—');$('meta').textContent=s.completed?'64 / 64':(s.started?'ROUND '+s.round+' · PICK '+s.pick+' · CALL '+s.call+'/64':'WAITING FOR HOST');if(n){const d=s.draws[n-1];$('player').textContent=d.player;$('details').textContent='RATING '+d.rating+' · '+d.age+' ANNI · '+d.value+' · '+d.club}else{$('player').textContent='84 PLAYERS'}$('rows').innerHTML=[...s.draws].reverse().map(d=>'<div class="row"><b>#'+d.call+' · R'+d.round+' P'+d.pick+'</b> · '+d.manager+'<br><strong>'+d.player+'</strong> · '+d.rating+' · '+d.age+' · '+d.club+'</div>').join('')}catch(e){$('meta').textContent='RECONNECTING...'}}load();setInterval(load,800)})();</script></body></html>
