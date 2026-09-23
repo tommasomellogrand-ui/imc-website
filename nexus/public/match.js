@@ -93,7 +93,7 @@ function render(){stateURL();$('tabs').hidden=false;$('tabs').innerHTML=tabs.map
 document.addEventListener('click',e=>{const a=e.target.closest('a[data-view]');if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;e.preventDefault();history.pushState(null,'',a.href);render()});
 window.addEventListener('popstate',()=>{if(record)render()});
 document.addEventListener('error',e=>{if(e.target.tagName==='IMG'){const fallback=document.createElement('span');fallback.className=e.target.className;fallback.textContent='—';e.target.replaceWith(fallback)}},true);
-async function fetchJSON(query){const response=await fetch('public/data.php?'+new URLSearchParams(query),{cache:'no-store',credentials:'omit'});const d=await response.json();if(!response.ok||!d.ok)throw Error('Il report non è momentaneamente disponibile.');return d}
+async function fetchJSON(query){const response=await fetch('/nexus-next/api.php?'+new URLSearchParams(query),{cache:'no-store',credentials:'omit'});const d=await response.json();if(!response.ok||!d.ok)throw Error('Il report non è momentaneamente disponibile.');return d}
 async function boot(){
  $('world').textContent=world;
  const fallback='./?'+new URLSearchParams({world,resource:'match_report'});$('back').href=fallback;
