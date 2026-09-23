@@ -2,4 +2,4 @@
 
 Repository privato del sito pubblico `www.italianmastersclub.it`.
 
-Questo repository è separato da IMC Nexus. La cartella remota `/nexus` non deve essere modificata dai workflow di questo repository.
+Repository ufficiale del sito Italian Masters Club.
