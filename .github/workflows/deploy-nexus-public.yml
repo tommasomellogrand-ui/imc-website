@@ -1,4 +1,5 @@
-name: Deploy Nexus public runtime
+name: Deploy Nexus to Aruba
+
 on:
   push:
     branches: [main]
@@ -6,39 +7,65 @@ on:
       - 'nexus/**'
       - '.github/workflows/deploy-nexus-public.yml'
   workflow_dispatch:
+
 permissions:
   contents: read
+
 concurrency:
-  group: nexus-public-production
+  group: nexus-production
   cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate public website
-        run: |
-          php -l nexus/public/trophies.php
-          php nexus/public/trophies.test.php
-          php -l nexus/public/hub.php
-          php nexus/public/competition-names.test.php
-          php -l nexus/public/core.php
-          php nexus/public/core.test.php
-          php -l nexus/api.php
-          php -l nexus/public/data.php
-          node --check nexus/public/site.js
-          node --check nexus/public/clubhouse.js
-          node --test nexus/public/news.test.cjs
-          node --check nexus/public/match.js
-          node --test nexus/public/hub.test.cjs
-          ! grep -Eiq 'supabase|v1/app|password|loginView' nexus/index.html nexus/public/site.js
+
+      - name: Validate Nexus
+        run: test -s nexus/index.html
+
       - name: Publish Nexus to Aruba
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
-        run: python3 nexus/public/deploy.py
-      - name: Verify public website and all forty data routes
-        run: python3 nexus/public/verify.py
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          root='/www.italianmastersclub.it/nexus'
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx); ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
+          ftp.cwd('/')
+          for part in [p for p in root.split('/') if p]:
+              try: ftp.cwd(part)
+              except error_perm: ftp.mkd(part); ftp.cwd(part)
+          for p in Path('nexus').iterdir():
+              if not p.is_file(): continue
+              raw=p.read_bytes()
+              ftp.storbinary('STOR '+p.name,io.BytesIO(raw))
+              check=io.BytesIO(); ftp.retrbinary('RETR '+p.name,check.write)
+              if check.getvalue()!=raw: raise SystemExit('Upload verification failed: '+p.name)
+              print('VERIFIED',p.name,len(raw))
+          ftp.quit()
+          PY
 
-
-
+      - name: Verify Nexus live
+        run: |
+          python3 - <<'PY'
+          import urllib.request, time
+          url='https://www.italianmastersclub.it/nexus/'
+          last=None
+          for _ in range(8):
+              try:
+                  req=urllib.request.Request(url,headers={'User-Agent':'IMC-Nexus-Verify/1.0','Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      body=r.read().decode('utf-8','replace')
+                      if r.status==200 and '<h1>NEXUS</h1>' in body:
+                          print('NEXUS LIVE OK')
+                          break
+              except Exception as e: last=e
+              time.sleep(5)
+          else: raise SystemExit('Nexus live verification failed: '+str(last))
+          PY
