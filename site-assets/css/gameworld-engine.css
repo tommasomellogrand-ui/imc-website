@@ -480,7 +480,7 @@ main { width: min(100%, 520px); min-height: calc(100svh - 152px); margin: auto; 
 }
 
 
-/* Nexus GW002 structure parity · Team Hub + Managers */
+/* GW002 structure parity · Team Hub + Managers */
 .team-hub-tabs,
 .managers-tabs {
   display: grid;
