@@ -4,7 +4,7 @@
 -- Importer unchanged. Match identity is game_world_id + sm_fixture_id.
 -- Exactly one Result: all 20 shared scalar fields come from Results, including NULLs.
 -- Missing/ambiguous Result: shared fields become NULL; report-specific fields remain intact.
--- Existing player normalization and Nexus projection triggers remain installed.
+-- Existing player normalization and site projection triggers remain installed.
 -- No historical bulk rewrite. Results-only writes do not trigger this normalization;
 -- if Results arrive later, updating the Match Report re-runs the lookup.
 -- The nonunique lookup index preserves existing duplicate policy.
