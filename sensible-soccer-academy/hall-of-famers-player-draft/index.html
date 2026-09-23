@@ -5,3 +5,4 @@ function paint(x){s=x;q('count').textContent=x.count+'/64';q('available').textCo
 q('reset').onclick=async()=>{running=false;paint(await req('reset'))};q('auto').onclick=async()=>{if(running)return;running=true;try{const full=await req('generate');const all=full.draws;for(let i=0;i<all.length;i++){const shown=all.slice(0,i+1);const d=all[i];q('count').textContent=(i+1)+'/64';q('available').textContent=63-i;q('meta').textContent='PICK '+d.round+' · '+d.pick+'/16 · CALL '+d.call+'/64';q('manager').textContent=d.manager;q('player').textContent=d.player;q('details').textContent='RATING '+d.rating+' · '+d.age+' ANNI · '+d.club;q('history').innerHTML=[...shown].reverse().map(x=>'<div class="row"><b>#'+x.call+' · PICK '+x.round+' · '+x.manager+'</b> → '+x.player+' · '+x.rating+'</div>').join('');await new Promise(r=>setTimeout(r,1600));}s=full;paint(full)}finally{running=false}};req().then(paint);
 })();
 </script></body></html>
+<!-- v2-public-deploy -->
