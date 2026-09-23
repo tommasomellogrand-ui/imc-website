@@ -1,117 +1,27 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache"><title>Hall Of Famers · Player Lottery · Live</title><style>*{box-sizing:border-box}body{margin:0;background:#0d0a07;color:#f5ead2;font-family:Georgia,serif}.shell{min-height:100vh;padding:14px;background:radial-gradient(circle at 50% 0,#59462b,#17110b 45%,#070503)}.temple{max-width:1180px;margin:auto;border:8px double #a8874b;background:#17110c}.head{text-align:center;padding:20px;background:linear-gradient(#e4dccb,#b9aa8f);color:#261d13;border-bottom:7px double #92703a}.head small{letter-spacing:.32em}.head h1{margin:5px 0;font-size:clamp(30px,6vw,62px);letter-spacing:.08em}.head b{color:#77541c;letter-spacing:.18em}.hall{padding:24px 8%;background:linear-gradient(90deg,#a89d89 0 4%,#d8cfbd 4% 8%,#1b140d 8% 92%,#d8cfbd 92% 96%,#a89d89 96%)}.stage{min-height:430px;border:3px double #b28d49;background:radial-gradient(circle,#382b1b,#15100b 70%);display:grid;place-items:center;text-align:center;padding:24px}.ring{width:min(590px,86vw);min-height:310px;border:14px double #aa8745;border-radius:50%;display:grid;place-items:center;padding:30px}.meta{color:#c8ad74;letter-spacing:.15em;font-weight:bold}.manager{font-size:clamp(28px,5vw,56px);font-weight:bold;text-transform:uppercase}.player{font-size:clamp(36px,7vw,74px);color:#e4bd6c;font-weight:bold;text-shadow:3px 3px #000}.details{font-size:18px;margin-top:8px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.stat{background:#c9bea9;color:#281f16;padding:12px;text-align:center;border:1px solid #846b42}.stat b{display:block;font-size:24px;color:#73531f}.history{margin-top:14px;background:#c9bea9;color:#281f16;padding:14px}.rows{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.row{padding:8px;background:linear-gradient(135deg,#e3dac8,#b3a58c);border:1px solid #89724c}.row b{color:#73531f}@media(max-width:700px){.stats,.rows{grid-template-columns:1fr}.hall{padding-left:10%;padding-right:10%}}
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache"><title>Hall Of Famers · Player Lottery · Live</title><style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior-x:none;touch-action:pan-y;background:#0d0a07;color:#f5ead2;font-family:Georgia,serif}
+.shell{width:100%;max-width:100%;min-height:100vh;padding:10px;background:radial-gradient(circle at 50% 0,#59462b,#17110b 45%,#070503);overflow:hidden}
+.temple{width:min(100%,1180px);max-width:1180px;margin:0 auto;border:8px double #a8874b;background:#17110c;overflow:hidden}
+.head{text-align:center;padding:20px 12px;background:linear-gradient(#e4dccb,#b9aa8f);color:#261d13;border-bottom:7px double #92703a}
+.head small{letter-spacing:.32em}.head h1{margin:5px 0;font-size:clamp(30px,6vw,62px);letter-spacing:.08em}.head b{color:#77541c;letter-spacing:.18em}
+.hall{width:100%;padding:22px 8%;background:linear-gradient(90deg,#c7bca8 0 5%,#1b140d 5% 95%,#c7bca8 95%);overflow:hidden}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.links a,button{display:block;width:100%;padding:13px;border:2px solid #c8a35c;background:linear-gradient(#4b3820,#21170e);color:#f5dfad;text-decoration:none;text-align:center;font:bold 15px Georgia}
+.stage{width:100%;min-height:370px;margin:0;padding:32px 20px;border:3px double #b28d49;background:radial-gradient(circle,#382b1b,#15100b 70%);display:flex;align-items:center;justify-content:center;overflow:hidden;text-align:center}
+.stagecontent{width:100%;max-width:760px;margin:0 auto;padding:0;text-align:center}
+.meta{color:#c8ad74;letter-spacing:.15em;font-weight:bold}.manager{font-size:clamp(28px,5vw,54px);font-weight:bold;text-transform:uppercase;text-align:center}.player{font-size:clamp(34px,7vw,70px);color:#e4bd6c;font-weight:bold;text-shadow:3px 3px #000;text-align:center}.details{font-size:18px;line-height:1.35;margin-top:8px;text-align:center}
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}.controls button:disabled{opacity:.35}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:#c9bea9;color:#281f16;padding:12px;text-align:center;border:1px solid #846b42}.stat b{display:block;font-size:24px;color:#73531f}
+.history{margin-top:14px;background:#c9bea9;color:#281f16;padding:14px;overflow:hidden}.rows{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.row{min-width:0;padding:8px;background:linear-gradient(135deg,#e3dac8,#b3a58c);border:1px solid #89724c;overflow-wrap:anywhere}.row b{color:#73531f}
 @media(max-width:700px){
- body{overflow-x:hidden}
- .shell{padding:6px}
- .temple{width:100%;max-width:100%;border-width:4px;overflow:hidden}
- .head{padding:14px 8px}
- .head small{font-size:10px;letter-spacing:.18em}
- .head h1{font-size:32px;line-height:1.05}
- .head b{font-size:11px;letter-spacing:.10em}
- .hall{padding:14px 18px;background:linear-gradient(90deg,#b9ad98 0 7%,#21180f 7% 93%,#b9ad98 93%)}
- .stage{width:100%;min-height:0;padding:18px 10px;overflow:hidden}
- .ring{width:min(76vw,330px);height:min(76vw,330px);min-height:0;aspect-ratio:1/1;margin:0 auto;padding:22px 18px;border-width:8px;overflow:hidden}
- .meta{font-size:11px;letter-spacing:.12em}
- .manager{font-size:clamp(21px,7vw,30px);line-height:1.08;overflow-wrap:anywhere}
- .player{font-size:clamp(29px,9vw,42px);line-height:1.02;overflow-wrap:anywhere}
- .details{font-size:14px;line-height:1.35}
+ .shell{padding:4px}.temple{width:100%;max-width:100%;margin:0;border-width:4px}
+ .head{padding:14px 8px}.head small{font-size:10px;letter-spacing:.16em}.head h1{font-size:32px;line-height:1.05}.head b{font-size:11px;letter-spacing:.08em}
+ .hall{padding:14px 18px;background:linear-gradient(90deg,#c7bca8 0 6%,#1b140d 6% 94%,#c7bca8 94%)}
  .links,.controls,.stats,.rows{grid-template-columns:1fr}
- .links a,button{min-height:52px;font-size:15px}
- .stat{padding:9px}.stat b{font-size:21px}
- .history{padding:10px}.row{font-size:14px}
+ .stage{min-height:330px;padding:28px 18px}
+ .stagecontent{width:100%;max-width:100%}
+ .meta,.manager,.player,.details{width:100%;max-width:100%;margin-left:auto;margin-right:auto;text-align:center;overflow-wrap:anywhere}
+ .meta{font-size:12px}.manager{font-size:clamp(26px,8vw,34px);line-height:1.08}.player{font-size:clamp(36px,11vw,48px);line-height:1.04}.details{font-size:15px}
+ .links a,button{min-height:52px}.stat{padding:9px}.stat b{font-size:21px}.history{padding:10px}.row{font-size:14px}
 }
-
-@media (max-width:700px){
- html,body{width:100%;max-width:100%;overflow-x:hidden}
- .shell{width:100%;padding:4px;overflow:hidden}
- .temple{width:100%;max-width:100%;margin:0;border-width:4px;overflow:hidden}
- .head{padding:12px 6px}
- .head h1{font-size:30px;line-height:1.05}
- .head small{font-size:9px;letter-spacing:.16em}
- .head b{font-size:10px;letter-spacing:.08em}
- .hall{width:100%;padding:12px 14px;background:linear-gradient(90deg,#c7bca8 0 6%,#1b140d 6% 94%,#c7bca8 94%)}
- .stage{width:100%;min-width:0;min-height:340px;padding:12px;overflow:hidden}
- .ring{box-sizing:border-box;width:280px!important;height:280px!important;min-width:280px!important;max-width:280px!important;min-height:280px!important;max-height:280px!important;margin:0 auto!important;padding:18px!important;border-width:7px!important;border-radius:50%!important;transform:none!important}
- .ring>div{width:100%;max-width:240px;margin:0 auto}
- .meta{font-size:10px;letter-spacing:.10em}
- .manager{font-size:23px;line-height:1.05;max-width:240px;margin:5px auto;overflow-wrap:anywhere}
- .player{font-size:34px;line-height:1;max-width:240px;margin:5px auto;overflow-wrap:anywhere}
- .details{font-size:13px;line-height:1.25;max-width:230px;margin:7px auto 0}
- .links,.controls,.stats,.rows{grid-template-columns:1fr!important}
- .links a,button{width:100%;min-height:50px;margin:0;font-size:14px}
- .stats{gap:6px}.stat{padding:8px}.stat b{font-size:20px}
- .history{padding:9px}.row{font-size:13px}
-}
-@media (max-width:360px){
- .ring{width:250px!important;height:250px!important;min-width:250px!important;max-width:250px!important;min-height:250px!important;max-height:250px!important}
- .ring>div{max-width:215px}.player{font-size:30px}.manager{font-size:20px}
-}
-
-@media(max-width:700px){
- html,body{margin:0!important;width:100%!important;max-width:100%!important;overflow-x:hidden!important;overscroll-behavior-x:none!important;touch-action:pan-y!important}
- .shell{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:4px!important;overflow-x:clip!important}
- .temple{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0 auto!important;overflow:hidden!important}
- .hall{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:12px 18px!important;overflow:hidden!important}
- .stage{box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:14px 8px!important;overflow:hidden!important}
- .ring{position:relative!important;left:auto!important;right:auto!important;top:auto!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 260px!important;width:260px!important;height:260px!important;min-width:260px!important;max-width:260px!important;min-height:260px!important;max-height:260px!important;margin:0 auto!important;padding:18px!important;transform:none!important;border-radius:50%!important}
- .ring>div{box-sizing:border-box!important;width:100%!important;max-width:220px!important;margin:0 auto!important;text-align:center!important}
- .manager,.player,.details,.meta{box-sizing:border-box!important;max-width:220px!important;margin-left:auto!important;margin-right:auto!important;overflow-wrap:anywhere!important}
- .links,.controls,.stats,.rows,.history{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important}
- .links a,button,.stat,.row{box-sizing:border-box!important;max-width:100%!important}
-}
-@media(max-width:360px){.ring{flex-basis:235px!important;width:235px!important;height:235px!important;min-width:235px!important;max-width:235px!important;min-height:235px!important;max-height:235px!important}.ring>div,.manager,.player,.details,.meta{max-width:200px!important}}
-
-@media(max-width:700px){
- .stage{position:relative!important;display:block!important;width:100%!important;padding:20px 0!important;overflow:hidden!important;text-align:center!important}
- .stage .ring{position:relative!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;width:250px!important;height:250px!important;min-width:250px!important;max-width:250px!important;min-height:250px!important;max-height:250px!important;margin-left:calc((100% - 250px)/2)!important;margin-right:0!important;padding:16px!important;left:0!important;right:auto!important;transform:none!important;border-radius:50%!important}
- .stage .ring>div{width:210px!important;max-width:210px!important;margin:0!important;text-align:center!important}
-}
-@media(max-width:340px){
- .stage .ring{width:230px!important;height:230px!important;min-width:230px!important;max-width:230px!important;min-height:230px!important;max-height:230px!important;margin-left:calc((100% - 230px)/2)!important}
- .stage .ring>div{width:195px!important;max-width:195px!important}
-}
-
-@media(max-width:700px){
- .stage{box-sizing:border-box!important;position:relative!important;display:grid!important;grid-template-columns:1fr!important;place-items:center!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:24px 12px!important;margin:0!important;overflow:hidden!important}
- .stage>.ring{box-sizing:border-box!important;position:static!important;display:grid!important;place-items:center!important;width:220px!important;height:220px!important;min-width:220px!important;max-width:220px!important;min-height:220px!important;max-height:220px!important;margin:0!important;padding:14px!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;flex:none!important;border-radius:50%!important}
- .stage>.ring>div{box-sizing:border-box!important;width:184px!important;max-width:184px!important;margin:0!important;padding:0!important;text-align:center!important}
- .stage .meta,.stage .manager,.stage .player,.stage .details{width:100%!important;max-width:184px!important;margin-left:auto!important;margin-right:auto!important;text-align:center!important}
- .stage .manager{font-size:19px!important;line-height:1.05!important}
- .stage .player{font-size:28px!important;line-height:1!important}
- .stage .details{font-size:12px!important;line-height:1.2!important}
-}
-
-/* HOF FINAL MOBILE: no circle */
-@media(max-width:700px){
- .stage{box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-height:300px!important;padding:28px 18px!important;overflow:hidden!important;text-align:center!important}
- .stage>.ring{box-sizing:border-box!important;position:static!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:auto!important;min-width:0!important;max-width:100%!important;min-height:0!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important;transform:none!important}
- .stage>.ring>div{box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0 auto!important;padding:0 8px!important;text-align:center!important}
- .stage .meta,.stage .manager,.stage .player,.stage .details{box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin-left:auto!important;margin-right:auto!important;text-align:center!important}
- .stage .manager{font-size:clamp(22px,7vw,30px)!important;line-height:1.08!important}
- .stage .player{font-size:clamp(32px,10vw,44px)!important;line-height:1.05!important}
- .stage .details{font-size:14px!important;line-height:1.35!important}
-}
-
-.stagecontent{width:100%;max-width:100%;margin:0 auto;text-align:center}
-@media(max-width:700px){
- .stage{display:flex!important;align-items:center!important;justify-content:center!important;min-height:300px!important;padding:28px 18px!important;text-align:center!important}
- .stagecontent{display:block!important;width:100%!important;max-width:100%!important;margin:0 auto!important;padding:0!important;text-align:center!important}
- .stagecontent .meta,.stagecontent .manager,.stagecontent .player,.stagecontent .details{width:100%!important;max-width:100%!important;margin-left:auto!important;margin-right:auto!important;text-align:center!important}
-}
-
-/* FINAL ONLINE MOBILE LAYOUT */
-@media(max-width:700px){
- html,body{margin:0!important;width:100%!important;max-width:100%!important;overflow-x:hidden!important}
- .shell{width:100%!important;max-width:100%!important;padding:4px!important;overflow:hidden!important}
- .temple{width:100%!important;max-width:100%!important;margin:0!important;overflow:hidden!important}
- .hall{box-sizing:border-box!important;width:100%!important;max-width:100%!important;padding:14px 18px!important;overflow:hidden!important}
- .stage{box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;max-width:100%!important;min-height:380px!important;margin:0!important;padding:36px 20px!important;overflow:hidden!important;text-align:center!important;border:3px double #b28d49!important;background:radial-gradient(circle,#382b1b,#15100b 70%)!important}
- .stagecontent{box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;width:100%!important;max-width:100%!important;height:auto!important;min-width:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;position:static!important;transform:none!important;text-align:center!important}
- .stagecontent .meta,.stagecontent .manager,.stagecontent .player,.stagecontent .details{box-sizing:border-box!important;display:block!important;width:100%!important;max-width:100%!important;margin-left:auto!important;margin-right:auto!important;text-align:center!important;position:static!important;transform:none!important}
- .stagecontent .meta{font-size:13px!important;letter-spacing:.18em!important}
- .stagecontent .manager{font-size:clamp(28px,8vw,38px)!important;line-height:1.08!important;margin-top:10px!important}
- .stagecontent .player{font-size:clamp(38px,11vw,52px)!important;line-height:1.04!important;margin-top:10px!important}
- .stagecontent .details{font-size:16px!important;line-height:1.35!important;margin-top:12px!important}
- .links,.controls,.stats,.rows{grid-template-columns:1fr!important;width:100%!important}
- .links a,button{width:100%!important;min-height:52px!important}
-}
-</style></head><body><div class="shell"><main class="temple"><header class="head"><small>ITALIAN MASTERS CLUB</small><h1>HALL OF FAMERS</h1><b>PLAYER LOTTERY · LIVE</b></header><section class="hall"><div class="stage"><div class="stagecontent"><div class="meta" id="meta">WAITING FOR HOST</div><div class="manager" id="manager">—</div><div class="player" id="player">84 PLAYERS</div><div class="details" id="details">64 estrazioni · 4 round</div></div></div><div class="stats"><div class="stat"><b id="call">0/64</b>CALL</div><div class="stat"><b id="round">—</b>ROUND</div><div class="stat"><b id="pick">—</b>PICK</div><div class="stat"><b id="remaining">84</b>AVAILABLE</div></div><div class="history"><b>THE DRAFT</b><div class="rows" id="rows"></div></div></section></main></div><script>(()=>{const $=id=>document.getElementById(id);async function load(){try{const r=await fetch('../api.php?ts='+Date.now(),{cache:'no-store'}),s=await r.json();if(!s.ok)return;const n=s.draws.length;$('call').textContent=n+'/64';$('round').textContent=s.completed?'4':s.round;$('pick').textContent=s.completed?'16':s.pick+'/16';$('remaining').textContent=s.remaining.length;$('manager').textContent=s.completed?'CEREMONY COMPLETE':(s.started?s.manager:'—');$('meta').textContent=s.completed?'64 / 64':(s.started?'ROUND '+s.round+' · PICK '+s.pick+' · CALL '+s.call+'/64':'WAITING FOR HOST');if(n){const d=s.draws[n-1];$('player').textContent=d.player;$('details').textContent='RATING '+d.rating+' · '+d.age+' ANNI · '+d.value+' · '+d.club}else{$('player').textContent='84 PLAYERS'}$('rows').innerHTML=[...s.draws].reverse().map(d=>'<div class="row"><b>#'+d.call+' · R'+d.round+' P'+d.pick+'</b> · '+d.manager+'<br><strong>'+d.player+'</strong> · '+d.rating+' · '+d.age+' · '+d.club+'</div>').join('')}catch(e){$('meta').textContent='RECONNECTING...'}}load();setInterval(load,800)})();</script></body></html>
+</style></head><body><div class="shell"><main class="temple"><header class="head"><small>ITALIAN MASTERS CLUB</small><h1>HALL OF FAMERS</h1><b>PLAYER LOTTERY · LIVE</b></header><section class="hall"><div class="stage"><div class="stagecontent"><div class="meta" id="meta">WAITING FOR HOST</div><div class="manager" id="manager">—</div><div class="player" id="player">84 PLAYERS</div><div class="details" id="details">64 estrazioni · 4 round</div></div><div class="stats"><div class="stat"><b id="call">0/64</b>CALL</div><div class="stat"><b id="round">—</b>ROUND</div><div class="stat"><b id="pick">—</b>PICK</div><div class="stat"><b id="remaining">84</b>AVAILABLE</div></div><div class="history"><b>THE DRAFT</b><div class="rows" id="rows"></div></div></section></main></div><script>(()=>{const $=id=>document.getElementById(id);async function load(){try{const r=await fetch('../api.php?ts='+Date.now(),{cache:'no-store'}),s=await r.json();if(!s.ok)return;const n=s.draws.length;$('call').textContent=n+'/64';$('round').textContent=s.completed?'4':s.round;$('pick').textContent=s.completed?'16':s.pick+'/16';$('remaining').textContent=s.remaining.length;$('manager').textContent=s.completed?'CEREMONY COMPLETE':(s.started?s.manager:'—');$('meta').textContent=s.completed?'64 / 64':(s.started?'ROUND '+s.round+' · PICK '+s.pick+' · CALL '+s.call+'/64':'WAITING FOR HOST');if(n){const d=s.draws[n-1];$('player').textContent=d.player;$('details').textContent='RATING '+d.rating+' · '+d.age+' ANNI · '+d.value+' · '+d.club}else{$('player').textContent='84 PLAYERS'}$('rows').innerHTML=[...s.draws].reverse().map(d=>'<div class="row"><b>#'+d.call+' · R'+d.round+' P'+d.pick+'</b> · '+d.manager+'<br><strong>'+d.player+'</strong> · '+d.rating+' · '+d.age+' · '+d.club+'</div>').join('')}catch(e){$('meta').textContent='RECONNECTING...'}}load();setInterval(load,800)})();</script></body></html>
