@@ -116,7 +116,7 @@ def generate(envelope, crosswalk):
         require(r.get('ok') and not r['result']['truncated'], 'incomplete_export:'+name)
         require(r['result']['returned_rows'] == len(r['result']['rows']), 'export_count:'+name)
         return r['result']['rows']
-    s = {'schema_version':1, 'game_world_id':GW, 'generated_at':envelope['acquired_at'], 'version':envelope['acquired_at'], 'source':'MySQL Aruba via IMC Nexus', 'bridge_project':PROJECT}
+    s = {'schema_version':1, 'game_world_id':GW, 'generated_at':envelope['acquired_at'], 'version':envelope['acquired_at'], 'source':'MySQL Aruba via Supabase bridge', 'bridge_project':PROJECT}
     for name in ('world','membership','nations_mapping','clubs','nations','managers','assignments','competitions','countries'):
         s[name] = rows(name)
     for name in ('players','player_data','history'):
