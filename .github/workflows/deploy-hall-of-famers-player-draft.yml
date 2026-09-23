@@ -31,7 +31,7 @@ jobs:
               except error_perm:ftp.mkd(p);ftp.cwd(p)
           base=Path('sensible-soccer-academy/hall-of-famers-player-draft')
           for rel in ['index.html','api.php','live/index.html']:
-            p=base/rel;cd(root+'/'+str(Path(rel).parent));ftp.storbinary('STOR '+p.name,io.BytesIO(p.read_bytes()))
+            p=base/rel;cd(root+'/'+str(Path(rel).parent));data=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(data));chk=io.BytesIO();ftp.retrbinary('RETR '+p.name,chk.write);assert chk.getvalue()==data,rel
           cd(root)
           try:ftp.size('state.json')
           except Exception:ftp.storbinary('STOR state.json',io.BytesIO(b'{}\\n'))
