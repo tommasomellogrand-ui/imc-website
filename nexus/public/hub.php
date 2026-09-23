@@ -14,7 +14,7 @@ function nexus_date_where(string $column,?array $season,array &$params): string 
 }
 function nexus_match_rows(PDO $db,string $world,string $key,?array $season,string $kind): array {
     $schedule=$kind==='schedule';$table=$schedule?'IMC_Site_Schedule':'IMC_Site_Results';$id=$schedule?'site_schedule_id':'site_result_id';
-    $fields=$schedule?'match_time,home_sm_team_id,away_sm_team_id':'result_status,competition_group_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score,home_sm_club_id,away_sm_club_id';
+    $fields=$schedule?'match_time,competition_group_name,home_sm_team_id,away_sm_team_id':'result_status,competition_group_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score,home_sm_club_id,away_sm_club_id';
     $params=[$world,$key];$where=nexus_date_where('match_date',$season,$params);
      $rows=nexus_core_rows($db,"SELECT $id site_id,game_world_id,competition_key,sm_fixture_id,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_name,away_name,home_sm_manager_id,away_sm_manager_id,$fields FROM `$table` WHERE game_world_id=? AND competition_key=? $where ORDER BY match_date,`$id`",$params);
     nexus_report_logo_ids($db,$world,$rows);return $rows;
