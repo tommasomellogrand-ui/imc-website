@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nexus · Competitions</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+:root{--blue:#0B103A;--gold:#D5A13A;--white:#FFF;--charcoal:#1A1A1A;--line:#D9DDE5;--soft:#F5F6F8}
+*{box-sizing:border-box}body{margin:0;background:var(--white);color:var(--charcoal);font-family:Inter,Arial,sans-serif}.shell{max-width:1180px;margin:auto;padding:28px 18px 70px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--line);padding-bottom:24px}.back{color:var(--blue);text-decoration:none;font-weight:800}.context{display:flex;gap:8px}select{font:inherit;background:#fff;color:var(--blue);border:1px solid var(--line);border-radius:8px;padding:10px 12px}.hero{padding:42px 0 30px}.ey{font-size:11px;letter-spacing:.18em;color:var(--gold);font-weight:800}.hero h1{margin:8px 0;font-size:clamp(40px,7vw,72px);line-height:.95;color:var(--blue);font-weight:900}.groups{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.group{font:inherit;text-align:left;background:#fff;color:var(--blue);border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:14px;padding:24px;min-height:160px;cursor:pointer}.group small{color:var(--gold);font-weight:800}.group b{display:block;font-size:24px;margin:12px 0}.group span{color:#667085}.group:hover{background:#fffaf0}.list{margin-top:24px;border:1px solid var(--line);border-radius:14px;padding:20px}.row{display:flex;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}.row b{color:var(--blue)}.muted{color:#667085}@media(max-width:700px){.top{align-items:flex-start;flex-direction:column}.groups{grid-template-columns:1fr}.context{width:100%}select{flex:1;min-width:0}}
+</style></head><body><main class="shell">
+<header class="top"><a class="back" href="../">← NEXUS</a><div class="context"><select id="world"></select><select id="season"><option value="">Season</option></select></div></header>
+<section class="hero"><div class="ey">NEXUS · COMPETITIONS</div><h1>Competitions</h1><p class="muted" id="worldName">Seleziona il Game World.</p></section>
+<section class="groups">
+<button class="group" data-group="DOMESTIC"><small>01</small><b>DOMESTIC</b><span id="nDomestic">—</span></button>
+<button class="group" data-group="INTERNATIONAL"><small>02</small><b>INTERNATIONAL</b><span id="nInternational">—</span></button>
+<button class="group" data-group="NATIONS"><small>03</small><b>NATIONS</b><span id="nNations">—</span></button>
+</section>
+<section class="list" id="list"><div class="muted">Seleziona una categoria.</div></section>
+</main><script>
+const $=x=>document.getElementById(x),w=$('world'),s=$('season'),list=$('list');let catalog=[];
+for(let i=1;i<=10;i++){let g='GW'+String(i).padStart(3,'0');w.add(new Option(g,g))}w.value=new URLSearchParams(location.search).get('world')||'GW001';
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+async function load(){let ctx=await fetch('../core/context.php?world='+w.value,{cache:'no-store'}).then(r=>r.json());$('worldName').textContent=(ctx.world?.game_world_name||w.value)+' · '+w.value;s.innerHTML='<option value="">Season</option>';(ctx.seasons||[]).forEach(x=>s.add(new Option('Season '+x.imc_season,x.imc_season)));if(ctx.seasons?.length)s.value=ctx.seasons.at(-1).imc_season;let j=await fetch('catalog.php?world='+w.value,{cache:'no-store'}).then(r=>r.json());catalog=j.rows||[];for(const g of ['DOMESTIC','INTERNATIONAL','NATIONS'])$('n'+g[0]+g.slice(1).toLowerCase()).textContent=catalog.filter(x=>String(x.competition_group).toUpperCase()===g).length+' competizioni';list.innerHTML='<div class="muted">Seleziona una categoria.</div>'}
+document.querySelectorAll('.group').forEach(b=>b.onclick=()=>{let g=b.dataset.group,rows=catalog.filter(x=>String(x.competition_group).toUpperCase()===g);list.innerHTML='<h2>'+g+'</h2>'+rows.map(x=>'<div class="row"><b>'+esc(x.nexus_view)+'</b><span class="muted">'+esc(x.competition_key)+'</span></div>').join('')});w.onchange=load;load();
+</script></body></html>
