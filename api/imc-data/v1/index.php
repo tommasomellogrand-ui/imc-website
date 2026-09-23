@@ -84,7 +84,7 @@ function api_core_club_index(string $world, array $worldClubIds): array {
             'club_id' => (int)$row['club_id'],
             'name' => $row['name'],
             'short_name' => $row['short_name'],
-            'image_url' => '/nexus/assets/clubs/'.(int)$row['club_id'].'.png',
+            'image_url' => null,
         ];
     }
     return $index;
@@ -114,7 +114,7 @@ function api_core_club_name_index(string $world, array $clubNames): array {
             'club_id' => (int)$row['club_id'],
             'name' => $row['name'],
             'short_name' => $row['short_name'],
-            'image_url' => '/nexus/assets/clubs/'.(int)$row['club_id'].'.png',
+            'image_url' => null,
         ];
     }
     return $index;
@@ -538,7 +538,7 @@ function api_clubs(string $world): never {
         'club_gw_id' => (int)$row['club_gw_id'],
         'name' => $row['name'],
         'short_name' => $row['short_name'],
-        'image_url' => '/nexus/assets/clubs/'.(int)$row['club_id'].'.png',
+        'image_url' => null,
         'local' => [
             'world_club_row_id' => api_nullable_int($localRow['world_club_row_id'] ?? null),
             'world_club_id' => api_nullable_int($localRow['world_club_id'] ?? $row['club_gw_id']),
