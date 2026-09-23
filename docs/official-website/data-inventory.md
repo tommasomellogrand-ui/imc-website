@@ -1,6 +1,6 @@
 # Data inventory — verified 10 September 2026
 
-Source: IMC Repository Report read through IMC Nexus bridge from GOLD and CUSTOM.
+Source: IMC Repository Report read through the Supabase bridge from GOLD and CUSTOM.
 Counts are imported rows, not deduplicated sporting metrics.
 
 | World | Results | Schedule | Match Report | Transfers | Player Codex | SM Player Stats |
