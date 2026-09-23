@@ -12,11 +12,11 @@
 <button class="group" data-group="INTERNATIONAL"><small>02</small><b>INTERNATIONAL</b><span id="nInternational">—</span></button>
 <button class="group" data-group="NATIONS"><small>03</small><b>NATIONS</b><span id="nNations">—</span></button>
 </section>
-<section class="list" id="list"><div class="muted">Seleziona una categoria.</div></section>
+
 </main><script>
-const $=x=>document.getElementById(x),w=$('world'),s=$('season'),list=$('list');let catalog=[];
+const $=x=>document.getElementById(x),w=$('world'),s=$('season');let catalog=[];
 for(let i=1;i<=10;i++){let g='GW'+String(i).padStart(3,'0');w.add(new Option(g,g))}w.value=new URLSearchParams(location.search).get('world')||'GW001';
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-async function load(){let ctx=await fetch('../core/context.php?world='+w.value,{cache:'no-store'}).then(r=>r.json());$('worldName').textContent=(ctx.world?.game_world_name||w.value)+' · '+w.value;s.innerHTML='<option value="">Season</option>';(ctx.seasons||[]).forEach(x=>s.add(new Option('Season '+x.imc_season,x.imc_season)));if(ctx.seasons?.length)s.value=ctx.seasons.at(-1).imc_season;let j=await fetch('catalog.php?world='+w.value,{cache:'no-store'}).then(r=>r.json());catalog=j.rows||[];for(const g of ['DOMESTIC','INTERNATIONAL','NATIONS'])$('n'+g[0]+g.slice(1).toLowerCase()).textContent=catalog.filter(x=>String(x.competition_group).toUpperCase()===g).length+' competizioni';list.innerHTML='<div class="muted">Seleziona una categoria.</div>'}
-document.querySelectorAll('.group').forEach(b=>b.onclick=()=>{location.href='group.html?world='+encodeURIComponent(w.value)+'&season='+encodeURIComponent(s.value||'')+'&group='+encodeURIComponent(b.dataset.group)});w.onchange=load;load();
+async function load(){let ctx=await fetch('../core/context.php?world='+w.value,{cache:'no-store'}).then(r=>r.json());$('worldName').textContent=(ctx.world?.game_world_name||w.value)+' · '+w.value;s.innerHTML='<option value="">Season</option>';(ctx.seasons||[]).forEach(x=>s.add(new Option('Season '+x.imc_season,x.imc_season)));if(ctx.seasons?.length)s.value=ctx.seasons.at(-1).imc_season;let j=await fetch('catalog.php?world='+w.value,{cache:'no-store'}).then(r=>r.json());catalog=j.rows||[];for(const g of ['DOMESTIC','INTERNATIONAL','NATIONS'])$('n'+g[0]+g.slice(1).toLowerCase()).textContent=catalog.filter(x=>String(x.competition_group).toUpperCase()===g).length+' competizioni'}
+document.querySelectorAll('.group').forEach(b=>b.onclick=()=>location.href='group.html?world='+encodeURIComponent(w.value)+'&season='+encodeURIComponent(s.value||'')+'&group='+encodeURIComponent(b.dataset.group));w.onchange=load;load();
 </script></body></html>
