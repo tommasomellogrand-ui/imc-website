@@ -2,11 +2,21 @@
  if(autoRunning||!s||s.completed)return;
  if(!s.started){s=await api('start');render(s)}
  autoRunning=true;stopRequested=false;render(s);
- while(!stopRequested&&!s.completed&&s.draws.length<64){
-   try{s=await api('draw');render(s)}
-   catch(e){try{s=await api();render(s)}catch(_){}}
+ while(!stopRequested && s.draws.length<64){
+   let advanced=false;
+   try{
+     const next=await api('draw');
+     if(next.draws.length>s.draws.length)advanced=true;
+     s=next;render(s);
+   }catch(e){
+     try{
+       const fresh=await api();
+       if(fresh.draws.length>s.draws.length)advanced=true;
+       s=fresh;render(s);
+     }catch(_){}
+   }
    if(s.completed||s.draws.length>=64)break;
-   await new Promise(r=>setTimeout(r,1400));
+   await new Promise(r=>setTimeout(r,advanced?1800:800));
  }
  autoRunning=false;busy=false;render(s);
 }$('start').onclick=async()=>{try{const x=await api('start');render(x)}catch(e){console.error('START ERROR',e)}};$('draw').onclick=async()=>{if(busy)return;try{const before=s,next=await api('draw');await spin(next,before)}catch(e){busy=false;console.error('DRAW ERROR',e)}};$('auto').onclick=()=>runAutoPick().catch(e=>{autoRunning=false;busy=false;console.error(e);render(s)});$('stop').onclick=()=>{stopRequested=true;autoRunning=false;render(s)};$('reset').onclick=async()=>{if(confirm('Reset completo?')){stopRequested=true;autoRunning=false;render(await api('reset'))}};api().then(render).catch(e=>console.error('API ERROR',e))})();</script></body></html>
