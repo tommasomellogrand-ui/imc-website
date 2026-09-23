@@ -64,31 +64,6 @@ if (is_array($imcPreflight)) {
         }
     }
 
-    if ($imcAction === 'nexus_trophy_room' && $imcChannel === 'NEXUS') {
-        $imcConfigFile = dirname(__DIR__).'/__imc_private_gateway/config.php';
-        if (is_file($imcConfigFile)) {
-            $imcConfig = require $imcConfigFile;
-            if (is_array($imcConfig) && isset($imcConfig['token'])) {
-                $_SERVER['HTTP_X_IMC_UNIVERSAL_TOKEN'] = (string)$imcConfig['token'];
-            }
-        }
-        $imcGw = strtoupper(trim((string)($imcPreflight['game_world_id'] ?? '')));
-        if (!preg_match('/^GW(?:00[1-9]|01[0-5])$/', $imcGw)) {
-            http_response_code(422);
-            echo json_encode(['ok'=>false,'error'=>'invalid_game_world']);
-            exit;
-        }
-        $imcPreflight = [
-            'action' => 'read',
-            'channel' => 'CHATGPT',
-            'source' => 'core',
-            'repository' => 'IMC Trophy Room',
-            'where' => ['game_world_id' => $imcGw],
-            'limit' => 1000
-        ];
-        $GLOBALS['IMC_NEXUS_PREFLIGHT'] = $imcPreflight;
-    }
-
     $imcRepository = trim((string)($imcPreflight['repository'] ?? ''));
     if ($imcRepository === 'transfers' && in_array($imcAction, ['read', 'insert_many'], true)) {
         $imcConfigFile = dirname(__DIR__).'/__imc_private_gateway/config.php';
@@ -101,9 +76,6 @@ if (is_array($imcPreflight)) {
     }
 }
 
-if (isset($GLOBALS['IMC_NEXUS_PREFLIGHT'])) {
-    $imcRawInput = json_encode($GLOBALS['IMC_NEXUS_PREFLIGHT'], JSON_UNESCAPED_SLASHES);
-}
 require __DIR__.'/core.php';
 require __DIR__.'/read.php';
 require __DIR__.'/write.php';
