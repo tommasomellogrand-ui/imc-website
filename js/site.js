@@ -23,7 +23,7 @@
         }
       });
     },{threshold:.12});
-    document.querySelectorAll('.world-card,.competition-card,.nexus-panel,.community-panel').forEach(function(el){observer.observe(el);});
+    document.querySelectorAll('.world-card,.competition-card,.community-panel').forEach(function(el){observer.observe(el);});
   }
 
   const SUPABASE_URL='https://toanuzojdkfjgucztpze.supabase.co';
