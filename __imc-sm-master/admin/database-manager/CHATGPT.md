@@ -1,7 +1,7 @@
 # IMC — Comandi dati dalla chat
 
 ## Percorso operativo
-ChatGPT con strumento Supabase collegato → progetto IMC Nexus `toanuzojdkfjgucztpze` → `private.imc_aruba_request(jsonb)` → Database Manager Aruba → MySQL.
+ChatGPT con strumento Supabase collegato → progetto Supabase `toanuzojdkfjgucztpze` → `private.imc_aruba_request(jsonb)` → Database Manager Aruba → MySQL.
 
 MySQL Aruba è autoritativo. Supabase inoltra soltanto la richiesta.
 Il Database Manager v1.6.0 espone direttamente read, count, insert, update, delete, delete_one, clear_repository anche tramite MCP.
