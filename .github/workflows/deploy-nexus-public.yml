@@ -24,6 +24,7 @@ jobs:
           php nexus/public/competition-names.test.php
           php -l nexus/public/core.php
           php nexus/public/core.test.php
+          php -l nexus/api.php
           php -l nexus/public/data.php
           node --check nexus/public/site.js
           node --check nexus/public/clubhouse.js
