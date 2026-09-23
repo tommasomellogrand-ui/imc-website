@@ -400,7 +400,7 @@
     const usesLeagueNavigation = code === 'LEAGUE' || code === 'INTERNATIONAL_QUALIFIER' || competitionType(group?.competition) === 'league';
     const tabs = usesLeagueNavigation
       ? [['overview', 'OVERVIEW'], ['results', 'RESULTS'], ['table', 'TABLE'], ['schedule', 'SCHEDULE']]
-      : [['overview', 'OVERVIEW'], ['competition', 'COMPETITION'], ['matches', 'MATCHES'], ['stats', 'STATS'], ['history', 'HISTORY']];
+      : [['overview', 'OVERVIEW'], ['competition', 'RESULTS'], ['matches', 'TABLE'], ['stats', 'SCHEDULE'], ['history', 'TROPHY ROOM']];
     if (!tabs.some(([key]) => key === state.competitionTab)) state.competitionTab = 'overview';
     return `<nav class="competition-detail-tabs">${tabs.map(([key, label]) => `<button type="button" data-competition-tab="${key}" class="${state.competitionTab === key ? 'active' : ''}">${label}</button>`).join('')}</nav>`;
   }
