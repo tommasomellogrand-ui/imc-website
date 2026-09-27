@@ -1,0 +1,20 @@
+.nc-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);background:#fff;border:1px solid var(--l);border-radius:16px;overflow:hidden}
+.nc-photo{position:relative;display:flex;align-items:center;justify-content:center;min-height:150px;background:var(--s);border-right:1px solid var(--l);overflow:hidden}
+.nc-photo img{position:absolute;width:100%;height:100%;object-fit:contain;object-position:center bottom;background:var(--s)}
+.nc-photo-empty{font-weight:800;color:var(--m);font-size:28px;opacity:.35}
+.nc-data{min-width:0;padding:14px}
+.nc-name{font-weight:900;font-size:17px;overflow-wrap:anywhere;margin-bottom:5px}
+.nc-meta{font-size:11px;color:var(--m);line-height:1.6;margin-bottom:9px}
+.nc-stat-row{display:grid;gap:4px;margin-top:5px;grid-template-columns:repeat(5,minmax(0,1fr))}
+.nc-stat-row.second{grid-template-columns:repeat(6,minmax(0,1fr))}
+.nc-stat{background:var(--s);padding:7px 1px;text-align:center;border-radius:7px;min-width:0}
+.nc-stat b{display:block;font-size:14px}
+.nc-stat span{display:block;font-size:8px;color:var(--m);margin-top:3px}
+.nc-club{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;min-height:26px;overflow-wrap:anywhere}
+.nc-club img{width:28px;height:28px;object-fit:contain;flex-shrink:0}
+.nc-arrow{font-size:12px;color:var(--g);padding-left:9px}
+.nc-amount{font-weight:900;color:var(--g);font-size:13px;margin-top:8px}
+.nc-toolbar{margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.nc-toolbar select{font:inherit;padding:10px;border:1px solid var(--l);border-radius:10px;background:#fff;color:var(--b)}
+.nc-roster-note{font-size:11px;color:var(--m);line-height:1.6}
+@media(max-width:500px){.nc-data{padding:9px 6px}.nc-name{font-size:13px}.nc-meta{font-size:9px;margin-bottom:7px}.nc-photo{min-height:145px}.nc-stat-row{gap:2px}.nc-stat{padding:6px 0;border-radius:5px}.nc-stat b{font-size:12px}.nc-stat span{font-size:7px;letter-spacing:-.15px}.nc-club{font-size:10px;gap:5px}.nc-club img{width:23px;height:23px}.nc-when{font-size:9px}}
