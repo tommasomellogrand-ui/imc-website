@@ -32,7 +32,7 @@ function h2h_manager(array $r,string $side,array $team,array $ctx): ?array {
  }
  return count($found)===1?array_values($found)[0]:null;
 }
-function h2h_matches(array $rows,array $ctx,string $kind,string $id,string $scope): array {
+function h2h_matches(array $rows,array $ctx,string $kind,string $id,string $scope,bool $imcOpponentsOnly=true): array {
  $out=[];$seen=[];
  foreach($rows as $r){
   $fixture=(string)($r['sm_fixture_id']??'');if($fixture===''||isset($seen[$fixture])||!is_numeric($r['home_score']??null)||!is_numeric($r['away_score']??null))continue;
@@ -40,7 +40,7 @@ function h2h_matches(array $rows,array $ctx,string $kind,string $id,string $scop
   $home=h2h_team($r,'home',$ctx);$away=h2h_team($r,'away',$ctx);
   $hm=h2h_manager($r,'home',$home,$ctx);$am=h2h_manager($r,'away',$away,$ctx);
   // Manager H2H includes only encounters between two identified IMC managers.
-  if($kind==='manager'&&(!str_starts_with($hm['key']??'','imc:')||!str_starts_with($am['key']??'','imc:')))continue;
+  if($imcOpponentsOnly&&$kind==='manager'&&(!str_starts_with($hm['key']??'','imc:')||!str_starts_with($am['key']??'','imc:')))continue;
   if($kind==='club'){$isHome=$home['world_id']===(int)$id;$isAway=$away['world_id']===(int)$id;}
   else{$isHome=($hm['key']??'')==='imc:'.$id;$isAway=($am['key']??'')==='imc:'.$id;}
   if($isHome===$isAway)continue;
