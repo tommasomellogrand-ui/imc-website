@@ -8,7 +8,19 @@ require __DIR__.'/stats-engine.php';
 try{
  $c=nexus_config();$gw=nexus_world($_GET['world']??'');$raw=(string)($_GET['player']??'');if(!ctype_digit($raw)||(int)$raw<1)throw new InvalidArgumentException('invalid_player');$id=(int)$raw;
  $db=nexus_db($c,nexus_target($c,$gw));$core=nexus_db($c,'core');
- $players=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Player_Codex').'` WHERE player_id=?',[$id]);$player=$players[0]??null;if(!$player)throw new InvalidArgumentException('player_not_in_world');
+ $players=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Player_Codex').'` WHERE player_id=?',[$id]);$player=$players[0]??null;
+ if(!$player){
+  $global=nexus_rows($core,'SELECT * FROM `IMC Player Codex Global Data` WHERE player_id=?',[$id]);$identityFallback=nexus_player_identity($core,[$id])[$id]??[];
+  $player=array_merge($identityFallback,$global[0]??[],['player_id'=>$id]);
+  if(empty($player['full_name']))$player['full_name']=trim(($player['forename']??'').' '.($player['surname']??''));
+  if(empty($player['full_name'])){
+   $candidates=nexus_rows($db,'SELECT players_json FROM `'.nexus_table($gw,'Match_Report').'` WHERE game_world_id=? AND players_json REGEXP ? ORDER BY match_date DESC',[$gw,'"sm_player_id"[[:space:]]*:[[:space:]]*"?'.$id.'"?[[:space:]]*[,}]']);
+   foreach($candidates as $report){foreach(json_decode((string)$report['players_json'],true)??[] as $entry){if((int)($entry['sm_player_id']??0)===$id){$player['full_name']=$entry['player_name']??('Player '.$id);break 2;}}}
+  }
+  if(empty($player['full_name'])){$tr=nexus_rows($db,'SELECT player_name FROM `'.nexus_table($gw,'Transfers').'` WHERE player_id=? ORDER BY imc_transfer_number DESC LIMIT 1',[$id]);$player['full_name']=$tr[0]['player_name']??null;}
+  if(empty($player['full_name']))throw new InvalidArgumentException('player_not_found');
+  $player['real_club']=$player['soccerwiki_club_name']??null;$player['salary']=null;$player['current_club']='Club nel GW non disponibile';$player['contract_seasons']=null;
+ }
  $identity=nexus_player_identity($core,[$id])[$id]??[];$player['image_urls']=nexus_player_images($id,$identity,$player['image_url']??null);
  $lookup=nexus_team_lookup(nexus_rows($core,'SELECT id,name,image_url FROM `IMC Club Codex Global`'),nexus_rows($core,'SELECT `Club ID` entity_id,`SM World Club ID` world_id FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]));
  $logo=static function($world,$name)use($lookup){$entity=$lookup['world'][(int)$world]??$lookup['name'][nexus_team_name_key((string)$name)]??null;return $entity!==null?nexus_player_image_url($lookup['id'][$entity]['image_url']??null):null;};
@@ -17,7 +29,7 @@ try{
  $competitionNames=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $comp)$competitionNames[$comp['competition_key']]=$comp['nexus_view'];
  $errors=[];$matches=[];$invalid=0;
  try{
-  $reports=nexus_rows($db,'SELECT r.*,mr.players_json,mr.commentary_json FROM `'.nexus_table($gw,'Match_Report').'` mr JOIN `'.nexus_table($gw,'Results').'` r ON r.game_world_id=mr.game_world_id AND r.sm_fixture_id=mr.sm_fixture_id WHERE mr.game_world_id=? AND mr.players_json LIKE ? ORDER BY r.match_date DESC,r.sm_fixture_id DESC',[$gw,'%'.$id.'%']);
+  $reports=nexus_rows($db,'SELECT r.*,mr.players_json,mr.commentary_json FROM `'.nexus_table($gw,'Match_Report').'` mr JOIN `'.nexus_table($gw,'Results').'` r ON r.game_world_id=mr.game_world_id AND r.sm_fixture_id=mr.sm_fixture_id WHERE mr.game_world_id=? AND mr.players_json REGEXP ? ORDER BY r.match_date DESC,r.sm_fixture_id DESC',[$gw,'"sm_player_id"[[:space:]]*:[[:space:]]*"?'.$id.'"?[[:space:]]*[,}]']);
   $result=nexus_player_match_rows($player,$reports);$matches=$result['matches'];$invalid=$result['invalid_reports'];if($matches){$enriched=nexus_enrich_match_teams($core,$gw,array_map(static function($m){$m['home_sm_club_id']=$m['side']==='home'?$m['club_id']:null;$m['away_sm_club_id']=$m['side']==='away'?$m['club_id']:null;return $m;},$matches));$matches=$enriched;foreach($matches as &$match)$match['competition_name']=$competitionNames[$match['competition_key']]??$match['competition_key'];unset($match);}
  }catch(Throwable $e){$errors['matches']='Statistiche e partite temporaneamente non disponibili.';}
  $transfers=[];try{$transfers=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Transfers').'` WHERE game_world_id=? AND player_id=? ORDER BY (normalized_transfer_date IS NULL),normalized_transfer_date DESC,imc_transfer_number DESC',[$gw,$id]);foreach($transfers as &$t){$t['from_logo_url']=$logo($t['from_sm_world_club_id']??0,$t['club_from']??'');$t['to_logo_url']=$logo($t['to_sm_world_club_id']??0,$t['club_to']??'');}unset($t);}catch(Throwable $e){$errors['transfers']='Trasferimenti temporaneamente non disponibili.';}

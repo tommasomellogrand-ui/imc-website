@@ -11,9 +11,10 @@
   img.onerror=next;if(img.complete&&!img.naturalWidth)next();
  });root.querySelectorAll('img[data-club-logo]').forEach(img=>{img.onerror=()=>img.hidden=true;if(img.complete&&!img.naturalWidth)img.hidden=true;});}
  function club(name,url){const src=safe(url);return '<div class="nc-club">'+(src?'<img data-club-logo src="'+esc(src)+'" alt="">':'')+'<span>'+esc(name||'—')+'</span></div>';}
+ function playerUrl(id,world){if(!/^\d+$/.test(String(id||''))||Number(id)<1)return '';let saved='';try{saved=localStorage.getItem('imc_nexus_world')||''}catch(e){}const gw=world||new URLSearchParams(location.search).get('world')||saved||'GW001';return '/nexus/players/profile.html?'+new URLSearchParams({world:gw,player:String(id)})}
  function transfer(x){
   const date=x.normalized_transfer_date?String(x.normalized_transfer_date).slice(0,10).split('-').reverse().join('/'):'Data da normalizzare';
-  return '<article class="nc-card nc-transfer">'+photo(x.player_images||[x.player_image],x.player_name)+'<div class="nc-data"><div class="nc-name">'+esc(x.player_name||'Giocatore')+'</div><div class="nc-meta nc-when">'+esc(date)+' · Stagione '+esc(x.imc_season||x.normalized_season||x.season||'—')+'</div>'+club(x.club_from,x.from_logo_url)+'<div class="nc-arrow">↓</div>'+club(x.club_to,x.to_logo_url)+(x.amount_text?'<div class="nc-amount">'+esc(x.amount_text)+'</div>':'')+'</div></article>';
+  const href=playerUrl(x.player_id);return (href?'<a class="nc-card nc-transfer" href="'+esc(href)+'" style="color:inherit;text-decoration:none">':'<article class="nc-card nc-transfer">')+photo(x.player_images||[x.player_image],x.player_name)+'<div class="nc-data"><div class="nc-name">'+esc(x.player_name||'Giocatore')+'</div><div class="nc-meta nc-when">'+esc(date)+' · Stagione '+esc(x.imc_season||x.normalized_season||x.season||'—')+'</div>'+club(x.club_from,x.from_logo_url)+'<div class="nc-arrow">↓</div>'+club(x.club_to,x.to_logo_url)+(x.amount_text?'<div class="nc-amount">'+esc(x.amount_text)+'</div>':'')+'</div>'+(href?'</a>':'</article>');
  }
- window.NexusCards={photo,wireImages,transfer};
+ window.NexusCards={photo,wireImages,transfer,playerUrl};
 })();
