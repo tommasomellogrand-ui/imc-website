@@ -34,3 +34,17 @@ function md_players(array $reports): array {
  $clubs[$club][$id]??=['id'=>$id,'name'=>$p['player_name']??'','played'=>0,'goals'=>0,'assists'=>0,'rating_sum'=>0,'ratings'=>0];$x=&$clubs[$club][$id];$x['played']++;$x['goals']+=$goals;$x['assists']+=$assists;if($rating!==null){$x['rating_sum']+=$rating;$x['ratings']++;}unset($x);}}
  foreach($clubs as &$rows){$rows=array_values($rows);foreach($rows as &$r){$r['rating']=$r['ratings']?round($r['rating_sum']/$r['ratings'],2):null;unset($r['rating_sum']);}unset($r);usort($rows,fn($a,$b)=>($b['goals']<=>$a['goals'])?:($b['assists']<=>$a['assists'])?:(($b['rating']??0)<=>($a['rating']??0)));}unset($rows);return $clubs;
 }
+
+function md_manager_h2h(array $rows,int $home,int $away): array {
+ $out=['available'=>$home>0&&$away>0&&$home!==$away,'played'=>0,'home_wins'=>0,'draws'=>0,'away_wins'=>0,'last'=>null,'incomplete'=>false];
+ if(!$out['available'])return $out;
+ foreach($rows as $r){
+  $h=(int)($r['home_sm_manager_id']??0);$a=(int)($r['away_sm_manager_id']??0);
+  if($h<1||$a<1){$out['incomplete']=true;continue;}
+  if(!(($h===$home&&$a===$away)||($h===$away&&$a===$home)))continue;
+  $gf=(int)$r[$h===$home?'home_score':'away_score'];$ga=(int)$r[$h===$home?'away_score':'home_score'];
+  $out['played']++;$out[$gf>$ga?'home_wins':($gf<$ga?'away_wins':'draws')]++;
+  if(!$out['last'])$out['last']=['date'=>$r['match_date'],'home'=>$r['home_name'],'away'=>$r['away_name'],'score'=>$r['home_score'].' – '.$r['away_score']];
+ }
+ return $out;
+}
