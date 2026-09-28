@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.12';
+const IMC_DBM_VERSION = '1.6.13';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -797,6 +797,41 @@ function dbm_sync_game_world_seasons(array $payload): array {
     dbm_audit($record); return ['ok'=>true]+$record;
 }
 
+function dbm_sync_game_world_club_mapping(array $payload): array {
+    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_CLUB_MAPPING_SYNC') throw new InvalidArgumentException('Explicit club mapping sync confirmation required.');
+    [, $core] = dbm_storage('core');
+    $table = chr(96) . 'IMC Game World Club Mapping' . chr(96);
+    $rs = $core->query("SELECT ".chr(96)."Club ID".chr(96)." club_id,".chr(96)."Club Name".chr(96)." club_name,".chr(96)."Game World".chr(96)." game_world_id,".chr(96)."SM Club ID".chr(96)." sm_club_id,".chr(96)."SM World Club ID".chr(96)." sm_world_club_id FROM ".$table." ORDER BY ".chr(96)."Game World".chr(96).",".chr(96)."SM Club ID".chr(96));
+    $rows=[]; while($row=$rs->fetch_assoc()) $rows[]=$row; $rs->free();
+    $routing=['gold'=>['GW002','GW003','GW007','GW008'],'custom'=>['GW001','GW004','GW005','GW006','GW009','GW010']];
+    $summary=[];
+    foreach($routing as $target=>$gws) {
+        [$database,$db]=dbm_storage($target);
+        $allowed=array_fill_keys($gws,true); $wanted=[];
+        foreach($rows as $row) if(isset($allowed[(string)$row['game_world_id']])) $wanted[]=$row;
+        $db->begin_transaction();
+        try {
+            $db->query("DELETE FROM ".chr(96)."IMC_Game_World_Club_Mapping".chr(96));
+            $stmt=$db->prepare("INSERT INTO ".chr(96)."IMC_Game_World_Club_Mapping".chr(96)." (club_id,club_name,game_world_id,sm_club_id,sm_world_club_id) VALUES (?,?,?,?,?)");
+            foreach($wanted as $row) {
+                $clubId=(int)$row['club_id']; $clubName=(string)$row['club_name']; $gw=(string)$row['game_world_id']; $smClubId=(int)$row['sm_club_id'];
+                $smWorldClubId=$row['sm_world_club_id']===null?null:(int)$row['sm_world_club_id'];
+                $stmt->bind_param('issii',$clubId,$clubName,$gw,$smClubId,$smWorldClubId); $stmt->execute();
+            }
+            $stmt->close(); $db->commit();
+            $counts=[];
+            foreach($gws as $gw) {
+                $safe=$db->real_escape_string($gw);
+                $cr=$db->query("SELECT COUNT(*) n FROM ".chr(96)."IMC_Game_World_Club_Mapping".chr(96)." WHERE game_world_id='".$safe."'");
+                $counts[$gw]=(int)$cr->fetch_assoc()['n']; $cr->free();
+            }
+            $summary[$target]=['database'=>$database,'rows'=>count($wanted),'game_worlds'=>$gws,'counts'=>$counts];
+        } catch(Throwable $e) { $db->rollback(); throw $e; }
+    }
+    $record=['action'=>'sync_game_world_club_mapping','status'=>'success','core_rows'=>count($rows),'targets'=>$summary];
+    dbm_audit($record); return ['ok'=>true]+$record;
+}
+
 function dbm_standardize_imc_table_names(array $payload): array {
     if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_IMC_UNDERSCORE_STANDARDIZATION') throw new InvalidArgumentException('Explicit owner confirmation required.');
     $routing=['gold'=>['GW002','GW003','GW007','GW008'],'custom'=>['GW001','GW004','GW005','GW006','GW009','GW010']];
@@ -958,6 +993,8 @@ try {
     if ($action === 'remove_gw005_legacy_player_codex') dbm_reply(dbm_remove_gw005_legacy_player_codex($payload));
 
     if ($action === 'sync_game_world_seasons') dbm_reply(dbm_sync_game_world_seasons($payload));
+
+    if ($action === 'sync_game_world_club_mapping') dbm_reply(dbm_sync_game_world_club_mapping($payload));
 
     if ($action === 'standardize_imc_table_names') dbm_reply(dbm_standardize_imc_table_names($payload));
 
