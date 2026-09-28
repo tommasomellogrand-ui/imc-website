@@ -1,0 +1,21 @@
+name: Test Nexus matchday identities
+on:
+  push:
+    paths:
+      - 'nexus/matchday/**'
+      - 'nexus/competitions/match-teams.php'
+      - 'tests/nexus-matchday-identity.php'
+      - '.github/workflows/nexus-identity-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PHP and test identity regression cases
+        run: |
+          php -l nexus/matchday/data.php
+          php -l nexus/matchday/identity.php
+          php tests/nexus-matchday-identity.php

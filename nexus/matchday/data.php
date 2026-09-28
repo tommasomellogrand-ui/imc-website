@@ -3,6 +3,7 @@ declare(strict_types=1);
 require dirname(__DIR__).'/core/bootstrap.php';
 require dirname(__DIR__).'/competitions/match-teams.php';
 require __DIR__.'/engine.php';
+require __DIR__.'/identity.php';
 try{
  $gw=nexus_world($_GET['world']??'GW001');if($gw!=='GW001')throw new InvalidArgumentException('matchday_only_gw001');
  $c=nexus_config();$core=nexus_db($c,'core');$db=nexus_db($c,nexus_target($c,$gw));$today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
@@ -11,6 +12,9 @@ try{
  $results=md_unique(nexus_rows($db,'SELECT '.$fields.',home_sm_club_id,away_sm_club_id,home_score,away_score FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id=? ORDER BY match_date DESC,sm_fixture_id DESC',[$gw]));
  $selectedFixture=null;if(isset($_GET['fixture']))foreach($results as $r)if((string)$r['sm_fixture_id']===(string)$_GET['fixture']&&$r['sm_action']==='league'){$selectedFixture=$r;$season=(int)$r['imc_season'];break;}
  $schedule=nexus_rows($db,'SELECT '.$fields.',home_sm_team_id AS home_sm_club_id,away_sm_team_id AS away_sm_club_id FROM `'.nexus_table($gw,'Schedule').'` WHERE game_world_id=? AND imc_season=? AND sm_action=? ORDER BY match_date,sm_fixture_id',[$gw,$season,'league']);
+ $mapped=nexus_rows($core,'SELECT c.name,m.`SM World Club ID` world_id FROM `IMC Game World Club Mapping` m INNER JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=?',[$gw]);
+ $identity=md_identity_index($mapped,array_merge($results,$schedule));
+ $results=md_resolve_identities($results,$identity);$schedule=md_resolve_identities($schedule,$identity);
  $leagueResults=array_values(array_filter($results,fn($r)=>(int)$r['imc_season']===$season&&$r['sm_action']==='league'));
  $all=md_unique(array_merge($leagueResults,$schedule));$dates=array_values(array_unique(array_map(fn($r)=>substr((string)$r['match_date'],0,10),$all)));sort($dates);
  $days=[];foreach($dates as $i=>$d)$days[]=['number'=>$i+1,'date'=>$d,'matches'=>count(array_filter($all,fn($r)=>substr((string)$r['match_date'],0,10)===$d))];
@@ -20,7 +24,7 @@ try{
  $date=$dates[$day-1];$fixtures=array_values(array_filter($all,fn($r)=>substr((string)$r['match_date'],0,10)===$date));$fixtures=nexus_enrich_match_teams($core,$gw,$fixtures);
  $past=array_values(array_filter($results,fn($r)=>substr((string)$r['match_date'],0,10)<$date&&md_played($r)));$pastLeague=array_values(array_filter($past,fn($r)=>(int)$r['imc_season']===$season&&$r['sm_action']==='league'));
  $ids=array_column($fixtures,'sm_fixture_id');$in=implode(',',array_fill(0,count($ids),'?'));$reports=nexus_rows($db,'SELECT sm_fixture_id,players_json,team_stats_json,events_json FROM `'.nexus_table($gw,'Match_Report').'` WHERE game_world_id=? AND sm_fixture_id IN ('.$in.')',array_merge([$gw],$ids));$reportMap=[];foreach($reports as $r)$reportMap[(string)$r['sm_fixture_id']]=$r;
- $playerReports=nexus_rows($db,'SELECT m.sm_fixture_id,m.players_json,r.competition_key,m.home_sm_club_id,m.away_sm_club_id FROM `'.nexus_table($gw,'Match_Report').'` m INNER JOIN `'.nexus_table($gw,'Results').'` r ON r.game_world_id=m.game_world_id AND r.sm_fixture_id=m.sm_fixture_id WHERE m.game_world_id=? AND r.imc_season=? AND r.match_date<? AND r.sm_action=\'league\'',[$gw,$season,$date]);$playersByCompetition=[];foreach($playerReports as $pr)$playersByCompetition[$pr['competition_key']][]=$pr;
+ $playerReports=nexus_rows($db,'SELECT m.sm_fixture_id,m.players_json,r.competition_key,m.home_sm_club_id,m.away_sm_club_id FROM `'.nexus_table($gw,'Match_Report').'` m INNER JOIN `'.nexus_table($gw,'Results').'` r ON r.game_world_id=m.game_world_id AND r.sm_fixture_id=m.sm_fixture_id WHERE m.game_world_id=? AND r.imc_season=? AND r.match_date<? AND r.sm_action=\'league\'',[$gw,$season,$date]);$playerReports=md_report_identities($playerReports,$results);$playersByCompetition=[];foreach($playerReports as $pr)$playersByCompetition[$pr['competition_key']][]=$pr;
  $simulation=($_GET['simulation']??'')==='1';
  $codex=nexus_rows($db,'SELECT player_id,full_name,current_sm_club_id,current_club,position,image_url FROM `'.nexus_table($gw,'Player_Codex').'`');$photos=[];$rosters=[];
  $clubNames=[];foreach($fixtures as $f)foreach(['home','away'] as $side)$clubNames[nexus_team_name_key($f[$side.'_name'])]=md_team($f,$side);
