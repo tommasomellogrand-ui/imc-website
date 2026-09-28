@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101238"><title>Nexus · Admin assegnazioni</title><link rel="stylesheet" href="admin.css?v=1"><script src="admin.js?v=1" defer></script></head>
+<body><header><a href="../">NEXUS</a><span>Amministrazione</span><button id="logout" hidden>Esci</button></header><main>
+<h1>Assegnazioni manager</h1><p class="muted">Club, nazionali e storico degli incarichi nei Game World.</p>
+<p id="message" role="status" aria-live="polite"></p>
+<form id="login" class="panel"><h2>Accesso amministratore</h2><p>Usa la chiave amministratore IMC già in uso per SM Master.</p><label>Chiave amministratore<input id="key" type="password" autocomplete="current-password" required></label><button type="submit" class="primary">Accedi</button></form>
+<section id="workspace" hidden>
+<div class="toolbar"><label>Game World<select id="world"></select></label><label>Tipo<select id="kind"><option value="all">Club e nazionali</option><option value="club">Club</option><option value="national_team">Nazionali</option></select></label><label>Stato<select id="status"><option value="active">In carica</option><option value="all">Tutti gli incarichi</option><option value="closed">Conclusi</option><option value="future">Futuri</option></select></label><label>Cerca manager o squadra<input id="search" type="search" placeholder="Nome o ID"></label></div>
+<div class="actions"><p id="count" class="muted"></p><button id="reload">Ricarica</button><button id="add" class="primary">Nuova assegnazione</button></div>
+<div id="assignments"></div>
+</section>
+<dialog id="editor"><form id="edit-form"><div class="actions"><h2 id="edit-title">Assegnazione</h2><button type="button" id="cancel" aria-label="Chiudi">×</button></div><p id="edit-context" class="muted"></p><p id="edit-error" role="alert"></p>
+<div id="identity-fields"><label>Manager<select id="manager" required></select></label><label>Tipo di incarico<select id="type"><option value="club">Club</option><option value="national_team">Nazionale</option></select></label><label>Squadra già presente nel GW<select id="team" required></select></label></div>
+<div class="dates"><label id="start-label">Data inizio<input id="start" type="date" required></label><label id="end-label">Data fine · vuota se in carica<input id="end" type="date"></label><label id="close-label" hidden>Ultimo giorno del precedente incarico<input id="close-date" type="date"></label></div>
+<p id="edit-note" class="muted"></p><div class="actions"><button id="save" type="submit" class="primary">Salva</button></div></form></dialog>
+</main></body></html>

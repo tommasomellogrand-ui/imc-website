@@ -1,0 +1,65 @@
+name: Nexus assignments admin
+on:
+  push:
+    branches: [main, nexus-admin-assignments]
+    paths: ['nexus/admin/**', 'tests/nexus-admin*', '.github/workflows/nexus-admin.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nexus-admin
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: admin-ci-only
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -padmin-ci-only"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      MYSQL_TEST_PASSWORD: admin-ci-only
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test assignments without production writes
+        run: |
+          for file in nexus/admin/*.php; do php -l "$file"; done
+          node --check nexus/admin/admin.js
+          php tests/nexus-admin.php
+          python3 tests/nexus-admin-http.py
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy admin and verify files
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl
+          from pathlib import Path
+          from ftplib import FTP_TLS, error_perm
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True)
+          root='/www.italianmastersclub.it/'
+          try: ftp.mkd(root+'nexus/admin')
+          except error_perm: ftp.cwd(root+'nexus/admin')
+          for local in [*Path('nexus/admin').glob('*'),Path('nexus/index.html')]:
+              if not local.is_file(): continue
+              ftp.cwd(root+local.parent.as_posix())
+              data=local.read_bytes(); ftp.storbinary('STOR '+local.name,io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary('RETR '+local.name,check.write)
+              if check.getvalue()!=data: raise RuntimeError('Upload mismatch: '+str(local))
+          ftp.quit()
+          print('Admin files uploaded and verified')
+          PY
