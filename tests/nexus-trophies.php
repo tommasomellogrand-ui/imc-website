@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require dirname(__DIR__).'/nexus/trophies/engine.php';
+require_once dirname(__DIR__).'/nexus/trophies/engine.php';
 function check(bool $condition,string $message): void {if(!$condition)throw new RuntimeException($message);echo "PASS $message\n";}
 function fixture(int $id,int $h,int $a,int $hs=1,int $as=0): array {
     return ['game_world_id'=>'GW001','imc_season'=>1,'competition_key'=>'GW001|DOMESTIC|league|1','sm_action'=>'league','competition_group'=>'DOMESTIC','sm_country'=>null,'sm_division'=>'1','sm_fixture_id'=>$id,'home_sm_club_id'=>$h,'away_sm_club_id'=>$a,'home_name'=>'Team '.$h,'away_name'=>'Team '.$a,'home_score'=>$hs,'away_score'=>$as,'match_date'=>'2026-09-10','result_status'=>'COMPLETED'];
