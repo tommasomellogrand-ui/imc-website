@@ -31,6 +31,11 @@ jobs:
           node --check nexus/admin/admin.js
           php tests/nexus-admin.php
           python3 tests/nexus-admin-http.py
+      - name: Test mobile admin flows
+        run: |
+          npm install --prefix /tmp/nexus-admin-test --package-lock-only --ignore-scripts playwright@1.62.1
+          npm ci --prefix /tmp/nexus-admin-test --ignore-scripts
+          NEXUS_PLAYWRIGHT_PATH=/tmp/nexus-admin-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-admin-ui.cjs
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: test
