@@ -21,11 +21,18 @@ try {
     $action=$method==='POST'?($input['action']??'save'):($_GET['action']??'list');
     if ($action==='login' && $method==='POST') {
         // Reuse the existing private administrator credential, never the public import token.
+        if (isset($input['access_token'])) {
+            $provided=$input['access_token'];
+            $expected=require __DIR__.'/access-link.php';
+            $valid=is_string($provided) && strlen($provided)>=40 && hash_equals($expected,hash('sha256',$provided));
+        } else {
         $file=dirname(__DIR__,2).'/__imc_private_sm_master/config.php';
         if (!is_file($file)) throw new RuntimeException('Configurazione admin non disponibile.',503);
         $cfg=require $file;$expected=(string)($cfg['admin_token']??'');
         $provided=$input['key']??'';
-        if ($expected==='' || !is_string($provided) || !hash_equals($expected,$provided)) {
+        $valid=$expected!=='' && is_string($provided) && hash_equals($expected,$provided);
+        }
+        if (!$valid) {
             usleep(350000);nexus_out(['ok'=>false,'error'=>'Chiave amministratore non valida.'],401);
         }
         session_regenerate_id(true);

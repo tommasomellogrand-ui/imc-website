@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101238"><title>Nexus · Admin assegnazioni</title><link rel="stylesheet" href="admin.css?v=1"><script src="admin.js?v=1" defer></script></head>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101238"><title>Nexus · Admin assegnazioni</title><link rel="stylesheet" href="admin.css?v=1"><script src="admin.js?v=2" defer></script></head>
 <body><header><a href="../">NEXUS</a><span>Amministrazione</span><button id="logout" hidden>Esci</button></header><main>
 <h1>Assegnazioni manager</h1><p class="muted">Club, nazionali e storico degli incarichi nei Game World.</p>
 <p id="message" role="status" aria-live="polite"></p>
-<form id="login" class="panel"><h2>Accesso amministratore</h2><p>Usa la chiave amministratore IMC già in uso per SM Master.</p><label>Chiave amministratore<input id="key" type="password" autocomplete="current-password" required></label><button type="submit" class="primary">Accedi</button></form>
+<section id="login" class="panel"><h2>Accesso personale</h2><p>Apri il tuo link personale per entrare direttamente nel pannello.</p></section>
 <section id="workspace" hidden>
 <div class="toolbar"><label>Game World<select id="world"></select></label><label>Tipo<select id="kind"><option value="all">Club e nazionali</option><option value="club">Club</option><option value="national_team">Nazionali</option></select></label><label>Stato<select id="status"><option value="active">In carica</option><option value="all">Tutti gli incarichi</option><option value="closed">Conclusi</option><option value="future">Futuri</option></select></label><label>Cerca manager o squadra<input id="search" type="search" placeholder="Nome o ID"></label></div>
 <div class="actions"><p id="count" class="muted"></p><button id="reload">Ricarica</button><button id="add" class="primary">Nuova assegnazione</button></div>
