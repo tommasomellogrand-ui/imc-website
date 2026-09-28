@@ -2,7 +2,7 @@ name: Nexus Trophy Room automation
 on:
   push:
     branches: [main, nexus-trophy-automation]
-    paths: ['nexus/trophies/**', 'tests/nexus-trophies.php', '.github/workflows/nexus-trophies.yml']
+    paths: ['nexus/trophies/**', 'tests/nexus-trophies*.php', '.github/workflows/nexus-trophies.yml']
   schedule:
     - cron: '3,8,13,18,23,28,33,38,43,48,53,58 * * * *'
   workflow_dispatch:
@@ -15,12 +15,23 @@ jobs:
   test:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: trophy-ci-only
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -ptrophy-ci-only"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      MYSQL_TEST_PASSWORD: trophy-ci-only
     steps:
       - uses: actions/checkout@v4
       - name: Validate PHP and trophy rules
         run: |
           for file in nexus/trophies/*.php; do php -l "$file"; done
-          php tests/nexus-trophies.php
+          php tests/nexus-trophies-integration.php
   refresh:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest

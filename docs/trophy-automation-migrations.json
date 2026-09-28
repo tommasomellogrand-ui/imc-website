@@ -1,0 +1,182 @@
+[
+  {
+    "target": "custom",
+    "migration_id": "trophy-auto-custom-setup-20260928",
+    "data_migration": true,
+    "statements": [
+      "CREATE TABLE IF NOT EXISTS IMC_Trophy_Sync_State (game_world_id VARCHAR(16) NOT NULL PRIMARY KEY, revision BIGINT UNSIGNED NOT NULL DEFAULT 1, processed_revision BIGINT UNSIGNED NOT NULL DEFAULT 0, enabled TINYINT NOT NULL DEFAULT 0, touched_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, checked_at DATETIME NULL, engine_version VARCHAR(32) NULL, last_summary JSON NULL) ENGINE=InnoDB",
+      "CREATE TABLE IF NOT EXISTS IMC_Trophy_Sync_Log (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, game_world_id VARCHAR(16) NOT NULL, engine_version VARCHAR(32) NOT NULL, source_revision BIGINT UNSIGNED NOT NULL, before_json JSON NOT NULL, summary_json JSON NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, KEY gw_date (game_world_id,created_at)) ENGINE=InnoDB",
+      "INSERT INTO IMC_Trophy_Sync_State (game_world_id) VALUES ('GW001'),('GW004'),('GW005'),('GW006'),('GW009'),('GW010')"
+    ]
+  },
+  {
+    "target": "custom",
+    "migration_id": "trophy-auto-gw001-20260928",
+    "statements": [
+      "ALTER TABLE GW001_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw001_res_ai AFTER INSERT ON GW001_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW001',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw001_res_au AFTER UPDATE ON GW001_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW001',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw001_res_ad AFTER DELETE ON GW001_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW001',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw001_mr_ai AFTER INSERT ON GW001_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW001',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw001_mr_au AFTER UPDATE ON GW001_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW001',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw001_mr_ad AFTER DELETE ON GW001_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW001',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw001_sch_ai AFTER INSERT ON GW001_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW001',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw001_sch_au AFTER UPDATE ON GW001_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW001',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw001_sch_ad AFTER DELETE ON GW001_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW001',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  },
+  {
+    "target": "custom",
+    "migration_id": "trophy-auto-gw004-20260928",
+    "statements": [
+      "ALTER TABLE GW004_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw004_res_ai AFTER INSERT ON GW004_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW004',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw004_res_au AFTER UPDATE ON GW004_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW004',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw004_res_ad AFTER DELETE ON GW004_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW004',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw004_mr_ai AFTER INSERT ON GW004_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW004',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw004_mr_au AFTER UPDATE ON GW004_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW004',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw004_mr_ad AFTER DELETE ON GW004_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW004',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw004_sch_ai AFTER INSERT ON GW004_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW004',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw004_sch_au AFTER UPDATE ON GW004_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW004',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw004_sch_ad AFTER DELETE ON GW004_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW004',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  },
+  {
+    "target": "custom",
+    "migration_id": "trophy-auto-gw005-20260928",
+    "statements": [
+      "ALTER TABLE GW005_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw005_res_ai AFTER INSERT ON GW005_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW005',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw005_res_au AFTER UPDATE ON GW005_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW005',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw005_res_ad AFTER DELETE ON GW005_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW005',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw005_mr_ai AFTER INSERT ON GW005_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW005',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw005_mr_au AFTER UPDATE ON GW005_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW005',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw005_mr_ad AFTER DELETE ON GW005_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW005',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw005_sch_ai AFTER INSERT ON GW005_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW005',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw005_sch_au AFTER UPDATE ON GW005_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW005',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw005_sch_ad AFTER DELETE ON GW005_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW005',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  },
+  {
+    "target": "custom",
+    "migration_id": "trophy-auto-gw006-20260928",
+    "statements": [
+      "ALTER TABLE GW006_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw006_res_ai AFTER INSERT ON GW006_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW006',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw006_res_au AFTER UPDATE ON GW006_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW006',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw006_res_ad AFTER DELETE ON GW006_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW006',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw006_mr_ai AFTER INSERT ON GW006_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW006',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw006_mr_au AFTER UPDATE ON GW006_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW006',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw006_mr_ad AFTER DELETE ON GW006_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW006',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw006_sch_ai AFTER INSERT ON GW006_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW006',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw006_sch_au AFTER UPDATE ON GW006_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW006',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw006_sch_ad AFTER DELETE ON GW006_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW006',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  },
+  {
+    "target": "custom",
+    "migration_id": "trophy-auto-gw009-20260928",
+    "statements": [
+      "ALTER TABLE GW009_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw009_res_ai AFTER INSERT ON GW009_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW009',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw009_res_au AFTER UPDATE ON GW009_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW009',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw009_res_ad AFTER DELETE ON GW009_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW009',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw009_mr_ai AFTER INSERT ON GW009_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW009',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw009_mr_au AFTER UPDATE ON GW009_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW009',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw009_mr_ad AFTER DELETE ON GW009_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW009',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw009_sch_ai AFTER INSERT ON GW009_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW009',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw009_sch_au AFTER UPDATE ON GW009_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW009',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw009_sch_ad AFTER DELETE ON GW009_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW009',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  },
+  {
+    "target": "custom",
+    "migration_id": "trophy-auto-gw010-20260928",
+    "statements": [
+      "ALTER TABLE GW010_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw010_res_ai AFTER INSERT ON GW010_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW010',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw010_res_au AFTER UPDATE ON GW010_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW010',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw010_res_ad AFTER DELETE ON GW010_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW010',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw010_mr_ai AFTER INSERT ON GW010_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW010',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw010_mr_au AFTER UPDATE ON GW010_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW010',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw010_mr_ad AFTER DELETE ON GW010_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW010',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw010_sch_ai AFTER INSERT ON GW010_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW010',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw010_sch_au AFTER UPDATE ON GW010_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW010',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw010_sch_ad AFTER DELETE ON GW010_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW010',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  },
+  {
+    "target": "gold",
+    "migration_id": "trophy-auto-gold-setup-20260928",
+    "data_migration": true,
+    "statements": [
+      "CREATE TABLE IF NOT EXISTS IMC_Trophy_Sync_State (game_world_id VARCHAR(16) NOT NULL PRIMARY KEY, revision BIGINT UNSIGNED NOT NULL DEFAULT 1, processed_revision BIGINT UNSIGNED NOT NULL DEFAULT 0, enabled TINYINT NOT NULL DEFAULT 0, touched_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, checked_at DATETIME NULL, engine_version VARCHAR(32) NULL, last_summary JSON NULL) ENGINE=InnoDB",
+      "CREATE TABLE IF NOT EXISTS IMC_Trophy_Sync_Log (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, game_world_id VARCHAR(16) NOT NULL, engine_version VARCHAR(32) NOT NULL, source_revision BIGINT UNSIGNED NOT NULL, before_json JSON NOT NULL, summary_json JSON NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, KEY gw_date (game_world_id,created_at)) ENGINE=InnoDB",
+      "INSERT INTO IMC_Trophy_Sync_State (game_world_id) VALUES ('GW002'),('GW003'),('GW007'),('GW008')"
+    ]
+  },
+  {
+    "target": "gold",
+    "migration_id": "trophy-auto-gw002-20260928",
+    "statements": [
+      "ALTER TABLE GW002_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw002_res_ai AFTER INSERT ON GW002_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW002',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw002_res_au AFTER UPDATE ON GW002_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW002',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw002_res_ad AFTER DELETE ON GW002_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW002',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw002_mr_ai AFTER INSERT ON GW002_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW002',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw002_mr_au AFTER UPDATE ON GW002_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW002',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw002_mr_ad AFTER DELETE ON GW002_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW002',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw002_sch_ai AFTER INSERT ON GW002_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW002',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw002_sch_au AFTER UPDATE ON GW002_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW002',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw002_sch_ad AFTER DELETE ON GW002_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW002',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  },
+  {
+    "target": "gold",
+    "migration_id": "trophy-auto-gw003-20260928",
+    "statements": [
+      "ALTER TABLE GW003_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw003_res_ai AFTER INSERT ON GW003_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW003',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw003_res_au AFTER UPDATE ON GW003_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW003',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw003_res_ad AFTER DELETE ON GW003_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW003',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw003_mr_ai AFTER INSERT ON GW003_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW003',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw003_mr_au AFTER UPDATE ON GW003_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW003',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw003_mr_ad AFTER DELETE ON GW003_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW003',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw003_sch_ai AFTER INSERT ON GW003_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW003',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw003_sch_au AFTER UPDATE ON GW003_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW003',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw003_sch_ad AFTER DELETE ON GW003_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW003',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  },
+  {
+    "target": "gold",
+    "migration_id": "trophy-auto-gw007-20260928",
+    "statements": [
+      "ALTER TABLE GW007_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw007_res_ai AFTER INSERT ON GW007_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW007',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw007_res_au AFTER UPDATE ON GW007_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW007',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw007_res_ad AFTER DELETE ON GW007_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW007',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw007_mr_ai AFTER INSERT ON GW007_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW007',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw007_mr_au AFTER UPDATE ON GW007_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW007',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw007_mr_ad AFTER DELETE ON GW007_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW007',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw007_sch_ai AFTER INSERT ON GW007_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW007',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw007_sch_au AFTER UPDATE ON GW007_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW007',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw007_sch_ad AFTER DELETE ON GW007_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW007',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  },
+  {
+    "target": "gold",
+    "migration_id": "trophy-auto-gw008-20260928",
+    "statements": [
+      "ALTER TABLE GW008_IMC_Trophy_Room ADD UNIQUE KEY trophy_season_competition (imc_season,competition_key)",
+      "CREATE TRIGGER imc_trophy_gw008_res_ai AFTER INSERT ON GW008_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW008',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw008_res_au AFTER UPDATE ON GW008_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW008',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw008_res_ad AFTER DELETE ON GW008_IMC_Results FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW008',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw008_mr_ai AFTER INSERT ON GW008_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW008',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw008_mr_au AFTER UPDATE ON GW008_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW008',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw008_mr_ad AFTER DELETE ON GW008_IMC_Match_Report FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW008',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw008_sch_ai AFTER INSERT ON GW008_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW008',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw008_sch_au AFTER UPDATE ON GW008_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW008',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()",
+      "CREATE TRIGGER imc_trophy_gw008_sch_ad AFTER DELETE ON GW008_IMC_Schedule FOR EACH ROW INSERT INTO IMC_Trophy_Sync_State (game_world_id,revision,touched_at) VALUES ('GW008',1,NOW()) ON DUPLICATE KEY UPDATE revision=revision+1,touched_at=NOW()"
+    ]
+  }
+]
