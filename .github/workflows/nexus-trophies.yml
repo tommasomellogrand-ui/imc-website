@@ -2,7 +2,7 @@ name: Nexus Trophy Room automation
 on:
   push:
     branches: [main, nexus-trophy-automation]
-    paths: ['nexus/trophies/**', 'tests/nexus-trophies*.php', '.github/workflows/nexus-trophies.yml']
+    paths: ['nexus/trophies/**', 'nexus/teams/detail.html', 'tests/nexus-trophies*.php', '.github/workflows/nexus-trophies.yml']
   schedule:
     - cron: '3,8,13,18,23,28,33,38,43,48,53,58 * * * *'
   workflow_dispatch:
@@ -74,7 +74,7 @@ jobs:
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p(); ftp.set_pasv(True)
           files=[Path('nexus/trophies',name) for name in ['engine.php','sync.php','automation.php','index.php']]
-          files += [Path('nexus/assets/home.js'),Path('nexus/index.html')]
+          files += [Path('nexus/assets/home.js'),Path('nexus/index.html'),Path('nexus/teams/detail.html')]
           for local in files:
               ftp.cwd('/www.italianmastersclub.it/'+local.parent.as_posix())
               data=local.read_bytes()

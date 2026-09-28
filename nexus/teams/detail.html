@@ -6,7 +6,29 @@ else if(n==='ROSTER')showRoster();
 else if(n==='STATS')showClubStats();
 else if(n==='H2H'){document.getElementById('meta').textContent='ID '+(D.team?.world_id||'—')+' · '+gw+' · Tutto lo storico';NexusH2H.mount(view,{world:gw,kind:'club',id:String(D.team.world_id),name:D.team.name})}
 else if(n==='TRANSFERS')showTransfers();
-else view.innerHTML='<div class="card empty">Trophy Room del club.</div>'}
+else if(n==='TROPHY ROOM'&&type==='club')showClubTrophies();
+else view.innerHTML='<div class="card empty">Sezione non ancora collegata.</div>'}
+
+let trophyRequestVersion=0;
+async function showClubTrophies(){
+ const version=++trophyRequestVersion;
+ document.getElementById('meta').textContent='ID '+(D.team?.world_id||'—')+' · '+gw+' · Trophy Room · Tutte le stagioni';
+ view.innerHTML='<div class="card empty" aria-live="polite">Caricamento trofei…</div>';
+ try{
+  if(!D.team?.world_id)throw Error('Squadra non disponibile.');
+  const j=await readClub('../trophies/index.php',false);
+  if(activeTab!=='TROPHY ROOM'||version!==trophyRequestVersion)return;
+  const rows=j.rows||[];
+  if(!rows.length){view.innerHTML='<div class="card empty">Nessun trofeo registrato per questo club.</div>';return;}
+  const seasons=[...new Set(rows.map(r=>Number(r.imc_season)))].sort((a,b)=>b-a);
+  const formatDate=value=>/^\d{4}-\d{2}-\d{2}$/.test(String(value||''))?new Date(value+'T12:00:00Z').toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/Rome'}):'Data non disponibile';
+  view.innerHTML='<p class="muted">'+rows.length+' '+(rows.length===1?'trofeo conquistato':'trofei conquistati')+' · Tutte le stagioni</p>'+seasons.map(s=>{
+   const awards=rows.filter(r=>Number(r.imc_season)===s).sort((a,b)=>String(b.won_date).localeCompare(String(a.won_date))||Number(b.id)-Number(a.id));
+   return '<section aria-label="Stagione '+s+'"><h3 class="section-title">Stagione '+s+' · '+awards.length+'</h3><div class="rows">'+awards.map(r=>'<article class="card"><h4 style="margin:0 0 8px">'+esc(r.nexus_view||r.trophy_type)+'</h4><p class="muted" style="margin:0">'+esc(formatDate(r.won_date))+'</p></article>').join('')+'</div></section>';
+  }).join('');
+ }catch(e){if(activeTab==='TROPHY ROOM'&&version===trophyRequestVersion)view.innerHTML='<div class="card empty">'+esc(e.message)+'</div>';}
+}
+
 let clubStatsSeason='',clubStatSeasons=[],clubStatsVersion=0;
 function statsPeriodLabel(){return clubStatsSeason?'Stagione '+clubStatsSeason:'Globali · Tutte le stagioni'}
 async function showClubStats(){
@@ -71,7 +93,7 @@ async function showRoster(background=false){
 setInterval(()=>{if(activeTab==='ROSTER'&&!document.hidden&&!rosterLoading)showRoster(true)},60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeTab==='ROSTER'&&!rosterLoading)showRoster(true)});
 async function openTab(n){
- NexusH2H.stop(view);NexusHistory.stop(view);activeTab=n;
+ NexusH2H.stop(view);NexusHistory.stop(view);activeTab=n;trophyRequestVersion++;
  tabs.querySelectorAll('.tab').forEach(b=>{const active=b.dataset.n===n;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});clubStatsVersion++;rosterVersion++;rosterLoading=false;
  if(n!=='STATS')document.getElementById('meta').textContent='ID '+(D.team?.world_id||'—')+' · '+gw+(season?' · Season '+season:'');
  if(n==='OVERVIEW'&&type==='club'){document.getElementById('meta').textContent='ID '+(D.team?.world_id||'—')+' · '+gw+' · Storico globale e stagioni';NexusHistory.mount(view,{world:gw,kind:'club',id:String(D.team.world_id)});return;}

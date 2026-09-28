@@ -7,6 +7,11 @@ try {
     $gw = isset($_GET['world']) && $_GET['world'] !== ''
         ? nexus_world($_GET['world']) : null;
     $season = nexus_season($_GET['season'] ?? null);
+    $club = null;
+    if (array_key_exists('sm_club',$_GET)) {
+        $club=filter_var($_GET['sm_club'],FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+        if ($club===false || $gw===null) throw new InvalidArgumentException('invalid_club_scope');
+    }
     // Keep the unfiltered endpoint available, using only the individual GW tables.
     $worlds = $gw !== null ? [$gw] : array_map(
         static fn(int $n): string => sprintf('GW%03d', $n), range(1, 10)
@@ -24,6 +29,10 @@ try {
         if ($season !== null) {
             $sql .= ' AND imc_season=?';
             $params[] = $season;
+        }
+        if ($club!==null) {
+            $sql .= " AND winner_sm_world_club_id=? AND COALESCE(competition_group,'')<>'NATIONS' AND trophy_type NOT IN ('worldcup','interqualifier')";
+            $params[]=$club;
         }
         $sql .= ' ORDER BY game_world_id,imc_season,id';
         foreach (nexus_rows($connections[$target], $sql, $params) as $row) {
