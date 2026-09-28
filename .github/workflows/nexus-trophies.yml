@@ -52,3 +52,33 @@ jobs:
           with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
               list(pool.map(refresh,range(1,11)))
           PY
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish tested Trophy Room files
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True)
+          ftp.cwd('/www.italianmastersclub.it/nexus/trophies')
+          for name in ['engine.php','sync.php','automation.php','index.php']:
+              data=Path('nexus/trophies',name).read_bytes()
+              ftp.storbinary('STOR '+name,io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary('RETR '+name,check.write)
+              if check.getvalue()!=data: raise RuntimeError('Upload verification failed: '+name)
+          ftp.quit()
+          print('Trophy Room files uploaded and verified')
+          PY
