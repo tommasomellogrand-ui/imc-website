@@ -11,13 +11,15 @@ $core=nexus_db($config,'core');
 $core->exec('CREATE TABLE `IMC Game World Club Mapping` (`Game World` VARCHAR(16),`Club Name` VARCHAR(255),`SM World Club ID` BIGINT)');
 $core->exec('CREATE TABLE `IMC Competition Codex Global` (game_world_id VARCHAR(16),competition_key VARCHAR(255),sm_action VARCHAR(64),sm_country VARCHAR(128),sm_division VARCHAR(128),teams_count INT,expected_match INT)');
 foreach(['gold','custom'] as $target)nexus_db($config,$target)->exec('CREATE TABLE IMC_Game_World_Season (game_world_id VARCHAR(16),imc_season INT,imc_season_start_date DATE,imc_season_end_date DATE)');
+$core->exec('CREATE TABLE `IMC Competition Nexus Mapping` (game_world_id VARCHAR(16),competition_key VARCHAR(255),nexus_view VARCHAR(255))');
 $source='(game_world_id VARCHAR(16),imc_season INT,competition_key VARCHAR(255),sm_action VARCHAR(64),sm_country VARCHAR(128),sm_division VARCHAR(128),competition_group VARCHAR(64),competition_group_name VARCHAR(128),competition_stage VARCHAR(128),competition_round VARCHAR(128),sm_fixture_id BIGINT,home_sm_club_id BIGINT,away_sm_club_id BIGINT,home_name VARCHAR(255),away_name VARCHAR(255),home_score INT,away_score INT,penalty_home_score INT,penalty_away_score INT,aggregate_home_score INT,aggregate_away_score INT,match_date DATE,result_status VARCHAR(64)) ENGINE=InnoDB';
-$trophy='(id BIGINT AUTO_INCREMENT PRIMARY KEY,game_world_id VARCHAR(16),imc_season INT NOT NULL,competition_key VARCHAR(255) NOT NULL,competition_group VARCHAR(64),trophy_type VARCHAR(64),sm_country VARCHAR(128),sm_division VARCHAR(128),winner_sm_world_club_id BIGINT,winner_name VARCHAR(255),decided_by VARCHAR(32),deciding_fixture_id BIGINT,won_date DATE,date_source VARCHAR(32),source_repository VARCHAR(64),created_at DATETIME DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB';
+$trophy='(id BIGINT AUTO_INCREMENT PRIMARY KEY,game_world_id VARCHAR(16),imc_season INT NOT NULL,competition_key VARCHAR(255) NOT NULL,nexus_view VARCHAR(255),competition_group VARCHAR(64),trophy_type VARCHAR(64),sm_country VARCHAR(128),sm_division VARCHAR(128),winner_sm_world_club_id BIGINT,winner_name VARCHAR(255),decided_by VARCHAR(32),deciding_fixture_id BIGINT,won_date DATE,date_source VARCHAR(32),source_repository VARCHAR(64),created_at DATETIME DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB';
 for($i=1;$i<=10;$i++) {
     $gw=sprintf('GW%03d',$i);$db=nexus_db($config,nexus_target($config,$gw));
     $db->prepare("INSERT INTO IMC_Game_World_Season VALUES (?,1,'2000-01-01',NULL)")->execute([$gw]);
     foreach(['Results','Match_Report','Schedule'] as $repo)$db->exec('CREATE TABLE '.$gw.'_IMC_'.$repo.' '.$source);
     $db->exec('CREATE TABLE '.$gw.'_IMC_Trophy_Room '.$trophy);
+    $core->prepare('INSERT INTO `IMC Competition Nexus Mapping` VALUES (?,?,?)')->execute([$gw,$gw.'|DOMESTIC|league|1','Mapped Division 1']);
     $core->prepare('INSERT INTO `IMC Competition Codex Global` VALUES (?,NULL,?,NULL,?,?,?)')->execute([$gw,'league','1',4,12]);
 }
 foreach(json_decode(file_get_contents(dirname(__DIR__).'/docs/trophy-automation-migrations.json'),true) as $plan) {
@@ -35,6 +37,7 @@ for($i=1;$i<=10;$i++) {
     $preview=trophy_sync($config,$db,$gw,true);check(count($preview['awards'])===1,$gw.' dry run winner');
     check((int)$db->query('SELECT COUNT(*) FROM '.$gw.'_IMC_Trophy_Room')->fetchColumn()===0,$gw.' preview never writes');
     $sync=trophy_sync($config,$db,$gw);check($sync['changes']['inserted']===1,$gw.' sync inserts champion');
+    check($db->query('SELECT nexus_view FROM '.$gw.'_IMC_Trophy_Room')->fetchColumn()==='Mapped Division 1',$gw.' new trophy uses exact competition mapping');
     $again=trophy_sync($config,$db,$gw);check($again['state']==='current',$gw.' idempotent clean refresh');
     $db->exec('DELETE FROM '.$gw.'_IMC_Results WHERE sm_fixture_id=1');
     $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$gw'");

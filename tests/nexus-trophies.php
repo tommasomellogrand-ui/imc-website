@@ -51,3 +51,6 @@ $resolved=trophy_derive('GW001',$legacy,[],[],$defs,'2026-09-28',$mapping);
 check(count($resolved['awards'])===1 && $resolved['awards'][0]['winner_sm_world_club_id']===1,'historical results resolve unique CORE club IDs');
 $mapping[]=['Club Name'=>'Team 1','SM World Club ID'=>99];
 check(count(trophy_derive('GW001',$legacy,[],[],$defs,'2026-09-28',$mapping)['awards'])===0,'ambiguous CORE mapping cannot assign a title');
+
+check(trophy_nexus_view(['competition_key'=>'GW008|ENG|DOMESTIC|league|2','trophy_type'=>'league'],[])==='ENG Div 2','multi division Nexus View fallback');
+check(trophy_nexus_view(['competition_key'=>'GW001|DOMESTIC|leaguecup','trophy_type'=>'leaguecup'],[])==='National Cup','cup Nexus View agrees with competition catalog');

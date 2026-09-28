@@ -3,6 +3,19 @@ declare(strict_types=1);
 
 // Pure derivation: no writes, network access or dependency on the current club roster.
 const TROPHY_ENGINE_VERSION = '20260928.2';
+function trophy_nexus_view(array $row,array $labels): string {
+    $key=(string)$row['competition_key'];
+    if (isset($labels[$key])) return (string)$labels[$key];
+    // Same fallback names and country/division rules as the competition catalog.
+    $parts=explode('|',$key);$groupIndex=null;
+    foreach($parts as $i=>$part)if(in_array($part,['DOMESTIC','INTERNATIONAL','NATIONS'],true)){$groupIndex=$i;break;}
+    $action=strtolower(trim((string)$row['trophy_type']));
+    $country=$groupIndex===2?$parts[1]:null;
+    $division=$groupIndex!==null?($parts[$groupIndex+2]??$row['sm_division']??null):($row['sm_division']??null);
+    $names=['charityshield'=>'Charity Shield','leaguecup'=>'National Cup','nationalcup'=>'National Cup','leagueshield'=>'League Cup','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers','worldcup'=>'World Cup'];
+    $name=in_array($action,['league','playoff'],true)?'Div '.$division.($action==='playoff'?' Playoff':''):($names[$action]??$action);
+    return ($country?$country.' ':'').$name;
+}
 function trophy_name(string $name): string {
     return function_exists('mb_strtolower') ? mb_strtolower(trim($name),'UTF-8') : strtolower(trim($name));
 }
