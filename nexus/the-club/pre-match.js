@@ -1,28 +1,14 @@
-(()=>{'use strict';
-function story(f){
- const p=f.preview||{},h=p.home_table||{},a=p.away_table||{},hf=p.home_form||[],af=p.away_form||[];
- const names=[f.home_name,f.away_name],first=!h.played&&!a.played;
- const run=rows=>{let n=0;for(const r of rows){if(r.outcome!==rows[0]?.outcome)break;n++}return n};
- let title=first?'Si apre il campionato. Il primo segnale conta.':h.points===a.points?'A pari punti, non a pari ambizioni.':'La classifica mette qualcosa in palio.';
- if(!first&&run(hf)>=2&&hf[0].outcome==='V')title=f.home_name+': la continuità passa da questa sfida.';
- else if(!first&&run(af)>=2&&af[0].outcome==='P')title=f.away_name+': una risposta da cercare sul campo.';
- const lead=first?'Per '+names.join(' e ')+' è il debutto in questo campionato. Nessuna forma ereditata dalla stagione passata: il primo confronto va costruito sul campo.':f.home_name+' arriva con '+h.points+' punti in '+h.played+' partite; '+f.away_name+' con '+a.points+' in '+a.played+'. Il distacco è di '+Math.abs(h.points-a.points)+' punti prima della giornata.';
- const moment=rows=>!rows.length?'Nessuna partita di campionato ancora disputata.':rows.filter(r=>r.outcome==='V').length+' vittorie, '+rows.filter(r=>r.outcome==='N').length+' pareggi e '+rows.filter(r=>r.outcome==='P').length+' sconfitte nelle ultime '+rows.length+' di campionato.';
- const themes=[{label:'IL MOMENTO',text:f.home_name+': '+moment(hf)+' '+f.away_name+': '+moment(af)}];
- const venue=(rows,n)=>rows?.length?n+': '+rows.length+' partite, '+rows.reduce((v,r)=>v+Number(r.gf),0)+' gol fatti e '+rows.reduce((v,r)=>v+Number(r.ga),0)+' subiti.':n+': nessun precedente stagionale in questa situazione.';
- themes.push({label:'CASA E TRASFERTA',text:venue(p.home_venue,f.home_name+' in casa')+' '+venue(p.away_venue,f.away_name+' fuori')});
- const leaders=['home','away'].flatMap(s=>(p[s+'_players']||[]).filter(x=>x.goals>0||x.assists>0).map(x=>({...x,club:f[s+'_name']}))).sort((x,y)=>y.goals-x.goals||y.assists-x.assists);
- themes.push({label:'I PROTAGONISTI',text:leaders.length?leaders.slice(0,2).map(x=>x.name+' ('+x.club+'): '+x.goals+' gol e '+x.assists+' assist in '+x.played+' presenze di campionato.').join(' '):'Il campionato non offre ancora contributi offensivi registrati nei report precedenti alla giornata. Sarà il campo a indicare i protagonisti.'});
- const mh=p.manager_h2h,hn=f.home_imc_manager_name,an=f.away_imc_manager_name;
- const duel=mh?.available&&hn&&an?(mh.played===0?'PRIMO CONFRONTO DOCUMENTATO — '+hn+' e '+an+' non hanno precedenti identificati nell’archivio prima di questa giornata.':hn+' contro '+an+': '+mh.played+' precedenti documentati, '+mh.home_wins+' vittorie del primo, '+mh.away_wins+' del secondo e '+mh.draws+' pareggi.'):'Storico tra i manager non disponibile con identificazione sufficiente.';
- let question='Chi darà il primo segnale nel nuovo campionato?',kind='opening';
- if(!first){kind='points';question=h.points===a.points?'Quale delle due riuscirà a rompere la parità in classifica?':'Chi saprà far pesare il confronto diretto nella corsa ai punti?';if(run(hf)>=2&&hf[0].outcome==='V'){kind='home-run';question=f.home_name+' riuscirà ad allungare la serie di '+run(hf)+' vittorie in campionato?';}else if(run(af)>=2&&af[0].outcome==='P'){kind='away-response';question=f.away_name+' riuscirà a interrompere la serie di '+run(af)+' sconfitte?';}}
- return {title,lead,themes,duel,question,kind};
-}
-function response(f){const s=story(f),h=Number(f.home_score),a=Number(f.away_score);let answer=h===a?'Il campo non separa le due squadre: '+h+'–'+a+', un punto a testa.':(h>a?f.home_name:f.away_name)+' chiude davanti: '+h+'–'+a+'.';
- if(s.kind==='home-run')answer=(h>a?'Sì: la serie di vittorie prosegue.':'No: la serie di vittorie si interrompe.')+' '+answer;
- if(s.kind==='away-response')answer=(a>=h?'Sì: arriva un risultato utile.':'No: arriva un’altra sconfitta.')+' '+answer;
- return {question:s.question,answer};
-}
-window.ClubPreMatch={story,response};
-})();
+(()=>{'use strict';const L=window.ClubPreMatchLibrary||{},H=t=>[...String(t)].reduce((h,c)=>(h*33+c.charCodeAt(0))>>>0,5381),P=(k,a)=>a?.length?a[H(k)%a.length]:'',R=(t,v)=>Object.entries(v).reduce((s,[k,x])=>s.replaceAll('{'+k+'}',x??''),t),S=n=>{const a=String(n||'').trim().split(/\s+/);return a.length>1?a.at(-1):a[0]||''};
+function story(f){const p=f.preview||{},h=p.home_table||{},a=p.away_table||{},hf=p.home_form||[],af=p.away_form||[],k=String(f.sm_fixture_id),first=!h.played&&!a.played,gap=Math.abs((h.points||0)-(a.points||0)),leader=(h.points||0)>=(a.points||0)?f.home_name:f.away_name,chaser=leader===f.home_name?f.away_name:f.home_name,beats=[];
+ const ctx={gap,leader,chaser,home:f.home_name,away:f.away_name};let title=first?'Si riparte. E il primo segnale conta.':gap<=3?gap+' punti. Una partita per spostarli.':P(k+'open',L.open);
+ beats.push({type:'narrator',text:first?f.home_name+' e '+f.away_name+' ripartono da zero. Oggi contano soprattutto il primo segnale e il modo in cui arriverà.':R(P(k+'gap',L.gap),ctx)});
+ beats.push({type:'studio',text:P(k+'studio1',L.studio)});
+ const addForm=(team,rows,x)=>{if((rows||[]).length<2)return;const w=rows.filter(r=>r.outcome==='V').length,l=rows.filter(r=>r.outcome==='P').length,n=rows.length;if(w>=Math.max(2,l+1))beats.push({type:'narrator',text:R(P(k+x+'form',L.form),{team,w,n})});else if(l>=Math.max(2,w+1))beats.push({type:'narrator',text:R(P(k+x+'bad',L.bad),{team,l,n})})};addForm(f.home_name,hf,'h');addForm(f.away_name,af,'a');
+ const hh=p.h2h;if(hh?.played){beats.push({type:'transition',text:P(k+'tr1',L.trans)});beats.push({type:'narrator',text:R(P(k+'h2h',L.h2h),{...ctx,played:hh.played,hw:hh.home_wins,aw:hh.away_wins,d:hh.draws})})}
+ const mh=p.manager_h2h,hm=S(f.home_imc_manager_name),am=S(f.away_imc_manager_name);if(hm&&am&&mh?.available){beats.push({type:'transition',text:P(k+'tr2',L.trans)});beats.push({type:'narrator',text:R(P(k+'mgr',mh.played?L.mgr:L.first),{hm,am,played:mh.played,hw:mh.home_wins,aw:mh.away_wins,d:mh.draws,next:mh.played+1})});beats.push({type:'studio',text:P(k+'studio2',L.studio)})}
+ const ps=['home','away'].flatMap(s=>(p[s+'_players']||[]).filter(x=>x.goals>0||x.assists>0).map(x=>({...x,team:f[s+'_name']}))).sort((x,y)=>y.goals-x.goals||y.assists-x.assists);if(ps[0]){const x=ps[0];beats.push({type:'transition',text:P(k+'tr3',L.trans)});beats.push({type:'narrator',text:R(P(k+'player',L.player),{player:x.name,goals:x.goals,assists:x.assists,played:x.played,team:x.team})})}
+ if(f.home_stadium_name)beats.push({type:'narrator',text:R(P(k+'venue',L.venue),{stadium:f.home_stadium_name,home:f.home_name})});
+ beats.push({type:'narrator',text:P(k+'neutral',L.neutral)});
+ const team=hf.filter(x=>x.outcome==='V').length>=2?f.home_name:af.filter(x=>x.outcome==='P').length>=2?f.away_name:leader,question=R(P(k+'question',L.question),{...ctx,team,hm,am});
+ return {title,beats,question,kind:gap<=3?'gap':'open'};}
+function response(f){const s=story(f),h=Number(f.home_score),a=Number(f.away_score);return {question:s.question,answer:h===a?'Il campo non le separa: '+h+'–'+a+'.':(h>a?f.home_name:f.away_name)+' chiude davanti: '+h+'–'+a+'.'};}window.ClubPreMatch={story,response,library:L};})();
