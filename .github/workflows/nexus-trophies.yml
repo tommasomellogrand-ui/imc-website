@@ -1,0 +1,43 @@
+name: Nexus Trophy Room automation
+on:
+  push:
+    branches: [main, nexus-trophy-automation]
+    paths: ['nexus/trophies/**', 'tests/nexus-trophies.php', '.github/workflows/nexus-trophies.yml']
+  schedule:
+    - cron: '3,8,13,18,23,28,33,38,43,48,53,58 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nexus-trophies-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  test:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PHP and trophy rules
+        run: |
+          for file in nexus/trophies/*.php; do php -l "$file"; done
+          php tests/nexus-trophies.php
+  refresh:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Refresh dirty Game Worlds
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures, json, urllib.request
+          def refresh(i):
+              gw=f'GW{i:03d}'
+              url='https://www.italianmastersclub.it/nexus/trophies/automation.php?world='+gw
+              with urllib.request.urlopen(url,timeout=90) as response:
+                  data=json.load(response)
+              if not data.get('ok') or data.get('state')=='disabled':
+                  raise RuntimeError(f'{gw}: {data}')
+              print(gw,data['state'])
+          with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+              list(pool.map(refresh,range(1,11)))
+          PY
