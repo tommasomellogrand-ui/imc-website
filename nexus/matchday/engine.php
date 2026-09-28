@@ -48,3 +48,8 @@ function md_manager_h2h(array $rows,int $home,int $away): array {
  }
  return $out;
 }
+
+function md_team_performance(array $reports,int $club): array {
+ $rows=[];foreach($reports as $r){$stats=json_decode((string)($r['team_stats_json']??''),true);if(!is_array($stats))continue;$side=md_team($r,'home')===$club?'home':(md_team($r,'away')===$club?'away':null);if(!$side||!is_array($stats[$side]??null))continue;$s=$stats[$side];$opp=$side==='home'?'away':'home';$rows[]=['date'=>$r['match_date'],'opponent'=>$r[$opp.'_name'],'gf'=>(int)$r[$side.'_score'],'ga'=>(int)$r[$opp.'_score'],'possession'=>(float)($s['possession']??0),'shots'=>(int)($s['total_shots']??0),'on_target'=>(int)($s['shots_on_target']??0),'corners'=>(int)($s['corners']??0)];}
+ $n=count($rows);$avg=function($key)use($rows,$n){return $n?round(array_sum(array_column($rows,$key))/$n,1):null;};return ['played'=>$n,'possession'=>$avg('possession'),'shots'=>$avg('shots'),'on_target'=>$avg('on_target'),'corners'=>$avg('corners'),'gf'=>$avg('gf'),'ga'=>$avg('ga'),'last'=>$rows[0]??null];
+}
