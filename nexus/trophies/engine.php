@@ -245,3 +245,18 @@ function trophy_league(string $gw,array $rows,array $schedule,array $definitions
     $sample['match_date']=max(array_column($rows,'match_date'));
     return trophy_record($gw,$sample,'home','standings');
 }
+
+function trophy_manager_at_win(array $trophy,array $assignments): ?string {
+    if (($trophy['competition_group']??'')==='NATIONS' || in_array($trophy['trophy_type']??'',['worldcup','interqualifier'],true)) return null;
+    $day=(string)($trophy['won_date']??'');$club=(string)($trophy['winner_sm_world_club_id']??'');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/',$day) || (int)$club<1) return null;
+    $managers=[];
+    foreach($assignments as $a) {
+        if (($a['assignment_type']??'')!=='club' || ($a['game_world_id']??'')!==($trophy['game_world_id']??'') || (string)($a['team_id']??'')!==$club) continue;
+        $start=(string)($a['start_date']??'');$end=$a['end_date']??null;
+        if ($start==='' || $start==='0000-00-00' || $start>$day || ($end!==null && $end<$day)) continue;
+        $id=trim((string)($a['manager_id']??''));
+        if ($id!=='')$managers[$id]=true;
+    }
+    return count($managers)===1?(string)array_key_first($managers):null;
+}

@@ -12,6 +12,14 @@ try {
         $club=filter_var($_GET['sm_club'],FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
         if ($club===false || $gw===null) throw new InvalidArgumentException('invalid_club_scope');
     }
+    $manager=null;$assignments=[];
+    if (array_key_exists('manager',$_GET)) {
+        $manager=trim((string)$_GET['manager']);
+        if ($manager==='' || strlen($manager)>255 || $gw===null) throw new InvalidArgumentException('invalid_manager_scope');
+        $core=nexus_db($c,'core');
+        // Read all club tenures in this world to detect conflicting managers on the award date.
+        $assignments=nexus_rows($core,"SELECT game_world_id,manager_id,assignment_type,team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=? AND assignment_type='club'",[$gw]);
+    }
     // Keep the unfiltered endpoint available, using only the individual GW tables.
     $worlds = $gw !== null ? [$gw] : array_map(
         static fn(int $n): string => sprintf('GW%03d', $n), range(1, 10)
@@ -36,6 +44,11 @@ try {
         }
         $sql .= ' ORDER BY game_world_id,imc_season,id';
         foreach (nexus_rows($connections[$target], $sql, $params) as $row) {
+            if ($manager!==null) {
+                $winnerManager=trophy_manager_at_win($row,$assignments);
+                if ($winnerManager!==$manager) continue;
+                $row['winner_manager_id']=$winnerManager;
+            }
             $rows[] = $row;
         }
     }

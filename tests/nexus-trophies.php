@@ -54,3 +54,24 @@ check(count(trophy_derive('GW001',$legacy,[],[],$defs,'2026-09-28',$mapping)['aw
 
 check(trophy_nexus_view(['competition_key'=>'GW008|ENG|DOMESTIC|league|2','trophy_type'=>'league'],[])==='ENG Div 2','multi division Nexus View fallback');
 check(trophy_nexus_view(['competition_key'=>'GW001|DOMESTIC|leaguecup','trophy_type'=>'leaguecup'],[])==='National Cup','cup Nexus View agrees with competition catalog');
+
+$award=['game_world_id'=>'GW008','winner_sm_world_club_id'=>42,'competition_group'=>'DOMESTIC','trophy_type'=>'league','won_date'=>'2026-06-10'];
+$tenure=['game_world_id'=>'GW008','assignment_type'=>'club','team_id'=>42,'manager_id'=>'MNG001','start_date'=>'2026-06-01','end_date'=>'2026-06-10'];
+check(trophy_manager_at_win($award,[$tenure])==='MNG001','manager receives award on last day in office');
+$tenure['start_date']='2026-06-10';$tenure['end_date']=null;
+check(trophy_manager_at_win($award,[$tenure])==='MNG001','manager receives award on first day in office');
+$tenure['start_date']='2026-06-11';
+check(trophy_manager_at_win($award,[$tenure])===null,'current manager cannot inherit earlier trophies');
+$tenure['start_date']='2026-06-01';$tenure['end_date']='2026-06-09';
+check(trophy_manager_at_win($award,[$tenure])===null,'departed manager cannot receive later trophies');
+$tenure['end_date']=null;$other=$tenure;$other['manager_id']='MNG002';
+check(trophy_manager_at_win($award,[$tenure,$other])===null,'overlapping different managers remain unassigned');
+check(trophy_manager_at_win($award,[$tenure,$tenure])==='MNG001','duplicate tenure does not duplicate a trophy');
+$other=$tenure;$other['game_world_id']='GW001';
+check(trophy_manager_at_win($award,[$other])===null,'same club ID in another world cannot receive trophy');
+$other=$tenure;$other['team_id']=43;
+check(trophy_manager_at_win($award,[$other])===null,'different club cannot receive trophy');
+$other=$tenure;$other['start_date']=null;
+check(trophy_manager_at_win($award,[$other])===null,'missing tenure date cannot receive trophy');
+$award['competition_group']='NATIONS';
+check(trophy_manager_at_win($award,[$tenure])===null,'club tenure cannot claim national trophy');
