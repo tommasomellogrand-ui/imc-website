@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__).'/core/bootstrap.php';
+require __DIR__.'/sync.php';
 try {
     $c = nexus_config();
     $gw = isset($_GET['world']) && $_GET['world'] !== ''
@@ -15,6 +16,7 @@ try {
     foreach ($worlds as $world) {
         $target = nexus_target($c, $world);
         $connections[$target] ??= nexus_db($c, $target);
+        trophy_sync($c, $connections[$target], $world);
         // World identifiers are validated above or generated from the supported range.
         $table = $world.'_IMC_Trophy_Room';
         $sql = 'SELECT * FROM `'.$table.'` WHERE game_world_id=?';
@@ -34,3 +36,4 @@ try {
 } catch (Throwable $e) {
     nexus_out(['ok'=>false, 'error'=>'trophies_error'], 500);
 }
+
