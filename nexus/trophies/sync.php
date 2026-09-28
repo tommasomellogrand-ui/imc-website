@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__.'/engine.php';
 
-const TROPHY_SYNC_VERSION = TROPHY_ENGINE_VERSION.'.h1';
+const TROPHY_SYNC_VERSION = TROPHY_ENGINE_VERSION.'.h2';
 
 function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false): array {
     $gw=nexus_world($gw);
@@ -18,12 +18,12 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false): arra
             if ($state['revision']===$state['processed_revision'] && $state['engine_version']===TROPHY_SYNC_VERSION && substr((string)$state['checked_at'],0,10)===$today) return ['state'=>'current','version'=>TROPHY_SYNC_VERSION];
             if ((int)$db->query("SELECT TIMESTAMPDIFF(SECOND,touched_at,NOW()) FROM IMC_Trophy_Sync_State WHERE game_world_id=".$db->quote($gw))->fetchColumn()<30) return ['state'=>'waiting_for_import'];
         }
-        $core=nexus_db($config,'core');
         // Historical Trophy Room rows are authoritative, regardless of their source.
-        // Only an explicitly active season from CORE can enable automatic reconciliation.
-        $seasons=nexus_rows($core,'SELECT imc_season FROM `IMC Game World Season` WHERE game_world_id=? AND imc_season_start_date<=? AND (imc_season_end_date IS NULL OR imc_season_end_date>=?) ORDER BY imc_season',[$gw,$today,$today]);
+        // Only an explicitly active season from the local mapping can enable automatic reconciliation.
+        $seasons=nexus_rows($db,'SELECT imc_season FROM `IMC_Game_World_Season` WHERE game_world_id=? AND imc_season_start_date<=? AND (imc_season_end_date IS NULL OR imc_season_end_date>=?) ORDER BY imc_season',[$gw,$today,$today]);
         if (count($seasons)!==1 || (int)$seasons[0]['imc_season']<1) return ['state'=>'current_season_unavailable','version'=>TROPHY_SYNC_VERSION];
         $currentSeason=(int)$seasons[0]['imc_season'];
+        $core=nexus_db($config,'core');
         $definitions=nexus_rows($core,'SELECT game_world_id,competition_key,sm_action,sm_country,sm_division,teams_count,expected_match FROM `IMC Competition Codex Global` WHERE game_world_id=? AND sm_action=?',[$gw,'league']);
         $mapping=nexus_rows($core,'SELECT `Club Name`,`SM World Club ID` FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]);
         $db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
