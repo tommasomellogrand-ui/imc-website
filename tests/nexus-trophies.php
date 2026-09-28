@@ -45,3 +45,9 @@ $cup2=$cup;$cup2['imc_season']=2;$cup2['sm_fixture_id']=200;$cup2['penalty_home_
 check(count($run([$cup,$cup2],[$cup,$cup2])['awards'])===2,'seasons remain separate');
 $same=$run([$cup],[$cup]);check($same===$run([$cup],[$cup]),'repeated evaluation is idempotent');
 echo "Trophy engine tests passed\n";
+$legacy=array_map(function($r){$r['home_sm_club_id']=null;$r['away_sm_club_id']=null;return $r;},$league);
+$mapping=[];for($i=1;$i<=4;$i++)$mapping[]=['Club Name'=>'Team '.$i,'SM World Club ID'=>$i];
+$resolved=trophy_derive('GW001',$legacy,[],[],$defs,'2026-09-28',$mapping);
+check(count($resolved['awards'])===1 && $resolved['awards'][0]['winner_sm_world_club_id']===1,'historical results resolve unique CORE club IDs');
+$mapping[]=['Club Name'=>'Team 1','SM World Club ID'=>99];
+check(count(trophy_derive('GW001',$legacy,[],[],$defs,'2026-09-28',$mapping)['awards'])===0,'ambiguous CORE mapping cannot assign a title');

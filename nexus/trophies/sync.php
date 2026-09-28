@@ -18,14 +18,15 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false): arra
         }
         $core=nexus_db($config,'core');
         $definitions=nexus_rows($core,'SELECT game_world_id,competition_key,sm_action,sm_country,sm_division,teams_count,expected_match FROM `IMC Competition Codex Global` WHERE game_world_id=? AND sm_action=?',[$gw,'league']);
+        $mapping=nexus_rows($core,'SELECT `Club Name`,`SM World Club ID` FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]);
         $db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
         $db->beginTransaction();
         $state=nexus_rows($db,'SELECT * FROM IMC_Trophy_Sync_State WHERE game_world_id=?',[$gw])[0];
         $results=nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Results` WHERE game_world_id=?',[$gw]);
         // Deliberately exclude the large players/events/commentary JSON columns.
-        $reports=nexus_rows($db,'SELECT sm_fixture_id,imc_season,competition_key,home_sm_club_id,away_sm_club_id,home_name,away_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score FROM `'.$gw.'_IMC_Match_Report` WHERE game_world_id=?',[$gw]);
+        $reports=nexus_rows($db,'SELECT sm_fixture_id,imc_season,competition_key,sm_action,competition_group,home_sm_club_id,away_sm_club_id,home_name,away_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score FROM `'.$gw.'_IMC_Match_Report` WHERE game_world_id=?',[$gw]);
         $schedule=nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Schedule` WHERE game_world_id=?',[$gw]);
-        $derived=trophy_derive($gw,$results,$reports,$schedule,$definitions,$today);
+        $derived=trophy_derive($gw,$results,$reports,$schedule,$definitions,$today,$mapping);
         $table='`'.$gw.'_IMC_Trophy_Room`';
         $before=nexus_rows($db,'SELECT * FROM '.$table.' ORDER BY id');
         if ($preview) {$db->rollBack();return ['state'=>'preview','version'=>TROPHY_ENGINE_VERSION,'existing_count'=>count($before)]+$derived;}

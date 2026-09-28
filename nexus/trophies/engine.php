@@ -2,7 +2,36 @@
 declare(strict_types=1);
 
 // Pure derivation: no writes, network access or dependency on the current club roster.
-const TROPHY_ENGINE_VERSION = '20260928.1';
+const TROPHY_ENGINE_VERSION = '20260928.2';
+function trophy_name(string $name): string {
+    return function_exists('mb_strtolower') ? mb_strtolower(trim($name),'UTF-8') : strtolower(trim($name));
+}
+function trophy_resolve_ids(array $results,array $reports,array $schedules,array $mapping): array {
+    $names=[];
+    foreach ($mapping as $row) {
+        $id=(int)($row['SM World Club ID']??0);$name=trophy_name((string)($row['Club Name']??''));
+        if ($id>0 && $name!=='')$names[$name][$id]=true;
+    }
+    foreach ([$results,$reports,$schedules] as $list) foreach ($list as $r) {
+        if (($r['competition_group']??'')==='NATIONS' || in_array($r['sm_action']??'',['worldcup','interqualifier'],true)) continue;
+        foreach (['home','away'] as $side) {
+            $id=(int)($r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']??0);$name=trophy_name((string)($r[$side.'_name']??''));
+            if ($id>0 && $name!=='')$names[$name][$id]=true;
+        }
+    }
+    $resolve=static function(array $list)use($names):array {
+        foreach ($list as &$r) {
+            if (($r['competition_group']??'')==='NATIONS' || in_array($r['sm_action']??'',['worldcup','interqualifier'],true)) continue;
+            foreach (['home','away'] as $side) {
+                $field=array_key_exists($side.'_sm_team_id',$r)?$side.'_sm_team_id':$side.'_sm_club_id';
+                if ((int)($r[$field]??0)>0)continue;
+                $ids=$names[trophy_name((string)($r[$side.'_name']??''))]??[];
+                if(count($ids)===1)$r[$field]=(int)array_key_first($ids);
+            }
+        }unset($r);return $list;
+    };
+    return [$resolve($results),$resolve($reports),$resolve($schedules)];
+}
 function trophy_country(mixed $country): string {
     $s = strtoupper(trim((string)$country));
     return ['SPAGNA'=>'SPA','ESP'=>'SPA','INGHILTERRA'=>'ENG','FRANCIA'=>'FRA',
@@ -61,7 +90,8 @@ function trophy_record(string $gw,array $r,string $side,string $method): array {
         'date_source'=>$method==='final'?'match_report':'result',
         'source_repository'=>$method==='final'?'IMC Match Report':'IMC Results'];
 }
-function trophy_derive(string $gw,array $results,array $reports,array $schedules,array $definitions,string $today): array {
+function trophy_derive(string $gw,array $results,array $reports,array $schedules,array $definitions,string $today,array $mapping=[]): array {
+    [$results,$reports,$schedules]=trophy_resolve_ids($results,$reports,$schedules,$mapping);
     [$fixtures,$conflicts]=trophy_fixture_map($results);
     [$reportMap,$reportConflicts]=trophy_fixture_map($reports);
     $groups=[]; $scheduleGroups=[]; $issues=[]; $invalid=0;
