@@ -29,6 +29,7 @@ jobs:
         run: |
           for file in nexus/club-house/*.php; do php -l "$file"; done
           php tests/nexus-club-house.php
+          php tests/nexus-club-house-ranking.php
           node --check nexus/club-house/club-house.js
           node --check nexus/assets/home.js
       - name: Verify tabs and responsive layout
@@ -38,6 +39,7 @@ jobs:
           npm ci --prefix /tmp/club-house-test --ignore-scripts
           NEXUS_PLAYWRIGHT_PATH=/tmp/club-house-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-club-house-ui.cjs
           NEXUS_PLAYWRIGHT_PATH=/tmp/club-house-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-club-house-entry.cjs
+          NEXUS_PLAYWRIGHT_PATH=/tmp/club-house-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-club-house-ranking.cjs
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: test
@@ -83,6 +85,11 @@ jobs:
                   assert m['opponent_id'] is None or (m['opponent_id'] in ids and m['opponent_identity_source']=='id')
               for v in d['managers'].values():
                   s=v['stats']; assert s['played']==s['won']+s['drawn']+s['lost']; assert s['played']==s['matched_by_id']; assert s['matched_by_name']==0
+                  r=v['ranking']; weight=3 if gw=='GW008' else 2 if gw in ['GW001','GW002','GW003'] else 1
+                  assert r['weight']==weight and r['match_points']==(2*s['won']+s['drawn'])*weight
+                  assert r['trophy_points']==r['trophy_base']*weight and r['total']==r['match_points']+r['trophy_points']
+                  assert r['unscored_trophies']==0, (gw, r['awards'])
+                  assert len(r['awards'])==v['trophies']
               print(gw,'OK',sum(v['stats']['matched_by_id'] for v in d['managers'].values()),'by ID;',sum(v['stats']['matched_by_name'] for v in d['managers'].values()),'by name;',len(d['matches']),'MNG001 matches')
           with urllib.request.urlopen(base,timeout=30) as r: assert 'Club House' in r.read().decode()
           print('Club House online; all ten GW verified without database writes')

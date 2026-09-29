@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require dirname(__DIR__).'/core/bootstrap.php';
 require __DIR__.'/engine.php';
+require __DIR__.'/ranking.php';
 require dirname(__DIR__).'/trophies/engine.php';
 try {
  $c=nexus_config();$core=nexus_db($c,'core');
@@ -15,6 +16,7 @@ try {
  $selected=$selected===''?null:$selected;
  $db=nexus_db($c,nexus_target($c,$gw));$db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();
  $out=ch_read($db,$gw,$managers,$selected);
+ foreach($out['managers'] as &$m)$m['ranking']=imc_rank_start($m['stats'],$gw);unset($m);
  // Display-only club logos: use existing world mappings, never create clubs.
  $out['clubs']=[];
  if($selected!==null)try {
@@ -28,6 +30,7 @@ try {
   $assignments=nexus_rows($core,"SELECT game_world_id,manager_id,assignment_type,team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=? AND assignment_type='club'",[$gw]);
   foreach(nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Trophy_Room` WHERE game_world_id=?',[$gw]) as $t){
    $id=trophy_manager_at_win($t,$assignments);if($id===null||!isset($out['managers'][$id]))continue;$out['managers'][$id]['trophies']++;
+   imc_rank_award($out['managers'][$id]['ranking'],$t);
    if($selected===$id)$out['trophies'][]=['world'=>$gw,'season'=>$t['imc_season'],'date'=>$t['won_date'],'competition'=>($t['nexus_view']??'')?:$t['competition_key'],'team'=>$t['winner_name'],'country'=>$t['sm_country']??null];
   }
  }catch(Throwable $e){$out['trophy_error']=true;error_log('Club House trophies '.$gw.': '.$e->getMessage());}
