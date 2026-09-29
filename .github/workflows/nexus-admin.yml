@@ -69,22 +69,14 @@ jobs:
               data=local.read_bytes(); ftp.storbinary('STOR '+local.name,io.BytesIO(data))
               check=io.BytesIO(); ftp.retrbinary('RETR '+local.name,check.write)
               if check.getvalue()!=data: raise RuntimeError('Upload mismatch: '+str(local))
-          # Reuse the existing admin credential for read-only live verification.
-          # Never print the credential or private configuration.
-          private=io.BytesIO()
-          ftp.retrbinary('RETR '+root+'__imc_private_sm_master/config.php',private.write)
           ftp.quit()
-          with tempfile.TemporaryDirectory() as temp:
-              cfg=Path(temp)/'config.php'; cfg.write_bytes(private.getvalue()); cfg.chmod(0o600)
-              token=subprocess.check_output(['php','-r',"$c=require $argv[1]; echo $c['admin_token'] ?? '';",str(cfg)]).decode()
-          if not token: raise RuntimeError('Existing admin credential unavailable')
           opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
           base='https://www.italianmastersclub.it/nexus/admin/api.php'
           def call(body=None, query='', csrf=''):
               req=urllib.request.Request(base+query, data=json.dumps(body).encode() if body else None,
                   headers={'Content-Type':'application/json','X-CSRF-Token':csrf})
               with opener.open(req,timeout=30) as response: return json.load(response)
-          auth=call({'action':'login','key':token}); token=''
+          auth=call({'action':'login','username':'admin','password':'admin'})
           if not auth.get('ok'): raise RuntimeError('Live admin login failed')
           for i in range(1,11):
               gw=f'GW{i:03d}'; result=call(query='?world='+gw)

@@ -31,6 +31,22 @@ try:
     assert call(cookie=cookie)[0]==401
     assert call({'action':'login','access_token':'invalid'})[0]==401
     assert call({'action':'login','access_token':'ci-personal-link-token-that-is-longer-than-forty-characters'})[0]==200
+    assert call({'action':'login','username':'admin','password':'wrong'})[0]==401
+    status,result,headers=call({'action':'login','username':'admin','password':'admin'})
+    assert status==200 and result['csrf']
+    persistent=headers.get_all('Set-Cookie')[-1]
+    assert 'max-age=2592000' in persistent.lower()
+    cookie=persistent.split(';')[0]; token=result['csrf']
+    # Simulate three hours of inactivity: the former two-hour cutoff must not log out.
+    import tempfile
+    session_dir=pathlib.Path(tempfile.gettempdir())/('nexus-admin-'+hashlib.sha256(str(root/'nexus/admin').encode()).hexdigest()[:16])
+    session_file=session_dir/('sess_'+cookie.split('=',1)[1])
+    original_session=session_file.read_text()
+    import re
+    session_file.write_text(re.sub(r'(authenticated_at|last_activity)\|i:\d+;',lambda m:m.group(1)+'|i:'+str(int(time.time())-10800)+';',original_session))
+    assert call(cookie=cookie)[0]==200
+    assert call({'action':'logout'},cookie,token)[0]==200
+    assert call(cookie=cookie)[0]==401
     print('PASS: anonymous access, invalid login, secure session, CSRF and logout')
 finally:
     server.terminate();server.wait();config.unlink();link.write_text(original)
