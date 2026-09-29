@@ -57,7 +57,7 @@ function rc_build(array $sets,string $date,?int $season,string $today): array {
         elseif (!$s) $state='orphan_results';
         elseif (!$m) $state='missing_report';
         else $state='complete';
-        if ($state==='complete' && $issues) $state='anomaly';
+        if (in_array($state,['complete','pending','today'],true) && $issues) $state='anomaly';
         if ($g['fixture_id']===null) $state='anomaly';
         foreach (['schedule','results','report'] as $source) $summary[$source]+=count($g[$source]);
         $summary['fixtures']++;$summary[$state]++;
@@ -86,7 +86,7 @@ function rc_check(PDO $db,string $gw,string $date,?int $season,string $today): a
     $sets=[];$ids=[];$missing=[];
     foreach (rc_sources() as $source=>$repo) {
         $table=nexus_table($gw,$repo);
-        $where=$date==='undated'?"(match_date IS NULL OR match_date='0000-00-00')":'match_date>=? AND match_date<DATE_ADD(?, INTERVAL 1 DAY)';
+        $where=$date==='undated'?"(match_date IS NULL OR LEFT(CAST(match_date AS CHAR),10)='0000-00-00')":'match_date>=? AND match_date<DATE_ADD(?, INTERVAL 1 DAY)';
         $params=$date==='undated'?[]:[$date,$date];
         if ($season!==null) {$where.=' AND imc_season=?';$params[]=$season;}
         $rows=nexus_rows($db,'SELECT '.rc_select($source).' FROM `'.$table.'` WHERE '.$where,$params);
