@@ -8,13 +8,13 @@ foreach(['GW001'=>2,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>1,'GW006'=>1,'GW00
   $r=imc_rank_start(compact('played','won','lost'),$gw);check($r['total'],$points*$weight);
  }
  $r=imc_rank_start(['played'=>6,'won'=>3,'lost'=>1],$gw);
- foreach(['smfacup'=>30,'smfashield'=>20,'leaguecup'=>15,'leagueshield'=>15,'supercup'=>15,'charityshield'=>15,'playoff'=>5] as $type=>$points){
+ foreach(['smfacup'=>100,'smfashield'=>50,'leaguecup'=>25,'leagueshield'=>25,'supercup'=>25,'charityshield'=>25,'playoff'=>10] as $type=>$points){
   check(imc_rank_bonus(['trophy_type'=>$type]),$points);
   imc_rank_award($r,['trophy_type'=>$type]);
  }
- check($r['trophy_base'],115);check($r['total'],123*$weight);check(count($r['awards']),7);
+ check($r['trophy_base'],260);check($r['total'],268*$weight);check(count($r['awards']),7);
 }
-foreach([1=>25,2=>5,3=>5,4=>5,5=>5] as $d=>$points)check(imc_rank_bonus(['trophy_type'=>'league','sm_division'=>$d]),$points);
+foreach([1=>75,2=>15,3=>15,4=>15,5=>15] as $d=>$points)check(imc_rank_bonus(['trophy_type'=>'league','sm_division'=>$d]),$points);
 foreach([['trophy_type'=>'league'],['trophy_type'=>'unknown'],['trophy_type'=>'worldcup'],['trophy_type'=>'smfacup','competition_group'=>'NATIONS']] as $t)check(imc_rank_bonus($t),null);
 $r=imc_rank_start(['played'=>0,'won'=>0,'lost'=>0],'GW008');imc_rank_award($r,['trophy_type'=>'unknown']);check($r['total'],0);check($r['unscored_trophies'],1);
 echo "PASS: IMC Ranking match scores, ten GW weights, all trophy bonuses, lower divisions, unknown types and nationals\n";
