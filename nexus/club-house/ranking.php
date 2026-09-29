@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-// IMC Ranking v2: read-only scoring; never changes reports or trophy attribution.
+// IMC Ranking v3: read-only scoring; never changes reports or trophy attribution.
 function imc_rank_weight(string $gw): int {
- return $gw==='GW008'?3:(in_array($gw,['GW001','GW002','GW003'],true)?2:1);
+ return in_array($gw,['GW001','GW008'],true)?3:(in_array($gw,['GW002','GW003'],true)?2:1);
 }
 function imc_rank_bonus(array $t): ?int {
  $type=strtolower(trim((string)($t['trophy_type']??'')));
@@ -17,8 +17,8 @@ function imc_rank_bonus(array $t): ?int {
  return null; // Unknown competitions are flagged, never silently assigned a bonus.
 }
 function imc_rank_start(array $s,string $gw): array {
- $base=(int)$s['played']+(int)$s['won']-(int)$s['lost'];$weight=imc_rank_weight($gw);
- return ['version'=>2,'weight'=>$weight,'match_base'=>$base,'trophy_base'=>0,'match_points'=>$base*$weight,'trophy_points'=>0,'total'=>$base*$weight,'unscored_trophies'=>0,'awards'=>[]];
+ $base=(int)$s['won']-(int)$s['lost'];$weight=imc_rank_weight($gw);
+ return ['version'=>3,'weight'=>$weight,'match_base'=>$base,'trophy_base'=>0,'match_points'=>$base*$weight,'trophy_points'=>0,'total'=>$base*$weight,'unscored_trophies'=>0,'awards'=>[]];
 }
 function imc_rank_award(array &$rank,array $t): void {
  $bonus=imc_rank_bonus($t);
