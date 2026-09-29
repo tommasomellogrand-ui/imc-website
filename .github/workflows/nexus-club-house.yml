@@ -86,7 +86,7 @@ jobs:
               for v in d['managers'].values():
                   s=v['stats']; assert s['played']==s['won']+s['drawn']+s['lost']; assert s['played']==s['matched_by_id']; assert s['matched_by_name']==0
                   r=v['ranking']; weight=3 if gw in ['GW001','GW008'] else 2 if gw in ['GW002','GW003'] else 1
-                  assert r['version']==3 and r['weight']==weight and r['match_points']==(s['won']+0.5*s['drawn']-s['lost'])*weight
+                  assert r['version']==4 and r['weight']==weight and r['match_points']==(s['played']+s['won']+0.5*s['drawn']-s['lost'])
                   assert r['trophy_points']==r['trophy_base']*weight and r['total']==r['match_points']+r['trophy_points']
                   assert r['unscored_trophies']==0, (gw, r['awards'])
                   assert len(r['awards'])==v['trophies']

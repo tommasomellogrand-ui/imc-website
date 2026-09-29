@@ -4,15 +4,15 @@ require dirname(__DIR__).'/nexus/club-house/ranking.php';
 function check($got,$want):void {if($got!==$want && !(is_numeric($got)&&is_numeric($want)&&(float)$got===(float)$want))throw new RuntimeException(json_encode([$got,$want]));}
 foreach(['GW001'=>3,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>1,'GW006'=>1,'GW007'=>1,'GW008'=>3,'GW009'=>1,'GW010'=>1] as $gw=>$weight){
  check(imc_rank_weight($gw),$weight);
- foreach([[1,1,0,1],[1,0,0,0.5],[1,0,1,-1],[6,3,1,3],[4,0,4,-4]] as [$played,$won,$lost,$points]){
-  $drawn=$played-$won-$lost;$r=imc_rank_start(compact('played','won','drawn','lost'),$gw);check($r['total'],$points*$weight);
+ foreach([[1,1,0,2],[1,0,0,1.5],[1,0,1,0],[6,3,1,9],[4,0,4,0]] as [$played,$won,$lost,$points]){
+  $drawn=$played-$won-$lost;$r=imc_rank_start(compact('played','won','drawn','lost'),$gw);check($r['total'],$points);check($r['match_points'],$points);
  }
  $r=imc_rank_start(['played'=>6,'won'=>3,'drawn'=>2,'lost'=>1],$gw);
  foreach(['smfacup'=>100,'smfashield'=>50,'leaguecup'=>25,'leagueshield'=>25,'supercup'=>25,'charityshield'=>25,'playoff'=>10] as $type=>$points){
   check(imc_rank_bonus(['trophy_type'=>$type]),$points);
   imc_rank_award($r,['trophy_type'=>$type]);
  }
- check($r['trophy_base'],260);check($r['total'],263*$weight);check(count($r['awards']),7);
+ check($r['trophy_base'],260);check($r['total'],9+260*$weight);check(count($r['awards']),7);
 }
 foreach([1=>75,2=>15,3=>15,4=>15,5=>15] as $d=>$points)check(imc_rank_bonus(['trophy_type'=>'league','sm_division'=>$d]),$points);
 foreach([['trophy_type'=>'league'],['trophy_type'=>'unknown'],['trophy_type'=>'worldcup'],['trophy_type'=>'smfacup','competition_group'=>'NATIONS']] as $t)check(imc_rank_bonus($t),null);
