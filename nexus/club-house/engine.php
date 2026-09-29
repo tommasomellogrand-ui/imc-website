@@ -6,27 +6,16 @@ function ch_add(array &$s,int $gf,int $ga,?int $pf=null,?int $pa=null): void {
  if($pf!==null&&$pa!==null){if($pf>$pa)$s['penalty_won']++;elseif($pf<$pa)$s['penalty_lost']++;}
 }
 function ch_nation(array $r): bool {return strtoupper((string)($r['competition_group']??''))==='NATIONS'||str_contains(strtoupper((string)($r['competition_key']??'')),'|NATIONS|')||in_array(strtolower((string)($r['sm_action']??'')),['worldcup','interqualifier'],true);}
-function ch_name(mixed $value): string {
- $value=preg_replace('/[\s\p{Z}]+/u',' ',(string)($value??''))??'';
- $value=trim($value);return function_exists('mb_strtolower')?mb_strtolower($value,'UTF-8'):strtolower(strtr($value,['À'=>'à','È'=>'è','É'=>'é','Ì'=>'ì','Ò'=>'ò','Ù'=>'ù']));
-}
-function ch_missing_id(mixed $value): bool {return $value===null||trim((string)$value)===''||preg_match('/^0+$/',trim((string)$value))===1;}
 function ch_identity(array $managers): array {
- $map=[];foreach($managers as $m){
-  if((int)$m['sm_manager_id']>0)$map[(string)$m['sm_manager_id']][]=$m['manager_id'];
-  $name=ch_name($m['full_name']);if($name!=='')$map['name:'.$name][]=$m['manager_id'];
- }return $map;
+ $map=[];foreach($managers as $m)if((int)$m['sm_manager_id']>0)$map[(string)$m['sm_manager_id']][]=$m['manager_id'];return $map;
 }
 function ch_resolve(array $row,string $side,array $map): array {
- $sm=$row[$side.'_sm_manager_id']??null;$by=ch_missing_id($sm)?'name':'id';
- $key=$by==='name'?'name:'.ch_name($row[$side.'_manager_name']??''):(string)$sm;
- return ['ids'=>$map[$key]??[],'by'=>$by];
+ $sm=$row[$side.'_sm_manager_id']??null;
+ return ['ids'=>(int)$sm>0?($map[(string)$sm]??[]):[],'by'=>'id'];
 }
 function ch_signature(array $r): string {
  $fields=['match_date','imc_season','competition_key','competition_group','sm_action','home_sm_club_id','away_sm_club_id','home_sm_manager_id','away_sm_manager_id','home_score','away_score','penalty_home_score','penalty_away_score'];
  $values=array_map(fn($k)=>(string)($r[$k]??''),$fields);
- // Names influence identity only when the report ID is absent.
- foreach(['home','away'] as $side)$values[]=ch_missing_id($r[$side.'_sm_manager_id']??null)?ch_name($r[$side.'_manager_name']??''):'';
  return hash('sha256',json_encode($values));
 }
 function ch_init(array $managers): array {
@@ -47,7 +36,7 @@ function ch_group(array &$out,array $rows,array $map,array $names,string $gw,?st
  if(count($home)===1&&$home===$away)$reason='Stesso manager IMC su entrambe le squadre';
  if($reason){$out['coverage']['excluded_fixtures']++;foreach(array_keys($candidates) as $id){$out['managers'][$id]['excluded']++;if($id===$selected)$out['issues'][]=['world'=>$gw,'fixture_id'=>$r['sm_fixture_id'],'date'=>$r['match_date'],'reason'=>$reason];}return;}
  foreach(['home'=>$home,'away'=>$away] as $side=>$ids){
-  if(count($ids)>1){foreach($ids as $ambiguous){$out['managers'][$ambiguous]['excluded']++;if($ambiguous===$selected)$out['issues'][]=['world'=>$gw,'fixture_id'=>$r['sm_fixture_id'],'date'=>$r['match_date'],'reason'=>'Identità ambigua: '.($resolved[$side]['by']==='name'?'nome':'ID').' associato a più manager IMC'];}continue;}
+  if(count($ids)>1){foreach($ids as $ambiguous){$out['managers'][$ambiguous]['excluded']++;if($ambiguous===$selected)$out['issues'][]=['world'=>$gw,'fixture_id'=>$r['sm_fixture_id'],'date'=>$r['match_date'],'reason'=>'ID associato a più manager IMC'];}continue;}
   if(count($ids)!==1)continue;$id=$ids[0];$other=$side==='home'?'away':'home';$opponentIds=$side==='home'?$away:$home;
   $gf=(int)$r[$side.'_score'];$ga=(int)$r[$other.'_score'];
   $pf=is_numeric($r['penalty_'.$side.'_score']??null)?(int)$r['penalty_'.$side.'_score']:null;$pa=is_numeric($r['penalty_'.$other.'_score']??null)?(int)$r['penalty_'.$other.'_score']:null;
@@ -59,7 +48,7 @@ function ch_group(array &$out,array $rows,array $map,array $names,string $gw,?st
 }
 function ch_read(PDO $db,string $gw,array $managers,?string $selected): array {
  $map=ch_identity($managers);$names=array_column($managers,'full_name','manager_id');$out=ch_init($managers);
- $sql='SELECT sm_fixture_id,imc_season,match_date,competition_key,competition_group,sm_action,home_sm_club_id,away_sm_club_id,home_name,away_name,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score,home_manager_name,away_manager_name FROM `'.nexus_table($gw,'Match_Report').'` ORDER BY sm_fixture_id';
+ $sql='SELECT sm_fixture_id,imc_season,match_date,competition_key,competition_group,sm_action,home_sm_club_id,away_sm_club_id,home_name,away_name,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.nexus_table($gw,'Match_Report').'` ORDER BY sm_fixture_id';
  $stmt=$db->query($sql);$group=[];$last=null;
  while($r=$stmt->fetch()){
   if(ch_nation($r))continue;$key=(string)($r['sm_fixture_id']??'');

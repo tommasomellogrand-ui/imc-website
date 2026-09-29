@@ -77,11 +77,12 @@ jobs:
               assert not d['trophy_error'], gw+' trophy read failed'
               assert len(d['matches'])==d['managers']['MNG001']['stats']['played']
               assert len({m['fixture_id'] for m in d['matches']})==len(d['matches'])
-              for m in d['matches']: assert m['opponent_id'] is None or m['opponent_id'] in ids
+              for m in d['matches']:
+                  assert m['identity_source']=='id'
+                  assert m['opponent_id'] is None or (m['opponent_id'] in ids and m['opponent_identity_source']=='id')
               for v in d['managers'].values():
-                  s=v['stats']; assert s['played']==s['won']+s['drawn']+s['lost']; assert s['played']==s['matched_by_id']+s['matched_by_name']
+                  s=v['stats']; assert s['played']==s['won']+s['drawn']+s['lost']; assert s['played']==s['matched_by_id']; assert s['matched_by_name']==0
               print(gw,'OK',sum(v['stats']['matched_by_id'] for v in d['managers'].values()),'by ID;',sum(v['stats']['matched_by_name'] for v in d['managers'].values()),'by name;',len(d['matches']),'MNG001 matches')
-              print(gw,'NAME_FALLBACK',json.dumps({k:v['stats']['matched_by_name'] for k,v in d['managers'].items() if v['stats']['matched_by_name']}))
           with urllib.request.urlopen(base,timeout=30) as r: assert 'Club House' in r.read().decode()
           print('Club House online; all ten GW verified without database writes')
           PY
