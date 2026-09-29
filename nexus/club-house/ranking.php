@@ -6,7 +6,8 @@ function imc_rank_weight(string $gw): int {
 }
 function imc_rank_bonus(array $t): ?int {
  $type=strtolower(trim((string)($t['trophy_type']??'')));
- if(strtoupper((string)($t['competition_group']??''))==='NATIONS'||in_array($type,['worldcup','interqualifier'],true))return null;
+ if($type==='worldcup')return 125;
+ if(strtoupper((string)($t['competition_group']??''))==='NATIONS'||$type==='interqualifier')return null;
  $fixed=['smfacup'=>100,'smfashield'=>75,'leaguecup'=>50,'nationalcup'=>50,'leagueshield'=>50,'supercup'=>75,'charityshield'=>75,'playoff'=>10];
  if(isset($fixed[$type]))return $fixed[$type];
  if($type==='league'){
