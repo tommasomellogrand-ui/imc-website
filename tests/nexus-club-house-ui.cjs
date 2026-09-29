@@ -11,13 +11,16 @@ function bundle(world){
  try{
   const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];let fail=false;
   page.on('pageerror',e=>errors.push(e.message));
-  await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='club.test')return route.abort();if(u.pathname.endsWith('data.php')){const w=u.searchParams.get('world');return route.fulfill({status:fail&&w==='GW010'?503:200,contentType:'application/json',body:JSON.stringify(w?bundle(w):{ok:true,managers:people,worlds:[]})});}const name=u.pathname.endsWith('/')?'index.html':path.basename(u.pathname);return route.fulfill({contentType:name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html',body:fs.readFileSync(path.join('nexus/club-house',name))});});
+  await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='club.test'||u.pathname.startsWith('/site-assets/'))return route.abort();if(u.pathname.endsWith('data.php')){const w=u.searchParams.get('world');return route.fulfill({status:fail&&w==='GW010'?503:200,contentType:'application/json',body:JSON.stringify(w?bundle(w):{ok:true,managers:people,worlds:[]})});}const name=u.pathname.endsWith('/')?'index.html':path.basename(u.pathname);return route.fulfill({contentType:name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html',body:fs.readFileSync(path.join('nexus/club-house',name))});});
   await page.goto('https://club.test/');await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('10/10'));
   assert.equal(await page.locator('.manager-card').count(),3);assert.equal(await page.locator('#tabs').isVisible(),false);
+  await page.getByRole('button',{name:'Game World ↗',exact:true}).click();assert.equal(await page.locator('#world-links a').count(),10);assert.equal(await page.locator('#world-links a').first().getAttribute('href'),'../?world=GW001');await page.getByRole('button',{name:'Chiudi Game World'}).click();
+  console.log('SCREENSHOT_DIRECTORY='+ (await page.screenshot()).toString('base64'));
   await page.locator('#search').fill('Uno');assert.equal(await page.locator('.manager-card').count(),1);await page.locator('.manager-card').click();
   await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('10/10'));
   assert.equal(await page.locator('.kpi strong').first().textContent(),'4');assert.equal(await page.locator('.match').count(),4);
   assert.match(await page.locator('#content').textContent(),/4 partite tramite ID Soccer Manager/);
+  console.log('SCREENSHOT_PROFILE='+ (await page.screenshot()).toString('base64'));
   await page.getByRole('button',{name:'Carriera',exact:true}).click();assert.equal(await page.locator('#content section').count(),2);
   await page.getByRole('button',{name:'Head to Head',exact:true}).click();assert.equal(await page.locator('.rival').count(),1);assert.match(await page.locator('.rival summary').textContent(),/2 partite/);await page.locator('.rival summary').click();assert.equal(await page.locator('.rival .match').count(),2);
   await page.getByRole('button',{name:'Trophy Room',exact:true}).click();assert.equal(await page.locator('.trophy').count(),2);

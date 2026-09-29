@@ -1,6 +1,7 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),valid=v=>/^GW00[1-9]$|^GW010$/.test(v||'');
+if(!valid(params.get('world'))){location.replace('club-house/'+location.search+location.hash);return;}
 let saved='';try{saved=localStorage.getItem('imc_nexus_world')||''}catch(e){}
 const gw=valid(params.get('world'))?params.get('world'):valid(saved)?saved:'GW001';
 if(params.get('section')==='players'){location.replace('players/page.html?'+new URLSearchParams({world:gw}));return;}

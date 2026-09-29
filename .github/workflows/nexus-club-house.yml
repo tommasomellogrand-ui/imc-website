@@ -37,6 +37,7 @@ jobs:
           npm install --prefix /tmp/club-house-test --package-lock-only --ignore-scripts playwright@1.62.1
           npm ci --prefix /tmp/club-house-test --ignore-scripts
           NEXUS_PLAYWRIGHT_PATH=/tmp/club-house-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-club-house-ui.cjs
+          NEXUS_PLAYWRIGHT_PATH=/tmp/club-house-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-club-house-entry.cjs
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: test
