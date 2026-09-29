@@ -30,6 +30,8 @@ jobs:
           for file in nexus/admin/*.php; do php -l "$file"; done
           node --check nexus/admin/admin.js
           php tests/nexus-admin.php
+          php tests/nexus-admin-results-check.php
+          node --check nexus/admin/results-check.js
           python3 tests/nexus-admin-http.py
       - name: Test mobile admin flows
         run: |
@@ -37,6 +39,7 @@ jobs:
           npm install --prefix /tmp/nexus-admin-test --package-lock-only --ignore-scripts playwright@1.62.1
           npm ci --prefix /tmp/nexus-admin-test --ignore-scripts
           NEXUS_PLAYWRIGHT_PATH=/tmp/nexus-admin-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-admin-ui.cjs
+          NEXUS_PLAYWRIGHT_PATH=/tmp/nexus-admin-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-admin-results-ui.cjs
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: test
@@ -87,6 +90,13 @@ jobs:
               gw=f'GW{i:03d}'; result=call(query='?world='+gw)
               if not result.get('ok') or 'rows' not in result: raise RuntimeError('Admin read failed: '+gw)
               print(gw, len(result['rows']), 'assignments readable')
+              meta=call(query='?action=check-meta&world='+gw)
+              if not meta.get('ok'): raise RuntimeError('Results Check metadata failed: '+gw)
+              dated=[d['date'] for d in meta['dates'] if d['date']!='undated' and d['date']<=meta['today']]
+              if dated:
+                  check=call(query='?action=results-check&world='+gw+'&date='+dated[-1])
+                  if not check.get('ok') or 'summary' not in check: raise RuntimeError('Results Check failed: '+gw)
+                  print(gw, check['summary'], 'read-only check verified')
           call({'action':'logout'},csrf=auth['csrf'])
           print('Admin deployed, login and all worlds verified; no assignment writes')
           PY

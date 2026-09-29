@@ -47,6 +47,16 @@ try {
     if ($action==='session' && $method==='GET') nexus_out(['ok'=>true,'csrf'=>$_SESSION['csrf']]);
     if ($method==='POST' && !in_array($action,['save','close','replace'],true)) throw new InvalidArgumentException('Operazione non valida.');
     $gw=nexus_world($method==='GET'?($_GET['world']??''):($input['world']??''));
+    if ($method==='GET' && in_array($action,['check-meta','results-check'],true)) {
+        require __DIR__.'/results-check-service.php';
+        $c=nexus_config();$checkDb=nexus_db($c,nexus_target($c,$gw));
+        $season=nexus_season($_GET['season']??null);
+        $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
+        $checkDb->exec('SET TRANSACTION READ ONLY');$checkDb->beginTransaction();
+        $result=$action==='check-meta'?rc_metadata($checkDb,$gw,$season):rc_check($checkDb,$gw,(string)($_GET['date']??''),$season,$today);
+        $checkDb->commit();
+        nexus_out(['ok'=>true,'world'=>$gw,'season'=>$season,'today'=>$today]+$result);
+    }
     $db=nexus_db(nexus_config(),'core');
     if ($method==='GET' && $action==='list') {
         $rows=nexus_rows($db,'SELECT * FROM '.NA_TABLE.' WHERE game_world_id=? ORDER BY full_name,start_date DESC,id DESC',[$gw]);

@@ -35,3 +35,4 @@ $('edit-form').addEventListener('submit',async e=>{e.preventDefault();if(busy)re
 $('logout').addEventListener('click',async()=>{try{await api({action:'logout'});location.reload();}catch(e){message(e.message);}});
 $('world').addEventListener('change',()=>{message('');load();});$('reload').addEventListener('click',load);for(const id of ['kind','status','search'])$(id).addEventListener(id==='search'?'input':'change',render);
 (async()=>{const access=new URLSearchParams(location.hash.slice(1)).get('access');if(access)history.replaceState(null,'',location.pathname+location.search);try{const result=access?await api({action:'login',access_token:access}):await api(null,'?action=session');csrf=result.csrf;$('login').hidden=true;$('workspace').hidden=false;$('logout').hidden=false;await load();}catch(e){if(e.message!=='Accedi come amministratore.')message(e.message);}})();
+
