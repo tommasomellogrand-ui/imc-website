@@ -25,8 +25,8 @@ function out(array $x, int $s = 200): never {
 }
 function valid_gw(string $gw): bool { return (bool)preg_match('/^GW00[1-9]$/', $gw); }
 function valid_identifier(string $value): bool { return (bool)preg_match('/^[A-Za-z0-9_]+$/', $value); }
-function public_gateway_version(): string { return '1.9.2'; }
-function public_core_tables(): array { return ['gw_manager_assignments'=>'IMC Manager Assignment Global','imc_managers'=>'IMC Manager Codex Global']; }
+function public_gateway_version(): string { return '1.9.3'; }
+function public_core_tables(): array { return ['gw_manager_assignments'=>'IMC Manager Assignment Global','imc_managers'=>'IMC Manager Codex Global','ext_manager_assignments'=>'EXT Manager Assignment Global','ext_managers'=>'EXT Manager Codex Global']; }
 function public_site_tables(): array {
   return [
     'results' => 'IMC Site Results',
@@ -214,11 +214,16 @@ function normalize_insert_row(PDO $pdo, string $gw, string $repo, array $row, ar
 }
 
 function normalize_public_rows(array $rows, string $repo): array {
-  if ($repo === 'gw_manager_assignments') {
+  if ($repo === 'gw_manager_assignments' || $repo === 'ext_manager_assignments') {
     foreach ($rows as &$row) {
-      $row['team_id'] = $row['club_id'] ?? null;
-      $row['nation_id'] = $row['national_team_id'] ?? null;
-      if (!array_key_exists('season_id',$row)) $row['season_id'] = null;
+      if ($repo === 'gw_manager_assignments') {
+        $row['team_id'] = $row['club_id'] ?? null;
+        $row['nation_id'] = $row['national_team_id'] ?? null;
+        if (!array_key_exists('season_id',$row)) $row['season_id'] = null;
+      } else {
+        $row['team_id'] = $row['sm_world_team_id'] ?? null;
+        $row['nation_id'] = $row['sm_world_team_id'] ?? null;
+      }
     }
     unset($row);
   }
