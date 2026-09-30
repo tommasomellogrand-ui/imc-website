@@ -247,15 +247,19 @@ function trophy_league(string $gw,array $rows,array $schedule,array $definitions
 }
 
 function trophy_manager_at_win(array $trophy,array $assignments,array $nationalManagers=[]): ?string {
-    if (($trophy['competition_group']??'')==='NATIONS' || in_array(strtolower((string)($trophy['trophy_type']??'')),['worldcup','interqualifier'],true)) {
-        $fixture=(string)($trophy['deciding_fixture_id']??'');
-        return $fixture!=='' ? ($nationalManagers[$fixture]??null) : null;
-    }
-    $day=(string)($trophy['won_date']??'');$club=(string)($trophy['winner_sm_world_club_id']??'');
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/',$day) || (int)$club<1) return null;
+    $day=(string)($trophy['won_date']??'');
+    if (!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/',$day)) return null;
+    $isNation=($trophy['competition_group']??'')==='NATIONS' || strtolower((string)($trophy['trophy_type']??''))==='worldcup';
+    $winner=(string)($trophy['winner_sm_world_club_id']??'');
+    if ((int)$winner<1) return null;
     $managers=[];
     foreach($assignments as $a) {
-        if (($a['assignment_type']??'')!=='club' || ($a['game_world_id']??'')!==($trophy['game_world_id']??'') || (string)($a['team_id']??'')!==$club) continue;
+        if (($a['game_world_id']??'')!==($trophy['game_world_id']??'')) continue;
+        if ($isNation) {
+            if (($a['assignment_type']??'')!=='national_team' || (string)($a['national_team_id']??'')!==$winner) continue;
+        } else {
+            if (($a['assignment_type']??'')!=='club' || (string)($a['team_id']??'')!==$winner) continue;
+        }
         $start=(string)($a['start_date']??'');$end=$a['end_date']??null;
         if ($start==='' || $start==='0000-00-00' || $start>$day || ($end!==null && $end<$day)) continue;
         $id=trim((string)($a['manager_id']??''));
