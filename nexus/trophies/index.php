@@ -12,13 +12,20 @@ try {
         $club=filter_var($_GET['sm_club'],FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
         if ($club===false || $gw===null) throw new InvalidArgumentException('invalid_club_scope');
     }
-    $manager=null;$assignments=[];
+    $manager=null;$assignments=[];$nationalManagers=[];
     if (array_key_exists('manager',$_GET)) {
         $manager=trim((string)$_GET['manager']);
         if ($manager==='' || strlen($manager)>255 || $gw===null) throw new InvalidArgumentException('invalid_manager_scope');
         $core=nexus_db($c,'core');
         // Read all club tenures in this world to detect conflicting managers on the award date.
         $assignments=nexus_rows($core,"SELECT game_world_id,manager_id,assignment_type,team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=? AND assignment_type='club'",[$gw]);
+        $codex=[];foreach(nexus_rows($core,'SELECT manager_id,sm_manager_id FROM `IMC Manager Codex Global` WHERE sm_manager_id IS NOT NULL') as $m)if((int)$m['sm_manager_id']>0)$codex[(string)$m['sm_manager_id']]=$m['manager_id'];
+        $worldDb=nexus_db($c,nexus_target($c,$gw));
+        foreach(nexus_rows($worldDb,'SELECT sm_fixture_id,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.$gw.'_IMC_Match_Report` WHERE game_world_id=? AND competition_group=?',[$gw,'NATIONS']) as $r){
+            $home=(int)($r['home_score']??0);$away=(int)($r['away_score']??0);$ph=$r['penalty_home_score']??null;$pa=$r['penalty_away_score']??null;
+            $side=($ph!==null&&$pa!==null&&(int)$ph!==(int)$pa)?((int)$ph>(int)$pa?'home':'away'):($home!==$away?($home>$away?'home':'away'):null);
+            if($side===null)continue;$sm=(string)($r[$side.'_sm_manager_id']??'');if(isset($codex[$sm]))$nationalManagers[(string)$r['sm_fixture_id']]=$codex[$sm];
+        }
     }
     // Keep the unfiltered endpoint available, using only the individual GW tables.
     $worlds = $gw !== null ? [$gw] : array_map(
@@ -45,7 +52,7 @@ try {
         $sql .= ' ORDER BY game_world_id,imc_season,id';
         foreach (nexus_rows($connections[$target], $sql, $params) as $row) {
             if ($manager!==null) {
-                $winnerManager=trophy_manager_at_win($row,$assignments);
+                $winnerManager=trophy_manager_at_win($row,$assignments,$nationalManagers);
                 if ($winnerManager!==$manager) continue;
                 $row['winner_manager_id']=$winnerManager;
             }
