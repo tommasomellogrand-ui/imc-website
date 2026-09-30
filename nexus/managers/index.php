@@ -3,6 +3,10 @@ declare(strict_types=1);
 require dirname(__DIR__).'/core/bootstrap.php';
 try{
  $c=nexus_config();$core=nexus_db($c,'core');$id=trim((string)($_GET['manager']??''));$gw=isset($_GET['world'])?nexus_world($_GET['world']):null;
+ if(isset($_GET['external'])){
+  $sql='SELECT a.sm_manager_id,m.manager_name,a.game_world_id,a.assignment_type,a.sm_world_team_id,a.team_name FROM `EXT Manager Assignment Global` a JOIN `EXT Manager Codex Global` m ON m.sm_manager_id=a.sm_manager_id WHERE a.game_world_id=? ORDER BY m.manager_name,a.assignment_type,a.team_name';
+  $rows=nexus_rows($core,$sql,[$gw??'GW001']);nexus_out(['ok'=>true,'rows'=>$rows]);
+ }
  if($id!==''){
   $rows=nexus_rows($core,'SELECT manager_id,full_name,imc_join_date,sm_manager_id FROM `IMC Manager Codex Global` WHERE manager_id=? LIMIT 1',[$id]);
   $sql='SELECT a.*, COALESCE(a.team_name,n.`National Team Name`) AS assignment_name, n.`National Team Name` AS national_name FROM `IMC Manager Assignment Global` a LEFT JOIN `IMC Game World National Team Mapping` n ON n.`Game World`=a.game_world_id AND (n.`National Team ID`=a.national_team_id OR n.`SM National Team ID`=a.national_team_id OR n.`SM World National Club ID`=a.national_team_id) WHERE a.manager_id=?'.($gw?' AND a.game_world_id=?':'').' ORDER BY a.start_date DESC,a.id DESC';
