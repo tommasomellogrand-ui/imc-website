@@ -15,6 +15,7 @@ foreach(['GW001'=>3,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>1,'GW006'=>1,'GW00
  check($r['trophy_base'],435);check($r['total'],442*$weight);check(count($r['awards']),7);
 }
 foreach([1=>100,2=>25,3=>25,4=>25,5=>25] as $d=>$points)check(imc_rank_bonus(['trophy_type'=>'league','sm_division'=>$d]),$points);
-foreach([['trophy_type'=>'league'],['trophy_type'=>'unknown'],['trophy_type'=>'worldcup'],['trophy_type'=>'smfacup','competition_group'=>'NATIONS']] as $t)check(imc_rank_bonus($t),null);
+check(imc_rank_bonus(['trophy_type'=>'worldcup']),125);check(imc_rank_bonus(['trophy_type'=>'World Cup','competition_group'=>'NATIONS']),125);
+foreach([['trophy_type'=>'league'],['trophy_type'=>'unknown'],['trophy_type'=>'smfacup','competition_group'=>'NATIONS']] as $t)check(imc_rank_bonus($t),null);
 $r=imc_rank_start(['played'=>0,'won'=>0,'drawn'=>0,'lost'=>0],'GW008');imc_rank_award($r,['trophy_type'=>'unknown']);check($r['total'],0);check($r['unscored_trophies'],1);
-echo "PASS: IMC Ranking match scores, ten GW weights, all trophy bonuses, lower divisions, unknown types and nationals\n";
+echo "PASS: IMC Ranking match scores, ten GW weights, trophy bonuses including World Cup 125, lower divisions and unknown types\n";
