@@ -36,9 +36,9 @@ try{
    foreach(['home','away'] as $side){$sm=(string)($r[$side.'_sm_manager_id']??'');$mid=$bySm[$sm]??null;if(!$mid)continue;$gf=$side==='home'?$hs:$as;$ga=$side==='home'?$as:$hs;$base=1+($gf>$ga?.5:($gf<$ga?-.5:0));$scoreEvents[]=['date'=>$day,'manager_id'=>$mid,'delta'=>$base*$weight,'kind'=>'match'];}
    if(($r['competition_group']??'')==='NATIONS'){$ph=$r['penalty_home_score']??null;$pa=$r['penalty_away_score']??null;$side=($ph!==null&&$pa!==null&&(int)$ph!==(int)$pa)?((int)$ph>(int)$pa?'home':'away'):($hs!==$as?($hs>$as?'home':'away'):null);if($side){$sm=(string)($r[$side.'_sm_manager_id']??'');if(isset($bySm[$sm]))$national[(string)$r['sm_fixture_id']]=$bySm[$sm];}}
   }
-  $clubAssign=array_values(array_filter($assign,fn($a)=>$a['game_world_id']===$gw&&$a['assignment_type']==='club'));
+  $worldAssign=array_values(array_filter($assign,fn($a)=>$a['game_world_id']===$gw));
   foreach(nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Trophy_Room` WHERE game_world_id=?',[$gw]) as $t){
-   $mid=trophy_manager_at_win($t,$clubAssign,$national);if(!$mid||!isset($byId[$mid]))continue;$base=imc_rank_bonus($t);if($base===null)continue;$pts=$base*$weight;$day=(string)$t['won_date'];
+   $mid=trophy_manager_at_win($t,$worldAssign);if(!$mid||!isset($byId[$mid]))continue;$base=imc_rank_bonus($t);if($base===null)continue;$pts=$base*$weight;$day=(string)$t['won_date'];
    $scoreEvents[]=['date'=>$day,'manager_id'=>$mid,'delta'=>$pts,'kind'=>'trophy','fixture'=>(string)($t['deciding_fixture_id']??'')];
    $events[]=['type'=>'trophy','date'=>$day,'manager_id'=>$mid,'manager_name'=>$byId[$mid]['full_name'],'world'=>$gw,'season'=>$t['imc_season'],'competition'=>($t['nexus_view']??'')?:($t['trophy_type']??''),'team'=>$t['winner_name'],'team_logo'=>(($t['competition_group']??'')==='NATIONS'
     ?($nationLogos[$gw.'|'.(string)($t['winner_sm_world_club_id']??'')]??null)
