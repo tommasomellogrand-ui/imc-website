@@ -47,3 +47,6 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 
 .timeline-team{display:inline-flex;align-items:center;gap:9px;vertical-align:middle}.timeline-team-logo{width:30px;height:30px;object-fit:contain;flex:0 0 30px}.timeline-season{margin-left:6px;color:#68758b;font-size:11px}
 @media(max-width:600px){.timeline-team{gap:6px}.timeline-team-logo{width:24px;height:24px;flex-basis:24px}.timeline-season{font-size:9px;margin-left:3px}}
+
+/* Club House career assignment status */
+.career-card{position:relative;overflow:hidden}.career-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}.career-card.career-active:before{background:#3f8a5b}.career-card.career-closed:before{background:#b85b52}.career-status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0}.career-status-row .career-dates{margin:0}.career-status{display:inline-flex;align-items:center;border-radius:999px;padding:6px 9px;font-size:9px;font-weight:800;letter-spacing:.45px;white-space:nowrap}.career-status.active{background:#e8f5ec;color:#27683f}.career-status.closed{background:#fbeceb;color:#98443d}@media(max-width:480px){.career-status-row{align-items:flex-start;flex-direction:column;gap:7px}}
