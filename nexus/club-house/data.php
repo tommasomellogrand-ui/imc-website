@@ -27,7 +27,8 @@ try {
  // Only trophies keep the existing award-date attribution; matches use report IDs exclusively.
  $out['trophy_error']=false;
  try {
-  $assignments=nexus_rows($core,"SELECT game_world_id,manager_id,assignment_type,team_id,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?",[$gw]);
+  $assignments=nexus_rows($core,"SELECT game_world_id,manager_id,full_name,assignment_type,team_id,team_name,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?",[$gw]);
+  if($selected!==null)$out['assignments']=array_values(array_filter($assignments,fn($a)=>$a['manager_id']===$selected&&$a['assignment_type']==='club'));
   $codex=[];foreach($managers as $m)if((int)($m['sm_manager_id']??0)>0)$codex[(string)$m['sm_manager_id']]=$m['manager_id'];
   $nationalManagers=[];
   foreach(nexus_rows($db,'SELECT sm_fixture_id,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.$gw.'_IMC_Match_Report` WHERE game_world_id=? AND competition_group=?',[$gw,'NATIONS']) as $r){
