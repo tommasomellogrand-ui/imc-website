@@ -1,0 +1,48 @@
+name: Deploy Nexus trophy design
+on:
+  push:
+    branches: [main]
+    paths: ['nexus/assets/home.js', 'nexus/assets/trophy-room.js', 'nexus/assets/trophy-room.css', 'nexus/index.html', '.github/workflows/nexus-trophy-design.yml', '.github/workflows/deploy-website-aruba.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-public-website-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript
+        run: |
+          node --check nexus/assets/home.js
+          node --check nexus/assets/trophy-room.js
+      - name: Publish only Trophy Room design files
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, urllib.request
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          ctx=ssl.create_default_context()
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True)
+          files=['nexus/assets/trophy-room.css','nexus/assets/trophy-room.js','nexus/assets/home.js','nexus/index.html']
+          for path in files:
+              local=Path(path); data=local.read_bytes()
+              ftp.cwd('/www.italianmastersclub.it/'+str(local.parent))
+              ftp.storbinary('STOR '+local.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+local.name,check.write)
+              if check.getvalue()!=data:raise RuntimeError('Upload mismatch: '+path)
+          ftp.quit()
+          for path in files:
+              with urllib.request.urlopen('https://www.italianmastersclub.it/'+path+'?verify='+os.environ['GITHUB_SHA'],timeout=30) as response:
+                  if response.read()!=Path(path).read_bytes():raise RuntimeError('Live mismatch: '+path)
+          print('Four frontend files uploaded and verified live. No database changes.')
+          PY

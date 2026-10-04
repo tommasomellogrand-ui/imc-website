@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - '.github/workflows/deploy-website-aruba.yml'
+      - 'nexus/assets/home.js'
+      - 'nexus/assets/trophy-room.js'
+      - 'nexus/assets/trophy-room.css'
+      - 'nexus/index.html'
+      - '.github/workflows/nexus-trophy-design.yml'
       - 'minisite/GW001/**'
       - 'minisite/GW007/**'
       - 'minisite/api/results-schedule.php'
