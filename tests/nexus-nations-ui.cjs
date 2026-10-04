@@ -12,7 +12,7 @@ try{for(const national of [true,false]){
  else if(u.pathname.endsWith('/detail.php'))data={ok:true,team:{world_id:101,name:national?'England':'Test Club',image_url:'/nexus/assets/flags/nations/1.svg'},manager:{manager_id:'MNG001',full_name:'Tommaso Mello',start_date:'2026-01-01'}};
  else if(u.pathname.endsWith('/h2h/index.php'))data=u.searchParams.get('mode')==='overview'?{ok:true,global:{stats},seasons:[{season:1,stats,current:false}]}:{ok:true,summary:stats,opponents:[],competitions:{}};
  else if(u.pathname.endsWith('/stats.php'))data={ok:true,stats};
- else if(u.pathname.endsWith('/roster.php'))data={ok:true,reports:5,roster_date:'2026-09-23',rows:[{player_id:22,full_name:'Selected Player',role_group:'Attaccanti',position:'A(C)',image_urls:[],appearances:3,goals:2}]};
+ else if(u.pathname.endsWith('/roster.php'))data={ok:true,reports:5,roster_date:'2026-09-23',rows:[{player_id:22,full_name:'Selected Player',roster_status:'active',role_group:'Attaccanti',position:'A(C)',image_urls:[],appearances:3,goals:2},...(!national?[{player_id:23,full_name:'Sold Player',roster_status:'departed',role_group:'Attaccanti',image_urls:[],appearances:7,goals:4}]:[])]};
  await route.fulfill({contentType:'application/json',body:JSON.stringify(data)});
  });
  await page.goto(base+'/nexus/teams/page.html?world=GW001'+(national?'&type=nations':''));
@@ -21,6 +21,7 @@ try{for(const national of [true,false]){
  const labels=await page.locator('#tabs button').allTextContents();assert.deepEqual(labels,national?['OVERVIEW','MANAGER','ROSTER','STATS','H2H','TROPHY ROOM']:['OVERVIEW','MANAGER','ROSTER','STATS','H2H','TRANSFERS','TROPHY ROOM']);
  await page.getByRole('button',{name:'MANAGER',exact:true}).click();await page.getByText('Tommaso Mello',{exact:true}).waitFor();
  await page.getByRole('button',{name:'ROSTER',exact:true}).click();await page.getByText('Selected Player',{exact:true}).waitFor();if(national)assert((await page.locator('#view').textContent()).includes('Convocati nell’ultimo Match Report'));
+ if(!national){assert.equal(await page.locator('[data-roster-state]').count(),2);await page.locator('[data-roster-state=departed]').click();await page.getByText('Sold Player',{exact:true}).waitFor();assert.equal(await page.getByText('Selected Player',{exact:true}).count(),0);await page.locator('[data-roster-state=active]').click();await page.getByText('Selected Player',{exact:true}).waitFor();}
  await page.getByRole('button',{name:'STATS',exact:true}).click();await page.locator('#club-stats-values .kpis').waitFor();
  await page.getByRole('button',{name:'H2H',exact:true}).click();await page.locator('.hh-summary h3').waitFor();
  await page.getByRole('button',{name:'TROPHY ROOM',exact:true}).click();await page.getByText('Nessun trofeo', {exact:false}).first().waitFor();
@@ -30,3 +31,4 @@ try{for(const national of [true,false]){
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.deepEqual(errors,[]);await page.close();
  }console.log('PASS: Nations and clubs directory, all tabs, scopes, no national transfers, mobile layout');
 }finally{await browser.close();server.close();}})().catch(e=>{console.error(e);server.close();process.exit(1)});
+
