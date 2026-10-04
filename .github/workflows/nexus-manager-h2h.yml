@@ -1,0 +1,82 @@
+name: Nexus manager scopes and report H2H
+on:
+  push:
+    branches: [main]
+    paths: ["nexus/teams/detail.html","nexus/h2h/index.php","nexus/h2h/engine.php","nexus/assets/history-overview.js","nexus/managers/index.php","nexus/managers/profile.html","nexus/assets/manager-profile.js","nexus/assets/manager-scope.css","nexus/assets/h2h.js","nexus/assets/h2h.css","nexus/club-house/club-house.js","nexus/club-house/index.html","nexus/club-house/h2h-detail.php","tests/nexus-h2h-report-scope.php",".github/workflows/nexus-manager-h2h.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-public-website-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate report scopes and scripts
+        run: |
+          php -l nexus/managers/index.php
+          php -l nexus/h2h/index.php
+          php -l nexus/club-house/h2h-detail.php
+          php tests/nexus-h2h-report-scope.php
+          node --check nexus/assets/manager-profile.js
+          node --check nexus/assets/h2h.js
+          node --check nexus/assets/history-overview.js
+          node --check nexus/club-house/club-house.js
+      - name: Publish exact scoped files
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl,urllib.request
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          from concurrent.futures import ThreadPoolExecutor
+          # Existing approved Aruba certificate hostname exception; CA checks stay enabled.
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p()
+          files=["nexus/teams/detail.html","nexus/h2h/index.php","nexus/h2h/engine.php","nexus/assets/history-overview.js","nexus/managers/index.php","nexus/managers/profile.html","nexus/assets/manager-profile.js","nexus/assets/manager-scope.css","nexus/assets/h2h.js","nexus/assets/h2h.css","nexus/club-house/club-house.js","nexus/club-house/index.html","nexus/club-house/h2h-detail.php"]
+          for name in sorted(files,key=lambda n:n.endswith('.html')):
+              p=Path(name);ftp.cwd('/www.italianmastersclub.it/'+str(p.parent))
+              data=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,name
+          ftp.quit()
+          def verify(name):
+              if name.endswith('.php'):return
+              with urllib.request.urlopen('https://www.italianmastersclub.it/'+name+'?verify='+os.environ['GITHUB_SHA'],timeout=60) as r:assert r.read()==Path(name).read_bytes(),name
+          list(ThreadPoolExecutor(max_workers=4).map(verify,files))
+          PY
+      - name: Verify live manager scopes and aggregate report details
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request,urllib.parse
+          def get(path,**q):
+              with urllib.request.urlopen('https://www.italianmastersclub.it/nexus/'+path+'?'+urllib.parse.urlencode(q),timeout=120) as r:d=json.load(r)
+              assert d['ok'],d
+              return d
+          manager=get('managers/index.php',world='GW001',manager='MNG001')
+          for scope in ['club','national_team']:
+              rows=[a for a in manager['assignments'] if a['assignment_type']==scope and not a['end_date']]
+              assert rows and rows[0].get('world_team_id') and rows[0].get('image_url'),scope
+              h=get('h2h/index.php',world='GW001',kind='manager',id='MNG001',scope=scope)
+              assert h['source']=='Match Report'
+              if h['opponents']:
+                  d=get('h2h/index.php',world='GW001',kind='manager',id='MNG001',scope=scope,opponent=h['opponents'][0]['key'])
+                  assert all(('|NATIONS|' in m['competition_key'])==(scope=='national_team') for m in d['matches'])
+                  assert d['summary']['played']==len(d['matches'])==d['summary']['reports']
+          bundles=[get('club-house/data.php',world=w,manager='MNG001') for w in ['GW001','GW002']]
+          matches=[m for b in bundles for m in b['matches'] if m['opponent_id']]
+          assert matches
+          opponent=matches[0]['opponent_id']
+          expected=[m for m in matches if m['opponent_id']==opponent]
+          d=get('club-house/h2h-detail.php',manager='MNG001',opponent=opponent,worlds='GW001,GW002')
+          assert d['source']=='Match Report' and d['summary']['played']==len(expected),(d['summary'],len(expected))
+          assert {(m['world'],str(m['sm_fixture_id'])) for m in d['matches']}=={(m['world'],str(m['fixture_id'])) for m in expected}
+          assert all(k in d for k in ['home','away','players','metrics'])
+          print('Manager logos, scope isolation, report-only H2H and cross-world detail verified live. No database writes.')
+          PY

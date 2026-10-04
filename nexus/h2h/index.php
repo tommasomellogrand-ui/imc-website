@@ -38,6 +38,8 @@ try{
   $assigned=array_values(array_unique($assigned));if($assigned){$slots=implode(',',array_fill(0,count($assigned),'?'));$conditions[]='(r.home_sm_club_id IN ('.$slots.') OR r.away_sm_club_id IN ('.$slots.'))';array_push($params,...$assigned,...$assigned);}
  }
  $sql='SELECT r.*,mr.sm_fixture_id report_fixture,mr.home_sm_manager_id report_home_sm_manager_id,mr.away_sm_manager_id report_away_sm_manager_id,mr.home_manager_name report_home_manager_name,mr.away_manager_name report_away_manager_name FROM `'.$rt.'` r LEFT JOIN `'.$mt.'` mr ON mr.game_world_id=r.game_world_id AND mr.sm_fixture_id=r.sm_fixture_id WHERE r.game_world_id=? AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND ('.($conditions?implode(' OR ',$conditions):'0=1').') ORDER BY r.match_date DESC,r.sm_fixture_id DESC';
+ // H2H is report-authoritative. Results remain only for the separate career overview.
+ if(!$overview)$sql='SELECT r.*,r.sm_fixture_id report_fixture,r.home_sm_manager_id report_home_sm_manager_id,r.away_sm_manager_id report_away_sm_manager_id,r.home_manager_name report_home_manager_name,r.away_manager_name report_away_manager_name FROM `'.$mt.'` r WHERE r.game_world_id=? AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND ('.($conditions?str_replace('mr.','r.',implode(' OR ',$conditions)):'0=1').') ORDER BY r.match_date DESC,r.sm_fixture_id DESC';
  $resultRows=nexus_rows($db,$sql,$params);
  if($overview){
   $matches=$kind==='manager'?array_merge(h2h_matches($resultRows,$ctx,$kind,$id,'club',false),h2h_matches($resultRows,$ctx,$kind,$id,'national_team',false)):h2h_matches($resultRows,$ctx,$kind,$id,$scope,false);
@@ -47,7 +49,7 @@ try{
  $matches=h2h_matches($resultRows,$ctx,$kind,$id,$scope);
  $competitions=[];foreach($matches as $m)$competitions[(string)$m['competition_key']]=$m['competition_name'];
  $matches=array_values(array_filter($matches,static fn($m)=>($competition===''||(string)$m['competition_key']===$competition)&&($venue===''||$m['side']===$venue)));
- $base=['ok'=>true,'world'=>$gw,'kind'=>$kind,'scope'=>$scope,'subject'=>$subject,'generated_at'=>gmdate('c')];
+ $base=['ok'=>true,'source'=>'Match Report','world'=>$gw,'kind'=>$kind,'scope'=>$scope,'subject'=>$subject,'generated_at'=>gmdate('c')];
  if($opponent===''){$result=h2h_overview($matches);$result['competitions']=$competitions;nexus_out(array_merge($base,$result));}
  $matches=array_values(array_filter($matches,static fn($m)=>$m['opponent']['key']===$opponent));$reports=[];
  foreach(array_chunk(array_column($matches,'sm_fixture_id'),400) as $ids){foreach(nexus_rows($db,'SELECT sm_fixture_id,team_stats_json,players_json FROM `'.$mt.'` WHERE game_world_id=? AND sm_fixture_id IN ('.implode(',',array_fill(0,count($ids),'?')).')',array_merge([$gw],$ids)) as $r)$reports[(string)$r['sm_fixture_id']]=$r;}

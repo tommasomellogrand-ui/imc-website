@@ -83,7 +83,7 @@ function h2h_report_comparison(array $matches,array $reports): array {
  $accuracy=['own_shots'=>0,'own_target'=>0,'opponent_shots'=>0,'opponent_target'=>0,'matches'=>0];$players=['own'=>[],'opponent'=>[]];$playerReports=0;$teamReports=0;
  $count=static fn($v): int=>is_numeric($v)?max(0,(int)$v):0;
  foreach($matches as $m){
-  $r=$reports[(string)$m['sm_fixture_id']]??null;if(!$r)continue;
+  $r=$reports[(string)($m['report_key']??$m['sm_fixture_id'])]??null;if(!$r)continue;
   $own=$m['side'];$other=$own==='home'?'away':'home';
   $teams=json_decode((string)($r['team_stats_json']??''),true);
   if(is_array($teams)&&isset($teams[$own],$teams[$other])){

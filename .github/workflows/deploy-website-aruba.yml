@@ -4,6 +4,20 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/h2h/index.php'
+      - 'nexus/h2h/engine.php'
+      - 'nexus/assets/history-overview.js'
+      - 'nexus/managers/index.php'
+      - 'nexus/managers/profile.html'
+      - 'nexus/assets/manager-profile.js'
+      - 'nexus/assets/manager-scope.css'
+      - 'nexus/assets/h2h.js'
+      - 'nexus/assets/h2h.css'
+      - 'nexus/club-house/club-house.js'
+      - 'nexus/club-house/index.html'
+      - 'nexus/club-house/h2h-detail.php'
+      - 'tests/nexus-h2h-report-scope.php'
+      - '.github/workflows/nexus-manager-h2h.yml'
       - 'nexus/assets/filter-chips.js'
       - 'nexus/assets/filter-chips.css'
       - 'nexus/competitions/match-report.php'
