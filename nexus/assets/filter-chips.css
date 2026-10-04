@@ -1,0 +1,12 @@
+.nexus-chip-container{min-width:0;max-width:100%}
+.filters:has(.nexus-filter-chips){display:grid;gap:12px;margin-bottom:16px}
+.nexus-filter-chips{display:flex;gap:8px;overflow-x:auto;max-width:100%;padding:3px 2px 7px;scrollbar-width:thin;scrollbar-color:#d7aa43 transparent;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.nexus-filter-chips button{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:0 0 auto;min-height:44px;padding:10px 16px;border:1px solid #e1e6ef;border-radius:11px;background:#fff;color:#6b7288;font:600 13px Inter,Arial,sans-serif;white-space:nowrap;cursor:pointer}
+.nexus-filter-chips button[aria-pressed="true"]{background:#101238;color:#fff;border-color:#101238;box-shadow:inset 0 -3px #d7aa43}
+.nexus-filter-chips button:disabled{opacity:.5;cursor:default}
+.nexus-filter-chips button:focus-visible{outline:3px solid #d7aa43;outline-offset:2px}
+.nexus-filter-chips img{display:block;width:23px;height:17px;object-fit:cover;border-radius:2px}
+.card.nexus-chip-container,.nc-toolbar.nexus-chip-container{display:block;background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:16px}
+.nexus-chip-container>select[hidden],.nexus-chip-container>label[hidden]{display:none!important}
+.selection-tabs{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin;max-width:100%;padding-bottom:7px}
+.selection-tabs>.choice{flex-shrink:0;min-height:44px}

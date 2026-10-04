@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/assets/filter-chips.js'
+      - 'nexus/assets/filter-chips.css'
       - 'nexus/competitions/match-report.php'
       - 'nexus/assets/competition-view.js'
       - 'nexus/assets/the-club-links.js'
