@@ -34,3 +34,11 @@ $insert=$db->prepare('INSERT INTO GW001_IMC_Match_Report VALUES ('.implode(',',a
 // There is intentionally no Results, Schedule or Assignment table in this test database.
 $db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();$read=ch_read($db,'GW001',$people,'MNG001');$db->commit();ck($read['managers']['MNG001']['stats']['played']===3,'MR-only SQL engine');ck(count($read['matches'])===3,'Details equal stats');ck($read['coverage']['duplicate_rows']===1,'Duplicates reported');ck($read['managers']['MNG001']['stats']['matched_by_id']===3&&$read['managers']['MNG001']['stats']['matched_by_name']===0,'SQL attribution counts');
 echo "PASS: Match Report only, IMC IDs, one-sided identity, no assignments dependency, club isolation, duplicates, scores, penalties, cross-world identity\n";
+
+foreach(['club'=>3,'national_team'=>1,'global'=>4] as $scope=>$expected){
+ $scoped=ch_read($db,'GW001',$people,'MNG001',$scope);
+ ck(count($scoped['matches'])===$expected,'Scope fixture count '.$scope);
+ ck($scoped['managers']['MNG001']['stats']['played']===$expected,'Scope stats '.$scope);
+ foreach($scoped['matches'] as $m)ck($scope==='global'||$m['scope']===$scope,'Scope isolation');
+}
+echo "PASS: Global = Club + Nations, national report IDs, scoped matches\n";

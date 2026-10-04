@@ -22,7 +22,7 @@ function ch_init(array $managers): array {
  $out=['managers'=>[],'matches'=>[],'trophies'=>[],'issues'=>[],'coverage'=>['reports'=>0,'fixtures'=>0,'duplicate_rows'=>0,'excluded_fixtures'=>0]];
  foreach($managers as $m)$out['managers'][$m['manager_id']]=['stats'=>ch_zero(),'trophies'=>0,'excluded'=>0];return $out;
 }
-function ch_group(array &$out,array $rows,array $map,array $names,string $gw,?string $selected): void {
+function ch_group(array &$out,array $rows,array $map,array $names,string $gw,?string $selected,string $scope='club'): void {
  if(!$rows)return;$r=$rows[0];$candidates=[];$signatures=[];
  foreach($rows as $row){$signatures[ch_signature($row)]=true;foreach(['home','away'] as $side)foreach(ch_resolve($row,$side,$map)['ids'] as $id)$candidates[$id]=true;}
  $out['coverage']['reports']+=count($rows);$out['coverage']['fixtures']++;$out['coverage']['duplicate_rows']+=count($rows)-1;
@@ -30,7 +30,7 @@ function ch_group(array &$out,array $rows,array $map,array $names,string $gw,?st
  if(count($signatures)>1)$reason='Match Report duplicati con dati discordanti';
  elseif((int)($r['sm_fixture_id']??0)<1)$reason='Fixture ID mancante';
  elseif(!is_numeric($r['home_score']??null)||!is_numeric($r['away_score']??null)||(int)$r['home_score']<0||(int)$r['away_score']<0)$reason='Punteggio non disponibile';
- elseif(ch_nation($r))return;
+ elseif($scope!=='global'&&ch_nation($r)!==($scope==='national_team'))return;
  $resolved=['home'=>ch_resolve($r,'home',$map),'away'=>ch_resolve($r,'away',$map)];
  $home=$resolved['home']['ids'];$away=$resolved['away']['ids'];
  if(count($home)===1&&$home===$away)$reason='Stesso manager IMC su entrambe le squadre';
@@ -43,17 +43,17 @@ function ch_group(array &$out,array $rows,array $map,array $names,string $gw,?st
   ch_add($out['managers'][$id]['stats'],$gf,$ga,$pf,$pa);
   $out['managers'][$id]['stats']['matched_by_'.$resolved[$side]['by']]++;
   if($id!==$selected)continue;$opponent=count($opponentIds)===1?$opponentIds[0]:null;
-  $out['matches'][]=['world'=>$gw,'fixture_id'=>(string)$r['sm_fixture_id'],'date'=>$r['match_date'],'season'=>$r['imc_season'],'competition'=>$r['competition_key'],'team_id'=>$r[$side.'_sm_club_id'],'team'=>$r[$side.'_name'],'opponent_team'=>$r[$other.'_name'],'gf'=>$gf,'ga'=>$ga,'outcome'=>$gf>$ga?'V':($gf<$ga?'S':'P'),'penalty_for'=>$pf,'penalty_against'=>$pa,'opponent_id'=>$opponent,'opponent_name'=>$opponent!==null?($names[$opponent]??$opponent):null,'identity_source'=>$resolved[$side]['by'],'opponent_identity_source'=>$opponent!==null?$resolved[$other]['by']:null];
+  $out['matches'][]=['world'=>$gw,'fixture_id'=>(string)$r['sm_fixture_id'],'date'=>$r['match_date'],'season'=>$r['imc_season'],'competition'=>$r['competition_key'],'scope'=>ch_nation($r)?'national_team':'club','team_id'=>$r[$side.'_sm_club_id'],'team'=>$r[$side.'_name'],'opponent_team'=>$r[$other.'_name'],'gf'=>$gf,'ga'=>$ga,'outcome'=>$gf>$ga?'V':($gf<$ga?'S':'P'),'penalty_for'=>$pf,'penalty_against'=>$pa,'opponent_id'=>$opponent,'opponent_name'=>$opponent!==null?($names[$opponent]??$opponent):null,'identity_source'=>$resolved[$side]['by'],'opponent_identity_source'=>$opponent!==null?$resolved[$other]['by']:null];
  }
 }
-function ch_read(PDO $db,string $gw,array $managers,?string $selected): array {
+function ch_read(PDO $db,string $gw,array $managers,?string $selected,string $scope='club'): array {
  $map=ch_identity($managers);$names=array_column($managers,'full_name','manager_id');$out=ch_init($managers);
  $sql='SELECT sm_fixture_id,imc_season,match_date,competition_key,competition_group,sm_action,home_sm_club_id,away_sm_club_id,home_name,away_name,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.nexus_table($gw,'Match_Report').'` ORDER BY sm_fixture_id';
  $stmt=$db->query($sql);$group=[];$last=null;
  while($r=$stmt->fetch()){
-  if(ch_nation($r))continue;$key=(string)($r['sm_fixture_id']??'');
-  if($group&&($key!==$last||(int)$key<1)){ch_group($out,$group,$map,$names,$gw,$selected);$group=[];}
+  if($scope!=='global'&&ch_nation($r)!==($scope==='national_team'))continue;$key=(string)($r['sm_fixture_id']??'');
+  if($group&&($key!==$last||(int)$key<1)){ch_group($out,$group,$map,$names,$gw,$selected,$scope);$group=[];}
   $last=$key;$group[]=$r;
  }
- ch_group($out,$group,$map,$names,$gw,$selected);$stmt->closeCursor();return $out;
+ ch_group($out,$group,$map,$names,$gw,$selected,$scope);$stmt->closeCursor();return $out;
 }

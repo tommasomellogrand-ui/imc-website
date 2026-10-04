@@ -4,7 +4,7 @@ const people=[{manager_id:'MNG001',full_name:'Manager Uno',sm_manager_id:100},{m
 const zero={played:0,won:0,drawn:0,lost:0,gf:0,ga:0,penalty_won:0,penalty_lost:0,matched_by_id:0,matched_by_name:0};
 function bundle(world){
  const active=['GW001','GW002'].includes(world),stats=active?{...zero,played:2,won:1,drawn:1,gf:3,ga:1,matched_by_id:2,matched_by_name:0}:zero;
- return {ok:true,world,assignments:active?[{team_id:20,team_name:'Club Uno',assignment_type:'club',start_date:'2026-01-01',end_date:null}]:[],managers:Object.fromEntries(people.map(m=>[m.manager_id,{stats:m.manager_id==='MNG001'?stats:zero,trophies:active?1:0,excluded:0}])),issues:[],matches:active?[{world,fixture_id:'10',date:'2026-09-01',season:1,team_id:20,team:'Club Uno',opponent_team:'Club Due',gf:2,ga:0,outcome:'V',penalty_for:null,penalty_against:null,opponent_id:'MNG002',opponent_name:'Manager Due'},{world,fixture_id:'11',date:'2026-09-02',season:1,team_id:20,team:'Club Uno',opponent_team:'Esterno',gf:1,ga:1,outcome:'P',penalty_for:null,penalty_against:null,opponent_id:null,opponent_name:null}]:[],trophies:active?[{world,season:1,date:'2026-09-03',competition:'Coppa Test',team:'Club Uno'}]:[]};
+ return {ok:true,world,assignments:active?[{team_id:20,team_name:'Club Uno',assignment_type:'club',start_date:'2026-01-01',end_date:null}]:[],managers:Object.fromEntries(people.map(m=>[m.manager_id,{stats:m.manager_id==='MNG001'?stats:zero,trophies:active?1:0,excluded:0}])),issues:[],matches:active?[{world,fixture_id:'10',date:'2026-09-01',season:1,scope:'club',team_id:20,team:'Club Uno',opponent_team:'Club Due',gf:2,ga:0,outcome:'V',penalty_for:null,penalty_against:null,opponent_id:'MNG002',opponent_name:'Manager Due'},{world,fixture_id:'11',date:'2026-09-02',season:1,team_id:20,team:'Club Uno',opponent_team:'Esterno',gf:1,ga:1,outcome:'P',penalty_for:null,penalty_against:null,opponent_id:null,opponent_name:null}]:[],trophies:active?[{world,season:1,date:'2026-09-03',competition:'Coppa Test',team:'Club Uno'}]:[]};
 }
 (async()=>{
  const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||undefined,headless:true,args:['--no-sandbox']});
@@ -18,7 +18,7 @@ function bundle(world){
   console.log('SCREENSHOT_DIRECTORY='+ (await page.screenshot()).toString('base64'));
   await page.locator('#search').fill('Uno');assert.equal(await page.locator('.manager-card').count(),1);await page.locator('.manager-card').click();
   await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('10/10'));
-  assert.equal(await page.locator('.kpi strong').first().textContent(),'4');assert.equal(await page.locator('.match').count(),4);
+  assert.equal(await page.locator('#scope-tabs button').count(),3); for(const label of ['Club','Nations','Global']){await page.locator('#scope-tabs').getByRole('button',{name:label,exact:true}).click();await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('10/10'));assert.equal(await page.locator('#scope-tabs button[aria-pressed="true"]').textContent(),label);} assert.equal(await page.locator('.kpi strong').first().textContent(),'4');assert.equal(await page.locator('.match').count(),4);
   assert.match(await page.locator('#content').textContent(),/4 partite tramite ID Soccer Manager/);
   console.log('SCREENSHOT_PROFILE='+ (await page.screenshot()).toString('base64'));
   await page.getByRole('button',{name:'Carriera',exact:true}).click();assert.equal(await page.locator('#content section').count(),2);

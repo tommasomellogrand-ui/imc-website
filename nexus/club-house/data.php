@@ -14,8 +14,9 @@ try {
  $gw=nexus_world($_GET['world']);$selected=trim((string)($_GET['manager']??''));
  if($selected!==''&&!in_array($selected,array_column($managers,'manager_id'),true))throw new InvalidArgumentException('Manager IMC non trovato.');
  $selected=$selected===''?null:$selected;
+ $scope=(string)($_GET['scope']??'club');if(!in_array($scope,['global','club','national_team'],true))throw new InvalidArgumentException('Scope non valido.');
  $db=nexus_db($c,nexus_target($c,$gw));$db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();
- $out=ch_read($db,$gw,$managers,$selected);
+ $out=ch_read($db,$gw,$managers,$selected,$scope);
  $out['national_ranking_error']=false;$national=['stats'=>[],'coverage'=>null];
  try{$national=imc_rank_national_read($db,$gw,$managers);}catch(Throwable $e){$out['national_ranking_error']=true;error_log('National ranking Results '.$gw.': '.$e->getMessage());}
  $out['national_ranking_coverage']=$national['coverage'];
@@ -27,11 +28,17 @@ try {
   $clubGroups=[];foreach($clubRows as $club)if((int)$club['world_id']>0)$clubGroups[(string)$club['world_id']][]=$club;
   foreach($clubGroups as $id=>$items)if(count($items)===1)$out['clubs'][$id]=['logo'=>$items[0]['logo']];
  }catch(Throwable $e){error_log('Club House display logos '.$gw.': '.$e->getMessage());}
+ $out['nations']=[];
+ if($selected!==null)try {
+  foreach(nexus_rows($core,'SELECT m.`National Team ID` entity_id,m.`SM World National Club ID` world_id,m.`SM National Team ID` sm_id,c.image_url logo FROM `IMC Game World National Team Mapping` m JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`=?',[$gw]) as $n){
+   foreach(['world_id','sm_id','entity_id'] as $key)if((int)$n[$key]>0)$out['nations'][(string)$n[$key]]=['logo'=>$n['logo'],'world_id'=>$n['world_id']];
+  }
+ }catch(Throwable $e){error_log('Club House national flags '.$gw.': '.$e->getMessage());}
  // Only trophies keep the existing award-date attribution; matches use report IDs exclusively.
  $out['trophy_error']=false;
  try {
   $assignments=nexus_rows($core,"SELECT game_world_id,manager_id,full_name,assignment_type,team_id,team_name,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?",[$gw]);
-  if($selected!==null)$out['assignments']=array_values(array_filter($assignments,fn($a)=>$a['manager_id']===$selected&&$a['assignment_type']==='club'));
+  if($selected!==null)$out['assignments']=array_values(array_filter($assignments,fn($a)=>$a['manager_id']===$selected&&($scope==='global'||$a['assignment_type']===$scope)));
   $codex=[];foreach($managers as $m)if((int)($m['sm_manager_id']??0)>0)$codex[(string)$m['sm_manager_id']]=$m['manager_id'];
   $nationalManagers=[];
   foreach(nexus_rows($db,'SELECT sm_fixture_id,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.$gw.'_IMC_Match_Report` WHERE game_world_id=? AND competition_group=?',[$gw,'NATIONS']) as $r){
@@ -40,11 +47,13 @@ try {
    if($side===null)continue;$sm=(string)($r[$side.'_sm_manager_id']??'');if(isset($codex[$sm]))$nationalManagers[(string)$r['sm_fixture_id']]=$codex[$sm];
   }
   foreach(nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Trophy_Room` WHERE game_world_id=?',[$gw]) as $t){
+   $isNation=($t['competition_group']??'')==='NATIONS'||strtolower((string)($t['trophy_type']??''))==='worldcup';
+   if(isset($_GET['scope'])&&$scope!=='global'&&$isNation!==($scope==='national_team'))continue;
    $id=trophy_manager_at_win($t,$assignments,$nationalManagers);if($id===null||!isset($out['managers'][$id]))continue;$out['managers'][$id]['trophies']++;
    imc_rank_award($out['managers'][$id]['ranking'],$t);
    if($selected===$id)$out['trophies'][]=['world'=>$gw,'season'=>$t['imc_season'],'date'=>$t['won_date'],'competition'=>($t['nexus_view']??'')?:$t['competition_key'],'team'=>$t['winner_name'],'country'=>$t['sm_country']??null];
   }
  }catch(Throwable $e){$out['trophy_error']=true;error_log('Club House trophies '.$gw.': '.$e->getMessage());}
- $db->commit();nexus_out(['ok'=>true,'world'=>$gw,'source'=>'Match Report','scope'=>'club','generated_at'=>gmdate('c')]+$out);
+ $db->commit();nexus_out(['ok'=>true,'world'=>$gw,'source'=>'Match Report','scope'=>$scope,'generated_at'=>gmdate('c')]+$out);
 }catch(InvalidArgumentException $e){nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}
 catch(Throwable $e){error_log('Club House: '.$e->getMessage());nexus_out(['ok'=>false,'error'=>'Dati Club House temporaneamente non disponibili.'],500);}
