@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require dirname(__DIR__).'/core/bootstrap.php';
 require __DIR__.'/engine.php';
+require __DIR__.'/national-results.php';
 require dirname(__DIR__).'/competitions/match-teams.php';
 require dirname(__DIR__).'/players/media.php';
 require dirname(__DIR__).'/h2h/engine.php';
@@ -18,7 +19,7 @@ try {
  foreach($worlds as $gw){
   $db=nexus_db($c,nexus_target($c,$gw));
   // Use exactly the same accepted, ID-resolved report fixtures as the Club House cards.
-  $bundle=ch_read($db,$gw,$managers,$id,$scope);
+  $bundle=$scope==='national_team'?ch_init($managers):ch_read($db,$gw,$managers,$id,'club');
   $ids=array_column(array_filter($bundle['matches'],static fn($m)=>$m['opponent_id']===$opponent),'fixture_id');
   $map=nexus_rows($core,'SELECT `Club ID` entity_id,`SM World Club ID` world_id FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]);
   $ctx['teams']['club']=nexus_team_lookup($codex,$map);
@@ -28,12 +29,26 @@ try {
   foreach(array_chunk($ids,300) as $batch){
    $rows=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Match_Report').'` WHERE game_world_id=? AND sm_fixture_id IN ('.implode(',',array_fill(0,count($batch),'?')).')',array_merge([$gw],$batch));
    foreach($rows as &$r){$r['report_fixture']=$r['sm_fixture_id'];$reports[$gw.':'.$r['sm_fixture_id']]=$r;}unset($r);
-   foreach(array_merge($scope!=='national_team'?h2h_matches($rows,$ctx,'manager',$id,'club'):[],$scope!=='club'?h2h_matches($rows,$ctx,'manager',$id,'national_team'):[]) as $m){$m['world']=$gw;$m['report_key']=$gw.':'.$m['sm_fixture_id'];$matches[]=$m;}
+   foreach(h2h_matches($rows,$ctx,'manager',$id,'club') as $m){$m['world']=$gw;$m['report_key']=$gw.':'.$m['sm_fixture_id'];$matches[]=$m;}
+  }
+  if($scope!=='club'){
+   $assignments=nexus_rows($core,'SELECT game_world_id,manager_id,assignment_type,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?',[$gw]);
+   $nation=ch_national_read($db,$gw,$managers,$id,$assignments,$nationMap);
+   foreach($nation['accepted_results'] as $r){
+    $homeId=$r['_home_manager'];$awayId=$r['_away_manager'];
+    if(!(($homeId===$id&&$awayId===$opponent)||($awayId===$id&&$homeId===$opponent)))continue;
+    $side=$homeId===$id?'home':'away';$other=$side==='home'?'away':'home';$gf=(int)$r[$side.'_score'];$ga=(int)$r[$other.'_score'];
+    $r['competition_group']='NATIONS';$m=[];
+    foreach(['sm_fixture_id','match_date','imc_season','competition_key','competition_stage','competition_round','competition_group_name','home_score','away_score','penalty_home_score','penalty_away_score','aggregate_home_score','aggregate_away_score'] as $f)$m[$f]=$r[$f]??null;
+    $m+=['world'=>$gw,'source'=>'Results','identity_source'=>'assignment_dates','home'=>h2h_team($r,'home',$ctx),'away'=>h2h_team($r,'away',$ctx),'home_manager'=>$ctx['managers'][$homeId],'away_manager'=>$ctx['managers'][$awayId],'side'=>$side,'gf'=>$gf,'ga'=>$ga,'outcome'=>$gf>$ga?'V':($gf<$ga?'P':'N'),'opponent'=>$ctx['managers'][$opponent],'has_report'=>false,'competition_name'=>$ctx['competitions'][(string)($r['competition_key']??'')]??(string)($r['competition_key']??'Nations')];
+    $matches[]=$m;
+   }
   }
  }
  usort($matches,static fn($a,$b)=>[$b['match_date'],$b['world'],$b['sm_fixture_id']]<=>[$a['match_date'],$a['world'],$a['sm_fixture_id']]);
  $comparison=h2h_report_comparison($matches,$reports);
  $identities=nexus_player_identity($core,array_merge(array_column($comparison['players']['own'],'player_id'),array_column($comparison['players']['opponent'],'player_id')));
  foreach($comparison['players'] as &$players){foreach($players as &$p){$i=$identities[$p['player_id']]??[];$name=trim((string)($i['full_name']??(($i['forename']??'').' '.($i['surname']??''))));if($name!=='')$p['name']=$name;}unset($p);}unset($players);
- nexus_out(['ok'=>true,'source'=>'Match Report','world'=>$worlds[0],'worlds'=>$worlds,'subject'=>$ctx['managers'][$id],'opponent'=>$ctx['managers'][$opponent],'summary'=>h2h_summary($matches),'home'=>h2h_summary(array_values(array_filter($matches,static fn($m)=>$m['side']==='home'))),'away'=>h2h_summary(array_values(array_filter($matches,static fn($m)=>$m['side']==='away'))),'matches'=>$matches]+$comparison);
+ $source=$scope==='club'?'Match Report':($scope==='national_team'?'Results':'Club: Match Report; Nations: Results');
+ nexus_out(['ok'=>true,'source'=>$source,'national_results'=>$scope!=='club','scope'=>$scope,'world'=>$worlds[0],'worlds'=>$worlds,'subject'=>$ctx['managers'][$id],'opponent'=>$ctx['managers'][$opponent],'summary'=>h2h_summary($matches),'home'=>h2h_summary(array_values(array_filter($matches,static fn($m)=>$m['side']==='home'))),'away'=>h2h_summary(array_values(array_filter($matches,static fn($m)=>$m['side']==='away'))),'matches'=>$matches]+$comparison);
 }catch(InvalidArgumentException $e){nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){error_log('Club House H2H: '.$e->getMessage());nexus_out(['ok'=>false,'error'=>'h2h_detail_unavailable'],500);}

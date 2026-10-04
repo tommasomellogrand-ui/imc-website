@@ -29,6 +29,7 @@ jobs:
         run: |
           for file in nexus/club-house/*.php; do php -l "$file"; done
           php tests/nexus-club-house.php
+          php tests/nexus-club-house-national.php
           php tests/nexus-club-house-ranking.php
           node --check nexus/club-house/club-house.js
           node --check nexus/assets/home.js
@@ -61,7 +62,8 @@ jobs:
           root='/www.italianmastersclub.it/'
           try: ftp.mkd(root+'nexus/club-house')
           except error_perm: ftp.cwd(root+'nexus/club-house')
-          files=[*Path('nexus/club-house').glob('*'),Path('nexus/assets/home.js'),Path('nexus/index.html')]
+          files=[*Path('nexus/club-house').glob('*'),Path('nexus/assets/h2h.js'),Path('nexus/assets/home.js'),Path('nexus/index.html')]
+          files=sorted(files,key=lambda p:p.suffix=='.html')
           for local in files:
               if not local.is_file(): continue
               ftp.cwd(root+local.parent.as_posix()); data=local.read_bytes()
@@ -104,6 +106,31 @@ jobs:
           assert report_id_total>0, 'No national manager IDs linked from reports'
           assert national_total>0, 'No attributed national Results'
           print('National Results manager appearances included:',national_total)
+          for i in range(1,11):
+              gw=f'GW{i:03d}'
+              national=get('?world='+gw+'&manager=MNG001&scope=national_team')
+              global_data=get('?world='+gw+'&manager=MNG001&scope=global')
+              club=get('?world='+gw+'&manager=MNG001&scope=club')
+              assert national['source']=='Results' and national['national_coverage']['identity_source']=='assignment_dates'
+              n=national['managers']['MNG001']['stats']; c=club['managers']['MNG001']['stats']; g=global_data['managers']['MNG001']['stats']
+              assert n['played']==len(national['matches'])==n['matched_by_assignment']
+              assert len({m['fixture_id'] for m in national['matches']})==n['played']
+              for key in ['played','won','drawn','lost','gf','ga','penalty_won','penalty_lost']:
+                  assert g[key]==n[key]+c[key], (gw,key,g,c,n)
+              for m in national['matches']:
+                  assert m['source']=='Results' and m['identity_source']=='assignment_dates'
+                  matches=[a for a in national['assignments'] if a['game_world_id']==gw and a['assignment_type']=='national_team' and str(national['nations'].get(str(a['national_team_id']),{}).get('world_id',a['national_team_id']))==str(m['team_id']) and a['start_date'] and a['start_date']<=m['date'] and (not a['end_date'] or a['end_date']>=m['date'])]
+                  assert matches,(gw,m)
+              opponents={m['opponent_id'] for m in national['matches'] if m['opponent_id']}
+              if opponents:
+                  opponent=sorted(opponents)[0]
+                  with urllib.request.urlopen(base+'h2h-detail.php?manager=MNG001&opponent='+opponent+'&worlds='+gw+'&scope=national_team',timeout=90) as response: h=json.load(response)
+                  assert h['ok'] and h['source']=='Results'
+                  expected=[m for m in national['matches'] if m['opponent_id']==opponent]
+                  assert h['summary']['played']==len(expected)==len(h['matches'])
+                  assert h['summary']['reports']==0 and h['team_reports']==0
+                  assert all(m['identity_source']=='assignment_dates' for m in h['matches'])
+              print('ASSIGNMENT_CHECK',gw,'MNG001',n['played'],'Results;',c['played'],'club;',g['played'],'global; conflicts',national['national_coverage']['ambiguous_sides'])
           with urllib.request.urlopen(base,timeout=30) as r: assert 'Club House' in r.read().decode()
           print('Club House online; all ten GW verified without database writes')
           PY
