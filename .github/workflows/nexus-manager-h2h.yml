@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: imc-public-website-production
+  group: nexus-manager-h2h-release
   cancel-in-progress: false
 jobs:
   deploy:
