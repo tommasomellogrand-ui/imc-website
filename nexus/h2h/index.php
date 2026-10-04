@@ -46,6 +46,17 @@ try{
   $seasonRows=nexus_rows($core,'SELECT imc_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season',[$gw]);
   nexus_out(array_merge(['ok'=>true,'world'=>$gw,'kind'=>$kind,'subject'=>$subject],nexus_history_overview($matches,$seasonRows,(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d'))));
  }
+ if(($_GET['mode']??'')==='data-room'){
+  require __DIR__.'/data-room-engine.php';require dirname(__DIR__).'/teams/roster-stats.php';
+  // Unlike H2H, Data Room includes all opponents. Match Report manager IDs are authoritative.
+  $ctx['assignments']=[];
+  $all=h2h_matches($resultRows,$ctx,$kind,$id,$scope,false);$seasons=[];$comps=[];
+  foreach($all as $m){if($m['imc_season']!==null)$seasons[(string)$m['imc_season']]=(int)$m['imc_season'];$comps[(string)$m['competition_key']]=$m['competition_name'];}
+  $season=trim((string)($_GET['season']??''));if($season!==''&&!ctype_digit($season))throw new InvalidArgumentException('invalid_season');
+  $selected=array_values(array_filter($all,static fn($m)=>($season===''||(string)$m['imc_season']===$season)&&($competition===''||(string)$m['competition_key']===$competition)));
+  sort($seasons,SORT_NUMERIC);
+  nexus_out(array_merge(['ok'=>true,'source'=>'Match Report','world'=>$gw,'scope'=>$scope,'subject'=>$subject,'seasons'=>array_values($seasons),'competitions'=>$comps,'generated_at'=>gmdate('c')],nexus_data_room($selected,$resultRows)));
+ }
  $matches=h2h_matches($resultRows,$ctx,$kind,$id,$scope);
  $competitions=[];foreach($matches as $m)$competitions[(string)$m['competition_key']]=$m['competition_name'];
  $matches=array_values(array_filter($matches,static fn($m)=>($competition===''||(string)$m['competition_key']===$competition)&&($venue===''||$m['side']===$venue)));

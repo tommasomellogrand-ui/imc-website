@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/h2h/data-room-engine.php'
+      - 'nexus/assets/data-room.*'
+      - 'tests/nexus-data-room*'
       - 'tests/nexus-club-house*'
       - 'nexus/h2h/index.php'
       - 'nexus/h2h/engine.php'

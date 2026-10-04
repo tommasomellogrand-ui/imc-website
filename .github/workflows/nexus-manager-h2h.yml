@@ -2,7 +2,7 @@ name: Nexus manager scopes and report H2H
 on:
   push:
     branches: [main]
-    paths: ["nexus/teams/detail.html","nexus/h2h/index.php","nexus/h2h/engine.php","nexus/assets/history-overview.js","nexus/managers/index.php","nexus/managers/profile.html","nexus/assets/manager-profile.js","nexus/assets/manager-scope.css","nexus/assets/h2h.js","nexus/assets/h2h.css","nexus/club-house/club-house.js","nexus/club-house/index.html","nexus/club-house/h2h-detail.php","tests/nexus-h2h-report-scope.php",".github/workflows/nexus-manager-h2h.yml"]
+    paths: ["nexus/h2h/data-room-engine.php","nexus/assets/data-room.js","nexus/assets/data-room.css","tests/nexus-data-room.php","nexus/teams/detail.html","nexus/h2h/index.php","nexus/h2h/engine.php","nexus/assets/history-overview.js","nexus/managers/index.php","nexus/managers/profile.html","nexus/assets/manager-profile.js","nexus/assets/manager-scope.css","nexus/assets/h2h.js","nexus/assets/h2h.css","nexus/club-house/club-house.js","nexus/club-house/index.html","nexus/club-house/h2h-detail.php","tests/nexus-h2h-report-scope.php",".github/workflows/nexus-manager-h2h.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,6 +17,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate report scopes and scripts
         run: |
+          php -l nexus/h2h/data-room-engine.php
+          php tests/nexus-data-room.php
+          node --check nexus/assets/data-room.js
           php -l nexus/managers/index.php
           php -l nexus/h2h/index.php
           php -l nexus/club-house/h2h-detail.php
@@ -25,6 +28,12 @@ jobs:
           node --check nexus/assets/h2h.js
           node --check nexus/assets/history-overview.js
           node --check nexus/club-house/club-house.js
+      - name: Verify Data Room responsive tabs
+        run: |
+          mkdir -p /tmp/data-room-test
+          npm install --prefix /tmp/data-room-test --package-lock-only --ignore-scripts playwright@1.62.1
+          npm ci --prefix /tmp/data-room-test --ignore-scripts
+          NEXUS_PLAYWRIGHT_PATH=/tmp/data-room-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-data-room-ui.cjs
       - name: Publish exact scoped files
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -39,7 +48,7 @@ jobs:
           ctx=ssl.create_default_context();ctx.check_hostname=False
           ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p()
-          files=["nexus/teams/detail.html","nexus/h2h/index.php","nexus/h2h/engine.php","nexus/assets/history-overview.js","nexus/managers/index.php","nexus/managers/profile.html","nexus/assets/manager-profile.js","nexus/assets/manager-scope.css","nexus/assets/h2h.js","nexus/assets/h2h.css","nexus/club-house/club-house.js","nexus/club-house/index.html","nexus/club-house/h2h-detail.php"]
+          files=["nexus/h2h/data-room-engine.php","nexus/assets/data-room.js","nexus/assets/data-room.css","nexus/teams/detail.html","nexus/h2h/index.php","nexus/h2h/engine.php","nexus/assets/history-overview.js","nexus/managers/index.php","nexus/managers/profile.html","nexus/assets/manager-profile.js","nexus/assets/manager-scope.css","nexus/assets/h2h.js","nexus/assets/h2h.css","nexus/club-house/club-house.js","nexus/club-house/index.html","nexus/club-house/h2h-detail.php"]
           for name in sorted(files,key=lambda n:n.endswith('.html')):
               p=Path(name);ftp.cwd('/www.italianmastersclub.it/'+str(p.parent))
               data=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(data))
@@ -69,6 +78,12 @@ jobs:
                   d=get('h2h/index.php',world='GW001',kind='manager',id='MNG001',scope=scope,opponent=h['opponents'][0]['key'])
                   assert all(('|NATIONS|' in m['competition_key'])==(scope=='national_team') for m in d['matches'])
                   assert d['summary']['played']==len(d['matches'])==d['summary']['reports']
+          for scope in ['club','national_team']:
+              d=get('h2h/index.php',world='GW001',kind='manager',id='MNG001',scope=scope,mode='data-room')
+              assert d['source']=='Match Report' and d['scope']==scope
+              assert d['summary']['played']==d['summary']['reports'] and d['summary']['played']>0
+              assert d['analysis']['reports']<=d['summary']['played']
+              print('Data Room',scope,d['summary']['played'],'reports; complete goal timelines',d['analysis']['reports'])
           bundles=[get('club-house/data.php',world=w,manager='MNG001') for w in ['GW001','GW002']]
           matches=[m for b in bundles for m in b['matches'] if m['opponent_id']]
           assert matches
