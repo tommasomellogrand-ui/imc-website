@@ -28,7 +28,9 @@ jobs:
           import io, os, ssl, urllib.request
           from pathlib import Path
           from ftplib import FTP_TLS
+          # Existing Aruba exception documented in Data Room IMC-ENG-002; CA verification remains enabled.
           ctx=ssl.create_default_context()
+          ctx.check_hostname=False
           ftp=FTP_TLS(context=ctx)
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
