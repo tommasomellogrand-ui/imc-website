@@ -1,0 +1,407 @@
+{
+  "source": "lipis/flag-icons",
+  "version": "v7.5.0",
+  "format": "4x3",
+  "nations": [
+    {
+      "id": 1,
+      "source_code": "gb-eng",
+      "path": "nexus/assets/flags/nations/1.svg"
+    },
+    {
+      "id": 2,
+      "source_code": "fr",
+      "path": "nexus/assets/flags/nations/2.svg"
+    },
+    {
+      "id": 3,
+      "source_code": "de",
+      "path": "nexus/assets/flags/nations/3.svg"
+    },
+    {
+      "id": 4,
+      "source_code": "it",
+      "path": "nexus/assets/flags/nations/4.svg"
+    },
+    {
+      "id": 5,
+      "source_code": "cz",
+      "path": "nexus/assets/flags/nations/5.svg"
+    },
+    {
+      "id": 6,
+      "source_code": "pt",
+      "path": "nexus/assets/flags/nations/6.svg"
+    },
+    {
+      "id": 7,
+      "source_code": "nl",
+      "path": "nexus/assets/flags/nations/7.svg"
+    },
+    {
+      "id": 8,
+      "source_code": "es",
+      "path": "nexus/assets/flags/nations/8.svg"
+    },
+    {
+      "id": 9,
+      "source_code": "gr",
+      "path": "nexus/assets/flags/nations/9.svg"
+    },
+    {
+      "id": 10,
+      "source_code": "se",
+      "path": "nexus/assets/flags/nations/10.svg"
+    },
+    {
+      "id": 11,
+      "source_code": "hr",
+      "path": "nexus/assets/flags/nations/11.svg"
+    },
+    {
+      "id": 12,
+      "source_code": "ro",
+      "path": "nexus/assets/flags/nations/12.svg"
+    },
+    {
+      "id": 13,
+      "source_code": "pl",
+      "path": "nexus/assets/flags/nations/13.svg"
+    },
+    {
+      "id": 14,
+      "source_code": "tr",
+      "path": "nexus/assets/flags/nations/14.svg"
+    },
+    {
+      "id": 15,
+      "source_code": "ru",
+      "path": "nexus/assets/flags/nations/15.svg"
+    },
+    {
+      "id": 16,
+      "source_code": "ch",
+      "path": "nexus/assets/flags/nations/16.svg"
+    },
+    {
+      "id": 17,
+      "source_code": "dk",
+      "path": "nexus/assets/flags/nations/17.svg"
+    },
+    {
+      "id": 18,
+      "source_code": "bg",
+      "path": "nexus/assets/flags/nations/18.svg"
+    },
+    {
+      "id": 19,
+      "source_code": "rs",
+      "path": "nexus/assets/flags/nations/19.svg"
+    },
+    {
+      "id": 20,
+      "source_code": "no",
+      "path": "nexus/assets/flags/nations/20.svg"
+    },
+    {
+      "id": 21,
+      "source_code": "il",
+      "path": "nexus/assets/flags/nations/21.svg"
+    },
+    {
+      "id": 22,
+      "source_code": "ua",
+      "path": "nexus/assets/flags/nations/22.svg"
+    },
+    {
+      "id": 23,
+      "source_code": "gb-sct",
+      "path": "nexus/assets/flags/nations/23.svg"
+    },
+    {
+      "id": 24,
+      "source_code": "sk",
+      "path": "nexus/assets/flags/nations/24.svg"
+    },
+    {
+      "id": 25,
+      "source_code": "ie",
+      "path": "nexus/assets/flags/nations/25.svg"
+    },
+    {
+      "id": 26,
+      "source_code": "fi",
+      "path": "nexus/assets/flags/nations/26.svg"
+    },
+    {
+      "id": 27,
+      "source_code": "be",
+      "path": "nexus/assets/flags/nations/27.svg"
+    },
+    {
+      "id": 28,
+      "source_code": "ba",
+      "path": "nexus/assets/flags/nations/28.svg"
+    },
+    {
+      "id": 29,
+      "source_code": "at",
+      "path": "nexus/assets/flags/nations/29.svg"
+    },
+    {
+      "id": 30,
+      "source_code": "lv",
+      "path": "nexus/assets/flags/nations/30.svg"
+    },
+    {
+      "id": 31,
+      "source_code": "hu",
+      "path": "nexus/assets/flags/nations/31.svg"
+    },
+    {
+      "id": 32,
+      "source_code": "lt",
+      "path": "nexus/assets/flags/nations/32.svg"
+    },
+    {
+      "id": 33,
+      "source_code": "si",
+      "path": "nexus/assets/flags/nations/33.svg"
+    },
+    {
+      "id": 34,
+      "source_code": "gb-wls",
+      "path": "nexus/assets/flags/nations/34.svg"
+    },
+    {
+      "id": 35,
+      "source_code": "gb-nir",
+      "path": "nexus/assets/flags/nations/35.svg"
+    },
+    {
+      "id": 36,
+      "source_code": "ee",
+      "path": "nexus/assets/flags/nations/36.svg"
+    },
+    {
+      "id": 37,
+      "source_code": "mk",
+      "path": "nexus/assets/flags/nations/37.svg"
+    },
+    {
+      "id": 38,
+      "source_code": "by",
+      "path": "nexus/assets/flags/nations/38.svg"
+    },
+    {
+      "id": 39,
+      "source_code": "cy",
+      "path": "nexus/assets/flags/nations/39.svg"
+    },
+    {
+      "id": 40,
+      "source_code": "is",
+      "path": "nexus/assets/flags/nations/40.svg"
+    },
+    {
+      "id": 41,
+      "source_code": "mt",
+      "path": "nexus/assets/flags/nations/41.svg"
+    },
+    {
+      "id": 42,
+      "source_code": "ge",
+      "path": "nexus/assets/flags/nations/42.svg"
+    },
+    {
+      "id": 43,
+      "source_code": "al",
+      "path": "nexus/assets/flags/nations/43.svg"
+    },
+    {
+      "id": 44,
+      "source_code": "me",
+      "path": "nexus/assets/flags/nations/44.svg"
+    },
+    {
+      "id": 45,
+      "source_code": "md",
+      "path": "nexus/assets/flags/nations/45.svg"
+    },
+    {
+      "id": 46,
+      "source_code": "ar",
+      "path": "nexus/assets/flags/nations/46.svg"
+    },
+    {
+      "id": 47,
+      "source_code": "br",
+      "path": "nexus/assets/flags/nations/47.svg"
+    },
+    {
+      "id": 48,
+      "source_code": "cl",
+      "path": "nexus/assets/flags/nations/48.svg"
+    },
+    {
+      "id": 49,
+      "source_code": "co",
+      "path": "nexus/assets/flags/nations/49.svg"
+    },
+    {
+      "id": 50,
+      "source_code": "ec",
+      "path": "nexus/assets/flags/nations/50.svg"
+    },
+    {
+      "id": 51,
+      "source_code": "py",
+      "path": "nexus/assets/flags/nations/51.svg"
+    },
+    {
+      "id": 52,
+      "source_code": "pe",
+      "path": "nexus/assets/flags/nations/52.svg"
+    },
+    {
+      "id": 53,
+      "source_code": "uy",
+      "path": "nexus/assets/flags/nations/53.svg"
+    },
+    {
+      "id": 54,
+      "source_code": "ve",
+      "path": "nexus/assets/flags/nations/54.svg"
+    },
+    {
+      "id": 55,
+      "source_code": "bo",
+      "path": "nexus/assets/flags/nations/55.svg"
+    },
+    {
+      "id": 56,
+      "source_code": "cr",
+      "path": "nexus/assets/flags/nations/56.svg"
+    },
+    {
+      "id": 57,
+      "source_code": "us",
+      "path": "nexus/assets/flags/nations/57.svg"
+    },
+    {
+      "id": 58,
+      "source_code": "mx",
+      "path": "nexus/assets/flags/nations/58.svg"
+    },
+    {
+      "id": 59,
+      "source_code": "ca",
+      "path": "nexus/assets/flags/nations/59.svg"
+    },
+    {
+      "id": 60,
+      "source_code": "jm",
+      "path": "nexus/assets/flags/nations/60.svg"
+    },
+    {
+      "id": 61,
+      "source_code": "tt",
+      "path": "nexus/assets/flags/nations/61.svg"
+    },
+    {
+      "id": 62,
+      "source_code": "eg",
+      "path": "nexus/assets/flags/nations/62.svg"
+    },
+    {
+      "id": 63,
+      "source_code": "gh",
+      "path": "nexus/assets/flags/nations/63.svg"
+    },
+    {
+      "id": 64,
+      "source_code": "cm",
+      "path": "nexus/assets/flags/nations/64.svg"
+    },
+    {
+      "id": 65,
+      "source_code": "ng",
+      "path": "nexus/assets/flags/nations/65.svg"
+    },
+    {
+      "id": 66,
+      "source_code": "ci",
+      "path": "nexus/assets/flags/nations/66.svg"
+    },
+    {
+      "id": 67,
+      "source_code": "dz",
+      "path": "nexus/assets/flags/nations/67.svg"
+    },
+    {
+      "id": 68,
+      "source_code": "ma",
+      "path": "nexus/assets/flags/nations/68.svg"
+    },
+    {
+      "id": 69,
+      "source_code": "za",
+      "path": "nexus/assets/flags/nations/69.svg"
+    },
+    {
+      "id": 70,
+      "source_code": "tn",
+      "path": "nexus/assets/flags/nations/70.svg"
+    },
+    {
+      "id": 71,
+      "source_code": "sn",
+      "path": "nexus/assets/flags/nations/71.svg"
+    },
+    {
+      "id": 72,
+      "source_code": "ml",
+      "path": "nexus/assets/flags/nations/72.svg"
+    },
+    {
+      "id": 73,
+      "source_code": "gn",
+      "path": "nexus/assets/flags/nations/73.svg"
+    },
+    {
+      "id": 74,
+      "source_code": "au",
+      "path": "nexus/assets/flags/nations/74.svg"
+    },
+    {
+      "id": 75,
+      "source_code": "cn",
+      "path": "nexus/assets/flags/nations/75.svg"
+    },
+    {
+      "id": 76,
+      "source_code": "jp",
+      "path": "nexus/assets/flags/nations/76.svg"
+    },
+    {
+      "id": 77,
+      "source_code": "kr",
+      "path": "nexus/assets/flags/nations/77.svg"
+    },
+    {
+      "id": 78,
+      "source_code": "ir",
+      "path": "nexus/assets/flags/nations/78.svg"
+    },
+    {
+      "id": 79,
+      "source_code": "sa",
+      "path": "nexus/assets/flags/nations/79.svg"
+    },
+    {
+      "id": 80,
+      "source_code": "iq",
+      "path": "nexus/assets/flags/nations/80.svg"
+    }
+  ]
+}

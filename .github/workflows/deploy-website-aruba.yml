@@ -7,6 +7,8 @@ on:
       - 'nexus/teams/detail.html'
       - 'nexus/managers/profile.html'
       - '.github/workflows/deploy-website-aruba.yml'
+      - 'nexus/assets/flags/**'
+      - '.github/workflows/nexus-national-flags.yml'
       - 'nexus/assets/home.js'
       - 'nexus/assets/trophy-room.js'
       - 'nexus/assets/trophy-room.css'
