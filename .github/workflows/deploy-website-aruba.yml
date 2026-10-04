@@ -4,6 +4,18 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/teams/page.html'
+      - 'nexus/teams/detail.php'
+      - 'nexus/teams/stats.php'
+      - 'nexus/teams/matches.php'
+      - 'nexus/teams/roster.php'
+      - 'nexus/teams/roster-stats.php'
+      - 'nexus/assets/profiles-shell.js'
+      - 'nexus/h2h/index.php'
+      - 'nexus/h2h/engine.php'
+      - 'nexus/trophies/index.php'
+      - 'tests/nexus-nations*'
+      - '.github/workflows/nexus-nations.yml'
       - 'nexus/teams/detail.html'
       - 'nexus/managers/profile.html'
       - '.github/workflows/deploy-website-aruba.yml'

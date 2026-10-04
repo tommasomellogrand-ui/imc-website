@@ -12,6 +12,11 @@ try {
         $club=filter_var($_GET['sm_club'],FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
         if ($club===false || $gw===null) throw new InvalidArgumentException('invalid_club_scope');
     }
+    $nation=null;
+    if (array_key_exists('sm_nation',$_GET)) {
+        $nation=filter_var($_GET['sm_nation'],FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+        if ($nation===false || $gw===null || $club!==null) throw new InvalidArgumentException('invalid_nation_scope');
+    }
     $manager=null;$assignments=[];$nationalManagers=[];
     if (array_key_exists('manager',$_GET)) {
         $manager=trim((string)$_GET['manager']);
@@ -48,6 +53,10 @@ try {
         if ($club!==null) {
             $sql .= " AND winner_sm_world_club_id=? AND COALESCE(competition_group,'')<>'NATIONS' AND trophy_type NOT IN ('worldcup','interqualifier')";
             $params[]=$club;
+        }
+        if ($nation!==null) {
+            $sql .= " AND winner_sm_world_club_id=? AND (competition_group='NATIONS' OR trophy_type IN ('worldcup','interqualifier'))";
+            $params[]=$nation;
         }
         $sql .= ' ORDER BY game_world_id,imc_season,id';
         foreach (nexus_rows($connections[$target], $sql, $params) as $row) {

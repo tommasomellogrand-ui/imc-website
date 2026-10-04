@@ -1,0 +1,30 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/../nexus/competitions/match-teams.php';
+require __DIR__.'/../nexus/players/media.php';
+require __DIR__.'/../nexus/h2h/engine.php';
+require __DIR__.'/../nexus/h2h/overview-engine.php';
+require __DIR__.'/../nexus/teams/roster-stats.php';
+function verify(bool $value,string $message): void {if(!$value)throw new RuntimeException($message);}
+$codex=[['id'=>1,'name'=>'England','image_url'=>'/nexus/assets/flags/nations/1.svg'],['id'=>2,'name'=>'France','image_url'=>'/nexus/assets/flags/nations/2.svg']];
+$map=[['entity_id'=>1,'world_id'=>101],['entity_id'=>2,'world_id'=>102]];
+$ctx=['teams'=>['club'=>nexus_team_lookup($codex,$map),'national_team'=>nexus_team_lookup($codex,$map)],'sm_managers'=>[],'assignments'=>[],'competitions'=>[]];
+$r=['sm_fixture_id'=>1,'competition_key'=>'GW001|NATIONS|worldcup','competition_group'=>'NATIONS','imc_season'=>1,'match_date'=>'2026-09-18','home_sm_club_id'=>101,'away_sm_club_id'=>102,'home_name'=>'England','away_name'=>'France','home_score'=>2,'away_score'=>1,'report_fixture'=>1];
+$club=$r;$club['sm_fixture_id']=2;$club['competition_key']='GW001|DOMESTIC|league|1';$club['competition_group']='DOMESTIC';
+$second=$r;$second['sm_fixture_id']=3;$second['match_date']='2026-09-19';$second['home_sm_club_id']=102;$second['away_sm_club_id']=101;$second['home_name']='France';$second['away_name']='England';$second['home_score']=0;$second['away_score']=0;
+$matches=h2h_matches([$r,$club,$second,$r],$ctx,'nation','101','national_team');
+verify(count($matches)===2,'Only national games, duplicate fixtures excluded');
+$stats=h2h_summary($matches);verify($stats['played']===2&&$stats['won']===1&&$stats['drawn']===1&&$stats['gf']===2,'National home/away results');
+verify($matches[0]['opponent']['key']==='team:102','Nation H2H compares teams');
+verify(count(h2h_matches([$r,$club],$ctx,'club','101','club'))===1,'Club scope preserved');
+verify($matches[0]['home']['image_url']==='/nexus/assets/flags/nations/2.svg','National flag namespace');
+$overview=nexus_history_overview($matches,[['imc_season'=>1,'imc_season_start_date'=>'2026-01-01','imc_season_end_date'=>null]],'2026-10-04');
+verify($overview['global']['stats']['played']===2&&$overview['global']['club']['played']===0,'National overview isolation');
+$old=$r+['players_json'=>json_encode([['team_side'=>'home','sm_player_id'=>11,'player_name'=>'Old']])];
+$new=$second+['players_json'=>json_encode([['team_side'=>'away','sm_player_id'=>22,'player_name'=>'Selected','starter'=>1],['team_side'=>'home','sm_player_id'=>33,'player_name'=>'Opponent']])];
+$snapshot=nexus_national_roster([$old,$new],101);
+verify(array_column($snapshot['rows'],'player_id')===[22]&&$snapshot['fixture']===3,'Latest national selection excludes opponent and former roster');
+$stats=nexus_roster_stats($snapshot['rows'],[$old,$new],101);
+verify(count($stats['rows'])===1&&$stats['rows'][0]['appearances']===1,'Roster statistics restricted to selection');
+verify(nexus_national_roster([],101)['rows']===[],'No invented roster without reports');
+echo "PASS: national H2H, overview, flags, latest selection, roster statistics, club isolation\n";

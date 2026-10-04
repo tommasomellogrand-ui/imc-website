@@ -1,6 +1,25 @@
 <?php
 declare(strict_types=1);
 
+// National selections come from the latest available report, not player nationality.
+function nexus_national_roster(array $reports,int $team): array {
+  usort($reports,static fn($a,$b)=>[$b['match_date']??'',(int)$b['sm_fixture_id']]<=>[$a['match_date']??'',(int)$a['sm_fixture_id']]);
+  foreach($reports as $r){
+    $side=(int)$r['home_sm_club_id']===$team?'home':((int)$r['away_sm_club_id']===$team?'away':null);
+    if($side===null)continue;
+    $players=json_decode((string)($r['players_json']??''),true);
+    if(!is_array($players)||!array_is_list($players))continue;
+    $roster=[];
+    foreach($players as $p){
+      if(!is_array($p)||($p['team_side']??'')!==$side||(int)($p['sm_player_id']??0)<1)continue;
+      $id=(int)$p['sm_player_id'];
+      $roster[$id]=['player_id'=>$id,'full_name'=>$p['player_name']??('Player '.$id),'position'=>null,'rating'=>null,'age'=>null,'nationality'=>null,'image_url'=>null];
+    }
+    if($roster)return ['rows'=>array_values($roster),'fixture'=>$r['sm_fixture_id'],'date'=>$r['match_date']??null];
+  }
+  return ['rows'=>[],'fixture'=>null,'date'=>null];
+}
+
 function nexus_roster_group(string $position): string {
   // Remove lateral qualifiers before matching: Dx/Sx must not classify midfielders as defenders.
   $roles=explode(',',strtoupper(preg_replace('/\([^)]*\)/','',$position)));

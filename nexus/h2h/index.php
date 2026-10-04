@@ -7,9 +7,9 @@ require __DIR__.'/engine.php';
 require __DIR__.'/overview-engine.php';
 try{
  $c=nexus_config();$gw=nexus_world($_GET['world']??'');$kind=(string)($_GET['kind']??'club');$id=trim((string)($_GET['id']??''));
- if(!in_array($kind,['club','manager'],true)||($kind==='club'&&(!ctype_digit($id)||(int)$id<1))||($kind==='manager'&&!preg_match('/^MNG\d+$/',$id)))throw new InvalidArgumentException('invalid_subject');
+ if(!in_array($kind,['club','nation','manager'],true)||($kind!=='manager'&&(!ctype_digit($id)||(int)$id<1))||($kind==='manager'&&!preg_match('/^MNG\d+$/',$id)))throw new InvalidArgumentException('invalid_subject');
  $overview=($_GET['mode']??'')==='overview';
- $scope=$kind==='manager'?(string)($_GET['scope']??'club'):'club';if(!in_array($scope,['club','national_team'],true))throw new InvalidArgumentException('invalid_scope');
+ $scope=$kind==='manager'?(string)($_GET['scope']??'club'):($kind==='nation'?'national_team':'club');if(!in_array($scope,['club','national_team'],true))throw new InvalidArgumentException('invalid_scope');
  $opponent=trim((string)($_GET['opponent']??''));$competition=trim((string)($_GET['competition']??''));$venue=(string)($_GET['venue']??'');if(!in_array($venue,['','home','away'],true))throw new InvalidArgumentException('invalid_venue');
  $core=nexus_db($c,'core');$db=nexus_db($c,nexus_target($c,$gw));
  $clubMap=nexus_rows($core,'SELECT `Club ID` entity_id,`SM World Club ID` world_id FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]);
@@ -26,9 +26,9 @@ try{
  }
  foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$ctx['competitions'][$m['competition_key']]=$m['nexus_view'];
  if($kind==='manager'){$subject=$ctx['managers'][$id]??null;if(!$subject)throw new InvalidArgumentException('manager_not_found');}
- else{$entity=$ctx['teams']['club']['world'][(int)$id]??null;$club=$ctx['teams']['club']['id'][$entity]??null;if(!$club)throw new InvalidArgumentException('club_not_found');$subject=['key'=>'team:'.$id,'name'=>$club['name'],'image_url'=>nexus_player_image_url($club['image_url']??null)];}
+ else{$teamKind=$kind==='nation'?'national_team':'club';$entity=$ctx['teams'][$teamKind]['world'][(int)$id]??null;$club=$ctx['teams'][$teamKind]['id'][$entity]??null;if(!$club)throw new InvalidArgumentException('club_not_found');$subject=['key'=>'team:'.$id,'name'=>$club['name'],'image_url'=>nexus_player_image_url($club['image_url']??null)];}
  $rt=nexus_table($gw,'Results');$mt=nexus_table($gw,'Match_Report');$params=[$gw];$conditions=[];
- if($kind==='club'){
+ if($kind!=='manager'){
   $conditions[]='(r.home_sm_club_id=? OR r.away_sm_club_id=?)';$params[]=(int)$id;$params[]=(int)$id;
   // Exact codex name is only a fallback for rows whose world club ID is missing.
   $conditions[]='((r.home_sm_club_id IS NULL OR r.home_sm_club_id=0) AND r.home_name=?)';$params[]=$subject['name'];
@@ -40,7 +40,7 @@ try{
  $sql='SELECT r.*,mr.sm_fixture_id report_fixture,mr.home_sm_manager_id report_home_sm_manager_id,mr.away_sm_manager_id report_away_sm_manager_id,mr.home_manager_name report_home_manager_name,mr.away_manager_name report_away_manager_name FROM `'.$rt.'` r LEFT JOIN `'.$mt.'` mr ON mr.game_world_id=r.game_world_id AND mr.sm_fixture_id=r.sm_fixture_id WHERE r.game_world_id=? AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND ('.($conditions?implode(' OR ',$conditions):'0=1').') ORDER BY r.match_date DESC,r.sm_fixture_id DESC';
  $resultRows=nexus_rows($db,$sql,$params);
  if($overview){
-  $matches=$kind==='manager'?array_merge(h2h_matches($resultRows,$ctx,$kind,$id,'club',false),h2h_matches($resultRows,$ctx,$kind,$id,'national_team',false)):h2h_matches($resultRows,$ctx,$kind,$id,'club',false);
+  $matches=$kind==='manager'?array_merge(h2h_matches($resultRows,$ctx,$kind,$id,'club',false),h2h_matches($resultRows,$ctx,$kind,$id,'national_team',false)):h2h_matches($resultRows,$ctx,$kind,$id,$scope,false);
   $seasonRows=nexus_rows($core,'SELECT imc_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season',[$gw]);
   nexus_out(array_merge(['ok'=>true,'world'=>$gw,'kind'=>$kind,'subject'=>$subject],nexus_history_overview($matches,$seasonRows,(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d'))));
  }

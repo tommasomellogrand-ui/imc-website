@@ -41,11 +41,11 @@ function h2h_matches(array $rows,array $ctx,string $kind,string $id,string $scop
   $hm=h2h_manager($r,'home',$home,$ctx);$am=h2h_manager($r,'away',$away,$ctx);
   // Manager H2H includes only encounters between two identified IMC managers.
   if($imcOpponentsOnly&&$kind==='manager'&&(!str_starts_with($hm['key']??'','imc:')||!str_starts_with($am['key']??'','imc:')))continue;
-  if($kind==='club'){$isHome=$home['world_id']===(int)$id;$isAway=$away['world_id']===(int)$id;}
+  if($kind!=='manager'){$isHome=$home['world_id']===(int)$id;$isAway=$away['world_id']===(int)$id;}
   else{$isHome=($hm['key']??'')==='imc:'.$id;$isAway=($am['key']??'')==='imc:'.$id;}
   if($isHome===$isAway)continue;
   $seen[$fixture]=true;$own=$isHome?'home':'away';$opposite=$isHome?'away':'home';
-  $opponent=$kind==='club'?($isHome?$away:$home):($isHome?$am:$hm);
+  $opponent=$kind!=='manager'?($isHome?$away:$home):($isHome?$am:$hm);
   if(!$opponent){$ot=$isHome?$away:$home;$opponent=['key'=>'unknown:'.$ot['key'],'name'=>'Manager non identificato · '.$ot['name'],'image_url'=>null,'unidentified'=>true];}
   $gf=(int)$r[$own.'_score'];$ga=(int)$r[$opposite.'_score'];
   $match=[];
