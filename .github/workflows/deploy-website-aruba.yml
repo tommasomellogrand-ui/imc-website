@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/club-house/ranking.php'
+      - 'nexus/club-house/data.php'
+      - 'nexus/club-house/club-house.css'
+      - '.github/workflows/nexus-club-house.yml'
       - 'nexus/h2h/data-room-engine.php'
       - 'nexus/assets/data-room.*'
       - 'tests/nexus-data-room*'
@@ -242,3 +246,4 @@ jobs:
                   except Exception as e:last=e;time.sleep(5)
               else:raise SystemExit(f'Live verification failed: {url}: {last}')
           PY
+

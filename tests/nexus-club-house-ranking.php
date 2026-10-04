@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__).'/nexus/club-house/ranking.php';
+require dirname(__DIR__).'/nexus/club-house/engine.php';
 function check($got,$want):void {if($got!==$want && !(is_numeric($got)&&is_numeric($want)&&(float)$got===(float)$want))throw new RuntimeException(json_encode([$got,$want]));}
 foreach(['GW001'=>3,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>1,'GW006'=>1,'GW007'=>1,'GW008'=>3,'GW009'=>1,'GW010'=>1] as $gw=>$weight){
  check(imc_rank_weight($gw),$weight);
@@ -19,3 +20,14 @@ check(imc_rank_bonus(['trophy_type'=>'worldcup']),125);check(imc_rank_bonus(['tr
 foreach([['trophy_type'=>'league'],['trophy_type'=>'unknown'],['trophy_type'=>'smfacup','competition_group'=>'NATIONS']] as $t)check(imc_rank_bonus($t),null);
 $r=imc_rank_start(['played'=>0,'won'=>0,'drawn'=>0,'lost'=>0],'GW008');imc_rank_award($r,['trophy_type'=>'unknown']);check($r['total'],0);check($r['unscored_trophies'],1);
 echo "PASS: IMC Ranking match scores, ten GW weights, trophy bonuses including World Cup 125, lower divisions and unknown types\n";
+$managers=[['manager_id'=>'MNG001','sm_manager_id'=>10],['manager_id'=>'MNG002','sm_manager_id'=>20]];
+$row=['sm_fixture_id'=>1,'competition_group'=>'NATIONS','home_sm_manager_id'=>10,'away_sm_manager_id'=>20,'home_score'=>2,'away_score'=>1];
+$draw=$row; $draw['sm_fixture_id']=2;$draw['home_score']=1;$draw['penalty_home_score']=3;$draw['penalty_away_score']=4;
+$club=$row;$club['sm_fixture_id']=3;$club['competition_group']='DOMESTIC';
+$conflict=$row;$conflict['home_score']=3;
+$d=imc_rank_national_rows([$row,$row,$draw,$club],$managers);
+check($d['stats']['MNG001']['played'],2);check($d['stats']['MNG001']['won'],1);check($d['stats']['MNG001']['drawn'],1);check($d['stats']['MNG002']['lost'],1);check($d['coverage']['duplicate_rows'],1);
+check(imc_rank_national_rows([$row,$conflict],$managers)['coverage']['excluded_fixtures'],1);
+$missing=$row;$missing['home_sm_manager_id']=null;check(imc_rank_national_rows([$missing],$managers)['stats']['MNG001']['played'],0);
+foreach(['GW001','GW002','GW004'] as $gw){$r=imc_rank_start(['played'=>2,'won'=>1,'lost'=>0],$gw,$d['stats']['MNG001']);check($r['national_points'],2.5*imc_rank_weight($gw));check($r['total'],5*imc_rank_weight($gw));check($r['match_points'],$r['club_points']+$r['national_points']);}
+echo "PASS: national Results scoring, scope isolation, duplicate/conflict handling, shootout draw and same GW weights\n";

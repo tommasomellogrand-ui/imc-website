@@ -16,7 +16,10 @@ try {
  $selected=$selected===''?null:$selected;
  $db=nexus_db($c,nexus_target($c,$gw));$db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();
  $out=ch_read($db,$gw,$managers,$selected);
- foreach($out['managers'] as &$m)$m['ranking']=imc_rank_start($m['stats'],$gw);unset($m);
+ $out['national_ranking_error']=false;$national=['stats'=>[],'coverage'=>null];
+ try{$national=imc_rank_national_read($db,$gw,$managers);}catch(Throwable $e){$out['national_ranking_error']=true;error_log('National ranking Results '.$gw.': '.$e->getMessage());}
+ $out['national_ranking_coverage']=$national['coverage'];
+ foreach($out['managers'] as $id=>&$m){$m['national_stats']=$national['stats'][$id]??ch_zero();$m['ranking']=imc_rank_start($m['stats'],$gw,$m['national_stats']);}unset($m);
  // Display-only club logos: use existing world mappings, never create clubs.
  $out['clubs']=[];
  if($selected!==null)try {
