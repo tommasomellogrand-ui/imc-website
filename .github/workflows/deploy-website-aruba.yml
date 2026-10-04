@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'tests/nexus-club-house*'
       - 'nexus/h2h/index.php'
       - 'nexus/h2h/engine.php'
       - 'nexus/assets/history-overview.js'
