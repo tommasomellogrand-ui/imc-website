@@ -25,13 +25,15 @@ function competition_player_stats(array $reports): array {
       // An unused substitute is not an appearance and never contributes a zero rating.
       $played=$count($p['starter']??0)>0||($p['sub_on_minute']??null)!==null||$rating!==null||$goals>0||$assists>0||$mom>0;
       if(!$played&&!$yellow&&!$red) continue;
-      if(!isset($players[$id])) $players[$id]=['sm_player_id'=>$id,'player_name'=>(string)($p['player_name']??''),'clubs'=>[],'played'=>0,'goals'=>0,'assists'=>0,'yellow_card'=>0,'red_card'=>0,'man_of_match'=>0,'rating_sum'=>0,'rated_matches'=>0];
+      if(!isset($players[$id])) $players[$id]=['sm_player_id'=>$id,'player_name'=>(string)($p['player_name']??''),'clubs'=>[],'teams'=>[],'played'=>0,'goals'=>0,'assists'=>0,'yellow_card'=>0,'red_card'=>0,'man_of_match'=>0,'rating_sum'=>0,'rated_matches'=>0];
       $row=&$players[$id];
       if(!empty($p['player_name']))$row['player_name']=(string)$p['player_name'];
       $side=$p['team_side']??'';
       if(in_array($side,['home','away'],true)){
         $club=(string)($report[$side.'_name']??'');
         if($club!==''&&!in_array($club,$row['clubs'],true))$row['clubs'][]=$club;
+        $team=['id'=>(string)($report[$side.'_sm_club_id']??''),'name'=>$club];
+        if($club!==''&&!in_array($team,$row['teams'],true))$row['teams'][]=$team;
       }
       $row['played']+=(int)$played;$row['goals']+=$goals;$row['assists']+=$assists;$row['yellow_card']+=$yellow;$row['red_card']+=$red;$row['man_of_match']+=$mom;
       if($rating!==null){$row['rating_sum']+=$rating;$row['rated_matches']++;}
@@ -47,7 +49,7 @@ try{
     $season=nexus_season($_GET['season']??null);$competition=trim((string)($_GET['competition']??''));
     if($season===null||$competition==='')throw new InvalidArgumentException('season_and_competition_required');
     $db=nexus_db($c,nexus_target($c,$gw));$table=nexus_table($gw,'Match_Report');
-    $reports=nexus_rows($db,'SELECT sm_fixture_id,home_name,away_name,players_json FROM `'.$table.'` WHERE game_world_id=? AND imc_season=? AND competition_key=? ORDER BY match_date,sm_fixture_id',[$gw,$season,$competition]);
+    $reports=nexus_rows($db,'SELECT sm_fixture_id,home_sm_club_id,home_name,away_sm_club_id,away_name,players_json FROM `'.$table.'` WHERE game_world_id=? AND imc_season=? AND competition_key=? ORDER BY match_date,sm_fixture_id',[$gw,$season,$competition]);
     $stats=competition_player_stats($reports);
     // Batch the existing Codex image lookup; visual enrichment must not hide statistics.
     $identities=[];
