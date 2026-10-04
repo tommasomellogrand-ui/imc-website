@@ -28,3 +28,17 @@ $stats=nexus_roster_stats($snapshot['rows'],[$old,$new],101);
 verify(count($stats['rows'])===1&&$stats['rows'][0]['appearances']===1,'Roster statistics restricted to selection');
 verify(nexus_national_roster([],101)['rows']===[],'No invented roster without reports');
 echo "PASS: national H2H, overview, flags, latest selection, roster statistics, club isolation\n";
+
+
+$move=static fn($id,$from,$to,$date,$num,$extra=[])=>array_merge(['player_id'=>$id,'player_name'=>'Player '.$id,'from_sm_world_club_id'=>$from,'to_sm_world_club_id'=>$to,'normalized_transfer_date'=>$date,'imc_transfer_number'=>$num,'status'=>'Com'],$extra);
+$moves=[$move(22,101,102,'2026-09-21',1),$move(44,102,101,'2026-09-22',2),$move(55,102,101,'2026-09-23',3,['status'=>'Pending']),$move(66,101,102,'2026-09-24',4,['exchange_players'=>'[{"player_id":77,"player_name":"Exchange"}]'])];
+$rows=nexus_club_roster($snapshot['rows'],[$old,$new],$moves,101);$by=array_column($rows,null,'player_id');
+verify($by[22]['roster_status']==='departed','Transfer overrides stale squad membership');
+verify($by[44]['roster_status']==='active'&&!isset($by[55]),'New arrival without appearances; pending transfer ignored');
+verify($by[77]['roster_status']==='active'&&$by[66]['roster_status']==='departed','Exchange direction reversed');
+verify(!isset($by[33]),'Opponent never added');
+$stats=nexus_roster_stats($rows,[$old,$new],101);$byStats=array_column($stats['rows'],null,'player_id');
+verify($byStats[22]['appearances']===1&&$byStats[44]['appearances']===0,'Departed statistics preserved; new arrival starts at zero');
+$moves[]=$move(22,102,101,'2026-09-25',5);$by=array_column(nexus_club_roster([],[$old,$new],array_reverse($moves),101),null,'player_id');
+verify($by[22]['roster_status']==='active','Latest dated return restores active status regardless of input order');
+echo "PASS: club active/departed, retained stats, arrivals, returns, exchanges and pending transfers\n";

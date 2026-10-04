@@ -89,3 +89,35 @@ function nexus_roster_stats(array $roster,array $reports,int $club): array {
   }unset($row);
   return ['rows'=>array_values($players),'reports'=>$used,'invalid_reports'=>$invalid];
 }
+
+
+// Club membership is independent of the selected statistics season.
+function nexus_club_roster(array $current,array $reports,array $transfers,int $club): array {
+  $players=[];
+  $blank=static fn($id,$name)=>['player_id'=>$id,'full_name'=>$name?:('Player '.$id),'position'=>null,'rating'=>null,'age'=>null,'nationality'=>null,'image_url'=>null,'roster_status'=>'unknown'];
+  foreach($reports as $r){
+    $snapshot=nexus_national_roster([$r],$club);
+    foreach($snapshot['rows'] as $p)$players[$p['player_id']]=$p+['roster_status'=>'unknown'];
+  }
+  foreach(nexus_national_roster($reports,$club)['rows'] as $p)$players[$p['player_id']]['roster_status']='active';
+  foreach($current as $p)$players[(int)$p['player_id']]=array_merge($p,['roster_status'=>'active']);
+  usort($transfers,static fn($a,$b)=>[(string)($a['normalized_transfer_date']??''),(int)$a['imc_transfer_number']]<=>[(string)($b['normalized_transfer_date']??''),(int)$b['imc_transfer_number']]);
+  foreach($transfers as $t){
+    $status=strtolower(trim((string)($t['status']??'')));
+    if(!in_array($status,['','com','completed','complete','completato'],true))continue;
+    $from=(int)($t['from_sm_world_club_id']??0);$to=(int)($t['to_sm_world_club_id']??0);
+    if($from!==$club&&$to!==$club)continue;
+    $moves=[['id'=>(int)($t['player_id']??0),'name'=>$t['player_name']??'','to'=>$to]];
+    // Exchange players move in the opposite direction; only explicit IDs are used.
+    $exchange=json_decode((string)($t['exchange_players']??'[]'),true);
+    foreach(is_array($exchange)?$exchange:[] as $e){if(!is_array($e))continue;$moves[]=['id'=>(int)($e['player_id']??$e['sm_player_id']??0),'name'=>$e['player_name']??'','to'=>$from];}
+    foreach($moves as $m){
+      if($m['id']<1)continue;
+      if(!isset($players[$m['id']]))$players[$m['id']]=$blank($m['id'],$m['name']);
+      $players[$m['id']]['roster_status']=$m['to']===$club?'active':'departed';
+      $players[$m['id']]['status_transfer_date']=$t['normalized_transfer_date']??null;
+      $players[$m['id']]['status_transfer_number']=$t['imc_transfer_number'];
+    }
+  }
+  return array_values($players);
+}
