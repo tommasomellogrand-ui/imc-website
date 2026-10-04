@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__).'/core/bootstrap.php';
+require dirname(__DIR__).'/players/media.php';
 // Always derive rankings from the current reports, never from a saved summary.
 function competition_player_stats(array $reports): array {
   $players=[];$fixtures=[];$used=0;$invalid=0;$unidentified=0;
@@ -47,7 +48,15 @@ try{
     if($season===null||$competition==='')throw new InvalidArgumentException('season_and_competition_required');
     $db=nexus_db($c,nexus_target($c,$gw));$table=nexus_table($gw,'Match_Report');
     $reports=nexus_rows($db,'SELECT sm_fixture_id,home_name,away_name,players_json FROM `'.$table.'` WHERE game_world_id=? AND imc_season=? AND competition_key=? ORDER BY match_date,sm_fixture_id',[$gw,$season,$competition]);
-    nexus_out(array_merge(['ok'=>true,'game_world_id'=>$gw,'imc_season'=>$season,'competition_key'=>$competition,'generated_at'=>gmdate('c')],competition_player_stats($reports)));
+    $stats=competition_player_stats($reports);
+    // Batch the existing Codex image lookup; visual enrichment must not hide statistics.
+    $identities=[];
+    try{$identities=nexus_player_identity(nexus_db($c,'core'),array_column($stats['rows'],'sm_player_id'));}catch(Throwable $e){}
+    foreach($stats['rows'] as &$player){
+      $id=(int)$player['sm_player_id'];
+      $player['image_urls']=nexus_player_images($id,$identities[$id]??[]);
+    }unset($player);
+    nexus_out(array_merge(['ok'=>true,'game_world_id'=>$gw,'imc_season'=>$season,'competition_key'=>$competition,'generated_at'=>gmdate('c')],$stats));
   }
   if($fixture<1) throw new InvalidArgumentException('invalid_fixture');
   $db=nexus_db($c,nexus_target($c,$gw));$table=nexus_table($gw,'Match_Report');

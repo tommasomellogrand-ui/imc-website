@@ -27,3 +27,60 @@
  .round-box .score{font-size:23px}
  .round-box .open-match-report,.round-box .club-match-actions>a{min-height:36px;padding:7px 12px}
 }
+
+/* Table and Stats share the navy round headers and readable row rhythm. */
+.ranking-card{background:#fff;border:1px solid var(--l);border-radius:13px;overflow:hidden;margin-bottom:18px}
+.ranking-head{background:var(--b);color:#fff;padding:15px 18px}
+.ranking-head h3{font-size:20px;line-height:1.25;letter-spacing:-.025em;margin:0 0 6px}
+.ranking-head p{color:#d4d7e7;font-size:12px;margin:0;line-height:1.5}
+.ranking-scroll{overflow-x:auto;max-width:100%;scrollbar-width:thin;scrollbar-color:#bdc3d3 #f5f7fb}
+.ranking-scroll:focus-visible{outline:3px solid #d7aa43;outline-offset:-3px}
+.ranking-section .stand{font-size:14px;font-variant-numeric:tabular-nums}
+.ranking-section .stand th,.ranking-section .stand td{padding:13px 12px;vertical-align:middle}
+.ranking-section .stand thead th{font-size:11px;font-weight:700;color:var(--m);background:#f5f7fb}
+.ranking-section .stand tbody th{background:#fff;color:var(--b);text-align:left;font-size:14px;font-weight:700}
+.ranking-section .stand tbody tr:last-child th{border-bottom:0}
+.ranking-section .stand abbr{text-decoration:none}
+.ranking-position{color:var(--m);font-weight:700;width:38px}
+.ranking-value{display:inline-block;min-width:36px;padding:7px 9px;border-radius:8px;background:#fff5dc;color:var(--b);font-size:18px;font-weight:800}
+.ranking-team{display:flex;align-items:center;gap:10px;text-align:left;line-height:1.35}
+.ranking-team img{width:30px;height:32px;object-fit:contain;flex-shrink:0}
+.team-ranking{min-width:650px}
+.team-ranking th:nth-child(2){width:27%;min-width:180px;max-width:240px;white-space:normal}
+.team-ranking th:first-child,.team-ranking td:first-child{position:sticky;left:0;background:#fff;z-index:1;min-width:38px;width:38px}
+.team-ranking th:nth-child(2){position:sticky;left:38px;z-index:1;box-shadow:4px 0 5px -5px #65708a}
+.ranking-section .team-ranking thead th:first-child,.ranking-section .team-ranking thead th:nth-child(2){background:#f5f7fb}
+.ranking-section .player-ranking{table-layout:fixed}
+.ranking-section .player-ranking th:first-child{width:38px}
+.ranking-section .player-ranking th:nth-child(2){width:auto;min-width:0;white-space:normal}
+.ranking-section .player-ranking thead th:nth-child(n+3){width:72px;white-space:normal}
+.ranking-player-link{display:flex;gap:12px;align-items:center;color:var(--b)}
+.ranking-player-link:hover b{text-decoration:underline;text-underline-offset:3px}
+.ranking-player-link b{font-size:15px;line-height:1.35;overflow-wrap:anywhere}
+.ranking-photo{width:44px;height:44px;flex:0 0 44px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#e9edf5;color:#6b7288;font-size:13px}
+.ranking-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#e9edf5}
+.ranking-clubs{display:flex;flex-wrap:wrap;gap:5px 12px;margin:5px 0 0 56px}
+.ranking-clubs .ranking-team{font-size:12px;font-weight:400;color:var(--m);gap:5px}
+.ranking-clubs .ranking-team img{width:19px;height:20px}
+.ranking-note,.ranking-section #stats-status{font-size:12px;line-height:1.6;color:var(--m)}
+.ranking-section .stat-tabs{margin:0 0 16px}
+.ranking-section .stat-tab{font-size:13px;min-height:42px}
+@media(max-width:760px){
+ .ranking-head{padding:14px 13px}
+ .ranking-head h3{font-size:20px}
+ .ranking-section .stand{font-size:13px}
+ .ranking-section .stand th,.ranking-section .stand td{padding:12px 8px}
+ .ranking-section .stand tbody th{font-size:13px}
+ .team-ranking th:nth-child(2){min-width:150px;width:150px;max-width:150px}
+ .ranking-team{gap:7px}
+ .ranking-team img{width:26px;height:29px}
+ .ranking-section .player-ranking thead th:nth-child(n+3){width:47px;font-size:10px}
+ .ranking-section .player-ranking th:first-child{width:27px}
+ .ranking-section .player-ranking th,.ranking-section .player-ranking td{padding:12px 5px}
+ .ranking-player-link{gap:8px}
+ .ranking-player-link b{font-size:13px}
+ .ranking-photo{width:36px;height:36px;flex-basis:36px}
+ .ranking-clubs{margin-left:44px;gap:5px}
+ .ranking-clubs .ranking-team{font-size:11px}
+ .ranking-value{font-size:17px;min-width:30px;padding:6px}
+}

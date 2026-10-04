@@ -2,7 +2,7 @@ name: Deploy Nexus round design
 on:
   push:
     branches: [main]
-    paths: ["nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html",".github/workflows/nexus-round-design.yml"]
+    paths: ["nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html",".github/workflows/nexus-round-design.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,6 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate round scripts
         run: |
+          php -l nexus/competitions/match-report.php
           node --check nexus/assets/competition-view.js
           node --check nexus/assets/the-club-links.js
       - name: Publish and verify round design
@@ -35,7 +36,7 @@ jobs:
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p(); ftp.set_pasv(True)
-          files=[Path(p) for p in ["nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html"]]
+          files=[Path(p) for p in ["nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html"]]
           for path in files:
               ftp.cwd('/www.italianmastersclub.it')
               for part in path.parent.parts:
@@ -47,6 +48,7 @@ jobs:
               if check.getvalue()!=data: raise RuntimeError('Upload mismatch: '+str(path))
           ftp.quit()
           def verify(path):
+              if path.suffix=='.php': return # PHP source is verified by FTPS above.
               with urllib.request.urlopen('https://www.italianmastersclub.it/'+str(path)+'?verify='+os.environ['GITHUB_SHA'],timeout=30) as response:
                   if response.read()!=path.read_bytes(): raise RuntimeError('Live mismatch: '+str(path))
           list(ThreadPoolExecutor(max_workers=6).map(verify,files))

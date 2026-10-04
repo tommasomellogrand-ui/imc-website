@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/competitions/match-report.php'
       - 'nexus/assets/competition-view.js'
       - 'nexus/assets/the-club-links.js'
       - 'nexus/assets/competitions.css'
