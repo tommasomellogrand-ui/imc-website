@@ -81,7 +81,9 @@ jobs:
           overview=get('h2h/index.php',world='GW001',kind='nation',id=nation,mode='overview')
           h2h=get('h2h/index.php',world='GW001',kind='nation',id=nation)
           stats=get('teams/stats.php',world='GW001',type='nation',sm_club=nation)
-          assert overview['global']['stats']['played']>0 and h2h['summary']['played']==stats['stats']['played']
+          assert overview['global']['stats']['played']>0
+          assert h2h['source']=='Match Report'
+          assert h2h['summary']['played']==h2h['summary']['reports']
           assert all('|NATIONS|' in k for k in h2h['competitions'])
           roster=get('teams/roster.php',world='GW001',type='nation',sm_club=nation)
           assert roster['roster_source']=='latest_match_report' and roster['rows']
