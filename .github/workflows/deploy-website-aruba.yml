@@ -4,6 +4,15 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/assets/competition-view.js'
+      - 'nexus/assets/the-club-links.js'
+      - 'nexus/assets/competitions.css'
+      - 'nexus/competitions/index.html'
+      - 'nexus/competitions/view.html'
+      - 'nexus/competitions/domestic.html'
+      - 'nexus/competitions/group.html'
+      - 'nexus/competitions/family.html'
+      - '.github/workflows/nexus-round-design.yml'
       - 'nexus/teams/page.html'
       - 'nexus/teams/detail.php'
       - 'nexus/teams/stats.php'

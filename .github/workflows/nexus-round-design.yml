@@ -1,0 +1,54 @@
+name: Deploy Nexus round design
+on:
+  push:
+    branches: [main]
+    paths: ["nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html",".github/workflows/nexus-round-design.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-public-website-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate round scripts
+        run: |
+          node --check nexus/assets/competition-view.js
+          node --check nexus/assets/the-club-links.js
+      - name: Publish and verify round design
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, urllib.request
+          from pathlib import Path
+          from ftplib import FTP_TLS, error_perm
+          from concurrent.futures import ThreadPoolExecutor
+          # Existing Aruba exception; CA verification remains enabled.
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True)
+          files=[Path(p) for p in ["nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html"]]
+          for path in files:
+              ftp.cwd('/www.italianmastersclub.it')
+              for part in path.parent.parts:
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
+              data=path.read_bytes()
+              ftp.storbinary('STOR '+path.name,io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary('RETR '+path.name,check.write)
+              if check.getvalue()!=data: raise RuntimeError('Upload mismatch: '+str(path))
+          ftp.quit()
+          def verify(path):
+              with urllib.request.urlopen('https://www.italianmastersclub.it/'+str(path)+'?verify='+os.environ['GITHUB_SHA'],timeout=30) as response:
+                  if response.read()!=path.read_bytes(): raise RuntimeError('Live mismatch: '+str(path))
+          list(ThreadPoolExecutor(max_workers=6).map(verify,files))
+          print('All round design uploaded and verified live. No database changes.')
+          PY

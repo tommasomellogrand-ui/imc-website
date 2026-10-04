@@ -6,3 +6,24 @@
 
 .group-tabs-wrap{background:#fff;border-bottom:1px solid var(--l)}.group-tabs{display:flex;gap:0}.choice{border:0;background:transparent;color:var(--m);font:inherit;font-weight:700;cursor:pointer;white-space:nowrap;position:relative}.choice:disabled{opacity:.38;cursor:default}.group-tabs .choice{flex:1;padding:19px 15px;font-size:15px}.group-tabs .choice.active{color:var(--b)}.group-tabs .choice.active:after{content:'';position:absolute;height:3px;bottom:0;left:14px;right:14px;background:var(--b);border-radius:3px}.selection-tabs{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin:0 0 14px;padding:2px 1px 5px;max-width:100%}.selection-tabs::-webkit-scrollbar{display:none}.selection-tabs .choice{padding:12px 18px;border:1px solid var(--l);background:#fff;border-radius:10px;font-size:13px}.family-tabs .choice.active{background:var(--b);border-color:var(--b);color:#fff}.competition-tabs .choice.active{border-color:#d4a94c;background:#fff9e9;color:var(--b);box-shadow:inset 0 -2px #d4a94c}.selected-name{font-size:25px;letter-spacing:-.035em;margin:22px 0 14px;line-height:1.2}.detail-tabs{border-bottom:1px solid var(--l);border-radius:10px 10px 0 0;background:#fff;margin-bottom:18px}.detail-tabs .tab{padding:17px 13px}.group-filter-row:has([hidden]){margin:0}.standing-group{margin:22px 0 26px}.standing-group h3{font-size:17px;margin:0 0 11px;color:var(--b)}.standing-group .stand td:nth-child(2){min-width:140px}.standing-group .stand th,.standing-group .stand td{padding:12px 9px}.standing-group .stand th:first-child,.standing-group .stand td:first-child{width:35px}.group-tabs .choice:focus-visible,.selection-tabs .choice:focus-visible{outline-offset:-3px}
 @media(max-width:760px){.group-tabs{padding:0 5px}.group-tabs .choice{font-size:13px;padding:17px 8px}.group-tabs .choice.active:after{left:8px;right:8px}.selection-tabs .choice{padding:10px 14px;font-size:12px}.selected-name{font-size:23px;margin:19px 0 13px}.detail-tabs .tab{padding:15px 7px;font-size:12px;flex:1 0 auto}.detail-tabs .tab.active:after{left:6px;right:6px}.standing-group .stand th,.standing-group .stand td{padding:11px 7px}.standing-group .stand{font-size:11px}.content>.back-row{margin-bottom:12px}}
+
+/* Shared round presentation: Results, Schedule and Overview. */
+.round-box>.round-head{background:var(--b);color:#fff;padding:15px 42px 15px 18px}
+.round-box>.round-head:after{color:#d7aa43;top:20px}
+.round-box>.round-head h3{font-size:21px;margin:5px 0 6px}
+.round-box>.round-head span{color:#d4d7e7;font-size:12px}
+.round-box>.round-head .round-kicker{color:#e3b654;font-size:9px;letter-spacing:.12em}
+.round-head:focus-visible{outline:3px solid #d7aa43;outline-offset:-3px}
+.round-box .match{padding:13px 16px;row-gap:8px}
+.round-box .score{font-size:26px}
+.round-box .club-match-actions{grid-column:1/-1;display:flex;justify-content:center;gap:8px}
+.round-box .open-match-report,.round-box .club-match-actions>a{display:flex;align-items:center;justify-content:center;min-height:36px;padding:7px 14px;border:1px solid var(--l);border-radius:7px;background:#f5f7fb;color:var(--b);font-size:11px;font-weight:700;text-decoration:none}
+.round-box .match>.open-match-report{grid-column:1/-1;justify-self:center}
+.round-box .open-match-report:hover,.round-box .club-match-actions>a:hover{border-color:#d7aa43;background:#fff9e9}
+@media(max-width:760px){
+ .round-box>.round-head{padding:13px 36px 13px 13px}
+ .round-box>.round-head h3{font-size:20px}
+ .round-box .match{padding:12px 10px;row-gap:8px}
+ .round-box .score{font-size:23px}
+ .round-box .open-match-report,.round-box .club-match-actions>a{min-height:36px;padding:7px 12px}
+}
