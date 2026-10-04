@@ -31,3 +31,12 @@ check(imc_rank_national_rows([$row,$conflict],$managers)['coverage']['excluded_f
 $missing=$row;$missing['home_sm_manager_id']=null;check(imc_rank_national_rows([$missing],$managers)['stats']['MNG001']['played'],0);
 foreach(['GW001','GW002','GW004'] as $gw){$r=imc_rank_start(['played'=>2,'won'=>1,'lost'=>0],$gw,$d['stats']['MNG001']);check($r['national_points'],2.5*imc_rank_weight($gw));check($r['total'],5*imc_rank_weight($gw));check($r['match_points'],$r['club_points']+$r['national_points']);}
 echo "PASS: national Results scoring, scope isolation, duplicate/conflict handling, shootout draw and same GW weights\n";
+$result=$row;$result['home_sm_manager_id']=null;$result['away_sm_manager_id']=null;
+$report=['game_world_id'=>'GW001','sm_fixture_id'=>1,'home_sm_manager_id'=>10,'away_sm_manager_id'=>20,'home_score'=>0,'away_score'=>5];
+$linked=imc_rank_link_national_reports([$result],[$report,$report],'GW001');
+$d=imc_rank_national_rows($linked,$managers);check($d['stats']['MNG001']['won'],1);check($d['stats']['MNG001']['played'],1);check($d['stats']['MNG001']['gf'],2);check($d['coverage']['report_manager_sides'],2);
+$wrongWorld=$report;$wrongWorld['game_world_id']='GW002';check(imc_rank_national_rows(imc_rank_link_national_reports([$result],[$wrongWorld],'GW001'),$managers)['stats']['MNG001']['played'],0);
+$external=$report;$external['home_sm_manager_id']=999;check(imc_rank_national_rows(imc_rank_link_national_reports([$row],[$external],'GW001'),$managers)['stats']['MNG001']['played'],0);
+$conflict=$report;$conflict['home_sm_manager_id']=20;check(imc_rank_national_rows(imc_rank_link_national_reports([$row],[$report,$conflict],'GW001'),$managers)['stats']['MNG001']['played'],0);
+check(imc_rank_national_rows(imc_rank_link_national_reports([$row],[],'GW001'),$managers)['stats']['MNG001']['played'],1);
+echo "PASS: Results scores with report manager IDs, exact world/fixture join, deduplication, authoritative IDs and conflict exclusion\n";
