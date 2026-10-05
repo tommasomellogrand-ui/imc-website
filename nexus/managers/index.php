@@ -10,7 +10,7 @@ try{
    $logos=[];
    foreach(nexus_rows($core,'SELECT m.`SM World Club ID` world_id,c.image_url FROM `IMC Game World Club Mapping` m LEFT JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=?',[$gw??'GW001']) as $m){$logos['club'][(string)$m['world_id']]=$m['image_url'];}
    foreach(nexus_rows($core,'SELECT m.`SM World National Club ID` world_id,c.image_url FROM `IMC Game World National Team Mapping` m LEFT JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`=?',[$gw??'GW001']) as $m){$logos['national_team'][(string)$m['world_id']]=$m['image_url'];}
-   foreach($rows as &$a){$a['image_url']=$logos[$a['assignment_type']][(string)$a['sm_world_team_id']]??null;}unset($a);
+   foreach($rows as &$a){$a['image_url']=$logos[strtolower((string)$a['assignment_type'])][(string)$a['sm_world_team_id']]??null;}unset($a);
   }catch(Throwable $e){/* Optional logos must not hide external managers. */}
   nexus_out(['ok'=>true,'rows'=>$rows]);
  }
