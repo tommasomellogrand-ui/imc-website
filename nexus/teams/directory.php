@@ -18,7 +18,8 @@ try{
   // League membership defines the country filter (including cross-border clubs).
   $db=nexus_db($c,nexus_target($c,$gw));$countries=[];
   foreach(['Results','Schedule'] as $source){$table=nexus_table($gw,$source);
-   $members=nexus_rows($db,"SELECT DISTINCT competition_key,home_sm_club_id,away_sm_club_id FROM `".$table."` WHERE game_world_id=? AND sm_action='league'",[$gw]);
+   $home=$source==='Schedule'?'home_sm_team_id':'home_sm_club_id';$away=$source==='Schedule'?'away_sm_team_id':'away_sm_club_id';
+   $members=nexus_rows($db,"SELECT DISTINCT competition_key,`".$home."` AS home_sm_club_id,`".$away."` AS away_sm_club_id FROM `".$table."` WHERE game_world_id=? AND sm_action='league'",[$gw]);
    foreach($members as $m){$parts=explode('|',(string)$m['competition_key']);if(count($parts)<4||$parts[2]!=='DOMESTIC'||!preg_match('/^[A-Z]{3}$/',$parts[1]))continue;foreach(['home_sm_club_id','away_sm_club_id'] as $side)$countries[(string)$m[$side]][$parts[1]]=true;}
   }
   foreach($rows as &$row){$codes=array_keys($countries[(string)$row['world_id']]??[]);$row['country_code']=count($codes)===1?$codes[0]:null;}unset($row);
