@@ -5,7 +5,14 @@ try{
  $c=nexus_config();$core=nexus_db($c,'core');$id=trim((string)($_GET['manager']??''));$gw=isset($_GET['world'])?nexus_world($_GET['world']):null;
  if(isset($_GET['external'])){
   $sql='SELECT a.sm_manager_id,m.manager_name,a.game_world_id,a.assignment_type,a.sm_world_team_id,a.team_name FROM `EXT Manager Assignment Global` a JOIN `EXT Manager Codex Global` m ON m.sm_manager_id=a.sm_manager_id WHERE a.game_world_id=? ORDER BY m.manager_name,a.assignment_type,a.team_name';
-  $rows=nexus_rows($core,$sql,[$gw??'GW001']);nexus_out(['ok'=>true,'rows'=>$rows]);
+  $rows=nexus_rows($core,$sql,[$gw??'GW001']);
+  try {
+   $logos=[];
+   foreach(nexus_rows($core,'SELECT m.`SM World Club ID` world_id,c.image_url FROM `IMC Game World Club Mapping` m LEFT JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=?',[$gw??'GW001']) as $m){$logos['club'][(string)$m['world_id']]=$m['image_url'];}
+   foreach(nexus_rows($core,'SELECT m.`SM World National Club ID` world_id,c.image_url FROM `IMC Game World National Team Mapping` m LEFT JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`=?',[$gw??'GW001']) as $m){$logos['national_team'][(string)$m['world_id']]=$m['image_url'];}
+   foreach($rows as &$a){$a['image_url']=$logos[$a['assignment_type']][(string)$a['sm_world_team_id']]??null;}unset($a);
+  }catch(Throwable $e){/* Optional logos must not hide external managers. */}
+  nexus_out(['ok'=>true,'rows'=>$rows]);
  }
  if($id!==''){
   $rows=nexus_rows($core,'SELECT manager_id,full_name,imc_join_date,sm_manager_id FROM `IMC Manager Codex Global` WHERE manager_id=? LIMIT 1',[$id]);
