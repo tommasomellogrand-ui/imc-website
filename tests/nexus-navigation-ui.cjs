@@ -10,7 +10,7 @@ const fixture=(cls,labels,attr)=>`<nav class="${cls}">${labels.map((n,i)=>button
  await page.setContent(`<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><style>body{margin:0}main{width:100%;padding:16px;box-sizing:border-box}.tabs button.tab.active{background:#101238!important;color:white!important;box-shadow:inset 0 -4px gold!important}</style><style>${read('nexus/assets/navigation.css')}</style></head><body class="clubhouse-page" data-profile-family="managers"><main>
  ${fixture('manager-scope',['Club','Nations'])}
  <nav class="tabs" id="profile-tabs">${['OVERVIEW','MANAGER','ROSTER','STATS','DATA ROOM','H2H','TRANSFERS','TROPHY ROOM'].map((n,i)=>button(n,i).replace('class="','class="tab ')).join('')}</nav>
- <div class="dr"><div class="dr-filters"><b>Stagione</b>${fixture('dr-chips',['Tutte','S1','S2'])}</div>${fixture('dr-tabs',['Overview','Attacco','Difesa','Giocatori','Match Analysis'])}</div>
+ <div class="dr"><header><small>ANALISI E RENDIMENTO</small><h2>Data Room</h2><p>Solo Match Report</p></header><div class="dr-filters"><div><b>Stagione</b>${fixture('dr-chips',['Tutte','S1','S2'])}</div><div><b>Competizione</b>${fixture('dr-chips',['Tutte','Div 4','National Cup'])}</div></div>${fixture('dr-tabs',['Overview','Attacco','Difesa','Giocatori','Match Analysis'])}<p class="dr-status">Report disponibili</p><div class="dr-content">Statistiche</div></div>
  ${fixture('group-tabs',['Domestic','International','World Cup'])}${fixture('selection-tabs',['Campionati','Coppe'])}${fixture('selection-tabs',['Div 1','Div 2','Div 3','Div 4'])}
  ${fixture('tabs detail-tabs',['Overview','Results','Table','Schedule','Stats'])}${fixture('stat-tabs',['Marcatori','Assist','Clean sheet','Cartellini'])}
  ${fixture('hh-detail-tabs',['Overview','Partite','Confronto','Giocatori'],'aria-selected')}${fixture('transfer-tabs',['Attivi','Ceduti'],'aria-selected')}${fixture('mx-tabs',['Overview','Formazioni','Statistiche','Cronaca'])}
@@ -18,9 +18,15 @@ const fixture=(cls,labels,attr)=>`<nav class="${cls}">${labels.map((n,i)=>button
  ${fixture('md-tabs',['Pre Match','Live','Post Match'])}${fixture('article-tabs',['Overview','Interviste','Analisi'])}${fixture('deep-tabs',['Contesto','Forma','Confronto'])}${fixture('division-tabs',['Platinum','Gold','Silver','Bronze'])}
  <nav id="scope-tabs">${['Global','Club','Nations'].map((n,i)=>button(n,i)).join('')}</nav><nav id="tabs">${['Panoramica','Carriera','Head to Head','Trophy Room'].map((n,i)=>button(n,i)).join('')}</nav><nav class="tabs" hidden><button>Hidden</button></nav>
  </main></body></html>`);
+ await page.evaluate(()=>{const h=document.createElement('header');h.className='profile-banner';h.innerHTML='<div class="profile-wrap"><div class="profile-top"><a class="nexus-brand">NEXUS</a><select><option>GW001</option></select></div><section class="profile-hero"><div id="image"></div><div><small>CLUB</small><h1>Hertha Berlino</h1><p>GW001</p></div></section></div>';document.body.prepend(h);});
  await page.addScriptTag({content:read('nexus/assets/navigation.js')});
  await page.waitForFunction(()=>document.querySelector('#profile-tabs').dataset.nxNav==='tabs');
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'page overflow '+width);
+ assert.equal(await page.locator('.nx-topbar').evaluate(b=>getComputedStyle(b).backgroundColor),'rgb(16, 18, 56)');
+ assert.equal(await page.locator('.nx-hero').evaluate(b=>getComputedStyle(b).backgroundColor),'rgb(245, 246, 250)');
+ assert(await page.locator('.nx-menu').isVisible());
+ assert.equal(await page.locator('.dr-tabs').isVisible(),false);await page.locator('.nx-report summary').click();assert(await page.locator('.dr-tabs').isVisible());
+ const filters=await page.locator('.dr-filters>div').evaluateAll(xs=>xs.map(x=>x.getBoundingClientRect().top));assert(Math.abs(filters[0]-filters[1])<2,'filters must remain side by side');
  for(const nav of await page.locator('[data-nx-nav]:visible').all()){
   const geometry=await nav.evaluate(el=>{const r=el.getBoundingClientRect();return {width:r.width,items:[...el.children].map(b=>{const q=b.getBoundingClientRect(),s=getComputedStyle(b);return {y:q.y,h:q.height,w:q.width,scroll:b.scrollWidth,client:b.clientWidth,shadow:s.boxShadow};})};});
   assert(geometry.width<=width,'rail overflow');assert(geometry.items.every(b=>b.h>=44&&b.shadow==='none'&&b.scroll<=b.client+2),'button sizing '+width);
@@ -38,7 +44,7 @@ const fixture=(cls,labels,attr)=>`<nav class="${cls}">${labels.map((n,i)=>button
  // Dynamically mounted Data Room / trophy / H2H controls get the same system.
  await page.evaluate(()=>{const nav=document.createElement('nav');nav.className='nexus-filter-chips';nav.innerHTML='<button aria-pressed="true">Tutte</button><button>S3</button>';document.querySelector('main').append(nav)});
  await page.waitForFunction(()=>document.querySelector('.nexus-filter-chips')?.dataset.nxNav==='filter');
- assert.equal(await page.locator('.nexus-filter-chips button').first().evaluate(b=>getComputedStyle(b).backgroundColor),'rgb(251, 242, 218)');
+ assert.equal(await page.locator('.nexus-filter-chips button').first().evaluate(b=>getComputedStyle(b).backgroundColor),'rgb(248, 237, 207)');
  assert.deepEqual(errors,[]);console.log('LINEA_ORO_OK width='+width+' rails, active state, no overlap, dynamic filters, keyboard');await page.close();
  }
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
