@@ -8,7 +8,7 @@ try{for(const national of [true,false]){
  const page=await browser.newPage({viewport:{width:390,height:844}}),requests=[],errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.route('**/*.php*',async route=>{const u=new URL(route.request().url());requests.push(u);let data={ok:true,rows:[]};
  if(u.pathname.endsWith('/context.php'))data={ok:true,current_season:2,seasons:[{imc_season:1},{imc_season:2}]};
- else if(u.pathname.endsWith('/directory.php'))data={ok:true,count:1,rows:[{entity_id:1,world_id:101,name:national?'England':'Test Club',image_url:'/nexus/assets/flags/nations/1.svg'}]};
+ else if(u.pathname.endsWith('/directory.php'))data={ok:true,count:3,rows:[{entity_id:1,world_id:101,name:national?'England':'Test Club',image_url:'/nexus/assets/flags/nations/1.svg',manager:{manager_id:'MNG001',full_name:'Tommaso Mello',is_imc:true}},{entity_id:2,world_id:102,name:'External Team',manager:{sm_manager_id:42,full_name:'External Manager',is_imc:false}},{entity_id:3,world_id:103,name:'Unassigned Team',manager:null}]};
  else if(u.pathname.endsWith('/detail.php'))data={ok:true,team:{world_id:101,name:national?'England':'Test Club',image_url:'/nexus/assets/flags/nations/1.svg'},manager:{manager_id:'MNG001',full_name:'Tommaso Mello',start_date:'2026-01-01'}};
  else if(u.pathname.endsWith('/h2h/index.php'))data=u.searchParams.get('mode')==='data-room'?{ok:true,summary:{played:0},seasons:[],competitions:{}}:u.searchParams.get('mode')==='overview'?{ok:true,global:{stats},seasons:[{season:1,stats,current:false}]}:{ok:true,summary:stats,opponents:[],competitions:{}};
  else if(u.pathname.endsWith('/stats.php'))data={ok:true,stats};
@@ -16,7 +16,7 @@ try{for(const national of [true,false]){
  await route.fulfill({contentType:'application/json',body:JSON.stringify(data)});
  });
  await page.goto(base+'/nexus/teams/page.html?world=GW001'+(national?'&type=nations':''));
- await page.locator('article.team').waitFor();assert.equal(await page.locator('.hero h1').textContent(),national?'Nations':'Clubs');await page.locator('article.team').click();
+ await page.locator('article.team').first().waitFor();assert.equal(await page.locator('.imc-badge').count(),1);assert.equal(await page.locator('.manager-empty').textContent(),'Nessun manager assegnato');assert((await page.locator('.team-manager a').first().getAttribute('href')).includes('manager=MNG001'));assert((await page.locator('.team-manager a').nth(1).getAttribute('href')).includes('mode=ext_active'));const heights=await page.locator('article.team').evaluateAll(xs=>xs.map(x=>x.getBoundingClientRect().height));assert(heights.every(h=>h===heights[0]));assert.equal(await page.locator('.hero h1').textContent(),national?'Nations':'Clubs');await page.locator('article.team .team-main').first().click();
  await page.getByText('Storico globale',{exact:true}).waitFor();
  const labels=(await page.locator('#tabs button').allTextContents()).map(label=>label.toUpperCase());assert.deepEqual(labels,national?['OVERVIEW','MANAGER','ROSTER','STATS','DATA ROOM','H2H','TROPHY ROOM']:['OVERVIEW','MANAGER','ROSTER','STATS','DATA ROOM','H2H','TRANSFERS','TROPHY ROOM']);
  await page.getByRole('button',{name:'MANAGER',exact:true}).click();await page.getByText('Tommaso Mello',{exact:true}).waitFor();
@@ -32,4 +32,3 @@ try{for(const national of [true,false]){
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.deepEqual(errors,[]);await page.close();
  }console.log('PASS: Nations and clubs directory, all tabs, scopes, no national transfers, mobile layout');
 }finally{await browser.close();server.close();}})().catch(e=>{console.error(e);server.close();process.exit(1)});
-

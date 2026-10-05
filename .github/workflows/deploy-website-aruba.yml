@@ -58,6 +58,7 @@ on:
       - 'nexus/competitions/group.html'
       - 'nexus/competitions/family.html'
       - '.github/workflows/nexus-round-design.yml'
+      - 'nexus/teams/directory.php'
       - 'nexus/teams/page.html'
       - 'nexus/teams/detail.php'
       - 'nexus/teams/stats.php'
