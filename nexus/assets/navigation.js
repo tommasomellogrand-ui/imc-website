@@ -18,6 +18,7 @@
  new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','aria-pressed','aria-selected','aria-current','hidden']});
  window.addEventListener('resize',()=>{for(const [nav,active] of known)reveal(nav,active);},{passive:true});
  function enhanceLayout(){
+  enhanceCompetitions();
   if(!document.body.classList.contains('nx-linea-oro'))document.body.classList.add('nx-linea-oro');
   const header=document.querySelector('body>.profile-banner,body>header.hero,body.clubhouse-page>header,body>.md-banner,body>.club-hero');
   if(header&&!header.classList.contains('nx-masthead')){
@@ -34,7 +35,27 @@
    const detail=document.createElement('details');detail.className='nx-report';const summary=document.createElement('summary');const label=document.body.dataset.profileFamily==='managers'?'Report manager':document.body.dataset.profileFamily==='nations'?'Report nazionale':'Report squadre';summary.innerHTML='<span class="nx-report-icon" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>'+label+'</strong><small>Approfondimenti, trend e metriche chiave.</small></span><span class="nx-report-arrow" aria-hidden="true">›</span>';detail.append(summary);nav.before(detail);detail.append(nav,status,content);
   });
  }
+ function enhanceCompetitions(){
+  const name=document.getElementById('selected-name'),choices=document.getElementById('competition-tabs'),tabs=document.getElementById('competition-nav');
+  if(!name||!choices||!tabs)return;
+  if(!document.body.classList.contains('nx-competition'))document.body.classList.add('nx-competition');
+  let card=document.querySelector('.nx-competition-card');
+  if(!card){
+   const back=document.querySelector('.back-row'),season=document.getElementById('season-select');if(back&&season)back.append(season.parentElement);
+   card=document.createElement('section');card.className='nx-competition-card';choices.before(card);
+   const hero=document.createElement('div');hero.className='nx-competition-identity';
+   const symbol=document.createElement('div');symbol.className='nx-competition-symbol';symbol.setAttribute('aria-hidden','true');symbol.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M7 3h10v5a5 5 0 0 1-10 0zM12 13v6M8 21h8M7 5H3v3a4 4 0 0 0 4 4M17 5h4v3a4 4 0 0 1-4 4"/></svg>';
+   const tools=document.getElementById('competition-tools'),meta=document.createElement('p');meta.className='nx-competition-meta';tools.append(meta);hero.append(symbol,tools);card.append(hero,choices,tabs.parentElement.classList.contains('nx-rail-frame')?tabs.parentElement:tabs);
+  }
+  const full=name.textContent.replace(/\bDiv\s+(\d+)/i,'Divisione $1');if(name.textContent!==full)name.textContent=full;
+  const source=document.getElementById('meta')?.textContent||'',country=document.getElementById('country-filter'),active=country?.querySelector('[aria-pressed="true"]');
+  const line=country&&!country.hidden&&active?active.textContent.trim()+' · '+source:source;
+  const meta=card.querySelector('.nx-competition-meta');if(meta.textContent!==line)meta.textContent=line;
+  if(card.hidden!==tabs.hidden)card.hidden=tabs.hidden;
+  for(const b of choices.querySelectorAll('button')){const short=b.textContent.replace(/^Div\s+(\d+)$/,'D$1');if(short!==b.textContent){b.setAttribute('aria-label',b.textContent.replace('Div ','Divisione '));b.textContent=short;}}
+ }
  function enhanceScope(nav){
+  if(nav.id==='group-tabs'&&document.body.classList.contains('nx-competition'))return;
   if(nav.parentElement.classList.contains('nx-scope-band')){if(nav.parentElement.hidden!==nav.hidden)nav.parentElement.hidden=nav.hidden;return;}
   const title=nav.id==='group-tabs'?'Competizioni':nav.id==='scope-tabs'?'Manager · Club House':nav.classList.contains('manager-scope')?'Manager':nav.classList.contains('trophy-groups')?'Trophy Room':null;if(!title)return;
   const band=document.createElement('div');band.className='nx-scope-band';const heading=document.createElement('strong');heading.className='nx-scope-title';heading.textContent=title;nav.before(band);band.append(heading,nav);band.hidden=nav.hidden;

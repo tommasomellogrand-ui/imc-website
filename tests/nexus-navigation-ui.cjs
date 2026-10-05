@@ -45,6 +45,14 @@ const fixture=(cls,labels,attr)=>`<nav class="${cls}">${labels.map((n,i)=>button
  await page.evaluate(()=>{const nav=document.createElement('nav');nav.className='nexus-filter-chips';nav.innerHTML='<button aria-pressed="true">Tutte</button><button>S3</button>';document.querySelector('main').append(nav)});
  await page.waitForFunction(()=>document.querySelector('.nexus-filter-chips')?.dataset.nxNav==='filter');
  assert.equal(await page.locator('.nexus-filter-chips button').first().evaluate(b=>getComputedStyle(b).backgroundColor),'rgb(248, 237, 207)');
- assert.deepEqual(errors,[]);console.log('LINEA_ORO_OK width='+width+' rails, active state, no overlap, dynamic filters, keyboard');await page.close();
+ // Competition layout uses existing controls without replacing their event handlers.
+ await page.evaluate(()=>{const m=document.querySelector('main');m.innerHTML='<div class="back-row"><a>Nexus</a></div><div id="meta">Gold 558 · Stagione 1</div><div class="filters"><div class="filter"><select id="season-select"><option>1</option></select></div><div id="country-filter"><button aria-pressed="true">Inghilterra</button></div></div><nav id="group-tabs" class="group-tabs"><button aria-pressed="true">Domestic</button><button>International</button><button>World Cup</button></nav><nav id="family-tabs" class="selection-tabs"><button aria-pressed="true">Campionati</button><button>Coppe</button></nav><nav id="competition-tabs" class="selection-tabs">'+[1,2,3,4,5].map(i=>'<button data-competition="'+i+'" aria-pressed="'+(i===1)+'">Div '+i+'</button>').join('')+'</nav><div id="competition-tools"><h2 id="selected-name">England Div 1</h2></div><nav id="competition-nav" class="tabs"><button>Overview</button><button>Results</button><button>Table</button><button>Schedule</button><button>Stats</button></nav>';document.querySelector('[data-competition="2"]').onclick=()=>document.getElementById('selected-name').textContent='England Div 2';});
+ await page.waitForSelector('.nx-competition-card');await page.waitForFunction(()=>document.getElementById('selected-name').textContent==='England Divisione 1');
+ assert.equal(await page.locator('#competition-tabs button').first().textContent(),'D1');
+ assert.equal(await page.locator('.back-row #season-select').count(),1);
+ assert.equal(await page.locator('.nx-competition-meta').textContent(),'Inghilterra · Gold 558 · Stagione 1');
+ await page.locator('[data-competition="2"]').click();await page.waitForFunction(()=>document.getElementById('selected-name').textContent==='England Divisione 2');
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'competition overflow '+width);
+ assert.deepEqual(errors,[]);console.log('LINEA_ORO_OK width='+width+' competition card, Gold, controls, rails, keyboard');await page.close();
  }
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
