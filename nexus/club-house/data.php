@@ -24,10 +24,11 @@ try {
   $nation=ch_national_read($db,$gw,$managers,$selected,$assignments,$nationMapping);
   $out=$scope==='national_team'?$nation:ch_scope_merge($club,$nation);unset($out['accepted_results']);
  }
- $out['national_ranking_error']=false;$national=['stats'=>[],'coverage'=>null];
- try{$national=imc_rank_national_read($db,$gw,$managers);}catch(Throwable $e){$out['national_ranking_error']=true;error_log('National ranking Results '.$gw.': '.$e->getMessage());}
- $out['national_ranking_coverage']=$national['coverage'];
- foreach($out['managers'] as $id=>&$m){$m['national_stats']=$national['stats'][$id]??ch_zero();$m['ranking']=imc_rank_start($club['managers'][$id]['stats'],$gw,$m['national_stats']);}unset($m);
+ $out['ranking_error']=false;$out['national_ranking_error']=false;
+ $rankingResults=['club'=>['stats'=>[],'coverage'=>null],'national'=>['stats'=>[],'coverage'=>null]];
+ try{$rankingResults=imc_rank_results_read($db,$gw,$managers);}catch(Throwable $e){$out['ranking_error']=true;$out['national_ranking_error']=true;error_log('Ranking Results '.$gw.': '.$e->getMessage());}
+ $out['ranking_source']='Results';$out['ranking_coverage']=$rankingResults['club']['coverage'];$out['national_ranking_coverage']=$rankingResults['national']['coverage'];
+ foreach($out['managers'] as $id=>&$m){$m['ranking_club_stats']=$rankingResults['club']['stats'][$id]??ch_zero();$m['national_stats']=$rankingResults['national']['stats'][$id]??ch_zero();$m['ranking']=imc_rank_start($m['ranking_club_stats'],$gw,$m['national_stats']);}unset($m);
  // Display-only club logos: use existing world mappings, never create clubs.
  $out['clubs']=[];
  if($selected!==null)try {

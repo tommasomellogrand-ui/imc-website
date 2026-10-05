@@ -25,7 +25,7 @@ jobs:
       MYSQL_TEST_PASSWORD: club-house-ci-only
     steps:
       - uses: actions/checkout@v4
-      - name: Verify Match Report-only engine
+      - name: Verify Club House and Results-only ranking
         run: |
           for file in nexus/club-house/*.php; do php -l "$file"; done
           php tests/nexus-club-house.php
@@ -82,8 +82,10 @@ jobs:
               assert d['ok'] and d['scope']=='club' and d['source']=='Match Report'
               assert not d['trophy_error'], gw+' trophy read failed'
               coverage=d['national_ranking_coverage']; report_id_total+=coverage['report_manager_sides']
-              assert coverage['manager_source']=='Match Report, fallback Results'
-              print(gw,'national manager IDs from Match Report:',coverage['report_manager_sides'],'Results fallback:',coverage['result_manager_sides'],'MNG001 national games:',d['managers']['MNG001']['national_stats']['played'])
+              assert coverage['manager_source']=='Results'
+              assert d['ranking_source']=='Results' and not d['ranking_error']
+              assert d['ranking_coverage']['manager_source']=='Results'
+              print(gw,'ranking report manager IDs (must be zero):',coverage['report_manager_sides'],'Results manager IDs:',coverage['result_manager_sides'],'MNG001 national games:',d['managers']['MNG001']['national_stats']['played'])
               assert len(d['matches'])==d['managers']['MNG001']['stats']['played']
               assert len({m['fixture_id'] for m in d['matches']})==len(d['matches'])
               for m in d['matches']:
@@ -95,15 +97,16 @@ jobs:
                   n=v['national_stats']; national_total+=n['played']
                   assert n['played']==n['won']+n['drawn']+n['lost']==n['matched_by_id']
                   assert not d['national_ranking_error'] and d['national_ranking_coverage']['source']=='Results'
-                  assert r['version']==7 and r['weight']==weight
-                  assert r['club_points']==(s['played']+0.5*s['won']-0.5*s['lost'])*weight
+                  assert r['version']==8 and r['weight']==weight
+                  rs=v['ranking_club_stats']; assert rs['played']==rs['won']+rs['drawn']+rs['lost']==rs['matched_by_id']
+                  assert r['club_points']==(rs['played']+0.5*rs['won']-0.5*rs['lost'])*weight
                   assert r['national_points']==(n['played']+0.5*n['won']-0.5*n['lost'])*weight
                   assert r['match_points']==r['club_points']+r['national_points']
                   assert r['trophy_points']==r['trophy_base']*weight and r['total']==r['match_points']+r['trophy_points']
                   assert r['unscored_trophies']==0, (gw, r['awards'])
                   assert len(r['awards'])==v['trophies']
               print(gw,'OK',sum(v['stats']['matched_by_id'] for v in d['managers'].values()),'by ID;',sum(v['stats']['matched_by_name'] for v in d['managers'].values()),'by name;',len(d['matches']),'MNG001 matches')
-          assert report_id_total>0, 'No national manager IDs linked from reports'
+          assert report_id_total==0, 'Ranking must not use manager IDs from reports'
           assert national_total>0, 'No attributed national Results'
           print('National Results manager appearances included:',national_total)
           for i in range(1,11):
