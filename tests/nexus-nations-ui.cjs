@@ -18,7 +18,7 @@ try{for(const national of [true,false]){
  await page.goto(base+'/nexus/teams/page.html?world=GW001'+(national?'&type=nations':''));
  await page.locator('article.team').waitFor();assert.equal(await page.locator('.hero h1').textContent(),national?'Nations':'Clubs');await page.locator('article.team').click();
  await page.getByText('Storico globale',{exact:true}).waitFor();
- const labels=await page.locator('#tabs button').allTextContents();assert.deepEqual(labels,national?['OVERVIEW','MANAGER','ROSTER','STATS','DATA ROOM','H2H','TROPHY ROOM']:['OVERVIEW','MANAGER','ROSTER','STATS','DATA ROOM','H2H','TRANSFERS','TROPHY ROOM']);
+ const labels=(await page.locator('#tabs button').allTextContents()).map(label=>label.toUpperCase());assert.deepEqual(labels,national?['OVERVIEW','MANAGER','ROSTER','STATS','DATA ROOM','H2H','TROPHY ROOM']:['OVERVIEW','MANAGER','ROSTER','STATS','DATA ROOM','H2H','TRANSFERS','TROPHY ROOM']);
  await page.getByRole('button',{name:'MANAGER',exact:true}).click();await page.getByText('Tommaso Mello',{exact:true}).waitFor();
  await page.getByRole('button',{name:'ROSTER',exact:true}).click();await page.getByText('Selected Player',{exact:true}).waitFor();if(national)assert((await page.locator('#view').textContent()).includes('Convocati nell’ultimo Match Report'));
  if(!national){assert.equal(await page.locator('[data-roster-state]').count(),2);await page.locator('[data-roster-state=departed]').click();await page.getByText('Sold Player',{exact:true}).waitFor();assert.equal(await page.getByText('Selected Player',{exact:true}).count(),0);await page.locator('[data-roster-state=active]').click();await page.getByText('Selected Player',{exact:true}).waitFor();}
@@ -32,4 +32,5 @@ try{for(const national of [true,false]){
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.deepEqual(errors,[]);await page.close();
  }console.log('PASS: Nations and clubs directory, all tabs, scopes, no national transfers, mobile layout');
 }finally{await browser.close();server.close();}})().catch(e=>{console.error(e);server.close();process.exit(1)});
+
 

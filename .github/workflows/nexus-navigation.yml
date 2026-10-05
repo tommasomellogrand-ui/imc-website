@@ -1,0 +1,68 @@
+name: Nexus Linea Oro navigation
+on:
+  push:
+    branches: [main, nexus-linea-oro]
+    paths: ['nexus/assets/navigation.*', 'tests/nexus-navigation*', 'nexus/**/*.html', '.github/workflows/nexus-navigation.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nexus-navigation-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate presentation scripts
+        run: |
+          node --check nexus/assets/navigation.js
+          node --check tests/nexus-navigation-ui.cjs
+      - name: Verify mobile and desktop navigation
+        run: |
+          mkdir -p /tmp/nexus-navigation-test
+          npm install --prefix /tmp/nexus-navigation-test --package-lock-only --ignore-scripts playwright@1.62.1
+          npm ci --prefix /tmp/nexus-navigation-test --ignore-scripts
+          NEXUS_PLAYWRIGHT_PATH=/tmp/nexus-navigation-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-navigation-ui.cjs
+          NEXUS_PLAYWRIGHT_PATH=/tmp/nexus-navigation-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-nations-ui.cjs
+          NEXUS_PLAYWRIGHT_PATH=/tmp/nexus-navigation-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-data-room-ui.cjs
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: imc-public-website-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish only navigation assets and page references
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, urllib.request
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          from concurrent.futures import ThreadPoolExecutor
+          # Existing Aruba certificate hostname exception; CA verification remains enabled.
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx); ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
+          files=["nexus/assets/navigation.css","nexus/assets/navigation.js","nexus/club-house/index.html","nexus/competitions/domestic.html","nexus/competitions/family.html","nexus/competitions/group.html","nexus/competitions/index.html","nexus/competitions/match.html","nexus/competitions/view.html","nexus/index.html","nexus/managers/page.html","nexus/managers/profile.html","nexus/players/page.html","nexus/players/profile.html","nexus/teams/detail.html","nexus/teams/page.html","nexus/transfers/page.html"]
+          for name in files:
+              p=Path(name); data=p.read_bytes()
+              ftp.cwd('/www.italianmastersclub.it/'+str(p.parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data, name
+          ftp.quit()
+          def verify(name):
+              with urllib.request.urlopen('https://www.italianmastersclub.it/'+name+'?verify='+os.environ['GITHUB_SHA'],timeout=60) as r:
+                  assert r.read()==Path(name).read_bytes(), name
+          list(ThreadPoolExecutor(max_workers=4).map(verify,files))
+          print('LINEA_ORO_LIVE: navigation assets and '+str(len(files)-2)+' public pages verified byte for byte. No PHP or database changes.')
+          PY
+

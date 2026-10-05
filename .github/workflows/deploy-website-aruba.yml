@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/assets/navigation.*'
+      - 'tests/nexus-navigation*'
+      - '.github/workflows/nexus-navigation.yml'
+      - 'nexus/competitions/match.html'
+      - 'nexus/managers/page.html'
+      - 'nexus/players/page.html'
+      - 'nexus/players/profile.html'
+      - 'nexus/transfers/page.html'
       - 'nexus/club-house/**'
       - 'nexus/club-house/ranking.php'
       - 'nexus/club-house/data.php'
