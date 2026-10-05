@@ -1,10 +1,10 @@
 /* Shared presentation enhancement. No fetching, routing or data changes. */
 (()=>{'use strict';
- const groups={tabs:'.tabs,.stat-tabs,.dr-tabs,.hh-detail-tabs,.mx-tabs,.transfer-tabs,.clubhouse-page #tabs',scope:'.manager-scope,#scope-tabs,.group-tabs,.trophy-groups,.hh-scope',filter:'.nexus-filter-chips,.selection-tabs,.dr-chips'};
+ const groups={tabs:'.tabs,.stat-tabs,.dr-tabs,.hh-detail-tabs,.mx-tabs,.transfer-tabs,.clubhouse-page #tabs,.md-tabs,.article-tabs,.deep-tabs',scope:'.manager-scope,#scope-tabs,.group-tabs,.trophy-groups,.hh-scope',filter:'.nexus-filter-chips,.selection-tabs,.dr-chips,.division-tabs,.md-divisions'};
  const labels={'OVERVIEW':'Overview','MANAGER':'Manager','ROSTER':'Roster','STATS':'Stats','DATA ROOM':'Data Room','H2H':'H2H','TRANSFERS':'Transfers','TROPHY ROOM':'Trophy Room','CAREER':'Career','TABLE':'Table','RESULTS':'Results','SCHEDULE':'Schedule','IMC ACTIVE':'IMC Active','EXT ACTIVE':'EXT Active','IMC CAREER':'IMC Career'};
  const known=new Map();let pending=false;
  const children=nav=>Array.from(nav.children).filter(e=>e.matches('button,a'));
- const selected=nav=>children(nav).find(e=>e.matches('.active,[aria-pressed="true"],[aria-selected="true"],[aria-current="page"]'));
+ const selected=nav=>children(nav).find(e=>e.matches('.active,.on,[aria-pressed="true"],[aria-selected="true"],[aria-current="page"]'));
  function reveal(nav,button){if(!button||nav.clientWidth===0)return;const a=nav.getBoundingClientRect(),b=button.getBoundingClientRect();if(b.left<a.left+6)nav.scrollLeft-=a.left+6-b.left;else if(b.right>a.right-6)nav.scrollLeft+=b.right-a.right+6;}
  function scan(){pending=false;for(const [kind,selector] of Object.entries(groups))document.querySelectorAll(selector).forEach(nav=>{
    nav.dataset.nxNav=kind;

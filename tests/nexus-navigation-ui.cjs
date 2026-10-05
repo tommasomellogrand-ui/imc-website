@@ -15,6 +15,7 @@ const fixture=(cls,labels,attr)=>`<nav class="${cls}">${labels.map((n,i)=>button
  ${fixture('tabs detail-tabs',['Overview','Results','Table','Schedule','Stats'])}${fixture('stat-tabs',['Marcatori','Assist','Clean sheet','Cartellini'])}
  ${fixture('hh-detail-tabs',['Overview','Partite','Confronto','Giocatori'],'aria-selected')}${fixture('transfer-tabs',['Attivi','Ceduti'],'aria-selected')}${fixture('mx-tabs',['Overview','Formazioni','Statistiche','Cronaca'])}
  ${fixture('trophy-groups',['Domestic','International','World Cup'])}
+ ${fixture('md-tabs',['Pre Match','Live','Post Match'])}${fixture('article-tabs',['Overview','Interviste','Analisi'])}${fixture('deep-tabs',['Contesto','Forma','Confronto'])}${fixture('division-tabs',['Platinum','Gold','Silver','Bronze'])}
  <nav id="scope-tabs">${['Global','Club','Nations'].map((n,i)=>button(n,i)).join('')}</nav><nav id="tabs">${['Panoramica','Carriera','Head to Head','Trophy Room'].map((n,i)=>button(n,i)).join('')}</nav><nav class="tabs" hidden><button>Hidden</button></nav>
  </main></body></html>`);
  await page.addScriptTag({content:read('nexus/assets/navigation.js')});

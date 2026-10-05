@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/the-club/index.html'
+      - 'nexus/the-club/post.html'
+      - 'nexus/matchday/live.html'
       - 'nexus/assets/navigation.*'
       - 'tests/nexus-navigation*'
       - '.github/workflows/nexus-navigation.yml'
