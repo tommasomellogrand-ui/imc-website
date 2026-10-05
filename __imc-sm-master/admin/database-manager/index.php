@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 
-const IMC_DBM_VERSION = '1.6.13';
+const IMC_DBM_VERSION = '1.6.14';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -124,8 +124,25 @@ function dbm_assert_single_statement(string $sql): void {
 }
 
 function dbm_assert_no_cross_database(string $sql, string $database): void {
-    if (preg_match_all('/`?(Sql\d+_\d+)`?\s*\./i', $sql, $matches)) {
-        foreach ($matches[1] as $found) if (strcasecmp($found, $database) !== 0) throw new InvalidArgumentException('Cross-database SQL is forbidden.');
+    // Owner-authorized CORE lookups for dated national-team manager assignments.
+    $lookupTables = ['IMC Manager Assignment Global', 'IMC Manager Codex Global', 'IMC Game World National Team Mapping'];
+    $isRead = preg_match('/^\s*SELECT\b/i', $sql) === 1;
+    $isNationalTrigger = preg_match('/^\s*CREATE\s+TRIGGER\s+`?imc_results_nations_gw[0-9]{3}_bi`?\s+BEFORE\s+INSERT\s+ON\s+`?GW[0-9]{3}_IMC_Results`?\s+FOR\s+EACH\s+ROW\s+SET\s+NEW\./i', $sql) === 1;
+    $canLookup = in_array(strtolower($database), ['sql1956795_2', 'sql1956795_3'], true) && ($isRead || $isNationalTrigger);
+    if (preg_match_all('/`?(Sql\d+_\d+)`?\s*\./i', $sql, $matches, PREG_OFFSET_CAPTURE)) {
+        foreach ($matches[1] as $i => $match) {
+            $found = $match[0];
+            if (strcasecmp($found, $database) === 0) continue;
+            $offset = $matches[0][$i][1];
+            $prefix = substr($sql, 0, $offset);
+            $suffix = substr($sql, $offset + strlen($matches[0][$i][0]));
+            $table = [];
+            $lookup = $canLookup && strcasecmp($found, 'Sql1956795_1') === 0
+                && preg_match('/\b(?:FROM|JOIN)\s*$/i', $prefix)
+                && preg_match('/^\s*`([^`]+)`/', $suffix, $table)
+                && in_array($table[1], $lookupTables, true);
+            if (!$lookup) throw new InvalidArgumentException('Cross-database SQL is forbidden except approved CORE assignment lookups.');
+        }
     }
 }
 
