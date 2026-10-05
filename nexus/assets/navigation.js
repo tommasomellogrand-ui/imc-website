@@ -47,9 +47,13 @@
    const symbol=document.createElement('div');symbol.className='nx-competition-symbol';symbol.setAttribute('aria-hidden','true');symbol.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M7 3h10v5a5 5 0 0 1-10 0zM12 13v6M8 21h8M7 5H3v3a4 4 0 0 0 4 4M17 5h4v3a4 4 0 0 1-4 4"/></svg>';
    const tools=document.getElementById('competition-tools'),meta=document.createElement('p');meta.className='nx-competition-meta';tools.append(meta);hero.append(symbol,tools);card.append(hero,choices,tabs.parentElement.classList.contains('nx-rail-frame')?tabs.parentElement:tabs);
   }
-  const full=name.textContent.replace(/\bDiv\s+(\d+)/i,'Divisione $1');if(name.textContent!==full)name.textContent=full;
   const source=document.getElementById('meta')?.textContent||'',country=document.getElementById('country-filter'),active=country?.querySelector('[aria-pressed="true"]');
-  const line=country&&!country.hidden&&active?active.textContent.trim()+' · '+source:source;
+  const code=country&&!country.hidden?document.getElementById('country-select')?.value||active?.dataset.value||'':'';
+  country?.querySelectorAll('.nexus-filter-chips button[data-value]').forEach(b=>{const c=b.dataset.value;if(!/^[A-Z]{3}$/.test(c))return;if(!b.hasAttribute('aria-label'))b.setAttribute('aria-label',b.title||b.textContent.trim());for(const node of b.childNodes)if(node.nodeType===3&&node.textContent!==c)node.textContent=c;});
+  let full=name.textContent.replace(/\bDiv\s+(\d+)/i,'Divisione $1');
+  if(code){const competition=full.match(/(?:Divisione\s+\d+(?:\s+Playoff)?|Charity Shield|National Cup|League Cup|League Shield)$/i);if(competition)full=code+' · '+competition[0];}
+  if(name.textContent!==full)name.textContent=full;
+  const line=code?code+' · '+source:source;
   const meta=card.querySelector('.nx-competition-meta');if(meta.textContent!==line)meta.textContent=line;
   if(card.hidden!==tabs.hidden)card.hidden=tabs.hidden;
   for(const b of choices.querySelectorAll('button')){const short=b.textContent.replace(/^Div\s+(\d+)$/,'D$1');if(short!==b.textContent){b.setAttribute('aria-label',b.textContent.replace('Div ','Divisione '));b.textContent=short;}}

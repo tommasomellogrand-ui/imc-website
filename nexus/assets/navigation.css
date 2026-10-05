@@ -137,3 +137,7 @@ html body.nx-competition #group-tabs[data-nx-nav]{padding:0 4px!important;gap:0}
 html body.nx-competition #group-tabs[data-nx-nav]>button{font-size:12px;padding:12px 8px!important}
 .nx-competition .back-row{padding:12px 0}.nx-competition-card{border-radius:12px;margin-bottom:20px}
 }
+/* Full-width competition family selector. */
+html body.nx-competition #family-tabs.selection-tabs[data-nx-nav]{display:flex!important;width:100%!important;gap:0!important;background:#fff!important;border:1px solid #e1e6ef!important;border-radius:9px!important;overflow:hidden!important}
+html body.nx-competition #family-tabs.selection-tabs[data-nx-nav]>button{flex:1 1 0!important;min-width:0!important;min-height:46px!important;padding:12px 8px!important;text-align:center;background:transparent!important;border:0!important;border-bottom:3px solid transparent!important;font-size:14px!important}
+html body.nx-competition #family-tabs.selection-tabs[data-nx-nav]>button[aria-pressed="true"]{background:#f8edcf!important;color:#101238!important;border-bottom-color:#d3ac50!important}
