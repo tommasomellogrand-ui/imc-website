@@ -1,6 +1,6 @@
 (async()=>{'use strict';
 const {p,gw,esc,url,get}=NexusUI,$=id=>document.getElementById(id);
-const families=[{id:'domestic-leagues',group:'DOMESTIC',name:'Campionati',actions:['league']},{id:'domestic-playoffs',group:'DOMESTIC',name:'Playoff',actions:['playoff']},{id:'domestic-cups',group:'DOMESTIC',name:'Coppe',actions:['charityshield','nationalcup','leaguecup','leagueshield']},{id:'international-cups',group:'INTERNATIONAL',name:'International',actions:['smfacup','smfashield','supercup']},{id:'world-cup',group:'NATIONS',name:'World Cup',actions:['interqualifier','worldcup']}];
+const families=[{id:'domestic-leagues',group:'DOMESTIC',name:'Campionati',actions:['league']},{id:'domestic-playoffs',group:'DOMESTIC',name:'Playoff',actions:['playoff']},{id:'domestic-cups',group:'DOMESTIC',name:'Coppe',actions:['charityshield','nationalcup','leaguecup','leagueshield']},{id:'international-cups',group:'INTERNATIONAL',name:'International',actions:['smfacup','smfashield','supercup','copa_libertadores','coppa_dei_campioni']},{id:'world-cup',group:'NATIONS',name:'World Cup',actions:['interqualifier','worldcup']}];
 const familyOf=r=>families.find(f=>f.actions.includes(String(r.sm_action).toLowerCase()));
 let cleanup=()=>{},all=[],season='',currentGroup='',currentFamily='',country=p.get('country')||'',selectedKey=p.get('competition')||'';
 const legacyFamily=p.get('family')||(document.body.dataset.page==='domestic'?(p.get('section')==='cups'?'domestic-cups':'domestic-leagues'):'');
@@ -31,7 +31,8 @@ function render(){
  $('competition-tools').hidden=!selected;$('competition-nav').hidden=!selected;$('group-filter').hidden=true;
  if(!selected){$('title').textContent='Competizioni';$('selected-name').textContent='';$('view').innerHTML='<div class="empty">Nessuna competizione con risultati o calendario nella stagione selezionata.</div>';updateUrl(null,'overview');return}
  $('title').textContent='Competizioni';$('selected-name').textContent=selected.nexus_view;$('group').textContent='IMC · COMPETIZIONI';document.title='Nexus · '+selected.nexus_view;
- const tab=firstRender&&['overview','results','standings','schedule','stats'].includes(p.get('tab'))?p.get('tab'):'overview';firstRender=false;
+ const customCup=selected.sm_action==='copa_libertadores'||selected.sm_action==='coppa_dei_campioni';
+ const tab=firstRender&&['overview','results','standings','schedule','stats'].includes(p.get('tab'))?p.get('tab'):(customCup?'standings':'overview');firstRender=false;
  updateUrl(selected,tab);
  cleanup=NexusCompetition.mount({season,key:selected.competition_key,name:selected.nexus_view,tab})||(()=>{});
 }

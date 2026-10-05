@@ -2,7 +2,7 @@ name: Deploy Nexus round design
 on:
   push:
     branches: [main]
-    paths: ["nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html",".github/workflows/nexus-round-design.yml"]
+    paths: ["nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","tests/nexus-custom-cups.php","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html",".github/workflows/nexus-round-design.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,6 +17,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate round scripts
         run: |
+          php tests/nexus-custom-cups.php
+          php -l nexus/competitions/custom-cups.php
+          php -l nexus/competitions/catalog.php
+          php -l nexus/competitions/standings.php
+          node --check nexus/assets/competition-tabs.js
           php -l nexus/competitions/match-report.php
           node --check nexus/assets/filter-chips.js
           node --check nexus/assets/competition-view.js
@@ -37,7 +42,7 @@ jobs:
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p(); ftp.set_pasv(True)
-          files=[Path(p) for p in ["nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html"]]
+          files=[Path(p) for p in ["nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html"]]
           for path in files:
               ftp.cwd('/www.italianmastersclub.it')
               for part in path.parent.parts:
@@ -53,5 +58,15 @@ jobs:
               with urllib.request.urlopen('https://www.italianmastersclub.it/'+str(path)+'?verify='+os.environ['GITHUB_SHA'],timeout=30) as response:
                   if response.read()!=path.read_bytes(): raise RuntimeError('Live mismatch: '+str(path))
           list(ThreadPoolExecutor(max_workers=6).map(verify,files))
+          import json
+          base='https://www.italianmastersclub.it/nexus/competitions/'
+          def api(path):
+              with urllib.request.urlopen(base+path,timeout=30) as r: return json.load(r)
+          catalog=api('catalog.php?world=GW010&season=1')
+          for key in ['GW010_COPA_LIBERTADORES','GW010_COPPA_DEI_CAMPIONI']:
+              assert any(r['competition_key']==key and r['competition_group']=='INTERNATIONAL' for r in catalog['rows'])
+              table=api('standings.php?world=GW010&season=1&competition='+key)
+              assert table['ok'] and len(table['groups'])==4 and len(table['rows'])==12
+          print('GW010 custom cups and all 24 group entries verified live.')
           print('All round design uploaded and verified live. No database changes.')
           PY

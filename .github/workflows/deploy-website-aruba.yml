@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/competitions/custom-cups.json'
+      - 'nexus/competitions/custom-cups.php'
+      - 'nexus/competitions/standings-engine.php'
+      - 'nexus/competitions/standings.php'
+      - 'nexus/competitions/catalog.php'
+      - 'nexus/assets/competition-tabs.js'
+      - 'nexus/assets/catalog-page.js'
+      - 'tests/nexus-custom-cups.php'
       - 'nexus/the-club/index.html'
       - 'nexus/the-club/post.html'
       - 'nexus/matchday/live.html'

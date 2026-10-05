@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__).'/core/bootstrap.php';
+require __DIR__.'/custom-cups.php';
 try{
   $c=nexus_config();$gw=nexus_world($_GET['world']??'');$season=nexus_season($_GET['season']??null);$core=nexus_db($c,'core');
   $seasons=nexus_rows($core,'SELECT imc_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season',[$gw]);
@@ -28,6 +29,13 @@ try{
     $r['game_world_id']=$gw;$r['imc_season']=$season;$r['world_type']=$country?'MULTI':'SINGLE';$r['sm_country']=$country;$r['sm_action']=$action;$r['competition_group']=$group;$r['sm_division']=$division;
     $r['nexus_view']=$labels[$key]??(($country?$country.' ':'').$fallback);$r['result_count']=(int)$r['result_count'];$r['schedule_count']=(int)$r['schedule_count'];
   }unset($r);
+  foreach(nexus_custom_cups($gw,$season) as $cup){
+    $found=false;
+    foreach($rows as &$r)if($r['competition_key']===$cup['competition_key']){
+      $r=array_merge($r,array_diff_key($cup,['groups'=>true]));$found=true;break;
+    }unset($r);
+    if(!$found)$rows[]=array_merge(array_diff_key($cup,['groups'=>true]),['result_count'=>0,'schedule_count'=>0]);
+  }
   usort($rows,fn($a,$b)=>[($order[$a['sm_action']]??99),$a['sm_country']??'',(int)$a['sm_division'],$a['competition_key']]<=>[($order[$b['sm_action']]??99),$b['sm_country']??'',(int)$b['sm_division'],$b['competition_key']]);
   nexus_out(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'rows'=>$rows]);
 }catch(InvalidArgumentException $e){nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){nexus_out(['ok'=>false,'error'=>'competition_catalog_error'],500);}

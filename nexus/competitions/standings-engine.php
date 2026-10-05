@@ -9,7 +9,7 @@ function nexus_standings_group(array $row): string {
     return preg_match('/^(?:group|gruppo|girone)\s+[A-Z0-9]+$/i',$stage)?$stage:'';
 }
 
-function nexus_standings_tables(array $rows): array {
+function nexus_standings_tables(array $rows, array $seeds=[]): array {
     $eligible=[];$seen=[];$hasGroups=false;
     foreach($rows as $r){
         if($r['home_score']===null||$r['away_score']===null)continue;
@@ -22,6 +22,13 @@ function nexus_standings_tables(array $rows): array {
         $r['_group']=nexus_standings_group($r);$hasGroups=$hasGroups||$r['_group']!=='';$eligible[]=$r;
     }
     $tables=[];$excluded=0;
+    foreach($seeds as $seed){
+        $name=$seed['group_name'];$tables[$name]=[];$hasGroups=true;
+        foreach($seed['teams'] as $team){
+            $id=(string)$team['team_id'];
+            $tables[$name][$id]=['team_id'=>$id,'team_name'=>$team['team_name'],'played'=>0,'won'=>0,'drawn'=>0,'lost'=>0,'gf'=>0,'ga'=>0,'gd'=>0,'points'=>0];
+        }
+    }
     foreach($eligible as $r){
         $group=$r['_group'];
         if($hasGroups&&$group===''){$excluded++;continue;}
