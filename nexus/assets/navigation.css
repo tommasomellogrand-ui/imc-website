@@ -1,7 +1,7 @@
 /* Nexus · Linea Oro. Presentation only; shared by public game pages. */
 :root{--nx-nav-navy:#101238;--nx-nav-gold:#d3ac50;--nx-nav-muted:#697187;--nx-nav-line:#e1e6ef}
 html body [data-nx-nav]{box-sizing:border-box;min-width:0;max-width:100%;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scroll-padding-inline:14px;scrollbar-width:thin;scrollbar-color:var(--nx-nav-gold) transparent}
-html body [data-nx-nav][hidden]{display:none!important}
+html body :is(#nexus-nav-priority,[data-nx-nav])[data-nx-nav][hidden]{display:none!important}
 html body :is(#nexus-nav-priority,[data-nx-nav])[data-nx-nav]>:is(button,a){box-sizing:border-box;appearance:none;-webkit-appearance:none;position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:max-content;min-height:46px;margin:0;font-family:Inter,Arial,sans-serif;font-size:13px;font-weight:600;line-height:1.35;letter-spacing:0;text-transform:none;white-space:nowrap;text-decoration:none;opacity:1;cursor:pointer;transform:none!important;box-shadow:none!important;background-image:none!important}
 /* Sections: a single white rail, never wrapped or compressed. */
 html body :is(#nexus-nav-priority,[data-nx-nav="tabs"])[data-nx-nav]{display:flex!important;flex-flow:row nowrap!important;align-items:stretch;justify-content:flex-start;gap:4px;padding:0 6px!important;border:0!important;border-bottom:1px solid var(--nx-nav-line)!important;border-radius:0!important;background:#fff!important;box-shadow:none!important;overflow-x:auto!important;overflow-y:hidden!important;margin-block:16px 22px;isolation:isolate}
