@@ -50,7 +50,7 @@ function ch_national_rows(array $rows,string $gw,array $managers,?string $select
   if(count($resolved['home'])===1&&$resolved['home']===$resolved['away'])$reason='Stesso manager su entrambe le nazionali';
   if($reason){$cov['excluded_fixtures']++;foreach(array_unique(array_merge(...array_values($resolved))) as $id)if(isset($out['managers'][$id])){$out['managers'][$id]['excluded']++;if($id===$selected)$out['issues'][]=['world'=>$gw,'fixture_id'=>$r['sm_fixture_id']??null,'date'=>$day,'reason'=>$reason];}continue;}
   foreach(['home','away'] as $side){
-   $ids=$resolved[$side];if(count($ids)!==1){$cov[count($ids)?'ambiguous_sides':'unassigned_sides']++;foreach($ids as $id)if(isset($out['managers'][$id])){$out['managers'][$id]['excluded']++;if($id===$selected)$out['issues'][]=['world'=>$gw,'fixture_id'=>$r['sm_fixture_id'],'date'=>$day,'reason'=>'Incarichi nazionali sovrapposti alla data della partita'];}}
+   $ids=$resolved[$side];if(count($ids)>1){$cov['ambiguous_sides']++;foreach($ids as $id)if(isset($out['managers'][$id])){$out['managers'][$id]['excluded']++;if($id===$selected)$out['issues'][]=['world'=>$gw,'fixture_id'=>$r['sm_fixture_id'],'date'=>$day,'reason'=>'Incarichi nazionali sovrapposti alla data della partita'];}}
    $r['_'.$side.'_manager']=count($ids)===1&&isset($out['managers'][$ids[0]])?$ids[0]:null;
    $r[$side.'_sm_club_id']=$teams[$side];
   }
