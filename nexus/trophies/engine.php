@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 // Pure derivation: no writes, network access or dependency on the current club roster.
-const TROPHY_ENGINE_VERSION = '20260928.2';
+const TROPHY_ENGINE_VERSION = '20261006.1';
 function trophy_nexus_view(array $row,array $labels): string {
     $key=(string)$row['competition_key'];
     if (isset($labels[$key])) return (string)$labels[$key];
@@ -100,11 +100,11 @@ function trophy_record(string $gw,array $r,string $side,string $method): array {
         'winner_sm_world_club_id'=>(int)($r[$side.'_sm_club_id']??0) ?: null,
         'winner_name'=>$r[$side.'_name'],'decided_by'=>$method,
         'deciding_fixture_id'=>$method==='final'?(int)$r['sm_fixture_id']:null,'won_date'=>$r['match_date'],
-        'date_source'=>$method==='final'?'match_report':'result',
-        'source_repository'=>$method==='final'?'IMC Match Report':'IMC Results'];
+        'date_source'=>'result',
+        'source_repository'=>'IMC Results'];
 }
 function trophy_derive(string $gw,array $results,array $reports,array $schedules,array $definitions,string $today,array $mapping=[]): array {
-    [$results,$reports,$schedules]=trophy_resolve_ids($results,$reports,$schedules,$mapping);
+    [$results,$reports,$schedules]=trophy_resolve_ids($results,[],$schedules,$mapping);
     [$fixtures,$conflicts]=trophy_fixture_map($results);
     [$reportMap,$reportConflicts]=trophy_fixture_map($reports);
     $groups=[]; $scheduleGroups=[]; $issues=[]; $invalid=0;
@@ -137,22 +137,10 @@ function trophy_derive(string $gw,array $results,array $reports,array $schedules
             $issues[$key]='ambiguous_finals';continue;
         }
         if (trophy_leg($last)===1) {$issues[$key]='awaiting_second_leg';continue;}
-        $mr=$reportMap[$id]??null;
-        if (!$mr || isset($reportConflicts[$id])) {$issues[$key]='final_report_missing_or_conflicting';continue;}
-        // Results define the current competition/season even when an old report has stale metadata.
-        // Scores must agree when both sources contain them; never choose a winner from contradictory sources.
+        // Results are the sole authority for final scores and winners.
         $m=$last; $mismatch=false;
-        foreach (['home_score','away_score','penalty_home_score','penalty_away_score','aggregate_home_score','aggregate_away_score'] as $f) {
-            if (isset($mr[$f],$last[$f]) && (int)$mr[$f] !== (int)$last[$f]) $mismatch=true;
-            if (isset($mr[$f])) $m[$f]=$mr[$f];
-        }
-        foreach (['home','away'] as $side) {
-            $f=$side.'_sm_club_id';
-            if (!empty($mr[$f]) && !empty($last[$f]) && (string)$mr[$f] !== (string)$last[$f]) $mismatch=true;
-            if (empty($m[$f]) && !empty($mr[$f])) $m[$f]=$mr[$f];
-        }
-        if ($mismatch || !isset($mr['home_score'],$mr['away_score']) || !trophy_finished($m,$today)) {
-            $issues[$key]='final_incomplete_or_sources_disagree';continue;
+        if (!trophy_finished($m,$today)) {
+            $issues[$key]='final_incomplete';continue;
         }
         foreach ($schedule as $s) if (trophy_final($s) && ((string)($s['match_date']??'') > $m['match_date'] || trophy_leg($s)===2 && trophy_leg($m)!==2)) {
             $mismatch=true;
