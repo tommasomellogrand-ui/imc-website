@@ -31,8 +31,7 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false): arra
         $db->beginTransaction();
         $state=nexus_rows($db,'SELECT * FROM IMC_Trophy_Sync_State WHERE game_world_id=?',[$gw])[0];
         $results=nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Results` WHERE game_world_id=? AND imc_season>=?',[$gw,$currentSeason]);
-        // Deliberately exclude the large players/events/commentary JSON columns.
-        $reports=nexus_rows($db,'SELECT sm_fixture_id,imc_season,competition_key,sm_action,competition_group,home_sm_club_id,away_sm_club_id,home_name,away_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score FROM `'.$gw.'_IMC_Match_Report` WHERE game_world_id=? AND imc_season>=?',[$gw,$currentSeason]);
+        $reports=[]; // Results-only trophy derivation.
         $schedule=nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Schedule` WHERE game_world_id=? AND imc_season>=?',[$gw,$currentSeason]);
         $derived=trophy_derive($gw,$results,$reports,$schedule,$definitions,$today,$mapping);
         foreach($derived['awards'] as &$award)$award['nexus_view']=trophy_nexus_view($award,$labels);unset($award);
@@ -43,10 +42,11 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false): arra
         $existing=[];foreach($before as $row)$existing[trophy_group_key($row)]=$row;
         $changes=['inserted'=>0,'updated'=>0,'removed'=>0];
         $remove=$db->prepare('DELETE FROM '.$table.' WHERE id=?');
-        foreach ($before as $old) if ((int)($old['imc_season']??0)>=$currentSeason && !isset($wanted[trophy_group_key($old)])) {$remove->execute([$old['id']]);$changes['removed']++;}
+        foreach ($before as $old) if ((int)($old['imc_season']??0)>=$currentSeason && in_array($old['source_repository']??'', ['IMC Results','IMC Match Report'],true) && !isset($wanted[trophy_group_key($old)])) {$remove->execute([$old['id']]);$changes['removed']++;}
         foreach ($wanted as $key=>$row) {
             $old=$existing[$key]??null;
             if ($old) {
+                if (!in_array($old['source_repository']??'', ['IMC Results','IMC Match Report'],true)) continue;
                 $changed=false;foreach($row as $field=>$value)if((string)($old[$field]??'')!==(string)($value??'')){$changed=true;break;}
                 if (!$changed)continue;
                 $sql='UPDATE '.$table.' SET '.implode(',',array_map(fn($f)=>'`'.$f.'`=?',array_keys($row))).' WHERE id=?';
