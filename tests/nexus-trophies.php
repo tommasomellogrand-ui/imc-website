@@ -26,10 +26,10 @@ check(count($run($league,[],[],[])['awards'])===0,'no definition or full schedul
 $future=$league;$future[0]['match_date']='2099-01-01';
 check(count($run($future)['awards'])===0,'future result cannot award a trophy');
 $cup=fixture(100,1,2,2,2);$cup['competition_key']='GW001|DOMESTIC|leaguecup';$cup['sm_action']='leaguecup';$cup['competition_stage']='Finale';$cup['sm_division']=null;$cup['penalty_home_score']=4;$cup['penalty_away_score']=5;
-check(count($run([$cup])['awards'])===0,'cup needs linked match report');
+check(count($run([$cup])['awards'])===1,'Results final awards without match report');
 $r=$run([$cup],[$cup]);check($r['awards'][0]['winner_name']==='Team 2','penalties decide final');
 $mr=$cup;$mr['home_score']=3;
-check(count($run([$cup],[$mr])['awards'])===0,'report/result score conflict suspended');
+check($run([$cup],[$mr])['awards'][0]['winner_name']==='Team 2','Results remain authoritative over conflicting report');
 $semi=$cup;$semi['competition_stage']='Semifinale';check(count($run([$semi],[$semi])['awards'])===0,'semifinal is not a final');
 $quarters=$cup;$quarters['competition_stage']='Quarti di Finalee';check(count($run([$quarters],[$quarters])['awards'])===0,'quarter final is not a final');
 $q=$cup;$q['sm_action']='interqualifier';check(count($run([$q],[$q])['awards'])===0,'qualifiers never award trophies');
