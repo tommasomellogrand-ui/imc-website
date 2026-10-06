@@ -61,6 +61,16 @@ for($i=1;$i<=10;$i++) {
     $sync=trophy_sync($config,$db,$gw);
     check($sync['changes']===['inserted'=>1,'updated'=>0,'removed'=>0],$gw.' current season still derives awards');
     check(nexus_rows($db,'SELECT * FROM '.$gw.'_IMC_Trophy_Room WHERE imc_season=1 ORDER BY id')===$history,$gw.' all historical fields preserved regardless of source');
+    // Current-season Honours survive both conflicting and missing Results.
+    $db->exec("UPDATE ".$gw."_IMC_Trophy_Room SET source_repository='SM Honours',winner_name='Official winner' WHERE imc_season=2");
+    $official=nexus_rows($db,'SELECT * FROM '.$gw.'_IMC_Trophy_Room WHERE imc_season=2');
+    $db->exec("UPDATE IMC_Trophy_Sync_State SET revision=revision+1,touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$gw'");
+    trophy_sync($config,$db,$gw);
+    check(nexus_rows($db,'SELECT * FROM '.$gw.'_IMC_Trophy_Room WHERE imc_season=2')===$official,$gw.' current Honours not overwritten');
+    $db->exec('DELETE FROM '.$gw.'_IMC_Results WHERE imc_season=2');
+    $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$gw'");
+    trophy_sync($config,$db,$gw);
+    check(nexus_rows($db,'SELECT * FROM '.$gw.'_IMC_Trophy_Room WHERE imc_season=2')===$official,$gw.' current Honours not deleted');
     $db->prepare('DELETE FROM IMC_Game_World_Season WHERE game_world_id=?')->execute([$gw]);
     $preview=trophy_sync($config,$db,$gw,true);
     check($preview['state']==='current_season_unavailable',$gw.' missing local mapping never falls back to CORE');
