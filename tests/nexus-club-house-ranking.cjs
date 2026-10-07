@@ -14,7 +14,7 @@ function bundle(world){const weight=['GW001','GW008'].includes(world)?3:['GW002'
  assert.match(await page.locator('.rank-split').first().textContent(),/Nazionali/);assert.match(await page.locator('.rank-world').first().textContent(),/Results/);
  assert.equal(await page.locator('.rank-world').first().locator('tbody tr small').allTextContents().then(x=>x.join(',')),'Results,Results');
  assert.equal(await page.locator('.rank-calculation[open]').count(),0);await page.locator('.rank-calculation summary').first().click();assert.match(await page.locator('.rank-calculation').first().textContent(),/Nazionali: /);
- await page.locator('#search').fill('Tre');assert.equal(await page.locator('.rank-total').first().textContent(),'24PUNTI');assert.deepEqual(await page.locator('.rank-position').allTextContents(),['3']);await page.locator('#search').fill('');
+ assert.equal(await page.locator('#search').isVisible(),false);
  await page.locator('#world').selectOption('GW008');assert.equal(await page.locator('.rank-total').first().textContent(),'237PUNTI');
  await page.locator('#world').selectOption('GW004');assert.equal(await page.locator('.rank-total').first().textContent(),'79PUNTI');
  await page.locator('#world').selectOption('');fail=true;await page.locator('#retry').click();await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('9/10'));assert.match(await page.locator('#content').textContent(),/Classifica provvisoria/);

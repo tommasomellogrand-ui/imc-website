@@ -31,7 +31,7 @@ function bundle(world){
   await page.locator('#world').selectOption('');
   assert.equal(await page.locator('.manager-card').count(),3);
   console.log('SCREENSHOT_DIRECTORY='+ (await page.screenshot()).toString('base64'));
-  await page.locator('#search').fill('Uno');assert.equal(await page.locator('.manager-card').count(),1);await page.locator('.manager-card').click();
+  assert.equal(await page.locator('#search').isVisible(),false);await page.locator('.manager-card').filter({hasText:'Manager Uno'}).click();
   await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('10/10'));
   assert.equal(await page.locator('#scope-tabs button').count(),3); for(const label of ['Club','Nations','Global']){await page.locator('#scope-tabs').getByRole('button',{name:label,exact:true}).click();await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('10/10'));assert.equal(await page.locator('#scope-tabs button[aria-pressed="true"]').textContent(),label);} assert.equal(await page.locator('.summary-played strong').textContent(),'4');assert.equal(await page.locator('#tabs').isVisible(),false);for(const el of await page.locator('.career-matches summary').all())await el.click();await page.waitForFunction(()=>document.querySelectorAll('.match').length===4);assert.equal(await page.locator('.match').count(),4);
   assert.match(await page.locator('#content').textContent(),/4 partite tramite ID Soccer Manager/);
