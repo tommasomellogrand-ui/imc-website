@@ -89,7 +89,7 @@ function career(){
  const detailStats=rows=>{const s=matchStats(rows);return '<div class="stat-line">'+[['partite',s.played],['vittorie',s.won],['pareggi',s.drawn],['sconfitte',s.lost],['gol fatti',s.gf],['gol subiti',s.ga],['diff. reti',s.gf-s.ga],['vittorie',pct(s)]].map(([label,value])=>'<span><strong>'+esc(value)+'</strong>'+label+'</span>').join('')+'</div>';};
  const groups=available().map(w=>{
   const rows=matches.filter(m=>m.world===w);
-  const assignments=(bundles[w].assignments||[]).filter(a=>scope==='global'||a.assignment_type===scope).slice().sort((a,b)=>String(a.start_date||'').localeCompare(String(b.start_date||'')));
+  const assignments=(bundles[w].assignments||[]).filter(a=>scope==='global'||a.assignment_type===scope).slice().sort((a,b)=>(Number(a.assignment_type==='national_team')-Number(b.assignment_type==='national_team'))||String(a.start_date||'').localeCompare(String(b.start_date||'')));
   const buckets=assignments.map(()=>[]),unassigned=[];
   rows.forEach(m=>{
    const indices=assignments.flatMap((a,i)=>m.scope===a.assignment_type&&String(m.team_id||'')===String(a.assignment_type==='national_team'?(bundles[w]?.nations?.[a.national_team_id]?.world_id||a.national_team_id):(a.team_id||''))&&(!a.start_date||String(m.date).slice(0,10)>=a.start_date)&&(!a.end_date||String(m.date).slice(0,10)<=a.end_date)?[i]:[]);
