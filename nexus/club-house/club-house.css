@@ -223,3 +223,36 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 .clubhouse-hub .rank-rules .ranking-score-guide>span:nth-child(2){background:#eaf4ed;color:#306943}
 .clubhouse-hub .rank-rules .ranking-score-guide>span:nth-child(3){background:#f8f2e3;color:#89651d}
 .clubhouse-hub .rank-rules .ranking-score-guide>span:nth-child(4){background:#fbeeea;color:#a34437}
+
+/* Timeline: dates once, compact events, club crests and national flags. */
+.clubhouse-hub .timeline-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:#e9ecf3;border-radius:12px;padding:3px;margin:14px 0 20px}
+.clubhouse-hub .timeline-filters button{min-height:44px;border:0;border-radius:9px;padding:9px 4px;font-size:12px;background:transparent;color:#697087}
+.clubhouse-hub .timeline-filters button.active{background:#101238;color:#fff;box-shadow:inset 0 -2px #d3ac50}
+.clubhouse-hub .timeline-feed{display:block}
+.clubhouse-hub .timeline-day{margin:0 0 24px}
+.clubhouse-hub .timeline-day>h2{font-size:11px;letter-spacing:.7px;color:#8b6a27;margin:0 0 12px}
+.clubhouse-hub .timeline-day-events{border-left:2px solid #dfe3ed;margin-left:5px;padding-left:17px;display:grid;gap:12px}
+.clubhouse-hub .timeline-card{position:relative;margin:0;background:#fff;border:1px solid #e1e6ef;border-radius:13px;overflow:visible;box-shadow:0 3px 12px #10123804;--event-color:#697087}
+.clubhouse-hub .timeline-card:before{content:"";position:absolute;left:-24px;top:17px;width:10px;height:10px;border-radius:50%;background:var(--event-color);border:2px solid #f4f5f9}
+.clubhouse-hub .timeline-card.type-assignment_start{--event-color:#3d8054}
+.clubhouse-hub .timeline-card.type-assignment_end{--event-color:#af5147}
+.clubhouse-hub .timeline-card.type-trophy{--event-color:#b58a2d}
+.clubhouse-hub .timeline-world{display:flex;align-items:center;gap:10px;background:#101238;color:#fff;border-radius:12px 12px 0 0;padding:9px 12px;font-size:11px}
+.clubhouse-hub .timeline-world strong{color:#e1c674;font-size:11px;white-space:nowrap}
+.clubhouse-hub .timeline-world span{min-width:0;overflow-wrap:anywhere}
+.clubhouse-hub .timeline-event-content{padding:12px}
+.clubhouse-hub .timeline-event-label{color:var(--event-color);font-size:9px;font-weight:800;letter-spacing:.5px}
+.clubhouse-hub .timeline-event-content h3{font-size:16px;margin:7px 0 4px;color:#101238}
+.clubhouse-hub .timeline-action{font-size:12px;line-height:1.5;margin:0 0 10px;color:#697087}
+.clubhouse-hub .timeline-team{display:flex;align-items:center;gap:10px;margin:0;background:#f4f5f9;border-radius:9px;padding:9px}
+.clubhouse-hub .timeline-team-logo{width:38px;height:38px;object-fit:contain;flex:0 0 38px}
+.clubhouse-hub .timeline-team-logo.timeline-flag{height:28px}
+.clubhouse-hub .timeline-team>span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.clubhouse-hub .timeline-team strong{font-size:13px;overflow-wrap:anywhere}
+.clubhouse-hub .timeline-team small{font-size:10px;color:#697087}
+.clubhouse-hub .timeline-team-fallback{width:38px;text-align:center;color:#8b6a27}
+.clubhouse-hub .timeline-more{margin-top:8px;border-top:1px solid #e1e6ef}
+.clubhouse-hub .timeline-more summary{cursor:pointer;padding:12px 0 2px;font-size:11px;color:#697087;min-height:44px}
+.clubhouse-hub .timeline-more summary strong{color:#967026;float:right}
+.clubhouse-hub .timeline-more p{font-size:11px;line-height:1.5;color:#697087}
+@media(max-width:600px){.clubhouse-hub .timeline-filters button{font-size:11px}.clubhouse-hub .timeline-event-content h3{font-size:15px}}

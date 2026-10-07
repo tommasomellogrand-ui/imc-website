@@ -47,7 +47,7 @@ try{
    }else{
     $logoRows=nexus_rows($core,'SELECT c.image_url FROM `IMC Game World Club Mapping` m LEFT JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=? AND m.`SM World Club ID`=? LIMIT 1',[$gw,(int)($t['winner_sm_world_club_id']??0)]);
    }
-   $events[]=['type'=>'trophy','date'=>$day,'manager_id'=>$mid,'manager_name'=>$byId[$mid]['full_name'],'world'=>$gw,'season'=>$t['imc_season'],'competition'=>($t['nexus_view']??'')?:($t['trophy_type']??''),'team'=>$t['winner_name'],'team_logo'=>$logoRows[0]['image_url']??null,'base_points'=>$base,'multiplier'=>$weight,'ranking_points'=>$pts,'fixture'=>(string)($t['deciding_fixture_id']??'')];
+   $events[]=['type'=>'trophy','assignment_type'=>$isNation?'national_team':'club','date'=>$day,'manager_id'=>$mid,'manager_name'=>$byId[$mid]['full_name'],'world'=>$gw,'season'=>$t['imc_season'],'competition'=>($t['nexus_view']??'')?:($t['trophy_type']??''),'team'=>$t['winner_name'],'team_logo'=>$logoRows[0]['image_url']??null,'base_points'=>$base,'multiplier'=>$weight,'ranking_points'=>$pts,'fixture'=>(string)($t['deciding_fixture_id']??'')];
   }
  }
  usort($scoreEvents,fn($a,$b)=>[$a['date'],$a['kind']==='trophy'?1:0]<=>[$b['date'],$b['kind']==='trophy'?1:0]);
