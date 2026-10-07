@@ -131,4 +131,13 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
  .clubhouse-hub .manager-card .mini-stats small{font-size:8px}
  .clubhouse-hub .manager-card .card-foot{font-size:9px}
 }
-
+/* Unified Career, with an explicit heading for every Game World. */
+.clubhouse-hub .career-world{margin:24px 0 32px}
+.clubhouse-hub .career-world-heading{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:13px 14px;background:#101238;color:#fff;border-radius:12px;border-bottom:3px solid #d3ac50}
+.clubhouse-hub .career-world-heading>span{font-size:12px;font-weight:800;color:#e1c674}
+.clubhouse-hub .career-world-heading h2{font-size:17px;margin:0;flex:1;min-width:120px}
+.clubhouse-hub .career-world-heading small{color:#e1e5f0;font-size:11px}
+.clubhouse-hub .career-world .career-grid{grid-template-columns:1fr}
+.clubhouse-hub .career-matches{border-top:1px solid #e1e6ef;margin-top:14px}
+.clubhouse-hub .career-matches>summary{cursor:pointer;min-height:44px;padding:14px 0;font-size:13px;font-weight:700}
+.clubhouse-hub .career-card .stat-line{margin-top:0}
