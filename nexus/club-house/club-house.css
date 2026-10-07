@@ -266,8 +266,8 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 .clubhouse-hub .trophy-world-section{margin:0 0 26px}
 .clubhouse-hub .trophy-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px;align-items:start}
 .clubhouse-hub .trophy-tile{min-width:0;border:1px solid #e1e6ef;border-top:3px solid #d3ac50;background:#fff;border-radius:13px;overflow:hidden;text-align:center}
-.clubhouse-hub .trophy-tile>summary{list-style:none;cursor:pointer;display:flex;align-items:center;flex-direction:column;gap:10px;padding:16px 9px 10px}
-.clubhouse-hub .trophy-tile>summary::-webkit-details-marker{display:none}
+.clubhouse-hub .trophy-tile>.trophy-face{display:flex;align-items:center;flex-direction:column;gap:10px;padding:16px 9px 10px}
+.clubhouse-hub .trophy-tile>.trophy-face::-webkit-details-marker{display:none}
 .clubhouse-hub .trophy-tile .trophy-icon{width:34px;height:34px;color:#b58a2d}
 .clubhouse-hub .trophy-competition{font-size:12px;line-height:1.4;min-height:4.2em;overflow-wrap:anywhere}
 .clubhouse-hub .trophy-team{display:flex;align-items:center;flex-direction:column;gap:7px;width:100%}
@@ -278,4 +278,4 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 .clubhouse-hub .trophy-info{padding:8px;border-top:1px solid #e1e6ef;font-size:11px}
 .clubhouse-hub .trophy-info p{margin:5px 0;overflow-wrap:anywhere}
 .clubhouse-hub .trophy-info a{display:block;min-height:44px;align-content:center;font-weight:700;color:#89651d}
-@media(max-width:600px){.clubhouse-hub .trophy-tiles{gap:7px}.clubhouse-hub .trophy-tile>summary{padding:12px 5px 9px;gap:8px}.clubhouse-hub .trophy-competition{font-size:10px}.clubhouse-hub .trophy-team>span:last-child{font-size:10px}.clubhouse-hub .trophy-summary strong{font-size:26px}.clubhouse-hub .trophy-info{font-size:10px;padding:6px}}
+@media(max-width:600px){.clubhouse-hub .trophy-tiles{gap:7px}.clubhouse-hub .trophy-tile>.trophy-face{padding:12px 5px 9px;gap:8px}.clubhouse-hub .trophy-competition{font-size:10px}.clubhouse-hub .trophy-team>span:last-child{font-size:10px}.clubhouse-hub .trophy-summary strong{font-size:26px}.clubhouse-hub .trophy-info{font-size:10px;padding:6px}}
