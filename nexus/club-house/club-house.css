@@ -141,3 +141,31 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 .clubhouse-hub .career-matches{border-top:1px solid #e1e6ef;margin-top:14px}
 .clubhouse-hub .career-matches>summary{cursor:pointer;min-height:44px;padding:14px 0;font-size:13px;font-weight:700}
 .clubhouse-hub .career-card .stat-line{margin-top:0}
+
+/* Career overview: one compact summary before the Game World sections. */
+.clubhouse-hub .career-summary{background:#fff;border:1px solid #e1e6ef;border-top:3px solid #d3ac50;border-radius:16px;padding:18px;margin:16px 0 24px;box-shadow:0 4px 16px #10123804}
+.clubhouse-hub .summary-heading{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.clubhouse-hub .summary-heading h2{font-size:16px;margin:0}
+.clubhouse-hub .summary-heading>span{font-size:11px;color:#6b7288}
+.clubhouse-hub .summary-primary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;background:#101238;color:#fff;border-radius:12px;padding:16px}
+.clubhouse-hub .summary-metric{min-width:0;text-align:center;display:flex;flex-direction:column;gap:5px}
+.clubhouse-hub .summary-metric strong{font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums}
+.clubhouse-hub .summary-metric span{font-size:11px}
+.clubhouse-hub .summary-primary strong{font-size:36px;letter-spacing:-1px}
+.clubhouse-hub .summary-primary span{color:#e1e5f0}
+.clubhouse-hub .summary-primary .summary-metric+div{border-left:1px solid #ffffff25}
+.clubhouse-hub .summary-outcomes,.clubhouse-hub .summary-goals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.clubhouse-hub .summary-outcomes .summary-metric{padding:12px 4px;border-radius:9px}
+.clubhouse-hub .summary-wins{background:#eaf4ed;color:#306943}
+.clubhouse-hub .summary-draws{background:#f8f2e3;color:#89651d}
+.clubhouse-hub .summary-losses{background:#fbeeea;color:#a34437}
+.clubhouse-hub .summary-goals{padding:15px 0;margin-top:5px;border-bottom:1px solid #e1e6ef}
+.clubhouse-hub .summary-goals strong{font-size:20px}
+.clubhouse-hub .summary-goals span{color:#6b7288}
+.clubhouse-hub .summary-extra{display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px;padding-top:12px;font-size:11px;color:#6b7288}
+.clubhouse-hub .summary-extra>span:first-child{color:#967026}
+.clubhouse-hub .summary-source{margin-top:8px;color:#6b7288;font-size:10px}
+.clubhouse-hub .summary-source summary{cursor:pointer;padding:6px 0}
+.clubhouse-hub .summary-source p{margin:4px 0}
+@media(max-width:600px){.clubhouse-hub .career-summary{padding:12px}.clubhouse-hub .summary-heading h2{font-size:14px}.clubhouse-hub .summary-primary{margin:12px 0;padding:13px}.clubhouse-hub .summary-primary strong{font-size:30px}.clubhouse-hub .summary-outcomes .summary-metric strong{font-size:22px}}
+
