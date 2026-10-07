@@ -59,3 +59,21 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 @media(max-width:340px){.clubhouse-page .manager-grid{grid-template-columns:1fr}.clubhouse-page .identity{flex-direction:row}.clubhouse-page .identity h2{min-height:0}}
 
 .clubhouse-page #scope-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:5px;margin:16px 0 12px;background:#e9ecf3;border-radius:14px}.clubhouse-page #scope-tabs[hidden]{display:none}.clubhouse-page #scope-tabs button{border:0;background:transparent;color:#686e83;padding:14px 6px;border-radius:10px;font:700 15px Inter,sans-serif;min-height:48px}.clubhouse-page #scope-tabs button[aria-pressed="true"]{background:#101238;color:white;box-shadow:inset 0 -3px #d4af50}.clubhouse-page #scope-tabs button:focus-visible{outline:3px solid #d4af50;outline-offset:2px}
+
+/* Club House: one parent, five internal sections. */
+.hub-sections{display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin;padding:8px 0 14px;border-bottom:1px solid #dce0e9;margin-bottom:20px}
+.hub-sections a{flex:0 0 auto;text-decoration:none;color:#697087;padding:14px 19px;border-radius:12px;font:700 14px Inter,sans-serif;white-space:nowrap;min-height:48px;box-sizing:border-box}
+.hub-sections a[aria-current="page"]{background:#101238;color:#fff;box-shadow:inset 0 -3px #d4af50}
+.hub-sections a:focus-visible{outline:3px solid #d4af50;outline-offset:2px}
+.hub-context{display:flex;align-items:center;gap:10px;margin:12px 0 24px}
+.hub-context>span{font-size:10px;letter-spacing:1.4px;color:#767e94;font-weight:700}
+.hub-context h2{font-size:22px;margin:0;letter-spacing:-.5px}
+.clubhouse-hub .controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px}
+.clubhouse-hub .controls label{flex:1 1 180px;min-width:0}
+.clubhouse-hub .controls select,.clubhouse-hub .controls input{width:100%;box-sizing:border-box;min-height:46px}
+.clubhouse-hub #tabs{display:flex;grid-template-columns:none;position:static}
+.clubhouse-hub #tabs[hidden]{display:none}
+.clubhouse-hub #tabs button{flex:1}
+.clubhouse-hub .global-nav{justify-content:center}
+.clubhouse-hub .global-nav>*{flex:0 1 220px}
+@media(max-width:600px){.hub-sections{margin:0 -2px 18px}.hub-sections a{font-size:13px;padding:14px}.hub-context h2{font-size:20px}.clubhouse-hub .controls label{flex-basis:140px}.clubhouse-hub .controls #search{font-size:16px}}

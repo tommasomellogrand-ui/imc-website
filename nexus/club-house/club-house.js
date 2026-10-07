@@ -1,8 +1,9 @@
 'use strict';
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),manager=params.get('manager')||'';
-const rankingView=params.get('view')==='ranking'&&!manager;
-const timelineView=params.get('view')==='timeline'&&!manager;
-if(!rankingView&&!timelineView)document.body.classList.add('clubhouse-page');
+const section=['career','ranking','timeline','trophies','h2h'].includes(params.get('view'))?params.get('view'):'career';
+const rankingView=section==='ranking';
+const timelineView=section==='timeline';
+document.body.classList.add('clubhouse-page','clubhouse-hub');
 let scope=['global','club','national_team'].includes(params.get('scope'))?params.get('scope'):'global';
 const sourceLabel=()=>scope==='club'?'Match Report · ID manager':scope==='national_team'?'Results · GW, nazionale e date incarico':'Club: Match Report · Nations: Results e date incarico';
 const scopeLabel=()=>scope==='club'?'Club':scope==='national_team'?'Nations':'Global';
@@ -12,7 +13,7 @@ const zero=()=>Object.fromEntries(fields.map(k=>[k,0]));
 const sum=items=>items.reduce((a,s)=>{fields.forEach(k=>a[k]+=Number(s[k]||0));return a;},zero());
 const pct=s=>s.played?(100*s.won/s.played).toLocaleString('it-IT',{maximumFractionDigits:1})+'%':'—';
 const number=n=>Number(n||0).toLocaleString('it-IT');
-let people=[],worldNames={},bundles={},failed=[],tab='overview',limit=25,loading=true,runId=0;
+let people=[],worldNames={},bundles={},failed=[],tab=section==='h2h'?'h2h':section==='trophies'?'trophies':'overview',limit=25,loading=true,runId=0;
 const worlds=Array.from({length:10},(_,i)=>'GW'+String(i+1).padStart(3,'0'));
 const selected=()=>worlds.filter(w=>!$('world').value||w===$('world').value);
 const available=()=>selected().filter(w=>bundles[w]);
@@ -28,8 +29,6 @@ function worldLinks(){ $('world-links').innerHTML=worlds.map(w=>'<a href="../?wo
 function wireLogos(){document.querySelectorAll('.club-logo').forEach(img=>{img.onerror=()=>img.hidden=true;if(img.complete&&!img.naturalWidth)img.hidden=true;});}
 $('open-worlds').onclick=$('nav-worlds').onclick=()=>$('world-dialog').showModal();$('close-worlds').onclick=()=>$('world-dialog').close();$('world-dialog').addEventListener('click',e=>{if(e.target===$('world-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});worldLinks();
 
-if(timelineView){$('title').textContent='IMC Timeline';document.title='Nexus · IMC Timeline';$('subtitle').textContent='La storia della community IMC, evento dopo evento.';$('directory-heading').querySelector('h2').textContent='La storia dell’Italian Masters Club';$('directory-heading').querySelector('.eyebrow').textContent='IMC TIMELINE';$('nav-club').removeAttribute('aria-current');$('nav-timeline').setAttribute('aria-current','page');$('world').closest('label').hidden=true;}
-if(rankingView){document.body.classList.add('ranking-page');document.querySelector('.hero-tags').innerHTML='<span>Club + Nazionali</span><span>GW001–GW010</span>';document.querySelector('.hero-mark').innerHTML='IMC<span>RANKING</span>';document.querySelector('.source-badge').textContent='CLUB E NAZIONALI: RESULTS';document.querySelector('footer p').textContent='Ranking: partite e ID manager di club e nazionali dai Results. Stessi punti e moltiplicatori GW; esito prima dei rigori.';$('title').textContent='IMC Ranking';document.title='Nexus · IMC Ranking';$('subtitle').textContent='Tutti i manager. Dieci mondi. Una classifica.';$('directory-heading').querySelector('h2').textContent='La classifica globale dei manager';$('directory-heading').querySelector('.eyebrow').textContent='IMC RANKING';$('nav-club').removeAttribute('aria-current');$('nav-ranking').setAttribute('aria-current','page');}
 async function get(q=''){const r=await fetch('data.php'+q,{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Dati non disponibili');return d;}
 function stats(id){return sum(available().map(w=>bundles[w].managers[id]?.stats||zero()));}
 function trophies(id){return available().reduce((n,w)=>n+(bundles[w].managers[id]?.trophies||0),0);}
@@ -43,7 +42,7 @@ function timelineCard(e){const meta=timelineMeta[e.type]||['◆','EVENTO'],gw=e.
  else if(e.type==='assignment_end')body='<h2><a href="?manager='+encodeURIComponent(e.manager_id)+'">'+esc(e.manager_name)+'</a></h2><p>Termina l’incarico con <strong>'+esc(e.team||'—')+'</strong></p><small>'+esc(e.assignment_type||'')+'</small>';
  else body='<h2><a href="?manager='+encodeURIComponent(e.manager_id)+'">'+esc(e.manager_name)+'</a> conquista '+esc(e.competition)+'</h2><p><strong>'+esc(e.team)+'</strong> · Season '+esc(e.season)+'</p><p class="timeline-ranking"><strong>+'+number(e.ranking_points)+' PT</strong><span>'+number(e.base_points)+' × '+number(e.multiplier)+' IMC Ranking'+(e.position?' · nuova posizione #'+number(e.position):'')+'</span></p>';
  return '<article class="timeline-card type-'+esc(e.type)+'"><header class="timeline-head"><strong>'+esc(gw)+'</strong><span>'+esc(name)+'</span><time>'+esc(date)+'</time></header><div class="timeline-body"><div class="timeline-visual"><b>'+meta[0]+'</b><span>'+meta[1]+'</span></div><div class="timeline-copy">'+body+'</div></div></article>';}
-async function timeline(){try{$('loading').textContent='Caricamento IMC Timeline…';const d=await fetch('timeline.php',{cache:'no-store'}).then(r=>r.json());if(!d.ok)throw Error(d.error||'Timeline non disponibile');$('loading').textContent=d.events.length+' eventi';$('manager-count').textContent=d.events.length+' eventi';const q=$('search').value.toLocaleLowerCase('it').trim(),rows=d.events.filter(e=>JSON.stringify(e).toLocaleLowerCase('it').includes(q));$('content').innerHTML='<div class="timeline-filters"><button class="active" data-kind="">Tutto</button><button data-kind="trophy">🏆 Trofei</button><button data-kind="assignment">↔ Manager</button><button data-kind="passport">🛂 Passport</button></div><div class="timeline-feed">'+rows.map(timelineCard).join('')+'</div>';document.querySelectorAll('.timeline-filters button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.timeline-filters button').forEach(x=>x.classList.toggle('active',x===b));const kind=b.dataset.kind;document.querySelectorAll('.timeline-card').forEach(card=>card.hidden=kind&&!(kind==='assignment'?card.classList.contains('type-assignment_start')||card.classList.contains('type-assignment_end'):card.classList.contains('type-'+kind)));});}catch(e){$('loading').textContent=e.message;$('content').innerHTML='<p class="notice">'+esc(e.message)+'</p>';}}
+async function timeline(){try{$('loading').textContent='Caricamento IMC Timeline…';const d=await fetch('timeline.php',{cache:'no-store'}).then(r=>r.json());if(!d.ok)throw Error(d.error||'Timeline non disponibile');$('loading').textContent=d.events.length+' eventi';$('manager-count').textContent=d.events.length+' eventi';const q=$('search').value.toLocaleLowerCase('it').trim(),rows=d.events.filter(e=>(!manager||e.manager_id===manager)&&(!$('world').value||e.world===$('world').value)&&JSON.stringify(e).toLocaleLowerCase('it').includes(q));$('content').innerHTML='<div class="timeline-filters"><button class="active" data-kind="">Tutto</button><button data-kind="trophy">🏆 Trofei</button><button data-kind="assignment">↔ Manager</button><button data-kind="passport">🛂 Passport</button></div><div class="timeline-feed">'+rows.map(timelineCard).join('')+'</div>';document.querySelectorAll('.timeline-filters button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.timeline-filters button').forEach(x=>x.classList.toggle('active',x===b));const kind=b.dataset.kind;document.querySelectorAll('.timeline-card').forEach(card=>card.hidden=kind&&!(kind==='assignment'?card.classList.contains('type-assignment_start')||card.classList.contains('type-assignment_end'):card.classList.contains('type-'+kind)));});}catch(e){$('loading').textContent=e.message;$('content').innerHTML='<p class="notice">'+esc(e.message)+'</p>';}}
 function render(){if(timelineView){timeline();return;}status();if(!available().length){$('content').innerHTML='<p class="notice">'+(loading?'Lettura delle partite…':'Nessun GW disponibile. Riprova con Aggiorna.')+'</p>';return;}if(rankingView)return ranking();if(!manager)return directory();if(!people.some(m=>m.manager_id===manager))return;({overview,career,h2h,trophies:trophyRoom}[tab]||overview)();wireLogos();}
 function rankFor(id){return available().reduce((r,w)=>{const x=bundles[w].managers[id]?.ranking;if(!x){r.incomplete=true;return r;}r.clubs+=x.club_points??x.match_points;r.nations+=x.national_points??0;r.matches+=x.match_points;r.trophies+=x.trophy_points;r.total+=x.total;r.unscored+=x.unscored_trophies;r.incomplete=r.incomplete||bundles[w].national_ranking_error||x.version!==8;return r;},{clubs:0,nations:0,matches:0,trophies:0,total:0,unscored:0,incomplete:false});}
 function ranking(){
@@ -51,7 +50,7 @@ function ranking(){
  const rows=people.map(m=>({...m,rank:rankFor(m.manager_id)})).sort((a,b)=>b.rank.total-a.rank.total||a.full_name.localeCompare(b.full_name,'it'));
  let previous=null,position=0;rows.forEach((m,i)=>{if(m.rank.total!==previous)position=i+1;m.position=position;previous=m.rank.total;});
  const incomplete=loading||available().length!==selected().length||available().some(w=>bundles[w].trophy_error)||rows.some(m=>m.rank.incomplete||m.rank.unscored);
- const q=$('search').value.toLocaleLowerCase('it').trim(),filtered=rows.filter(m=>(m.full_name+' '+m.manager_id).toLocaleLowerCase('it').includes(q));
+ const q=$('search').value.toLocaleLowerCase('it').trim(),filtered=rows.filter(m=>(!manager||m.manager_id===manager)&&(m.full_name+' '+m.manager_id).toLocaleLowerCase('it').includes(q));
  $('manager-count').textContent=filtered.length+' manager';
  $('content').innerHTML='<p class="rank-status">'+(incomplete?'Classifica provvisoria: caricamento o dati incompleti.':'Classifica aggiornata sui dati disponibili.')+' Club + Nazionali · Tutte le stagioni · Pari punti, pari posizione.</p>'+rankRules()+
  '<div class="ranking-list">'+filtered.map(m=>'<details class="ranking-row" data-manager="'+esc(m.manager_id)+'"'+(opened.has(m.manager_id)?' open':'')+'><summary><span class="rank-position">'+m.position+'</span><span class="rank-name"><strong>'+esc(m.full_name)+'</strong><small>'+esc(m.manager_id)+'</small></span><span class="rank-total">'+number(m.rank.total)+'<small>PUNTI</small></span><span class="rank-chevron" aria-hidden="true">⌄</span></summary><div class="rank-detail"><div class="rank-split">'+[['Club',m.rank.clubs],['Nazionali',m.rank.nations],['Trofei',m.rank.trophies]].map(([label,value])=>'<div><small>'+label+'</small><strong>'+number(value)+'<span> pt</span></strong></div>').join('')+'</div><div class="rank-detail-heading"><h3>Punti per Game World</h3><a href="?manager='+encodeURIComponent(m.manager_id)+'">Club House ↗</a></div><div class="rank-world-grid">'+rankWorlds(m.manager_id)+'</div>'+(m.rank.unscored?'<p class="notice">'+m.rank.unscored+' trofei senza regola riconosciuta: bonus non assegnato.</p>':'')+'</div></details>').join('')+'</div>'+(filtered.length?'':'<p class="notice">Nessun manager trovato.</p>');
@@ -74,21 +73,56 @@ function h2h(){const matches=allMatches(),groups=new Map();for(const m of matche
  }));
 }
 function trophyRoom(){const rows=available().flatMap(w=>bundles[w].trophies||[]).sort((a,b)=>String(b.date).localeCompare(String(a.date)));const groups=new Map();for(const t of rows){if(!groups.has(t.world))groups.set(t.world,new Map());const countries=groups.get(t.world),country=t.country||'Internazionali / paese non indicato';if(!countries.has(country))countries.set(country,new Map());const comps=countries.get(country);if(!comps.has(t.competition))comps.set(t.competition,[]);comps.get(t.competition).push(t);} $('content').innerHTML='<div class="section-heading"><div><p class="eyebrow">IL PALMARÈS</p><h2>Trophy Room</h2></div><span class="pill">'+rows.length+' trofei</span></div><p class="muted">Trofei già registrati in Nexus e attribuiti al manager in base all’incarico alla data della vittoria.</p>'+([...groups].map(([w,countries])=>'<section class="trophy-world"><h3>'+esc(worldName(w))+'</h3>'+[...countries].map(([country,comps])=>(['GW002','GW003','GW007','GW008'].includes(w)?'<h4 class="trophy-country">'+esc(country)+'</h4>':'')+[...comps].map(([name,items])=>'<div class="trophy-group"><h4>'+cup+esc(name)+' <span class="pill">'+items.length+'</span></h4>'+items.map(t=>'<article class="panel trophy"><p>'+esc(t.team)+'</p><small>Stagione '+esc(t.season)+' · '+esc(t.date)+'</small></article>').join('')+'</div>').join('')).join('')+'</section>').join('')||'<p class="notice">Nessun trofeo attribuito nei GW disponibili.</p>');}
-async function load(){const token=++runId;loading=true;bundles={};failed=[];$('retry').disabled=true;render();let next=0;async function worker(){while(next<worlds.length){const w=worlds[next++];try{const d=await get('?'+new URLSearchParams({world:w,...(manager?{manager}:{}),...(!rankingView&&!timelineView?{scope}:{})}));if(token!==runId)return;bundles[w]=d;}catch(e){if(token!==runId)return;failed.push(w);}render();}}await Promise.all([worker(),worker()]);if(token!==runId)return;loading=false;$('retry').disabled=false;render();}
-$('world').addEventListener('change',()=>{limit=25;render();});$('search').addEventListener('input',render);$('retry').addEventListener('click',()=>start());document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render();});
+async function load(){const token=++runId;loading=true;bundles={};failed=[];$('retry').disabled=true;render();let next=0;async function worker(){while(next<worlds.length){const w=worlds[next++];try{const d=await get('?'+new URLSearchParams({world:w,...(manager&&!rankingView?{manager}:{}),...(!rankingView&&!timelineView?{scope}:{})}));if(token!==runId)return;bundles[w]=d;}catch(e){if(token!==runId)return;failed.push(w);}render();}}await Promise.all([worker(),worker()]);if(token!==runId)return;loading=false;$('retry').disabled=false;render();}
+$('world').addEventListener('change',()=>{limit=25;const url=new URL(location.href);if($('world').value)url.searchParams.set('world',$('world').value);else url.searchParams.delete('world');history.replaceState(null,'',url);syncHubLinks();render();});$('search').addEventListener('input',render);$('retry').addEventListener('click',()=>start());document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render();});
 function updateScope(){
  document.querySelectorAll('#scope-tabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scope===scope)));
  document.querySelector('.hero-tags').innerHTML='<span>'+scopeLabel()+'</span><span>GW001–GW010</span>';
  document.querySelector('footer p').textContent='Fonte partite: '+sourceLabel()+'. Nazionali: inizio e fine incarico inclusi; incarichi sovrapposti non attribuiti. Esiti prima dei rigori; rigori separati.';
  document.querySelector('.source-badge').textContent=sourceLabel();
  $('subtitle').textContent=manager?manager+' · Carriera '+scopeLabel():'Tutti i manager IMC · '+scopeLabel();
- $('back').href='?scope='+scope;
+ $('back').href=hubURL(section,'');
 }
 if(!rankingView&&!timelineView){
  $('scope-tabs').hidden=false;updateScope();
  document.querySelectorAll('#scope-tabs button').forEach(b=>b.onclick=()=>{
   if(scope===b.dataset.scope)return;scope=b.dataset.scope;limit=25;updateScope();
-  const url=new URL(location.href);url.searchParams.set('scope',scope);history.replaceState(null,'',url);load();
+  const url=new URL(location.href);url.searchParams.set('scope',scope);history.replaceState(null,'',url);syncHubLinks();if(timelineView)timeline();else load();
  });
 }
-async function start(){try{const meta=await get();people=meta.managers;worldNames=Object.fromEntries(meta.worlds.map(w=>[w.id,w.name]));worldLinks();if($('world').options.length===1)worlds.forEach(w=>$('world').add(new Option(worldName(w),w)));if(timelineView){await timeline();return;}if(manager){const m=people.find(x=>x.manager_id===manager);if(!m){$('loading').textContent='Manager IMC non trovato.';$('content').replaceChildren();return;}$('directory-heading').hidden=true;$('profile-avatar').hidden=false;$('profile-avatar').textContent=initials(m.full_name);$('title').textContent=m.full_name;document.title='Club House · '+m.full_name;$('subtitle').textContent=m.manager_id+' · Carriera '+scopeLabel();$('tabs').hidden=false;$('back').hidden=false;$('search-label').hidden=true;}await load();}catch(e){$('loading').textContent=e.message;$('retry').disabled=false;}}start();
+async function start(){try{const meta=await get();people=meta.managers;worldNames=Object.fromEntries(meta.worlds.map(w=>[w.id,w.name]));worldLinks();if($('world').options.length===1)worlds.forEach(w=>$('world').add(new Option(worldName(w),w)));initHub();if(timelineView){await timeline();return;}if(manager){const m=people.find(x=>x.manager_id===manager);if(!m){$('loading').textContent='Manager IMC non trovato.';$('content').replaceChildren();return;}$('directory-heading').hidden=true;$('profile-avatar').hidden=false;$('profile-avatar').textContent=initials(m.full_name);$('title').textContent='Club House';document.title='Club House · '+sectionNames[section]+' · '+m.full_name;$('subtitle').textContent=m.full_name+' · '+m.manager_id;$('tabs').hidden=section!=='career';$('back').hidden=false;$('search-label').hidden=true;}await load();}catch(e){$('loading').textContent=e.message;$('retry').disabled=false;}}
+
+const sectionNames={career:'IMC Career',ranking:'IMC Ranking',timeline:'IMC Timeline',trophies:'IMC Trophy Room',h2h:'IMC H2H'};
+function hubURL(view,id=manager){
+ const q=new URLSearchParams(location.search);q.set('view',view);q.set('scope',scope);
+ if(id)q.set('manager',id);else q.delete('manager');
+ return '?'+q.toString();
+}
+function syncHubLinks(){
+ document.querySelectorAll('[data-section]').forEach(a=>{a.href=hubURL(a.dataset.section);if(a.dataset.section===section)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+ $('back').href=hubURL(section,'');
+}
+function initHub(){
+ $('title').textContent='Club House';document.title='Club House · '+sectionNames[section];
+ $('hub-section-title').textContent=sectionNames[section];
+ $('directory-heading').querySelector('h2').textContent=section==='career'?'Una carriera, oltre il singolo mondo.':section==='ranking'?'La classifica dei manager IMC':section==='timeline'?'La storia della community':section==='trophies'?'Scegli un manager e scopri il suo palmarès':'Scegli un manager per gli scontri diretti';
+ $('directory-heading').querySelector('.eyebrow').textContent=sectionNames[section];
+ const currentWorld=new URL(location.href).searchParams.get('world');$('world').value=worlds.includes(currentWorld)?currentWorld:'';
+ $('manager-filter').innerHTML='<option value="">Tutti i manager</option>'+people.map(m=>'<option value="'+esc(m.manager_id)+'">'+esc(m.full_name)+'</option>').join('');
+ $('manager-filter').value=manager;
+ $('manager-filter').onchange=()=>{location.href=hubURL(section,$('manager-filter').value);};
+ $('subtitle').textContent=manager?(people.find(m=>m.manager_id===manager)?.full_name||manager):'Carriere, classifiche e storie dei manager IMC.';
+ if(rankingView){document.body.classList.add('ranking-page');document.querySelector('.source-badge').textContent='CLUB E NAZIONALI: RESULTS';$('scope-tabs').hidden=true;}
+ if(timelineView){document.querySelector('.hero-tags').innerHTML='<span>Community IMC</span><span>GW001–GW010</span>';$('scope-tabs').hidden=true;document.querySelector('.source-badge').textContent='INCARICHI · PASSPORT · TROFEI';$('retry').disabled=false;}
+ syncHubLinks();
+}
+// Preserve the Club House context when opening a manager from any section.
+$('content').addEventListener('click',e=>{
+ const a=e.target.closest('a[href]');if(!a)return;
+ const url=new URL(a.href,location.href);
+ if(url.origin===location.origin&&url.pathname===location.pathname&&url.searchParams.has('manager')){
+  a.href=hubURL(section==='ranking'?'career':section,url.searchParams.get('manager'));
+ }
+});
+
+start();

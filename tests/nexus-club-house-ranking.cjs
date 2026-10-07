@@ -7,7 +7,7 @@ function bundle(world){const weight=['GW001','GW008'].includes(world)?3:['GW002'
  page.on('pageerror',e=>errors.push(e.message));
  await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='rank.test'||u.pathname.startsWith('/site-assets/'))return route.abort();if(u.pathname.endsWith('data.php')){const w=u.searchParams.get('world');return route.fulfill({status:fail&&w==='GW010'?503:200,contentType:'application/json',body:JSON.stringify(w?bundle(w):{ok:true,managers:people,worlds:[]})});}const name=u.pathname.endsWith('/')?'index.html':path.basename(u.pathname);return route.fulfill({contentType:name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html',body:fs.readFileSync(path.join(u.pathname.startsWith('/assets/')?'nexus/assets':'nexus/club-house',name))});});
  await page.goto('https://rank.test/?view=ranking');await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('10/10'));
- assert.equal(await page.locator('#title').textContent(),'IMC Ranking');assert.equal(await page.locator('.ranking-row').count(),3);
+ assert.equal(await page.locator('#title').textContent(),'Club House');assert.equal(await page.locator('.ranking-row').count(),3);
  assert.deepEqual(await page.locator('.rank-position').allTextContents(),['1','1','3']);assert.equal((await page.locator('.rank-total').first().textContent()).replace(/\./g,''),'1264PUNTI');
  await page.locator('.ranking-row>summary').first().click();assert.equal(await page.locator('.ranking-row').first().locator('.rank-world').count(),10);
  assert.match(await page.locator('.rank-detail').first().textContent(),/75/);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile overflow');
