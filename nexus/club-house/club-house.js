@@ -13,7 +13,7 @@ const zero=()=>Object.fromEntries(fields.map(k=>[k,0]));
 const sum=items=>items.reduce((a,s)=>{fields.forEach(k=>a[k]+=Number(s[k]||0));return a;},zero());
 const pct=s=>s.played?(100*s.won/s.played).toLocaleString('it-IT',{maximumFractionDigits:1})+'%':'—';
 const number=n=>Number(n||0).toLocaleString('it-IT');
-let careerSort=['name','played','won','trophies'].includes(params.get('sort'))?params.get('sort'):'played';
+let careerSort=['name','played','won','trophies'].includes(params.get('sort'))?params.get('sort'):'name';
 let people=[],worldNames={},bundles={},failed=[],tab=section==='h2h'?'h2h':section==='trophies'?'trophies':'overview',limit=25,loading=true,runId=0;
 const worlds=Array.from({length:10},(_,i)=>'GW'+String(i+1).padStart(3,'0'));
 const selected=()=>worlds.filter(w=>!$('world').value||w===$('world').value);
