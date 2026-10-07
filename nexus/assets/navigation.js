@@ -20,12 +20,12 @@
  function enhanceLayout(){
   enhanceCompetitions();
   if(!document.body.classList.contains('nx-linea-oro'))document.body.classList.add('nx-linea-oro');
-  const header=document.querySelector('body>.profile-banner,body>header.hero,body.clubhouse-page>header,body>.md-banner,body>.club-hero');
+  const header=document.querySelector('body>.profile-banner,body>header.hero,body.clubhouse-page>header:not(#nx-universal-header),body>.md-banner,body>.club-hero');
   if(header&&!header.classList.contains('nx-masthead')){
    header.classList.add('nx-masthead');
    const top=header.querySelector('.profile-top,.top,.md-top,.club-top');
    if(top){top.classList.add('nx-topbar');const brand=top.querySelector('.nexus-brand,.brand');if(brand){const strap=document.createElement('span');strap.className='nx-brand-caption';strap.textContent='Italian Masters Club';brand.after(strap);}
-    const menu=document.createElement('button');menu.type='button';menu.className='nx-menu';menu.setAttribute('aria-label','Apri menu Nexus');menu.innerHTML='<span aria-hidden="true">☰</span>';menu.onclick=()=>{const existing=document.querySelector('#profile-open,#open-more');if(existing){existing.click();return;}let dialog=document.getElementById('nx-site-menu');if(!dialog){dialog=document.createElement('dialog');dialog.id='nx-site-menu';const title=document.createElement('h2');title.textContent='Esplora Nexus';const close=document.createElement('button');close.textContent='Chiudi';close.onclick=()=>dialog.close();dialog.append(title,close);document.querySelectorAll('.global-nav a,.bottom-nav a,.profile-nav a').forEach(a=>dialog.append(a.cloneNode(true)));document.body.append(dialog);}dialog.showModal();};top.append(menu);
+
    }
    let hero=header.querySelector('.profile-hero');if(!hero&&header.classList.contains('hero')&&top){hero=document.createElement('div');hero.className='nx-hero';while(top.nextSibling)hero.append(top.nextSibling);top.parentNode.append(hero);}else if(!hero)hero=header.querySelector('.hero');if(hero)hero.classList.add('nx-hero');
   }
@@ -68,5 +68,37 @@
   let frame=nav.parentElement;if(!frame.classList.contains('nx-rail-frame')){frame=document.createElement('div');frame.className='nx-rail-frame';nav.before(frame);frame.append(nav);const next=document.createElement('button');next.type='button';next.className='nx-rail-next';next.setAttribute('aria-label','Scorri le sezioni');next.innerHTML='<span aria-hidden="true">›</span>';next.onclick=()=>{const end=nav.scrollLeft+nav.clientWidth>=nav.scrollWidth-8;nav.scrollTo({left:end?0:nav.scrollLeft+nav.clientWidth*.7,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});};frame.append(next);const update=()=>{const overflow=nav.scrollWidth>nav.clientWidth+2;if(next.hidden===overflow)next.hidden=!overflow;frame.classList.toggle('nx-has-overflow',overflow);const arrow=next.querySelector('span'),text=nav.scrollLeft+nav.clientWidth>=nav.scrollWidth-8?'‹':'›';if(arrow.textContent!==text)arrow.textContent=text;};nav.addEventListener('scroll',update,{passive:true});new ResizeObserver(update).observe(nav);frame._nxUpdate=update;}
   if(frame.hidden!==nav.hidden)frame.hidden=nav.hidden;frame._nxUpdate();
  }
+
+ function universalShell(){
+  if(document.getElementById('nx-universal-header'))return;
+  document.body.classList.add('nx-universal');
+  const params=new URLSearchParams(location.search),valid=w=>/^GW00[1-9]$|^GW010$/.test(w||'');
+  let remembered='';try{remembered=localStorage.getItem('imc_nexus_world')||''}catch(e){}
+  let world=valid(params.get('world'))?params.get('world'):valid(remembered)?remembered:'GW001';
+  const href=(path,w=world)=>'/nexus/'+path+'?'+new URLSearchParams({world:w});
+  const header=document.createElement('header');header.id='nx-universal-header';
+  header.innerHTML='<div class="nx-universal-top"><a class="nx-universal-brand" href="/nexus/club-house/"><img src="/site-assets/images/imc-logo.png" alt="IMC"><span>NEXUS</span></a><select id="nx-world-select" aria-label="Game World">'+Array.from({length:10},(_,i)=>{const w='GW'+String(i+1).padStart(3,'0');return '<option value="'+w+'">'+w+'</option>'}).join('')+'</select></div><div class="nx-universal-context" id="nx-universal-context"></div>';
+  document.body.prepend(header);const selector=header.querySelector('select');selector.value=world;
+  const context=document.getElementById('nx-universal-context');
+  const updateContext=()=>{context.textContent=location.pathname.includes('/club-house/')&&!params.get('world')?'Club House · Tutti i Game World':world;fetch(href('core/context.php'),{cache:'no-store'}).then(r=>r.json()).then(d=>{if(!d.ok)return;if(location.pathname.includes('/club-house/')&&!params.get('world'))return;context.textContent=(d.world?.game_world_name||world)+(params.get('season')||d.current_season?' · S'+(params.get('season')||d.current_season):'');}).catch(()=>{});};
+  selector.onchange=()=>{try{localStorage.setItem('imc_nexus_world',selector.value)}catch(e){}location.href=href('',selector.value);};
+  const icon=path=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+path+'</svg>';
+  const icons={home:icon('<path d="M3 10 12 3l9 7v11h-6v-7H9v7H3z"/>'),cup:icon('<path d="M7 3h10v5a5 5 0 0 1-10 0zM12 13v7M8 21h8M7 5H3v3a4 4 0 0 0 4 4M17 5h4v3a4 4 0 0 1-4 4"/>'),club:icon('<path d="M3 10 12 3l9 7M5 9v12h14V9M10 21v-7h4v7M9 10h6"/>'),manager:icon('<circle cx="12" cy="7" r="4"/><path d="M4 21v-3a8 8 0 0 1 16 0v3z"/>'),more:icon('<circle cx="4" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="20" cy="12" r="1"/>')};
+  const nav=document.createElement('nav');nav.id='nx-universal-nav';nav.setAttribute('aria-label','Navigazione Nexus');
+  const page=location.pathname,active=page.includes('/club-house/')?'club':page.includes('/competitions/')?'cup':page.includes('/managers/')?'manager':page==='/nexus/'||page==='/nexus/index.html'?'home':'more';
+  nav.innerHTML=[['Home','home',href('')],['Competizioni','cup',href('competitions/')],['Club House','club','/nexus/club-house/'],['Manager','manager',href('managers/page.html')]].map(([name,id,url])=>'<a href="'+url+'" class="'+(id==='club'?'nx-clubhouse-center':'')+'"'+(active===id?' aria-current="page"':'')+'><span class="nx-nav-icon">'+icons[id]+'</span><span>'+name+'</span></a>').join('')+'<button type="button" aria-haspopup="dialog" id="nx-universal-more"><span class="nx-nav-icon">'+icons.more+'</span><span>Altro</span></button>';
+  document.body.append(nav);
+  const dialog=document.createElement('dialog');dialog.id='nx-universal-dialog';dialog.innerHTML='<div><h2>Esplora Nexus</h2><button type="button" aria-label="Chiudi menu">×</button></div><section></section>';document.body.append(dialog);
+  dialog.querySelector('button').onclick=()=>dialog.close();
+  document.getElementById('nx-universal-more').onclick=()=>{
+   const links=new Map();[['Club',href('teams/page.html')],['Nazionali',href('teams/page.html')+'&type=nations'],['Giocatori',href('players/page.html')],['Trasferimenti',href('transfers/page.html')]].forEach(([name,url])=>links.set(url,name));
+   document.querySelectorAll('#more-links a,#profile-more-links a').forEach(a=>{if(a.href&&!a.href.includes('/club-house/'))links.set(a.href,a.textContent.trim());});
+   const section=dialog.querySelector('section');section.replaceChildren();for(const [url,name]of links){const a=document.createElement('a');a.href=url;a.textContent=name;section.append(a);}dialog.showModal();
+  };
+  dialog.onclick=e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}};
+  updateContext();
+ }
+ universalShell();
+
  scan();
 })();

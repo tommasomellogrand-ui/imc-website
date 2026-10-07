@@ -51,7 +51,7 @@ jobs:
           ctx=ssl.create_default_context(); ctx.check_hostname=False
           ftp=FTP_TLS(context=ctx); ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
-          files=["nexus/assets/navigation.stadium.png","nexus/assets/navigation.css","nexus/assets/navigation.js","nexus/club-house/index.html","nexus/competitions/domestic.html","nexus/competitions/family.html","nexus/competitions/group.html","nexus/competitions/index.html","nexus/competitions/match.html","nexus/competitions/view.html","nexus/index.html","nexus/managers/page.html","nexus/managers/profile.html","nexus/players/page.html","nexus/players/profile.html","nexus/teams/detail.html","nexus/teams/page.html","nexus/transfers/page.html","nexus/the-club/index.html","nexus/the-club/post.html","nexus/matchday/live.html"]
+          files=["nexus/matchday/index.html","nexus/assets/navigation.stadium.png","nexus/assets/navigation.css","nexus/assets/navigation.js","nexus/club-house/index.html","nexus/competitions/domestic.html","nexus/competitions/family.html","nexus/competitions/group.html","nexus/competitions/index.html","nexus/competitions/match.html","nexus/competitions/view.html","nexus/index.html","nexus/managers/page.html","nexus/managers/profile.html","nexus/players/page.html","nexus/players/profile.html","nexus/teams/detail.html","nexus/teams/page.html","nexus/transfers/page.html","nexus/the-club/index.html","nexus/the-club/post.html","nexus/matchday/live.html"]
           for name in files:
               p=Path(name); data=p.read_bytes()
               ftp.cwd('/www.italianmastersclub.it/'+str(p.parent))

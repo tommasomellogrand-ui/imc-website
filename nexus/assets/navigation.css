@@ -141,3 +141,38 @@ html body.nx-competition #group-tabs[data-nx-nav]>button{font-size:12px;padding:
 html body.nx-competition #family-tabs.selection-tabs[data-nx-nav]{display:flex!important;width:100%!important;gap:0!important;background:#fff!important;border:1px solid #e1e6ef!important;border-radius:9px!important;overflow:hidden!important}
 html body.nx-competition #family-tabs.selection-tabs[data-nx-nav]>button{flex:1 1 0!important;min-width:0!important;min-height:46px!important;padding:12px 8px!important;text-align:center;background:transparent!important;border:0!important;border-bottom:3px solid transparent!important;font-size:14px!important}
 html body.nx-competition #family-tabs.selection-tabs[data-nx-nav]>button[aria-pressed="true"]{background:#f8edcf!important;color:#101238!important;border-bottom-color:#d3ac50!important}
+
+/* Sportivo: the same shell on every Nexus page. */
+body.nx-universal{padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}
+.nx-universal .nx-topbar,.nx-universal .mx-top,.nx-universal .global-nav,.nx-universal .bottom-nav,.nx-universal .profile-nav,.nx-universal .mx-nav,.nx-universal .nx-menu{display:none!important}
+#nx-universal-header,#nx-universal-header * ,#nx-universal-nav,#nx-universal-nav *{box-sizing:border-box}
+#nx-universal-header{display:block;max-width:1180px;width:100%;margin:0 auto;padding:0;border:0;border-radius:0;background:#101238;color:white}
+#nx-universal-header .nx-universal-top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 20px;min-height:76px}
+#nx-universal-header .nx-universal-brand{display:flex;align-items:center;gap:10px;font:800 25px/1 Arial,sans-serif;letter-spacing:2px;color:white;text-decoration:none}
+#nx-universal-header img{display:block;width:44px;height:48px;object-fit:contain}
+#nx-world-select{width:106px;min-height:44px;margin:0;padding:10px;border:0;border-radius:9px;background:#d3ac50;color:#101238;font:800 14px/1.3 Arial,sans-serif}
+#nx-universal-context{padding:9px 20px;background:#d3ac50;color:#101238;font:600 12px/1.4 Arial,sans-serif;min-height:34px}
+.nx-universal .nx-masthead{margin-top:0;border-radius:0}
+.nx-universal .nx-masthead .nx-hero{min-height:0;padding:18px 20px!important}
+.nx-universal .nx-masthead .nx-hero::before,.nx-universal .nx-masthead .nx-hero::after{display:none}
+.nx-universal .nx-masthead .nx-hero h1{font-size:26px!important;margin-bottom:6px!important}
+.nx-universal .nx-masthead .nx-hero .eyebrow{display:none}
+#nx-universal-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;align-items:end;background:#fff;border-top:1px solid #e1e6ef;padding:7px max(4px,calc((100vw - 760px)/2)) calc(7px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px #10123808}
+#nx-universal-nav>a,#nx-universal-nav>button{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;min-height:56px;border:0;border-radius:0;padding:3px 1px;background:transparent;color:#727b8e;text-decoration:none;font:500 10px/1.2 Arial,sans-serif}
+#nx-universal-nav .nx-nav-icon{display:flex;align-items:center;justify-content:center;height:27px}
+#nx-universal-nav svg{width:25px;height:25px}
+#nx-universal-nav [aria-current="page"]{color:#101238;font-weight:700}
+#nx-universal-nav [aria-current="page"] .nx-nav-icon{color:#b68a2b}
+#nx-universal-nav .nx-clubhouse-center{color:#101238;font-weight:800}
+#nx-universal-nav .nx-clubhouse-center .nx-nav-icon{width:49px;height:49px;margin-top:-19px;border-radius:50%;background:#d3ac50;color:#101238;box-shadow:0 0 0 5px #fff}
+#nx-universal-nav .nx-clubhouse-center svg{width:29px;height:29px}
+#nx-universal-dialog{max-width:420px;width:calc(100% - 28px);padding:20px;border:1px solid #e1e6ef;border-radius:14px;color:#101238;background:#fff}
+#nx-universal-dialog::backdrop{background:#10123888}
+#nx-universal-dialog>div{display:flex;justify-content:space-between;align-items:center}
+#nx-universal-dialog h2{font-size:20px}
+#nx-universal-dialog button{min-width:44px;min-height:44px;border:0;background:transparent;font-size:25px;color:#101238}
+#nx-universal-dialog a{display:block;padding:14px 0;color:#101238;border-bottom:1px solid #e1e6ef;text-decoration:none}
+#nx-universal-header a:focus-visible,#nx-universal-nav :focus-visible{outline:2px solid #b68a2b;outline-offset:2px}
+@media(max-width:360px){#nx-universal-header .nx-universal-top{padding:10px 14px}#nx-universal-header .nx-universal-brand{font-size:21px;gap:7px}#nx-world-select{width:94px}#nx-universal-nav>a,#nx-universal-nav>button{font-size:9px}}
+
+.nx-universal .md-bottom,.nx-universal .club-nav{display:none!important}

@@ -24,7 +24,12 @@ const fixture=(cls,labels,attr)=>`<nav class="${cls}">${labels.map((n,i)=>button
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'page overflow '+width);
  assert.equal(await page.locator('.nx-topbar').evaluate(b=>getComputedStyle(b).backgroundColor),'rgb(16, 18, 56)');
  assert.equal(await page.locator('.nx-hero').evaluate(b=>getComputedStyle(b).backgroundColor),'rgb(245, 246, 250)');
- assert(await page.locator('.nx-menu').isVisible());
+ assert.equal(await page.locator('.nx-menu').count(),0);
+ assert.equal(await page.locator('#nx-universal-nav>a,#nx-universal-nav>button').count(),5);
+ assert.equal(await page.locator('#nx-universal-nav>a').nth(2).textContent(),'Club House');
+ assert.equal(await page.locator('#nx-universal-nav>a').nth(2).getAttribute('href'),'/nexus/club-house/');
+ assert.equal(await page.locator('#nx-universal-header img').getAttribute('alt'),'IMC');
+ await page.locator('#nx-universal-more').click();assert(await page.locator('#nx-universal-dialog').isVisible());await page.locator('#nx-universal-dialog button').click();
  assert.equal(await page.locator('.dr-tabs').isVisible(),false);await page.locator('.nx-report summary').click();assert(await page.locator('.dr-tabs').isVisible());
  const filters=await page.locator('.dr-filters>div').evaluateAll(xs=>xs.map(x=>x.getBoundingClientRect().top));assert(Math.abs(filters[0]-filters[1])<2,'filters must remain side by side');
  for(const nav of await page.locator('[data-nx-nav]:visible').all()){
