@@ -1,4 +1,4 @@
-name: Deploy IMC Master Website
+name: Deploy IMC Public Homepage
 on:
   push:
     branches: [main]
@@ -19,8 +19,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate master application
         run: |
-          node --check site-assets/master/app.js
-          php -l site-assets/master/api.php
+          node --check site-assets/master/homepage.js
+          php -l site-assets/master/homepage.php
           python3 -m json.tool site-assets/master/release.json >/dev/null
       - name: Upload bounded master manifest and verify bytes
         env:
@@ -42,7 +42,7 @@ jobs:
               for part in path.strip('/').split('/'):
                   try:ftp.cwd(part)
                   except error_perm:ftp.mkd(part);ftp.cwd(part)
-          files=[p for p in sorted(Path('site-assets/master').glob('*')) if p.is_file() and p.suffix in {'.php','.js','.css','.html','.json'}]
+          files=[Path('site-assets/master')/name for name in ['homepage.php','homepage.js','homepage.css','homepage-preview.html','release.json']]
           for p in files:
               directory(root+'/'+p.parent.as_posix())
               data=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(data))
@@ -51,24 +51,21 @@ jobs:
           ftp.quit()
           print('Master assets uploaded and byte verified:',len(files))
           PY
-      - name: Verify public data before root publication
+      - name: Verify public directory before root publication
         run: |
-          python3 - <<'PY'
-          import json,urllib.request,urllib.parse,urllib.error
-          base='https://www.italianmastersclub.it/site-assets/master/api.php?'
-          for dataset in ['pulse','worlds','managers','clubs','players','results','schedule','today','transfers','rankings','records','stories','archive','competitions']:
-              url=base+urllib.parse.urlencode({'dataset':dataset,'limit':2,'release':'${{ github.sha }}'})
-              try:
-                  with urllib.request.urlopen(url,timeout=90) as response:data=json.load(response)
-              except urllib.error.HTTPError as error:
-                  print(dataset,error.code,error.read().decode());raise
-              assert data.get('ok'),dataset
-              print(dataset,'OK')
-          for params,key in [({'dataset':'match','world':'GW004','id':409804228},'match'),({'dataset':'manager','id':'MNG016'},'managers'),({'dataset':'club','id':115},'clubs'),({'dataset':'player','id':101403},'players')]:
-              with urllib.request.urlopen(base+urllib.parse.urlencode(params),timeout=90) as response:data=json.load(response)
-              assert data.get('ok') and data['data'].get(key),params
-              print(params['dataset'],'detail OK')
-          PY
+          python3 - <<'PYCODE'
+          import json,urllib.request
+          url='https://www.italianmastersclub.it/site-assets/master/homepage.php?release=${{ github.sha }}'
+          with urllib.request.urlopen(url,timeout=45) as response:data=json.load(response)
+          assert data.get('ok') and data['worlds'] and data['managers'], 'Directory unavailable'
+          ids=[m['manager_id'] for m in data['managers']]
+          assert len(ids)==len(set(ids)), 'Duplicate managers'
+          for world in data['worlds']:
+              gw=world['game_world_id']
+              assert world['href']=='/nexus/?world='+gw
+              assert world['manager_count']==sum(gw in m['worlds'] for m in data['managers'])
+          print('Live directory verified:',len(data['worlds']),'worlds,',len(ids),'active managers')
+          PYCODE
       - name: Publish root only after data verification
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -91,3 +88,14 @@ jobs:
           assert check.getvalue()==data,'Root byte verification failed'
           ftp.quit();print('Root published and byte verified')
           PY
+      - name: Verify published homepage
+        run: |
+          python3 - <<'PYCODE'
+          import urllib.request
+          with urllib.request.urlopen('https://www.italianmastersclub.it/?release=${{ github.sha }}',timeout=45) as r:html=r.read().decode()
+          assert 'site-assets/master/homepage.js?v=20261007a' in html
+          assert 'site-assets/master/homepage.css?v=20261007a' in html
+          assert 'THE WORLD IS' in html and 'OUR PLAYGROUND.' in html
+          assert '/gameworld001/' not in html
+          print('Public homepage verified')
+          PYCODE
