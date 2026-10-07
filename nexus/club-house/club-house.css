@@ -279,3 +279,7 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 .clubhouse-hub .trophy-info p{margin:5px 0;overflow-wrap:anywhere}
 .clubhouse-hub .trophy-info a{display:block;min-height:44px;align-content:center;font-weight:700;color:#89651d}
 @media(max-width:600px){.clubhouse-hub .trophy-tiles{gap:7px}.clubhouse-hub .trophy-tile>.trophy-face{padding:12px 5px 9px;gap:8px}.clubhouse-hub .trophy-competition{font-size:10px}.clubhouse-hub .trophy-team>span:last-child{font-size:10px}.clubhouse-hub .trophy-summary strong{font-size:26px}.clubhouse-hub .trophy-info{font-size:10px;padding:6px}}
+
+/* Keep trophy winner names aligned in a consistent two-line slot. */
+.clubhouse-hub .trophy-winner{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;width:100%;font-size:12px;line-height:1.35;height:2.7em;min-height:2.7em;overflow-wrap:anywhere}
+@media(max-width:600px){.clubhouse-hub .trophy-winner{font-size:11px}}
