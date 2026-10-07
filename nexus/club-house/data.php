@@ -19,10 +19,13 @@ try {
  $db=nexus_db($c,nexus_target($c,$gw));$db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();
  $assignments=nexus_rows($core,"SELECT game_world_id,manager_id,full_name,assignment_type,team_id,team_name,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?",[$gw]);
  $nationMapping=nexus_rows($core,'SELECT m.`National Team ID` entity_id,m.`SM World National Club ID` world_id,m.`SM National Team ID` sm_id,c.name,c.image_url logo FROM `IMC Game World National Team Mapping` m JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`=?',[$gw]);
+ $resultsCareer=($_GET['source']??'')==='results';
+ if($resultsCareer){$out=ch_results_read($db,$gw,$managers,$selected,$scope);}else{
  $club=ch_read($db,$gw,$managers,$selected,'club');$out=$club;
  if($scope!=='club'){
   $nation=ch_national_read($db,$gw,$managers,$selected,$assignments,$nationMapping);
   $out=$scope==='national_team'?$nation:ch_scope_merge($club,$nation);unset($out['accepted_results']);
+ }
  }
  $out['ranking_error']=false;$out['national_ranking_error']=false;
  $rankingResults=['club'=>['stats'=>[],'coverage'=>null],'national'=>['stats'=>[],'coverage'=>null]];
@@ -61,7 +64,7 @@ try {
    if($selected===$id)$out['trophies'][]=['world'=>$gw,'season'=>$t['imc_season'],'date'=>$t['won_date'],'competition'=>($t['nexus_view']??'')?:$t['competition_key'],'team'=>$t['winner_name'],'country'=>$t['sm_country']??null];
   }
  }catch(Throwable $e){$out['trophy_error']=true;error_log('Club House trophies '.$gw.': '.$e->getMessage());}
- $source=$scope==='club'?'Match Report':($scope==='national_team'?'Results':'Club: Match Report; Nations: Results');
+ $source=$resultsCareer?'Results':($scope==='club'?'Match Report':($scope==='national_team'?'Results':'Club: Match Report; Nations: Results'));
  $db->commit();nexus_out(['ok'=>true,'world'=>$gw,'source'=>$source,'scope'=>$scope,'generated_at'=>gmdate('c')]+$out);
 }catch(InvalidArgumentException $e){nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}
 catch(Throwable $e){error_log('Club House: '.$e->getMessage());nexus_out(['ok'=>false,'error'=>'Dati Club House temporaneamente non disponibili.'],500);}

@@ -77,3 +77,33 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 .clubhouse-hub .global-nav{justify-content:center}
 .clubhouse-hub .global-nav>*{flex:0 1 220px}
 @media(max-width:600px){.hub-sections{margin:0 -2px 18px}.hub-sections a{font-size:13px;padding:14px}.hub-context h2{font-size:20px}.clubhouse-hub .controls label{flex-basis:140px}.clubhouse-hub .controls #search{font-size:16px}}
+
+/* Compact Club House: content first, accessible controls remain at least 44px. */
+.clubhouse-hub .hero{padding:16px 24px!important;min-height:0!important}
+.clubhouse-hub .hero .eyebrow,.clubhouse-hub .hero-tags,.clubhouse-hub .hero-mark,.clubhouse-hub #subtitle,.clubhouse-hub .hub-context,.clubhouse-hub #directory-heading{display:none!important}
+.clubhouse-hub .hero h1{font-size:28px!important;margin:0!important}
+.clubhouse-hub main{padding-top:8px}
+.clubhouse-hub .hub-sections{margin-bottom:10px;padding-bottom:8px;gap:4px}
+.clubhouse-hub .hub-sections a{padding:12px 14px;font-size:13px;min-height:44px}
+.clubhouse-hub .controls{padding:10px;gap:8px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;box-shadow:none}
+.clubhouse-hub .controls label[hidden]{display:none!important}
+.clubhouse-hub .controls label{font-size:11px;gap:5px}
+.clubhouse-hub .controls #search,.clubhouse-hub .controls select{font-size:16px;min-height:44px;padding:10px}
+.clubhouse-hub #retry{width:44px;min-height:44px;padding:0;font-size:21px}
+.clubhouse-hub .data-status{display:flex;align-items:center;justify-content:space-between;margin:8px 0;font-size:11px;gap:10px}
+.clubhouse-hub .source-details{position:relative;text-align:right}
+.clubhouse-hub .source-details summary{cursor:pointer;padding:6px}
+.clubhouse-hub .source-details[open]{max-width:100%}
+.clubhouse-hub .source-details p{font-size:11px}
+.clubhouse-hub .nx-scope-band{padding:0!important;margin:8px 0 14px!important;background:transparent!important;border:0!important;min-height:0!important;display:block!important}
+.clubhouse-hub .nx-scope-title{display:none!important}
+.clubhouse-hub #scope-tabs{margin:0!important;padding:3px!important;max-width:none!important;width:100%}
+.clubhouse-hub #scope-tabs button{min-height:44px!important;padding:10px!important;font-size:13px!important}
+.clubhouse-hub #warning:empty{display:none}
+@media(max-width:600px){
+ .clubhouse-hub .hero{padding:12px 16px!important}
+ .clubhouse-hub .hero h1{font-size:24px!important}
+ .clubhouse-hub .controls{grid-template-columns:minmax(0,1fr) 44px}
+ .clubhouse-hub #search-label{grid-column:1/-1}
+ .clubhouse-hub .top{padding-top:10px!important;padding-bottom:10px!important}
+}

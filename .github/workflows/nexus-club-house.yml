@@ -29,6 +29,7 @@ jobs:
         run: |
           for file in nexus/club-house/*.php; do php -l "$file"; done
           php tests/nexus-club-house.php
+          php tests/nexus-club-house-career-results.php
           php tests/nexus-club-house-national.php
           php tests/nexus-club-house-ranking.php
           node --check nexus/club-house/club-house.js
@@ -135,5 +136,17 @@ jobs:
                   assert all(m['identity_source']=='assignment_dates' for m in h['matches'])
               print('ASSIGNMENT_CHECK',gw,'MNG001',n['played'],'Results;',c['played'],'club;',g['played'],'global; conflicts',national['national_coverage']['ambiguous_sides'])
           with urllib.request.urlopen(base,timeout=30) as r: assert 'Club House' in r.read().decode()
+          for i in range(1,11):
+              gw=f'GW{i:03d}'
+              result=get('?world='+gw+'&manager=MNG001&scope=global&source=results')
+              assert result['source']=='Results' and result['coverage']['manager_source']=='Results'
+              assert len(result['matches'])==result['managers']['MNG001']['stats']['played']
+              for value in result['managers'].values():
+                  stats=value['stats']; club=value['ranking_club_stats']; nation=value['national_stats']
+                  assert stats['played']==stats['won']+stats['drawn']+stats['lost']==stats['matched_by_id']
+                  for key in ['played','won','drawn','lost','gf','ga']:
+                      assert stats[key]==club[key]+nation[key], (gw,key,stats,club,nation)
+              assert all(m['source']=='Results' and m['identity_source']=='id' for m in result['matches'])
+              print('CAREER_RESULTS',gw,result['managers']['MNG001']['stats']['played'])
           print('Club House online; all ten GW verified without database writes')
           PY

@@ -57,3 +57,24 @@ function ch_read(PDO $db,string $gw,array $managers,?string $selected,string $sc
  }
  ch_group($out,$group,$map,$names,$gw,$selected,$scope);$stmt->closeCursor();return $out;
 }
+
+/** Career: Results only, by fixture and the manager IDs stored on each result. */
+function ch_results_rows(array $rows,string $gw,array $managers,?string $selected,string $scope='global'): array {
+ $out=ch_init($managers);$groups=[];$map=ch_identity($managers);$names=array_column($managers,'full_name','manager_id');
+ foreach($rows as $r){
+  if(($r['game_world_id']??'')!==$gw)continue;
+  if($scope!=='global'&&ch_nation($r)!==($scope==='national_team'))continue;
+  $groups[(string)($r['sm_fixture_id']??'')][]=$r;
+ }
+ foreach($groups as $items)ch_group($out,$items,$map,$names,$gw,$selected,$scope);
+ $out['coverage']['results']=$out['coverage']['reports'];unset($out['coverage']['reports']);
+ $out['coverage']['source']='Results';$out['coverage']['manager_source']='Results';
+ foreach($out['matches'] as &$m)$m['source']='Results';unset($m);
+ foreach($out['issues'] as &$i)$i['reason']=str_replace('Match Report','Results',$i['reason']);unset($i);
+ return $out;
+}
+function ch_results_read(PDO $db,string $gw,array $managers,?string $selected,string $scope='global'): array {
+ $stmt=$db->prepare('SELECT * FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id=? ORDER BY sm_fixture_id');
+ $stmt->execute([$gw]);$rows=$stmt->fetchAll(PDO::FETCH_ASSOC);$stmt->closeCursor();
+ return ch_results_rows($rows,$gw,$managers,$selected,$scope);
+}
