@@ -2,7 +2,7 @@ name: Deploy Nexus round design
 on:
   push:
     branches: [main]
-    paths: ["nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","tests/nexus-custom-cups.php","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html",".github/workflows/nexus-round-design.yml"]
+    paths: ["nexus/assets/match.js","nexus/assets/match.css","nexus/competitions/match.html","tests/nexus-match-ui.cjs","nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","tests/nexus-custom-cups.php","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html",".github/workflows/nexus-round-design.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,6 +26,12 @@ jobs:
           node --check nexus/assets/filter-chips.js
           node --check nexus/assets/competition-view.js
           node --check nexus/assets/the-club-links.js
+      - name: Verify compact Match Centre
+        run: |
+          node --check nexus/assets/match.js
+          mkdir -p /tmp/nexus-match-test
+          npm install --prefix /tmp/nexus-match-test --ignore-scripts playwright@1.62.1
+          NEXUS_PLAYWRIGHT_PATH=/tmp/nexus-match-test/node_modules/playwright CHROME_PATH=/usr/bin/google-chrome node tests/nexus-match-ui.cjs
       - name: Publish and verify round design
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -42,7 +48,7 @@ jobs:
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p(); ftp.set_pasv(True)
-          files=[Path(p) for p in ["nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html"]]
+          files=[Path(p) for p in ["nexus/assets/match.js","nexus/assets/match.css","nexus/competitions/match.html","nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html"]]
           for path in files:
               ftp.cwd('/www.italianmastersclub.it')
               for part in path.parent.parts:
