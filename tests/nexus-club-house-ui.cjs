@@ -22,7 +22,7 @@ function bundle(world){
   await page.locator('[data-career-sort="trophies"]').click();assert.match(await page.locator('.manager-card').first().textContent(),/Manager Due/);
   await page.locator('[data-career-sort="won"]').click();assert.match(await page.locator('.manager-card').first().textContent(),/Manager Uno/);
   await page.locator('[data-career-sort="played"]').click();assert.equal(await page.locator('[data-career-sort="played"]').getAttribute('aria-pressed'),'true');
-  await page.locator('#open-worlds').click();assert.equal(await page.locator('#world-links a').count(),10);assert.equal(await page.locator('#world-links a').first().getAttribute('href'),'../?world=GW001');await page.getByRole('button',{name:'Chiudi Game World'}).click();
+  assert.equal(await page.locator('#nx-world-select option').count(),10);assert.equal(await page.locator('#nx-universal-nav a').nth(2).getAttribute('href'),'/nexus/club-house/');
   for(const width of [320,390,1440]){
    await page.setViewportSize({width,height:844});
    assert.equal(await page.locator('.manager-grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),3,'Three manager columns at '+width);
