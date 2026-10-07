@@ -72,16 +72,18 @@
  function universalShell(){
   if(document.getElementById('nx-universal-header'))return;
   document.body.classList.add('nx-universal');
+  const inClubHouse=location.pathname.includes('/club-house/');
   const params=new URLSearchParams(location.search),valid=w=>/^GW00[1-9]$|^GW010$/.test(w||'');
   let remembered='';try{remembered=localStorage.getItem('imc_nexus_world')||''}catch(e){}
   let world=valid(params.get('world'))?params.get('world'):valid(remembered)?remembered:'GW001';
   const href=(path,w=world)=>'/nexus/'+path+'?'+new URLSearchParams({world:w});
   const header=document.createElement('header');header.id='nx-universal-header';
-  header.innerHTML='<div class="nx-universal-top"><a class="nx-universal-brand" href="/nexus/club-house/"><img src="/site-assets/images/imc-logo.png" alt="IMC"><span>NEXUS</span></a><select id="nx-world-select" aria-label="Game World">'+Array.from({length:10},(_,i)=>{const w='GW'+String(i+1).padStart(3,'0');return '<option value="'+w+'">'+w+'</option>'}).join('')+'</select></div><div class="nx-universal-context" id="nx-universal-context"></div>';
-  document.body.prepend(header);const selector=header.querySelector('select');selector.value=world;
+  header.innerHTML='<div class="nx-universal-top"><a class="nx-universal-brand" href="/nexus/club-house/"><img src="/site-assets/images/imc-logo.png" alt="IMC"><span>NEXUS</span></a><select id="nx-world-select" aria-label="Game World"><option value="clubhouse">Club House</option>'+Array.from({length:10},(_,i)=>{const w='GW'+String(i+1).padStart(3,'0');return '<option value="'+w+'">'+w+'</option>'}).join('')+'</select></div><div class="nx-universal-context" id="nx-universal-context"></div>';
+  document.body.prepend(header);const selector=header.querySelector('select');selector.value=inClubHouse?'clubhouse':world;
+  fetch('/nexus/club-house/data.php',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(!d.ok||!Array.isArray(d.worlds))return;for(const w of d.worlds){const option=Array.from(selector.options).find(o=>o.value===w.id);if(option&&w.name)option.textContent=w.name;}}).catch(()=>{});
   const context=document.getElementById('nx-universal-context');
   const updateContext=()=>{context.textContent=location.pathname.includes('/club-house/')&&!params.get('world')?'Club House · Tutti i Game World':world;fetch(href('core/context.php'),{cache:'no-store'}).then(r=>r.json()).then(d=>{if(!d.ok)return;if(location.pathname.includes('/club-house/')&&!params.get('world'))return;context.textContent=(d.world?.game_world_name||world)+(params.get('season')||d.current_season?' · S'+(params.get('season')||d.current_season):'');}).catch(()=>{});};
-  selector.onchange=()=>{try{localStorage.setItem('imc_nexus_world',selector.value)}catch(e){}location.href=href('',selector.value);};
+  selector.onchange=()=>{if(selector.value==='clubhouse'){location.href='/nexus/club-house/';return;}try{localStorage.setItem('imc_nexus_world',selector.value)}catch(e){}location.href=href('',selector.value);};
   const icon=path=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+path+'</svg>';
   const icons={home:icon('<path d="M3 10 12 3l9 7v11h-6v-7H9v7H3z"/>'),cup:icon('<path d="M7 3h10v5a5 5 0 0 1-10 0zM12 13v7M8 21h8M7 5H3v3a4 4 0 0 0 4 4M17 5h4v3a4 4 0 0 1-4 4"/>'),club:icon('<path d="M3 10 12 3l9 7M5 9v12h14V9M10 21v-7h4v7M9 10h6"/>'),manager:icon('<circle cx="12" cy="7" r="4"/><path d="M4 21v-3a8 8 0 0 1 16 0v3z"/>'),more:icon('<circle cx="4" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="20" cy="12" r="1"/>')};
   const nav=document.createElement('nav');nav.id='nx-universal-nav';nav.setAttribute('aria-label','Navigazione Nexus');

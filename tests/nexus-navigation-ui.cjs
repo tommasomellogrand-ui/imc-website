@@ -24,7 +24,7 @@ const fixture=(cls,labels,attr)=>`<nav class="${cls}">${labels.map((n,i)=>button
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'page overflow '+width);
  assert.equal(await page.locator('.nx-topbar').evaluate(b=>getComputedStyle(b).backgroundColor),'rgb(16, 18, 56)');
  assert.equal(await page.locator('.nx-hero').evaluate(b=>getComputedStyle(b).backgroundColor),'rgb(245, 246, 250)');
- assert.equal(await page.locator('.nx-menu').count(),0);
+ assert.equal(await page.locator('.nx-menu').count(),0);assert.equal(await page.locator('#nx-world-select option').first().textContent(),'Club House');
  assert.equal(await page.locator('#nx-universal-nav>a,#nx-universal-nav>button').count(),5);
  assert.equal(await page.locator('#nx-universal-nav>a').nth(2).textContent(),'Club House');
  assert.equal(await page.locator('#nx-universal-nav>a').nth(2).getAttribute('href'),'/nexus/club-house/');

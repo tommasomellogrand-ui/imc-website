@@ -176,3 +176,5 @@ body.nx-universal{padding-bottom:calc(92px + env(safe-area-inset-bottom))!import
 @media(max-width:360px){#nx-universal-header .nx-universal-top{padding:10px 14px}#nx-universal-header .nx-universal-brand{font-size:21px;gap:7px}#nx-world-select{width:94px}#nx-universal-nav>a,#nx-universal-nav>button{font-size:9px}}
 
 .nx-universal .md-bottom,.nx-universal .club-nav{display:none!important}
+
+#nx-universal-header #nx-world-select{width:clamp(116px,43vw,230px);min-width:0;max-width:48%;text-overflow:ellipsis}
