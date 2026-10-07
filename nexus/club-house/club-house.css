@@ -213,6 +213,6 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 .clubhouse-hub .rank-rules .rank-rule-notes p{font-size:11px;line-height:1.5;margin:6px 0;color:#6b7288}
 .clubhouse-hub .career-sort{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}
 .clubhouse-hub .career-sort>span{font-size:11px;font-weight:600;color:#6b7288;white-space:nowrap}
-.clubhouse-hub .career-sort>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:#e9ecf3;padding:3px;border-radius:11px;flex:1;max-width:420px}
+.clubhouse-hub .career-sort>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:#e9ecf3;padding:3px;border-radius:11px;flex:1;max-width:420px}
 .clubhouse-hub .career-sort button{border:0;min-height:44px;padding:8px 6px;font-size:12px;font-weight:700;background:transparent;color:#697087;border-radius:8px}
 .clubhouse-hub .career-sort button[aria-pressed="true"]{background:#101238;color:#fff;box-shadow:inset 0 -2px #d3ac50}

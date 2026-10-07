@@ -13,7 +13,7 @@ const zero=()=>Object.fromEntries(fields.map(k=>[k,0]));
 const sum=items=>items.reduce((a,s)=>{fields.forEach(k=>a[k]+=Number(s[k]||0));return a;},zero());
 const pct=s=>s.played?(100*s.won/s.played).toLocaleString('it-IT',{maximumFractionDigits:1})+'%':'—';
 const number=n=>Number(n||0).toLocaleString('it-IT');
-let careerSort=['played','won','trophies'].includes(params.get('sort'))?params.get('sort'):'played';
+let careerSort=['name','played','won','trophies'].includes(params.get('sort'))?params.get('sort'):'played';
 let people=[],worldNames={},bundles={},failed=[],tab=section==='h2h'?'h2h':section==='trophies'?'trophies':'overview',limit=25,loading=true,runId=0;
 const worlds=Array.from({length:10},(_,i)=>'GW'+String(i+1).padStart(3,'0'));
 const selected=()=>worlds.filter(w=>!$('world').value||w===$('world').value);
@@ -74,10 +74,11 @@ function syncManagerOptions(){
 function directory(){
  const q=$('search').value.toLocaleLowerCase('it').trim(),rows=directoryPeople().filter(m=>(m.full_name+' '+m.manager_id).toLocaleLowerCase('it').includes(q));
  if(section==='career')rows.sort((a,b)=>{
+  if(careerSort==='name')return a.full_name.localeCompare(b.full_name,'it');
   const score=m=>careerSort==='trophies'?trophies(m.manager_id):stats(m.manager_id)[careerSort];
   return score(b)-score(a)||a.full_name.localeCompare(b.full_name,'it');
  });
- const sortBar=section==='career'?'<div class="career-sort" role="group" aria-label="Ordina manager"><span>Sort by</span><div>'+[['played','Partite'],['won','Vittorie'],['trophies','Trofei']].map(([key,label])=>'<button type="button" data-career-sort="'+key+'" aria-pressed="'+(careerSort===key)+'">'+label+'</button>').join('')+'</div></div>':'';
+ const sortBar=section==='career'?'<div class="career-sort" role="group" aria-label="Ordina manager"><div>'+[['name','Nome'],['played','Partite'],['won','Vittorie'],['trophies','Trofei']].map(([key,label])=>'<button type="button" data-career-sort="'+key+'" aria-pressed="'+(careerSort===key)+'">'+label+'</button>').join('')+'</div></div>':'';
 
  $('manager-count').textContent=rows.length+' manager';$('compact-count').textContent=rows.length+' manager';
  $('content').innerHTML=sortBar+'<div class="manager-grid">'+rows.map(m=>{
