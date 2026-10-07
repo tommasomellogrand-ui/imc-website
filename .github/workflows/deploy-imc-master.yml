@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: imc-public-website-production
+  group: imc-public-homepage-production
   cancel-in-progress: false
 jobs:
   deploy:
