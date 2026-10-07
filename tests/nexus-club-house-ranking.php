@@ -5,7 +5,7 @@ require dirname(__DIR__).'/nexus/club-house/engine.php';
 function check($got,$want):void {if($got!==$want && !(is_numeric($got)&&is_numeric($want)&&(float)$got===(float)$want))throw new RuntimeException(json_encode([$got,$want]));}
 foreach(['GW001'=>3,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>1,'GW006'=>1,'GW007'=>1,'GW008'=>3,'GW009'=>1,'GW010'=>1] as $gw=>$weight){
  check(imc_rank_weight($gw),$weight);
- foreach([[1,1,0,1.5],[1,0,0,1],[1,0,1,0.5],[6,3,1,7],[4,0,4,2]] as [$played,$won,$lost,$points]){
+ foreach([[1,1,0,1],[1,0,0,0.5],[1,0,1,0],[6,3,1,4],[4,0,4,0]] as [$played,$won,$lost,$points]){
   $drawn=$played-$won-$lost;$r=imc_rank_start(compact('played','won','drawn','lost'),$gw);check($r['total'],$points*$weight);check($r['match_points'],$points*$weight);
  }
  $r=imc_rank_start(['played'=>6,'won'=>3,'drawn'=>2,'lost'=>1],$gw);
@@ -13,7 +13,7 @@ foreach(['GW001'=>3,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>1,'GW006'=>1,'GW00
   check(imc_rank_bonus(['trophy_type'=>$type]),$points);
   imc_rank_award($r,['trophy_type'=>$type]);
  }
- check($r['trophy_base'],435);check($r['total'],442*$weight);check(count($r['awards']),7);
+ check($r['trophy_base'],435);check($r['total'],439*$weight);check(count($r['awards']),7);
 }
 foreach([1=>100,2=>25,3=>25,4=>25,5=>25] as $d=>$points)check(imc_rank_bonus(['trophy_type'=>'league','sm_division'=>$d]),$points);
 check(imc_rank_bonus(['trophy_type'=>'worldcup']),125);check(imc_rank_bonus(['trophy_type'=>'World Cup','competition_group'=>'NATIONS']),125);
@@ -29,7 +29,7 @@ $d=imc_rank_national_rows([$row,$row,$draw,$club],$managers);
 check($d['stats']['MNG001']['played'],2);check($d['stats']['MNG001']['won'],1);check($d['stats']['MNG001']['drawn'],1);check($d['stats']['MNG002']['lost'],1);check($d['coverage']['duplicate_rows'],1);
 check(imc_rank_national_rows([$row,$conflict],$managers)['coverage']['excluded_fixtures'],1);
 $missing=$row;$missing['home_sm_manager_id']=null;check(imc_rank_national_rows([$missing],$managers)['stats']['MNG001']['played'],0);
-foreach(['GW001','GW002','GW004'] as $gw){$r=imc_rank_start(['played'=>2,'won'=>1,'lost'=>0],$gw,$d['stats']['MNG001']);check($r['national_points'],2.5*imc_rank_weight($gw));check($r['total'],5*imc_rank_weight($gw));check($r['match_points'],$r['club_points']+$r['national_points']);}
+foreach(['GW001','GW002','GW004'] as $gw){$r=imc_rank_start(['played'=>2,'won'=>1,'lost'=>0],$gw,$d['stats']['MNG001']);check($r['national_points'],1.5*imc_rank_weight($gw));check($r['total'],3*imc_rank_weight($gw));check($r['match_points'],$r['club_points']+$r['national_points']);}
 echo "PASS: national Results scoring, scope isolation, duplicate/conflict handling, shootout draw and same GW weights\n";
 // Club ranking must use Results independently of the Club House report stats.
 $c=imc_rank_result_rows([$club,$club,$row],$managers,false);
@@ -44,8 +44,20 @@ $same=$club;$same['away_sm_manager_id']=10;
 check(imc_rank_result_rows([$same],$managers,false)['coverage']['excluded_fixtures'],1);
 $invalid=$club;$invalid['home_score']=null;
 check(imc_rank_result_rows([$invalid],$managers,false)['coverage']['excluded_fixtures'],1);
-check(imc_rank_start($c['stats']['MNG001'],'GW001')['version'],8);
+check(imc_rank_start($c['stats']['MNG001'],'GW001')['version'],9);
 $source=file_get_contents(dirname(__DIR__).'/nexus/club-house/ranking.php');
 check(str_contains($source,"nexus_table(\$gw,'Match_Report')"),false);
 check(str_contains($source,"nexus_table(\$gw,'Results')"),true);
 echo "PASS: Results-only club and national IDs, deduplication, conflicts, missing IDs and unchanged scoring\n";
+
+// Ranking and Career must match every statistic, including penalties.
+$rows=[$row,$row,$draw,$club];foreach($rows as &$r)$r['game_world_id']='GW010';unset($r);
+foreach(['club'=>false,'national_team'=>true,'global'=>null] as $scope=>$national){
+ $career=ch_results_rows($rows,'GW010',$managers,null,$scope);
+ $rank=$national===null?null:imc_rank_result_rows($rows,$managers,$national);
+ foreach($managers as $m){$id=$m['manager_id'];$expected=$rank['stats'][$id]??null;
+  if($national===null){$c=imc_rank_result_rows($rows,$managers,false)['stats'][$id];$n=imc_rank_result_rows($rows,$managers,true)['stats'][$id];$expected=[];foreach($c as $key=>$v)$expected[$key]=$v+$n[$key];}
+  check($career['managers'][$id]['stats'],$expected);
+ }
+}
+echo "PASS: Career and Ranking statistics identical for clubs, nations and global including penalties\n";

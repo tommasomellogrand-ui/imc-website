@@ -98,10 +98,10 @@ jobs:
                   n=v['national_stats']; national_total+=n['played']
                   assert n['played']==n['won']+n['drawn']+n['lost']==n['matched_by_id']
                   assert not d['national_ranking_error'] and d['national_ranking_coverage']['source']=='Results'
-                  assert r['version']==8 and r['weight']==weight
+                  assert r['version']==9 and r['weight']==weight
                   rs=v['ranking_club_stats']; assert rs['played']==rs['won']+rs['drawn']+rs['lost']==rs['matched_by_id']
-                  assert r['club_points']==(rs['played']+0.5*rs['won']-0.5*rs['lost'])*weight
-                  assert r['national_points']==(n['played']+0.5*n['won']-0.5*n['lost'])*weight
+                  assert r['club_points']==(0.5*rs['played']+0.5*rs['won']-0.5*rs['lost'])*weight
+                  assert r['national_points']==(0.5*n['played']+0.5*n['won']-0.5*n['lost'])*weight
                   assert r['match_points']==r['club_points']+r['national_points']
                   assert r['trophy_points']==r['trophy_base']*weight and r['total']==r['match_points']+r['trophy_points']
                   assert r['unscored_trophies']==0, (gw, r['awards'])
@@ -144,7 +144,7 @@ jobs:
               for value in result['managers'].values():
                   stats=value['stats']; club=value['ranking_club_stats']; nation=value['national_stats']
                   assert stats['played']==stats['won']+stats['drawn']+stats['lost']==stats['matched_by_id']
-                  for key in ['played','won','drawn','lost','gf','ga']:
+                  for key in ['played','won','drawn','lost','gf','ga','penalty_won','penalty_lost']:
                       assert stats[key]==club[key]+nation[key], (gw,key,stats,club,nation)
               assert all(m['source']=='Results' and m['identity_source']=='id' for m in result['matches'])
               print('CAREER_RESULTS',gw,result['managers']['MNG001']['stats']['played'])

@@ -177,3 +177,21 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 .clubhouse-hub .controls #world{border:0;border-radius:8px;background:#f4f5f9;color:#101238;font-size:15px;font-weight:700;min-height:46px;padding:10px 12px;letter-spacing:0;text-transform:none}
 .clubhouse-hub .controls #retry{align-self:end;border:1px solid #e1e6ef;background:#f4f5f9;border-radius:10px;color:#101238;min-height:46px}
 @media(max-width:600px){.clubhouse-hub .controls{padding:10px;gap:8px}.clubhouse-hub .controls #world{font-size:14px}}
+
+/* Ranking shares Career's compact navy, gold and outcome colours. */
+.clubhouse-hub .ranking-score-guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.clubhouse-hub .ranking-score-guide>span{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 6px;border-radius:10px;background:#eaf4ed;color:#306943;font-size:12px}
+.clubhouse-hub .ranking-score-guide>span:nth-child(2){background:#f8f2e3;color:#89651d}
+.clubhouse-hub .ranking-score-guide>span:nth-child(3){background:#fbeeea;color:#a34437}
+.clubhouse-hub .ranking-score-guide b{font-size:24px}
+.clubhouse-hub .ranking-row{border-radius:14px;border:1px solid #e1e6ef;background:#fff;margin:9px 0;overflow:hidden}
+.clubhouse-hub .ranking-row>summary{padding:16px 12px;gap:10px}
+.clubhouse-hub .ranking-podium{border-left:3px solid #d3ac50}
+.clubhouse-hub .ranking-row .rank-position{background:#101238;color:#e1c674;border-radius:10px;font-size:20px;display:grid;place-items:center;min-width:36px;min-height:40px}
+.clubhouse-hub .rank-name strong{font-size:15px}
+.clubhouse-hub .rank-name small{font-size:10px;line-height:1.5;margin-top:5px}
+.clubhouse-hub .rank-total{font-size:24px;color:#101238;font-variant-numeric:tabular-nums}
+.clubhouse-hub .rank-total small{font-size:9px;letter-spacing:.8px}
+.clubhouse-hub .rank-split{border-radius:12px;background:#f4f5f9;padding:12px}
+.clubhouse-hub .rank-world{border-radius:12px}
+@media(max-width:600px){.clubhouse-hub .ranking-row>summary{gap:7px;padding:13px 8px;grid-template-columns:32px minmax(0,1fr) auto 12px}.clubhouse-hub .ranking-row .rank-position{min-width:30px;font-size:17px}.clubhouse-hub .rank-name strong{font-size:13px}.clubhouse-hub .rank-total{font-size:21px}.clubhouse-hub .ranking-score-guide>span{font-size:10px;gap:5px}.clubhouse-hub .ranking-score-guide b{font-size:20px}}

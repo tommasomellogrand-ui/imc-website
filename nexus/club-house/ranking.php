@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-// IMC Ranking v8: Results-only match scores and manager IDs; trophy rules unchanged.
+// IMC Ranking v9: Results-only match scores and manager IDs; trophy rules unchanged.
 function imc_rank_weight(string $gw): int {
  return in_array($gw,['GW001','GW008'],true)?3:(in_array($gw,['GW002','GW003'],true)?2:1);
 }
@@ -20,22 +20,24 @@ function imc_rank_bonus(array $t): ?int {
 }
 function imc_rank_start(array $s,string $gw,?array $national=null): array {
  $national=$national??['played'=>0,'won'=>0,'drawn'=>0,'lost'=>0];
- $base=(int)$s['played']+0.5*(int)$s['won']-0.5*(int)$s['lost'];$weight=imc_rank_weight($gw);
- $nb=(int)$national['played']+0.5*(int)$national['won']-0.5*(int)$national['lost'];
- return ['version'=>8,'weight'=>$weight,'club_base'=>$base,'national_base'=>$nb,'club_points'=>$base*$weight,'national_points'=>$nb*$weight,'match_base'=>$base+$nb,'trophy_base'=>0,'match_points'=>($base+$nb)*$weight,'trophy_points'=>0,'total'=>($base+$nb)*$weight,'unscored_trophies'=>0,'awards'=>[]];
+ $base=0.5*(int)$s['played']+0.5*(int)$s['won']-0.5*(int)$s['lost'];$weight=imc_rank_weight($gw);
+ $nb=0.5*(int)$national['played']+0.5*(int)$national['won']-0.5*(int)$national['lost'];
+ return ['version'=>9,'weight'=>$weight,'club_base'=>$base,'national_base'=>$nb,'club_points'=>$base*$weight,'national_points'=>$nb*$weight,'match_base'=>$base+$nb,'trophy_base'=>0,'match_points'=>($base+$nb)*$weight,'trophy_points'=>0,'total'=>($base+$nb)*$weight,'unscored_trophies'=>0,'awards'=>[]];
 }
 
-// Ranking-only Results. Never changes Club House statistics or H2H.
+// Share Career's fixture validation, attribution and statistics.
 function imc_rank_result_rows(array $rows,array $managers,bool $national): array {
- $map=ch_identity($managers);$stats=[];foreach($managers as $m)$stats[$m['manager_id']]=ch_zero();
- $groups=[];$coverage=['source'=>'Results','manager_source'=>'Results','fixtures'=>0,'duplicate_rows'=>0,'excluded_fixtures'=>0,'unidentified_sides'=>0,'report_manager_sides'=>0,'result_manager_sides'=>0];
- foreach($rows as $r){if(ch_nation($r)!==$national)continue;$id=(string)($r['sm_fixture_id']??'');$groups[$id][]=$r;}
- foreach($groups as $items){$r=$items[0];$coverage['fixtures']++;$coverage['duplicate_rows']+=count($items)-1;$signatures=[];foreach($items as $row)$signatures[ch_signature($row)]=true;
-  if(count($signatures)!==1||(int)($r['sm_fixture_id']??0)<1||!is_numeric($r['home_score']??null)||!is_numeric($r['away_score']??null)||(int)$r['home_score']<0||(int)$r['away_score']<0){$coverage['excluded_fixtures']++;continue;}
-  $home=ch_resolve($r,'home',$map)['ids'];$away=ch_resolve($r,'away',$map)['ids'];
-  if(count($home)===1&&$home===$away){$coverage['excluded_fixtures']++;continue;}
-  foreach(['home'=>$home,'away'=>$away] as $side=>$ids){if(count($ids)!==1){$coverage['unidentified_sides']++;continue;}$other=$side==='home'?'away':'home';ch_add($stats[$ids[0]],(int)$r[$side.'_score'],(int)$r[$other.'_score']);$stats[$ids[0]]['matched_by_id']++;$coverage['result_manager_sides']++;}
+ $map=ch_identity($managers);$out=ch_init($managers);$names=array_column($managers,'full_name','manager_id');
+ $groups=[];$unidentified=0;
+ foreach($rows as $r){if(ch_nation($r)!==$national)continue;$groups[(string)($r['sm_fixture_id']??'')][]=$r;}
+ foreach($groups as $items){
+  $before=$out['coverage']['excluded_fixtures'];
+  ch_group($out,$items,$map,$names,'',null,$national?'national_team':'club');
+  if($out['coverage']['excluded_fixtures']===$before)foreach(['home','away'] as $side)if(count(ch_resolve($items[0],$side,$map)['ids'])!==1)$unidentified++;
  }
+ $stats=[];foreach($out['managers'] as $id=>$m)$stats[$id]=$m['stats'];
+ $coverage=$out['coverage'];unset($coverage['reports']);
+ $coverage+=['source'=>'Results','manager_source'=>'Results','unidentified_sides'=>$unidentified,'report_manager_sides'=>0,'result_manager_sides'=>array_sum(array_column($stats,'matched_by_id'))];
  return ['stats'=>$stats,'coverage'=>$coverage];
 }
 function imc_rank_national_rows(array $rows,array $managers): array {
