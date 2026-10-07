@@ -15,6 +15,8 @@ try {
  $gw=nexus_world($_GET['world']);$selected=trim((string)($_GET['manager']??''));
  if($selected!==''&&!in_array($selected,array_column($managers,'manager_id'),true))throw new InvalidArgumentException('Manager IMC non trovato.');
  $selected=$selected===''?null:$selected;
+ $trophyView=($_GET['view']??'')==='trophies';
+ $managerNames=array_column($managers,'full_name','manager_id');
  $scope=(string)($_GET['scope']??'club');if(!in_array($scope,['global','club','national_team'],true))throw new InvalidArgumentException('Scope non valido.');
  $db=nexus_db($c,nexus_target($c,$gw));$db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();
  $assignments=nexus_rows($core,"SELECT game_world_id,manager_id,full_name,assignment_type,team_id,team_name,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?",[$gw]);
@@ -34,13 +36,13 @@ try {
  foreach($out['managers'] as $id=>&$m){$m['ranking_club_stats']=$rankingResults['club']['stats'][$id]??ch_zero();$m['national_stats']=$rankingResults['national']['stats'][$id]??ch_zero();$m['ranking']=imc_rank_start($m['ranking_club_stats'],$gw,$m['national_stats']);}unset($m);
  // Display-only club logos: use existing world mappings, never create clubs.
  $out['clubs']=[];
- if($selected!==null)try {
+ if($selected!==null||$trophyView)try {
   $clubRows=nexus_rows($core,'SELECT m.`SM World Club ID` world_id,c.image_url logo FROM `IMC Game World Club Mapping` m JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=?',[$gw]);
   $clubGroups=[];foreach($clubRows as $club)if((int)$club['world_id']>0)$clubGroups[(string)$club['world_id']][]=$club;
   foreach($clubGroups as $id=>$items)if(count($items)===1)$out['clubs'][$id]=['logo'=>$items[0]['logo']];
  }catch(Throwable $e){error_log('Club House display logos '.$gw.': '.$e->getMessage());}
  $out['nations']=[];
- if($selected!==null)try {
+ if($selected!==null||$trophyView)try {
   foreach($nationMapping as $n){
    foreach(['world_id','sm_id'] as $key)if((int)$n[$key]>0)$out['nations'][(string)$n[$key]]=['logo'=>$n['logo'],'world_id'=>$n['world_id'],'name'=>$n['name']];
   }
@@ -61,7 +63,7 @@ try {
    if(isset($_GET['scope'])&&$scope!=='global'&&$isNation!==($scope==='national_team'))continue;
    $id=trophy_manager_at_win($t,$assignments,$nationalManagers);if($id===null||!isset($out['managers'][$id]))continue;$out['managers'][$id]['trophies']++;
    imc_rank_award($out['managers'][$id]['ranking'],$t);
-   if($selected===$id)$out['trophies'][]=['world'=>$gw,'season'=>$t['imc_season'],'date'=>$t['won_date'],'competition'=>($t['nexus_view']??'')?:$t['competition_key'],'team'=>$t['winner_name'],'country'=>$t['sm_country']??null,'scope'=>$isNation?'national_team':'club','team_id'=>$t['winner_sm_world_club_id']??null,'fixture_id'=>$t['deciding_fixture_id']??null];
+   if($selected===$id||($trophyView&&$selected===null))$out['trophies'][]=['manager_id'=>$id,'manager_name'=>$managerNames[$id]??$id,'world'=>$gw,'season'=>$t['imc_season'],'date'=>$t['won_date'],'competition'=>($t['nexus_view']??'')?:$t['competition_key'],'team'=>$t['winner_name'],'country'=>$t['sm_country']??null,'scope'=>$isNation?'national_team':'club','team_id'=>$t['winner_sm_world_club_id']??null,'fixture_id'=>$t['deciding_fixture_id']??null];
   }
  }catch(Throwable $e){$out['trophy_error']=true;error_log('Club House trophies '.$gw.': '.$e->getMessage());}
  $source=$resultsCareer?'Results':($scope==='club'?'Match Report':($scope==='national_team'?'Results':'Club: Match Report; Nations: Results'));
