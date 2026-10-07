@@ -256,3 +256,26 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 .clubhouse-hub .timeline-more summary strong{color:#967026;float:right}
 .clubhouse-hub .timeline-more p{font-size:11px;line-height:1.5;color:#697087}
 @media(max-width:600px){.clubhouse-hub .timeline-filters button{font-size:11px}.clubhouse-hub .timeline-event-content h3{font-size:15px}}
+
+/* Trophy Room: three medals per row, with the same world headings as Career. */
+.clubhouse-hub .trophy-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#101238;border-bottom:3px solid #d3ac50;border-radius:14px;padding:17px 8px;margin:16px 0 24px;color:#fff}
+.clubhouse-hub .trophy-summary>div{text-align:center;display:flex;flex-direction:column;gap:6px}
+.clubhouse-hub .trophy-summary>div+div{border-left:1px solid #ffffff25}
+.clubhouse-hub .trophy-summary strong{font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums;color:#e1c674}
+.clubhouse-hub .trophy-summary span{font-size:11px;color:#eef0f7}
+.clubhouse-hub .trophy-world-section{margin:0 0 26px}
+.clubhouse-hub .trophy-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px;align-items:start}
+.clubhouse-hub .trophy-tile{min-width:0;border:1px solid #e1e6ef;border-top:3px solid #d3ac50;background:#fff;border-radius:13px;overflow:hidden;text-align:center}
+.clubhouse-hub .trophy-tile>summary{list-style:none;cursor:pointer;display:flex;align-items:center;flex-direction:column;gap:10px;padding:16px 9px 10px}
+.clubhouse-hub .trophy-tile>summary::-webkit-details-marker{display:none}
+.clubhouse-hub .trophy-tile .trophy-icon{width:34px;height:34px;color:#b58a2d}
+.clubhouse-hub .trophy-competition{font-size:12px;line-height:1.4;min-height:4.2em;overflow-wrap:anywhere}
+.clubhouse-hub .trophy-team{display:flex;align-items:center;flex-direction:column;gap:7px;width:100%}
+.clubhouse-hub .trophy-team .club-logo,.clubhouse-hub .trophy-team .club-placeholder{width:30px;height:30px;object-fit:contain}
+.clubhouse-hub .trophy-team>span:last-child{font-size:11px;line-height:1.3;min-height:2.6em;overflow-wrap:anywhere}
+.clubhouse-hub .trophy-season{font-size:10px;color:#89651d;background:#f8f2e3;border-radius:6px;padding:5px 6px}
+.clubhouse-hub .trophy-expand{font-size:9px;color:#697087}
+.clubhouse-hub .trophy-info{padding:8px;border-top:1px solid #e1e6ef;font-size:11px}
+.clubhouse-hub .trophy-info p{margin:5px 0;overflow-wrap:anywhere}
+.clubhouse-hub .trophy-info a{display:block;min-height:44px;align-content:center;font-weight:700;color:#89651d}
+@media(max-width:600px){.clubhouse-hub .trophy-tiles{gap:7px}.clubhouse-hub .trophy-tile>summary{padding:12px 5px 9px;gap:8px}.clubhouse-hub .trophy-competition{font-size:10px}.clubhouse-hub .trophy-team>span:last-child{font-size:10px}.clubhouse-hub .trophy-summary strong{font-size:26px}.clubhouse-hub .trophy-info{font-size:10px;padding:6px}}
