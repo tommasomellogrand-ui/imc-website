@@ -107,3 +107,28 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
  .clubhouse-hub #search-label{grid-column:1/-1}
  .clubhouse-hub .top{padding-top:10px!important;padding-bottom:10px!important}
 }
+
+/* Three compact manager cards per row, including phones. */
+.clubhouse-hub .manager-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.clubhouse-hub .manager-card{min-width:0;padding:18px 12px 12px;border-radius:15px;text-align:center;display:flex;flex-direction:column;gap:12px}
+.clubhouse-hub .manager-card .identity{flex-direction:column;align-items:center;gap:9px;min-width:0}
+.clubhouse-hub .manager-card .identity>div{width:100%;min-width:0}
+.clubhouse-hub .manager-card .avatar{width:44px;height:44px;font-size:16px}
+.clubhouse-hub .manager-card .identity h2{font-size:15px;line-height:1.3;min-height:2.6em;margin:0 0 5px;overflow-wrap:anywhere}
+.clubhouse-hub .manager-card .identity small{font-size:10px;letter-spacing:.4px}
+.clubhouse-hub .manager-card .mini-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;margin:0;padding:10px 0;background:#f4f5f9;border-radius:9px}
+.clubhouse-hub .manager-card .mini-stats strong{font-size:20px;line-height:1.2;letter-spacing:-.5px}
+.clubhouse-hub .manager-card .mini-stats small{font-size:9px;letter-spacing:0;margin-top:4px}
+.clubhouse-hub .manager-card .card-foot{margin-top:auto;padding-top:9px;display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:4px;font-size:10px}
+@media(max-width:600px){
+ .clubhouse-hub .manager-grid{gap:7px}
+ .clubhouse-hub .manager-card{padding:12px 6px 9px;border-radius:12px;gap:9px}
+ .clubhouse-hub .manager-card .avatar{width:36px;height:36px;font-size:13px}
+ .clubhouse-hub .manager-card .identity h2{font-size:12px;min-height:3.9em}
+ .clubhouse-hub .manager-card .identity small{font-size:9px}
+ .clubhouse-hub .manager-card .mini-stats{padding:8px 2px}
+ .clubhouse-hub .manager-card .mini-stats strong{font-size:14px}
+ .clubhouse-hub .manager-card .mini-stats small{font-size:8px}
+ .clubhouse-hub .manager-card .card-foot{font-size:9px}
+}
+

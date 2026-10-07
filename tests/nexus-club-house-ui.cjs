@@ -15,6 +15,21 @@ function bundle(world){
   await page.goto('https://club.test/');await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('10/10'));
   assert.equal(await page.locator('.hub-sections a').count(),5);assert.equal(await page.locator('.global-nav a').count(),1);assert.equal(await page.locator('#title').textContent(),'Club House');assert.equal(await page.locator('.manager-card').count(),3);assert.equal(await page.locator('#tabs').isVisible(),false);
   await page.locator('#open-worlds').click();assert.equal(await page.locator('#world-links a').count(),10);assert.equal(await page.locator('#world-links a').first().getAttribute('href'),'../?world=GW001');await page.getByRole('button',{name:'Chiudi Game World'}).click();
+  for(const width of [320,390,1440]){
+   await page.setViewportSize({width,height:844});
+   assert.equal(await page.locator('.manager-grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),3,'Three manager columns at '+width);
+   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Directory overflow at '+width);
+  }
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('#world').selectOption('GW001');
+  assert.equal(await page.locator('.manager-card').count(),1);
+  assert.equal(await page.locator('#manager-options option').count(),2);
+  assert.equal(await page.locator('#compact-count').textContent(),'1 manager');
+  await page.locator('#world').selectOption('GW003');
+  assert.equal(await page.locator('.manager-card').count(),0);
+  assert.equal(await page.locator('#manager-options option').count(),1);
+  await page.locator('#world').selectOption('');
+  assert.equal(await page.locator('.manager-card').count(),3);
   console.log('SCREENSHOT_DIRECTORY='+ (await page.screenshot()).toString('base64'));
   await page.locator('#search').fill('Uno');assert.equal(await page.locator('.manager-card').count(),1);await page.locator('.manager-card').click();
   await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('10/10'));
