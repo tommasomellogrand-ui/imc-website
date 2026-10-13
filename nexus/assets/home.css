@@ -29,3 +29,27 @@
 @media(max-width:760px){.matchday{padding:16px 12px}.matchday-cards{grid-template-columns:1fr}.matchday-card{padding:14px 11px}.matchday-competition>header{align-items:flex-start}.matchday-competition header a{flex:0 0 95px}.matchday-card .team,.matchday-card .team.away{flex-direction:column;text-align:center}.matchday-card .score b{font-size:24px}}
 
 .matchday-date{font-size:20px;color:var(--navy);padding:12px 0 9px;border-bottom:2px solid #d2aa4c;margin:24px 0 4px}
+.matchday{padding:0 22px 22px;border:1px solid #d6dcec;border-radius:20px;box-shadow:0 8px 28px #1012380b;overflow:hidden}
+.matchday .matchday-brand{margin:0 -22px 0;padding:25px 22px 22px;background:radial-gradient(ellipse at top right,#353963,transparent 65%),#101238;color:#fff}
+.matchday-eyebrow{display:block;color:#dfbe69;font-size:9px;font-weight:700;letter-spacing:.12em;margin-bottom:10px;line-height:1.6}
+.matchday .matchday-brand h2{font-size:30px;letter-spacing:-.04em}
+.matchday .matchday-brand h2 span{color:#efd18b}
+.matchday-brand-icon{width:42px;height:48px;color:#dfbe69;opacity:.9}
+.matchday-intro{background:#f0f2f9;margin:0 -22px;padding:12px 22px;color:#606a83}
+.matchday-tabs{gap:10px;border:0;background:#f0f2f9;margin:0 -22px 18px;padding:4px 22px 18px}
+.matchday-tabs button{min-height:48px;border:1px solid #d7ddec;border-radius:11px;background:#fff;color:#30375b;transition:background .15s,color .15s}
+.matchday-tabs button[data-matchday="schedule"]{background:#e8efff;color:#244d88;border-color:#cbdbf6}
+.matchday-tabs button.active{background:#e0b94f;color:#101238;border-color:#cfa63c;box-shadow:0 3px 8px #a07e2925}
+.matchday-tabs button[data-matchday="schedule"].active{background:#294f8c;color:#fff;border-color:#294f8c}
+.matchday-date{text-align:center;margin:24px 0 18px;padding:15px 8px;border:0;background:linear-gradient(90deg,transparent,#f5efdF,transparent);line-height:1.4}
+.matchday-date>span{display:block;text-transform:uppercase;letter-spacing:.15em;color:#987423;font-size:10px;font-weight:800;margin-bottom:4px}
+.matchday-date time{display:block;font-size:22px;font-weight:800;letter-spacing:-.035em}
+.matchday-competition>header{padding:14px 15px;border:0;border-left:3px solid #d1aa4e;border-radius:0 10px 10px 0;background:#edf0f7}
+.matchday-competition h3{font-size:17px;letter-spacing:-.02em;font-weight:800}
+.matchday-competition header p{font-size:11px}
+.matchday-competition header a{color:#555f7c}
+.matchday-card{background:#fff}
+.matchday-final{border:1px solid #d4b25a;background:linear-gradient(135deg,#fff9e9,#fff);box-shadow:0 4px 16px #ac873c10}
+.matchday-final-banner{display:flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.1em;font-weight:800;color:#8c6416;border-bottom:1px solid #e9d7a6;padding:0 0 10px;margin-bottom:13px}
+.matchday-final-banner>span:last-child{margin-left:auto;background:#101238;color:#f1d28a;border-radius:5px;padding:5px 7px;font-size:8px;letter-spacing:.08em}
+@media(max-width:760px){.matchday{padding:0 13px 16px}.matchday .matchday-brand{margin:0 -13px;padding:22px 17px}.matchday .matchday-brand h2{font-size:28px}.matchday-eyebrow{font-size:8px}.matchday-intro{margin:0 -13px;padding:12px 17px;font-size:11px}.matchday-tabs{margin:0 -13px 14px;padding:2px 13px 16px;gap:8px}.matchday-tabs button{font-size:13px}.matchday-date time{font-size:21px}.matchday-competition>header{padding:12px 10px}.matchday-competition h3{font-size:16px}.matchday-competition header a{flex-basis:85px;font-size:10px}}

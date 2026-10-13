@@ -56,7 +56,13 @@ function feedStory(r,context=feedContext(r)){
  const h=Number(r.home_score),a=Number(r.away_score),both=feedIsIMC(r,'home')&&feedIsIMC(r,'away');
  const side=both?(h>=a?'home':'away'):(feedIsIMC(r,'home')?'home':'away'),otherSide=side==='home'?'away':'home';
  const own=side==='home'?h:a,other=side==='home'?a:h,manager=r[side+'_imc_manager_name'],team=r[side+'_name'],opponent=r[otherSide+'_name'],away=side==='away';
- const pick=(id,options)=>({scenario:id,title:feedChoice(r,id,options)});
+ const pick=(id,options)=>{
+  const selected=feedChoice(r,id,options);
+  let title=selected;
+  for(const s of ['home','away'])if(feedIsIMC(r,s)&&r[s+'_name'])title=title.split(r[s+'_name']).join(r[s+'_imc_manager_name']);
+  if(both&&['imc-home','imc-away'].includes(id))title=manager+' batte '+r[otherSide+'_imc_manager_name']+(away?' in trasferta':'');
+  return {scenario:id,title};
+ };
  const valid=v=>v!==null&&v!==undefined&&/^\d+$/.test(String(v));
  const ah=r.aggregate_home_score,aa=r.aggregate_away_score,ph=r.penalty_home_score,pa=r.penalty_away_score;
  const aggregate=valid(ah)&&valid(aa),penalties=valid(ph)&&valid(pa)&&Number(ph)!==Number(pa)&&(aggregate?Number(ah)===Number(aa):h===a);
@@ -65,11 +71,12 @@ function feedStory(r,context=feedContext(r)){
  if(decided){
   const winningSide=penalties?(Number(ph)>Number(pa)?'home':'away'):aggregate?(Number(ah)>Number(aa)?'home':'away'):(h>a?'home':'away');
   const win=winningSide===side,winner=r[winningSide+'_name'];
-  if(context.final)story=pick(win?'final-won':'final-lost',win?[manager+' alza il trofeo: festa '+team,team+', la finale è tua!']:[manager+', il sogno si ferma in finale','Finale amara per '+team]);
+  if(context.final)story=pick(win?'final-won':'final-lost',win?[manager+' conquista la coppa',manager+' alza il trofeo']:[manager+', il sogno si ferma in finale','Finale amara per '+manager]);
   else if(penalties)story=pick(win?'penalties-won':'penalties-lost',win?[manager+' passa ai rigori',team+', qualificazione dal dischetto']:[manager+', i rigori dicono no',team+' esce ai rigori']);
   else if(win&&own<other)story=pick('aggregate-loss-through',['Sconfitta indolore: '+manager+' passa',team+', il totale vale la qualificazione']);
   else if(!win&&own>other)story=pick('aggregate-win-out',['A '+manager+' non basta vincere',team+', vittoria senza qualificazione']);
   else story=pick(win?'aggregate-through':'aggregate-out',win?[manager+' stacca il pass',team+(aggregate?' avanti: decide il totale':' conquista la qualificazione')]:[manager+' saluta la coppa',team+', il cammino si interrompe']);
+  if(context.final&&both){const loser=winningSide==='home'?'away':'home';story.title=r[winningSide+'_imc_manager_name']+' batte '+r[loser+'_imc_manager_name']+' e conquista la coppa';}
   story.text=team+' '+(own>other?'vince':own===other?'pareggia':'perde')+' '+own+'–'+other+' '+(away?'in trasferta':'in casa')+'. '+(penalties?'Rigori: '+ph+'–'+pa+'. ':aggregate?'Totale delle due sfide: '+ah+'–'+aa+'. ':'')+winner+(context.final?' conquista il trofeo.':' passa il turno.');
   return story;
  }
@@ -88,9 +95,11 @@ function feedStory(r,context=feedContext(r)){
 }
 
  const context=feedContext(r,round(r));
- if(!preview)return feedStory(r,context);
+ if(!feedIsIMC(r,'home')&&!feedIsIMC(r,'away'))return {title:r.home_name+' – '+r.away_name,text:preview?'Prossimo appuntamento di campionato.':r.home_score+'–'+r.away_score+' · '+(round(r)||'Campionato')};
+ if(!preview){const story=feedStory(r,context);story.isFinal=context.final;return story;}
  const both=feedIsIMC(r,'home')&&feedIsIMC(r,'away'),side=feedIsIMC(r,'home')?'home':'away',manager=r[side+'_imc_manager_name'];
  const nation=r.competition_group==='NATIONS'||String(key).includes('|NATIONS|');
+ if(context.final)return {isFinal:true,title:both?'Finale IMC: '+r.home_imc_manager_name+' contro '+r.away_imc_manager_name:manager+', appuntamento con la finale',text:r.home_name+' e '+r.away_name+' si sfidano per conquistare la coppa. '+(r.nexus_view||'Finale')+': è la partita che vale il titolo.'};
  return {title:both?'Confronto IMC: '+r.home_imc_manager_name+' contro '+r.away_imc_manager_name:manager+(side==='home'?' attende ':' fa visita a ')+r[side==='home'?'away_name':'home_name'],
  text:(nation?'Impegno con la nazionale':context.league?'Appuntamento di campionato':r.sm_action==='friendly'?'Amichevole in calendario':'Sfida di coppa')+' · '+(context.label||r.nexus_view)+(context.leg===1?'. Primo atto della doppia sfida.':context.leg===2?'. Ritorno: si decide il confronto.':'.')};
 }
@@ -100,7 +109,7 @@ function matchdayTeam(r,side){
 function matchdayGroups(rows,kind){
  const groups=new Map(),seen=new Set();
  for(const r of rows){
-  if(!feedIsIMC(r,'home')&&!feedIsIMC(r,'away'))continue;
+  if(!feedIsIMC(r,'home')&&!feedIsIMC(r,'away')&&!r.matchday_league_complete)continue;
   const id=String(r.sm_fixture_id||[r.competition_key,r.match_date,r.home_name,r.away_name].join('|'));
   if(seen.has(id))continue;seen.add(id);
   const token=JSON.stringify([clean(r.match_date).slice(0,10),r.competition_key]);
@@ -113,13 +122,13 @@ function matchdayGroups(rows,kind){
 function matchdayMarkup(rows,kind){
  let previousDay='';
  return matchdayGroups(rows,kind).map(g=>{
-  const dayHeading=g.day!==previousDay?'<h3 class="matchday-date">'+esc(date(g.day))+'</h3>':'';
+  const dayHeading=g.day!==previousDay?'<h3 class="matchday-date"><span>'+esc(/^\d{4}-\d{2}-\d{2}$/.test(g.day)?new Date(g.day+'T12:00:00Z').toLocaleDateString('it-IT',{weekday:'long',timeZone:'Europe/Rome'}):'Data')+'</span><time datetime="'+esc(g.day)+'">'+esc(/^\d{4}-\d{2}-\d{2}$/.test(g.day)?new Date(g.day+'T12:00:00Z').toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/Rome'}):date(g.day))+'</time></h3>':'';
   previousDay=g.day;
   const r=g.row,href=url('competitions/view.html',{season:matchdaySeason,competition:r.competition_key,tab:kind==='results'?'overview':'schedule'});
   const dates=[...new Set(g.rows.map(x=>clean(x.match_date).slice(0,10)))].sort();
   return dayHeading+'<section class="matchday-competition"><header><div><h3>'+esc(r.nexus_view||r.competition_key)+'</h3><p>'+esc([...new Set(g.rows.map(round).filter(Boolean))].join(' · '))+'</p></div><a href="'+esc(href)+'">Vedi competizione →</a></header><div class="matchday-cards">'+g.rows.map(x=>{
    const story=matchdayEditorial(x,kind==='schedule');
-   return '<article class="matchday-card">'+(groupName(x)?'<span class="matchday-context">'+esc(groupName(x))+'</span>':'')+'<h4>'+esc(story.title)+'</h4><div class="match">'+matchdayTeam(x,'home')+score(x,kind)+matchdayTeam(x,'away')+'</div><p class="matchday-comment">'+esc(story.text)+'</p>'+(kind==='results'&&x.has_match_report?'<a class="matchday-report" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
+   return '<article class="matchday-card'+(story.isFinal?' matchday-final':'')+'">'+(story.isFinal?'<div class="matchday-final-banner"><span aria-hidden="true">★</span> FINALE <span>IN PALIO LA COPPA</span></div>':'')+(groupName(x)?'<span class="matchday-context">'+esc(groupName(x))+'</span>':'')+'<h4>'+esc(story.title)+'</h4><div class="match">'+matchdayTeam(x,'home')+score(x,kind)+matchdayTeam(x,'away')+'</div><p class="matchday-comment">'+esc(story.text)+'</p>'+(kind==='results'&&x.has_match_report?'<a class="matchday-report" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
   }).join('')+'</div></section>';
  }).join('');
 }

@@ -20,11 +20,22 @@ try {
             if($matchday){
                 // SQL ordering is newest first for results, nearest first for schedule.
                 // One selected fixture per IMC team across ALL competitions, not per cup.
+                // League coverage is complete: latest/next round per league, including non-IMC sides.
+                $leagueTurns=[];$leagueFixtures=[];
+                foreach($rows as $r){
+                    if(($r['sm_action']??'')!=='league')continue;
+                    $competition=(string)$r['competition_key'];
+                    $round=trim((string)($r['competition_round']??''));
+                    $turn=$round!==''?json_encode([(string)($r['competition_stage']??''),$round]):substr((string)$r['match_date'],0,10);
+                    if(!isset($leagueTurns[$competition]))$leagueTurns[$competition]=$turn;
+                    if($leagueTurns[$competition]===$turn)$leagueFixtures[(string)$r['sm_fixture_id']]=true;
+                }
                 $seenTeams=[];$seenFixtures=[];$selected=[];
                 foreach($rows as $r){
                     $nation=($r['competition_group']??'')==='NATIONS'||strpos((string)$r['competition_key'],'|NATIONS|')!==false;
                     $chosen=[];
                     foreach(['home','away'] as $side){
+                        if(($r['sm_action']??'')==='league')continue;
                         $id=(string)($r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']??'');
                         $identity=($nation?'nation:':'club:').($id!==''&&$id!=='0'?$id:'name:'.nexus_team_name_key((string)$r[$side.'_name']));
                         if(!isset($seenTeams[$identity])){
@@ -33,8 +44,10 @@ try {
                         }
                     }
                     $fixture=(string)($r['sm_fixture_id']??'');
-                    if(!$chosen||isset($seenFixtures[$fixture]))continue;
+                    $league=isset($leagueFixtures[$fixture]);
+                    if((($r['sm_action']??'')==='league'&&!$league)||(!$chosen&&!$league)||isset($seenFixtures[$fixture]))continue;
                     $seenFixtures[$fixture]=true;
+                    $r['matchday_league_complete']=$league;
                     $r['matchday_selected_sides']=$chosen;
                     $r['matchday_latest']=true;
                     $r['matchday_turn']=substr((string)$r['match_date'],0,10);

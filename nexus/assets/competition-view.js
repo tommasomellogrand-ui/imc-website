@@ -113,7 +113,13 @@ function feedStory(r,context=feedContext(r)){
  const h=Number(r.home_score),a=Number(r.away_score),both=feedIsIMC(r,'home')&&feedIsIMC(r,'away');
  const side=both?(h>=a?'home':'away'):(feedIsIMC(r,'home')?'home':'away'),otherSide=side==='home'?'away':'home';
  const own=side==='home'?h:a,other=side==='home'?a:h,manager=r[side+'_imc_manager_name'],team=r[side+'_name'],opponent=r[otherSide+'_name'],away=side==='away';
- const pick=(id,options)=>({scenario:id,title:feedChoice(r,id,options)});
+ const pick=(id,options)=>{
+  const selected=feedChoice(r,id,options);
+  let title=selected;
+  for(const s of ['home','away'])if(feedIsIMC(r,s)&&r[s+'_name'])title=title.split(r[s+'_name']).join(r[s+'_imc_manager_name']);
+  if(both&&['imc-home','imc-away'].includes(id))title=manager+' batte '+r[otherSide+'_imc_manager_name']+(away?' in trasferta':'');
+  return {scenario:id,title};
+ };
  const valid=v=>v!==null&&v!==undefined&&/^\d+$/.test(String(v));
  const ah=r.aggregate_home_score,aa=r.aggregate_away_score,ph=r.penalty_home_score,pa=r.penalty_away_score;
  const aggregate=valid(ah)&&valid(aa),penalties=valid(ph)&&valid(pa)&&Number(ph)!==Number(pa)&&(aggregate?Number(ah)===Number(aa):h===a);
@@ -122,11 +128,12 @@ function feedStory(r,context=feedContext(r)){
  if(decided){
   const winningSide=penalties?(Number(ph)>Number(pa)?'home':'away'):aggregate?(Number(ah)>Number(aa)?'home':'away'):(h>a?'home':'away');
   const win=winningSide===side,winner=r[winningSide+'_name'];
-  if(context.final)story=pick(win?'final-won':'final-lost',win?[manager+' alza il trofeo: festa '+team,team+', la finale è tua!']:[manager+', il sogno si ferma in finale','Finale amara per '+team]);
+  if(context.final)story=pick(win?'final-won':'final-lost',win?[manager+' conquista la coppa',manager+' alza il trofeo']:[manager+', il sogno si ferma in finale','Finale amara per '+manager]);
   else if(penalties)story=pick(win?'penalties-won':'penalties-lost',win?[manager+' passa ai rigori',team+', qualificazione dal dischetto']:[manager+', i rigori dicono no',team+' esce ai rigori']);
   else if(win&&own<other)story=pick('aggregate-loss-through',['Sconfitta indolore: '+manager+' passa',team+', il totale vale la qualificazione']);
   else if(!win&&own>other)story=pick('aggregate-win-out',['A '+manager+' non basta vincere',team+', vittoria senza qualificazione']);
   else story=pick(win?'aggregate-through':'aggregate-out',win?[manager+' stacca il pass',team+(aggregate?' avanti: decide il totale':' conquista la qualificazione')]:[manager+' saluta la coppa',team+', il cammino si interrompe']);
+  if(context.final&&both){const loser=winningSide==='home'?'away':'home';story.title=r[winningSide+'_imc_manager_name']+' batte '+r[loser+'_imc_manager_name']+' e conquista la coppa';}
   story.text=team+' '+(own>other?'vince':own===other?'pareggia':'perde')+' '+own+'–'+other+' '+(away?'in trasferta':'in casa')+'. '+(penalties?'Rigori: '+ph+'–'+pa+'. ':aggregate?'Totale delle due sfide: '+ah+'–'+aa+'. ':'')+winner+(context.final?' conquista il trofeo.':' passa il turno.');
   return story;
  }
