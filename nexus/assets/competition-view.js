@@ -77,11 +77,60 @@ function makeRounds(rows,allRows,descending){
  return [...buckets.values()].sort((a,b)=>(descending?b.last.localeCompare(a.last):a.first.localeCompare(b.first))||a.number-b.number);
 }
 async function loadMatches(){if(!matchRequest)matchRequest=Promise.all([api('results.php'),api('schedule.php')]).then(([r,s])=>{if(disposed)throw Error('cancelled');const results=distinct((r.rows||[]).filter(x=>x.home_score!=null&&x.away_score!=null)),played=new Set(results.map(fixtureKey)),schedule=distinct(s.rows||[]).filter(x=>!played.has(fixtureKey(x))),all=[...results,...schedule];const names=[...new Set(all.map(groupName).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));groupSelect.innerHTML='<option value="">Tutti i gruppi</option>'+names.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join('');if(!names.includes(selectedGroup))selectedGroup='';groupSelect.value=selectedGroup;groupFilter.hidden=!names.length||!['overview','results','schedule'].includes(activeTab);return {results:makeRounds(results,all,true),schedule:makeRounds(schedule,all,false)}}).catch(e=>{matchRequest=null;throw e});return matchRequest}
+/* Competition diary: result facts only; report enrichment is optional and scoped. */
+async function feedReports(){
+ try{
+  const response=await fetch('match-report.php'+q+'&mode=feed',{cache:'no-store',signal:AbortSignal.timeout(8000)});
+  if(!response.ok)throw Error('reports');
+  const data=await response.json();if(data.ok===false||!Array.isArray(data.rows))throw Error('reports');
+  return {rows:new Map(data.rows.map(r=>[String(r.sm_fixture_id),r])),available:true};
+ }catch(e){return {rows:new Map(),available:false}}
+}
+function feedIsIMC(r,side){return !!r[side+'_imc_manager_id']&&!!r[side+'_imc_manager_name']}
+function feedTeam(r,side){
+ const logo=safeImage(r[side+'_logo_url']);
+ return '<div class="feed-team">'+(logo?'<img src="'+esc(logo)+'" width="34" height="38" loading="lazy" alt="" onerror="this.hidden=true">':'')+'<div><b>'+esc(r[side+'_name']||'—')+'</b>'+(feedIsIMC(r,side)?'<small>'+esc(r[side+'_imc_manager_name'])+' <span class="feed-imc">IMC</span></small>':'')+'</div></div>';
+}
+function feedStory(r){
+ const h=Number(r.home_score),a=Number(r.away_score),home=feedIsIMC(r,'home'),away=feedIsIMC(r,'away');
+ const score=h+'–'+a,manager=side=>String(r[side+'_imc_manager_name']);
+ if(home&&away)return {title:h===a?'Parità nel confronto IMC':'Il confronto IMC va a '+manager(h>a?'home':'away'),text:manager('home')+' e '+manager('away')+' si affrontano in '+r.home_name+' – '+r.away_name+': '+score+' il risultato.'};
+ const side=home?'home':'away',own=side==='home'?h:a,other=side==='home'?a:h,opponent=r[side==='home'?'away_name':'home_name'];
+ return {title:manager(side)+(own>other?' conquista la vittoria':own===other?' chiude in parità':' si ferma contro '+opponent),text:r[side+'_name']+(own>other?' supera ':own===other?' pareggia con ':' perde contro ')+opponent+' per '+own+'–'+other+'.'+(own>other&&other===0?' Vittoria senza subire gol.':'')};
+}
+function feedCard(r,reports,featured=false){
+ const imc=feedIsIMC(r,'home')||feedIsIMC(r,'away'),story=imc?feedStory(r):null;
+ const report=reports.rows.get(String(r.sm_fixture_id));
+ // Never combine a report's player facts with a conflicting Results score.
+ const consistent=report&&report.home_score!=null&&report.away_score!=null&&Number(report.home_score)===Number(r.home_score)&&Number(report.away_score)===Number(r.away_score);
+ const facts=consistent?(report.players||[]):[],scorers=facts.filter(p=>p.goals>0).map(p=>p.name+' ('+p.goals+')'),mvps=facts.filter(p=>p.mvp).map(p=>p.name);
+ return '<article class="feed-card'+(featured?' feed-featured':'')+(imc?' feed-editorial':'')+'">'+
+ (featured?'<span class="feed-kicker">IN EVIDENZA · IMC</span>':'')+
+ (story?'<h4>'+esc(story.title)+'</h4>':'')+
+ '<div class="feed-scoreline">'+feedTeam(r,'home')+'<div class="score">'+matchScore(r)+'</div>'+feedTeam(r,'away')+'</div>'+
+ (story?'<p class="feed-comment">'+esc(story.text)+'</p>':'')+
+ (imc&&(scorers.length||mvps.length)?'<p class="feed-facts">'+(scorers.length?'Marcatori: '+esc(scorers.join(', '))+'. ':'')+(mvps.length?'MVP: '+esc(mvps.join(', '))+'.':'')+'</p>':'')+
+ (report?'<a class="feed-report" href="match.html?'+esc(new URLSearchParams({world:gw,fixture:r.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
+}
+function newsFeed(rounds,reports){
+ if(!rounds.length)return '<section class="section competition-feed"><h2>Diario della competizione</h2><div class="empty">Nessun risultato disponibile. Il diario si popolerà con le prime partite.</div></section>';
+ return '<section class="section competition-feed"><div class="feed-heading"><span class="feed-kicker">COMPETITION NEWS</span><h2>Diario della competizione</h2><p>Risultati e protagonisti IMC · Stagione '+esc(season)+'</p></div>'+
+ (!reports.available?'<p class="ranking-note">Match Report temporaneamente non disponibili: sono mostrati i risultati senza dettagli aggiuntivi.</p>':'')+
+ rounds.map((round,index)=>{
+  const rows=[...round.rows].sort((a,b)=>String(b.match_date).localeCompare(String(a.match_date))||String(a.sm_fixture_id).localeCompare(String(b.sm_fixture_id),undefined,{numeric:true}));
+  const featured=index===0?rows.find(r=>feedIsIMC(r,'home')||feedIsIMC(r,'away')):null;
+  const dates=[...new Set(rows.map(r=>clean(r.match_date).slice(0,10)))].sort();
+  const label=dateLabel(dates[0])+(dates.length>1?' – '+dateLabel(dates.at(-1)):'');
+  return '<details class="feed-round" data-round="'+esc('news:'+round.id)+'"'+(!index?' open':'')+'><summary><span class="feed-kicker">'+(!index?'ULTIMO TURNO':'ARCHIVIO')+'</span><h3>'+esc(round.label)+'</h3><span>'+esc(label)+'</span></summary><div class="feed-items">'+
+  (featured?feedCard(featured,reports,true):'')+rows.filter(r=>r!==featured).map(r=>(groupName(r)?'<div class="feed-group">'+esc(groupName(r))+'</div>':'')+feedCard(r,reports)).join('')+
+  '</div></details>';
+ }).join('')+'<p class="ranking-note">Commenti automatici basati sui Results. Marcatori e MVP provengono esclusivamente dai Match Report disponibili.</p></section>';
+}
 function matchTeam(r,side){const logo=String(r[side+'_logo_url']||''),manager=r[side+'_imc_manager_name'],name=r[side+'_name'];return '<div class="match-team '+(side==='away'?'away':'home')+'">'+(/^(https:\/\/|\/(?!\/))/i.test(logo)?'<img class="team-logo" src="'+esc(logo)+'" alt="Logo '+esc(name)+'" width="36" height="36" loading="lazy" decoding="async" onerror="this.hidden=true">':'')+'<div class="team-label"><b>'+esc(name)+'</b>'+(manager?'<small class="team-manager">'+esc(manager)+'</small>':'')+'</div></div>'}
 function matchScore(r){const valid=v=>v!==null&&v!==undefined&&String(v).trim()!==''&&/^\d+$/.test(String(v));let text=esc(r.home_score)+' - '+esc(r.away_score);for(const [prefix,label] of [['aggregate','Totale A/R'],['penalty','Rigori']]){const h=r[prefix+'_home_score'],a=r[prefix+'_away_score'];if(valid(h)&&valid(a))text+='<small style="display:block;font-size:10px;font-weight:600;line-height:1.4;margin-top:4px;text-align:center">'+label+' '+esc(h)+' - '+esc(a)+'</small>'}return text}
 function matches(rows,score=true){return rows.map(r=>'<div class="match">'+matchTeam(r,'home')+'<span class="score">'+(score?matchScore(r)+'<small>FINALE</small>':'VS<small>IN PROGRAMMA</small>')+'</span>'+matchTeam(r,'away')+(score?'<a class="open-match-report" href="match.html?'+esc(new URLSearchParams({world:gw,fixture:r.sm_fixture_id}))+'">Match Report</a>':'')+'</div>').join('')}
 function roundsHtml(rounds,score){if(!rounds.length)return '<div class="card loading">'+(score?'Nessun risultato disponibile.':'Nessuna partita in calendario.')+'</div>';return rounds.map((round,index)=>{const groups=new Map;for(const r of round.rows){const name=groupName(r);if(!groups.has(name))groups.set(name,[]);groups.get(name).push(r)}const hasGroups=[...groups.keys()].some(Boolean),dates=[...new Set(round.rows.map(r=>clean(r.match_date).slice(0,10)))].sort(),dateRange=dates.length?dateLabel(dates[0])+(dates.length>1?' – '+dateLabel(dates.at(-1)):''):'Data non disponibile';return '<details class="round-box" data-round="'+esc((score?'r:':'s:')+round.id)+'"'+(!index?' open':'')+'><summary class="round-head">'+(!index?'<span class="round-kicker">'+(score?'ULTIMO TURNO':'PROSSIMO TURNO')+'</span>':'')+'<h3>'+esc(round.label)+'</h3><span>'+esc(dateRange)+'</span></summary>'+[...groups.entries()].sort(([a],[b])=>a.localeCompare(b,undefined,{numeric:true})).map(([name,rows])=>'<div class="round-group">'+(hasGroups?'<h4>'+esc(name||'Girone non indicato')+'</h4>':'')+matches(rows,score)+'</div>').join('')+'</details>'}).join('')}
-async function show(tab,background=false){if(disposed)return;const epoch=++showEpoch;const opened=background?new Set([...view.querySelectorAll('details[open]')].map(x=>x.dataset.round)):null;clearTimeout(statsTimer);statsEpoch++;statsLoading=false;activeTab=tab;groupFilter.hidden=!['overview','results','schedule'].includes(tab)||groupSelect.options.length<2;if(!background)view.innerHTML='<div class="loading">Caricamento dati…</div>';try{if(['overview','results','schedule'].includes(tab)){const raw=await loadMatches(),j={results:visibleRounds(raw.results),schedule:visibleRounds(raw.schedule)};if(disposed||activeTab!==tab||epoch!==showEpoch)return;const group=key.split('|').find(x=>['DOMESTIC','INTERNATIONAL','NATIONS'].includes(x));if(tab==='overview'){const last=j.results[0],next=j.schedule[0];view.innerHTML='<section class="section"><h2>Ultimi risultati</h2>'+roundsHtml(last?[last]:[],true)+'</section><section class="section"><h2>Prossime partite</h2>'+roundsHtml(next?[next]:[],false)+'</section>'}else view.innerHTML='<section class="section"><h2>'+ (tab==='results'?'Risultati':'Calendario')+'</h2>'+roundsHtml(j[tab],tab==='results')+'</section>';return}
+async function show(tab,background=false){if(disposed)return;const epoch=++showEpoch;const opened=background?new Set([...view.querySelectorAll('details[open]')].map(x=>x.dataset.round)):null;clearTimeout(statsTimer);statsEpoch++;statsLoading=false;activeTab=tab;groupFilter.hidden=!['overview','results','schedule'].includes(tab)||groupSelect.options.length<2;if(!background)view.innerHTML='<div class="loading">Caricamento dati…</div>';try{if(['overview','results','schedule'].includes(tab)){const raw=await loadMatches(),j={results:visibleRounds(raw.results),schedule:visibleRounds(raw.schedule)};if(disposed||activeTab!==tab||epoch!==showEpoch)return;const group=key.split('|').find(x=>['DOMESTIC','INTERNATIONAL','NATIONS'].includes(x));if(tab==='overview'){const reports=await feedReports();if(disposed||activeTab!==tab||epoch!==showEpoch)return;const next=j.schedule[0];view.innerHTML=newsFeed(j.results,reports)+'<section class="section"><h2>Prossime partite</h2>'+roundsHtml(next?[next]:[],false)+'</section>'}else view.innerHTML='<section class="section"><h2>'+ (tab==='results'?'Risultati':'Calendario')+'</h2>'+roundsHtml(j[tab],tab==='results')+'</section>';return}
 if(tab==='standings'){const [j]=await Promise.all([api('standings.php'),loadTeamDirectory()]);if(disposed||activeTab!==tab||epoch!==showEpoch)return;
 const groups=j.groups||[{group_name:null,rows:j.rows||[]}];
 view.innerHTML='<section class="section ranking-section"><h2>Table</h2>'+(j.excluded_unassigned?'<p class="ranking-note">'+esc(j.excluded_unassigned)+' partite senza girone identificato non incluse.</p>':'')+(groups.length?groups.map(g=>'<section class="ranking-card standings-card">'+rankingHead(g.group_name||name,'Stagione '+season)+'<div class="ranking-scroll" tabindex="0" role="region" aria-label="Classifica '+esc(g.group_name||name)+'"><table class="stand team-ranking"><caption class="sr-only">Classifica '+esc(g.group_name||name)+'</caption><thead><tr><th scope="col">#</th><th scope="col">Squadra</th><th scope="col"><abbr title="Punti">PT</abbr></th><th scope="col"><abbr title="Partite giocate">PG</abbr></th><th scope="col"><abbr title="Vittorie">V</abbr></th><th scope="col"><abbr title="Pareggi">N</abbr></th><th scope="col"><abbr title="Sconfitte">P</abbr></th><th scope="col"><abbr title="Gol fatti">GF</abbr></th><th scope="col"><abbr title="Gol subiti">GS</abbr></th><th scope="col"><abbr title="Differenza reti">DR</abbr></th></tr></thead><tbody>'+g.rows.map(r=>'<tr><td class="ranking-position">'+esc(r.position)+'</td><th scope="row">'+teamBadge(r.team_name,r.team_id)+'</th><td><span class="ranking-value">'+esc(r.points)+'</span></td><td>'+esc(r.played)+'</td><td>'+esc(r.won)+'</td><td>'+esc(r.drawn)+'</td><td>'+esc(r.lost)+'</td><td>'+esc(r.gf)+'</td><td>'+esc(r.ga)+'</td><td>'+esc(r.gd)+'</td></tr>').join('')+'</tbody></table></div></section>').join(''):'<div class="empty">Nessuna classifica disponibile per questa competizione.</div>')+'<p class="ranking-note">'+(j.grouped?'Classifiche calcolate dai risultati di ciascun girone.':'Classifica calcolata dai risultati della competizione.')+'</p></section>';
@@ -95,4 +144,5 @@ const matchTimer=setInterval(refreshVisible,60000);document.addEventListener('vi
 
 return ()=>{disposed=true;clearTimeout(statsTimer);clearInterval(matchTimer);document.removeEventListener('visibilitychange',statsVisibility);document.removeEventListener('visibilitychange',refreshVisible)};
 }};
+
 

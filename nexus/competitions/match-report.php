@@ -45,6 +45,25 @@ function competition_player_stats(array $reports): array {
 }
 try{
   $c=nexus_config();$gw=nexus_world($_GET['world']??'');$fixture=(int)($_GET['fixture']??0);
+  if(($_GET['mode']??'')==='feed'){
+    $season=nexus_season($_GET['season']??null);$competition=trim((string)($_GET['competition']??''));
+    if($season===null||$competition==='')throw new InvalidArgumentException('season_and_competition_required');
+    $db=nexus_db($c,nexus_target($c,$gw));$table=nexus_table($gw,'Match_Report');
+    $reports=nexus_rows($db,'SELECT sm_fixture_id,home_score,away_score,players_json FROM `'.$table.'` WHERE game_world_id=? AND imc_season=? AND competition_key=? ORDER BY match_date DESC,sm_fixture_id',[$gw,$season,$competition]);
+    $rows=[];$seen=[];
+    foreach($reports as $r){
+      $id=(string)$r['sm_fixture_id'];if(isset($seen[$id]))continue;$seen[$id]=true;
+      $players=json_decode((string)$r['players_json'],true);$facts=[];
+      if(is_array($players)&&array_is_list($players))foreach($players as $p){
+        if(!is_array($p)||empty($p['player_name']))continue;
+        $goals=max(is_numeric($p['goals']??null)?max(0,(int)$p['goals']):0,is_array($p['goal_minutes']??null)?count($p['goal_minutes']):0);
+        $mvp=is_numeric($p['man_of_match']??null)&&(int)$p['man_of_match']>0;
+        if($goals||$mvp)$facts[]=['name'=>(string)$p['player_name'],'goals'=>$goals,'mvp'=>$mvp];
+      }
+      $rows[]=['sm_fixture_id'=>$id,'home_score'=>$r['home_score'],'away_score'=>$r['away_score'],'players'=>$facts];
+    }
+    nexus_out(['ok'=>true,'rows'=>$rows]);
+  }
   if(($_GET['mode']??'')==='stats'){
     $season=nexus_season($_GET['season']??null);$competition=trim((string)($_GET['competition']??''));
     if($season===null||$competition==='')throw new InvalidArgumentException('season_and_competition_required');
@@ -65,3 +84,4 @@ try{
   $sql='SELECT game_world_id,imc_season,sm_fixture_id,competition_key,sm_action,sm_country,sm_division,competition_group,competition_stage,competition_round,match_date,home_sm_club_id,home_name,away_sm_club_id,away_name,home_sm_manager_id,home_manager_name,away_sm_manager_id,away_manager_name,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score,stadium_name,attendance,team_stats_json,players_json,events_json,tactics_json FROM `'.$table.'` WHERE game_world_id=? AND sm_fixture_id=? LIMIT 1';
   $rows=nexus_rows($db,$sql,[$gw,$fixture]);nexus_out(['ok'=>true,'game_world_id'=>$gw,'fixture'=>$fixture,'row'=>$rows[0]??null]);
 }catch(InvalidArgumentException $e){nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){nexus_out(['ok'=>false,'error'=>'competition_match_report_error'],500);}
+
