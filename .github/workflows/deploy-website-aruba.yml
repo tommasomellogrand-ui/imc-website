@@ -19,6 +19,10 @@ on:
       - 'tests/nexus-navigation*'
       - '.github/workflows/nexus-navigation.yml'
       - 'nexus/competitions/match.html'
+      - 'nexus/competitions/match.php'
+      - 'nexus/assets/match.js'
+      - 'nexus/assets/match.css'
+      - 'tests/nexus-match-ui.cjs'
       - 'nexus/managers/page.html'
       - 'nexus/players/page.html'
       - 'nexus/players/profile.html'
@@ -269,4 +273,5 @@ jobs:
                   except Exception as e:last=e;time.sleep(5)
               else:raise SystemExit(f'Live verification failed: {url}: {last}')
           PY
+
 

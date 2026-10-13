@@ -39,3 +39,88 @@ html body.mx-compact .mx-tabs[data-nx-nav]>button{font-size:12px;min-height:44px
 .mx-mvp{background:#f7efd9;border:1px solid #e5d39e;border-radius:12px;padding:13px 14px;margin:14px 0}
 .mx-mvp-row{display:flex;align-items:center;gap:10px}.mx-mvp-star{color:#a67f25;font-size:20px}.mx-mvp-row img{width:28px;height:32px;object-fit:contain}.mx-mvp-name{min-width:0;flex:1}.mx-mvp-name small,.mx-mvp-name span{display:block;font-size:10px;color:#806a35}.mx-mvp-name strong{display:block;font-size:13px;margin:3px 0;overflow-wrap:anywhere}.mx-mvp a{color:inherit}.mx-mvp-rating{text-align:center}.mx-mvp-rating strong{display:block;font-size:25px}.mx-mvp-rating small{font-size:9px}
 @media(min-width:700px){.mx-compact .mx-scoreboard{max-width:680px;margin:auto}.mx-compact .mx-team h2{font-size:19px}.mx-compact .mx-score b{font-size:44px}}
+
+/* Match Journal: white editorial report, player photography and compact rosters. */
+body.mx-journal{background:#f5f6fa;color:#101238}
+.mx-journal .mx-wrap{max-width:920px}
+.mx-journal .mx-banner{background:linear-gradient(120deg,#fff,#fffdf7);color:#101238;border-bottom:1px solid #e4dfd2;padding:14px 0 18px}
+.mx-journal .mx-top>a{color:#101238}
+.mx-journal .mx-top>span{background:#f5edd8;border:1px solid #dfc783;color:#101238}
+.mx-journal #match-meta{color:#71798c;font-size:11px}
+.mx-journal .mx-team small{color:#697287}
+.mx-journal .mx-score small{color:#99792f}
+.mx-journal .mx-score b{letter-spacing:-.05em}
+.mx-journal .mx-team h2{min-height:0}
+.mx-journal .mx-team small{min-height:0}
+.mx-journal .mx-tabs{border-radius:0;border:0;border-bottom:1px solid #e1e5ed;padding:0;gap:0}
+.mx-journal .mx-tabs button{border-radius:0;background:#fff;color:#697287;padding:14px 10px;font-size:12px}
+.mx-journal .mx-tabs button.active{background:#fff;color:#101238;box-shadow:inset 0 -3px #d2ac4f}
+.mx-journal .mx-card,.mx-journal #match-view:has(.mx-venue) .mx-card{background:#fff;padding:18px;margin:16px 0;border:1px solid #e2e6ed;border-radius:12px;box-shadow:0 3px 12px #10123804}
+.mx-journal .mx-card h2,.mx-journal #match-view:has(.mx-venue) .mx-card h2{font-size:14px;letter-spacing:.045em;text-transform:uppercase;font-weight:800;margin:0 0 14px}
+.mx-journal .mx-goals-grid{gap:14px}
+.mx-journal .mx-goals-grid>div+div{padding-left:14px}
+.mx-journal .mx-goals-grid h3{font-size:10px;line-height:1.4;color:#727b8e;letter-spacing:.035em;margin:0 0 9px}
+.mx-journal .mx-scorer{display:flex;gap:9px;align-items:center;padding:10px 0;font-size:12px}
+.mx-journal .mx-scorer>div{min-width:0;overflow-wrap:anywhere}
+.mx-journal .mx-scorer small{display:block;font-size:11px;color:#99782e;margin-top:3px}
+.mx-journal .mx-scorer a,.mx-journal .mj-player-copy a,.mx-journal .mj-mvp-copy a{color:#101238;text-decoration:none}
+.mx-journal .mx-scorer a:hover,.mx-journal .mj-player-copy a:hover,.mx-journal .mj-mvp-copy a:hover{text-decoration:underline}
+.mj-portrait{display:inline-flex;align-items:center;justify-content:center;position:relative;overflow:hidden;width:42px;height:42px;flex:0 0 42px;border-radius:50%;background:#edf0f5;color:#7a8498;font-size:12px;font-weight:800}
+.mj-portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;background:#edf0f5}
+.mx-journal .mx-mvp{padding:0;overflow:hidden;border:1px solid #ddc589;background:#fffaf0;margin:16px 0;border-radius:12px}
+.mj-mvp-card{display:grid;grid-template-columns:minmax(110px,.8fr) minmax(0,1.2fr)}
+.mj-mvp-card+.mj-mvp-card{border-top:1px solid #e4d5b3}
+.mj-portrait-large{width:100%;height:100%;min-height:215px;border-radius:0;font-size:40px}
+.mj-mvp-copy{padding:18px;min-width:0}
+.mj-award-label{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;color:#70541a;padding:5px 7px;background:#f1dda5;border-radius:4px}
+.mj-mvp-copy h2{font-size:22px;line-height:1.2;margin:10px 0 5px;overflow-wrap:anywhere}
+.mj-mvp-copy>p{font-size:12px;margin:0 0 12px;color:#6c7488}
+.mj-rating{display:inline-flex;align-items:center;justify-content:center;min-width:39px;min-height:27px;background:#d1ab4f;color:#101238;border-radius:6px;font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;padding:4px 7px}
+.mj-mvp-copy>.mj-rating{font-size:22px;min-width:59px;min-height:37px}
+.mj-mvp-numbers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:15px}
+.mj-mvp-numbers span{font-size:10px;color:#777b87}
+.mj-mvp-numbers b{display:block;color:#101238;font-size:17px;margin-bottom:3px}
+.mx-journal .mx-venue{padding:15px 17px;background:#fff;border:1px solid #e2e6ed;border-radius:10px;gap:15px;margin:16px 0}
+.mx-journal .mx-venue small{letter-spacing:.08em;font-size:9px}
+.mj-lineup-head{display:flex;align-items:center;gap:12px;padding:14px 0 4px}
+.mj-lineup-head img{width:43px;height:45px;object-fit:contain}
+.mj-lineup-head h2{font-size:20px;margin:0 0 4px}
+.mj-lineup-head p{font-size:12px;margin:0;color:#727b8e}
+.mj-player-row{display:grid;grid-template-columns:42px minmax(0,1fr) 40px 45px;gap:11px;align-items:center;padding:12px 0;border-top:1px solid #edf0f5}
+.mj-player-row:first-child{border-top:0;padding-top:0}
+.mj-player-row:last-child{padding-bottom:0}
+.mj-player-copy{min-width:0}
+.mj-player-copy>b{font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+.mj-player-copy>small{display:block;font-size:10px;color:#68768b;line-height:1.5;margin-top:4px}
+.mj-events{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.mj-events:empty{display:none}
+.mj-badge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:#eef1f7;color:#515f79;white-space:nowrap}
+.mj-captain{background:#101238;color:#fff}.mj-yellow{background:#fff0a9;color:#705500}.mj-red{background:#fbe0df;color:#922b25}.mj-goal,.mj-assist{background:#e6f2e9;color:#236245}.mj-star{background:#f4e6bf;color:#73571c}
+.mj-player-minutes,.mj-player-rating{text-align:center;font-variant-numeric:tabular-nums}
+.mj-player-minutes>b{font-size:12px;font-weight:500;color:#71798d}
+.mj-player-minutes>small,.mj-player-rating>small{display:block;font-size:8px;letter-spacing:.04em;margin-top:4px;color:#9198a6}
+.mj-stat-teams{display:flex;justify-content:space-between;gap:16px;margin-bottom:10px}
+.mj-stat-teams>span{display:flex;align-items:center;gap:7px;min-width:0;font-size:12px}
+.mj-stat-teams>span:last-child{flex-direction:row-reverse;text-align:right}
+.mj-stat-teams img{width:27px;height:30px;object-fit:contain}
+.mj-stat-block{padding:12px 0}
+.mx-journal .mx-stat{padding:0 0 8px;border:0;grid-template-columns:minmax(30px,1fr) 2fr minmax(30px,1fr);font-size:13px}
+.mx-journal .mx-stat>b:first-child{text-align:left}
+.mx-journal .mx-stat>b:last-child{text-align:right}
+.mx-journal .mx-stat>span{font-size:12px}
+.mj-stat-track{height:8px;background:#eceff4;border-radius:10px;display:flex;overflow:hidden}
+.mj-stat-track i{display:block;height:100%;background:#182547}
+.mj-stat-track i+i{background:#88b7dc;border-left:2px solid #fff}
+.mx-journal .mj-legend{font-size:10px;line-height:1.65;color:#7a8396}
+@media(max-width:600px){
+ .mx-journal .mx-card,.mx-journal #match-view:has(.mx-venue) .mx-card{padding:14px}
+ .mx-journal .mx-scorer{gap:6px;font-size:11px}
+ .mx-journal .mx-scorer .mj-portrait{width:31px;height:31px;flex-basis:31px}
+ .mx-journal .mx-goals-grid{gap:9px}.mx-journal .mx-goals-grid>div+div{padding-left:9px}
+ .mj-player-row{grid-template-columns:35px minmax(0,1fr) 31px 40px;gap:7px}
+ .mj-player-row>.mj-portrait{width:35px;height:35px;flex-basis:35px}
+ .mj-player-copy>b{font-size:12px}.mj-rating{min-width:35px;font-size:12px;padding:4px}
+ .mj-player-minutes>b{font-size:11px}.mj-mvp-copy{padding:14px 12px}
+ .mj-mvp-copy h2{font-size:19px}.mj-portrait-large{min-height:205px}
+ .mj-award-label{font-size:8px;padding:5px}.mj-mvp-numbers{gap:4px}
+}

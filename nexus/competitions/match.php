@@ -3,6 +3,7 @@ declare(strict_types=1);
 require dirname(__DIR__).'/core/bootstrap.php';
 require __DIR__.'/match-teams.php';
 require dirname(__DIR__).'/teams/roster-stats.php';
+require dirname(__DIR__).'/players/media.php';
 try {
  $c=nexus_config();$gw=nexus_world($_GET['world']??'');$fixture=filter_var($_GET['fixture']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
  if(!$fixture)throw new InvalidArgumentException('invalid_fixture');
@@ -20,8 +21,13 @@ try {
   $decoded=json_decode((string)$report['team_stats_json'],true);if(is_array($decoded))$teamStats=$decoded;
   foreach(['home_manager_name','away_manager_name','stadium_name','attendance'] as $field)$match[$field]=$report[$field];
  }
+ // One batch for identity photos; image availability never blocks the match report.
+ $identities=[];
+ try{$identities=nexus_player_identity($core,array_column($players,'sm_player_id'));}catch(Throwable $e){}
+ foreach($players as &$p){$id=(int)($p['sm_player_id']??0);$p['image_urls']=nexus_player_images($id,$identities[$id]??[]);}unset($p);
  $match=nexus_enrich_match_teams($core,$gw,[$match])[0];
  $names=nexus_rows($core,'SELECT nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND competition_key=? LIMIT 1',[$gw,$match['competition_key']]);
  $match['competition_name']=$names[0]['nexus_view']??$match['competition_key'];
  nexus_out(['ok'=>true,'world'=>$gw,'match'=>$match,'report_available'=>$report!==null,'players'=>$players,'team_stats'=>$teamStats,'generated_at'=>gmdate('c')]);
 }catch(InvalidArgumentException $e){nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){nexus_out(['ok'=>false,'error'=>'match_detail_error'],500);}
+
