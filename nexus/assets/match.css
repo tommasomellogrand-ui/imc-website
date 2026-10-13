@@ -154,3 +154,23 @@ body.mx-journal{background:#f5f6fa;color:#101238}
 .mx-journal .mj-player-copy>.mj-sub-note{display:inline;margin:0;font-size:9px;white-space:nowrap}
 .mx-journal .mj-player-rating .mj-rating{min-width:29px;min-height:24px;font-size:12px;padding:3px}
 @media(min-width:700px){.mx-journal .mj-player-copy>b{font-size:14px}.mx-journal .mj-player-row{grid-template-columns:36px minmax(0,1fr) 40px 42px;gap:12px}}
+
+/* Four clear areas: identity, match events, minutes and rating. */
+.mx-journal .mj-player-row{grid-template-columns:minmax(0,1fr) 66px 36px 40px;gap:0;padding:0;min-height:72px;align-items:stretch}
+.mx-journal .mj-player-row:first-child,.mx-journal .mj-player-row:last-child{padding:0}
+.mj-player-identity{display:flex;align-items:center;gap:9px;min-width:0;padding:12px 9px 12px 0}
+.mx-journal .mj-player-identity>.mj-portrait{width:36px;height:36px;flex:0 0 36px}
+.mx-journal .mj-player-copy{display:block;min-width:0;line-height:1.35}
+.mx-journal .mj-player-copy>b{font-size:12px;font-weight:700;overflow-wrap:anywhere}
+.mx-journal .mj-player-copy>.mj-sub-note{display:block;margin-top:5px;white-space:normal;color:#778196}
+.mj-player-events,.mx-journal .mj-player-minutes,.mx-journal .mj-player-rating{border-left:1px solid #e8ebf1;display:flex;align-items:center;justify-content:center;padding:10px 4px}
+.mj-player-events{align-content:center;flex-wrap:wrap;gap:7px;background:#fafbfe}
+.mx-journal .mj-player-minutes,.mx-journal .mj-player-rating{flex-direction:column}
+.mx-journal .mj-event-icon{font-size:15px;line-height:20px;min-width:20px;min-height:22px;justify-content:center}
+.mx-journal .mj-event-icon b{font-size:10px}
+.mx-journal .mj-assist-icon>span{display:flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:5px;background:#e3f2eb;color:#23684f;font-size:12px;font-weight:800}
+.mx-journal .mj-mvp-icon{font-size:21px;color:#bc8d20}
+.mx-journal .mj-card-icon{width:10px;height:15px}
+.mj-no-events{font-size:12px;color:#b8bfcc}
+@media(min-width:600px){.mx-journal .mj-player-row{grid-template-columns:minmax(0,1fr) minmax(100px,.5fr) 60px 65px;min-height:78px}.mx-journal .mj-player-copy>b{font-size:15px}.mx-journal .mj-player-identity>.mj-portrait{width:43px;height:43px;flex-basis:43px}.mj-player-events{gap:12px}}
+@media(max-width:360px){.mx-journal .mj-player-row{grid-template-columns:minmax(0,1fr) 51px 30px 34px}.mj-player-identity{gap:6px;padding-right:6px}.mx-journal .mj-player-identity>.mj-portrait{width:29px;height:29px;flex-basis:29px}.mx-journal .mj-player-copy>b{font-size:11px}.mj-player-events{gap:4px;padding-left:2px;padding-right:2px}}

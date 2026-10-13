@@ -24,7 +24,7 @@ try {
  // One batch for identity photos; image availability never blocks the match report.
  $identities=[];
  try{$identities=nexus_player_identity($core,array_column($players,'sm_player_id'));}catch(Throwable $e){}
- foreach($players as &$p){$id=(int)($p['sm_player_id']??0);$p['image_urls']=nexus_player_images($id,$identities[$id]??[]);}unset($p);
+ foreach($players as &$p){$id=(int)($p['sm_player_id']??0);$identity=$identities[$id]??[];$p['image_urls']=nexus_player_images($id,$identity);$fullName=trim((string)($identity['forename']??'').' '.(string)($identity['surname']??''));$p['display_name']=$fullName!==''?$fullName:(trim((string)($identity['full_name']??''))?:($p['player_name']??''));}unset($p);
  $match=nexus_enrich_match_teams($core,$gw,[$match])[0];
  $names=nexus_rows($core,'SELECT nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND competition_key=? LIMIT 1',[$gw,$match['competition_key']]);
  $match['competition_name']=$names[0]['nexus_view']??$match['competition_key'];

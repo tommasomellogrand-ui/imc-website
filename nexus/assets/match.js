@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const q=new URLSearchParams(location.search),world=q.get('world')||'',fixture=q.get('fixture')||'',esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),$=id=>document.getElementById(id),safe=v=>/^(https:\/\/|\/(?!\/))/i.test(String(v||''))?v:'',date=v=>/^\d{4}-\d{2}-\d{2}/.test(String(v||''))?String(v).slice(0,10).split('-').reverse().join('/'):'Data non disponibile';
 let data=null,busy=false,active=['overview','home','away'].includes(q.get('tab'))?q.get('tab'):'overview';
-const link=(path,extra={})=>path+'?'+new URLSearchParams({world,...extra}),player=p=>Number(p.sm_player_id)>0?'<a href="'+esc(link('../players/profile.html',{player:p.sm_player_id}))+'">'+esc(p.player_name||'Giocatore '+p.sm_player_id)+'</a>':esc(p.player_name||'Giocatore non identificato');
+const link=(path,extra={})=>path+'?'+new URLSearchParams({world,...extra}),player=p=>Number(p.sm_player_id)>0?'<a href="'+esc(link('../players/profile.html',{player:p.sm_player_id}))+'">'+esc(p.display_name||p.player_name||'Giocatore '+p.sm_player_id)+'</a>':esc(p.display_name||p.player_name||'Giocatore non identificato');
 const val=v=>v===null||v===undefined||v===''?'—':esc(v),card=(title,body)=>'<section class="mx-card"><h2>'+esc(title)+'</h2>'+body+'</section>',empty=s=>'<p class="mx-muted">'+esc(s)+'</p>';
 $('home-link').href=link('../');$('match-world').textContent=world;document.querySelectorAll('[data-path]').forEach(a=>a.href=link(a.dataset.path));
 function header(){const m=data.match;document.title='Nexus · '+m.home_name+' – '+m.away_name;$('match-meta').textContent=[m.competition_name,'Stagione '+m.imc_season,m.competition_stage,m.competition_group_name,m.competition_round?'Turno '+m.competition_round:null,date(m.match_date)].filter(Boolean).join(' · ');$('match-back').href=link('view.html',{season:m.imc_season,competition:m.competition_key,name:m.competition_name,tab:'results'});
@@ -12,8 +12,8 @@ function header(){const m=data.match;document.title='Nexus · '+m.home_name+' �
 
 function portrait(p,large=false){
  const images=[...new Set((p.image_urls||[]).map(safe).filter(Boolean))];
- const initials=String(p.player_name||'?').trim().split(/\s+/).map(x=>x[0]).slice(0,2).join('');
- return '<span class="mj-portrait'+(large?' mj-portrait-large':'')+'"><span aria-hidden="true">'+esc(initials)+'</span>'+(images.length?'<img src="'+esc(images[0])+'" data-player-images="'+esc(JSON.stringify(images.slice(1)))+'" alt="Foto '+esc(p.player_name||'giocatore')+'" loading="lazy" decoding="async">':'')+'</span>';
+ const initials=String(p.display_name||p.player_name||'?').trim().split(/\s+/).map(x=>x[0]).slice(0,2).join('');
+ return '<span class="mj-portrait'+(large?' mj-portrait-large':'')+'"><span aria-hidden="true">'+esc(initials)+'</span>'+(images.length?'<img src="'+esc(images[0])+'" data-player-images="'+esc(JSON.stringify(images.slice(1)))+'" alt="Foto '+esc(p.display_name||p.player_name||'giocatore')+'" loading="lazy" decoding="async">':'')+'</span>';
 }
 function wirePortraits(){
  $('match-view').querySelectorAll('img[data-player-images]').forEach(img=>{
@@ -25,7 +25,7 @@ const eventIcon=(symbol,count,label,cls='')=>'<span class="mj-event-icon '+cls+'
 function events(p){return [
  Number(p.captain)>0?eventIcon('Ⓒ',1,'Capitano'):'',
  Number(p.goals)>0?eventIcon('⚽',p.goals,p.goals+' gol'):'',
- Number(p.assists)>0?eventIcon('↗⚽',p.assists,p.assists+' assist','mj-assist-icon'):'',
+ Number(p.assists)>0?eventIcon('A',p.assists,p.assists+' assist','mj-assist-icon'):'',
  Number(p.yellow_card)>0?eventIcon('<i class="mj-card-icon yellow"></i>',p.yellow_card,p.yellow_card+' ammonizioni'):'',
  Number(p.red_card)>0?eventIcon('<i class="mj-card-icon red"></i>',p.red_card,p.red_card+' espulsioni'):'',
  Number(p.man_of_match)>0?eventIcon('★',1,'MVP del match','mj-mvp-icon'):''
@@ -76,10 +76,10 @@ function lineup(side){
  if(!rows.length)return card(m[side+'_name'],empty('Formazione non disponibile nel report.'));
  const list=entries=>'<div class="mj-roster">'+entries.map(p=>{
   const notes=[p.sub_on_minute!=null?'↗ '+p.sub_on_minute+'′':null,p.sub_off_minute!=null?'↘ '+p.sub_off_minute+'′':null,p.red_card_minute!=null?'🟥 '+p.red_card_minute+'′':null].filter(Boolean);
-  return '<div class="mj-player-row">'+portrait(p)+'<div class="mj-player-copy"><b>'+player(p)+'</b><div class="mj-events">'+events(p)+'</div>'+(notes.length?'<small class="mj-sub-note">'+notes.map(esc).join(' · ')+'</small>':'')+'</div><div class="mj-player-minutes"><b>'+val(p.minutes)+(p.minutes!=null?'′':'')+'</b><small>MIN</small></div><div class="mj-player-rating">'+rating(p)+'<small>VOTO</small></div></div>';
+  return '<div class="mj-player-row"><div class="mj-player-identity">'+portrait(p)+'<div class="mj-player-copy"><b>'+player(p)+'</b>'+(notes.length?'<small class="mj-sub-note">'+notes.map(esc).join(' · ')+'</small>':'')+'</div></div><div class="mj-player-events" aria-label="Eventi del giocatore">'+(events(p)||'<span class="mj-no-events">—</span>')+'</div><div class="mj-player-minutes"><b>'+val(p.minutes)+(p.minutes!=null?'′':'')+'</b><small>MIN</small></div><div class="mj-player-rating">'+rating(p)+'<small>VOTO</small></div></div>';
  }).join('')+'</div>';
  const heading='<header class="mj-lineup-head">'+(safe(m[side+'_logo_url'])?'<img src="'+esc(m[side+'_logo_url'])+'" alt="">':'')+'<div><h2>'+esc(m[side+'_name'])+'</h2><p>'+esc(m[side+'_imc_manager_name']||m[side+'_manager_name']||'')+'</p></div></header>';
- return heading+[['Titolari',p=>Number(p.starter)>0],['Subentrati',p=>!Number(p.starter)&&played(p)],['Panchina',p=>!played(p)]].map(([title,filter])=>{const entries=rows.filter(filter);return entries.length?card(title+' · '+entries.length,list(entries)):''}).join('')+'<p class="mx-muted mj-legend">Ⓒ Capitano · ↗⚽ Assist · ★ MVP · ↗ Entrata · ↘ Uscita<br>— Dato non disponibile. Minuti ricavati dal Match Report.</p>';
+ return heading+[['Titolari',p=>Number(p.starter)>0],['Subentrati',p=>!Number(p.starter)&&played(p)],['Panchina',p=>!played(p)]].map(([title,filter])=>{const entries=rows.filter(filter);return entries.length?card(title+' · '+entries.length,list(entries)):''}).join('')+'<p class="mx-muted mj-legend">Ⓒ Capitano · A Assist · ★ MVP · ↗ Entrata · ↘ Uscita<br>— Dato non disponibile. Minuti ricavati dal Match Report.</p>';
 }
 function render(){document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===active;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});if(data){$('match-view').innerHTML=active==='overview'?overview():lineup(active);wirePortraits();}}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{active=b.dataset.tab;q.set('tab',active);history.replaceState(null,'','?'+q);render()});
