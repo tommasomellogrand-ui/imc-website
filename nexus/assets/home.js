@@ -96,7 +96,7 @@ function feedStory(r,context=feedContext(r)){
 
  const context=feedContext(r,round(r));
  if(!feedIsIMC(r,'home')&&!feedIsIMC(r,'away'))return {title:r.home_name+' – '+r.away_name,text:preview?'Prossimo appuntamento di campionato.':r.home_score+'–'+r.away_score+' · '+(round(r)||'Campionato')};
- if(!preview){const story=feedStory(r,context);story.isFinal=context.final;return story;}
+ if(!preview){const story=feedStory(r,context);story.isFinal=context.final;story.cupAwarded=['final-won','final-lost'].includes(story.scenario);return story;}
  const both=feedIsIMC(r,'home')&&feedIsIMC(r,'away'),side=feedIsIMC(r,'home')?'home':'away',manager=r[side+'_imc_manager_name'];
  const nation=r.competition_group==='NATIONS'||String(key).includes('|NATIONS|');
  if(context.final)return {isFinal:true,title:both?'Finale IMC: '+r.home_imc_manager_name+' contro '+r.away_imc_manager_name:manager+', appuntamento con la finale',text:r.home_name+' e '+r.away_name+' si sfidano per conquistare la coppa. '+(r.nexus_view||'Finale')+': è la partita che vale il titolo.'};
@@ -126,9 +126,9 @@ function matchdayMarkup(rows,kind){
   previousDay=g.day;
   const r=g.row,href=url('competitions/view.html',{season:matchdaySeason,competition:r.competition_key,tab:kind==='results'?'overview':'schedule'});
   const dates=[...new Set(g.rows.map(x=>clean(x.match_date).slice(0,10)))].sort();
-  return dayHeading+'<section class="matchday-competition"><header><div><h3>'+esc(r.nexus_view||r.competition_key)+'</h3><p>'+esc([...new Set(g.rows.map(round).filter(Boolean))].join(' · '))+'</p></div><a href="'+esc(href)+'">Vedi competizione →</a></header><div class="matchday-cards">'+g.rows.map(x=>{
+  return dayHeading+'<section class="matchday-competition"><header><div class="matchday-competition-heading">'+(r.sm_action!=='league'?'<span class="matchday-cup-icon">'+icon('cup')+'</span>':'')+'<h3>'+esc(r.nexus_view||r.competition_key)+'</h3><p>'+esc([...new Set(g.rows.map(round).filter(Boolean))].join(' · '))+'</p></div><a href="'+esc(href)+'">Vedi competizione →</a></header><div class="matchday-cards">'+g.rows.map(x=>{
    const story=matchdayEditorial(x,kind==='schedule');
-   return '<article class="matchday-card'+(story.isFinal?' matchday-final':'')+'">'+(story.isFinal?'<div class="matchday-final-banner"><span aria-hidden="true">★</span> FINALE <span>IN PALIO LA COPPA</span></div>':'')+(groupName(x)?'<span class="matchday-context">'+esc(groupName(x))+'</span>':'')+'<h4>'+esc(story.title)+'</h4><div class="match">'+matchdayTeam(x,'home')+score(x,kind)+matchdayTeam(x,'away')+'</div><p class="matchday-comment">'+esc(story.text)+'</p>'+(kind==='results'&&x.has_match_report?'<a class="matchday-report" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
+   return '<article class="matchday-card'+(story.isFinal?' matchday-final':'')+'">'+(story.isFinal?'<div class="matchday-final-banner"><span aria-hidden="true">★</span> FINALE <span>'+esc(kind==='schedule'?'IN PALIO LA COPPA':story.cupAwarded?'COPPA CONQUISTATA':'FINALE DISPUTATA')+'</span></div>':'')+(groupName(x)?'<span class="matchday-context">'+esc(groupName(x))+'</span>':'')+'<h4>'+esc(story.title)+'</h4><div class="match">'+matchdayTeam(x,'home')+score(x,kind)+matchdayTeam(x,'away')+'</div><p class="matchday-comment">'+esc(story.text)+'</p>'+(kind==='results'&&x.has_match_report?'<a class="matchday-report" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
   }).join('')+'</div></section>';
  }).join('');
 }

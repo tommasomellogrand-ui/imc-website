@@ -53,3 +53,11 @@
 .matchday-final-banner{display:flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.1em;font-weight:800;color:#8c6416;border-bottom:1px solid #e9d7a6;padding:0 0 10px;margin-bottom:13px}
 .matchday-final-banner>span:last-child{margin-left:auto;background:#101238;color:#f1d28a;border-radius:5px;padding:5px 7px;font-size:8px;letter-spacing:.08em}
 @media(max-width:760px){.matchday{padding:0 13px 16px}.matchday .matchday-brand{margin:0 -13px;padding:22px 17px}.matchday .matchday-brand h2{font-size:28px}.matchday-eyebrow{font-size:8px}.matchday-intro{margin:0 -13px;padding:12px 17px;font-size:11px}.matchday-tabs{margin:0 -13px 14px;padding:2px 13px 16px;gap:8px}.matchday-tabs button{font-size:13px}.matchday-date time{font-size:21px}.matchday-competition>header{padding:12px 10px}.matchday-competition h3{font-size:16px}.matchday-competition header a{flex-basis:85px;font-size:10px}}
+.matchday .matchday-competition>header{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;background:transparent;border:0;border-radius:0;padding:18px 10px 12px;margin-bottom:12px}
+.matchday .matchday-competition-heading{width:100%;min-width:0}
+.matchday .matchday-cup-icon{display:flex;align-items:center;justify-content:center;width:43px;height:43px;margin:0 auto 9px;border:1px solid #e6d197;border-radius:50%;background:#fff8e5;color:#ac8128}
+.matchday .matchday-competition h3{font-size:21px;line-height:1.25;letter-spacing:-.035em;margin:0 auto 7px;overflow-wrap:anywhere}
+.matchday .matchday-competition header p{font-size:11px;line-height:1.5;color:#967024;font-weight:700;letter-spacing:.04em}
+.matchday .matchday-competition header a{flex:0 0 auto;justify-content:center;min-height:36px;font-size:11px;color:#69738c;font-weight:600}
+.matchday .matchday-competition>header:after{content:'';display:block;width:42px;height:2px;background:#d1aa4e;margin-top:4px}
+@media(max-width:760px){.matchday .matchday-competition h3{font-size:20px}.matchday .matchday-competition>header{padding:16px 8px 10px}.matchday .matchday-competition header a{flex-basis:auto}}
