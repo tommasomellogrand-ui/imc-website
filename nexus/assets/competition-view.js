@@ -91,21 +91,66 @@ function feedTeam(r,side){
  const logo=safeImage(r[side+'_logo_url']);
  return '<div class="feed-team">'+(logo?'<img src="'+esc(logo)+'" width="34" height="38" loading="lazy" alt="" onerror="this.hidden=true">':'')+'<div><b>'+esc(r[side+'_name']||'—')+'</b>'+(feedIsIMC(r,side)?'<small>'+esc(r[side+'_imc_manager_name'])+' <span class="feed-imc">IMC</span></small>':'')+'</div></div>';
 }
-function feedStory(r){
- const h=Number(r.home_score),a=Number(r.away_score),home=feedIsIMC(r,'home'),away=feedIsIMC(r,'away');
- const score=h+'–'+a,manager=side=>String(r[side+'_imc_manager_name']);
- if(home&&away)return {title:h===a?'Parità nel confronto IMC':'Il confronto IMC va a '+manager(h>a?'home':'away'),text:manager('home')+' e '+manager('away')+' si affrontano in '+r.home_name+' – '+r.away_name+': '+score+' il risultato.'};
- const side=home?'home':'away',own=side==='home'?h:a,other=side==='home'?a:h,opponent=r[side==='home'?'away_name':'home_name'];
- return {title:manager(side)+(own>other?' conquista la vittoria':own===other?' chiude in parità':' si ferma contro '+opponent),text:r[side+'_name']+(own>other?' supera ':own===other?' pareggia con ':' perde contro ')+opponent+' per '+own+'–'+other+'.'+(own>other&&other===0?' Vittoria senza subire gol.':'')};
+function feedContext(r,roundLabel=''){
+ const stage=clean(r.competition_stage),round=clean(r.competition_round),phase=(stage+' '+round).toLowerCase();
+ const league=r.sm_action==='league',group=groupName(r);
+ // Leg numbers must be explicit: a round number alone never means first/second leg.
+ const leg=/\b(?:ritorno|second leg|2nd leg|leg 2)\b/.test(phase)?2:/\b(?:andata|first leg|1st leg|leg 1)\b/.test(phase)?1:0;
+ const final=/^(?:final|finale)(?:\s*[-·:]?\s*(?:andata|ritorno|first leg|second leg|1st leg|2nd leg))?$/i.test(stage)||/^(?:final|finale)$/i.test(round);
+ const knockout=!league&&!group&&(/\b(?:final|finale|semifinal|semifinale|semifinali|quarti|ottavi|quarter|quarterfinal|quarterfinals|round of|knockout|eliminazione|spareggio|playoff)\b/i.test(phase)||final);
+ const single=/\b(?:gara secca|partita secca|single leg|one leg|turno unico)\b/i.test(phase);
+ const type=r.sm_action==='friendly'?'Amichevole':r.sm_action==='interqualifier'?'Qualificazioni':'Coppa';
+ const label=league?['Campionato',roundLabel].filter(Boolean).join(' · '):[group||stage||type,leg===1?'Andata':leg===2?'Ritorno':(!stage?roundLabel:'')].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(' · ');
+ return {league,group,leg,final,knockout,single,label};
 }
-function feedCard(r,reports,featured=false){
- const imc=feedIsIMC(r,'home')||feedIsIMC(r,'away'),story=imc?feedStory(r):null;
+function feedChoice(r,scenario,options){
+ // Stable editorial rotation: refreshing never changes the headline.
+ let hash=2166136261;
+ for(const c of [gw,season,key,r.sm_fixture_id,r.match_date,scenario].join('|'))hash=Math.imul(hash^c.charCodeAt(0),16777619)>>>0;
+ return options[hash%options.length];
+}
+function feedStory(r,context=feedContext(r)){
+ const h=Number(r.home_score),a=Number(r.away_score),both=feedIsIMC(r,'home')&&feedIsIMC(r,'away');
+ const side=both?(h>=a?'home':'away'):(feedIsIMC(r,'home')?'home':'away'),otherSide=side==='home'?'away':'home';
+ const own=side==='home'?h:a,other=side==='home'?a:h,manager=r[side+'_imc_manager_name'],team=r[side+'_name'],opponent=r[otherSide+'_name'],away=side==='away';
+ const pick=(id,options)=>({scenario:id,title:feedChoice(r,id,options)});
+ const valid=v=>v!==null&&v!==undefined&&/^\d+$/.test(String(v));
+ const ah=r.aggregate_home_score,aa=r.aggregate_away_score,ph=r.penalty_home_score,pa=r.penalty_away_score;
+ const aggregate=valid(ah)&&valid(aa),penalties=valid(ph)&&valid(pa)&&Number(ph)!==Number(pa)&&(aggregate?Number(ah)===Number(aa):h===a);
+ const decided=context.knockout&&context.leg!==1&&(penalties||(context.leg===2&&aggregate&&Number(ah)!==Number(aa))||((context.final||context.single)&&!context.leg&&!aggregate&&h!==a));
+ let story;
+ if(decided){
+  const winningSide=penalties?(Number(ph)>Number(pa)?'home':'away'):aggregate?(Number(ah)>Number(aa)?'home':'away'):(h>a?'home':'away');
+  const win=winningSide===side,winner=r[winningSide+'_name'];
+  if(context.final)story=pick(win?'final-won':'final-lost',win?[manager+' alza il trofeo: festa '+team,team+', la finale è tua!']:[manager+', il sogno si ferma in finale','Finale amara per '+team]);
+  else if(penalties)story=pick(win?'penalties-won':'penalties-lost',win?[manager+' passa ai rigori',team+', qualificazione dal dischetto']:[manager+', i rigori dicono no',team+' esce ai rigori']);
+  else if(win&&own<other)story=pick('aggregate-loss-through',['Sconfitta indolore: '+manager+' passa',team+', il totale vale la qualificazione']);
+  else if(!win&&own>other)story=pick('aggregate-win-out',['A '+manager+' non basta vincere',team+', vittoria senza qualificazione']);
+  else story=pick(win?'aggregate-through':'aggregate-out',win?[manager+' stacca il pass',team+(aggregate?' avanti: decide il totale':' conquista la qualificazione')]:[manager+' saluta la coppa',team+', il cammino si interrompe']);
+  story.text=team+' '+(own>other?'vince':own===other?'pareggia':'perde')+' '+own+'–'+other+' '+(away?'in trasferta':'in casa')+'. '+(penalties?'Rigori: '+ph+'–'+pa+'. ':aggregate?'Totale delle due sfide: '+ah+'–'+aa+'. ':'')+winner+(context.final?' conquista il trofeo.':' passa il turno.');
+  return story;
+ }
+ if(context.leg===1)story=pick(own>other?'first-leg-win':own<other?'first-leg-loss':'first-leg-draw',own>other?[manager+' firma il primo atto',team+', vantaggio nell’andata']:own<other?[manager+', servirà un altro ritorno',team+', andata in salita']:['Tutto aperto tra '+team+' e '+opponent,'Nessun vincitore nel primo atto']);
+ else if(context.leg===2)story=pick('return-undecided',['Ritorno: '+team+' chiude sul '+own+'–'+other,manager+', il risultato del ritorno']);
+ else if(both)story=pick(own===other?'imc-draw':away?'imc-away':'imc-home',own===other?['Il confronto IMC finisce in parità','Equilibrio nel duello IMC']:away?[manager+' fa suo il duello IMC in trasferta','Colpo esterno di '+manager+' nel confronto IMC']:[manager+' si prende il confronto IMC','Il duello IMC premia '+manager]);
+ else if(own===other)story=pick(own===0?'goalless':own>=2?'scoring-draw':away?'away-draw':'home-draw',own===0?['Reti inviolate tra '+team+' e '+opponent,manager+', stavolta finisce senza gol']:own>=2?['Gol e parità: '+team+' chiude sul '+own+'–'+other,'Botta e risposta nel punteggio: '+team+' pareggia']:away?[manager+' torna con un pareggio','Parità in trasferta per '+team]:[manager+', pareggio davanti al proprio pubblico',team+' divide la posta']);
+ else if(own>other)story=pick(own-other>=3?(away?'away-big':'home-big'):other===0?(away?'away-clean':'home-clean'):away?'away-win':'home-win',own-other>=3?[team+' a valanga: '+own+'–'+other,manager+' firma una vittoria larga']:other===0?(away?[manager+' espugna il campo di '+opponent,'Colpo esterno e porta inviolata per '+team]:[manager+' vince e tiene la porta chiusa',team+', successo senza subire gol']):away?[manager+' espugna il campo di '+opponent,team+' passa in trasferta','Colpo esterno di '+manager]:[manager+' fa valere il fattore campo',team+', vittoria davanti al proprio pubblico']);
+ else story=pick(away?'away-loss':'home-loss',away?[manager+', trasferta amara sul campo di '+opponent,team+' torna senza la vittoria']:[opponent+' passa sul campo di '+team,manager+', il fattore campo non basta']);
+ story.text=team+(own>other?' supera ':own===other?' pareggia con ':' perde contro ')+opponent+' per '+own+'–'+other+' '+(away?'in trasferta':'in casa')+'.';
+ if(both)story.text+=' Confronto tra '+r.home_imc_manager_name+' e '+r.away_imc_manager_name+'.';
+ if(context.leg===1)story.text+=' La qualificazione si deciderà al ritorno.';
+ else if(context.leg===2)story.text+=' Il risultato della partita, da solo, non conferma la qualificazione.';
+ else if(context.league)story.text+=own>other?' Tre punti per '+manager+'.':own===other?' Un punto per parte.':' Nessun punto per '+manager+'.';
+ return story;
+}
+function feedCard(r,reports,featured=false,roundLabel=''){
+ const imc=feedIsIMC(r,'home')||feedIsIMC(r,'away'),context=feedContext(r,roundLabel),story=imc?feedStory(r,context):null;
  const report=reports.rows.get(String(r.sm_fixture_id));
  // Never combine a report's player facts with a conflicting Results score.
  const consistent=report&&report.home_score!=null&&report.away_score!=null&&Number(report.home_score)===Number(r.home_score)&&Number(report.away_score)===Number(r.away_score);
  const facts=consistent?(report.players||[]):[],scorers=facts.filter(p=>p.goals>0).map(p=>p.name+' ('+p.goals+')'),mvps=facts.filter(p=>p.mvp).map(p=>p.name);
  return '<article class="feed-card'+(featured?' feed-featured':'')+(imc?' feed-editorial':'')+'">'+
- (featured?'<span class="feed-kicker">IN EVIDENZA · IMC</span>':'')+
+ '<div class="feed-card-meta"><span>'+esc(context.label)+'</span>'+(featured?'<span class="feed-kicker">IN EVIDENZA · IMC</span>':'')+'</div>'+
  (story?'<h4>'+esc(story.title)+'</h4>':'')+
  '<div class="feed-scoreline">'+feedTeam(r,'home')+'<div class="score">'+matchScore(r)+'</div>'+feedTeam(r,'away')+'</div>'+
  (story?'<p class="feed-comment">'+esc(story.text)+'</p>':'')+
@@ -122,7 +167,7 @@ function newsFeed(rounds,reports){
   const dates=[...new Set(rows.map(r=>clean(r.match_date).slice(0,10)))].sort();
   const label=dateLabel(dates[0])+(dates.length>1?' – '+dateLabel(dates.at(-1)):'');
   return '<details class="feed-round" data-round="'+esc('news:'+round.id)+'"'+(!index?' open':'')+'><summary><span class="feed-kicker">'+(!index?'ULTIMO TURNO':'ARCHIVIO')+'</span><h3>'+esc(round.label)+'</h3><span>'+esc(label)+'</span></summary><div class="feed-items">'+
-  (featured?feedCard(featured,reports,true):'')+rows.filter(r=>r!==featured).map(r=>(groupName(r)?'<div class="feed-group">'+esc(groupName(r))+'</div>':'')+feedCard(r,reports)).join('')+
+  (featured?feedCard(featured,reports,true,round.label):'')+rows.filter(r=>r!==featured).map(r=>feedCard(r,reports,false,round.label)).join('')+
   '</div></details>';
  }).join('')+'<p class="ranking-note">Commenti automatici basati sui Results. Marcatori e MVP provengono esclusivamente dai Match Report disponibili.</p></section>';
 }
