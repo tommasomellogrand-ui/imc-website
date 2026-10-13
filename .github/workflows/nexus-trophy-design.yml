@@ -36,7 +36,7 @@ jobs:
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p(); ftp.set_pasv(True)
-          files=['nexus/home/data.php','nexus/assets/home.css','nexus/assets/trophy-room.css','nexus/assets/trophy-room.js','nexus/assets/home.js','nexus/index.html']
+          files=['nexus/assets/competition-view.js','nexus/competitions/index.html','nexus/competitions/view.html','nexus/competitions/domestic.html','nexus/competitions/family.html','nexus/competitions/group.html','nexus/home/data.php','nexus/assets/home.css','nexus/assets/trophy-room.css','nexus/assets/trophy-room.js','nexus/assets/home.js','nexus/index.html']
           for path in files:
               local=Path(path); data=local.read_bytes()
               ftp.cwd('/www.italianmastersclub.it/'+str(local.parent))
