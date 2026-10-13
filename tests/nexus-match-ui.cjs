@@ -10,13 +10,14 @@ if(u.pathname.endsWith('/matchday/data.php'))return route.fulfill({json:{league_
 const path=u.pathname.slice(1);if(!fs.existsSync(path))return route.abort();return route.fulfill({body:fs.readFileSync(path),contentType:path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':'text/html'});});
 for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});await page.goto('https://match.test/nexus/competitions/match.html?world=GW001&fixture=123');await page.waitForSelector('.mx-mvp');await page.waitForSelector('.mx-actions [data-club-addon]');
 assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Overflow '+width);
-assert.equal(await page.locator('.mx-goals-grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),2);
-assert(await page.locator('.mx-banner').evaluate(el=>el.getBoundingClientRect().height<330),'Header too tall');
-assert.equal(await page.locator('.mx-actions a').count(),2);assert.equal(await page.locator('.mx-goals-grid .mx-scorer').count(),3);
+assert.equal(await page.locator('.mj-header-goals').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),2);
+assert(await page.locator('.mx-banner').evaluate(el=>el.getBoundingClientRect().height<410),'Header too tall');
+assert.equal(await page.locator('[data-tab]').count(),3);assert.equal(await page.locator('[data-tab="stats"]').count(),0);assert.equal(await page.locator('#match-view .mx-stat').count(),6);assert(await page.locator('.mx-mvp').evaluate(el=>el.getBoundingClientRect().height<220),'MVP too tall');
+assert.equal(await page.locator('.mx-actions a').count(),2);assert.equal(await page.locator('.mj-header-scorer').count(),3);
 assert.match(await page.locator('.mx-mvp').textContent(),/F. TORRES/);assert.match(await page.locator('.mx-venue').textContent(),/17.011/);
 for(const side of ['home','away']){await page.locator('[data-tab="'+side+'"]').click();assert.equal(await page.locator('.mj-player-row').count(),13);assert.equal(await page.locator('.mj-roster').count(),3);assert.equal(await page.locator('.mj-player-row .mj-portrait').count(),13);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Lineup overflow '+width);}
-await page.locator('[data-tab="stats"]').click();assert.equal(await page.locator('.mx-stat').count(),6);assert.match(await page.locator('.mx-stat').nth(3).textContent(),/0Calci d’angolo2/);assert.match(await page.locator('.mx-stat').nth(4).textContent(),/—Ammonizioni—/);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Stats overflow '+width);
+await page.locator('[data-tab="overview"]').click();assert.equal(await page.locator('.mx-stat').count(),6);assert.match(await page.locator('.mx-stat').nth(3).textContent(),/0Calci d’angolo2/);assert.match(await page.locator('.mx-stat').nth(4).textContent(),/—Ammonizioni—/);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Stats overflow '+width);
 }
-report=false;await page.goto('https://match.test/nexus/competitions/match.html?world=GW001&fixture=123');await page.waitForSelector('.mx-report-state.pending');assert.match(await page.locator('#match-view').textContent(),/non ancora disponibile/);assert.deepEqual(errors,[]);console.log('Match header and Overview: mobile, desktop, other tabs and missing report verified.');
+report=false;await page.goto('https://match.test/nexus/competitions/match.html?world=GW001&fixture=123');await page.waitForSelector('.mx-report-state.pending');assert.match(await page.locator('#match-view').textContent(),/non ancora disponibile/);assert.deepEqual(errors,[]);console.log('Three tabs, header scorers, compact MVP, lineups and all Overview stats verified at mobile and desktop widths.');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
 

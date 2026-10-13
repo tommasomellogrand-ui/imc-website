@@ -124,3 +124,33 @@ body.mx-journal{background:#f5f6fa;color:#101238}
  .mj-mvp-copy h2{font-size:19px}.mj-portrait-large{min-height:205px}
  .mj-award-label{font-size:8px;padding:5px}.mj-mvp-numbers{gap:4px}
 }
+
+/* Match Journal: scorers in the header, unified Overview, compact player rows. */
+.mx-journal .mx-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.mj-header-goals{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:680px;margin:12px auto 0;padding-top:10px;border-top:1px solid #e5e3dc}
+.mj-header-goals>div{text-align:center;min-width:0}
+.mj-header-scorer{display:block;font-size:11px;line-height:1.6;overflow-wrap:anywhere;color:#687187}
+.mj-header-scorer a{color:inherit;text-decoration:none}.mj-header-scorer b{color:#967225;white-space:nowrap}
+.mx-journal .mx-mvp{max-width:460px;margin:16px auto;background:#fffdf7}
+.mx-journal .mj-mvp-card{display:flex;justify-content:center;align-items:center;gap:14px;padding:14px;text-align:center}
+.mx-journal .mj-portrait-large{width:72px;height:72px;min-height:0;flex:0 0 72px;border-radius:50%;font-size:22px}
+.mx-journal .mj-mvp-copy{padding:0;flex:0 1 auto}
+.mx-journal .mj-mvp-copy h2{font-size:17px;margin:6px 0 3px}
+.mx-journal .mj-mvp-copy>p{font-size:10px;margin:0 0 6px}
+.mx-journal .mj-mvp-copy>.mj-rating{font-size:15px;min-width:36px;min-height:25px;padding:3px 6px}
+.mx-journal .mj-mvp-numbers{display:flex;justify-content:center;gap:12px;margin-top:7px}
+.mx-journal .mj-mvp-numbers span{font-size:9px}.mx-journal .mj-mvp-numbers b{display:inline;font-size:11px;margin-right:3px}
+.mx-journal .mj-lineup-head{flex-direction:column;justify-content:center;text-align:center;gap:7px;padding:13px 0 0}
+.mx-journal .mj-lineup-head img{width:54px;height:58px}.mx-journal .mj-lineup-head h2{font-size:18px}
+.mx-journal .mj-player-row{grid-template-columns:32px minmax(0,1fr) 29px 33px;gap:7px;padding:10px 0}
+.mx-journal .mj-player-row>.mj-portrait{width:32px;height:32px;flex-basis:32px}
+.mx-journal .mj-player-copy{display:flex;align-items:center;gap:7px;flex-wrap:wrap;line-height:1.25}
+.mx-journal .mj-player-copy>b{font-size:12px;flex:0 1 auto}
+.mx-journal .mj-events{display:inline-flex;align-items:center;gap:5px;margin:0;flex-wrap:nowrap}
+.mj-event-icon{display:inline-flex;align-items:center;gap:2px;font-size:11px;line-height:16px;white-space:nowrap}
+.mj-event-icon b{font-size:9px;color:#596277}.mj-assist-icon{color:#28765e;font-size:10px}.mj-mvp-icon{color:#ba8c24;font-size:16px}
+.mj-card-icon{display:inline-block;width:8px;height:12px;border-radius:1px;vertical-align:middle;box-shadow:0 0 0 1px #00000012}
+.mj-card-icon.yellow{background:#efc63d}.mj-card-icon.red{background:#da4348}
+.mx-journal .mj-player-copy>.mj-sub-note{display:inline;margin:0;font-size:9px;white-space:nowrap}
+.mx-journal .mj-player-rating .mj-rating{min-width:29px;min-height:24px;font-size:12px;padding:3px}
+@media(min-width:700px){.mx-journal .mj-player-copy>b{font-size:14px}.mx-journal .mj-player-row{grid-template-columns:36px minmax(0,1fr) 40px 42px;gap:12px}}
