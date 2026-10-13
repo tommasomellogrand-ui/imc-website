@@ -103,7 +103,7 @@ function matchdayGroups(rows,kind){
   if(!feedIsIMC(r,'home')&&!feedIsIMC(r,'away'))continue;
   const id=String(r.sm_fixture_id||[r.competition_key,r.match_date,r.home_name,r.away_name].join('|'));
   if(seen.has(id))continue;seen.add(id);
-  const token=JSON.stringify([r.competition_key,r.matchday_turn]);
+  const token=JSON.stringify([clean(r.match_date).slice(0,10),r.competition_key]);
   if(!groups.has(token))groups.set(token,{row:r,rows:[],day:clean(r.match_date).slice(0,10)});
   const g=groups.get(token);g.rows.push(r);
   if(kind==='results'&&r.match_date>g.day)g.day=clean(r.match_date).slice(0,10);
@@ -111,10 +111,13 @@ function matchdayGroups(rows,kind){
  return [...groups.values()].sort((a,b)=>(kind==='results'?b.day.localeCompare(a.day):a.day.localeCompare(b.day))||String(a.row.nexus_view).localeCompare(String(b.row.nexus_view)));
 }
 function matchdayMarkup(rows,kind){
+ let previousDay='';
  return matchdayGroups(rows,kind).map(g=>{
+  const dayHeading=g.day!==previousDay?'<h3 class="matchday-date">'+esc(date(g.day))+'</h3>':'';
+  previousDay=g.day;
   const r=g.row,href=url('competitions/view.html',{season:matchdaySeason,competition:r.competition_key,tab:kind==='results'?'overview':'schedule'});
   const dates=[...new Set(g.rows.map(x=>clean(x.match_date).slice(0,10)))].sort();
-  return '<section class="matchday-competition"><header><div><h3>'+esc(r.nexus_view||r.competition_key)+'</h3><p>'+esc([round(r),date(dates[0])+(dates.length>1?' – '+date(dates.at(-1)):'')].filter(Boolean).join(' · '))+'</p></div><a href="'+esc(href)+'">Vedi competizione →</a></header><div class="matchday-cards">'+g.rows.map(x=>{
+  return dayHeading+'<section class="matchday-competition"><header><div><h3>'+esc(r.nexus_view||r.competition_key)+'</h3><p>'+esc([...new Set(g.rows.map(round).filter(Boolean))].join(' · '))+'</p></div><a href="'+esc(href)+'">Vedi competizione →</a></header><div class="matchday-cards">'+g.rows.map(x=>{
    const story=matchdayEditorial(x,kind==='schedule');
    return '<article class="matchday-card">'+(groupName(x)?'<span class="matchday-context">'+esc(groupName(x))+'</span>':'')+'<h4>'+esc(story.title)+'</h4><div class="match">'+matchdayTeam(x,'home')+score(x,kind)+matchdayTeam(x,'away')+'</div><p class="matchday-comment">'+esc(story.text)+'</p>'+(kind==='results'&&x.has_match_report?'<a class="matchday-report" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
   }).join('')+'</div></section>';
@@ -126,10 +129,7 @@ function renderMatchday(){
  document.querySelectorAll('[data-matchday]').forEach(b=>{const active=b.dataset.matchday===kind;b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1});
  panel.setAttribute('aria-labelledby','matchday-'+kind);
  if(matchdayData.errors?.[kind]){panel.innerHTML='<p class="empty">Dati temporaneamente non disponibili. Nuovo tentativo automatico.</p>';return}
- const current=rows.filter(r=>r.matchday_latest),archive=kind==='results'?rows.filter(r=>!r.matchday_latest):[];
- const opened=panel.querySelector('details')?.open;
- panel.innerHTML=(current.length?matchdayMarkup(current,kind):'<p class="empty">'+(kind==='results'?'Nessuna partita IMC nell’ultimo turno disponibile delle competizioni.':'Nessuna partita IMC nel prossimo turno disponibile delle competizioni.')+'</p>')+
- (archive.length?'<details class="matchday-archive"'+(opened?' open':'')+'><summary>Turni precedenti</summary>'+matchdayMarkup(archive,kind)+'</details>':'')+
+ panel.innerHTML=(rows.length?matchdayMarkup(rows,kind):'<p class="empty">'+(kind==='results'?'Nessun risultato IMC disponibile.':'Nessuna prossima partita IMC in calendario.')+'</p>')+
  (kind==='results'&&matchdayData.errors?.reports?'<p class="updated">Disponibilità dei Match Report temporaneamente non verificabile.</p>':'');
  NexusCards.wireImages(panel);
 }

@@ -28,3 +28,4 @@
 .matchday-archive>summary{cursor:pointer;padding:14px 0;font-size:13px;font-weight:700;color:var(--muted)}
 @media(max-width:760px){.matchday{padding:16px 12px}.matchday-cards{grid-template-columns:1fr}.matchday-card{padding:14px 11px}.matchday-competition>header{align-items:flex-start}.matchday-competition header a{flex:0 0 95px}.matchday-card .team,.matchday-card .team.away{flex-direction:column;text-align:center}.matchday-card .score b{font-size:24px}}
 
+.matchday-date{font-size:20px;color:var(--navy);padding:12px 0 9px;border-bottom:2px solid #d2aa4c;margin:24px 0 4px}

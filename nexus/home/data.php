@@ -15,31 +15,33 @@ try {
         try {
             if($kind==='results')$rows=nexus_rows($db,'SELECT * FROM `'.$rt.'` WHERE game_world_id=? AND imc_season=? AND home_score IS NOT NULL AND away_score IS NOT NULL ORDER BY match_date DESC,sm_fixture_id DESC '.($matchday?'':'LIMIT 6'),[$gw,$season]);
             else $rows=nexus_rows($db,'SELECT s.* FROM `'.$st.'` s WHERE s.game_world_id=? AND s.imc_season=? AND s.match_date>=? AND NOT EXISTS (SELECT 1 FROM `'.$rt.'` r WHERE r.sm_fixture_id=s.sm_fixture_id AND r.game_world_id=s.game_world_id AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL) ORDER BY s.match_date ASC,s.match_time ASC,s.sm_fixture_id ASC '.($matchday?'':'LIMIT 6'),[$gw,$season,$today]);
-            
-            if($matchday){
-                $groups=[];
-                foreach($rows as $r){
-                    $key=(string)$r['competition_key'];$day=substr((string)$r['match_date'],0,10);
-                    $stage=trim((string)($r['competition_stage']??''));
-                    if(preg_match('/^(?:group|gruppo|girone)\\s+[A-Z0-9]+$/i',$stage))$stage='';
-                    $round=trim((string)($r['competition_round']??''));
-                    $turn=json_encode([$stage,$round!==''?$round:$day]);
-                    if(!isset($groups[$key][$turn]))$groups[$key][$turn]=['day'=>$day,'rows'=>[]];
-                    $g=&$groups[$key][$turn];$g['day']=$kind==='results'?max($g['day'],$day):min($g['day'],$day);$g['rows'][]=$r;unset($g);
-                }
-                $rows=[];
-                foreach($groups as $turns){
-                    uasort($turns,fn($a,$b)=>$kind==='results'?strcmp($b['day'],$a['day']):strcmp($a['day'],$b['day']));
-                    $latest=true;
-                    foreach($turns as $turn=>$g){
-                        if($kind==='schedule'&&!$latest)break;
-                        foreach($g['rows'] as $r){$r['matchday_turn']=$turn;$r['matchday_latest']=$latest;$rows[]=$r;}
-                        $latest=false;
-                    }
-                }
-            }
+
             $rows=nexus_enrich_match_teams($core,$gw,$rows);
-            if($matchday)$rows=array_values(array_filter($rows,fn($r)=>!empty($r['home_imc_manager_id'])||!empty($r['away_imc_manager_id'])));
+            if($matchday){
+                // SQL ordering is newest first for results, nearest first for schedule.
+                // One selected fixture per IMC team across ALL competitions, not per cup.
+                $seenTeams=[];$seenFixtures=[];$selected=[];
+                foreach($rows as $r){
+                    $nation=($r['competition_group']??'')==='NATIONS'||strpos((string)$r['competition_key'],'|NATIONS|')!==false;
+                    $chosen=[];
+                    foreach(['home','away'] as $side){
+                        $id=(string)($r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']??'');
+                        $identity=($nation?'nation:':'club:').($id!==''&&$id!=='0'?$id:'name:'.nexus_team_name_key((string)$r[$side.'_name']));
+                        if(!isset($seenTeams[$identity])){
+                            $seenTeams[$identity]=true;
+                            if(!empty($r[$side.'_imc_manager_id']))$chosen[]=$side;
+                        }
+                    }
+                    $fixture=(string)($r['sm_fixture_id']??'');
+                    if(!$chosen||isset($seenFixtures[$fixture]))continue;
+                    $seenFixtures[$fixture]=true;
+                    $r['matchday_selected_sides']=$chosen;
+                    $r['matchday_latest']=true;
+                    $r['matchday_turn']=substr((string)$r['match_date'],0,10);
+                    $selected[]=$r;
+                }
+                $rows=$selected;
+            }
             $names=['charityshield'=>'Charity Shield','leaguecup'=>'National Cup','nationalcup'=>'National Cup','leagueshield'=>'League Cup','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers','worldcup'=>'World Cup'];
             foreach($rows as &$r){
                 $action=strtolower(trim((string)$r['sm_action']));
