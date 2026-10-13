@@ -76,6 +76,8 @@ on:
       - '.github/workflows/deploy-website-aruba.yml'
       - 'nexus/assets/flags/**'
       - '.github/workflows/nexus-national-flags.yml'
+      - 'nexus/assets/home.css'
+      - 'nexus/home/data.php'
       - 'nexus/assets/home.js'
       - 'nexus/assets/trophy-room.js'
       - 'nexus/assets/trophy-room.css'
@@ -267,3 +269,4 @@ jobs:
                   except Exception as e:last=e;time.sleep(5)
               else:raise SystemExit(f'Live verification failed: {url}: {last}')
           PY
+
