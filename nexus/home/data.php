@@ -20,7 +20,7 @@ try {
             if($matchday){
                 // SQL ordering is newest first for results, nearest first for schedule.
                 // One selected fixture per IMC team across ALL competitions, not per cup.
-                // League coverage is complete: latest/next round per league, including non-IMC sides.
+                // Keep every IMC match in the latest/next league round alongside other IMC competitions.
                 $leagueTurns=[];$leagueFixtures=[];
                 foreach($rows as $r){
                     if(($r['sm_action']??'')!=='league')continue;
@@ -45,6 +45,7 @@ try {
                     }
                     $fixture=(string)($r['sm_fixture_id']??'');
                     $league=isset($leagueFixtures[$fixture]);
+                    if(empty($r['home_imc_manager_id'])&&empty($r['away_imc_manager_id']))continue;
                     if((($r['sm_action']??'')==='league'&&!$league)||(!$chosen&&!$league)||isset($seenFixtures[$fixture]))continue;
                     $seenFixtures[$fixture]=true;
                     $r['matchday_league_complete']=$league;
