@@ -20,7 +20,7 @@ function ch_signature(array $r): string {
 }
 function ch_init(array $managers): array {
  $out=['managers'=>[],'matches'=>[],'trophies'=>[],'issues'=>[],'coverage'=>['reports'=>0,'fixtures'=>0,'duplicate_rows'=>0,'excluded_fixtures'=>0]];
- foreach($managers as $m)$out['managers'][$m['manager_id']]=['stats'=>ch_zero(),'trophies'=>0,'excluded'=>0];return $out;
+ foreach($managers as $m)$out['managers'][$m['manager_id']]=['stats'=>ch_zero(),'h2h_stats'=>ch_zero(),'trophies'=>0,'excluded'=>0];return $out;
 }
 function ch_group(array &$out,array $rows,array $map,array $names,string $gw,?string $selected,string $scope='club'): void {
  if(!$rows)return;$r=$rows[0];$candidates=[];$signatures=[];
@@ -41,6 +41,7 @@ function ch_group(array &$out,array $rows,array $map,array $names,string $gw,?st
   $gf=(int)$r[$side.'_score'];$ga=(int)$r[$other.'_score'];
   $pf=is_numeric($r['penalty_'.$side.'_score']??null)?(int)$r['penalty_'.$side.'_score']:null;$pa=is_numeric($r['penalty_'.$other.'_score']??null)?(int)$r['penalty_'.$other.'_score']:null;
   ch_add($out['managers'][$id]['stats'],$gf,$ga,$pf,$pa);
+  if(count($opponentIds)===1&&$opponentIds[0]!==$id)ch_add($out['managers'][$id]['h2h_stats'],$gf,$ga,$pf,$pa);
   $out['managers'][$id]['stats']['matched_by_'.$resolved[$side]['by']]++;
   if($id!==$selected)continue;$opponent=count($opponentIds)===1?$opponentIds[0]:null;
   $out['matches'][]=['world'=>$gw,'fixture_id'=>(string)$r['sm_fixture_id'],'date'=>$r['match_date'],'season'=>$r['imc_season'],'competition'=>$r['competition_key'],'scope'=>ch_nation($r)?'national_team':'club','team_id'=>$r[$side.'_sm_club_id'],'team'=>$r[$side.'_name'],'opponent_team'=>$r[$other.'_name'],'gf'=>$gf,'ga'=>$ga,'outcome'=>$gf>$ga?'V':($gf<$ga?'S':'P'),'penalty_for'=>$pf,'penalty_against'=>$pa,'opponent_id'=>$opponent,'opponent_name'=>$opponent!==null?($names[$opponent]??$opponent):null,'identity_source'=>$resolved[$side]['by'],'opponent_identity_source'=>$opponent!==null?$resolved[$other]['by']:null];
@@ -78,3 +79,4 @@ function ch_results_read(PDO $db,string $gw,array $managers,?string $selected,st
  $stmt->execute([$gw]);$rows=$stmt->fetchAll(PDO::FETCH_ASSOC);$stmt->closeCursor();
  return ch_results_rows($rows,$gw,$managers,$selected,$scope);
 }
+

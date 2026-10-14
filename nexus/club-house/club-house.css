@@ -283,3 +283,25 @@ dialog{width:min(720px,calc(100% - 28px));max-height:85dvh;padding:26px;border:0
 /* Keep trophy winner names aligned in a consistent two-line slot. */
 .clubhouse-hub .trophy-winner{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;width:100%;font-size:12px;line-height:1.35;height:2.7em;min-height:2.7em;overflow-wrap:anywhere}
 @media(max-width:600px){.clubhouse-hub .trophy-winner{font-size:11px}}
+
+/* IMC H2H: manager-first comparison cards with clearly separated metrics. */
+.h2h-heading{margin:8px 0 22px}.h2h-heading h2{margin:6px 0 10px}.h2h-heading p:not(.eyebrow){font-size:14px;margin:0 0 6px;color:#56647b}
+.clubhouse-page .h2h-rival{overflow:hidden;border:1px solid #e1e5ee;border-radius:15px;background:#fff;margin:14px 0}
+.clubhouse-page .h2h-rival>summary{display:block;padding:0;list-style:none;cursor:pointer}
+.h2h-rival>summary::-webkit-details-marker{display:none}
+.h2h-rival-identity{display:flex;align-items:center;gap:12px;padding:17px 18px;border-bottom:1px solid #eceef3}
+.h2h-rival-identity>div{flex:1;min-width:0}.h2h-rival-identity strong{display:block;font-size:17px;overflow-wrap:anywhere;color:#101238}.h2h-rival-identity small{display:block;font-size:9px;letter-spacing:.12em;margin-bottom:4px}
+.h2h-chevron{font-size:21px;color:#9c7b2f}.h2h-rival[open] .h2h-chevron{transform:rotate(180deg)}
+.h2h-primary{display:grid;grid-template-columns:1fr 1fr;background:#101238;color:white;padding:18px 0}
+.h2h-primary>div{text-align:center}.h2h-primary>div+div{border-left:1px solid #ffffff30}
+.h2h-primary strong{display:block;font-size:34px;line-height:1.15;font-weight:800;font-variant-numeric:tabular-nums}.h2h-primary>div:last-child strong{color:#e4c371}
+.h2h-primary span{display:block;font-size:11px;margin-top:5px;color:#d4d8e7}
+.clubhouse-page .h2h-rival .h2h-score{display:grid;grid-template-columns:repeat(3,1fr);gap:0;padding:14px 0;margin:0;border-bottom:1px solid #e7eaf0}
+.clubhouse-page .h2h-rival .h2h-score>span{padding:0;text-align:center;border-radius:0;background:transparent}
+.h2h-rival .h2h-score>span+span{border-left:1px solid #e7eaf0}
+.clubhouse-page .h2h-rival .h2h-score strong{display:block;font-size:23px}.h2h-rival .h2h-score small{display:block;font-size:10px;margin-top:3px}
+.h2h-goals{display:grid;grid-template-columns:1fr 1fr;padding:14px 0;background:#fafbfe}
+.h2h-goals>div{text-align:center}.h2h-goals>div+div{border-left:1px solid #e3e7ee}.h2h-goals strong{display:block;font-size:25px;color:#101238}.h2h-goals span{display:block;font-size:11px;color:#65718a;margin-top:4px}
+.h2h-rival-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 15px;border-top:1px solid #e7eaf0}.h2h-rival-footer>span{font-size:10px;color:#8b702f}.h2h-rival-footer .world-badges{flex-wrap:wrap}
+.h2h-method{font-size:11px;color:#69758a;line-height:1.6;margin-top:18px}
+@media(min-width:800px){.clubhouse-page .h2h-rival>summary{display:grid;grid-template-columns:1.2fr 1fr}.h2h-rival-identity{grid-column:1/-1}.h2h-primary{grid-row:2/4;align-content:center}.clubhouse-page .h2h-rival .h2h-score{grid-column:2}.h2h-goals{grid-column:2}.h2h-rival-footer{grid-column:1/-1}}

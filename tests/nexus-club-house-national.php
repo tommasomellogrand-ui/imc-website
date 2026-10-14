@@ -39,3 +39,10 @@ $stmt=$db->prepare('INSERT INTO GW001_IMC_Results VALUES ('.implode(',',array_fi
 $sql=ch_national_read($db,'GW001',$people,'A',$assignments,$mapping);
 ensure($sql['managers']['A']['stats']['played']===2,'SQL reads Results only, no Match Report table required');
 echo "PASS: national Results, world/team/date attribution, inclusive boundaries, transfers, gaps, overlapping tenures, duplicates, absent and misleading SM IDs, all seasons, Global sum\n";
+
+$expected=ch_zero();foreach($d['matches'] as $m)if($m['opponent_id']!==null)ch_add($expected,$m['gf'],$m['ga'],$m['penalty_for'],$m['penalty_against']);
+foreach(['played','won','drawn','lost','gf','ga'] as $key){
+ ensure($d['managers']['A']['h2h_stats'][$key]===$expected[$key],'National H2H summary matches detail '.$key);
+ ensure($merged['managers']['A']['h2h_stats'][$key]===$expected[$key],'Global H2H merges national totals '.$key);
+}
+

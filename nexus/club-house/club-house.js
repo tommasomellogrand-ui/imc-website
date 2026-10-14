@@ -32,6 +32,7 @@ $('open-worlds').onclick=$('nav-worlds').onclick=()=>$('world-dialog').showModal
 
 async function get(q=''){const r=await fetch('data.php'+q,{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Dati non disponibili');return d;}
 function stats(id){return sum(available().map(w=>bundles[w].managers[id]?.stats||zero()));}
+function h2hStats(id){return sum(available().map(w=>bundles[w].managers[id]?.h2h_stats||zero()));}
 function trophies(id){return available().reduce((n,w)=>n+(bundles[w].managers[id]?.trophies||0),0);}
 function status(){const ready=available().length,total=selected().length,missing=selected().filter(w=>failed.includes(w));$('loading').textContent=(loading?'Caricamento · ':'')+ready+'/'+total+' GW disponibili';const excluded=manager?available().reduce((n,w)=>n+(bundles[w].managers[manager]?.excluded||0),0):0;const nationalErrors=rankingView?available().filter(w=>(bundles[w].ranking_error||bundles[w].national_ranking_error)):[];const attribution=available().map(w=>({world:w,c:bundles[w].national_coverage})).filter(x=>x.c&&(x.c.ambiguous_sides||x.c.excluded_fixtures));const trophyErrors=available().filter(w=>bundles[w].trophy_error);$('warning').textContent=[attribution.length?'Results nazionali: incarichi ambigui o partite escluse in '+attribution.map(x=>x.world).join(', ')+'.':'',nationalErrors.length?'Results ranking non disponibili per '+nationalErrors.join(', ')+': classifica parziale.':'',missing.length?'Dati parziali: non disponibili '+missing.join(', ')+'. Usa Aggiorna per riprovare.':'',excluded?excluded+' partite escluse dai conteggi per anomalie nei dati. Vedi Panoramica.':'',trophyErrors.length?'Trofei incompleti per '+trophyErrors.join(', ')+'.':''].filter(Boolean).join(' ');}
 const timelineMeta={passport:['🛂','IMC PASSPORT'],assignment_start:['●','NUOVO INCARICO'],assignment_end:['●','FINE INCARICO'],trophy:['🏆','TROFEO']};
@@ -95,6 +96,7 @@ function syncManagerOptions(){
 }
 function directory(){
  const q=$('search').value.toLocaleLowerCase('it').trim(),rows=directoryPeople().filter(m=>(m.full_name+' '+m.manager_id).toLocaleLowerCase('it').includes(q));
+ if(section==='h2h')rows.sort((a,b)=>h2hStats(b.manager_id).played-h2hStats(a.manager_id).played||a.full_name.localeCompare(b.full_name,'it'));
  if(section==='career')rows.sort((a,b)=>{
   if(careerSort==='name')return a.full_name.localeCompare(b.full_name,'it');
   const score=m=>careerSort==='trophies'?trophies(m.manager_id):stats(m.manager_id)[careerSort];
@@ -104,8 +106,8 @@ function directory(){
 
  $('manager-count').textContent=rows.length+' manager';$('compact-count').textContent=rows.length+' manager';
  $('content').innerHTML=sortBar+'<div class="manager-grid">'+rows.map(m=>{
-  const s=stats(m.manager_id),ws=available().filter(w=>(bundles[w].managers[m.manager_id]?.stats.played||0)>0);
-  return `<a class="manager-card" href="${esc(hubURL(section,m.manager_id))}"><div class="identity"><span class="avatar">${esc(initials(m.full_name))}</span><div><h2>${esc(m.full_name)}</h2><small>${esc(m.manager_id)}</small></div></div><div class="mini-stats"><div><strong>${number(s.played)}</strong><small>Partite</small></div><div><strong>${number(s.won)}</strong><small>Vittorie</small></div><div><strong>${number(trophies(m.manager_id))}</strong><small>Trofei</small></div></div><div class="card-foot"><span class="gold">${ws.length} GW</span><span class="open-profile">Profilo →</span></div></a>`;
+  const s=section==='h2h'?h2hStats(m.manager_id):stats(m.manager_id),ws=available().filter(w=>(bundles[w].managers[m.manager_id]?.[section==='h2h'?'h2h_stats':'stats']?.played||0)>0);
+  return `<a class="manager-card" href="${esc(hubURL(section,m.manager_id))}"><div class="identity"><span class="avatar">${esc(initials(m.full_name))}</span><div><h2>${esc(m.full_name)}</h2><small>${esc(m.manager_id)}</small></div></div><div class="mini-stats"><div><strong>${number(s.played)}</strong><small>${section==='h2h'?'Partite H2H':'Partite'}</small></div><div><strong>${number(s.won)}</strong><small>Vittorie</small></div><div><strong>${section==='h2h'?pct(s):number(trophies(m.manager_id))}</strong><small>${section==='h2h'?'% vittorie':'Trofei'}</small></div></div><div class="card-foot"><span class="gold">${ws.length} GW</span><span class="open-profile">Profilo →</span></div></a>`;
  }).join('')+'</div>'+(rows.length?'':'<p class="notice">'+(loading?'Caricamento manager con risultati…':'Nessun manager con risultati per i filtri selezionati.')+'</p>');
 }
 function kpis(s){return '<div class="kpis">'+[['Partite',number(s.played)],['Vittorie',number(s.won)],['Pareggi',number(s.drawn)],['Sconfitte',number(s.lost)],['Vittorie %',pct(s)],['Gol fatti',number(s.gf)],['Gol subiti',number(s.ga)],['Differenza reti',number(s.gf-s.ga)]].map(([label,value])=>`<div class="kpi"><strong>${value}</strong><span>${label}</span></div>`).join('')+'</div>';}
@@ -144,7 +146,21 @@ function career(){
   el.addEventListener('toggle',()=>{if(el.open&&!shown)more();});
  });
 }
-function h2h(){const matches=allMatches(),groups=new Map();for(const m of matches)if(m.opponent_id){if(!groups.has(m.opponent_id))groups.set(m.opponent_id,[]);groups.get(m.opponent_id).push(m);}const rows=[...groups.values()].sort((a,b)=>b.length-a.length);$('content').innerHTML='<h2>Head to Head globali</h2><p class="muted">Club: ID manager dai Match Report. Nazionali: Results attribuiti tramite GW, nazionale e date incarico. Gli incontri nei GW selezionati sono aggregati.</p>'+`<p class="notice">${rows.reduce((n,r)=>n+r.length,0)} scontri IMC–IMC · ${matches.filter(m=>!m.opponent_id).length} partite con avversario esterno o non identificato, incluse nelle statistiche generali ma non qui.</p>`+(rows.map(items=>{const s=matchStats(items),m=items[0],gws=[...new Set(items.map(x=>x.world))];return `<details class="rival" data-opponent="${esc(m.opponent_id)}" data-worlds="${esc(gws.join(','))}"><summary><div><div class="rival-title"><span class="avatar">${esc(initials(m.opponent_name))}</span><div><strong>${esc(m.opponent_name)}</strong><p class="muted">${s.played} partite · Gol ${s.gf}–${s.ga}</p></div></div><div>${badges(gws)}</div></div><div><div class="h2h-score"><span class="win"><strong>${s.won}</strong><small>VITTORIE</small></span><span><strong>${s.drawn}</strong><small>PAREGGI</small></span><span class="loss"><strong>${s.lost}</strong><small>SCONFITTE</small></span></div><div class="balance" aria-hidden="true"><span class="win" style="flex:${s.won}"></span><span style="flex:${s.drawn}"></span><span class="loss" style="flex:${s.lost}"></span></div></div></summary><div class="rival-matches"><p><a href="?manager=${encodeURIComponent(m.opponent_id)}&scope=${scope}">Apri profilo globale →</a></p><div class="hh hh-global-detail">Apri per caricare il dettaglio completo.</div></div></details>`;}).join('')||'<p class="notice">Nessuno scontro diretto IMC disponibile.</p>');
+function h2h(){
+ const matches=allMatches().filter(m=>m.opponent_id&&m.opponent_id!==manager),groups=new Map();
+ for(const m of matches){if(!groups.has(m.opponent_id))groups.set(m.opponent_id,[]);groups.get(m.opponent_id).push(m);}
+ const rows=[...groups.values()].map(items=>({items,s:matchStats(items)})).sort((a,b)=>(b.s.won/b.s.played)-(a.s.won/a.s.played)||b.s.played-a.s.played||String(a.items[0].opponent_name).localeCompare(String(b.items[0].opponent_name),'it'));
+ $('content').innerHTML='<div class="h2h-heading"><p class="eyebrow">IMC CONTRO IMC</p><h2>Head to Head · '+esc(scopeLabel())+'</h2><p>'+number(matches.length)+' scontri diretti · '+rows.length+' avversari</p><small>Ordinati per % vittorie · a parità, più partite giocate</small></div>'+
+ (rows.map(({items,s})=>{
+ const m=items[0],gws=[...new Set(items.map(x=>x.world))];
+ return `<details class="rival h2h-rival" data-opponent="${esc(m.opponent_id)}" data-worlds="${esc(gws.join(','))}"><summary>
+ <div class="h2h-rival-identity"><span class="avatar">${esc(initials(m.opponent_name))}</span><div><small>CONTRO</small><strong>${esc(m.opponent_name)}</strong></div><span class="h2h-chevron" aria-hidden="true">⌄</span></div>
+ <div class="h2h-primary"><div><strong>${number(s.played)}</strong><span>partite giocate</span></div><div><strong>${pct(s)}</strong><span>vittorie</span></div></div>
+ <div class="h2h-score"><span class="win"><strong>${number(s.won)}</strong><small>Vittorie</small></span><span><strong>${number(s.drawn)}</strong><small>Pareggi</small></span><span class="loss"><strong>${number(s.lost)}</strong><small>Sconfitte</small></span></div>
+ <div class="h2h-goals"><div><strong>${number(s.gf)}</strong><span>Gol fatti</span></div><div><strong>${number(s.ga)}</strong><span>Gol subiti</span></div></div>
+ <div class="h2h-rival-footer">${badges(gws)}<span>Dettaglio confronto</span></div>
+ </summary><div class="rival-matches"><p><a href="${esc(hubURL('h2h',m.opponent_id))}">Apri H2H del manager →</a></p><div class="hh hh-global-detail">Apri per caricare il dettaglio completo.</div></div></details>`;
+ }).join('')||'<p class="notice">Nessuno scontro diretto IMC disponibile.</p>')+'<p class="h2h-method">Percentuale e gol dalla prospettiva del manager selezionato. Vittorie calcolate sul risultato prima dei rigori.</p>';
  $('content').querySelectorAll('.rival[data-opponent]').forEach(el=>el.addEventListener('toggle',async()=>{
   if(!el.open||el.dataset.loaded==='true'||el.dataset.loading==='true')return;
   el.dataset.loading='true';const body=el.querySelector('.hh-global-detail');body.textContent='Caricamento dettaglio partite…';
@@ -199,6 +215,7 @@ $('search').addEventListener('change',()=>{const value=$('search').value.trim();
 const sectionNames={career:'IMC Career',ranking:'IMC Ranking',timeline:'IMC Timeline',trophies:'IMC Trophy Room',h2h:'IMC H2H'};
 function hubURL(view,id=manager){
  const q=new URLSearchParams(location.search);q.set('view',view);q.set('scope',scope);
+ if(view==='h2h'&&id&&!manager)q.set('scope','global');
  if(id)q.set('manager',id);else q.delete('manager');
  return '?'+q.toString();
 }
@@ -232,3 +249,4 @@ $('content').addEventListener('click',e=>{
 });
 
 start();
+

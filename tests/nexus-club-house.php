@@ -42,3 +42,13 @@ foreach(['club'=>3,'national_team'=>1,'global'=>4] as $scope=>$expected){
  foreach($scoped['matches'] as $m)ck($scope==='global'||$m['scope']===$scope,'Scope isolation');
 }
 echo "PASS: Global = Club + Nations, national report IDs, scoped matches\n";
+
+ck($noFallback['managers']['MNG001']['h2h_stats']['played']===0,'External opponent excluded from H2H summary');
+ck($ambOut['managers']['MNG002']['h2h_stats']['played']===0,'Ambiguous opponent excluded from H2H summary');
+foreach(['club','national_team','global'] as $scope){
+ $h=ch_read($db,'GW001',$people,'MNG001',$scope);$expected=ch_zero();
+ foreach($h['matches'] as $m)if($m['opponent_id']!==null)ch_add($expected,$m['gf'],$m['ga'],$m['penalty_for'],$m['penalty_against']);
+ foreach(['played','won','drawn','lost','gf','ga'] as $key)ck($h['managers']['MNG001']['h2h_stats'][$key]===$expected[$key],'H2H summary matches IMC-only detail '.$scope.' '.$key);
+}
+echo "PASS: H2H totals exclude external and ambiguous opponents and match scoped detail\n";
+

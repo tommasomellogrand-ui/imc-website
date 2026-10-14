@@ -59,6 +59,7 @@ function ch_national_rows(array $rows,string $gw,array $managers,?string $select
    $id=$r['_'.$side.'_manager'];if($id===null)continue;$other=$side==='home'?'away':'home';$opponent=$r['_'.$other.'_manager'];
    $gf=(int)$r[$side.'_score'];$ga=(int)$r[$other.'_score'];$pf=is_numeric($r['penalty_'.$side.'_score']??null)?(int)$r['penalty_'.$side.'_score']:null;$pa=is_numeric($r['penalty_'.$other.'_score']??null)?(int)$r['penalty_'.$other.'_score']:null;
    ch_add($out['managers'][$id]['stats'],$gf,$ga,$pf,$pa);$out['managers'][$id]['stats']['matched_by_assignment']++;
+   if($opponent!==null&&$opponent!==$id)ch_add($out['managers'][$id]['h2h_stats'],$gf,$ga,$pf,$pa);
    if($id===$selected)$out['matches'][]=['world'=>$gw,'fixture_id'=>(string)$r['sm_fixture_id'],'date'=>$day,'season'=>$r['imc_season']??null,'competition'=>$r['competition_key']??null,'scope'=>'national_team','source'=>'Results','team_id'=>$teams[$side],'team'=>$r[$side.'_name']??'','opponent_team'=>$r[$other.'_name']??'','gf'=>$gf,'ga'=>$ga,'outcome'=>$gf>$ga?'V':($gf<$ga?'S':'P'),'penalty_for'=>$pf,'penalty_against'=>$pa,'opponent_id'=>$opponent,'opponent_name'=>$opponent!==null?($names[$opponent]??$opponent):null,'identity_source'=>'assignment_dates','opponent_identity_source'=>$opponent!==null?'assignment_dates':null];
   }
  }
@@ -70,6 +71,7 @@ function ch_national_read(PDO $db,string $gw,array $managers,?string $selected,a
  return ch_national_rows($rows,$gw,$managers,$selected,$assignments,$mapping);
 }
 function ch_scope_merge(array $club,array $nation): array {
- $out=$club;foreach($out['managers'] as $id=>&$m){foreach($nation['managers'][$id]['stats'] as $key=>$v)$m['stats'][$key]=($m['stats'][$key]??0)+$v;$m['excluded']+=$nation['managers'][$id]['excluded'];}unset($m);
+ $out=$club;foreach($out['managers'] as $id=>&$m){foreach($nation['managers'][$id]['stats'] as $key=>$v)$m['stats'][$key]=($m['stats'][$key]??0)+$v;foreach($nation['managers'][$id]['h2h_stats'] as $key=>$v)$m['h2h_stats'][$key]=($m['h2h_stats'][$key]??0)+$v;$m['excluded']+=$nation['managers'][$id]['excluded'];}unset($m);
  $out['matches']=array_merge($club['matches'],$nation['matches']);$out['issues']=array_merge($club['issues'],$nation['issues']);$out['national_coverage']=$nation['national_coverage'];return $out;
 }
+
