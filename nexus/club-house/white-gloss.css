@@ -16,6 +16,8 @@ body.white-gloss{--navy:#10243f;--gold:#a77a25;--muted:#627085;--line:#d6dde5;--
 .white-gloss :is(#subtitle,.season){color:#627085!important;font-size:13px;line-height:1.5}
 .white-gloss .hero-mark,.white-gloss .hero-tags{display:none}
 .white-gloss main{padding-top:16px}
+html body.white-gloss.nx-linea-oro main.wrap,html body.white-gloss.nx-linea-oro.clubhouse-page>main{width:100%;max-width:1120px;border:0;padding:16px 20px calc(100px + env(safe-area-inset-bottom))!important}
+.white-gloss.clubhouse-hub #subtitle{display:block!important;margin-top:8px}
 .white-gloss :is(.manager-card,.panel,.ranking-row,.timeline-card,.timeline-event,.trophy-tile,.career-summary,.career-card,.shortcut,.matchday-card,.transfer,.directory-item,.world-links a){background:var(--wg-enamel)!important;border:1px solid #d2dbe4!important;box-shadow:var(--wg-shadow);border-radius:16px}
 .white-gloss :is(a.manager-card,a.shortcut,.wg-tile,.wg-world){transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
 @media(hover:hover){.white-gloss :is(a.manager-card,a.shortcut,.wg-tile,.wg-world):hover{transform:translateY(-3px);border-color:#ba9a56!important;box-shadow:inset 0 1px white,0 10px 22px #16334d18}}
@@ -102,7 +104,7 @@ html body.white-gloss #scope-tabs[data-nx-nav]>button[aria-pressed=true]{backgro
 .white-gloss .matchday-comment{color:#52647a}.white-gloss .matchday-shootout{box-shadow:inset 0 1px #ffffff55}
 .white-gloss :focus-visible{outline:3px solid #a77a25;outline-offset:3px}
 .wg-portal{max-width:1120px;margin:auto;padding:18px 20px 35px}
-.wg-portal-hero{position:relative;padding:16px 0 28px;overflow:hidden}
+.wg-portal-hero{position:relative;isolation:isolate;padding:16px 0 28px;overflow:hidden}
 .wg-portal-hero h1{font-size:clamp(32px,5vw,52px);line-height:1.05;letter-spacing:-.055em;margin:0 0 13px;max-width:70%}
 .wg-portal-hero p{font-size:14px;color:#637287;line-height:1.5;max-width:72%;margin:0}
 .wg-orb{position:absolute;right:-25px;top:0;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff 3%,#f3f6fa 40%,#c8d2de 78%,#eaf0f5);box-shadow:inset -10px -10px 24px #90a2b32b,0 10px 20px #34495c0a;z-index:-1}

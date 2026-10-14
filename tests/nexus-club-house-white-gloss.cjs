@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 (async()=>{const browser=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true,args:['--no-sandbox']});try{
  const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));let fail=false;
  const worlds=Array.from({length:10},(_,i)=>({id:'GW'+String(i+1).padStart(3,'0'),name:i===0?'Road To History':'Gold '+(558+i)}));
- const match={sm_fixture_id:123,competition_key:'GW001|DOMESTIC|league',sm_action:'league',competition_round:'3',competition_group:'DOMESTIC',nexus_view:'Divisione 1',match_date:'2026-10-04',home_name:'Hertha Berlino',away_name:'Celtic',home_score:2,away_score:1,home_imc_manager_id:'MNG001',home_imc_manager_name:'Tommaso Mello',away_imc_manager_id:'MNG002',away_imc_manager_name:'Matteo Sartori'};
+ const match={sm_fixture_id:123,has_match_report:true,competition_key:'GW001|DOMESTIC|league',sm_action:'league',competition_round:'3',competition_group:'DOMESTIC',nexus_view:'Divisione 1',match_date:'2026-10-04',home_name:'Hertha Berlino',away_name:'Celtic',home_score:2,away_score:1,home_imc_manager_id:'MNG001',home_imc_manager_name:'Tommaso Mello',away_imc_manager_id:'MNG002',away_imc_manager_name:'Matteo Sartori'};
  await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='gloss.test')return route.abort();
   if(u.pathname.endsWith('/club-house/data.php'))return route.fulfill({status:fail?503:200,json:{ok:!fail,worlds,managers:[]}});
   if(u.pathname.endsWith('/core/context.php'))return route.fulfill({json:{ok:true,world:{game_world_name:'Road To History'},current_season:2}});
