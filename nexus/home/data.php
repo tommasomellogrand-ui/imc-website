@@ -2,6 +2,37 @@
 declare(strict_types=1);
 require dirname(__DIR__).'/core/bootstrap.php';
 require dirname(__DIR__).'/competitions/match-teams.php';
+require dirname(__DIR__).'/competitions/standings-engine.php';
+
+// Read-only preview context. The same standings engine powers competition tables.
+function nexus_matchday_preview(array $fixture,array $results,array &$cache): ?array {
+    $key=(string)$fixture['competition_key'];$day=substr((string)$fixture['match_date'],0,10);
+    $prior=array_values(array_filter($results,static fn($r)=>(string)$r['competition_key']===$key&&substr((string)$r['match_date'],0,10)<$day));
+    if(($fixture['sm_action']??'')==='league'){
+        $cacheKey=$key.'|'.$day;
+        if(!isset($cache[$cacheKey]))$cache[$cacheKey]=nexus_standings_tables($prior);
+        $table=$cache[$cacheKey];if($table['grouped']||count($table['rows'])<2)return null;
+        $byId=[];foreach($table['rows'] as $r)$byId[(string)$r['team_id']]=$r;
+        $home=$byId[(string)($fixture['home_sm_club_id']??'')]??null;
+        $away=$byId[(string)($fixture['away_sm_club_id']??'')]??null;
+        if(!$home||!$away)return null;
+        return ['type'=>'league','home'=>$home,'away'=>$away,'leader'=>$table['rows'][0],'second'=>$table['rows'][1],'teams'=>count($table['rows'])];
+    }
+    $phase=trim((string)($fixture['competition_stage']??'').' '.(string)($fixture['competition_round']??''));
+    if(!preg_match('/\b(?:ritorno|second leg|2nd leg|leg 2)\b/i',$phase))return null;
+    $normalize=static fn($s)=>strtolower(trim(preg_replace('/[\s:·-]+/u',' ',preg_replace('/\b(?:andata|ritorno|first leg|second leg|1st leg|2nd leg|leg [12])\b/i','',$s))));
+    $wanted=$normalize($phase);$matches=[];
+    $h=(string)($fixture['home_sm_club_id']??'');$a=(string)($fixture['away_sm_club_id']??'');
+    if($h===''||$a===''||$h==='0'||$a==='0')return null;
+    foreach($prior as $r){
+        $p=trim((string)($r['competition_stage']??'').' '.(string)($r['competition_round']??''));
+        if(!preg_match('/\b(?:andata|first leg|1st leg|leg 1)\b/i',$p)||$normalize($p)!==$wanted)continue;
+        $rh=(string)($r['home_sm_club_id']??'');$ra=(string)($r['away_sm_club_id']??'');
+        if(!(($rh===$h&&$ra===$a)||($rh===$a&&$ra===$h)))continue;
+        $matches[(string)$r['sm_fixture_id']]=['type'=>'return','home_goals'=>(int)$r[$rh===$h?'home_score':'away_score'],'away_goals'=>(int)$r[$rh===$h?'away_score':'home_score'],'first_leg_fixture'=>$r['sm_fixture_id']];
+    }
+    return count($matches)===1?array_values($matches)[0]:null;
+}
 try {
     $c=nexus_config();$gw=nexus_world($_GET['world']??'');$season=nexus_season($_GET['season']??null);
     if($season===null)throw new InvalidArgumentException('season_required');
@@ -11,11 +42,13 @@ try {
     $labels=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$labels[$m['competition_key']]=$m['nexus_view'];
     $matchday=($_GET['mode']??'')==='matchday';
     $out=['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'errors'=>[]];
+    $allResults=[];$previewCache=[];
     foreach(['results','schedule'] as $kind){
         try {
             if($kind==='results')$rows=nexus_rows($db,'SELECT * FROM `'.$rt.'` WHERE game_world_id=? AND imc_season=? AND home_score IS NOT NULL AND away_score IS NOT NULL ORDER BY match_date DESC,sm_fixture_id DESC '.($matchday?'':'LIMIT 6'),[$gw,$season]);
             else $rows=nexus_rows($db,'SELECT s.* FROM `'.$st.'` s WHERE s.game_world_id=? AND s.imc_season=? AND s.match_date>=? AND NOT EXISTS (SELECT 1 FROM `'.$rt.'` r WHERE r.sm_fixture_id=s.sm_fixture_id AND r.game_world_id=s.game_world_id AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL) ORDER BY s.match_date ASC,s.match_time ASC,s.sm_fixture_id ASC '.($matchday?'':'LIMIT 6'),[$gw,$season,$today]);
 
+            if($kind==='results'&&$matchday)$allResults=$rows;
             $rows=nexus_enrich_match_teams($core,$gw,$rows);
             if($matchday){
                 // SQL ordering is newest first for results, nearest first for schedule.
@@ -70,6 +103,10 @@ try {
                 catch(Throwable $e){$out['errors']['reports']='data_unavailable';}
                 foreach($rows as &$r)$r['has_match_report']=isset($reports[(string)$r['sm_fixture_id']]);unset($r);
             }
+            if($matchday&&$kind==='schedule')foreach($rows as &$r){
+                try{$r['preview_context']=nexus_matchday_preview($r,$allResults,$previewCache);}
+                catch(Throwable $e){$r['preview_context']=null;}
+            }unset($r);
             $out[$kind]=$rows;
         }catch(Throwable $e){$out[$kind]=[];$out['errors'][$kind]='data_unavailable';}
     }

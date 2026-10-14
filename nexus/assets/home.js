@@ -135,7 +135,35 @@ function feedStory(r,context=feedContext(r)){
  if(!preview){const story=feedStory(r,context);story.isFinal=context.final;story.cupAwarded=['final-won','final-lost','final-penalties'].includes(story.scenario);return story;}
  const both=feedIsIMC(r,'home')&&feedIsIMC(r,'away'),side=feedIsIMC(r,'home')?'home':'away',manager=r[side+'_imc_manager_name'];
  const nation=r.competition_group==='NATIONS'||String(key).includes('|NATIONS|');
- if(context.final)return {isFinal:true,title:both?'Finale IMC: '+r.home_imc_manager_name+' contro '+r.away_imc_manager_name:manager+', appuntamento con la finale',text:r.home_name+' e '+r.away_name+' si sfidano per conquistare la coppa. '+(r.nexus_view||'Finale')+': è la partita che vale il titolo.'};
+ const opponentSide=side==='home'?'away':'home',opponent=feedIsIMC(r,opponentSide)?r[opponentSide+'_imc_manager_name']:r[opponentSide+'_name'];
+ const previewStory=(label,options,text)=>({label,title:feedChoice(r,'preview-'+label,options),text});
+ const p=r.preview_context;
+ if(context.leg===2&&p?.type==='return'){
+  const own=Number(p[side+'_goals']),other=Number(p[opponentSide+'_goals']);
+  if(Number.isFinite(own)&&Number.isFinite(other)){
+   const fact='All’andata '+r[side+'_name']+' ha '+(own>other?'vinto':own<other?'perso':'pareggiato')+' '+own+'–'+other+' contro '+r[opponentSide+'_name']+'. ';
+   const story=own<other?previewStory('MISSIONE RIMONTA',[manager+' cerca la rimonta contro '+opponent,manager+' prova a ribaltarla: si riparte dal '+own+'–'+other],fact+'Il ritorno è l’occasione per ribaltare il confronto.'):
+    own>other?previewStory('VANTAGGIO DA DIFENDERE',[manager+' difende il vantaggio dell’andata',manager+', un ritorno per completare l’opera'],fact+opponent+' deve recuperare: '+manager+' cerca di proteggere il vantaggio.'):
+    previewStory('TUTTO APERTO',['Tutto aperto tra '+manager+' e '+opponent,manager+', il ritorno decide il confronto'],fact+'Nessuna squadra parte con un vantaggio nel punteggio.');
+   if(context.final){story.isFinal=true;story.label='FINALE · '+story.label;story.text+=' In palio c’è la coppa.';}
+   return story;
+  }
+ }
+ if(context.final)return {...previewStory('IN PALIO LA COPPA',both?['Una notte per la coppa: '+manager+' contro '+opponent,'Attesa per la finale: '+manager+' e '+opponent+' si giocano il titolo']:[manager+', l’ultimo ostacolo prima della coppa','Attesa per la finale: '+manager+' prepara l’assalto al trofeo'],r.home_name+' e '+r.away_name+' si sfidano per conquistare la coppa. '+(r.nexus_view||'Finale')+': è la partita che vale il titolo.'),isFinal:true};
+ if(context.league&&p?.type==='league'){
+  const own=p[side],other=p[opponentSide],leader=p.leader;
+  if(own&&other&&leader&&[own.points,other.points,own.position,other.position,leader.points].every(v=>v!==null&&Number.isFinite(Number(v)))){
+   const points=Number(own.points),opPoints=Number(other.points),gap=points-opPoints,leadGap=Number(leader.points)-points;
+   const fact=manager+' ('+r[side+'_name']+') è '+own.position+'° con '+points+' punti; '+opponent+' ('+r[opponentSide+'_name']+') è '+other.position+'° a '+opPoints+'. ';
+   const games=own.played!==other.played?' Le due squadre hanno disputato un numero diverso di partite ('+own.played+' e '+other.played+').':'';
+   if(gap<0&&gap>=-3)return previewStory('SCONTRO DIRETTO',[manager+(gap===-3?' può agganciare ':' può superare ')+opponent,'Punti pesanti tra '+manager+' e '+opponent],fact+'Una vittoria '+(gap===-3?'porterebbe le due squadre a pari punti.':'porterebbe '+manager+' davanti all’avversario di '+(gap+3)+' '+(gap+3===1?'punto.':'punti.'))+games);
+   if(gap>=0&&gap<=3&&Math.abs(Number(own.position)-Number(other.position))<=2)return previewStory(Number(own.position)<=2&&Number(other.position)<=2?'DUELLO PER LA VETTA':'SCONTRO DIRETTO',[manager+' cerca lo strappo contro '+opponent,'Occasione per '+manager+': staccare una rivale'],fact+'Vincendo, '+manager+' porterebbe il vantaggio sull’avversario a '+(gap+3)+' punti.'+games);
+   if(Number(own.position)===1)return previewStory('CORSA ALLA VETTA',[manager+' difende la vetta',manager+' punta ad allungare in testa'],fact+'L’obiettivo è restare davanti: per aumentare il margine sulle inseguitrici contano anche i loro risultati.'+games);
+   if(leadGap>0&&leadGap<=3)return previewStory('INSEGUIMENTO ALLA VETTA',[manager+' mette nel mirino la capolista',manager+' cerca punti per la corsa al primo posto'],fact+'Il distacco dalla capolista è di '+leadGap+' '+(leadGap===1?'punto':'punti')+': una vittoria terrebbe aperta la rincorsa, in attesa degli altri risultati.'+games);
+   if(Number(own.position)>Math.ceil(Number(p.teams)*.7))return previewStory('PUNTI PER RISALIRE',[manager+' cerca una spinta per risalire','Punti pesanti per '+manager+' contro '+opponent],fact+'Una vittoria darebbe slancio alla risalita; gli eventuali sorpassi dipendono anche dagli altri risultati.'+games);
+   return previewStory('OBIETTIVO TRE PUNTI',[manager+' cerca un passo avanti in classifica',manager+' prepara la sfida a '+opponent],fact+'Tre punti per migliorare il proprio bottino e guardare alle squadre davanti.'+games);
+  }
+ }
  return {title:both?'Confronto IMC: '+r.home_imc_manager_name+' contro '+r.away_imc_manager_name:manager+(side==='home'?' attende ':' fa visita a ')+r[side==='home'?'away_name':'home_name'],
  text:(nation?'Impegno con la nazionale':context.league?'Appuntamento di campionato':r.sm_action==='friendly'?'Amichevole in calendario':'Sfida di coppa')+' · '+(context.label||r.nexus_view)+(context.leg===1?'. Primo atto della doppia sfida.':context.leg===2?'. Ritorno: si decide il confronto.':'.')};
 }
@@ -164,7 +192,7 @@ function matchdayMarkup(rows,kind){
   const dates=[...new Set(g.rows.map(x=>clean(x.match_date).slice(0,10)))].sort();
   return dayHeading+'<section class="matchday-competition"><header><div class="matchday-competition-heading">'+(r.sm_action!=='league'?'<span class="matchday-cup-icon">'+icon('cup')+'</span>':'')+'<h3>'+esc(r.nexus_view||r.competition_key)+'</h3><p>'+esc([...new Set(g.rows.map(round).filter(Boolean))].join(' · '))+'</p></div><a href="'+esc(href)+'">Vedi competizione →</a></header><div class="matchday-cards">'+g.rows.map(x=>{
    const story=matchdayEditorial(x,kind==='schedule');
-   return '<article class="matchday-card'+(story.isFinal?' matchday-final':'')+'">'+(story.isFinal?'<div class="matchday-final-banner"><span aria-hidden="true">★</span> FINALE <span>'+esc(kind==='schedule'?'IN PALIO LA COPPA':story.cupAwarded?'COPPA CONQUISTATA':'FINALE DISPUTATA')+'</span></div>':'')+(groupName(x)?'<span class="matchday-context">'+esc(groupName(x))+'</span>':'')+'<h4>'+esc(story.title)+'</h4><div class="match">'+matchdayTeam(x,'home')+score(x,kind)+matchdayTeam(x,'away')+'</div>'+(kind==='results'?shootoutPanel(x,story):'')+'<p class="matchday-comment">'+esc(story.text)+'</p>'+(kind==='results'&&x.has_match_report?'<a class="matchday-report" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
+   return '<article class="matchday-card'+(story.isFinal?' matchday-final':'')+'">'+(story.isFinal?'<div class="matchday-final-banner"><span aria-hidden="true">★</span> FINALE <span>'+esc(kind==='schedule'?'IN PALIO LA COPPA':story.cupAwarded?'COPPA CONQUISTATA':'FINALE DISPUTATA')+'</span></div>':'')+(groupName(x)?'<span class="matchday-context">'+esc(groupName(x))+'</span>':'')+(kind==='schedule'&&story.label?'<span class="matchday-stakes">'+esc(story.label)+'</span>':'')+'<h4>'+esc(story.title)+'</h4><div class="match">'+matchdayTeam(x,'home')+score(x,kind)+matchdayTeam(x,'away')+'</div>'+(kind==='results'?shootoutPanel(x,story):'')+'<p class="matchday-comment">'+esc(story.text)+'</p>'+(kind==='results'&&x.has_match_report?'<a class="matchday-report" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
   }).join('')+'</div></section>';
  }).join('');
 }

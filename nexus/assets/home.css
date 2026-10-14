@@ -78,3 +78,6 @@
 .matchday-shootout-cup{background:linear-gradient(120deg,#fff8df,#f1dfaa);border-color:#d0ab4e;color:#514019;box-shadow:inset 0 3px #d0ab4e}
 .matchday-shootout-cup>strong{font-size:34px;color:#101238}
 @media(max-width:360px){.matchday-shootout{margin:8px 10px 13px}.matchday-shootout-label{font-size:10px}.matchday-shootout-winner{font-size:12px}}
+/* Upcoming matches: one factual stake per fixture. */
+.matchday-stakes{display:table;max-width:calc(100% - 28px);margin:15px auto 7px;padding:6px 12px;border-radius:6px;border:1px solid #ddd1aa;background:#fff7e2;color:#796025;text-align:center;font-size:10px;line-height:1.4;font-weight:800;letter-spacing:.065em}
+.matchday-final .matchday-stakes{background:#101238;color:#f2d788;border-color:#101238}
