@@ -13,8 +13,8 @@ function nexus_matchday_preview(array $fixture,array $results,array &$cache): ?a
         if(!isset($cache[$cacheKey]))$cache[$cacheKey]=nexus_standings_tables($prior);
         $table=$cache[$cacheKey];if($table['grouped']||count($table['rows'])<2)return null;
         $byId=[];foreach($table['rows'] as $r)$byId[(string)$r['team_id']]=$r;
-        $home=$byId[(string)($fixture['home_sm_club_id']??'')]??null;
-        $away=$byId[(string)($fixture['away_sm_club_id']??'')]??null;
+        $home=$byId[(string)($fixture['home_sm_club_id']??$fixture['home_sm_team_id']??'')]??null;
+        $away=$byId[(string)($fixture['away_sm_club_id']??$fixture['away_sm_team_id']??'')]??null;
         if(!$home||!$away)return null;
         return ['type'=>'league','home'=>$home,'away'=>$away,'leader'=>$table['rows'][0],'second'=>$table['rows'][1],'teams'=>count($table['rows'])];
     }
@@ -22,7 +22,7 @@ function nexus_matchday_preview(array $fixture,array $results,array &$cache): ?a
     if(!preg_match('/\b(?:ritorno|second leg|2nd leg|leg 2)\b/i',$phase))return null;
     $normalize=static fn($s)=>strtolower(trim(preg_replace('/[\s:·-]+/u',' ',preg_replace('/\b(?:andata|ritorno|first leg|second leg|1st leg|2nd leg|leg [12])\b/i','',$s))));
     $wanted=$normalize($phase);$matches=[];
-    $h=(string)($fixture['home_sm_club_id']??'');$a=(string)($fixture['away_sm_club_id']??'');
+    $h=(string)($fixture['home_sm_club_id']??$fixture['home_sm_team_id']??'');$a=(string)($fixture['away_sm_club_id']??$fixture['away_sm_team_id']??'');
     if($h===''||$a===''||$h==='0'||$a==='0')return null;
     foreach($prior as $r){
         $p=trim((string)($r['competition_stage']??'').' '.(string)($r['competition_round']??''));
