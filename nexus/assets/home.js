@@ -24,7 +24,20 @@ const message=(id,text)=>{$(id).innerHTML='<p class="empty">'+esc(text)+'</p>'};
 function date(value){const day=String(value||'').slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(day))return 'Data non disponibile';return new Date(day+'T12:00:00Z').toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric',timeZone:'Europe/Rome'})}
 function logo(src){src=safe(src);return src?'<img data-club-logo src="'+esc(src)+'" alt="" loading="lazy">':''}
 function team(r,side){return '<div class="team '+(side==='away'?'away':'')+'">'+logo(r[side+'_logo_url'])+'<div class="team-copy"><strong>'+esc(r[side+'_name'])+'</strong>'+(r[side+'_imc_manager_name']?'<small>'+esc(r[side+'_imc_manager_name'])+'</small>':'')+'</div></div>'}
-function score(r,kind){let main,details=[];if(kind==='results'){main=esc(r.home_score)+' – '+esc(r.away_score);details.push('FINALE');if(r.penalty_home_score!=null&&r.penalty_away_score!=null)details.push('Rigori '+r.penalty_home_score+'–'+r.penalty_away_score);if(r.aggregate_home_score!=null&&r.aggregate_away_score!=null)details.push('Totale A/R '+r.aggregate_home_score+'–'+r.aggregate_away_score)}else{main='VS';details.push('IN PROGRAMMA')}return '<div class="score"><b>'+main+'</b>'+details.map(d=>'<small>'+esc(d)+'</small>').join('')+'</div>'}
+function matchdayShootout(r){
+ const valid=v=>v!==null&&v!==undefined&&/^\d+$/.test(String(v));
+ const ph=r.penalty_home_score,pa=r.penalty_away_score,ah=r.aggregate_home_score,aa=r.aggregate_away_score;
+ if(r.sm_action==='league'||groupName(r)||/\b(?:andata|first leg|1st leg|leg 1)\b/i.test(String(r.competition_stage||'')+' '+String(r.competition_round||'')))return null;
+ if(!valid(ph)||!valid(pa)||Number(ph)===Number(pa))return null;
+ if(valid(ah)&&valid(aa)?Number(ah)!==Number(aa):!valid(r.home_score)||!valid(r.away_score)||Number(r.home_score)!==Number(r.away_score))return null;
+ return {home:Number(ph),away:Number(pa),winner:Number(ph)>Number(pa)?'home':'away'};
+}
+function shootoutPanel(r,story){
+ const p=matchdayShootout(r);if(!p)return '';
+ const winner=r[p.winner+'_imc_manager_name']||r[p.winner+'_name'];
+ return '<div class="matchday-shootout'+(story.cupAwarded?' matchday-shootout-cup':'')+'" aria-label="Risultato ai rigori"><span class="matchday-shootout-label">'+(story.cupAwarded?'LA COPPA SI DECIDE AI RIGORI':'DECISA AI RIGORI')+'</span><strong>'+p.home+' <span>–</span> '+p.away+'</strong><span class="matchday-shootout-winner">'+esc(winner)+(story.cupAwarded?' conquista la coppa':' la spunta dal dischetto')+'</span></div>';
+}
+function score(r,kind){let main,details=[];if(kind==='results'){main=esc(r.home_score)+' – '+esc(r.away_score);details.push(matchdayShootout(r)?'PRIMA DEI RIGORI':'FINALE');if(r.aggregate_home_score!=null&&r.aggregate_away_score!=null)details.push('Totale A/R '+r.aggregate_home_score+'–'+r.aggregate_away_score)}else{main='VS';details.push('IN PROGRAMMA')}return '<div class="score"><b>'+main+'</b>'+details.map(d=>'<small>'+esc(d)+'</small>').join('')+'</div>'}
 function round(r){let v=String(r.competition_round||r.competition_stage||'').trim();if(/^\d+$/.test(v))v='Giornata '+v;return v}
 function renderMatches(rows,kind,season,error){if(error){message(kind,'Dati temporaneamente non disponibili. Riprova tra poco.');return}if(!rows.length){message(kind,kind==='results'?'Nessun risultato disponibile per la stagione in corso.':'Nessuna prossima partita caricata per la stagione in corso.');return}const groups=new Map();for(const r of rows){const key=[r.competition_key,round(r),r.competition_group_name||'',String(r.match_date).slice(0,10)].join('|');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(r)}$(kind).innerHTML=[...groups.values()].map(matches=>{const r=matches[0];const href=url('competitions/view.html',{season,competition:r.competition_key,name:r.nexus_view});return '<article class="match-box"><div class="match-heading"><a href="'+esc(href)+'">'+esc(r.nexus_view)+'<span>'+esc([round(r),r.competition_group_name].filter(Boolean).map(x=>' · '+x).join(''))+'</span></a><time>'+esc(date(r.match_date))+'</time></div>'+matches.map(x=>'<div class="match">'+team(x,'home')+score(x,kind)+team(x,'away')+(kind==='results'?'<a class="open-match-report" style="display:block;grid-column:1 / -1;text-align:center;border-top:1px solid #e1e5ee;padding:12px 8px;color:#101238;font-size:12px;font-weight:700;text-decoration:none" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Open Match Report</a>':'')+'</div>').join('')+'</article>'}).join('');NexusCards.wireImages($(kind))}
 
@@ -68,6 +81,29 @@ function feedStory(r,context=feedContext(r)){
  const aggregate=valid(ah)&&valid(aa),penalties=valid(ph)&&valid(pa)&&Number(ph)!==Number(pa)&&(aggregate?Number(ah)===Number(aa):h===a);
  const decided=context.knockout&&context.leg!==1&&(penalties||(context.leg===2&&aggregate&&Number(ah)!==Number(aa))||((context.final||context.single)&&!context.leg&&!aggregate&&h!==a));
  let story;
+ const shootout=matchdayShootout(r);
+ if(shootout){
+  const winningSide=shootout.winner,losingSide=winningSide==='home'?'away':'home';
+  const winner=feedIsIMC(r,winningSide)?r[winningSide+'_imc_manager_name']:r[winningSide+'_name'];
+  const loser=feedIsIMC(r,losingSide)?r[losingSide+'_imc_manager_name']:r[losingSide+'_name'];
+  const final=context.final,scenario=final?'final-penalties':'cup-penalties';
+  const options=final?[
+   winner+' alza la coppa ai rigori',
+   'Undici metri per la gloria: '+winner+' conquista la coppa',
+   'Finale al cardiopalma: '+winner+' trionfa ai rigori',
+   'La coppa è di '+winner+': decisivi i rigori',
+   'Dal dischetto al trofeo: festa per '+winner,
+   winner+' batte '+loser+' ai rigori e alza la coppa'
+  ]:[
+   winner+' la spunta ai rigori contro '+loser,
+   'Servono i rigori a '+winner+' per superare '+loser,
+   'I tiri dagli 11 metri premiano '+winner,
+   winner+' sorride dal dischetto, beffato '+loser,
+   'Decidono i rigori: '+winner+' supera '+loser,
+   'Sfida al cardiopalma: '+winner+' la spunta dagli 11 metri'
+  ];
+  return {scenario,title:feedChoice(r,scenario,options),text:r.home_name+' e '+r.away_name+' chiudono sul '+h+'–'+a+'. '+(aggregate?'Totale A/R: '+ah+'–'+aa+'. ':'')+'La serie dei rigori termina '+shootout.home+'–'+shootout.away+': '+winner+(final?' conquista il trofeo davanti a '+loser+'.':' supera '+loser+' dal dischetto.')};
+ }
  if(decided){
   const winningSide=penalties?(Number(ph)>Number(pa)?'home':'away'):aggregate?(Number(ah)>Number(aa)?'home':'away'):(h>a?'home':'away');
   const win=winningSide===side,winner=r[winningSide+'_name'];
@@ -96,7 +132,7 @@ function feedStory(r,context=feedContext(r)){
 
  const context=feedContext(r,round(r));
  if(!feedIsIMC(r,'home')&&!feedIsIMC(r,'away'))return {title:r.home_name+' – '+r.away_name,text:preview?'Prossimo appuntamento di campionato.':r.home_score+'–'+r.away_score+' · '+(round(r)||'Campionato')};
- if(!preview){const story=feedStory(r,context);story.isFinal=context.final;story.cupAwarded=['final-won','final-lost'].includes(story.scenario);return story;}
+ if(!preview){const story=feedStory(r,context);story.isFinal=context.final;story.cupAwarded=['final-won','final-lost','final-penalties'].includes(story.scenario);return story;}
  const both=feedIsIMC(r,'home')&&feedIsIMC(r,'away'),side=feedIsIMC(r,'home')?'home':'away',manager=r[side+'_imc_manager_name'];
  const nation=r.competition_group==='NATIONS'||String(key).includes('|NATIONS|');
  if(context.final)return {isFinal:true,title:both?'Finale IMC: '+r.home_imc_manager_name+' contro '+r.away_imc_manager_name:manager+', appuntamento con la finale',text:r.home_name+' e '+r.away_name+' si sfidano per conquistare la coppa. '+(r.nexus_view||'Finale')+': è la partita che vale il titolo.'};
@@ -128,7 +164,7 @@ function matchdayMarkup(rows,kind){
   const dates=[...new Set(g.rows.map(x=>clean(x.match_date).slice(0,10)))].sort();
   return dayHeading+'<section class="matchday-competition"><header><div class="matchday-competition-heading">'+(r.sm_action!=='league'?'<span class="matchday-cup-icon">'+icon('cup')+'</span>':'')+'<h3>'+esc(r.nexus_view||r.competition_key)+'</h3><p>'+esc([...new Set(g.rows.map(round).filter(Boolean))].join(' · '))+'</p></div><a href="'+esc(href)+'">Vedi competizione →</a></header><div class="matchday-cards">'+g.rows.map(x=>{
    const story=matchdayEditorial(x,kind==='schedule');
-   return '<article class="matchday-card'+(story.isFinal?' matchday-final':'')+'">'+(story.isFinal?'<div class="matchday-final-banner"><span aria-hidden="true">★</span> FINALE <span>'+esc(kind==='schedule'?'IN PALIO LA COPPA':story.cupAwarded?'COPPA CONQUISTATA':'FINALE DISPUTATA')+'</span></div>':'')+(groupName(x)?'<span class="matchday-context">'+esc(groupName(x))+'</span>':'')+'<h4>'+esc(story.title)+'</h4><div class="match">'+matchdayTeam(x,'home')+score(x,kind)+matchdayTeam(x,'away')+'</div><p class="matchday-comment">'+esc(story.text)+'</p>'+(kind==='results'&&x.has_match_report?'<a class="matchday-report" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
+   return '<article class="matchday-card'+(story.isFinal?' matchday-final':'')+'">'+(story.isFinal?'<div class="matchday-final-banner"><span aria-hidden="true">★</span> FINALE <span>'+esc(kind==='schedule'?'IN PALIO LA COPPA':story.cupAwarded?'COPPA CONQUISTATA':'FINALE DISPUTATA')+'</span></div>':'')+(groupName(x)?'<span class="matchday-context">'+esc(groupName(x))+'</span>':'')+'<h4>'+esc(story.title)+'</h4><div class="match">'+matchdayTeam(x,'home')+score(x,kind)+matchdayTeam(x,'away')+'</div>'+(kind==='results'?shootoutPanel(x,story):'')+'<p class="matchday-comment">'+esc(story.text)+'</p>'+(kind==='results'&&x.has_match_report?'<a class="matchday-report" href="'+esc(url('competitions/match.html',{fixture:x.sm_fixture_id}))+'">Match Report →</a>':'')+'</article>';
   }).join('')+'</div></section>';
  }).join('');
 }

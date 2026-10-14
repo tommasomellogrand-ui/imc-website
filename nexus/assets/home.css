@@ -68,3 +68,13 @@
 .matchday .matchday-report:hover{background:#25294e;color:#fff0c9;border-color:#dfbb62;text-decoration:none}
 .matchday .matchday-report:focus-visible{outline:3px solid #d1aa4e;outline-offset:3px}
 .matchday .matchday-report:active{box-shadow:none;background:#34385d}
+
+/* Penalty shootouts have their own result, separate from the match score. */
+.matchday-shootout{display:grid;justify-items:center;gap:6px;margin:8px 14px 16px;padding:15px 12px;border:1px solid #c9c5e8;border-radius:12px;background:#f0eefb;text-align:center;color:#29234d}
+.matchday-shootout-label{font-size:11px;font-weight:800;letter-spacing:.08em}
+.matchday-shootout>strong{font-size:30px;line-height:1.15;font-weight:900;font-variant-numeric:tabular-nums}
+.matchday-shootout>strong>span{font-size:22px;opacity:.55;padding:0 5px}
+.matchday-shootout-winner{font-size:13px;font-weight:700;line-height:1.4;overflow-wrap:anywhere}
+.matchday-shootout-cup{background:linear-gradient(120deg,#fff8df,#f1dfaa);border-color:#d0ab4e;color:#514019;box-shadow:inset 0 3px #d0ab4e}
+.matchday-shootout-cup>strong{font-size:34px;color:#101238}
+@media(max-width:360px){.matchday-shootout{margin:8px 10px 13px}.matchday-shootout-label{font-size:10px}.matchday-shootout-winner{font-size:12px}}
