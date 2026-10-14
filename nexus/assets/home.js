@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),valid=v=>/^GW00[1-9]$|^GW010$/.test(v||'');
-if(!valid(params.get('world'))){location.replace('club-house/'+location.search+location.hash);return;}
+if(!valid(params.get('world'))){location.replace('club-house/home.html'+location.search+location.hash);return;}
 let saved='';try{saved=localStorage.getItem('imc_nexus_world')||''}catch(e){}
 const gw=valid(params.get('world'))?params.get('world'):valid(saved)?saved:'GW001';
 if(params.get('section')==='players'){location.replace('players/page.html?'+new URLSearchParams({world:gw}));return;}
@@ -218,6 +218,7 @@ async function refresh(){if(refreshing)return;refreshing=true;try{const c=await 
 async function directory(){if(!section)return;$('home-content').hidden=true;$('directory').hidden=false;$('directory-title').textContent=section==='players'?'Player Codex':'Trophy Room';message('directory-list','Caricamento…');try{const d=await get(url(section==='players'?'players/world.php':'trophies/index.php'));const rows=d.rows||[];if(section==='trophies'&&window.NexusTrophies){await NexusTrophies.render(rows,gw);return;}$('directory-note').textContent=rows.length+(section==='players'?' giocatori caricati'+(rows.length===1000?' · primi 1.000 record disponibili':''):' trofei registrati');const render=()=>{const q=$('search').value.trim().toLocaleLowerCase('it');const filtered=rows.filter(r=>[r.full_name,r.current_club,r.winner_name,r.nexus_view,r.trophy_type,r.competition_key].filter(Boolean).join(' ').toLocaleLowerCase('it').includes(q));$('directory-list').innerHTML=filtered.length?filtered.map(r=>section==='players'?'<article class="directory-item"><h3>'+esc(r.full_name)+'</h3><p>'+esc(r.current_club||'Svincolato')+'</p><p>'+esc([r.position,r.age!=null?r.age+' anni':null,r.rating!=null?'Rating '+r.rating:null].filter(Boolean).join(' · '))+'</p></article>':'<article class="directory-item"><h3>'+esc(r.winner_name||'Vincitore non disponibile')+'</h3><p>'+esc(r.nexus_view||r.trophy_type||r.competition_key)+'</p><p>'+esc(date(r.won_date))+(r.imc_season?' · Stagione '+esc(r.imc_season):'')+'</p></article>').join(''):'<p class="empty">Nessun dato disponibile.</p>'};$('search').oninput=render;render()}catch(e){message('directory-list','Dati temporaneamente non disponibili.')}}
 refresh();directory();if(!section){setInterval(()=>{if(!document.hidden)refresh()},60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()})}
 })();
+
 
 
 

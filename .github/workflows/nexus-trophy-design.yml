@@ -20,6 +20,8 @@ jobs:
           node --check nexus/assets/home.js
           php -l nexus/home/data.php
           node --check nexus/assets/trophy-room.js
+          node --check nexus/club-house/portal.js
+          node --check nexus/club-house/white-gloss.js
       - name: Publish only Trophy Room design files
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -36,7 +38,7 @@ jobs:
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p(); ftp.set_pasv(True)
-          files=['nexus/assets/competition-view.js','nexus/competitions/index.html','nexus/competitions/view.html','nexus/competitions/domestic.html','nexus/competitions/family.html','nexus/competitions/group.html','nexus/home/data.php','nexus/assets/home.css','nexus/assets/trophy-room.css','nexus/assets/trophy-room.js','nexus/assets/home.js','nexus/index.html']
+          files=['nexus/club-house/white-gloss.css','nexus/club-house/white-gloss.js','nexus/club-house/portal.js','nexus/club-house/home.html','nexus/assets/competition-view.js','nexus/competitions/index.html','nexus/competitions/view.html','nexus/competitions/domestic.html','nexus/competitions/family.html','nexus/competitions/group.html','nexus/home/data.php','nexus/assets/home.css','nexus/assets/trophy-room.css','nexus/assets/trophy-room.js','nexus/assets/home.js','nexus/index.html']
           for path in files:
               local=Path(path); data=local.read_bytes()
               ftp.cwd('/www.italianmastersclub.it/'+str(local.parent))
@@ -50,4 +52,5 @@ jobs:
                   if response.read()!=Path(path).read_bytes():raise RuntimeError('Live mismatch: '+path)
           print('Home Matchday and Trophy files uploaded and verified live. No database changes.')
           PY
+
 

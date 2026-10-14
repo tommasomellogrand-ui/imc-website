@@ -156,7 +156,8 @@ function h2h(){
  return `<details class="rival h2h-rival" data-opponent="${esc(m.opponent_id)}" data-worlds="${esc(gws.join(','))}"><summary>
  <div class="h2h-rival-identity"><span class="avatar">${esc(initials(m.opponent_name))}</span><div><small>CONTRO</small><strong>${esc(m.opponent_name)}</strong></div><span class="h2h-chevron" aria-hidden="true">⌄</span></div>
  <div class="h2h-primary"><div><strong>${number(s.played)}</strong><span>partite giocate</span></div><div><strong>${pct(s)}</strong><span>vittorie</span></div></div>
- <div class="h2h-score"><span class="win"><strong>${number(s.won)}</strong><small>Vittorie</small></span><span><strong>${number(s.drawn)}</strong><small>Pareggi</small></span><span class="loss"><strong>${number(s.lost)}</strong><small>Sconfitte</small></span></div>
+ <div class="wg-outcomes" aria-hidden="true"><span style="flex:${s.won}"></span><span class="draw" style="flex:${s.drawn}"></span><span class="loss" style="flex:${s.lost}"></span></div>
+<div class="h2h-score"><span class="win"><strong>${number(s.won)}</strong><small>Vittorie</small></span><span><strong>${number(s.drawn)}</strong><small>Pareggi</small></span><span class="loss"><strong>${number(s.lost)}</strong><small>Sconfitte</small></span></div>
  <div class="h2h-goals"><div><strong>${number(s.gf)}</strong><span>Gol fatti</span></div><div><strong>${number(s.ga)}</strong><span>Gol subiti</span></div></div>
  <div class="h2h-rival-footer">${badges(gws)}<span>Dettaglio confronto</span></div>
  </summary><div class="rival-matches"><p><a href="${esc(hubURL('h2h',m.opponent_id))}">Apri H2H del manager →</a></p><div class="hh hh-global-detail">Apri per caricare il dettaglio completo.</div></div></details>`;
@@ -249,4 +250,5 @@ $('content').addEventListener('click',e=>{
 });
 
 start();
+
 
