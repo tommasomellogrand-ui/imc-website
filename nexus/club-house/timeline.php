@@ -25,7 +25,7 @@ try{
   if(!empty($a['start_date']))$events[]=$base+['type'=>'assignment_start','date'=>$a['start_date']];
   if(!empty($a['end_date']))$events[]=$base+['type'=>'assignment_end','date'=>$a['end_date']];
  }
- $worlds=array_map(fn($n)=>sprintf('GW%03d',$n),range(1,10));
+ $worlds=array_map(fn($n)=>sprintf('GW%03d',$n),range(1,11));
  foreach($worlds as $gw){
   $db=nexus_db($c,nexus_target($c,$gw));$weight=imc_rank_weight($gw);
   $reports=nexus_rows($db,'SELECT sm_fixture_id,imc_season,competition_group,match_date,home_name,away_name,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.$gw.'_IMC_Match_Report` WHERE game_world_id=?',[$gw]);

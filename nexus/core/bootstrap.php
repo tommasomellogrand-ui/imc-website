@@ -19,12 +19,12 @@ function nexus_config(): array {
 }
 function nexus_world(?string $value): string {
   $gw=strtoupper(trim((string)$value));
-  if(!preg_match('/^GW00[1-9]$|^GW010$/',$gw)) throw new InvalidArgumentException('invalid_game_world');
+  if(!preg_match('/^GW00[1-9]$|^GW01[01]$/',$gw)) throw new InvalidArgumentException('invalid_game_world');
   return $gw;
 }
 function nexus_target(array $c,string $gw): string {
   if(in_array($gw,$c['gold_worlds']??[],true)) return 'gold';
-  if(in_array($gw,$c['custom_worlds']??[],true)) return 'custom';
+  if($gw==='GW011'||in_array($gw,$c['custom_worlds']??[],true)) return 'custom';
   throw new InvalidArgumentException('unsupported_game_world');
 }
 function nexus_db(array $c,string $target): PDO {

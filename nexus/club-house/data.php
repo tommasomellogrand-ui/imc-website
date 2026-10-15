@@ -10,7 +10,7 @@ try {
  $managers=nexus_rows($core,'SELECT manager_id,full_name,sm_manager_id FROM `IMC Manager Codex Global` ORDER BY full_name');
  if(empty($_GET['world'])){
   $worlds=nexus_rows($core,'SELECT `IMC GW` id,`IMC GW Name` name FROM `IMC Game World Codex Global` ORDER BY `IMC GW`');
-  nexus_out(['ok'=>true,'managers'=>$managers,'worlds'=>array_values(array_filter($worlds,fn($w)=>preg_match('/^GW00[1-9]$|^GW010$/',$w['id']))),'source'=>'Match Report · solo club']);
+  nexus_out(['ok'=>true,'managers'=>$managers,'worlds'=>array_values(array_filter($worlds,fn($w)=>preg_match('/^GW00[1-9]$|^GW01[01]$/',$w['id']))),'source'=>'Match Report · solo club']);
  }
  $gw=nexus_world($_GET['world']);$selected=trim((string)($_GET['manager']??''));
  if($selected!==''&&!in_array($selected,array_column($managers,'manager_id'),true))throw new InvalidArgumentException('Manager IMC non trovato.');

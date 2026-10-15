@@ -12,8 +12,8 @@ if(u.pathname.endsWith('.php'))return route.fulfill({contentType:'application/js
 return route.abort();});
 await page.goto('https://entry.test/nexus/');await page.waitForURL('**/nexus/club-house/home.html');assert.match(page.url(),/club-house\/home.html$/);
 await page.goto('https://entry.test/nexus/index.html');await page.waitForURL('**/nexus/club-house/home.html');
-for(let i=1;i<=10;i++){const gw='GW'+String(i).padStart(3,'0');await page.goto('https://entry.test/nexus/?world='+gw);await page.waitForFunction(()=>document.querySelector('#title').textContent==='Test GW');assert.equal(new URL(page.url()).searchParams.get('world'),gw);assert.equal(await page.locator('#world').inputValue(),gw);assert.equal(await page.locator('#shortcuts a').filter({hasText:'Club House'}).count(),1);}
+for(let i=1;i<=11;i++){const gw='GW'+String(i).padStart(3,'0');await page.goto('https://entry.test/nexus/?world='+gw);await page.waitForFunction(()=>document.querySelector('#title').textContent==='Test GW');assert.equal(new URL(page.url()).searchParams.get('world'),gw);assert.equal(await page.locator('#world').inputValue(),gw);assert.equal(await page.locator('#shortcuts a').filter({hasText:'Club House'}).count(),1);}
 await page.goto('https://entry.test/nexus/?world=GW002&section=trophies');await page.waitForFunction(()=>document.querySelector('#directory-title').textContent==='Trophy Room');assert.equal(new URL(page.url()).searchParams.get('section'),'trophies');assert.deepEqual(errors,[]);
-console.log('PASS: Nexus portal entry ignores saved GW; explicit GW001-GW010 and legacy trophy links preserved');
+console.log('PASS: Nexus portal entry ignores saved GW; explicit GW001-GW011 and legacy trophy links preserved');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1);});
 

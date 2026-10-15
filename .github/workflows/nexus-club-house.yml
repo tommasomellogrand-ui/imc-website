@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Publish and verify all ten worlds (read only)
+      - name: Publish and verify all eleven worlds (read only)
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
@@ -64,7 +64,7 @@ jobs:
           root='/www.italianmastersclub.it/'
           try: ftp.mkd(root+'nexus/club-house')
           except error_perm: ftp.cwd(root+'nexus/club-house')
-          files=[*Path('nexus/club-house').glob('*'),Path('nexus/assets/h2h.js'),Path('nexus/assets/home.js'),Path('nexus/index.html')]
+          files=[*Path('nexus/club-house').glob('*'),Path('nexus/assets/h2h.js'),Path('nexus/assets/home.js'),Path('nexus/index.html'),Path('nexus/admin/admin.js'),Path('nexus/admin/results-check.js'),Path('nexus/assets/competition-ui.js'),Path('nexus/assets/directory.js'),Path('nexus/assets/navigation.js'),Path('nexus/assets/profiles-shell.js'),Path('nexus/core/bootstrap.php'),Path('nexus/trophies/index.php'),Path('nexus/admin/index.html'),Path('nexus/admin/results-check.html'),Path('nexus/competitions/domestic.html'),Path('nexus/competitions/family.html'),Path('nexus/competitions/group.html'),Path('nexus/competitions/index.html'),Path('nexus/competitions/match.html'),Path('nexus/competitions/view.html'),Path('nexus/managers/page.html'),Path('nexus/managers/profile.html'),Path('nexus/matchday/live.html'),Path('nexus/players/page.html'),Path('nexus/players/profile.html'),Path('nexus/teams/detail.html'),Path('nexus/teams/page.html'),Path('nexus/the-club/index.html'),Path('nexus/the-club/post.html'),Path('nexus/transfers/page.html')]
           files=sorted(files,key=lambda p:p.suffix=='.html')
           for local in files:
               if not local.is_file(): continue
@@ -79,7 +79,7 @@ jobs:
           meta=get(); assert meta['ok'] and meta['managers']
           ids={m['manager_id'] for m in meta['managers']}
           national_total=0; report_id_total=0
-          for i in range(1,11):
+          for i in range(1,12):
               gw=f'GW{i:03d}'; d=get('?world='+gw+'&manager=MNG001')
               assert d['ok'] and d['scope']=='club' and d['source']=='Match Report'
               assert not d['trophy_error'], gw+' trophy read failed'

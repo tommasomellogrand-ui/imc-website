@@ -15,7 +15,7 @@ const pct=s=>s.played?(100*s.won/s.played).toLocaleString('it-IT',{maximumFracti
 const number=n=>Number(n||0).toLocaleString('it-IT');
 let careerSort=['name','played','won','trophies'].includes(params.get('sort'))?params.get('sort'):'name';
 let people=[],worldNames={},bundles={},failed=[],tab=section==='h2h'?'h2h':section==='trophies'?'trophies':'overview',limit=25,loading=true,runId=0;
-const worlds=Array.from({length:10},(_,i)=>'GW'+String(i+1).padStart(3,'0'));
+const worlds=Array.from({length:11},(_,i)=>'GW'+String(i+1).padStart(3,'0'));
 const selected=()=>worlds.filter(w=>!$('world').value||w===$('world').value);
 const available=()=>selected().filter(w=>bundles[w]);
 const allMatches=()=>available().flatMap(w=>bundles[w].matches||[]).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.fixture_id).localeCompare(String(a.fixture_id)));
@@ -197,7 +197,7 @@ async function load(){const token=++runId;loading=true;bundles={};failed=[];$('r
 $('world').addEventListener('change',()=>{limit=25;const url=new URL(location.href);if($('world').value)url.searchParams.set('world',$('world').value);else url.searchParams.delete('world');history.replaceState(null,'',url);syncHubLinks();render();});$('search').addEventListener('input',render);$('retry').addEventListener('click',()=>start());document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render();});
 function updateScope(){
  document.querySelectorAll('#scope-tabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scope===scope)));
- document.querySelector('.hero-tags').innerHTML='<span>'+scopeLabel()+'</span><span>GW001–GW010</span>';
+ document.querySelector('.hero-tags').innerHTML='<span>'+scopeLabel()+'</span><span>GW001–GW011</span>';
  document.querySelector('footer p').textContent=section==='career'?'Fonte partite: Results dei singoli GW. Attribuzione esclusivamente tramite ID manager registrati nei Results; nessuna riattribuzione dalle date degli incarichi. Esito prima dei rigori; rigori separati.':'Fonte partite: '+sourceLabel()+'. Esiti prima dei rigori; rigori separati.';
  document.querySelector('.source-badge').textContent=sourceLabel();
  $('subtitle').textContent=manager?manager+' · Carriera '+scopeLabel():'Tutti i manager IMC · '+scopeLabel();
@@ -236,7 +236,7 @@ function initHub(){
  $('manager-filter').onchange=()=>{location.href=hubURL(section,$('manager-filter').value);};
  $('subtitle').textContent=manager?(people.find(m=>m.manager_id===manager)?.full_name||manager):'Carriere, classifiche e storie dei manager IMC.';
  if(rankingView){document.body.classList.add('ranking-page');document.querySelector('.source-badge').textContent='CLUB E NAZIONALI: RESULTS';$('scope-tabs').hidden=true;}
- if(timelineView){document.querySelector('.hero-tags').innerHTML='<span>Community IMC</span><span>GW001–GW010</span>';$('scope-tabs').hidden=true;document.querySelector('.source-badge').textContent='INCARICHI · PASSPORT · TROFEI';$('retry').disabled=false;}
+ if(timelineView){document.querySelector('.hero-tags').innerHTML='<span>Community IMC</span><span>GW001–GW011</span>';$('scope-tabs').hidden=true;document.querySelector('.source-badge').textContent='INCARICHI · PASSPORT · TROFEI';$('retry').disabled=false;}
  syncHubLinks();
 }
 // Preserve the Club House context when opening a manager from any section.

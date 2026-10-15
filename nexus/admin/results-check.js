@@ -3,8 +3,8 @@ const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const labels={complete:'Completa',pending:'Da giocare',today:'In programma oggi',missing_results:'Risultato mancante',missing_report:'Report mancante',orphan_results:'Results senza Schedule',orphan_report:'Report senza Results',anomaly:'Dati da verificare'};
 let csrf='',meta=null,report=null,serial=0,limit=100;
-for(let i=1;i<=10;i++){const gw='GW'+String(i).padStart(3,'0');$('world').add(new Option(gw,gw));}
-const initial=new URLSearchParams(location.search).get('world');if(/^GW00[1-9]$|^GW010$/.test(initial||''))$('world').value=initial;
+for(let i=1;i<=11;i++){const gw='GW'+String(i).padStart(3,'0');$('world').add(new Option(gw,gw));}
+const initial=new URLSearchParams(location.search).get('world');if(/^GW00[1-9]$|^GW01[01]$/.test(initial||''))$('world').value=initial;
 async function request(query='',body=null){
  const response=await fetch('api.php'+query,{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify(body)}:{})});
  const data=await response.json();

@@ -2,8 +2,8 @@
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let csrf='',data=null,editing=null,mode='save',editingWorld='',serial=0,busy=false;
-for(let i=1;i<=10;i++){const gw='GW'+String(i).padStart(3,'0');$('world').add(new Option(gw,gw));}
-const requested=new URLSearchParams(location.search).get('world');if(/^GW00[1-9]$|^GW010$/.test(requested||''))$('world').value=requested;
+for(let i=1;i<=11;i++){const gw='GW'+String(i).padStart(3,'0');$('world').add(new Option(gw,gw));}
+const requested=new URLSearchParams(location.search).get('world');if(/^GW00[1-9]$|^GW01[01]$/.test(requested||''))$('world').value=requested;
 async function api(body,query=''){
  const response=await fetch('api.php'+query,{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify(body)}:{})});
  const result=await response.json();

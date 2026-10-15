@@ -34,7 +34,7 @@ try {
     }
     // Keep the unfiltered endpoint available, using only the individual GW tables.
     $worlds = $gw !== null ? [$gw] : array_map(
-        static fn(int $n): string => sprintf('GW%03d', $n), range(1, 10)
+        static fn(int $n): string => sprintf('GW%03d', $n), range(1, 11)
     );
     $connections = [];
     $rows = [];

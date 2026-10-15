@@ -73,12 +73,12 @@
   if(document.getElementById('nx-universal-header'))return;
   document.body.classList.add('nx-universal');
   const inClubHouse=location.pathname.includes('/club-house/');
-  const params=new URLSearchParams(location.search),valid=w=>/^GW00[1-9]$|^GW010$/.test(w||'');
+  const params=new URLSearchParams(location.search),valid=w=>/^GW00[1-9]$|^GW01[01]$/.test(w||'');
   let remembered='';try{remembered=localStorage.getItem('imc_nexus_world')||''}catch(e){}
   let world=valid(params.get('world'))?params.get('world'):valid(remembered)?remembered:'GW001';
   const href=(path,w=world)=>'/nexus/'+path+'?'+new URLSearchParams({world:w});
   const header=document.createElement('header');header.id='nx-universal-header';
-  header.innerHTML='<div class="nx-universal-top"><a class="nx-universal-brand" href="/nexus/club-house/"><img src="/site-assets/images/imc-logo.png" alt="IMC"><span>NEXUS</span></a><select id="nx-world-select" aria-label="Game World"><option value="clubhouse">Club House</option>'+Array.from({length:10},(_,i)=>{const w='GW'+String(i+1).padStart(3,'0');return '<option value="'+w+'">'+w+'</option>'}).join('')+'</select></div><div class="nx-universal-context" id="nx-universal-context"></div>';
+  header.innerHTML='<div class="nx-universal-top"><a class="nx-universal-brand" href="/nexus/club-house/"><img src="/site-assets/images/imc-logo.png" alt="IMC"><span>NEXUS</span></a><select id="nx-world-select" aria-label="Game World"><option value="clubhouse">Club House</option>'+Array.from({length:11},(_,i)=>{const w='GW'+String(i+1).padStart(3,'0');return '<option value="'+w+'">'+w+'</option>'}).join('')+'</select></div><div class="nx-universal-context" id="nx-universal-context"></div>';
   document.body.prepend(header);const selector=header.querySelector('select');selector.value=inClubHouse?'clubhouse':world;
   fetch('/nexus/club-house/data.php',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(!d.ok||!Array.isArray(d.worlds))return;for(const w of d.worlds){const option=Array.from(selector.options).find(o=>o.value===w.id);if(option&&w.name)option.textContent=w.name;}}).catch(()=>{});
   const context=document.getElementById('nx-universal-context');
