@@ -23,7 +23,7 @@ function bundle(world){
   await page.locator('[data-career-sort="trophies"]').click();assert.match(await page.locator('.manager-card').first().textContent(),/Manager Due/);
   await page.locator('[data-career-sort="won"]').click();assert.match(await page.locator('.manager-card').first().textContent(),/Manager Uno/);
   await page.locator('[data-career-sort="played"]').click();assert.equal(await page.locator('[data-career-sort="played"]').getAttribute('aria-pressed'),'true');
-  assert.equal(await page.locator('#nx-world-select option').count(),11);assert.equal(await page.locator('#nx-universal-nav a').nth(2).getAttribute('href'),'/nexus/club-house/');
+  assert.equal(await page.locator('#nx-world-select option').count(),12);assert.equal(await page.locator('#nx-universal-nav a').nth(2).getAttribute('href'),'/nexus/club-house/');
   for(const width of [320,390,1440]){
    await page.setViewportSize({width,height:844});
    assert.equal(await page.locator('.manager-grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),3,'Three manager columns at '+width);
