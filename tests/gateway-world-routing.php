@@ -39,10 +39,19 @@ echo "PASS: GW001-GW015, six repositories, both families; wrong targets and unsu
 
 $production=require __DIR__.'/../__imc_private_gateway/config.php';
 check(imc_route(['game_world_id'=>'GW010'],$production)['database']==='Sql1956795_3');
-foreach (range(11,15) as $n) {
+check(imc_route(['game_world_id'=>'GW011'],$production)['database']==='Sql1956795_3');
+foreach ($repos as $repo=>$suffix) {
+  $body=['game_world_id'=>'GW011','repository'=>$repo,'target_database'=>'Sql1956795_3','target_table'=>'GW011_'.$suffix];
+  check(imc_explicit_import_route($body,$production)['database']==='Sql1956795_3');
+  check(imc_ingress_route($body,$production)['database']==='Sql1956795_3');
+  $body['target_database']='Sql1956795_2';
+  rejects(fn()=>imc_explicit_import_route($body,$production));
+  rejects(fn()=>imc_ingress_route($body,$production));
+}
+foreach (range(12,15) as $n) {
   $gw=sprintf('GW%03d',$n);
   rejects(fn()=>imc_route(['game_world_id'=>$gw],$production));
   rejects(fn()=>imc_explicit_import_route(['game_world_id'=>$gw,'repository'=>'IMC Transfer','target_database'=>'Sql1956795_3','target_table'=>$gw.'_IMC_Transfers'],$production));
   rejects(fn()=>imc_ingress_route(['game_world_id'=>$gw,'target_database'=>'Sql1956795_3','target_table'=>$gw.'_IMC_Transfers'],$production));
 }
-echo "PASS: production GW010 Custom; GW011-GW015 pending.\n";
+echo "PASS: production GW010-GW011 Custom; GW012-GW015 pending.\n";

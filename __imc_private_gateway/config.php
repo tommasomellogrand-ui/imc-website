@@ -19,5 +19,5 @@ return [
   ],
   'gold_worlds' => ['GW002','GW003','GW007','GW008'],
   // GW011-GW015: destination pending assignment; imports remain disabled.
-  'custom_worlds' => ['GW001','GW004','GW005','GW006','GW009','GW010'],
+  'custom_worlds' => ['GW001','GW004','GW005','GW006','GW009','GW010','GW011'],
 ];
