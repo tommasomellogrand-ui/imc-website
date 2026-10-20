@@ -1,5 +1,6 @@
 (()=>{'use strict';
 const params=new URLSearchParams(location.search);if(params.get('world')&&params.get('world')!=='GW011'){location.replace('/nexus/?world='+encodeURIComponent(params.get('world')));return;}
+if(!params.get('world')){params.set('world','GW011');history.replaceState(null,'',location.pathname+'?'+params.toString()+location.hash);}
 const club=params.get('club')||'',categories=['Tutti','Mercato','Partite','Nazionali','Dietro le quinte'];let category='Tutti',data,timer=null,current=null,count=0;
 const $=id=>document.getElementById(id),el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
 function face(c){const a=el('span',undefined,'avatar');a.style.setProperty('--x',c.face[0]);a.style.setProperty('--y',c.face[1]);a.setAttribute('role','img');a.setAttribute('aria-label',c.name);return a;}
