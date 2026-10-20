@@ -6,9 +6,8 @@ await p.goto('http://127.0.0.1:8765/nexus/series/?world=GW001');await p.waitForU
 assert(await p.evaluate(()=>getComputedStyle(document.body).backgroundColor.match(/\d+/g).slice(0,3).every(v=>Number(v)>=240)));
 await p.locator('[data-world-tab=field]').click();const ids=await p.locator('.match-card').evaluateAll(ns=>ns.map(n=>n.dataset.fixture));assert.equal(ids.length,8);assert.equal(new Set(ids).size,8);assert.equal(await p.locator('.match-stories section').count(),16);assert(await p.locator('.match-stories').first().isVisible());
 await p.locator('[data-world-tab=rest]').click();assert.equal(await p.locator('#content .card').count(),24);
-await p.locator('[data-world-tab=world]').click();await p.locator('.feature button').click();assert(await p.locator('#reader').isVisible());assert.equal(await p.locator('#reader').evaluate(n=>getComputedStyle(n).backgroundColor),'rgb(255, 255, 255)');await p.locator('#close').click();
-await p.locator('[data-world-tab=clubs]').click();assert.equal(await p.locator('#clubs button').count(),40);assert.equal(await p.locator('#clubs img').count(),40);
-await p.locator('#search').fill('Dres');await p.locator('#clubs button').click();assert.equal(await p.locator('#content .card').count(),1);
+assert.deepEqual(await p.locator('.jumpnav [data-world-tab]').evaluateAll(ns=>ns.map(n=>n.dataset.worldTab)),['field','rest']);
+await p.locator('#content .clubtop button').first().click();assert.equal(await p.locator('#content .card').count(),1);
 await p.locator('[data-tab=cast]').click();assert.equal(await p.locator('#content .card').count(),10);
 await p.locator('[data-tab=episodes]').click();await p.locator('#content .card > button').click();assert((await p.locator('#scenes article').count())>=5);await p.locator('#close').click();
 assert(await p.evaluate(()=>window.__tabTest));assert.equal(popups,0);assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
