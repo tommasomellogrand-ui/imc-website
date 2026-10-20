@@ -1,4 +1,4 @@
-name: Nexus GW011 series
+name: Nexus GW001 and GW011 series
 on:
   push:
     branches: [main]
@@ -21,12 +21,15 @@ jobs:
         run: |
           node --check nexus/series/series.js
           node tests/nexus-series-data.cjs
+          node --check nexus/series/rth/app.js
+          node tests/nexus-series-rth.cjs
       - name: Test mobile and desktop reading
         run: |
           npm install --no-save playwright@1.62.1
           npx playwright install --with-deps chromium
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/series-http.log 2>&1 &
           node tests/nexus-series-ui.cjs
+          node tests/nexus-series-rth-ui.cjs
       - name: Publish only series assets
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
