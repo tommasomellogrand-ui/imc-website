@@ -18,6 +18,8 @@
  new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','aria-pressed','aria-selected','aria-current','hidden']});
  window.addEventListener('resize',()=>{for(const [nav,active] of known)reveal(nav,active);},{passive:true});
  function enhanceLayout(){
+  if(new URLSearchParams(location.search).get('world')==='GW001'&&['/nexus/','/nexus/index.html'].includes(location.pathname)){const shortcuts=document.getElementById('shortcuts');if(shortcuts&&!shortcuts.querySelector('[data-rth-entry]')){const ch=Array.from(shortcuts.querySelectorAll('a')).find(a=>a.href.includes('/club-house'));if(ch){const a=document.createElement('a');a.className='shortcut';a.dataset.rthEntry='1';a.href='/nexus/series/rth/?world=GW001';a.innerHTML='<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>ALL TO PLAY FOR</span>';ch.after(a)}}}
+
   enhanceCompetitions();
   if(!document.body.classList.contains('nx-linea-oro'))document.body.classList.add('nx-linea-oro');
   const header=document.querySelector('body>.profile-banner,body>header.hero,body.clubhouse-page>header:not(#nx-universal-header),body>.md-banner,body>.club-hero');
