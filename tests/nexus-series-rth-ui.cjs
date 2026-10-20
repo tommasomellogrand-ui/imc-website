@@ -4,7 +4,7 @@ const p=await b.newPage({viewport:{width,height:844}}),errors=[];let popups=0;p.
 await p.route('**/nexus/core/context.php?*',r=>r.fulfill({json:{ok:false}}));await p.route('**/nexus/club-house/data.php*',r=>r.fulfill({json:{ok:false}}));
 await p.goto('http://127.0.0.1:8765/nexus/series/?world=GW001');await p.waitForURL('**/rth/?world=GW001');await p.locator('.feature button').waitFor();await p.evaluate(()=>window.__tabTest=true);
 assert(await p.evaluate(()=>getComputedStyle(document.body).backgroundColor.match(/\d+/g).slice(0,3).every(v=>Number(v)>=240)));
-await p.locator('[data-world-tab=field]').click();assert.equal(await p.locator('#content .card').count(),16);
+await p.locator('[data-world-tab=field]').click();const ids=await p.locator('.match-card').evaluateAll(ns=>ns.map(n=>n.dataset.fixture));assert.equal(ids.length,8);assert.equal(new Set(ids).size,8);assert.equal(await p.locator('.match-stories section').count(),16);assert(await p.locator('.match-stories').first().isVisible());
 await p.locator('[data-world-tab=rest]').click();assert.equal(await p.locator('#content .card').count(),24);
 await p.locator('[data-world-tab=world]').click();await p.locator('.feature button').click();assert(await p.locator('#reader').isVisible());assert.equal(await p.locator('#reader').evaluate(n=>getComputedStyle(n).backgroundColor),'rgb(255, 255, 255)');await p.locator('#close').click();
 await p.locator('[data-world-tab=clubs]').click();assert.equal(await p.locator('#clubs button').count(),40);assert.equal(await p.locator('#clubs img').count(),40);
