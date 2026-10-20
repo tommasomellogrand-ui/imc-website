@@ -80,6 +80,10 @@
   const header=document.createElement('header');header.id='nx-universal-header';
   header.innerHTML='<div class="nx-universal-top"><a class="nx-universal-brand" href="/nexus/club-house/"><img src="/site-assets/images/imc-logo.png" alt="IMC"><span>NEXUS</span></a><select id="nx-world-select" aria-label="Game World"><option value="clubhouse">Club House</option>'+Array.from({length:11},(_,i)=>{const w='GW'+String(i+1).padStart(3,'0');return '<option value="'+w+'">'+w+'</option>'}).join('')+'</select></div><div class="nx-universal-context" id="nx-universal-context"></div>';
   document.body.prepend(header);const selector=header.querySelector('select');selector.value=inClubHouse?'clubhouse':world;
+  if(world==='GW011'&&!inClubHouse){
+   const seriesLink=document.createElement('a');seriesLink.href='/nexus/series/?world=GW011';seriesLink.textContent='Fuori dal Campo · La serie del GW011 →';seriesLink.style.cssText='display:block;padding:13px 20px;background:#153d32;color:#faf7ee;font-size:12px;font-weight:700;text-align:center;text-decoration:none';
+   if(location.pathname==='/nexus/'||location.pathname==='/nexus/index.html')header.after(seriesLink);
+  }
   fetch('/nexus/club-house/data.php',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(!d.ok||!Array.isArray(d.worlds))return;for(const w of d.worlds){const option=Array.from(selector.options).find(o=>o.value===w.id);if(option&&w.name)option.textContent=w.name;}}).catch(()=>{});
   const context=document.getElementById('nx-universal-context');
   const updateContext=()=>{context.textContent=location.pathname.includes('/club-house/')&&!params.get('world')?'Club House · Tutti i Game World':world;fetch(href('core/context.php'),{cache:'no-store'}).then(r=>r.json()).then(d=>{if(!d.ok)return;if(location.pathname.includes('/club-house/')&&!params.get('world'))return;context.textContent=(d.world?.game_world_name||world)+(params.get('season')||d.current_season?' · S'+(params.get('season')||d.current_season):'');}).catch(()=>{});};
@@ -94,6 +98,7 @@
   dialog.querySelector('button').onclick=()=>dialog.close();
   document.getElementById('nx-universal-more').onclick=()=>{
    const links=new Map();[['Club',href('teams/page.html')],['Nazionali',href('teams/page.html')+'&type=nations'],['Giocatori',href('players/page.html')],['Trasferimenti',href('transfers/page.html')]].forEach(([name,url])=>links.set(url,name));
+   if(world==='GW011')links.set('/nexus/series/?world=GW011','Fuori dal Campo · La serie');
    document.querySelectorAll('#more-links a,#profile-more-links a').forEach(a=>{if(a.href&&!a.href.includes('/club-house/'))links.set(a.href,a.textContent.trim());});
    const section=dialog.querySelector('section');section.replaceChildren();for(const [url,name]of links){const a=document.createElement('a');a.href=url;a.textContent=name;section.append(a);}dialog.showModal();
   };

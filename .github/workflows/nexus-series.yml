@@ -1,0 +1,64 @@
+name: Nexus GW011 series
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nexus/series/**'
+      - 'tests/nexus-series*'
+      - '.github/workflows/nexus-series.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-public-website-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate series
+        run: |
+          node --check nexus/series/series.js
+          node tests/nexus-series-data.cjs
+      - name: Test mobile and desktop reading
+        run: |
+          npm install --no-save playwright@1.62.1
+          npx playwright install --with-deps chromium
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/series-http.log 2>&1 &
+          node tests/nexus-series-ui.cjs
+      - name: Publish only series assets
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, urllib.request
+          from pathlib import Path
+          from ftplib import FTP_TLS, error_perm
+          root='/www.italianmastersclub.it'
+          context=ssl.create_default_context()
+          context.check_hostname=False
+          ftp=FTP_TLS(context=context)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p()
+          files=[p for p in Path('nexus/series').rglob('*') if p.is_file() and p.suffix in ['.html','.css','.js','.json','.webp']]
+          # Navigation is the only shared asset changed by this release.
+          files.append(Path('nexus/assets/navigation.js'))
+          for p in files:
+              ftp.cwd('/')
+              for part in (root+'/'+str(p.parent)).strip('/').split('/'):
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part); ftp.cwd(part)
+              data=p.read_bytes()
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary('RETR '+p.name,check.write)
+              if check.getvalue()!=data: raise RuntimeError('Upload verification: '+str(p))
+          ftp.quit()
+          for p in files:
+              req=urllib.request.Request('https://www.italianmastersclub.it/'+str(p)+'?series='+os.environ['GITHUB_SHA'],headers={'User-Agent':'IMC-Series-Verify'})
+              with urllib.request.urlopen(req,timeout=60) as r:
+                  if r.read()!=p.read_bytes(): raise RuntimeError('Public verification: '+str(p))
+          print('Series files uploaded and verified over HTTPS')
+          PY

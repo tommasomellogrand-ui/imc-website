@@ -1,0 +1,381 @@
+{
+  "version": 1,
+  "world": "GW011",
+  "snapshotDate": "2026-10-20",
+  "characters": [
+    {
+      "id": "cerezo",
+      "name": "Enrique Cerezo",
+      "role": "Presidente",
+      "face": [
+        82,
+        183
+      ],
+      "description": "Per lui ogni nuovo acquisto merita una prima cinematografica."
+    },
+    {
+      "id": "gil",
+      "name": "Miguel Ángel Gil Marín",
+      "role": "Amministratore delegato",
+      "face": [
+        197,
+        180
+      ],
+      "description": "Prima i conti, poi i fuochi d’artificio."
+    },
+    {
+      "id": "alemany",
+      "name": "Mateu Alemany",
+      "role": "Direttore calcio professionistico",
+      "face": [
+        310,
+        180
+      ],
+      "description": "Parla poco. Quando arriva, di solito c’è qualcosa da firmare."
+    },
+    {
+      "id": "tom",
+      "name": "Tommy Mello",
+      "role": "Manager IMC · GW011",
+      "face": [
+        426,
+        180
+      ],
+      "description": "Tra campo, mercato e chat: prova a tenere insieme tutti."
+    },
+    {
+      "id": "futre",
+      "name": "Paulo Futre",
+      "role": "L’icona",
+      "face": [
+        116,
+        402
+      ],
+      "description": "Un dribbling, un ricordo e una provocazione per riaccendere Madrid."
+    },
+    {
+      "id": "sabina",
+      "name": "Joaquín Sabina",
+      "role": "Il tifoso poeta",
+      "face": [
+        252,
+        401
+      ],
+      "description": "Trasforma ogni domenica in una strofa rojiblanca."
+    },
+    {
+      "id": "ranieri",
+      "name": "Claudio Ranieri",
+      "role": "L’ex allenatore",
+      "face": [
+        395,
+        397
+      ],
+      "description": "La voce calma quando il gruppo perde la misura."
+    },
+    {
+      "id": "fullana",
+      "name": "Pedro Fullana",
+      "role": "Il cronista",
+      "face": [
+        174,
+        563
+      ],
+      "description": "Fa la domanda che tutti speravano di evitare."
+    },
+    {
+      "id": "paco",
+      "name": "Paco «Las Llaves»",
+      "role": "Il custode · Personaggio inventato",
+      "face": [
+        338,
+        563
+      ],
+      "description": "Ha le chiavi di tutto. Compresa la stanza delle indiscrezioni."
+    }
+  ],
+  "clubs": [
+    {
+      "entity_id": 115,
+      "name": "AC Milan",
+      "world_id": 93399615,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/115.png",
+      "manager": {
+        "manager_id": "MNG016",
+        "full_name": "Saverio Cordiano",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 1,
+      "name": "Arsenal",
+      "world_id": 93399501,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/1.png",
+      "manager": {
+        "manager_id": "MNG051",
+        "full_name": "Luciano Tana",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 123,
+      "name": "AS Roma",
+      "world_id": 93399623,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/123.png",
+      "manager": {
+        "manager_id": "MNG033",
+        "full_name": "Simone Campanella",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 96,
+      "name": "Atalanta BC",
+      "world_id": 93399596,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/96.png",
+      "manager": {
+        "manager_id": "MNG052",
+        "full_name": "Carlo Colombo",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 139,
+      "name": "Atlético Madrid",
+      "world_id": 93399639,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/139.png",
+      "manager": {
+        "manager_id": "MNG001",
+        "full_name": "Tommaso Mello",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 140,
+      "name": "Barcelona",
+      "world_id": 93399640,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/140.png",
+      "manager": {
+        "manager_id": "MNG048",
+        "full_name": "Giuseppe Trovato",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 391,
+      "name": "Bayern München",
+      "world_id": 93399891,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/391.png",
+      "manager": {
+        "manager_id": "MNG032",
+        "full_name": "Vardan Minasyan",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 392,
+      "name": "Borussia Dortmund",
+      "world_id": 93399892,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/392.png",
+      "manager": {
+        "manager_id": "MNG060",
+        "full_name": "Cosimo Lonoce",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 21,
+      "name": "Chelsea",
+      "world_id": 93399521,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/21.png",
+      "manager": {
+        "manager_id": "MNG006",
+        "full_name": "Pep Buitre",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 1671,
+      "name": "Como 1907",
+      "world_id": 93401156,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/1671.png",
+      "manager": {
+        "manager_id": "MNG053",
+        "full_name": "Chicco Belin",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 109,
+      "name": "Internazionale",
+      "world_id": 93399609,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/109.png",
+      "manager": {
+        "manager_id": "MNG013",
+        "full_name": "Giovanni Cabrioli",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 110,
+      "name": "Juventus",
+      "world_id": 93399610,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/110.png",
+      "manager": {
+        "manager_id": "MNG008",
+        "full_name": "Giorgio Grugni",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 44,
+      "name": "Liverpool",
+      "world_id": 93399544,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/44.png",
+      "manager": {
+        "manager_id": "MNG065",
+        "full_name": "Carlo Ancelotti",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 47,
+      "name": "Manchester City",
+      "world_id": 93399547,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/47.png",
+      "manager": {
+        "manager_id": "MNG009",
+        "full_name": "Luca Nudo",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 49,
+      "name": "Manchester United",
+      "world_id": 93399549,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/49.png",
+      "manager": {
+        "manager_id": "MNG027",
+        "full_name": "Danilo FC 1908",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 338,
+      "name": "Paris Saint-Germain",
+      "world_id": 93399838,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/338.png",
+      "manager": {
+        "manager_id": "MNG004",
+        "full_name": "Luciano Catalano",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 163,
+      "name": "Real Madrid",
+      "world_id": 93399663,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/163.png",
+      "manager": {
+        "manager_id": "MNG039",
+        "full_name": "Attilio Bonnici",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 218,
+      "name": "SL Benfica",
+      "world_id": 93399718,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/218.png",
+      "manager": {
+        "manager_id": "MNG007",
+        "full_name": "Vincenzo Martorano",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 746,
+      "name": "SSC Napoli",
+      "world_id": 93400234,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/746.png",
+      "manager": {
+        "manager_id": "MNG015",
+        "full_name": "Marco Fioretti",
+        "is_imc": true
+      }
+    },
+    {
+      "entity_id": 80,
+      "name": "Tottenham Hotspur",
+      "world_id": 93399580,
+      "image_url": "https://cdn.soccerwiki.org/images/logos/clubs/80.png",
+      "manager": {
+        "manager_id": "MNG014",
+        "full_name": "Giovanni Iodice",
+        "is_imc": true
+      }
+    }
+  ],
+  "episodes": [
+    {
+      "id": "prologo-atletico",
+      "number": "00",
+      "label": "PROLOGO · PRESENTAZIONE",
+      "status": "published",
+      "publishedAt": "2026-10-20T00:00:00Z",
+      "category": "Dietro le quinte",
+      "clubs": [
+        "139"
+      ],
+      "title": "Paco ha aperto il gruppo.",
+      "description": "Nove personaggi, una sola squadra. La famiglia rojiblanca si presenta: e qualcuno ha già perso il controllo della chat.",
+      "note": "Episodio introduttivo di fantasia: presenta il cast e non racconta operazioni di mercato o partite reali.",
+      "messages": [
+        {
+          "character": "paco",
+          "text": "Ho aperto il gruppo. Le chiavi dello stadio le ho io. Quelle della chat, purtroppo, le avete tutti."
+        },
+        {
+          "character": "tom",
+          "text": "Perfetto, Paco. Partiamo da una cosa semplice: qui parliamo dell’Atlético."
+        },
+        {
+          "character": "cerezo",
+          "text": "Ottimo titolo. Ma per la prima puntata voglio una presentazione da cinema."
+        },
+        {
+          "character": "gil",
+          "text": "Prima della presentazione, il preventivo."
+        },
+        {
+          "character": "alemany",
+          "text": "Intanto io ascolto. Quando c’è qualcosa da firmare, chiamatemi."
+        },
+        {
+          "character": "futre",
+          "text": "Basta che ogni tanto qualcuno salti l’uomo. Anche in questa chat."
+        },
+        {
+          "character": "sabina",
+          "text": "Madrid ha già abbastanza notti insonni. Ci mancava questo gruppo."
+        },
+        {
+          "character": "ranieri",
+          "text": "Un messaggio alla volta, ragazzi. Cominciamo con ordine."
+        },
+        {
+          "character": "fullana",
+          "text": "Una domanda: quello che scrivete qui è tutto dichiarabile?"
+        },
+        {
+          "character": "tom",
+          "text": "Paco, chi gli ha dato il link?"
+        },
+        {
+          "character": "paco",
+          "text": "Mister, mi avete detto di aprire. Io apro."
+        }
+      ]
+    }
+  ]
+}
