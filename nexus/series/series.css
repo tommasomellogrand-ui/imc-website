@@ -7,3 +7,5 @@
 #reader .controls button{background:var(--club-primary);color:var(--club-ink);border:1px solid var(--club-secondary)}#reader .controls #read-all{background:white;color:var(--ink)}
 #reader .avatar{border-color:var(--club-secondary)}#reader .bubble{border-top:3px solid var(--club-primary);overflow-wrap:anywhere}#reader .message.tom .bubble{background:color-mix(in srgb,var(--club-primary) 9%,white)}
 .message-author{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-bottom:8px}.bubble .message-author strong{display:inline;margin:0;color:var(--ink)}.message-role{font-size:11px;line-height:1.4;color:#566270}.chat-order{font-size:11px;color:#566270;margin:16px 0 0}
+
+#series [hidden]{display:none!important}
