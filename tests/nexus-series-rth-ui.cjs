@@ -6,6 +6,14 @@ await p.goto('http://127.0.0.1:8765/nexus/series/?world=GW001');await p.waitForU
 assert(await p.evaluate(()=>getComputedStyle(document.body).backgroundColor.match(/\d+/g).slice(0,3).every(v=>Number(v)>=240)));
 await p.locator('[data-world-tab=field]').click();const ids=await p.locator('.match-card').evaluateAll(ns=>ns.map(n=>n.dataset.fixture));assert.equal(ids.length,8);assert.equal(new Set(ids).size,8);assert.equal(await p.locator('.match-stories section').count(),16);assert(await p.locator('.match-stories').first().isVisible());
 assert.equal(await p.locator('#content .cast-panel').count(),0);assert.equal(await p.locator('.match-stories .speaker').count(),80);assert.equal(await p.locator('.match-manager small').count(),16);const trani=p.locator('.speaker').filter({hasText:'Ugo Trani'}).first();assert.equal(await trani.locator('img').getAttribute('alt'),'Ugo Trani');assert.equal(await trani.locator('.speaker-name').innerText(),'Ugo Trani');assert((await trani.locator('.speaker-role').innerText()).includes('Giornalista')); assert.equal(await p.locator('.series-disclosure').count(),1);assert.equal(await p.locator('.match-card .note').count(),0);assert.equal(await p.locator('.hero h1 br').count(),0);assert(await p.locator('.hero h1').evaluate(n=>n.scrollWidth<=n.clientWidth+1));assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+await p.locator('#postmatch-opening').waitFor();await p.locator('.pm-match').last().waitFor();
+assert.equal(await p.locator('.pm-match').count(),8);assert.equal(await p.locator('.pm-result').count(),8);assert.equal(await p.locator('.pm-pairing').count(),4);assert.equal(await p.locator('.pm-team').count(),16);
+assert.equal(await p.locator('#content').evaluate(n=>n.firstElementChild.id),'postmatch-opening');
+assert((await p.locator('#postmatch-opening').innerText()).includes('Billy Costacurta'));
+assert.equal(await p.locator('#postmatch-369216978').getAttribute('data-reporter'),'Giorgia Cenni');
+assert(await p.locator('.pm-team').evaluateAll(ns=>ns.every(n=>n.querySelectorAll('.pm-qa').length<=5)));
+assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+await p.locator('[data-world-tab=field]').click();await p.locator('#postmatch-opening').waitFor();assert.equal(await p.locator('#postmatch-opening').count(),1);assert.equal(await p.locator('.pm-match').count(),8);
 assert.equal(await p.locator('[data-world-tab=rest]').count(),0);assert(await p.locator('#directory').isHidden());
 assert.deepEqual(await p.locator('.jumpnav [data-world-tab]').evaluateAll(ns=>ns.map(n=>n.dataset.worldTab)),['field']);
 const club=require('../nexus/series/rth/2026-10-20.json').clubs.find(c=>c.today.length);await p.goto('http://127.0.0.1:8765/nexus/series/rth/?world=GW001&club='+club.id);await p.locator('#content .clubtop button').waitFor();await p.evaluate(()=>window.__tabTest=true);assert.equal(await p.locator('#content .card').count(),1);
