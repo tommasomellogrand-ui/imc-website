@@ -34,7 +34,7 @@
   try{const response=await fetch('2026-10-20-postmatch.json?v=1');if(!response.ok)throw Error('Postmatch unavailable');const data=await response.json();
    const decorate=()=>{const cards=[...content.querySelectorAll('.match-card[data-fixture]')];if(!cards.length)return;
     if(!content.querySelector('#postmatch-opening'))content.prepend(opening(data));
-    for(const card of cards){const m=data.matches.find(m=>m.id===card.dataset.fixture);if(!m||card.querySelector('.pm-match'))continue;const before=card.querySelector('h3');card.insertBefore(match(m),before);}
+    for(const card of cards){const m=data.matches.find(m=>m.id===card.dataset.fixture);if(!m||card.querySelector('.pm-match'))continue;const before=card.querySelector(':scope > h3');card.insertBefore(match(m),before);}
    };new MutationObserver(decorate).observe(content,{childList:true,subtree:true});decorate();
   }catch(err){console.error('Dopopartita:',err);const note=el('p','Il dopopartita non è disponibile in questo momento. Ricarica la pagina per riprovare.','pm-load-error');content.before(note)}
  }
