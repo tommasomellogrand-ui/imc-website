@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'nexus/series/**'
+      - 'nexus/alltoplayfor/**'
       - 'tests/nexus-series*'
       - '.github/workflows/nexus-series.yml'
   workflow_dispatch:
@@ -22,6 +23,7 @@ jobs:
           node --check nexus/series/series.js
           node tests/nexus-series-data.cjs
           node --check nexus/series/rth/app.js
+          node --check nexus/alltoplayfor/postmatch.js
           node tests/nexus-series-rth.cjs
       - name: Test mobile and desktop reading
         run: |
@@ -46,7 +48,7 @@ jobs:
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p()
-          files=[p for p in Path('nexus/series').rglob('*') if p.is_file() and p.suffix in ['.html','.css','.js','.json','.webp']]
+          files=[p for folder in ['nexus/alltoplayfor','nexus/series'] for p in Path(folder).rglob('*') if p.is_file() and p.suffix in ['.html','.css','.js','.json','.webp']]
           # Navigation is the only shared asset changed by this release.
           files.append(Path('nexus/assets/navigation.js'))
           for p in files:
