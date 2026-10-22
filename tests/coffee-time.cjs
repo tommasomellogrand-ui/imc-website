@@ -23,7 +23,8 @@ setImmediate(()=>{
  assert(panels.every(p=>p.hidden));assert(buttons.every(b=>b.attrs['aria-selected']==='false'));assert.equal(buttons[0].tabIndex,0);assert.equal(panel.querySelectorAll('.coffee-schedule-match').length,20);
  for(let i=0;i<4;i++){buttons[i].events.click();assert.deepEqual(panels.map(p=>p.hidden),[0,1,2,3].map(j=>j!==i));assert.equal(buttons[i].attrs['aria-selected'],'true');assert.equal(panels[i].querySelectorAll('.coffee-fixture').length,5)}
  const tabs=panel.querySelector('.coffee-divisions');tabs.events.keydown({key:'Home',preventDefault(){}});assert.equal(panels[0].hidden,false);
- assert.equal(panel.querySelectorAll('.coffee-speaker').length,16);assert.equal(panel.querySelectorAll('.coffee-recovery').length,20);
+ assert.equal(panel.querySelectorAll('.coffee-speaker').length,36);assert.equal(panel.querySelectorAll('.coffee-recovery').length,20);
+ for(const f of fixtures)assert(fs.existsSync(__dirname+'/../nexus/alltoplayfor/'+data.reporter_portraits[f.home_reporter.name].image));
  panel.querySelector('.coffee-back').events.click();assert(panels.every(p=>p.hidden));assert.equal(panel.querySelector('.coffee-back').hidden,true);
  date.value='2026-10-20';events['programme-date-change']();assert.equal(panel.querySelector('.coffee-edition').hidden,true);assert.equal(pending.hidden,false);
  date.value='2026-10-22';events['programme-date-change']();assert.equal(panel.querySelector('.coffee-edition').hidden,false);

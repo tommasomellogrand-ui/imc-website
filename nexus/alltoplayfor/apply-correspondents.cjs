@@ -5,6 +5,7 @@ const rows=[
 [94079182,'Pietro Nicolodi'],[94078981,'Antonio Nucera'],[94079139,'Gianluigi Bagnulo'],[94078865,'Francesco Cosatti'],[94079202,'Filippo Benincampi'],[94079161,'Dario Massara'],[94079114,'Marco Bovicelli'],[94079162,'Matteo Barzaghi'],[94078959,'Riccardo Gentile'],[94079061,'Peppe Di Stefano'],[94078875,'Riccardo Re'],[94078884,'Bruno Palermo'],[94079067,'Luca Cilli'],[94078885,'Marco Nosotti'],[94079148,'Giovanni Guardalà'],[94079073,'Marina Presello'],[94079115,'Alessandro Sugoni'],[94078843,'Valentina Mariani'],[94078895,'Paolo Aghemo'],[94078847,'Massimo Marianella']];
 const women=new Set(['Eleonora Incardona','Giorgia Cenni','Valentina Caruso','Stefania Pinna','Federica Lodi','Veronica Brunati','Sarah Castellana','Anna Billò','Giorgia Rossi','Valentina Ciarlante','Vanessa Leonardi','Marina Presello','Valentina Mariani']);
 function apply(data){
+ data.reporter_portraits=require('./reporter-portraits.json');
  const clubs=new Map(data.divisions.flatMap(d=>d.fixtures.flatMap(f=>[['home',f],['away',f]]).map(([side,f])=>[Number(f[side+'_table'].id),f[side]])));
  const assignments=rows.map(([id,name,confirmed])=>({club_id:id,club:clubs.get(id),name,status:confirmed?'confirmed':'trial',label:confirmed?'Assegnazione confermata':(women.has(name)?'Inviata in prova':'Inviato in prova')}));
  if(assignments.some(a=>!a.club)||new Set(assignments.map(a=>a.name)).size!==40)throw Error('Invalid assignments');

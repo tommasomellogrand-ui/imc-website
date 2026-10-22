@@ -2030,5 +2030,87 @@
         "label": "Inviato in prova"
       }
     ]
+  },
+  "reporter_portraits": {
+    "Anna Billò": {
+      "image": "assets/reporter-anna-billo.webp",
+      "source": "Foto fornita dall’utente"
+    },
+    "Veronica Brunati": {
+      "image": "assets/reporter-veronica-brunati.webp",
+      "source": "Foto fornita dall’utente"
+    },
+    "Federica Lodi": {
+      "image": "assets/reporter-federica-lodi.webp",
+      "source": "Foto fornita dall’utente"
+    },
+    "Antonio Nucera": {
+      "image": "assets/reporter-antonio-nucera.webp",
+      "source": "https://net-storage-auto.tcccdn.com/storage/tuttoreggina.com/img_notizie/thumb3/50/5088eb6511e51807ad6e07d851c64e1c-11191-oooz0000.jpeg"
+    },
+    "Massimo Marianella": {
+      "image": "assets/reporter-massimo-marianella.webp",
+      "source": "https://sport.sky.it/autore/massimo-marianella"
+    },
+    "Stefania Pinna": {
+      "image": "assets/reporter-stefania-pinna.webp",
+      "source": "https://libropossibile.com/site/assets/files/1153/stefania_pinna.400x400.jpg"
+    },
+    "Stefano Borghi": {
+      "image": "assets/reporter-stefano-borghi.webp",
+      "source": "https://www.offside.community/wp-content/uploads/2019/05/2.jpg"
+    },
+    "Eleonora Incardona": {
+      "image": "assets/reporter-eleonora-incardona.webp",
+      "source": "https://tg24.sky.it/assets/images/ff78156a467b2256f1a4327f163fa4b5dadeb5b9/skytg24/it/spettacolo/2025/02/18/eleonora-incardona-foto/eleonora_incardona1.jpg?im=Resize,width=600"
+    },
+    "Bruno Palermo": {
+      "image": "assets/reporter-bruno-palermo.webp",
+      "source": "https://sport.sky.it/calcio/2026/06/14/calcio-integrazione-accoglienza-torneo-crotone"
+    },
+    "Marina Presello": {
+      "image": "assets/reporter-marina-presello.webp",
+      "source": "https://www.pesavento.com/web/wp-content/uploads/2019/02/MarinaPresello_SkySport.jpg"
+    },
+    "Marco Nosotti": {
+      "image": "assets/reporter-marco-nosotti.webp",
+      "source": "https://sport.sky.it/assets/images/archive/sezioni/sport/mondiali_calcio/2010/05/17/marco_nosotti.jpg?im=Resize,width=565"
+    },
+    "Paolo Assogna": {
+      "image": "assets/reporter-paolo-assogna.webp",
+      "source": "https://sport.sky.it/autore/paolo-assogna"
+    },
+    "Francesco Repice": {
+      "image": "assets/reporter-francesco-repice.webp",
+      "source": "https://www.aquinocresce.it/home/wp-content/uploads/2026/07/IMG-20260712-WA0022.jpg"
+    },
+    "Giorgia Cenni": {
+      "image": "assets/reporter-giorgia-cenni.webp",
+      "source": "https://www.vanityfair.it/sport/partite-eventi/2021/08/31/lo-sport-ve-lo-raccontano-le-donne"
+    },
+    "Maurizio Compagnoni": {
+      "image": "assets/reporter-maurizio-compagnoni.webp",
+      "source": "https://sport.sky.it/autore/maurizio-compagnoni"
+    },
+    "Nicola Roggero": {
+      "image": "assets/reporter-nicola-roggero.webp",
+      "source": "https://sport.sky.it/autore/nicola-roggero"
+    },
+    "Dario Massara": {
+      "image": "assets/reporter-dario-massara.webp",
+      "source": "https://sport.sky.it/autore/dario-massara"
+    },
+    "Paolo Aghemo": {
+      "image": "assets/reporter-paolo-aghemo.webp",
+      "source": "https://sport.sky.it/autore/paolo-aghemo"
+    },
+    "Riccardo Gentile": {
+      "image": "assets/reporter-riccardo-gentile.webp",
+      "source": "https://sport.sky.it/autore/riccardo-gentile"
+    },
+    "Marco Bovicelli": {
+      "image": "assets/reporter-marco-bovicelli.webp",
+      "source": "https://interclubpavia.eu/2018/08/09/bovicelli-per-candreva-difficile-lasciare-linter-keita-comunque-obiettivo/"
+    }
   }
 }
