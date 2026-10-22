@@ -1,0 +1,22 @@
+(()=>{'use strict';
+ const nav=document.querySelector('.jumpnav'),content=document.getElementById('content');
+ const datebar=document.querySelector('.datebar'),status=document.getElementById('status');
+ const sections=[['coffee-time','Coffee Time','Mercato, notizie e novità dai club.'],['daytime','Daytime','Dai campi di allenamento: collegamenti e pre-partita.'],['final-whistle','Final Whistle','Risultati, analisi e commenti del post-partita.']];
+ nav.replaceChildren();datebar.before(nav);
+ const panels=new Map();
+ for(const [id,title,description] of sections){
+  const button=document.createElement('button');button.type='button';button.id='tab-'+id;button.role='tab';button.textContent=title;button.setAttribute('aria-controls','panel-'+id);nav.append(button);
+  const panel=document.createElement('section');panel.id='panel-'+id;panel.role='tabpanel';panel.setAttribute('aria-labelledby',button.id);panel.tabIndex=0;
+  if(id==='final-whistle'){content.before(panel);panel.append(datebar,status,content)}else{
+   panel.className='programme-empty';const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=description;const note=document.createElement('p');note.className='programme-pending';note.textContent='Nessuna edizione pubblicata. Le notizie appariranno qui, dalla più recente.';panel.append(h,p,note);nav.after(panel);
+  }panels.set(id,panel);
+  button.addEventListener('click',()=>select(id,true));
+ }
+ function select(id,update){if(!panels.has(id))id='coffee-time';
+  for(const [key,panel] of panels){const active=key===id;panel.hidden=!active;const b=document.getElementById('tab-'+key);b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;}
+  if(update){const url=new URL(location.href);url.searchParams.set('section',id);history.pushState(null,'',url);}
+ }
+ function fromUrl(){const url=new URL(location.href);select(url.searchParams.get('section')||(url.hash.startsWith('#postmatch-')||url.searchParams.has('club')?'final-whistle':'coffee-time'),false)}
+ nav.addEventListener('keydown',event=>{const buttons=[...nav.querySelectorAll('button')];let index=buttons.indexOf(document.activeElement);if(index<0)return;if(event.key==='ArrowRight')index=(index+1)%3;else if(event.key==='ArrowLeft')index=(index+2)%3;else if(event.key==='Home')index=0;else if(event.key==='End')index=2;else return;event.preventDefault();buttons[index].focus();buttons[index].click()});
+ window.addEventListener('popstate',fromUrl);window.addEventListener('hashchange',fromUrl);fromUrl();
+})();

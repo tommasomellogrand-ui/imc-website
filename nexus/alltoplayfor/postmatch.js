@@ -45,7 +45,7 @@
    document.getElementById('status').textContent='20 ottobre 2026 · '+matches.length+' dopopartita';
    for(const id of ['tabs','directory','reader'])document.getElementById(id).hidden=true;
    for(const id of ['prev','next','today','date'])document.getElementById(id).disabled=true;
-   const tab=document.querySelector('[data-world-tab]');tab.textContent='Dopopartita';tab.setAttribute('aria-selected','true');
+   document.dispatchEvent(new Event('postmatch-ready'));
   }catch(err){console.error('Dopopartita:',err);const note=el('p','Il dopopartita non è disponibile in questo momento. Ricarica la pagina per riprovare.','pm-load-error');content.before(note)}
  }
  start();
