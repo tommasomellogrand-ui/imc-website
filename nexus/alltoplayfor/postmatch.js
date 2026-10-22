@@ -39,7 +39,7 @@
    const selected=new URLSearchParams(location.search).get('club');
    const matches=selected?data.matches.filter(m=>Object.values(m.teams).some(t=>t.id===selected)):data.matches;
    content.replaceChildren();if(!selected)content.append(opening(data));
-   else{const back=el('a','← Tutti i dopopartita','back');back.href='?world=GW001';content.append(back)}
+   else{const back=el('a','← Tutti i dopopartita','back');back.href='?world=GW001&section=final-whistle';content.append(back)}
    const list=el('div',null,'match-list');for(const m of matches){const card=el('article',null,'card match-card');card.dataset.fixture=m.id;card.append(match(m));list.append(card)}content.append(list);
    if(!matches.length)content.append(el('p','Questo club non ha giocato nel turno di coppa del 20 ottobre.'));
    document.getElementById('status').textContent='20 ottobre 2026 · '+matches.length+' dopopartita';
