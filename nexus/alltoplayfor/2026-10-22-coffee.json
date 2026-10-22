@@ -5,7 +5,7 @@
   "season": 2,
   "checked_at": "2026-10-22T07:22:53.077Z",
   "source": "https://www.italianmastersclub.it/nexus/matchday/data.php?world=GW001&season=2&day=8",
-  "title": "Venti partite, quattro storie da seguire",
+  "title": "Dalla coppa al campionato: ritrovare il ritmo",
   "portraits": [
     {
       "name": "Federica Zille",
@@ -38,9 +38,9 @@
     ]
   ],
   "opening": [
-    "Buongiorno e benvenuti a Coffee Time. Oggi, 22 ottobre, torna il campionato di Road To History con l’ottava giornata: venti partite, cinque per ciascuna delle quattro divisioni. Prima di entrare nei singoli campi, guardiamo il turno nel suo insieme: ci sono primati da difendere, inseguitrici vicinissime e squadre che cercano una svolta.",
-    "I distacchi raccontano quattro situazioni diverse. In Div 1 il Torino è a due punti dal Monaco 1860; in Div 2 il Bologna è a uno dal Celtic. Il Marsiglia ha invece sei punti sulle prime inseguitrici in Div 3. E in Div 4 il calendario ci offre direttamente Hertha–Lazio, prima contro seconda: oggi alcuni equilibri possono cambiare senza aspettare risultati da altri campi. Anche il calendario precedente conta: 16 delle quaranta squadre arrivano da un impegno di coppa negli ultimi tre giorni. Il tempo per preparare la partita non è uguale per tutti: controlliamo i precedenti prima di parlare di ritmi, rotazioni e possibile fatica.",
-    "Da calciatore penso soprattutto a come si arriva a queste partite. C’è chi deve confermare un buon percorso e chi sente il bisogno di reagire. La classifica dà il contesto, ma in campo servono attenzione e fiducia nei compagni: non basta essere favoriti, e non si parte battuti perché si è indietro. Entriamo nelle quattro divisioni."
+    "Buongiorno e benvenuti a Coffee Time. Oggi, 22 ottobre, Road To History torna in campo per l’ottava giornata di campionato: quaranta squadre, venti incontri e quattro divisioni, con calcio d’inizio alle 22:00. Il filo conduttore del turno è il passaggio dalla coppa al campionato: ritrovare ritmo e concentrazione prima di una nuova serata di calcio. Qui sotto trovate il programma completo; nelle quattro tab entreremo nel dettaglio di ogni divisione.",
+    "Il tema di oggi è la gestione del tempo fra una partita e l’altra. Sedici squadre hanno giocato in Coppa di Lega il 20 ottobre; per le altre ventiquattro l’ultimo impegno registrato risale al campionato del 18. Due giorni contro quattro tra gli incontri: un contesto diverso per preparare il turno, non una prova automatica di stanchezza. Chi ha giocato più di recente deve dosare il lavoro; chi ha avuto più tempo può curare i dettagli, senza perdere intensità.",
+    "Da calciatore, il cambio di competizione richiede soprattutto di voltare pagina. Una vittoria può darti fiducia, una sconfitta può restare in testa: in entrambi i casi devi ritrovare attenzione per il nuovo impegno. Con poco recupero contano la comunicazione e la lucidità; con qualche giorno in più, non bisogna confondere il riposo con una partita già facile. È questo il clima della giornata, prima di entrare nei singoli campi."
   ],
   "divisions": [
     {
@@ -1744,7 +1744,7 @@
       ]
     }
   ],
-  "closing": "Il quadro della giornata è completo: venti partite, dal duello a distanza Celtic–Bologna allo scontro diretto Hertha–Lazio. Ci ritroviamo alle 14:00 con Daytime per mercato, trattative e approfondimenti. Dopo le gare, Final Whistle raccoglierà risultati e analisi. Da Federica Zille, Andrea Stramaccioni e Alessandro Florenzi, buon calcio a tutti.",
+  "closing": "Scegliete la divisione per approfondire le partite del turno. Appuntamento alle 14:00 con Daytime per mercato, trattative e approfondimenti; dopo le gare, Final Whistle con risultati e analisi. Buona giornata da Federica Zille, Andrea Stramaccioni e Alessandro Florenzi.",
   "recovery_checked_at": "2026-10-22T07:41:56.083Z",
   "assignments": {
     "effective_from": "2026-10-22",
