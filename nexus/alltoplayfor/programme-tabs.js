@@ -21,7 +21,7 @@
   const button=document.createElement('button');button.type='button';button.id='tab-'+id;button.role='tab';button.textContent=title;button.setAttribute('aria-controls','panel-'+id);nav.append(button);
   const panel=document.createElement('section');panel.id='panel-'+id;panel.role='tabpanel';panel.setAttribute('aria-labelledby',button.id);panel.tabIndex=0;
   if(id==='final-whistle'){content.before(panel);panel.append(status,content,empty)}else{
-   panel.className='programme-empty';const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=description;const note=document.createElement('p');note.className='programme-pending';note.textContent='Nessuna edizione pubblicata. Le notizie appariranno qui, dalla più recente.';panel.append(h,p,note);nav.after(panel);
+   panel.className='programme-empty';const note=document.createElement('p');note.className='programme-pending';note.textContent='Nessuna edizione pubblicata. Le notizie appariranno qui, dalla più recente.';panel.append(note);nav.after(panel);
   }
   const banner=document.createElement('img');banner.className='section-banner';banner.src='assets/'+id+'-v1.webp';banner.alt='All To Play For | '+title+' — '+description;banner.width=2048;banner.height=683;banner.decoding='async';panel.prepend(banner);panels.set(id,panel);
   button.addEventListener('click',()=>select(id,true));
