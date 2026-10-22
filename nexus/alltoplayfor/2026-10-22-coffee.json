@@ -46,9 +46,9 @@
     {
       "name": "Div 1",
       "intro": [
-        "In Div 1 il Monaco 1860 difende due punti di vantaggio sul Torino. La capolista visita il Palermo, i granata ospitano l’Atalanta; dietro, Dynamo–Sampdoria mette di fronte due squadre separate da appena due punti. Reggina–Genoa pesa invece nella parte bassa.",
-        "Il Torino ha subito appena quattro gol: è una base solida per inseguire. Ma la Samp, terza, trova una Dynamo con soli sei gol incassati: lì la gestione delle occasioni può fare la differenza. Sul fronte recupero: Sampdoria, Parma Calcio 1913, AEK Athens, Palermo FC, Torino, Atalanta BC arrivano da impegni di coppa negli ultimi tre giorni. Questo può orientare la gestione delle energie e delle sostituzioni; non abbiamo però dati sui carichi individuali.",
-        "Quando giochi uno scontro diretto come Reggina–Genoa, a pari punti, senti il peso di ogni episodio. Non bisogna confondere l’importanza della partita con l’obbligo di risolverla subito."
+        "Entriamo in Div 1: analizziamo la classifica prima di collegarci con i campi. Il Monaco 1860 guida con 17 punti, il Torino segue a 15 e la Sampdoria è terza a 12. Guardiamo tutte e dieci le squadre, poi vediamo come questo turno può cambiare gli equilibri.",
+        "Ciao Fede. Il Torino può andare in testa se batte l’Atalanta e il Monaco perde a Palermo: 18 punti contro 17. Se invece la capolista pareggia, una vittoria granata porterebbe entrambe a 18, senza assegnare qui il primato a pari punti. Dietro, la Dynamo può sorpassare la Samp vincendo lo scontro diretto: 13 a 12. Il Parma, battendo l’AEK, lo raggiungerebbe a quota 10. Il Torino ha incassato appena quattro gol: mantenere quell’equilibrio sarà importante per trasformare l’occasione in punti.",
+        "Ciao Strama, nella testa di chi gioca cambia molto sapere che puoi superare proprio l’avversario che hai davanti. Reggina e Genoa partono entrambe da 5: chi vince sale a 8 e lascia l’altra a 5, ma la posizione finale dipenderà anche da Parma e Atalanta. A Dresda la Samp può invece portare a cinque punti il margine sui padroni di casa: 15 contro 10. Sono opportunità concrete, da affrontare senza cercare il gol a ogni costo fin dal primo minuto."
       ],
       "fixtures": [
         {
@@ -132,7 +132,7 @@
             "label": "Inviato in prova",
             "side": "home"
           },
-          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
+          "reporter_intro": "Ciao Fede! Sono in prova a Dresda: non so neanche come ho trovato il campo, figurati la formazione. Mi sto ambientando; intanto ti racconto il percorso delle due squadre."
         },
         {
           "id": 368861384,
@@ -215,7 +215,7 @@
             "label": "Inviato in prova",
             "side": "home"
           },
-          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
+          "reporter_intro": "Ciao Strama! Qui a Parma sono ancora in prova: per ora riconosco meglio la strada per il bar che quella per lo spogliatoio. Sulla formazione non mi sbilancio, parto dagli ultimi impegni."
         },
         {
           "id": 368861385,
@@ -298,7 +298,7 @@
             "label": "Inviato in prova",
             "side": "home"
           },
-          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
+          "reporter_intro": "Ciao Ale! Mi hanno mandato a Palermo e pensavano che con questo cognome fossi già di casa. Invece sono in prova e devo ancora orientarmi: cominciamo dal cammino delle due squadre."
         },
         {
           "id": 368861386,
@@ -381,7 +381,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Fede! Vi porto il punto da AS Reggina 1914: vediamo come arrivano le due squadre a questo appuntamento."
         },
         {
           "id": 368861387,
@@ -464,16 +464,16 @@
             "label": "Inviato in prova",
             "side": "home"
           },
-          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
+          "reporter_intro": "Ciao Fede! In prova a Torino, presente: ho trovato il microfono, la formazione ancora no. Prima di fare il fenomeno, ti porto il quadro degli ultimi incontri."
         }
       ]
     },
     {
       "name": "Div 2",
       "intro": [
-        "La Div 2 riparte dal duello Celtic–Bologna, separati da un punto. La capolista riceve il Partizan, l’inseguitrice va dal Feyenoord. Fenerbahçe–Kaiserslautern e Boca–Valencia possono invece cambiare la composizione del gruppo immediatamente dietro.",
-        "A Istanbul vedremo una squadra da ventuno gol fatti contro una che ne ha subiti otto. È un confronto fra produzione offensiva e tenuta: il numero di occasioni non coincide automaticamente con il controllo della gara. Sul fronte recupero: Celtic, 1. FC Kaiserslautern, Valencia CF arrivano da impegni di coppa negli ultimi tre giorni. Questo può orientare la gestione delle energie e delle sostituzioni; non abbiamo però dati sui carichi individuali.",
-        "Celtic e Bologna devono pensare prima alla propria prestazione. Sapere di avere il rivale così vicino può indurre a forzare: contro squadre in difficoltà serve comunque pazienza."
+        "Passiamo alla Div 2 e analizziamo la classifica: Celtic a 18, Bologna a 17, poi un gruppo molto compatto fra 13 e 12 punti. Ecco il quadro completo prima delle cinque partite di oggi.",
+        "Fede, il Bologna può sorpassare il Celtic vincendo a Rotterdam se la capolista non batte il Partizan: salirebbe a 20, contro 19 o 18 degli scozzesi. Con due vittorie il distacco resta di un punto. A Istanbul il Fenerbahçe, oggi sesto, può superare il Kaiserslautern: una vittoria lo porterebbe a 15 contro 13. Ma non equivale automaticamente al terzo posto, perché anche Boca e Valencia possono arrivare a 15. Conta gestire gli spazi, soprattutto contro i ventuno gol già segnati dal Kaiserslautern.",
+        "Ciao Fede, Boca e Valencia sono entrambe a 12: lo scontro diretto permette a una delle due di staccare l’altra di tre punti. Un pareggio le porterebbe a 13, lasciando aperta la porta alle rivali. Più in basso, Académica ed Eintracht partono da 5: vincere significa salire a 8 e prendere respiro; perdere espone anche al possibile sorpasso del Partizan, che vincendo arriverebbe a 7. Da giocatore, prima penso a questa possibilità concreta e poi guardo gli altri campi."
       ],
       "fixtures": [
         {
@@ -557,7 +557,7 @@
             "label": "Inviato in prova",
             "side": "home"
           },
-          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
+          "reporter_intro": "Ciao Strama! Sono in prova a Coimbra: sto imparando i nomi delle vie prima di quelli degli schemi. Non chiedermi ancora undici titolari a memoria, ma sugli ultimi risultati possiamo ragionare."
         },
         {
           "id": 368861474,
@@ -640,7 +640,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Strama! Vi porto il punto da Celtic: vediamo come arrivano le due squadre a questo appuntamento."
         },
         {
           "id": 368861475,
@@ -723,7 +723,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Strama! Vi porto il punto da Fenerbahçe SK: vediamo come arrivano le due squadre a questo appuntamento."
         },
         {
           "id": 368861476,
@@ -806,7 +806,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Strama! Vi porto il punto da Boca Juniors: vediamo come arrivano le due squadre a questo appuntamento."
         },
         {
           "id": 368861477,
@@ -889,16 +889,16 @@
             "label": "Inviato in prova",
             "side": "home"
           },
-          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
+          "reporter_intro": "Ciao Ale! Da Rotterdam tutto bene, a parte che sono in prova e non ho ancora capito dove devo mettermi. Per le dritte di spogliatoio ripassa; oggi partiamo dal calendario."
         }
       ]
     },
     {
       "name": "Div 3",
       "intro": [
-        "In Div 3 il Marsiglia ha raccolto tutti i ventuno punti disponibili. Oggi arriva il Legia, terzo a quindici, mentre il Dortmund riceve il Sunderland. Il Napoli cerca una risposta contro lo Shakhtar e l’Atlético affronta il Tottenham.",
-        "Dortmund e Shakhtar hanno entrambi segnato ventidue gol, ma ne hanno subiti rispettivamente quindici e diciotto. Il tema non è solo attaccare: è come restano disposti quando l’azione si interrompe. Sul fronte recupero: Borussia Dortmund, Tottenham Hotspur, Legia Warszawa arrivano da impegni di coppa negli ultimi tre giorni. Questo può orientare la gestione delle energie e delle sostituzioni; non abbiamo però dati sui carichi individuali.",
-        "Per il Legia affrontare chi ha sempre vinto può essere uno stimolo. L’importante è non cambiare atteggiamento al primo momento difficile: una partita così va attraversata, non vinta in dieci minuti."
+        "Ora analizziamo la classifica della Div 3. Marsiglia a punteggio pieno con 21 punti, Dortmund e Legia a 15, Shakhtar e Guangzhou a 13: il turno può modificare soprattutto le distanze. Vediamo la classifica completa.",
+        "Ciao Fede. Il Marsiglia resterà primo anche perdendo, ma il Legia può dimezzare il distacco vincendo lo scontro diretto: da sei a tre punti. Una vittoria dei francesi porterebbe invece il margine sul Legia a nove. Anche il Dortmund può avvicinarsi a tre punti, se batte il Sunderland e il Marsiglia perde. Shakhtar e Guangzhou, vincendo, salirebbero a 16 e potrebbero superare le inseguitrici ferme a 15: è una serata in cui il gruppo alle spalle della capolista può ridisegnarsi.",
+        "Ciao Strama, per il Legia questa è l’occasione di rendere la corsa meno lontana, senza pensare di dover recuperare sei punti in una sola partita. In basso l’Atlético può salire da 3 a 6 battendo il Tottenham, che resterebbe a 7: per uscire dall’ultimo posto dovrà comunque guardare gli altri risultati. Il Napoli, vincendo con lo Shakhtar, arriverebbe a 7 e potrebbe raggiungere gli Spurs se questi perdessero. Sono traguardi piccoli ma importanti per ritrovare fiducia."
       ],
       "fixtures": [
         {
@@ -982,7 +982,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Ale! Vi porto il punto da Borussia Dortmund: vediamo come arrivano le due squadre a questo appuntamento."
         },
         {
           "id": 368861564,
@@ -1065,7 +1065,7 @@
             "label": "Inviato in prova",
             "side": "home"
           },
-          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
+          "reporter_intro": "Ciao Fede! Qui al Tottenham sono in prova: mi sentivo pronto, poi mi hanno chiesto la formazione e ho controllato se il microfono fosse acceso. Meglio cominciare da come arrivano alla gara."
         },
         {
           "id": 368861565,
@@ -1148,7 +1148,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Ale! Vi porto il punto da Guangzhou FC: vediamo come arrivano le due squadre a questo appuntamento."
         },
         {
           "id": 368861566,
@@ -1231,7 +1231,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Ale! Vi porto il punto da Olympique Marseille: vediamo come arrivano le due squadre a questo appuntamento."
         },
         {
           "id": 368861567,
@@ -1314,16 +1314,16 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Ale! Vi porto il punto da SSC Napoli: vediamo come arrivano le due squadre a questo appuntamento."
         }
       ]
     },
     {
       "name": "Div 4",
       "intro": [
-        "La Div 4 mette al centro Hertha–Lazio: prima e seconda, diciotto e sedici punti. Il Flamengo visita la Roma e può approfittare del confronto al vertice; il Campobasso cerca continuità a Kyiv. Completano il turno São Paulo–Schalke e River–América.",
-        "La Lazio arriva con venti gol fatti e soltanto sei subiti: il miglior equilibrio dei numeri di questo confronto. L’Hertha ha però il vantaggio in classifica: sarà interessante vedere chi saprà gestire meglio i cambi di ritmo. Sul fronte recupero: HERTHA BSC, SS Lazio, Campobasso Calcio, AS Roma arrivano da impegni di coppa negli ultimi tre giorni. Questo può orientare la gestione delle energie e delle sostituzioni; non abbiamo però dati sui carichi individuali.",
-        "Uno scontro per la vetta si prepara anche controllando l’emozione. Hertha e Lazio non devono sentirsi obbligate a dimostrare tutto nella prima azione: lucidità e comunicazione fra compagni contano molto."
+        "Chiudiamo con la Div 4: analizziamo la classifica, perché oggi si affrontano le prime due. Hertha a 18, Lazio a 16; dietro ci sono Flamengo a 12 e Campobasso a 11. Ecco tutte le posizioni prima del calcio d’inizio.",
+        "Fede, a Berlino il sorpasso è diretto: la Lazio vincendo salirebbe a 19 e lascerebbe l’Hertha a 18. Una vittoria dell’Hertha allargherebbe invece il margine a cinque punti, 21 contro 16; il pareggio conserverebbe i due punti di distanza. La Lazio ha subito sei gol contro i dieci dell’Hertha, ma entrambe vengono dalla coppa: servirà lucidità per tenere l’equilibrio. Alle loro spalle il Campobasso può superare il Flamengo vincendo a Kyiv se i brasiliani non vincono a Roma: 14 contro 13 o 12.",
+        "Ciao Fede, Roma–Flamengo vale anche la possibilità di un aggancio: vincendo, la Roma arriverebbe a 12 come i brasiliani, senza poter dare per certa la posizione a pari punti. Più sotto il River può superare l’América nello scontro diretto: 10 contro 9. Lo Schalke può salire a 11 vincendo a São Paulo, mentre la Dynamo può arrivare a 10 battendo il Campobasso. Da giocatore non inseguirei tutti i risultati in tempo reale: il modo migliore di sfruttare questa classifica corta è restare dentro la propria partita."
       ],
       "fixtures": [
         {
@@ -1407,7 +1407,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Fede! Vi porto il punto da HERTHA BSC: vediamo come arrivano le due squadre a questo appuntamento."
         },
         {
           "id": 368861654,
@@ -1490,7 +1490,7 @@
             "label": "Inviato in prova",
             "side": "home"
           },
-          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
+          "reporter_intro": "Ciao Strama! Sono in prova a Kyiv e mi sto ancora ambientando: se mi chiedi una soffiata, al massimo ti dico da che parte tira il vento. Vediamo intanto gli impegni precedenti."
         },
         {
           "id": 368861655,
@@ -1573,7 +1573,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Fede! Vi porto il punto da AS Roma: vediamo come arrivano le due squadre a questo appuntamento."
         },
         {
           "id": 368861656,
@@ -1656,7 +1656,7 @@
             "label": "Inviata in prova",
             "side": "home"
           },
-          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
+          "reporter_intro": "Ciao Ale! In prova a São Paulo: ho appena capito dove siamo e già mi chiedete chi gioca. Dammi il tempo di conoscere la squadra; intanto mettiamo in ordine il percorso verso la partita."
         },
         {
           "id": 368861657,
@@ -1739,7 +1739,7 @@
             "label": "Assegnazione confermata",
             "side": "home"
           },
-          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
+          "reporter_intro": "Ciao Fede! Vi porto il punto da River Plate: vediamo come arrivano le due squadre a questo appuntamento."
         }
       ]
     }

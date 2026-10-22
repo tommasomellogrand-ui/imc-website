@@ -11,9 +11,9 @@ for(const f of data.divisions.flatMap(d=>d.fixtures)){
  assert.equal(f.home_reporter.club_id,f.home_table.id);
  assert.equal(f.reporters.length,2);
  if(f.home_reporter.status==='trial'){
-  assert.match(f.home_reporter.label,/in prova/);
-  assert.match(f.reporter_intro,/Sono ancora in prova/);
-  assert.match(f.reporter_intro,/non sono ancora sul pezzo/);
+  assert.match(f.home_reporter.label,/in prova/i);
+  assert.match(f.reporter_intro,/in prova/i);
+  assert.match(f.reporter_intro,/Ciao (Fede|Strama|Ale)/);
  }
 }
 assert.equal(roster.items.find(a=>a.club_id===94078890).name,'Paolo Assogna');

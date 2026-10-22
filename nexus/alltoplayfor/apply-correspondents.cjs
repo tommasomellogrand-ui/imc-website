@@ -16,6 +16,7 @@ function apply(data){
   const trial=f.home_reporter.status==='trial';
   f.reporter_intro=trial?'Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena.':'Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati.';
  }
+ require('./division-editorial.cjs')(data);
  return data;
 }
 module.exports={apply,rows};
