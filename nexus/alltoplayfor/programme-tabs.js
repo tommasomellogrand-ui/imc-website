@@ -33,6 +33,6 @@
  }
  function fromUrl(){const url=new URL(location.href);date.value=url.searchParams.get('date')||'2026-10-20';applyDate();select(url.searchParams.get('section')||(url.hash.startsWith('#postmatch-')||url.searchParams.has('club')?'final-whistle':'coffee-time'),false)}
  nav.addEventListener('keydown',event=>{const buttons=[...nav.querySelectorAll('button')];let index=buttons.indexOf(document.activeElement);if(index<0)return;if(event.key==='ArrowRight')index=(index+1)%3;else if(event.key==='ArrowLeft')index=(index+2)%3;else if(event.key==='Home')index=0;else if(event.key==='End')index=2;else return;event.preventDefault();buttons[index].focus();buttons[index].click()});
- const css=document.createElement('link');css.rel='stylesheet';css.href='coffee.css?v=2';document.head.append(css);const script=document.createElement('script');script.src='coffee.js?v=2';document.body.append(script);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='coffee.css?v=2';document.head.append(css);const script=document.createElement('script');script.src='coffee.js?v=3';document.body.append(script);
  window.addEventListener('popstate',fromUrl);window.addEventListener('hashchange',fromUrl);fromUrl();
 })();

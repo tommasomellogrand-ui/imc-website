@@ -1,0 +1,285 @@
+{
+  "effective_from": "2026-10-22",
+  "items": [
+    {
+      "club_id": 94078889,
+      "club": "AS Reggina 1914",
+      "name": "Eleonora Incardona",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079171,
+      "club": "HERTHA BSC",
+      "name": "Giorgia Cenni",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079408,
+      "club": "Legia Warszawa",
+      "name": "Valentina Caruso",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079188,
+      "club": "Celtic",
+      "name": "Nicola Roggero",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94078906,
+      "club": "Atlético Madrid",
+      "name": "Giancarlo Marocchi",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94078878,
+      "club": "SS Lazio",
+      "name": "Matteo Petrucci",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94080273,
+      "club": "Guangzhou FC",
+      "name": "Stefania Pinna",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079501,
+      "club": "SSC Napoli",
+      "name": "Francesco Repice",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94078863,
+      "club": "Atalanta BC",
+      "name": "Massimo Nebuloni",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079159,
+      "club": "Borussia Dortmund",
+      "name": "Federica Lodi",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079037,
+      "club": "Boca Juniors",
+      "name": "Veronica Brunati",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94078892,
+      "club": "Sampdoria",
+      "name": "Gianluca Di Marzio",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079165,
+      "club": "FC Schalke 04",
+      "name": "Sarah Castellana",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079117,
+      "club": "Fenerbahçe SK",
+      "name": "Anna Billò",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079172,
+      "club": "1. FC Kaiserslautern",
+      "name": "Giorgia Rossi",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94078890,
+      "club": "AS Roma",
+      "name": "Paolo Assogna",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94082591,
+      "club": "Campobasso Calcio",
+      "name": "Valentina Ciarlante",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079049,
+      "club": "River Plate",
+      "name": "Stefano Borghi",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079097,
+      "club": "Olympique Marseille",
+      "name": "Maurizio Compagnoni",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94078939,
+      "club": "Valencia CF",
+      "name": "Vanessa Leonardi",
+      "status": "confirmed",
+      "label": "Assegnazione confermata"
+    },
+    {
+      "club_id": 94079182,
+      "club": "TSV 1860 München",
+      "name": "Pietro Nicolodi",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94078981,
+      "club": "Académica de Coimbra",
+      "name": "Antonio Nucera",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94079139,
+      "club": "AEK Athens",
+      "name": "Gianluigi Bagnulo",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94078865,
+      "club": "Bologna FC",
+      "name": "Francesco Cosatti",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94079202,
+      "club": "Club América",
+      "name": "Filippo Benincampi",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94079161,
+      "club": "Dynamo Dresden",
+      "name": "Dario Massara",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94079114,
+      "club": "Dynamo Kyiv",
+      "name": "Marco Bovicelli",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94079162,
+      "club": "Eintracht Frankfurt",
+      "name": "Matteo Barzaghi",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94078959,
+      "club": "Feyenoord",
+      "name": "Riccardo Gentile",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94079061,
+      "club": "CR Flamengo",
+      "name": "Peppe Di Stefano",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94078875,
+      "club": "Genoa CFC",
+      "name": "Riccardo Re",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94078884,
+      "club": "Palermo FC",
+      "name": "Bruno Palermo",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94079067,
+      "club": "Palmeiras",
+      "name": "Luca Cilli",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94078885,
+      "club": "Parma Calcio 1913",
+      "name": "Marco Nosotti",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94079148,
+      "club": "FK Partizan",
+      "name": "Giovanni Guardalà",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94079073,
+      "club": "São Paulo FC",
+      "name": "Marina Presello",
+      "status": "trial",
+      "label": "Inviata in prova"
+    },
+    {
+      "club_id": 94079115,
+      "club": "Shakhtar Donetsk",
+      "name": "Alessandro Sugoni",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94078843,
+      "club": "Sunderland",
+      "name": "Valentina Mariani",
+      "status": "trial",
+      "label": "Inviata in prova"
+    },
+    {
+      "club_id": 94078895,
+      "club": "Torino",
+      "name": "Paolo Aghemo",
+      "status": "trial",
+      "label": "Inviato in prova"
+    },
+    {
+      "club_id": 94078847,
+      "club": "Tottenham Hotspur",
+      "name": "Massimo Marianella",
+      "status": "trial",
+      "label": "Inviato in prova"
+    }
+  ]
+}

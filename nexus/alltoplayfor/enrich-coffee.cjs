@@ -32,6 +32,7 @@ async function enrich(){
  ];
  data.recovery_checked_at=new Date().toISOString();
  assert.equal(fixtures.length,20);assert.equal(history.size,40);
+ require('./apply-correspondents.cjs').apply(data);
  fs.writeFileSync(path,JSON.stringify(data,null,2)+'\n');
  console.log('Verified recent fixtures for',history.size,'clubs;',recent,'recent cup participants');
  for(const d of data.divisions)console.log(d.name,d.fixtures.map(f=>`${f.home} (${f.recovery.home.competition}, ${f.recovery.home.days_between}) / ${f.away} (${f.recovery.away.competition}, ${f.recovery.away.days_between})`).join('\n'));

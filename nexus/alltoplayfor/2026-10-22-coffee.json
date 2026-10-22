@@ -7,9 +7,21 @@
   "source": "https://www.italianmastersclub.it/nexus/matchday/data.php?world=GW001&season=2&day=8",
   "title": "Venti partite, quattro storie da seguire",
   "portraits": [
-    {"name":"Federica Zille","image":"assets/coffee-zille.webp","source":"https://overtimefestival.it/federica-zille/"},
-    {"name":"Andrea Stramaccioni","image":"assets/coffee-stramaccioni.webp","source":"https://www.fcinternews.it/copertina/stramaccioni-allo-stadium-la-vittoria-dell-interismo-ecco-perche-dopo-il-derby-dissi-e-vostro-alla-curva-nord-337458"},
-    {"name":"Alessandro Florenzi","image":"assets/coffee-florenzi.webp","source":"https://sport.sky.it/calcio/serie-a/2025/08/27/alessandro-florenzi-ritiro-calcio-video"}
+    {
+      "name": "Federica Zille",
+      "image": "assets/coffee-zille.webp",
+      "source": "https://overtimefestival.it/federica-zille/"
+    },
+    {
+      "name": "Andrea Stramaccioni",
+      "image": "assets/coffee-stramaccioni.webp",
+      "source": "https://www.fcinternews.it/copertina/stramaccioni-allo-stadium-la-vittoria-dell-interismo-ecco-perche-dopo-il-derby-dissi-e-vostro-alla-curva-nord-337458"
+    },
+    {
+      "name": "Alessandro Florenzi",
+      "image": "assets/coffee-florenzi.webp",
+      "source": "https://sport.sky.it/calcio/serie-a/2025/08/27/alessandro-florenzi-ritiro-calcio-video"
+    }
   ],
   "cast": [
     [
@@ -68,8 +80,20 @@
           },
           "reporters": [
             {
+              "club_id": 94079161,
+              "club": "Dynamo Dresden",
+              "name": "Dario Massara",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "home"
+            },
+            {
+              "club_id": 94078892,
+              "club": "Sampdoria",
               "name": "Gianluca Di Marzio",
-              "club": "Sampdoria"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "away"
             }
           ],
           "title": "Due punti per cambiare gerarchie",
@@ -99,7 +123,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078892"
             }
           },
-          "recovery_text": "Dynamo Dresden: ultimo incontro registrato il 18 ottobre in campionato, Atalanta BC–Dynamo Dresden 1–1; 4 giorni tra le due date. Sampdoria: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Sampdoria–Celtic 0–4; 2 giorni tra le due date. Dynamo Dresden ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "Dynamo Dresden: ultimo incontro registrato il 18 ottobre in campionato, Atalanta BC–Dynamo Dresden 1–1; 4 giorni tra le due date. Sampdoria: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Sampdoria–Celtic 0–4; 2 giorni tra le due date. Dynamo Dresden ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94079161,
+            "club": "Dynamo Dresden",
+            "name": "Dario Massara",
+            "status": "trial",
+            "label": "Inviato in prova",
+            "side": "home"
+          },
+          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
         },
         {
           "id": 368861384,
@@ -128,7 +161,24 @@
             "ga": 6,
             "position": 4
           },
-          "reporters": [],
+          "reporters": [
+            {
+              "club_id": 94078885,
+              "club": "Parma Calcio 1913",
+              "name": "Marco Nosotti",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "home"
+            },
+            {
+              "club_id": 94079139,
+              "club": "AEK Athens",
+              "name": "Gianluigi Bagnulo",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
+            }
+          ],
           "title": "Parma cerca il contatto",
           "text": "Il Parma parte da sette punti e può raggiungere l’AEK a dieci. Le due squadre hanno subito entrambe sei reti: la differenza finora è nella produzione offensiva, nove gol per gli ospiti e sei per i padroni di casa. Una sfida in cui la qualità delle occasioni potrebbe pesare più della quantità.",
           "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078885",
@@ -156,7 +206,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079139"
             }
           },
-          "recovery_text": "Parma Calcio 1913: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Valencia CF–Parma Calcio 1913 0–0; 2 giorni tra le due date. AEK Athens: ultimo incontro registrato il 20 ottobre in Coppa di Lega, AS Roma–AEK Athens 2–2; 2 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 2 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "Parma Calcio 1913: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Valencia CF–Parma Calcio 1913 0–0; 2 giorni tra le due date. AEK Athens: ultimo incontro registrato il 20 ottobre in Coppa di Lega, AS Roma–AEK Athens 2–2; 2 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 2 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94078885,
+            "club": "Parma Calcio 1913",
+            "name": "Marco Nosotti",
+            "status": "trial",
+            "label": "Inviato in prova",
+            "side": "home"
+          },
+          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
         },
         {
           "id": 368861385,
@@ -185,7 +244,24 @@
             "ga": 10,
             "position": 1
           },
-          "reporters": [],
+          "reporters": [
+            {
+              "club_id": 94078884,
+              "club": "Palermo FC",
+              "name": "Bruno Palermo",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "home"
+            },
+            {
+              "club_id": 94079182,
+              "club": "TSV 1860 München",
+              "name": "Pietro Nicolodi",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
+            }
+          ],
           "title": "La capolista incontra la fame del Palermo",
           "text": "Diciassette punti contro due: il Monaco 1860 arriva da primo, il Palermo da ultimo. I diciotto gol della capolista sono un riferimento importante, ma per i siciliani la priorità è restare dentro la partita. Il rischio per gli ospiti è considerare il divario in classifica una garanzia: va trasformato in prestazione.",
           "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078884",
@@ -213,7 +289,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079182"
             }
           },
-          "recovery_text": "Palermo FC: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Palermo FC–Borussia Dortmund 2–2; 2 giorni tra le due date. TSV 1860 München: ultimo incontro registrato il 18 ottobre in campionato, TSV 1860 München–AS Reggina 1914 5–1; 4 giorni tra le due date. TSV 1860 München ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "Palermo FC: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Palermo FC–Borussia Dortmund 2–2; 2 giorni tra le due date. TSV 1860 München: ultimo incontro registrato il 18 ottobre in campionato, TSV 1860 München–AS Reggina 1914 5–1; 4 giorni tra le due date. TSV 1860 München ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94078884,
+            "club": "Palermo FC",
+            "name": "Bruno Palermo",
+            "status": "trial",
+            "label": "Inviato in prova",
+            "side": "home"
+          },
+          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
         },
         {
           "id": 368861386,
@@ -244,8 +329,20 @@
           },
           "reporters": [
             {
+              "club_id": 94078889,
+              "club": "AS Reggina 1914",
               "name": "Eleonora Incardona",
-              "club": "AS Reggina 1914"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
+            },
+            {
+              "club_id": 94078875,
+              "club": "Genoa CFC",
+              "name": "Riccardo Re",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
             }
           ],
           "title": "Stessi punti, stessa urgenza",
@@ -275,7 +372,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078875"
             }
           },
-          "recovery_text": "AS Reggina 1914: ultimo incontro registrato il 18 ottobre in campionato, TSV 1860 München–AS Reggina 1914 5–1; 4 giorni tra le due date. Genoa CFC: ultimo incontro registrato il 18 ottobre in campionato, Genoa CFC–Torino 0–1; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "AS Reggina 1914: ultimo incontro registrato il 18 ottobre in campionato, TSV 1860 München–AS Reggina 1914 5–1; 4 giorni tra le due date. Genoa CFC: ultimo incontro registrato il 18 ottobre in campionato, Genoa CFC–Torino 0–1; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94078889,
+            "club": "AS Reggina 1914",
+            "name": "Eleonora Incardona",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         },
         {
           "id": 368861387,
@@ -306,8 +412,20 @@
           },
           "reporters": [
             {
+              "club_id": 94078895,
+              "club": "Torino",
+              "name": "Paolo Aghemo",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "home"
+            },
+            {
+              "club_id": 94078863,
+              "club": "Atalanta BC",
               "name": "Massimo Nebuloni",
-              "club": "Atalanta BC"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "away"
             }
           ],
           "title": "Torino, solidità da confermare",
@@ -337,7 +455,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078863"
             }
           },
-          "recovery_text": "Torino: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Legia Warszawa–Torino 2–1; 2 giorni tra le due date. Atalanta BC: ultimo incontro registrato il 20 ottobre in Coppa di Lega, 1. FC Kaiserslautern–Atalanta BC 1–1; 2 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 2 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "Torino: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Legia Warszawa–Torino 2–1; 2 giorni tra le due date. Atalanta BC: ultimo incontro registrato il 20 ottobre in Coppa di Lega, 1. FC Kaiserslautern–Atalanta BC 1–1; 2 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 2 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94078895,
+            "club": "Torino",
+            "name": "Paolo Aghemo",
+            "status": "trial",
+            "label": "Inviato in prova",
+            "side": "home"
+          },
+          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
         }
       ]
     },
@@ -376,7 +503,24 @@
             "ga": 13,
             "position": 7
           },
-          "reporters": [],
+          "reporters": [
+            {
+              "club_id": 94078981,
+              "club": "Académica de Coimbra",
+              "name": "Antonio Nucera",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "home"
+            },
+            {
+              "club_id": 94079162,
+              "club": "Eintracht Frankfurt",
+              "name": "Matteo Barzaghi",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
+            }
+          ],
           "title": "Una sfida per staccarsi",
           "text": "Académica ed Eintracht hanno entrambe cinque punti: il confronto può interrompere un percorso fin qui complicato. I portoghesi hanno subito diciotto gol, i tedeschi tredici. Prima ancora delle ambizioni offensive, sarà importante evitare che ogni pallone perso diventi un’occasione per l’avversario.",
           "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078981",
@@ -404,7 +548,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079162"
             }
           },
-          "recovery_text": "Académica de Coimbra: ultimo incontro registrato il 18 ottobre in campionato, Bologna FC–Académica de Coimbra 3–0; 4 giorni tra le due date. Eintracht Frankfurt: ultimo incontro registrato il 18 ottobre in campionato, Eintracht Frankfurt–Celtic 0–4; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "Académica de Coimbra: ultimo incontro registrato il 18 ottobre in campionato, Bologna FC–Académica de Coimbra 3–0; 4 giorni tra le due date. Eintracht Frankfurt: ultimo incontro registrato il 18 ottobre in campionato, Eintracht Frankfurt–Celtic 0–4; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94078981,
+            "club": "Académica de Coimbra",
+            "name": "Antonio Nucera",
+            "status": "trial",
+            "label": "Inviato in prova",
+            "side": "home"
+          },
+          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
         },
         {
           "id": 368861474,
@@ -435,8 +588,20 @@
           },
           "reporters": [
             {
+              "club_id": 94079188,
+              "club": "Celtic",
               "name": "Nicola Roggero",
-              "club": "Celtic"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
+            },
+            {
+              "club_id": 94079148,
+              "club": "FK Partizan",
+              "name": "Giovanni Guardalà",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
             }
           ],
           "title": "Celtic, il primato non ammette distrazioni",
@@ -466,7 +631,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079148"
             }
           },
-          "recovery_text": "Celtic: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Sampdoria–Celtic 0–4; 2 giorni tra le due date. FK Partizan: ultimo incontro registrato il 18 ottobre in campionato, FK Partizan–Fenerbahçe SK 0–1; 4 giorni tra le due date. FK Partizan ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "Celtic: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Sampdoria–Celtic 0–4; 2 giorni tra le due date. FK Partizan: ultimo incontro registrato il 18 ottobre in campionato, FK Partizan–Fenerbahçe SK 0–1; 4 giorni tra le due date. FK Partizan ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94079188,
+            "club": "Celtic",
+            "name": "Nicola Roggero",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         },
         {
           "id": 368861475,
@@ -497,12 +671,20 @@
           },
           "reporters": [
             {
+              "club_id": 94079117,
+              "club": "Fenerbahçe SK",
               "name": "Anna Billò",
-              "club": "Fenerbahçe SK"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
             },
             {
+              "club_id": 94079172,
+              "club": "1. FC Kaiserslautern",
               "name": "Giorgia Rossi",
-              "club": "1. FC Kaiserslautern"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "away"
             }
           ],
           "title": "A Istanbul passa un pezzo di alta classifica",
@@ -532,7 +714,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079172"
             }
           },
-          "recovery_text": "Fenerbahçe SK: ultimo incontro registrato il 18 ottobre in campionato, FK Partizan–Fenerbahçe SK 0–1; 4 giorni tra le due date. 1. FC Kaiserslautern: ultimo incontro registrato il 20 ottobre in Coppa di Lega, 1. FC Kaiserslautern–Atalanta BC 1–1; 2 giorni tra le due date. Fenerbahçe SK ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "Fenerbahçe SK: ultimo incontro registrato il 18 ottobre in campionato, FK Partizan–Fenerbahçe SK 0–1; 4 giorni tra le due date. 1. FC Kaiserslautern: ultimo incontro registrato il 20 ottobre in Coppa di Lega, 1. FC Kaiserslautern–Atalanta BC 1–1; 2 giorni tra le due date. Fenerbahçe SK ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94079117,
+            "club": "Fenerbahçe SK",
+            "name": "Anna Billò",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         },
         {
           "id": 368861476,
@@ -563,8 +754,20 @@
           },
           "reporters": [
             {
+              "club_id": 94079037,
+              "club": "Boca Juniors",
               "name": "Veronica Brunati",
-              "club": "Boca Juniors"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
+            },
+            {
+              "club_id": 94078939,
+              "club": "Valencia CF",
+              "name": "Vanessa Leonardi",
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "away"
             }
           ],
           "title": "Dodici punti a testa, due modi di arrivarci",
@@ -594,7 +797,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078939"
             }
           },
-          "recovery_text": "Boca Juniors: ultimo incontro registrato il 18 ottobre in campionato, 1. FC Kaiserslautern–Boca Juniors 4–0; 4 giorni tra le due date. Valencia CF: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Valencia CF–Parma Calcio 1913 0–0; 2 giorni tra le due date. Boca Juniors ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "Boca Juniors: ultimo incontro registrato il 18 ottobre in campionato, 1. FC Kaiserslautern–Boca Juniors 4–0; 4 giorni tra le due date. Valencia CF: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Valencia CF–Parma Calcio 1913 0–0; 2 giorni tra le due date. Boca Juniors ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94079037,
+            "club": "Boca Juniors",
+            "name": "Veronica Brunati",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         },
         {
           "id": 368861477,
@@ -623,7 +835,24 @@
             "ga": 6,
             "position": 2
           },
-          "reporters": [],
+          "reporters": [
+            {
+              "club_id": 94078959,
+              "club": "Feyenoord",
+              "name": "Riccardo Gentile",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "home"
+            },
+            {
+              "club_id": 94078865,
+              "club": "Bologna FC",
+              "name": "Francesco Cosatti",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
+            }
+          ],
           "title": "Bologna in scia, Feyenoord in cerca di svolta",
           "text": "Il Bologna ha diciassette punti e tiene il Celtic nel mirino. Il Feyenoord è ultimo con un punto, due gol fatti e ventiquattro subiti: una distanza netta, che rende ancora più importante per gli ospiti affrontare bene la partita dall’inizio. Per gli olandesi servono ordine e una prestazione capace di restituire fiducia.",
           "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078959",
@@ -651,7 +880,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078865"
             }
           },
-          "recovery_text": "Feyenoord: ultimo incontro registrato il 18 ottobre in campionato, Valencia CF–Feyenoord 5–0; 4 giorni tra le due date. Bologna FC: ultimo incontro registrato il 18 ottobre in campionato, Bologna FC–Académica de Coimbra 3–0; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "Feyenoord: ultimo incontro registrato il 18 ottobre in campionato, Valencia CF–Feyenoord 5–0; 4 giorni tra le due date. Bologna FC: ultimo incontro registrato il 18 ottobre in campionato, Bologna FC–Académica de Coimbra 3–0; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94078959,
+            "club": "Feyenoord",
+            "name": "Riccardo Gentile",
+            "status": "trial",
+            "label": "Inviato in prova",
+            "side": "home"
+          },
+          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
         }
       ]
     },
@@ -692,8 +930,20 @@
           },
           "reporters": [
             {
+              "club_id": 94079159,
+              "club": "Borussia Dortmund",
               "name": "Federica Lodi",
-              "club": "Borussia Dortmund"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
+            },
+            {
+              "club_id": 94078843,
+              "club": "Sunderland",
+              "name": "Valentina Mariani",
+              "status": "trial",
+              "label": "Inviata in prova",
+              "side": "away"
             }
           ],
           "title": "Dortmund, segnare non basta",
@@ -723,7 +973,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078843"
             }
           },
-          "recovery_text": "Borussia Dortmund: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Palermo FC–Borussia Dortmund 2–2; 2 giorni tra le due date. Sunderland: ultimo incontro registrato il 18 ottobre in campionato, Sunderland–Tottenham Hotspur 1–3; 4 giorni tra le due date. Sunderland ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "Borussia Dortmund: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Palermo FC–Borussia Dortmund 2–2; 2 giorni tra le due date. Sunderland: ultimo incontro registrato il 18 ottobre in campionato, Sunderland–Tottenham Hotspur 1–3; 4 giorni tra le due date. Sunderland ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94079159,
+            "club": "Borussia Dortmund",
+            "name": "Federica Lodi",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         },
         {
           "id": 368861564,
@@ -754,8 +1013,20 @@
           },
           "reporters": [
             {
+              "club_id": 94078847,
+              "club": "Tottenham Hotspur",
+              "name": "Massimo Marianella",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "home"
+            },
+            {
+              "club_id": 94078906,
+              "club": "Atlético Madrid",
               "name": "Giancarlo Marocchi",
-              "club": "Atlético Madrid"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "away"
             }
           ],
           "title": "Tottenham–Atlético, difese sotto esame",
@@ -785,7 +1056,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078906"
             }
           },
-          "recovery_text": "Tottenham Hotspur: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Tottenham Hotspur–SS Lazio 4–2; 2 giorni tra le due date. Atlético Madrid: ultimo incontro registrato il 18 ottobre in campionato, Atlético Madrid–Guangzhou FC 1–2; 4 giorni tra le due date. Atlético Madrid ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "Tottenham Hotspur: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Tottenham Hotspur–SS Lazio 4–2; 2 giorni tra le due date. Atlético Madrid: ultimo incontro registrato il 18 ottobre in campionato, Atlético Madrid–Guangzhou FC 1–2; 4 giorni tra le due date. Atlético Madrid ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94078847,
+            "club": "Tottenham Hotspur",
+            "name": "Massimo Marianella",
+            "status": "trial",
+            "label": "Inviato in prova",
+            "side": "home"
+          },
+          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
         },
         {
           "id": 368861565,
@@ -816,8 +1096,20 @@
           },
           "reporters": [
             {
+              "club_id": 94080273,
+              "club": "Guangzhou FC",
               "name": "Stefania Pinna",
-              "club": "Guangzhou FC"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
+            },
+            {
+              "club_id": 94079067,
+              "club": "Palmeiras",
+              "name": "Luca Cilli",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
             }
           ],
           "title": "Guangzhou guarda avanti",
@@ -847,7 +1139,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079067"
             }
           },
-          "recovery_text": "Guangzhou FC: ultimo incontro registrato il 18 ottobre in campionato, Atlético Madrid–Guangzhou FC 1–2; 4 giorni tra le due date. Palmeiras: ultimo incontro registrato il 18 ottobre in campionato, Palmeiras–Olympique Marseille 0–3; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "Guangzhou FC: ultimo incontro registrato il 18 ottobre in campionato, Atlético Madrid–Guangzhou FC 1–2; 4 giorni tra le due date. Palmeiras: ultimo incontro registrato il 18 ottobre in campionato, Palmeiras–Olympique Marseille 0–3; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94080273,
+            "club": "Guangzhou FC",
+            "name": "Stefania Pinna",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         },
         {
           "id": 368861566,
@@ -878,8 +1179,20 @@
           },
           "reporters": [
             {
+              "club_id": 94079097,
+              "club": "Olympique Marseille",
+              "name": "Maurizio Compagnoni",
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
+            },
+            {
+              "club_id": 94079408,
+              "club": "Legia Warszawa",
               "name": "Valentina Caruso",
-              "club": "Legia Warszawa"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "away"
             }
           ],
           "title": "Il Legia sfida il percorso perfetto",
@@ -909,7 +1222,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079408"
             }
           },
-          "recovery_text": "Olympique Marseille: ultimo incontro registrato il 18 ottobre in campionato, Palmeiras–Olympique Marseille 0–3; 4 giorni tra le due date. Legia Warszawa: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Legia Warszawa–Torino 2–1; 2 giorni tra le due date. Olympique Marseille ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "Olympique Marseille: ultimo incontro registrato il 18 ottobre in campionato, Palmeiras–Olympique Marseille 0–3; 4 giorni tra le due date. Legia Warszawa: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Legia Warszawa–Torino 2–1; 2 giorni tra le due date. Olympique Marseille ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94079097,
+            "club": "Olympique Marseille",
+            "name": "Maurizio Compagnoni",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         },
         {
           "id": 368861567,
@@ -940,8 +1262,20 @@
           },
           "reporters": [
             {
+              "club_id": 94079501,
+              "club": "SSC Napoli",
               "name": "Francesco Repice",
-              "club": "SSC Napoli"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
+            },
+            {
+              "club_id": 94079115,
+              "club": "Shakhtar Donetsk",
+              "name": "Alessandro Sugoni",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
             }
           ],
           "title": "Napoli cerca una risposta",
@@ -971,7 +1305,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079115"
             }
           },
-          "recovery_text": "SSC Napoli: ultimo incontro registrato il 18 ottobre in campionato, Legia Warszawa–SSC Napoli 2–0; 4 giorni tra le due date. Shakhtar Donetsk: ultimo incontro registrato il 18 ottobre in campionato, Shakhtar Donetsk–Borussia Dortmund 4–5; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "SSC Napoli: ultimo incontro registrato il 18 ottobre in campionato, Legia Warszawa–SSC Napoli 2–0; 4 giorni tra le due date. Shakhtar Donetsk: ultimo incontro registrato il 18 ottobre in campionato, Shakhtar Donetsk–Borussia Dortmund 4–5; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94079501,
+            "club": "SSC Napoli",
+            "name": "Francesco Repice",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         }
       ]
     },
@@ -1012,12 +1355,20 @@
           },
           "reporters": [
             {
+              "club_id": 94079171,
+              "club": "HERTHA BSC",
               "name": "Giorgia Cenni",
-              "club": "HERTHA BSC"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
             },
             {
+              "club_id": 94078878,
+              "club": "SS Lazio",
               "name": "Matteo Petrucci",
-              "club": "SS Lazio"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "away"
             }
           ],
           "title": "A Berlino c’è in palio la vetta",
@@ -1047,7 +1398,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078878"
             }
           },
-          "recovery_text": "HERTHA BSC: ultimo incontro registrato il 20 ottobre in Coppa di Lega, HERTHA BSC–Campobasso Calcio 4–0; 2 giorni tra le due date. SS Lazio: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Tottenham Hotspur–SS Lazio 4–2; 2 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 2 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "HERTHA BSC: ultimo incontro registrato il 20 ottobre in Coppa di Lega, HERTHA BSC–Campobasso Calcio 4–0; 2 giorni tra le due date. SS Lazio: ultimo incontro registrato il 20 ottobre in Coppa di Lega, Tottenham Hotspur–SS Lazio 4–2; 2 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 2 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94079171,
+            "club": "HERTHA BSC",
+            "name": "Giorgia Cenni",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         },
         {
           "id": 368861654,
@@ -1076,7 +1436,24 @@
             "ga": 13,
             "position": 4
           },
-          "reporters": [],
+          "reporters": [
+            {
+              "club_id": 94079114,
+              "club": "Dynamo Kyiv",
+              "name": "Marco Bovicelli",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "home"
+            },
+            {
+              "club_id": 94082591,
+              "club": "Campobasso Calcio",
+              "name": "Valentina Ciarlante",
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "away"
+            }
+          ],
           "title": "Campobasso, occasione per restare in alto",
           "text": "Il Campobasso è quarto con undici punti e diciassette gol segnati. La Dynamo Kyiv, a sette, cerca un risultato che accorci le distanze: ha concesso undici reti, due meno degli avversari. Gli ospiti portano una produzione offensiva superiore, i padroni di casa devono trovare il modo di limitarla senza rinunciare a costruire.",
           "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079114",
@@ -1104,7 +1481,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94082591"
             }
           },
-          "recovery_text": "Dynamo Kyiv: ultimo incontro registrato il 18 ottobre in campionato, SS Lazio–Dynamo Kyiv 2–2; 4 giorni tra le due date. Campobasso Calcio: ultimo incontro registrato il 20 ottobre in Coppa di Lega, HERTHA BSC–Campobasso Calcio 4–0; 2 giorni tra le due date. Dynamo Kyiv ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "Dynamo Kyiv: ultimo incontro registrato il 18 ottobre in campionato, SS Lazio–Dynamo Kyiv 2–2; 4 giorni tra le due date. Campobasso Calcio: ultimo incontro registrato il 20 ottobre in Coppa di Lega, HERTHA BSC–Campobasso Calcio 4–0; 2 giorni tra le due date. Dynamo Kyiv ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94079114,
+            "club": "Dynamo Kyiv",
+            "name": "Marco Bovicelli",
+            "status": "trial",
+            "label": "Inviato in prova",
+            "side": "home"
+          },
+          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
         },
         {
           "id": 368861655,
@@ -1133,7 +1519,24 @@
             "ga": 9,
             "position": 3
           },
-          "reporters": [],
+          "reporters": [
+            {
+              "club_id": 94078890,
+              "club": "AS Roma",
+              "name": "Paolo Assogna",
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
+            },
+            {
+              "club_id": 94079061,
+              "club": "CR Flamengo",
+              "name": "Peppe Di Stefano",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
+            }
+          ],
           "title": "Roma–Flamengo, tre punti di distanza",
           "text": "La Roma ha nove punti, il Flamengo dodici. I giallorossi hanno incassato sette reti ma ne hanno segnate otto; i brasiliani hanno già trovato sedici gol. Il confronto può misurare la tenuta della Roma contro un attacco produttivo e la capacità del Flamengo di non lasciare spazi mentre cerca il vantaggio.",
           "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078890",
@@ -1161,7 +1564,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079061"
             }
           },
-          "recovery_text": "AS Roma: ultimo incontro registrato il 20 ottobre in Coppa di Lega, AS Roma–AEK Athens 2–2; 2 giorni tra le due date. CR Flamengo: ultimo incontro registrato il 18 ottobre in campionato, CR Flamengo–São Paulo FC 2–0; 4 giorni tra le due date. CR Flamengo ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza."
+          "recovery_text": "AS Roma: ultimo incontro registrato il 20 ottobre in Coppa di Lega, AS Roma–AEK Athens 2–2; 2 giorni tra le due date. CR Flamengo: ultimo incontro registrato il 18 ottobre in campionato, CR Flamengo–São Paulo FC 2–0; 4 giorni tra le due date. CR Flamengo ha 2 giorni in più tra gli incontri registrati: un possibile vantaggio nella preparazione, non una garanzia di maggiore freschezza.",
+          "home_reporter": {
+            "club_id": 94078890,
+            "club": "AS Roma",
+            "name": "Paolo Assogna",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         },
         {
           "id": 368861656,
@@ -1192,8 +1604,20 @@
           },
           "reporters": [
             {
+              "club_id": 94079073,
+              "club": "São Paulo FC",
+              "name": "Marina Presello",
+              "status": "trial",
+              "label": "Inviata in prova",
+              "side": "home"
+            },
+            {
+              "club_id": 94079165,
+              "club": "FC Schalke 04",
               "name": "Sarah Castellana",
-              "club": "FC Schalke 04"
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "away"
             }
           ],
           "title": "Schalke, una trasferta da interpretare",
@@ -1223,7 +1647,16 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079165"
             }
           },
-          "recovery_text": "São Paulo FC: ultimo incontro registrato il 18 ottobre in campionato, CR Flamengo–São Paulo FC 2–0; 4 giorni tra le due date. FC Schalke 04: ultimo incontro registrato il 18 ottobre in campionato, FC Schalke 04–River Plate 2–0; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "São Paulo FC: ultimo incontro registrato il 18 ottobre in campionato, CR Flamengo–São Paulo FC 2–0; 4 giorni tra le due date. FC Schalke 04: ultimo incontro registrato il 18 ottobre in campionato, FC Schalke 04–River Plate 2–0; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94079073,
+            "club": "São Paulo FC",
+            "name": "Marina Presello",
+            "status": "trial",
+            "label": "Inviata in prova",
+            "side": "home"
+          },
+          "reporter_intro": "Sono ancora in prova: sto imparando a conoscere la squadra e non sono ancora sul pezzo come vorrei. Per ora parto dai dati verificati, senza spacciarvi retroscena."
         },
         {
           "id": 368861657,
@@ -1252,7 +1685,24 @@
             "ga": 12,
             "position": 6
           },
-          "reporters": [],
+          "reporters": [
+            {
+              "club_id": 94079049,
+              "club": "River Plate",
+              "name": "Stefano Borghi",
+              "status": "confirmed",
+              "label": "Assegnazione confermata",
+              "side": "home"
+            },
+            {
+              "club_id": 94079202,
+              "club": "Club América",
+              "name": "Filippo Benincampi",
+              "status": "trial",
+              "label": "Inviato in prova",
+              "side": "away"
+            }
+          ],
           "title": "River e América, la distanza è colmabile",
           "text": "Due punti separano River Plate e Club América: sette contro nove. Il River ha segnato soltanto cinque reti, mentre i messicani sono a undici. Per gli argentini il tema è costruire una minaccia più continua; per gli ospiti, sfruttare il vantaggio offensivo senza offrire agli avversari la possibilità di ritrovare fiducia.",
           "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079049",
@@ -1280,11 +1730,305 @@
               "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079202"
             }
           },
-          "recovery_text": "River Plate: ultimo incontro registrato il 18 ottobre in campionato, FC Schalke 04–River Plate 2–0; 4 giorni tra le due date. Club América: ultimo incontro registrato il 18 ottobre in campionato, Club América–HERTHA BSC 2–4; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli."
+          "recovery_text": "River Plate: ultimo incontro registrato il 18 ottobre in campionato, FC Schalke 04–River Plate 2–0; 4 giorni tra le due date. Club América: ultimo incontro registrato il 18 ottobre in campionato, Club América–HERTHA BSC 2–4; 4 giorni tra le due date. Le due squadre hanno lo stesso intervallo di calendario: 4 giorni. La gestione dei ritmi dipenderà anche dai minuti effettivamente giocati dai singoli.",
+          "home_reporter": {
+            "club_id": 94079049,
+            "club": "River Plate",
+            "name": "Stefano Borghi",
+            "status": "confirmed",
+            "label": "Assegnazione confermata",
+            "side": "home"
+          },
+          "reporter_intro": "Vi racconto come arrivano le due squadre a questa partita, partendo dagli ultimi impegni registrati."
         }
       ]
     }
   ],
   "closing": "Il quadro della giornata è completo: venti partite, dal duello a distanza Celtic–Bologna allo scontro diretto Hertha–Lazio. Ci ritroviamo alle 14:00 con Daytime per mercato, trattative e approfondimenti. Dopo le gare, Final Whistle raccoglierà risultati e analisi. Da Federica Zille, Andrea Stramaccioni e Alessandro Florenzi, buon calcio a tutti.",
-  "recovery_checked_at": "2026-10-22T07:41:56.083Z"
+  "recovery_checked_at": "2026-10-22T07:41:56.083Z",
+  "assignments": {
+    "effective_from": "2026-10-22",
+    "items": [
+      {
+        "club_id": 94078889,
+        "club": "AS Reggina 1914",
+        "name": "Eleonora Incardona",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079171,
+        "club": "HERTHA BSC",
+        "name": "Giorgia Cenni",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079408,
+        "club": "Legia Warszawa",
+        "name": "Valentina Caruso",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079188,
+        "club": "Celtic",
+        "name": "Nicola Roggero",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94078906,
+        "club": "Atlético Madrid",
+        "name": "Giancarlo Marocchi",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94078878,
+        "club": "SS Lazio",
+        "name": "Matteo Petrucci",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94080273,
+        "club": "Guangzhou FC",
+        "name": "Stefania Pinna",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079501,
+        "club": "SSC Napoli",
+        "name": "Francesco Repice",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94078863,
+        "club": "Atalanta BC",
+        "name": "Massimo Nebuloni",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079159,
+        "club": "Borussia Dortmund",
+        "name": "Federica Lodi",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079037,
+        "club": "Boca Juniors",
+        "name": "Veronica Brunati",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94078892,
+        "club": "Sampdoria",
+        "name": "Gianluca Di Marzio",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079165,
+        "club": "FC Schalke 04",
+        "name": "Sarah Castellana",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079117,
+        "club": "Fenerbahçe SK",
+        "name": "Anna Billò",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079172,
+        "club": "1. FC Kaiserslautern",
+        "name": "Giorgia Rossi",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94078890,
+        "club": "AS Roma",
+        "name": "Paolo Assogna",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94082591,
+        "club": "Campobasso Calcio",
+        "name": "Valentina Ciarlante",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079049,
+        "club": "River Plate",
+        "name": "Stefano Borghi",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079097,
+        "club": "Olympique Marseille",
+        "name": "Maurizio Compagnoni",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94078939,
+        "club": "Valencia CF",
+        "name": "Vanessa Leonardi",
+        "status": "confirmed",
+        "label": "Assegnazione confermata"
+      },
+      {
+        "club_id": 94079182,
+        "club": "TSV 1860 München",
+        "name": "Pietro Nicolodi",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94078981,
+        "club": "Académica de Coimbra",
+        "name": "Antonio Nucera",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94079139,
+        "club": "AEK Athens",
+        "name": "Gianluigi Bagnulo",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94078865,
+        "club": "Bologna FC",
+        "name": "Francesco Cosatti",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94079202,
+        "club": "Club América",
+        "name": "Filippo Benincampi",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94079161,
+        "club": "Dynamo Dresden",
+        "name": "Dario Massara",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94079114,
+        "club": "Dynamo Kyiv",
+        "name": "Marco Bovicelli",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94079162,
+        "club": "Eintracht Frankfurt",
+        "name": "Matteo Barzaghi",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94078959,
+        "club": "Feyenoord",
+        "name": "Riccardo Gentile",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94079061,
+        "club": "CR Flamengo",
+        "name": "Peppe Di Stefano",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94078875,
+        "club": "Genoa CFC",
+        "name": "Riccardo Re",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94078884,
+        "club": "Palermo FC",
+        "name": "Bruno Palermo",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94079067,
+        "club": "Palmeiras",
+        "name": "Luca Cilli",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94078885,
+        "club": "Parma Calcio 1913",
+        "name": "Marco Nosotti",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94079148,
+        "club": "FK Partizan",
+        "name": "Giovanni Guardalà",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94079073,
+        "club": "São Paulo FC",
+        "name": "Marina Presello",
+        "status": "trial",
+        "label": "Inviata in prova"
+      },
+      {
+        "club_id": 94079115,
+        "club": "Shakhtar Donetsk",
+        "name": "Alessandro Sugoni",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94078843,
+        "club": "Sunderland",
+        "name": "Valentina Mariani",
+        "status": "trial",
+        "label": "Inviata in prova"
+      },
+      {
+        "club_id": 94078895,
+        "club": "Torino",
+        "name": "Paolo Aghemo",
+        "status": "trial",
+        "label": "Inviato in prova"
+      },
+      {
+        "club_id": 94078847,
+        "club": "Tottenham Hotspur",
+        "name": "Massimo Marianella",
+        "status": "trial",
+        "label": "Inviato in prova"
+      }
+    ]
+  }
 }
