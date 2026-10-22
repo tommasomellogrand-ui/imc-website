@@ -1,0 +1,784 @@
+{
+  "date": "2026-10-22",
+  "world": "GW001",
+  "day": 8,
+  "season": 2,
+  "checked_at": "2026-10-22T07:22:53.077Z",
+  "source": "https://www.italianmastersclub.it/nexus/matchday/data.php?world=GW001&season=2&day=8",
+  "title": "Venti partite, quattro storie da seguire",
+  "cast": [
+    [
+      "Federica Zille",
+      "Conduzione"
+    ],
+    [
+      "Andrea Stramaccioni",
+      "Analisi tattica"
+    ],
+    [
+      "Alessandro Florenzi",
+      "Il punto di vista del calciatore"
+    ]
+  ],
+  "opening": [
+    "Buongiorno e benvenuti a Coffee Time. Oggi, 22 ottobre, torna il campionato di Road To History con l’ottava giornata: venti partite, cinque per ciascuna delle quattro divisioni. Prima di entrare nei singoli campi, guardiamo il turno nel suo insieme: ci sono primati da difendere, inseguitrici vicinissime e squadre che cercano una svolta.",
+    "I distacchi raccontano quattro situazioni diverse. In Div 1 il Torino è a due punti dal Monaco 1860; in Div 2 il Bologna è a uno dal Celtic. Il Marsiglia ha invece sei punti sulle prime inseguitrici in Div 3. E in Div 4 il calendario ci offre direttamente Hertha–Lazio, prima contro seconda: oggi alcuni equilibri possono cambiare senza aspettare risultati da altri campi.",
+    "Da calciatore penso soprattutto a come si arriva a queste partite. C’è chi deve confermare un buon percorso e chi sente il bisogno di reagire. La classifica dà il contesto, ma in campo servono attenzione e fiducia nei compagni: non basta essere favoriti, e non si parte battuti perché si è indietro. Entriamo nelle quattro divisioni."
+  ],
+  "divisions": [
+    {
+      "name": "Div 1",
+      "intro": [
+        "In Div 1 il Monaco 1860 difende due punti di vantaggio sul Torino. La capolista visita il Palermo, i granata ospitano l’Atalanta; dietro, Dynamo–Sampdoria mette di fronte due squadre separate da appena due punti. Reggina–Genoa pesa invece nella parte bassa.",
+        "Il Torino ha subito appena quattro gol: è una base solida per inseguire. Ma la Samp, terza, trova una Dynamo con soli sei gol incassati: lì la gestione delle occasioni può fare la differenza.",
+        "Quando giochi uno scontro diretto come Reggina–Genoa, a pari punti, senti il peso di ogni episodio. Non bisogna confondere l’importanza della partita con l’obbligo di risolverla subito."
+      ],
+      "fixtures": [
+        {
+          "id": 368861383,
+          "home": "Dynamo Dresden",
+          "away": "Sampdoria",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/394.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/125.png",
+          "home_manager": "Matteo Sartori",
+          "away_manager": "Mattia Bertonati",
+          "home_table": {
+            "id": 94079161,
+            "name": "Dynamo Dresden",
+            "played": 7,
+            "points": 10,
+            "gf": 8,
+            "ga": 6,
+            "position": 5
+          },
+          "away_table": {
+            "id": 94078892,
+            "name": "Sampdoria",
+            "played": 7,
+            "points": 12,
+            "gf": 9,
+            "ga": 9,
+            "position": 3
+          },
+          "reporters": [
+            {
+              "name": "Gianluca Di Marzio",
+              "club": "Sampdoria"
+            }
+          ],
+          "title": "Due punti per cambiare gerarchie",
+          "text": "La Sampdoria arriva terza a quota 12, ma la Dynamo è a soli due punti. È uno scontro diretto che può consolidare il podio oppure riaprire la corsa: i padroni di casa hanno incassato sei gol, contro i nove dei blucerchiati. La Samp dovrà trovare continuità senza concedere alla Dynamo una gara giocata sui propri ritmi.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079161"
+        },
+        {
+          "id": 368861384,
+          "home": "Parma Calcio 1913",
+          "away": "AEK Athens",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/118.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/372.png",
+          "home_manager": "Lauro Crasti",
+          "away_manager": "Clemente Liggi",
+          "home_table": {
+            "id": 94078885,
+            "name": "Parma Calcio 1913",
+            "played": 7,
+            "points": 7,
+            "gf": 6,
+            "ga": 6,
+            "position": 6
+          },
+          "away_table": {
+            "id": 94079139,
+            "name": "AEK Athens",
+            "played": 7,
+            "points": 10,
+            "gf": 9,
+            "ga": 6,
+            "position": 4
+          },
+          "reporters": [],
+          "title": "Parma cerca il contatto",
+          "text": "Il Parma parte da sette punti e può raggiungere l’AEK a dieci. Le due squadre hanno subito entrambe sei reti: la differenza finora è nella produzione offensiva, nove gol per gli ospiti e sei per i padroni di casa. Una sfida in cui la qualità delle occasioni potrebbe pesare più della quantità.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078885"
+        },
+        {
+          "id": 368861385,
+          "home": "Palermo FC",
+          "away": "TSV 1860 München",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/117.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/415.png",
+          "home_manager": "Al Zubeidi",
+          "away_manager": "Marco Fioretti",
+          "home_table": {
+            "id": 94078884,
+            "name": "Palermo FC",
+            "played": 7,
+            "points": 2,
+            "gf": 8,
+            "ga": 14,
+            "position": 10
+          },
+          "away_table": {
+            "id": 94079182,
+            "name": "TSV 1860 München",
+            "played": 7,
+            "points": 17,
+            "gf": 18,
+            "ga": 10,
+            "position": 1
+          },
+          "reporters": [],
+          "title": "La capolista incontra la fame del Palermo",
+          "text": "Diciassette punti contro due: il Monaco 1860 arriva da primo, il Palermo da ultimo. I diciotto gol della capolista sono un riferimento importante, ma per i siciliani la priorità è restare dentro la partita. Il rischio per gli ospiti è considerare il divario in classifica una garanzia: va trasformato in prestazione.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078884"
+        },
+        {
+          "id": 368861386,
+          "home": "AS Reggina 1914",
+          "away": "Genoa CFC",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/122.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/108.png",
+          "home_manager": "Saverio Cordiano",
+          "away_manager": "Giovanni Cabrioli",
+          "home_table": {
+            "id": 94078889,
+            "name": "AS Reggina 1914",
+            "played": 7,
+            "points": 5,
+            "gf": 5,
+            "ga": 13,
+            "position": 9
+          },
+          "away_table": {
+            "id": 94078875,
+            "name": "Genoa CFC",
+            "played": 7,
+            "points": 5,
+            "gf": 8,
+            "ga": 12,
+            "position": 8
+          },
+          "reporters": [
+            {
+              "name": "Eleonora Incardona",
+              "club": "AS Reggina 1914"
+            }
+          ],
+          "title": "Stessi punti, stessa urgenza",
+          "text": "Reggina e Genoa si presentano entrambe a quota cinque. I rossoblù hanno segnato otto reti, i calabresi cinque, ma nessuna delle due difese ha ancora trovato piena stabilità. È uno scontro diretto nella parte bassa: gestire bene i momenti di difficoltà conterà quanto cercare il vantaggio.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078889"
+        },
+        {
+          "id": 368861387,
+          "home": "Torino",
+          "away": "Atalanta BC",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/128.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/96.png",
+          "home_manager": "Federico Bonzi",
+          "away_manager": "Matteo Giovi",
+          "home_table": {
+            "id": 94078895,
+            "name": "Torino",
+            "played": 7,
+            "points": 15,
+            "gf": 11,
+            "ga": 4,
+            "position": 2
+          },
+          "away_table": {
+            "id": 94078863,
+            "name": "Atalanta BC",
+            "played": 7,
+            "points": 7,
+            "gf": 7,
+            "ga": 9,
+            "position": 7
+          },
+          "reporters": [
+            {
+              "name": "Massimo Nebuloni",
+              "club": "Atalanta BC"
+            }
+          ],
+          "title": "Torino, solidità da confermare",
+          "text": "Il Torino insegue il primo posto con quindici punti e soltanto quattro reti subite. L’Atalanta, ferma a sette, affronta quindi una delle difese più difficili da superare. Per i granata la sfida è unire controllo e iniziativa; per i bergamaschi, trovare occasioni senza sbilanciarsi nella ricerca del colpo esterno.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078895"
+        }
+      ]
+    },
+    {
+      "name": "Div 2",
+      "intro": [
+        "La Div 2 riparte dal duello Celtic–Bologna, separati da un punto. La capolista riceve il Partizan, l’inseguitrice va dal Feyenoord. Fenerbahçe–Kaiserslautern e Boca–Valencia possono invece cambiare la composizione del gruppo immediatamente dietro.",
+        "A Istanbul vedremo una squadra da ventuno gol fatti contro una che ne ha subiti otto. È un confronto fra produzione offensiva e tenuta: il numero di occasioni non coincide automaticamente con il controllo della gara.",
+        "Celtic e Bologna devono pensare prima alla propria prestazione. Sapere di avere il rivale così vicino può indurre a forzare: contro squadre in difficoltà serve comunque pazienza."
+      ],
+      "fixtures": [
+        {
+          "id": 368861473,
+          "home": "Académica de Coimbra",
+          "away": "Eintracht Frankfurt",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/214.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/395.png",
+          "home_manager": "Nick Keyen",
+          "away_manager": "Nicolae Sasarman",
+          "home_table": {
+            "id": 94078981,
+            "name": "Académica de Coimbra",
+            "played": 7,
+            "points": 5,
+            "gf": 9,
+            "ga": 18,
+            "position": 8
+          },
+          "away_table": {
+            "id": 94079162,
+            "name": "Eintracht Frankfurt",
+            "played": 7,
+            "points": 5,
+            "gf": 10,
+            "ga": 13,
+            "position": 7
+          },
+          "reporters": [],
+          "title": "Una sfida per staccarsi",
+          "text": "Académica ed Eintracht hanno entrambe cinque punti: il confronto può interrompere un percorso fin qui complicato. I portoghesi hanno subito diciotto gol, i tedeschi tredici. Prima ancora delle ambizioni offensive, sarà importante evitare che ogni pallone perso diventi un’occasione per l’avversario.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078981"
+        },
+        {
+          "id": 368861474,
+          "home": "Celtic",
+          "away": "FK Partizan",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/421.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/381.png",
+          "home_manager": "Sir Simone",
+          "away_manager": "Tommaso Prisco",
+          "home_table": {
+            "id": 94079188,
+            "name": "Celtic",
+            "played": 7,
+            "points": 18,
+            "gf": 19,
+            "ga": 4,
+            "position": 1
+          },
+          "away_table": {
+            "id": 94079148,
+            "name": "FK Partizan",
+            "played": 7,
+            "points": 4,
+            "gf": 9,
+            "ga": 20,
+            "position": 9
+          },
+          "reporters": [
+            {
+              "name": "Nicola Roggero",
+              "club": "Celtic"
+            }
+          ],
+          "title": "Celtic, il primato non ammette distrazioni",
+          "text": "Il Celtic guida con diciotto punti e una differenza reti di +15; il Partizan è a quattro. Il Bologna resta però a una sola lunghezza dalla vetta, quindi la capolista non ha margine per rilassarsi. Gli ospiti hanno già concesso venti reti: reggere la prima pressione sarà uno dei passaggi della loro partita.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079188"
+        },
+        {
+          "id": 368861475,
+          "home": "Fenerbahçe SK",
+          "away": "1. FC Kaiserslautern",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/350.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/405.png",
+          "home_manager": "Vincenzo Martorano",
+          "away_manager": "Vardan Minasyan",
+          "home_table": {
+            "id": 94079117,
+            "name": "Fenerbahçe SK",
+            "played": 7,
+            "points": 12,
+            "gf": 8,
+            "ga": 8,
+            "position": 6
+          },
+          "away_table": {
+            "id": 94079172,
+            "name": "1. FC Kaiserslautern",
+            "played": 7,
+            "points": 13,
+            "gf": 21,
+            "ga": 9,
+            "position": 3
+          },
+          "reporters": [
+            {
+              "name": "Anna Billò",
+              "club": "Fenerbahçe SK"
+            },
+            {
+              "name": "Giorgia Rossi",
+              "club": "1. FC Kaiserslautern"
+            }
+          ],
+          "title": "A Istanbul passa un pezzo di alta classifica",
+          "text": "Il Kaiserslautern arriva con tredici punti, uno più del Fenerbahçe. Il confronto mette accanto due percorsi diversi: ventuno gol segnati dai tedeschi, otto dai turchi, che hanno però incassato soltanto otto reti. La domanda è se prevarrà la capacità degli ospiti di produrre occasioni o il controllo dei padroni di casa.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079117"
+        },
+        {
+          "id": 368861476,
+          "home": "Boca Juniors",
+          "away": "Valencia CF",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/270.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/172.png",
+          "home_manager": "Luca Nudo",
+          "away_manager": "Giovanni Iodice",
+          "home_table": {
+            "id": 94079037,
+            "name": "Boca Juniors",
+            "played": 7,
+            "points": 12,
+            "gf": 12,
+            "ga": 12,
+            "position": 5
+          },
+          "away_table": {
+            "id": 94078939,
+            "name": "Valencia CF",
+            "played": 7,
+            "points": 12,
+            "gf": 20,
+            "ga": 15,
+            "position": 4
+          },
+          "reporters": [
+            {
+              "name": "Veronica Brunati",
+              "club": "Boca Juniors"
+            }
+          ],
+          "title": "Dodici punti a testa, due modi di arrivarci",
+          "text": "Boca e Valencia sono appaiate a dodici punti. Gli spagnoli hanno segnato venti reti e ne hanno subite quindici, gli argentini hanno un bilancio di dodici e dodici. Il Boca proverà a non farsi trascinare in una gara troppo aperta; il Valencia ha numeri offensivi per mettere alla prova questo equilibrio.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079037"
+        },
+        {
+          "id": 368861477,
+          "home": "Feyenoord",
+          "away": "Bologna FC",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/192.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/98.png",
+          "home_manager": "Ringhio Gattuso",
+          "away_manager": "Fabio Ferrini",
+          "home_table": {
+            "id": 94078959,
+            "name": "Feyenoord",
+            "played": 7,
+            "points": 1,
+            "gf": 2,
+            "ga": 24,
+            "position": 10
+          },
+          "away_table": {
+            "id": 94078865,
+            "name": "Bologna FC",
+            "played": 7,
+            "points": 17,
+            "gf": 19,
+            "ga": 6,
+            "position": 2
+          },
+          "reporters": [],
+          "title": "Bologna in scia, Feyenoord in cerca di svolta",
+          "text": "Il Bologna ha diciassette punti e tiene il Celtic nel mirino. Il Feyenoord è ultimo con un punto, due gol fatti e ventiquattro subiti: una distanza netta, che rende ancora più importante per gli ospiti affrontare bene la partita dall’inizio. Per gli olandesi servono ordine e una prestazione capace di restituire fiducia.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078959"
+        }
+      ]
+    },
+    {
+      "name": "Div 3",
+      "intro": [
+        "In Div 3 il Marsiglia ha raccolto tutti i ventuno punti disponibili. Oggi arriva il Legia, terzo a quindici, mentre il Dortmund riceve il Sunderland. Il Napoli cerca una risposta contro lo Shakhtar e l’Atlético affronta il Tottenham.",
+        "Dortmund e Shakhtar hanno entrambi segnato ventidue gol, ma ne hanno subiti rispettivamente quindici e diciotto. Il tema non è solo attaccare: è come restano disposti quando l’azione si interrompe.",
+        "Per il Legia affrontare chi ha sempre vinto può essere uno stimolo. L’importante è non cambiare atteggiamento al primo momento difficile: una partita così va attraversata, non vinta in dieci minuti."
+      ],
+      "fixtures": [
+        {
+          "id": 368861563,
+          "home": "Borussia Dortmund",
+          "away": "Sunderland",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/392.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/76.png",
+          "home_manager": "Giorgio Grugni",
+          "away_manager": "Lorenzo Errico",
+          "home_table": {
+            "id": 94079159,
+            "name": "Borussia Dortmund",
+            "played": 7,
+            "points": 15,
+            "gf": 22,
+            "ga": 15,
+            "position": 2
+          },
+          "away_table": {
+            "id": 94078843,
+            "name": "Sunderland",
+            "played": 7,
+            "points": 5,
+            "gf": 13,
+            "ga": 17,
+            "position": 7
+          },
+          "reporters": [
+            {
+              "name": "Federica Lodi",
+              "club": "Borussia Dortmund"
+            }
+          ],
+          "title": "Dortmund, segnare non basta",
+          "text": "Il Borussia è secondo con quindici punti e ventidue gol segnati, ma anche quindici subiti. Il Sunderland, a cinque punti, ha trovato tredici reti: un dato che invita i padroni di casa a non trascurare le coperture. Per restare all’inseguimento del Marsiglia, il Dortmund deve accompagnare il proprio attacco con più equilibrio.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079159"
+        },
+        {
+          "id": 368861564,
+          "home": "Tottenham Hotspur",
+          "away": "Atlético Madrid",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/80.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/139.png",
+          "home_manager": "Max Zanoni",
+          "away_manager": "Giuseppe Trovato",
+          "home_table": {
+            "id": 94078847,
+            "name": "Tottenham Hotspur",
+            "played": 7,
+            "points": 7,
+            "gf": 15,
+            "ga": 20,
+            "position": 6
+          },
+          "away_table": {
+            "id": 94078906,
+            "name": "Atlético Madrid",
+            "played": 7,
+            "points": 3,
+            "gf": 10,
+            "ga": 18,
+            "position": 10
+          },
+          "reporters": [
+            {
+              "name": "Giancarlo Marocchi",
+              "club": "Atlético Madrid"
+            }
+          ],
+          "title": "Tottenham–Atlético, difese sotto esame",
+          "text": "Sette punti per il Tottenham, tre per l’Atlético: entrambe cercano una gara che cambi il passo. I venti gol subiti dagli inglesi e i diciotto degli spagnoli raccontano la principale difficoltà. Prima di immaginare una partita risolta dall’attacco, occorre capire chi saprà proteggersi meglio quando perde il pallone.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078847"
+        },
+        {
+          "id": 368861565,
+          "home": "Guangzhou FC",
+          "away": "Palmeiras",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/1521.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/300.png",
+          "home_manager": "Max Palace",
+          "away_manager": "Danilo FC 1908",
+          "home_table": {
+            "id": 94080273,
+            "name": "Guangzhou FC",
+            "played": 7,
+            "points": 13,
+            "gf": 12,
+            "ga": 12,
+            "position": 5
+          },
+          "away_table": {
+            "id": 94079067,
+            "name": "Palmeiras",
+            "played": 7,
+            "points": 5,
+            "gf": 6,
+            "ga": 15,
+            "position": 8
+          },
+          "reporters": [
+            {
+              "name": "Stefania Pinna",
+              "club": "Guangzhou FC"
+            }
+          ],
+          "title": "Guangzhou guarda avanti",
+          "text": "Il Guangzhou è a quota tredici, a due punti dalla coppia Dortmund–Legia. Il Palmeiras arriva invece con cinque punti e sei gol segnati. I padroni di casa hanno l’occasione di restare agganciati alla parte alta, ma il loro bilancio di dodici gol fatti e dodici subiti impone attenzione a entrambe le fasi.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94080273"
+        },
+        {
+          "id": 368861566,
+          "home": "Olympique Marseille",
+          "away": "Legia Warszawa",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/330.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/651.png",
+          "home_manager": "Mathieu Pioche",
+          "away_manager": "Luciano Catalano",
+          "home_table": {
+            "id": 94079097,
+            "name": "Olympique Marseille",
+            "played": 7,
+            "points": 21,
+            "gf": 20,
+            "ga": 5,
+            "position": 1
+          },
+          "away_table": {
+            "id": 94079408,
+            "name": "Legia Warszawa",
+            "played": 7,
+            "points": 15,
+            "gf": 19,
+            "ga": 12,
+            "position": 3
+          },
+          "reporters": [
+            {
+              "name": "Valentina Caruso",
+              "club": "Legia Warszawa"
+            }
+          ],
+          "title": "Il Legia sfida il percorso perfetto",
+          "text": "Ventuno punti in sette gare: il Marsiglia fin qui non ha lasciato nulla agli avversari. Il Legia arriva a quindici e può ridurre il distacco a tre oppure vedere la capolista allontanarsi ancora. I francesi hanno subito soltanto cinque reti: ai polacchi serviranno precisione e pazienza, non soltanto slancio.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079097"
+        },
+        {
+          "id": 368861567,
+          "home": "SSC Napoli",
+          "away": "Shakhtar Donetsk",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/746.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/348.png",
+          "home_manager": "Rosario Giamundo",
+          "away_manager": "Armando De Giulio",
+          "home_table": {
+            "id": 94079501,
+            "name": "SSC Napoli",
+            "played": 7,
+            "points": 4,
+            "gf": 7,
+            "ga": 14,
+            "position": 9
+          },
+          "away_table": {
+            "id": 94079115,
+            "name": "Shakhtar Donetsk",
+            "played": 7,
+            "points": 13,
+            "gf": 22,
+            "ga": 18,
+            "position": 4
+          },
+          "reporters": [
+            {
+              "name": "Francesco Repice",
+              "club": "SSC Napoli"
+            }
+          ],
+          "title": "Napoli cerca una risposta",
+          "text": "Il Napoli ha quattro punti e sette gol segnati; lo Shakhtar è a tredici con ventidue reti all’attivo. Gli ospiti hanno però subito diciotto gol: il divario in classifica non esclude spazi da sfruttare. Per il Napoli sarà essenziale non trasformare la necessità di reagire in una partita priva di equilibrio.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079501"
+        }
+      ]
+    },
+    {
+      "name": "Div 4",
+      "intro": [
+        "La Div 4 mette al centro Hertha–Lazio: prima e seconda, diciotto e sedici punti. Il Flamengo visita la Roma e può approfittare del confronto al vertice; il Campobasso cerca continuità a Kyiv. Completano il turno São Paulo–Schalke e River–América.",
+        "La Lazio arriva con venti gol fatti e soltanto sei subiti: il miglior equilibrio dei numeri di questo confronto. L’Hertha ha però il vantaggio in classifica: sarà interessante vedere chi saprà gestire meglio i cambi di ritmo.",
+        "Uno scontro per la vetta si prepara anche controllando l’emozione. Hertha e Lazio non devono sentirsi obbligate a dimostrare tutto nella prima azione: lucidità e comunicazione fra compagni contano molto."
+      ],
+      "fixtures": [
+        {
+          "id": 368861653,
+          "home": "HERTHA BSC",
+          "away": "SS Lazio",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/404.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/111.png",
+          "home_manager": "Tommaso Mello",
+          "away_manager": "Alessandro Berardi",
+          "home_table": {
+            "id": 94079171,
+            "name": "HERTHA BSC",
+            "played": 7,
+            "points": 18,
+            "gf": 18,
+            "ga": 10,
+            "position": 1
+          },
+          "away_table": {
+            "id": 94078878,
+            "name": "SS Lazio",
+            "played": 7,
+            "points": 16,
+            "gf": 20,
+            "ga": 6,
+            "position": 2
+          },
+          "reporters": [
+            {
+              "name": "Giorgia Cenni",
+              "club": "HERTHA BSC"
+            },
+            {
+              "name": "Matteo Petrucci",
+              "club": "SS Lazio"
+            }
+          ],
+          "title": "A Berlino c’è in palio la vetta",
+          "text": "Hertha prima a diciotto punti, Lazio seconda a sedici: è lo scontro diretto che può cambiare il comando della divisione. I biancocelesti hanno segnato venti reti e ne hanno subite sei; i berlinesi rispondono con diciotto gol fatti e dieci incassati. Il vantaggio in classifica e la solidità dei numeri ospiti rendono il confronto particolarmente aperto.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079171"
+        },
+        {
+          "id": 368861654,
+          "home": "Dynamo Kyiv",
+          "away": "Campobasso Calcio",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/347.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/3874.png",
+          "home_manager": "Oleksandr Medvid",
+          "away_manager": "Simone Campanella",
+          "home_table": {
+            "id": 94079114,
+            "name": "Dynamo Kyiv",
+            "played": 7,
+            "points": 7,
+            "gf": 9,
+            "ga": 11,
+            "position": 8
+          },
+          "away_table": {
+            "id": 94082591,
+            "name": "Campobasso Calcio",
+            "played": 7,
+            "points": 11,
+            "gf": 17,
+            "ga": 13,
+            "position": 4
+          },
+          "reporters": [],
+          "title": "Campobasso, occasione per restare in alto",
+          "text": "Il Campobasso è quarto con undici punti e diciassette gol segnati. La Dynamo Kyiv, a sette, cerca un risultato che accorci le distanze: ha concesso undici reti, due meno degli avversari. Gli ospiti portano una produzione offensiva superiore, i padroni di casa devono trovare il modo di limitarla senza rinunciare a costruire.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079114"
+        },
+        {
+          "id": 368861655,
+          "home": "AS Roma",
+          "away": "CR Flamengo",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/123.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/294.png",
+          "home_manager": "Pep Buitre",
+          "away_manager": "Igor Zanotto",
+          "home_table": {
+            "id": 94078890,
+            "name": "AS Roma",
+            "played": 7,
+            "points": 9,
+            "gf": 8,
+            "ga": 7,
+            "position": 5
+          },
+          "away_table": {
+            "id": 94079061,
+            "name": "CR Flamengo",
+            "played": 7,
+            "points": 12,
+            "gf": 16,
+            "ga": 9,
+            "position": 3
+          },
+          "reporters": [],
+          "title": "Roma–Flamengo, tre punti di distanza",
+          "text": "La Roma ha nove punti, il Flamengo dodici. I giallorossi hanno incassato sette reti ma ne hanno segnate otto; i brasiliani hanno già trovato sedici gol. Il confronto può misurare la tenuta della Roma contro un attacco produttivo e la capacità del Flamengo di non lasciare spazi mentre cerca il vantaggio.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94078890"
+        },
+        {
+          "id": 368861656,
+          "home": "São Paulo FC",
+          "away": "FC Schalke 04",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/306.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/398.png",
+          "home_manager": "Attilio Bonnici",
+          "away_manager": "Francesco Rossi",
+          "home_table": {
+            "id": 94079073,
+            "name": "São Paulo FC",
+            "played": 7,
+            "points": 1,
+            "gf": 6,
+            "ga": 19,
+            "position": 10
+          },
+          "away_table": {
+            "id": 94079165,
+            "name": "FC Schalke 04",
+            "played": 7,
+            "points": 8,
+            "gf": 12,
+            "ga": 16,
+            "position": 7
+          },
+          "reporters": [
+            {
+              "name": "Sarah Castellana",
+              "club": "FC Schalke 04"
+            }
+          ],
+          "title": "Schalke, una trasferta da interpretare",
+          "text": "Lo Schalke parte da otto punti e affronta un São Paulo fermo a uno. I tedeschi hanno segnato dodici reti ma ne hanno subite sedici: numeri che sconsigliano di leggere la gara soltanto attraverso la classifica. Ai brasiliani, con sei gol fatti e diciannove subiti, serve una prestazione più solida per provare a ripartire.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079073"
+        },
+        {
+          "id": 368861657,
+          "home": "River Plate",
+          "away": "Club América",
+          "time": "22:00",
+          "home_logo": "https://cdn.soccerwiki.org/images/logos/clubs/282.png",
+          "away_logo": "https://cdn.soccerwiki.org/images/logos/clubs/439.png",
+          "home_manager": "Marco Catalozzo",
+          "away_manager": "Emanuele Delli Calici",
+          "home_table": {
+            "id": 94079049,
+            "name": "River Plate",
+            "played": 7,
+            "points": 7,
+            "gf": 5,
+            "ga": 19,
+            "position": 9
+          },
+          "away_table": {
+            "id": 94079202,
+            "name": "Club América",
+            "played": 7,
+            "points": 9,
+            "gf": 11,
+            "ga": 12,
+            "position": 6
+          },
+          "reporters": [],
+          "title": "River e América, la distanza è colmabile",
+          "text": "Due punti separano River Plate e Club América: sette contro nove. Il River ha segnato soltanto cinque reti, mentre i messicani sono a undici. Per gli argentini il tema è costruire una minaccia più continua; per gli ospiti, sfruttare il vantaggio offensivo senza offrire agli avversari la possibilità di ritrovare fiducia.",
+          "source": "https://www.italianmastersclub.it/nexus/teams/matches.php?world=GW001&sm_club=94079049"
+        }
+      ]
+    }
+  ],
+  "closing": "Il quadro della giornata è completo: venti partite, dal duello a distanza Celtic–Bologna allo scontro diretto Hertha–Lazio. Ci ritroviamo alle 14:00 con Daytime per mercato, trattative e approfondimenti. Dopo le gare, Final Whistle raccoglierà risultati e analisi. Da Federica Zille, Andrea Stramaccioni e Alessandro Florenzi, buon calcio a tutti."
+}

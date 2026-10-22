@@ -10,6 +10,7 @@
  function applyDate(update=false){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date.value)||date.value<date.min||date.value>date.max)date.value='2026-10-20';
   const archived=date.value==='2026-10-20';content.hidden=!archived;status.hidden=!archived;empty.hidden=archived;
+  document.dispatchEvent(new Event('programme-date-change'));
   date.disabled=false;prev.disabled=date.value<=date.min;next.disabled=date.value>=date.max;today.disabled=date.value===currentDay;
   if(update){const url=new URL(location.href);url.searchParams.set('date',date.value);history.pushState(null,'',url);}
  }
@@ -32,5 +33,6 @@
  }
  function fromUrl(){const url=new URL(location.href);date.value=url.searchParams.get('date')||'2026-10-20';applyDate();select(url.searchParams.get('section')||(url.hash.startsWith('#postmatch-')||url.searchParams.has('club')?'final-whistle':'coffee-time'),false)}
  nav.addEventListener('keydown',event=>{const buttons=[...nav.querySelectorAll('button')];let index=buttons.indexOf(document.activeElement);if(index<0)return;if(event.key==='ArrowRight')index=(index+1)%3;else if(event.key==='ArrowLeft')index=(index+2)%3;else if(event.key==='Home')index=0;else if(event.key==='End')index=2;else return;event.preventDefault();buttons[index].focus();buttons[index].click()});
+ const css=document.createElement('link');css.rel='stylesheet';css.href='coffee.css?v=1';document.head.append(css);const script=document.createElement('script');script.src='coffee.js?v=1';document.body.append(script);
  window.addEventListener('popstate',fromUrl);window.addEventListener('hashchange',fromUrl);fromUrl();
 })();
