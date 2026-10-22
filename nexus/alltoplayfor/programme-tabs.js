@@ -1,7 +1,7 @@
 (()=>{'use strict';
  const nav=document.querySelector('.jumpnav'),content=document.getElementById('content');
  const datebar=document.querySelector('.datebar'),status=document.getElementById('status');
- const sections=[['coffee-time','Coffee Time','Mercato, notizie e novità dai club.'],['daytime','Daytime','Dai campi di allenamento: collegamenti e pre-partita.'],['final-whistle','Final Whistle','Risultati, analisi e commenti del post-partita.']];
+ const sections=[['coffee-time','Coffee Time','Presentazione di tutte le partite del giorno.'],['daytime','Daytime','Ore 14:00 · Mercato, trattative e approfondimenti dai club.'],['final-whistle','Final Whistle','Risultati, analisi e commenti del post-partita.']];
  nav.replaceChildren();datebar.after(nav);
  const date=document.getElementById('date'),prev=document.getElementById('prev'),next=document.getElementById('next'),today=document.getElementById('today');
  const currentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -22,7 +22,8 @@
   const panel=document.createElement('section');panel.id='panel-'+id;panel.role='tabpanel';panel.setAttribute('aria-labelledby',button.id);panel.tabIndex=0;
   if(id==='final-whistle'){content.before(panel);panel.append(status,content,empty)}else{
    panel.className='programme-empty';const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=description;const note=document.createElement('p');note.className='programme-pending';note.textContent='Nessuna edizione pubblicata. Le notizie appariranno qui, dalla più recente.';panel.append(h,p,note);nav.after(panel);
-  }panels.set(id,panel);
+  }
+  const banner=document.createElement('img');banner.className='section-banner';banner.src='assets/'+id+'-v1.webp';banner.alt='All To Play For | '+title+' — '+description;banner.width=2048;banner.height=683;banner.decoding='async';panel.prepend(banner);panels.set(id,panel);
   button.addEventListener('click',()=>select(id,true));
  }
  function select(id,update){if(!panels.has(id))id='coffee-time';
