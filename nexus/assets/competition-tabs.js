@@ -1,6 +1,7 @@
 (async()=>{'use strict';
 const {p,gw,esc,url,get}=NexusUI,$=id=>document.getElementById(id);
 const families=[{id:'domestic-leagues',group:'DOMESTIC',name:'Campionati',actions:['league']},{id:'domestic-playoffs',group:'DOMESTIC',name:'Playoff',actions:['playoff']},{id:'domestic-cups',group:'DOMESTIC',name:'Coppe',actions:['charityshield','nationalcup','leaguecup','leagueshield']},{id:'international-cups',group:'INTERNATIONAL',name:'International',actions:['smfacup','smfashield','supercup','copa_libertadores','coppa_dei_campioni']},{id:'world-cup',group:'NATIONS',name:'World Cup',actions:['interqualifier','worldcup']}];
+if(gw==='GW001')families.splice(3,0,{id:'imc-cups',group:'IMC',name:'IMC',actions:['imc_custom']});
 const familyOf=r=>families.find(f=>f.actions.includes(String(r.sm_action).toLowerCase()));
 let cleanup=()=>{},all=[],season='',currentGroup='',currentFamily='',country=p.get('country')||'',selectedKey=p.get('competition')||'';
 const legacyFamily=p.get('family')||(document.body.dataset.page==='domestic'?(p.get('section')==='cups'?'domestic-cups':'domestic-leagues'):'');
@@ -11,6 +12,7 @@ function chooseFamily(id){currentFamily=id;const f=families.find(x=>x.id===id);c
 function render(){
  cleanup();cleanup=()=>{};
  const groups=[['DOMESTIC','Domestic'],['INTERNATIONAL','International'],['NATIONS','World Cup']];
+ if(gw==='GW001')groups.splice(1,0,['IMC','IMC']);
  $('group-tabs').innerHTML=groups.map(([id,name])=>button(name,id,id===currentGroup,'data-group',!families.some(f=>f.group===id&&available(f)))).join('');
  $('group-tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{const first=families.find(f=>f.group===b.dataset.group&&available(f));if(first)chooseFamily(first.id)});
  const fs=families.filter(f=>f.group===currentGroup&&available(f));
@@ -22,6 +24,7 @@ function render(){
  $('country-filter').hidden=!countries.length;$('country-select').innerHTML=countries.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
  if(countries.length){if(!countries.includes(country))country=countries[0];$('country-select').value=country;rows=rows.filter(r=>r.sm_country===country)}else country='';
  $('country-select').onchange=()=>{country=$('country-select').value;render()};
+ if(currentGroup==='IMC')rows.sort((a,b)=>a.imc_order-b.imc_order);
  const old=all.find(r=>r.competition_key===selectedKey);
  const selected=rows.find(r=>r.competition_key===selectedKey)||rows.find(r=>old&&r.sm_action===old.sm_action&&String(r.sm_division)===String(old.sm_division))||rows[0];
  selectedKey=selected?.competition_key||'';
@@ -39,3 +42,4 @@ function render(){
 let firstRender=true;
 try{const c=await NexusUI.ready;season=c.season;$('back').href=url('../');if(!season)throw Error('Nessuna stagione configurata.');const d=await get(url('catalog.php',{season}));all=d.rows||[];const selected=all.find(r=>r.competition_key===selectedKey);const initial=selected?familyOf(selected):families.find(f=>f.id===legacyFamily&&available(f));currentGroup=initial?.group||p.get('group')||families.find(available)?.group||'DOMESTIC';currentFamily=initial?.id||families.find(f=>f.group===currentGroup&&available(f))?.id||'';render()}catch(e){$('view').innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
 })();
+

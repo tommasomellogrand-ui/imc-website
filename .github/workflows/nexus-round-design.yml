@@ -2,7 +2,7 @@ name: Deploy Nexus round design
 on:
   push:
     branches: [main]
-    paths: ["nexus/competitions/match.php","nexus/assets/match.js","nexus/assets/match.css","nexus/competitions/match.html","tests/nexus-match-ui.cjs","nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","tests/nexus-custom-cups.php","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html",".github/workflows/nexus-round-design.yml"]
+    paths: ["tests/nexus-imc-cups.php","nexus/competitions/imc-cups.php","nexus/competitions/imc-cups.json","nexus/competitions/match.php","nexus/assets/match.js","nexus/assets/match.css","nexus/competitions/match.html","tests/nexus-match-ui.cjs","nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","tests/nexus-custom-cups.php","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html",".github/workflows/nexus-round-design.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate round scripts
         run: |
+          php -l nexus/competitions/imc-cups.php
+          php tests/nexus-imc-cups.php
           php tests/nexus-custom-cups.php
           php -l nexus/competitions/custom-cups.php
           php -l nexus/competitions/catalog.php
@@ -49,7 +51,7 @@ jobs:
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p(); ftp.set_pasv(True)
-          files=[Path(p) for p in ["nexus/competitions/match.php","nexus/assets/match.js","nexus/assets/match.css","nexus/competitions/match.html","nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html"]]
+          files=[Path(p) for p in ["nexus/competitions/imc-cups.php","nexus/competitions/imc-cups.json","nexus/competitions/match.php","nexus/assets/match.js","nexus/assets/match.css","nexus/competitions/match.html","nexus/competitions/custom-cups.json","nexus/competitions/custom-cups.php","nexus/competitions/standings-engine.php","nexus/competitions/standings.php","nexus/competitions/catalog.php","nexus/assets/competition-tabs.js","nexus/assets/catalog-page.js","nexus/assets/filter-chips.js","nexus/assets/filter-chips.css","nexus/teams/detail.html","nexus/competitions/match-report.php","nexus/assets/competition-view.js","nexus/assets/the-club-links.js","nexus/assets/competitions.css","nexus/competitions/index.html","nexus/competitions/view.html","nexus/competitions/domestic.html","nexus/competitions/group.html","nexus/competitions/family.html"]]
           for path in files:
               ftp.cwd('/www.italianmastersclub.it')
               for part in path.parent.parts:
@@ -75,6 +77,13 @@ jobs:
               table=api('standings.php?world=GW010&season=1&competition='+key)
               assert table['ok'] and len(table['groups'])==4 and len(table['rows'])==12
           print('GW010 custom cups and all 24 group entries verified live.')
+          imc=api('imc-cups.php?world=GW001&season=2&competition=GW001_IMC_EUROPA_LEAGUE&mode=schedule')
+          assert imc['ok'] and len(imc['rows'])==7
+          assert all(r['home_imc_manager_name'] and r['away_imc_manager_name'] for r in imc['rows'])
+          table=api('imc-cups.php?world=GW001&season=2&competition=GW001_IMC_EUROPA_LEAGUE&mode=standings')
+          assert table['ok'] and len(table['rows'])==14
+          print('GW001 IMC: 7 fixtures, 14 managers and standings verified live.')
           print('All round design uploaded and verified live. No database changes.')
           PY
+
 

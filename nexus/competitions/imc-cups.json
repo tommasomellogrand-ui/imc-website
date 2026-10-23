@@ -1,0 +1,252 @@
+[
+  {
+    "teams": [],
+    "matches": [],
+    "name": "IMC Champions League",
+    "key": "GW001_IMC_CHAMPIONS_LEAGUE",
+    "season": 2,
+    "world": "GW001",
+    "action": "imc_custom",
+    "format": "league"
+  },
+  {
+    "frequency": "daily",
+    "teams": [
+      {
+        "name": "Tottenham Hotspur",
+        "aliases": [
+          "Tottenham"
+        ],
+        "team_id": "94078847",
+        "team_name": "Tottenham"
+      },
+      {
+        "name": "TSV 1860 München",
+        "aliases": [
+          "TSV 1860 Munich",
+          "1860 Munich",
+          "Monaco 1860",
+          "1860 München"
+        ],
+        "team_id": "94079182",
+        "team_name": "1860 München"
+      },
+      {
+        "name": "Hertha BSC",
+        "aliases": [
+          "Hertha Berlino",
+          "Hertha Berlin"
+        ],
+        "team_id": "94079171",
+        "team_name": "Hertha Berlino"
+      },
+      {
+        "name": "Feyenoord",
+        "aliases": [],
+        "team_id": "94078959",
+        "team_name": "Feyenoord"
+      },
+      {
+        "name": "SSC Napoli",
+        "aliases": [
+          "Napoli"
+        ],
+        "team_id": "94079501",
+        "team_name": "Napoli"
+      },
+      {
+        "name": "AS Roma",
+        "aliases": [
+          "Roma"
+        ],
+        "team_id": "94078890",
+        "team_name": "Roma"
+      },
+      {
+        "name": "Fenerbahçe SK",
+        "aliases": [
+          "Fenerbahce",
+          "Fenerbahçe"
+        ],
+        "team_id": "94079117",
+        "team_name": "Fenerbahçe"
+      },
+      {
+        "name": "Palermo FC",
+        "aliases": [
+          "Palermo"
+        ],
+        "team_id": "94078884",
+        "team_name": "Palermo"
+      },
+      {
+        "name": "Olympique Marseille",
+        "aliases": [
+          "Olympique de Marseille",
+          "Marsiglia"
+        ],
+        "team_id": "94079097",
+        "team_name": "Olympique Marseille"
+      },
+      {
+        "name": "Dynamo Kyiv",
+        "aliases": [
+          "Dynamo Kiev",
+          "Dinamo Kiev"
+        ],
+        "team_id": "94079114",
+        "team_name": "Dynamo Kyiv"
+      },
+      {
+        "name": "AEK Athens",
+        "aliases": [
+          "AEK Atene",
+          "AEK"
+        ],
+        "team_id": "94079139",
+        "team_name": "AEK Athens"
+      },
+      {
+        "name": "Boca Juniors",
+        "aliases": [],
+        "team_id": "94079037",
+        "team_name": "Boca Juniors"
+      },
+      {
+        "name": "AS Reggina 1914",
+        "aliases": [
+          "Reggina"
+        ],
+        "team_id": "94078889",
+        "team_name": "Reggina"
+      },
+      {
+        "name": "Genoa CFC",
+        "aliases": [
+          "Genoa"
+        ],
+        "team_id": "94078875",
+        "team_name": "Genoa"
+      }
+    ],
+    "matches": [
+      {
+        "id": "GW001-EL-20261023-1",
+        "round": 1,
+        "date": "2026-10-23",
+        "time": "20:00",
+        "home": "Tottenham Hotspur",
+        "away": "TSV 1860 München",
+        "homeScore": null,
+        "awayScore": null,
+        "source": "IMG_9880.png",
+        "home_id": "94078847",
+        "away_id": "94079182"
+      },
+      {
+        "id": "GW001-EL-20261023-2",
+        "round": 1,
+        "date": "2026-10-23",
+        "time": "20:00",
+        "home": "Hertha BSC",
+        "away": "Feyenoord",
+        "homeScore": null,
+        "awayScore": null,
+        "source": "IMG_9880.png",
+        "home_id": "94079171",
+        "away_id": "94078959"
+      },
+      {
+        "id": "GW001-EL-20261023-3",
+        "round": 1,
+        "date": "2026-10-23",
+        "time": "20:00",
+        "home": "SSC Napoli",
+        "away": "AS Roma",
+        "homeScore": null,
+        "awayScore": null,
+        "source": "IMG_9880.png",
+        "home_id": "94079501",
+        "away_id": "94078890"
+      },
+      {
+        "id": "GW001-EL-20261023-4",
+        "round": 1,
+        "date": "2026-10-23",
+        "time": "20:00",
+        "home": "Fenerbahçe SK",
+        "away": "Palermo FC",
+        "homeScore": null,
+        "awayScore": null,
+        "source": "IMG_9880.png",
+        "home_id": "94079117",
+        "away_id": "94078884"
+      },
+      {
+        "id": "GW001-EL-20261023-5",
+        "round": 1,
+        "date": "2026-10-23",
+        "time": "20:00",
+        "home": "Olympique Marseille",
+        "away": "Dynamo Kyiv",
+        "homeScore": null,
+        "awayScore": null,
+        "source": "IMG_9880.png",
+        "home_id": "94079097",
+        "away_id": "94079114"
+      },
+      {
+        "id": "GW001-EL-20261023-6",
+        "round": 1,
+        "date": "2026-10-23",
+        "time": "20:00",
+        "home": "AEK Athens",
+        "away": "Boca Juniors",
+        "homeScore": null,
+        "awayScore": null,
+        "source": "IMG_9880.png",
+        "home_id": "94079139",
+        "away_id": "94079037"
+      },
+      {
+        "id": "GW001-EL-20261023-7",
+        "round": 1,
+        "date": "2026-10-23",
+        "time": "20:00",
+        "home": "AS Reggina 1914",
+        "away": "Genoa CFC",
+        "homeScore": null,
+        "awayScore": null,
+        "source": "IMG_9880.png",
+        "home_id": "94078889",
+        "away_id": "94078875"
+      }
+    ],
+    "name": "IMC Europa League",
+    "key": "GW001_IMC_EUROPA_LEAGUE",
+    "season": 2,
+    "world": "GW001",
+    "action": "imc_custom",
+    "format": "league"
+  },
+  {
+    "teams": [],
+    "matches": [],
+    "name": "IMC Conference League",
+    "key": "GW001_IMC_CONFERENCE_LEAGUE",
+    "season": 2,
+    "world": "GW001",
+    "action": "imc_custom",
+    "format": "league"
+  },
+  {
+    "teams": [],
+    "matches": [],
+    "name": "IMC Club World Cup",
+    "key": "GW001_IMC_CLUB_WORLD_CUP",
+    "season": 2,
+    "world": "GW001",
+    "action": "imc_custom",
+    "format": "knockout"
+  }
+]
