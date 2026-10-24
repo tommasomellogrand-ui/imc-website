@@ -205,7 +205,7 @@ function imc_minisite_read(array $body): never {
             $gw = imc_minisite_gw($body);
             $rows = imc_minisite_rows(
                 $pdo,
-                'SELECT id, game_world_id, manager_id, full_name, club_id, assignment_type, start_date, end_date, national_team_id FROM `IMC Manager Assignment Global` WHERE game_world_id=? ORDER BY start_date DESC, id DESC',
+                'SELECT id, game_world_id, manager_id, full_name, team_id, team_id AS club_id, assignment_type, start_date, end_date, national_team_id FROM `IMC Manager Assignment Global` WHERE game_world_id=? ORDER BY start_date DESC, id DESC',
                 [$gw]
             );
             break;
