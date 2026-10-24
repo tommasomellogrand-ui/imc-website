@@ -72,7 +72,17 @@ function rc_build(array $sets,string $date,?int $season,string $today,?array $sc
     $out=[];$summary=['fixtures'=>0,'schedule'=>0,'results'=>0,'report'=>0,'complete'=>0,'pending'=>0,'today'=>0,'missing_results'=>0,'missing_report'=>0,'orphan_results'=>0,'orphan_report'=>0,'anomaly'=>0];
     foreach ($groups as $key=>$g) {
         if (!isset($anchors[$key])) continue;
-        $s=count($g['schedule']);$r=count($g['results']);
+        $r=count($g['results']);
+        if ($r) {
+            $g['schedule']=[];
+            $relevant=false;
+            foreach (array_merge($g['results'],$g['report']) as $record) {
+                $d=rc_day($record['match_date']??'');
+                if (($date==='undated'?(!$d||$d==='0000-00-00'):$d===$date)&&($season===null||(int)($record['imc_season']??0)===$season)) $relevant=true;
+            }
+            if (!$relevant) continue;
+        }
+        $s=count($g['schedule']);
         $required=false;foreach ($g['results'] as $result) if (rc_imc($result,$scope)) $required=true;
         if ($scope!==null && !$required) $g['report']=array_values(array_filter($g['report'],fn($row)=>rc_imc($row,$scope)));
         $m=count($g['report']);if (!$s&&!$r&&!$m) continue;
@@ -80,14 +90,12 @@ function rc_build(array $sets,string $date,?int $season,string $today,?array $sc
         $day=rc_day($anchor['match_date']??'');
         $issues=rc_compare(array_intersect_key($g,rc_sources()));
         if ($g['fixture_id']===null) $issues[]='Fixture ID mancante o non valido';
-        if (!$s && $r) $issues[]='Results senza Schedule';
         if (!$r && $m) $issues[]='Match Report senza Results';
         if ($required && !$m) $issues[]='Match Report mancante';
         if ($s && !$r) {
             $state=$day===''||$day==='0000-00-00'?'anomaly':($day>$today?'pending':($day===$today?'today':'missing_results'));
             if ($state==='missing_results') $issues[]='Risultato mancante';
         } elseif (!$r) $state='orphan_report';
-        elseif (!$s) $state='orphan_results';
         elseif ($required && !$m) $state='missing_report';
         else $state='complete';
         if (in_array($state,['complete','pending','today'],true) && $issues) $state='anomaly';
@@ -104,10 +112,12 @@ function rc_build(array $sets,string $date,?int $season,string $today,?array $sc
 function rc_metadata(PDO $db,string $gw,?int $season,?array $scope=null): array {
     $seasons=[];$dates=[];$competitions=[];$expected=[];$reportIds=[];$invalid=0;$sourceIds=[];$signatures=[];
     $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
-    foreach (rc_sources() as $kind=>$repository) {
+    foreach (['results'=>'Results','report'=>'Match_Report','schedule'=>'Schedule'] as $kind=>$repository) {
         $scan=$db->query('SELECT '.rc_select($kind,$db,$gw).' FROM `'.nexus_table($gw,$repository).'` WHERE sm_fixture_id>0');
         while ($record=$scan->fetch()) {
-            $id=rc_fixture($record['sm_fixture_id']);$sourceIds[$kind][$id]=($sourceIds[$kind][$id]??0)+1;
+            $id=rc_fixture($record['sm_fixture_id']);
+            if ($kind==='schedule'&&isset($sourceIds['results'][$id])) continue;
+            $sourceIds[$kind][$id]=($sourceIds[$kind][$id]??0)+1;
             $signature=[];
             foreach (['match_date','imc_season','competition_key','sm_country','sm_division','home_id','away_id'] as $field) {
                 $value=trim((string)($record[$field]??''));
@@ -127,19 +137,20 @@ function rc_metadata(PDO $db,string $gw,?int $season,?array $scope=null): array 
         $stmt=$db->prepare('SELECT '.rc_select($source,$db,$gw).' FROM `'.$table.'`'.($season!==null?' WHERE imc_season=?':''));
         $stmt->execute($season!==null?[$season]:[]);
         while ($row=$stmt->fetch()) {
+            $id=rc_fixture($row['sm_fixture_id']);
+            if ($source==='schedule'&&$id!==null&&isset($sourceIds['results'][$id])) continue;
             $eligible=rc_imc($row,$scope);
             if ($source==='report'&&!$eligible) continue;
             $day=rc_day($row['match_date']);if (!$day||$day==='0000-00-00') $day='undated';
             $key=json_encode([$row['competition_key'],$row['sm_country'],$row['sm_division']]);
             if (!isset($dates[$day])) $dates[$day]=['date'=>$day,'schedule'=>0,'results'=>0,'report'=>0];
             if (!isset($competitions[$key])) $competitions[$key]=['competition'=>$row['competition_key']??'','country'=>$row['sm_country']??'','division'=>$row['sm_division'],'action'=>$row['sm_action'],'schedule'=>0,'results'=>0,'report'=>0,'expected_report'=>0,'missing_reports'=>0,'issue_days'=>[]];
-            $dates[$day][$source]++;$competitions[$key][$source]++;
+            if ($source!=='schedule'||($day!=='undated'&&$day>=$today)) {$dates[$day][$source]++;$competitions[$key][$source]++;}
             $id=rc_fixture($row['sm_fixture_id']);$problems=[];
             if ($id===null) $problems[]='Fixture ID mancante';
             if ($id!==null && count($signatures[$id]??[])>1) $problems[]='Dati discordanti';
             if ($id!==null && ($sourceIds[$source][$id]??0)>1) $problems[]='Duplicati';
             if ($source==='schedule' && $day!=='undated' && $day<$today && ($id===null||!isset($sourceIds['results'][$id]))) $problems[]='Risultato mancante';
-            if ($source==='results' && ($id===null||!isset($sourceIds['schedule'][$id]))) $problems[]='Schedule mancante';
             if ($source==='report' && ($id===null||!isset($sourceIds['results'][$id]))) $problems[]='Results mancante';
             if ($source==='results' && $eligible && ($id===null||!isset($reportIds[$id]))) $problems[]='Match Report mancante';
             if ($problems) {
