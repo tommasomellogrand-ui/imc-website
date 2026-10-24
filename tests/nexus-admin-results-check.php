@@ -25,6 +25,18 @@ ok($by['missing']['state']==='anomaly','Null fixture');
 ok(rc_build(['schedule'=>[fixture(11,'2026-10-01')],'results'=>[],'report'=>[]],'2026-10-01',null,'2026-09-29')['rows'][0]['state']==='pending','Future not missing');
 ok(rc_build(['schedule'=>[fixture(11,'2026-09-29')],'results'=>[],'report'=>[]],'2026-09-29',null,'2026-09-29')['rows'][0]['state']==='today','Today not missing');
 ok(rc_build(['schedule'=>[fixture(11)],'results'=>[],'report'=>[]],'2026-09-02',null,'2026-09-29')['summary']['fixtures']===0,'Date filter');
+// GOLD: historical assignments, both sides, ended tenures, unique fixtures and national ID isolation.
+$scope=['club'=>[10=>[['2026-09-01','2026-09-01']]],'national_team'=>[30=>[['2026-09-01',null]]]];
+$gold=rc_build(['schedule'=>[fixture(1),fixture(2,'2026-09-02')],'results'=>[fixture(1),fixture(1),fixture(2,'2026-09-02')],'report'=>[]],'2026-09-01',1,'2026-09-29',$scope);
+ok($gold['summary']['expected_report']===1&&$gold['summary']['missing_reports']===1,'Two results for one fixture require one report');
+$gold=rc_build(['schedule'=>[fixture(2,'2026-09-02')],'results'=>[fixture(2,'2026-09-02')],'report'=>[]],'2026-09-02',1,'2026-09-29',$scope);
+ok($gold['rows'][0]['state']==='complete'&&!$gold['rows'][0]['report_required'],'Ended assignment must not require a report');
+ok(rc_imc(fixture(1),$scope),'Inclusive start/end date');
+$away=fixture(3);$away['home_id']=20;$away['away_id']=10;ok(rc_imc($away,$scope),'Away IMC manager');
+$national=fixture(4);$national['home_id']=30;ok(!rc_imc($national,$scope),'National assignment cannot match a club');$national['competition_key']='GW008|NATIONS|worldcup';ok(rc_imc($national,$scope),'National assignment');
+ok(!rc_imc(fixture(1),[]),'No assignments means no required GOLD reports');
+$gold=rc_build(['schedule'=>[],'results'=>[],'report'=>[fixture(9)]],'2026-09-01',1,'2026-09-29',[]);ok(!$gold['rows'],'Unassigned orphan report is outside GOLD scope');
+if (getenv('RESULTS_UNIT_ONLY')) {echo "PASS: Results Check unit tests including GOLD scope\n";exit;}
 $pwd=getenv('MYSQL_TEST_PASSWORD');if(!$pwd)throw new RuntimeException('Test password required');
 $db=new PDO('mysql:host=127.0.0.1;port=3306;dbname=nexus_admin_test;charset=utf8mb4','root',$pwd,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]);
 foreach(rc_sources() as $source=>$repo){$table=nexus_table('GW001',$repo);$db->exec('DROP TABLE IF EXISTS `'.$table.'`');$club=$source==='schedule'?'team':'club';$db->exec('CREATE TABLE `'.$table.'` (sm_fixture_id BIGINT NULL, imc_season INT,match_date DATE,competition_key VARCHAR(255),sm_action VARCHAR(32),sm_country VARCHAR(64),sm_division INT, home_sm_'.$club.'_id BIGINT,away_sm_'.$club.'_id BIGINT,home_name VARCHAR(255),away_name VARCHAR(255)) ENGINE=InnoDB');}
@@ -32,7 +44,7 @@ $db->exec("INSERT INTO GW001_IMC_Schedule VALUES (100,1,'2026-09-01','key','leag
 $db->exec("INSERT INTO GW001_IMC_Results VALUES (100,2,'2026-09-02','key','league',NULL,1,10,20,'Home','Away'),(101,1,'2026-09-01','key','league',NULL,1,10,20,'Home','Away')");
 $db->exec("INSERT INTO GW001_IMC_Match_Report VALUES (100,1,'2026-09-01','key','league',NULL,1,10,20,'Home','Away'),(102,1,'2026-09-01','key','league',NULL,1,10,20,'Home','Away')");
 $db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();
-$meta=rc_metadata($db,'GW001',1);ok($meta['seasons']===[2,1],'All seasons available');
+$meta=rc_metadata($db,'GW001',1);ok($meta['seasons']===[2,1],'All seasons available');ok(count($meta['competitions'])===1,'Competition coverage');ok($meta['competitions'][0]['expected_report']===1&&$meta['competitions'][0]['missing_reports']===1,'Distinct required and missing MR coverage');
 $out=rc_check($db,'GW001','2026-09-01',1,'2026-09-29');ok(count($out['rows'])===3,'Fixture union includes orphans');
 $by=[];foreach($out['rows'] as $row)$by[$row['fixture_id']]=$row;
 ok(count($by[100]['results'])===1&&count($by[100]['issues'])===2,'Database cross-date/season matching');

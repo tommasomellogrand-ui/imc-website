@@ -72,8 +72,9 @@ try {
         $c=nexus_config();$checkDb=nexus_db($c,nexus_target($c,$gw));
         $season=nexus_season($_GET['season']??null);
         $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
+        $scope=in_array($gw,['GW002','GW003','GW007','GW008'],true)?rc_scope(nexus_db($c,'core'),$gw):null;
         $checkDb->exec('SET TRANSACTION READ ONLY');$checkDb->beginTransaction();
-        $result=$action==='check-meta'?rc_metadata($checkDb,$gw,$season):rc_check($checkDb,$gw,(string)($_GET['date']??''),$season,$today);
+        $result=$action==='check-meta'?rc_metadata($checkDb,$gw,$season,$scope):rc_check($checkDb,$gw,(string)($_GET['date']??''),$season,$today,$scope);
         $checkDb->commit();
         nexus_out(['ok'=>true,'world'=>$gw,'season'=>$season,'today'=>$today]+$result);
     }
