@@ -43,6 +43,16 @@ try{
  $resultRows=nexus_rows($db,$sql,$params);
  if($overview){
   $matches=$kind==='manager'?array_merge(h2h_matches($resultRows,$ctx,$kind,$id,'club',false),h2h_matches($resultRows,$ctx,$kind,$id,'national_team',false)):h2h_matches($resultRows,$ctx,$kind,$id,$scope,false);
+  // IMC career requires an assignment valid on match day, even when a stored SM ID exists.
+  if($kind==='manager')$matches=array_values(array_filter($matches,static function($m)use($ctx,$id){
+   $type=str_contains((string)$m['competition_key'],'|NATIONS|')?'national_team':'club';
+   $team=(int)$m[$m['side']]['world_id'];$day=substr((string)$m['match_date'],0,10);
+   if(!preg_match('/^\d{4}-\d{2}-\d{2}$/',$day))return false;
+   foreach($ctx['assignments'][$type][$team]??[] as $a){
+    if($a['manager_id']===$id&&$a['start_date']&&$a['start_date']<=$day&&(!$a['end_date']||$a['end_date']>=$day))return true;
+   }
+   return false;
+  }));
   $seasonRows=nexus_rows($core,'SELECT imc_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season',[$gw]);
   $history=nexus_history_overview($matches,$seasonRows,(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d'));
   if($kind==='manager'){
