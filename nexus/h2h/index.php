@@ -44,7 +44,13 @@ try{
  if($overview){
   $matches=$kind==='manager'?array_merge(h2h_matches($resultRows,$ctx,$kind,$id,'club',false),h2h_matches($resultRows,$ctx,$kind,$id,'national_team',false)):h2h_matches($resultRows,$ctx,$kind,$id,$scope,false);
   $seasonRows=nexus_rows($core,'SELECT imc_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season',[$gw]);
-  nexus_out(array_merge(['ok'=>true,'world'=>$gw,'kind'=>$kind,'subject'=>$subject],nexus_history_overview($matches,$seasonRows,(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d'))));
+  $history=nexus_history_overview($matches,$seasonRows,(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d'));
+  if($kind==='manager'){
+   $validSeasons=array_column($history['seasons'],'season');
+   $history['matches']=array_values(array_filter($matches,static fn($m)=>in_array((int)$m['imc_season'],$validSeasons,true)));
+   usort($history['matches'],static fn($a,$b)=>[$b['match_date'],$b['sm_fixture_id']]<=>[$a['match_date'],$a['sm_fixture_id']]);
+  }
+  nexus_out(array_merge(['ok'=>true,'world'=>$gw,'kind'=>$kind,'subject'=>$subject],$history));
  }
  if(($_GET['mode']??'')==='data-room'){
   require __DIR__.'/data-room-engine.php';require dirname(__DIR__).'/teams/roster-stats.php';
