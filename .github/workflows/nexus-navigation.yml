@@ -2,7 +2,7 @@ name: Nexus Linea Oro navigation
 on:
   push:
     branches: [main, nexus-linea-oro]
-    paths: ['nexus/assets/navigation.*', 'tests/nexus-navigation*', 'nexus/**/*.html', '.github/workflows/nexus-navigation.yml']
+    paths: ['nexus/assets/navigation.*', 'tests/nexus-navigation*', 'nexus/**/*.html', '!nexus/admin/**']
   workflow_dispatch:
 permissions:
   contents: read

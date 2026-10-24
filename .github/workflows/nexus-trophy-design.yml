@@ -2,7 +2,7 @@ name: Deploy Nexus trophy design
 on:
   push:
     branches: [main]
-    paths: ['nexus/assets/home.css', 'nexus/home/data.php', 'nexus/assets/home.js', 'nexus/assets/trophy-room.js', 'nexus/assets/trophy-room.css', 'nexus/index.html', '.github/workflows/nexus-trophy-design.yml', '.github/workflows/deploy-website-aruba.yml']
+    paths: ['nexus/assets/home.css', 'nexus/home/data.php', 'nexus/assets/home.js', 'nexus/assets/trophy-room.js', 'nexus/assets/trophy-room.css', 'nexus/index.html']
   workflow_dispatch:
 permissions:
   contents: read

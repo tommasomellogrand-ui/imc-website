@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - '.github/workflows/nexus-admin-recovery.yml'
+      - '.github/workflows/deploy-website-aruba.yml'
       - 'nexus/admin/**'
       - 'tests/nexus-admin*'
       - '.github/workflows/nexus-admin.yml'
