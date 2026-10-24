@@ -58,8 +58,15 @@ try {
     $_SESSION['last_activity']=time();
     setcookie(session_name(),session_id(),['expires'=>time()+NA_SESSION_TTL,'path'=>'/nexus/admin/','secure'=>true,'httponly'=>true,'samesite'=>'Strict']);
     if ($action==='session' && $method==='GET') nexus_out(['ok'=>true,'csrf'=>$_SESSION['csrf']]);
-    if ($method==='POST' && !in_array($action,['save','close','replace'],true)) throw new InvalidArgumentException('Operazione non valida.');
+    if ($method==='POST' && !in_array($action,['save','close','replace','season-save'],true)) throw new InvalidArgumentException('Operazione non valida.');
     $gw=nexus_world($method==='GET'?($_GET['world']??''):($input['world']??''));
+    if (($method==='GET' && $action==='seasons') || ($method==='POST' && $action==='season-save')) {
+        require __DIR__.'/seasons-service.php';
+        $c=nexus_config();$seasonDb=nexus_db($c,'core');
+        $local=ns_local_table($c,$gw);
+        if ($method==='POST') ns_save($seasonDb,$local,$gw,$input);
+        nexus_out(['ok'=>true,'world'=>$gw,'rows'=>ns_list($seasonDb,$local,$gw)]);
+    }
     if ($method==='GET' && in_array($action,['check-meta','results-check'],true)) {
         require __DIR__.'/results-check-service.php';
         $c=nexus_config();$checkDb=nexus_db($c,nexus_target($c,$gw));
@@ -81,3 +88,4 @@ try {
     throw new InvalidArgumentException('Operazione non valida.');
 } catch (InvalidArgumentException|JsonException $e) {nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}
 catch (Throwable $e) {error_log('Nexus admin: '.$e->getMessage());$code=in_array($e->getCode(),[409,503],true)?$e->getCode():500;nexus_out(['ok'=>false,'error'=>$code===500?'Impossibile completare l’operazione. Nessuna modifica confermata.':$e->getMessage()],$code);}
+

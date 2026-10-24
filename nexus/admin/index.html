@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><title>Nexus · Admin assegnazioni</title><link rel="stylesheet" href="admin.css?v=3"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;800&display=swap"><script src="admin.js?v=20261015gw11" defer></script><script src="admin-nav.js?v=1" defer></script></head>
-<body><header><a href="../">NEXUS</a><span>Amministrazione</span><button id="logout" hidden>Esci</button></header><nav class="admin-nav" aria-label="Menu amministrazione"><a href="index.html" aria-current="page">Assegnazioni Manager</a><a href="results-check.html">Results Check</a></nav><main>
+<body><header><a href="../">NEXUS</a><span>Amministrazione</span><button id="logout" hidden>Esci</button></header><nav class="admin-nav" aria-label="Menu amministrazione"><a href="index.html" aria-current="page">Assegnazioni Manager</a><a href="results-check.html">Results Check</a><a href="seasons.html">IMC Seasons</a></nav><main>
 <h1>Assegnazioni manager</h1><p class="muted">Club, nazionali e storico degli incarichi nei Game World.</p>
 <p id="message" role="status" aria-live="polite"></p>
 <section id="login" class="panel"><h2>Accesso amministratore</h2><form id="login-form"><label>Username<input id="login-username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label><label>Password<input id="login-password" name="password" type="password" autocomplete="current-password" required></label><button id="login-submit" type="submit" class="primary">Accedi</button><p class="muted">Accesso ricordato per 30 giorni dall’ultimo utilizzo su questo browser.</p></form></section>
@@ -14,3 +14,4 @@
 <div class="dates"><label id="start-label">Data inizio<input id="start" type="date" required></label><label id="end-label">Data fine · vuota se in carica<input id="end" type="date"></label><label id="close-label" hidden>Ultimo giorno del precedente incarico<input id="close-date" type="date"></label></div>
 <p id="edit-note" class="muted"></p><div class="actions"><button id="save" type="submit" class="primary">Salva</button></div></form></dialog>
 </main></body></html>
+

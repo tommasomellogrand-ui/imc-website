@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/admin/**'
+      - 'tests/nexus-admin*'
+      - '.github/workflows/nexus-admin.yml'
       - 'tests/nexus-imc-cups.php'
       - 'nexus/competitions/imc-cups.php'
       - 'nexus/competitions/imc-cups.json'
@@ -279,6 +282,7 @@ jobs:
                   except Exception as e:last=e;time.sleep(5)
               else:raise SystemExit(f'Live verification failed: {url}: {last}')
           PY
+
 
 
 
