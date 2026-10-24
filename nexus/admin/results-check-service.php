@@ -2,9 +2,15 @@
 declare(strict_types=1);
 
 function rc_sources(): array {return ['schedule'=>'Schedule','results'=>'Results','report'=>'Match_Report'];}
-function rc_select(string $source): string {
+function rc_select(string $source,?PDO $db=null,?string $gw=null): string {
     $club=$source==='schedule'?'team':'club';
-    return 'sm_fixture_id,imc_season,match_date,competition_key,sm_action,sm_country,sm_division,home_sm_'.$club.'_id AS home_id,away_sm_'.$club.'_id AS away_id,home_name,away_name';
+    $round='NULL';
+    if ($db && $gw) {
+        static $columns=[];$table=nexus_table($gw,rc_sources()[$source]);
+        if (!isset($columns[$table])) $columns[$table]=array_column(nexus_rows($db,'SHOW COLUMNS FROM `'.$table.'`'),'Field');
+        if (in_array('competition_round',$columns[$table],true)) $round='competition_round';
+    }
+    return 'sm_fixture_id,imc_season,match_date,competition_key,sm_action,sm_country,sm_division,home_sm_'.$club.'_id AS home_id,away_sm_'.$club.'_id AS away_id,home_name,away_name,'.$round.' AS competition_round';
 }
 function rc_fixture(mixed $id): ?string {
     $id=trim((string)$id);
@@ -96,14 +102,29 @@ function rc_build(array $sets,string $date,?int $season,string $today,?array $sc
     return ['rows'=>$out,'summary'=>$summary];
 }
 function rc_metadata(PDO $db,string $gw,?int $season,?array $scope=null): array {
-    $seasons=[];$dates=[];$competitions=[];$expected=[];$reportIds=[];$invalid=0;
+    $seasons=[];$dates=[];$competitions=[];$expected=[];$reportIds=[];$invalid=0;$sourceIds=[];$signatures=[];
+    $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
+    foreach (rc_sources() as $kind=>$repository) {
+        $scan=$db->query('SELECT '.rc_select($kind,$db,$gw).' FROM `'.nexus_table($gw,$repository).'` WHERE sm_fixture_id>0');
+        while ($record=$scan->fetch()) {
+            $id=rc_fixture($record['sm_fixture_id']);$sourceIds[$kind][$id]=($sourceIds[$kind][$id]??0)+1;
+            $signature=[];
+            foreach (['match_date','imc_season','competition_key','sm_country','sm_division','home_id','away_id'] as $field) {
+                $value=trim((string)($record[$field]??''));
+                if ($field==='match_date') $value=rc_day($value);
+                if (in_array($field,['imc_season','sm_division','home_id','away_id'],true)&&ctype_digit($value)) $value=(string)(int)$value;
+                $signature[]=$value;
+            }
+            $signatures[$id][md5(json_encode($signature))]=true;
+        }
+    }
     // The existence check deliberately includes reports stored under another date/season.
     $stmt=$db->query('SELECT sm_fixture_id FROM `'.nexus_table($gw,'Match_Report').'` WHERE sm_fixture_id>0');
     while ($row=$stmt->fetch()) $reportIds[rc_fixture($row['sm_fixture_id'])]=true;
     foreach (rc_sources() as $source=>$repo) {
         $table=nexus_table($gw,$repo);
         foreach (nexus_rows($db,'SELECT DISTINCT imc_season FROM `'.$table.'` WHERE imc_season>0') as $row) $seasons[(int)$row['imc_season']]=true;
-        $stmt=$db->prepare('SELECT '.rc_select($source).' FROM `'.$table.'`'.($season!==null?' WHERE imc_season=?':''));
+        $stmt=$db->prepare('SELECT '.rc_select($source,$db,$gw).' FROM `'.$table.'`'.($season!==null?' WHERE imc_season=?':''));
         $stmt->execute($season!==null?[$season]:[]);
         while ($row=$stmt->fetch()) {
             $eligible=rc_imc($row,$scope);
@@ -111,8 +132,25 @@ function rc_metadata(PDO $db,string $gw,?int $season,?array $scope=null): array 
             $day=rc_day($row['match_date']);if (!$day||$day==='0000-00-00') $day='undated';
             $key=json_encode([$row['competition_key'],$row['sm_country'],$row['sm_division']]);
             if (!isset($dates[$day])) $dates[$day]=['date'=>$day,'schedule'=>0,'results'=>0,'report'=>0];
-            if (!isset($competitions[$key])) $competitions[$key]=['competition'=>$row['competition_key']??'','country'=>$row['sm_country']??'','division'=>$row['sm_division'],'action'=>$row['sm_action'],'schedule'=>0,'results'=>0,'report'=>0,'expected_report'=>0,'missing_reports'=>0];
+            if (!isset($competitions[$key])) $competitions[$key]=['competition'=>$row['competition_key']??'','country'=>$row['sm_country']??'','division'=>$row['sm_division'],'action'=>$row['sm_action'],'schedule'=>0,'results'=>0,'report'=>0,'expected_report'=>0,'missing_reports'=>0,'issue_days'=>[]];
             $dates[$day][$source]++;$competitions[$key][$source]++;
+            $id=rc_fixture($row['sm_fixture_id']);$problems=[];
+            if ($id===null) $problems[]='Fixture ID mancante';
+            if ($id!==null && count($signatures[$id]??[])>1) $problems[]='Dati discordanti';
+            if ($id!==null && ($sourceIds[$source][$id]??0)>1) $problems[]='Duplicati';
+            if ($source==='schedule' && $day!=='undated' && $day<$today && ($id===null||!isset($sourceIds['results'][$id]))) $problems[]='Risultato mancante';
+            if ($source==='results' && ($id===null||!isset($sourceIds['schedule'][$id]))) $problems[]='Schedule mancante';
+            if ($source==='report' && ($id===null||!isset($sourceIds['results'][$id]))) $problems[]='Results mancante';
+            if ($source==='results' && $eligible && ($id===null||!isset($reportIds[$id]))) $problems[]='Match Report mancante';
+            if ($problems) {
+                $round=trim((string)($row['competition_round']??''));
+                $issueKey=json_encode([$day,$row['imc_season'],$round]);
+                if (!isset($competitions[$key]['issue_days'][$issueKey])) $competitions[$key]['issue_days'][$issueKey]=['date'=>$day,'season'=>$row['imc_season'],'round'=>$round,'issues'=>[],'fixtures'=>[]];
+                $bucket=&$competitions[$key]['issue_days'][$issueKey];
+                $token=$id??$source.'-invalid-'.(++$invalid);$bucket['fixtures'][$token]=true;
+                foreach ($problems as $problem) $bucket['issues'][$problem][$token]=true;
+                unset($bucket);
+            }
             if ($source==='results'&&$eligible) {
                 $id=rc_fixture($row['sm_fixture_id']);$unique=$id??'invalid-'.(++$invalid);
                 if (!isset($expected[$key][$unique])) {
@@ -122,6 +160,16 @@ function rc_metadata(PDO $db,string $gw,?int $season,?array $scope=null): array 
             }
         }
     }
+    foreach ($competitions as &$competition) {
+        $competition['issue_count']=0;
+        foreach ($competition['issue_days'] as &$bucket) {
+            $bucket['count']=count($bucket['fixtures']);unset($bucket['fixtures']);
+            foreach ($bucket['issues'] as &$ids) $ids=count($ids);unset($ids);
+            $competition['issue_count']+=$bucket['count'];
+        } unset($bucket);
+        $competition['issue_days']=array_values($competition['issue_days']);
+        usort($competition['issue_days'],fn($a,$b)=>strcmp($b['date'],$a['date']));
+    } unset($competition);
     $seasons=array_keys($seasons);rsort($seasons);ksort($dates);
     return ['seasons'=>$seasons,'dates'=>array_values($dates),'competitions'=>array_values($competitions),'imc_only'=>$scope!==null];
 }
@@ -133,7 +181,7 @@ function rc_check(PDO $db,string $gw,string $date,?int $season,string $today,?ar
         $where=$date==='undated'?"(match_date IS NULL OR LEFT(CAST(match_date AS CHAR),10)='0000-00-00')":'match_date>=? AND match_date<DATE_ADD(?, INTERVAL 1 DAY)';
         $params=$date==='undated'?[]:[$date,$date];
         if ($season!==null) {$where.=' AND imc_season=?';$params[]=$season;}
-        $rows=nexus_rows($db,'SELECT '.rc_select($source).' FROM `'.$table.'` WHERE '.$where,$params);
+        $rows=nexus_rows($db,'SELECT '.rc_select($source,$db,$gw).' FROM `'.$table.'` WHERE '.$where,$params);
         $sets[$source]=[];$missing[$source]=[];
         foreach ($rows as $row) {
             $id=rc_fixture($row['sm_fixture_id']??null);
@@ -144,7 +192,7 @@ function rc_check(PDO $db,string $gw,string $date,?int $season,string $today,?ar
     foreach (rc_sources() as $source=>$repo) {
         $table=nexus_table($gw,$repo);$sets[$source]=$missing[$source];
         foreach (array_chunk(array_keys($ids),400) as $batch) {
-            $rows=nexus_rows($db,'SELECT '.rc_select($source).' FROM `'.$table.'` WHERE sm_fixture_id IN ('.implode(',',array_fill(0,count($batch),'?')).')',$batch);
+            $rows=nexus_rows($db,'SELECT '.rc_select($source,$db,$gw).' FROM `'.$table.'` WHERE sm_fixture_id IN ('.implode(',',array_fill(0,count($batch),'?')).')',$batch);
             $sets[$source]=array_merge($sets[$source],$rows);
         }
     }

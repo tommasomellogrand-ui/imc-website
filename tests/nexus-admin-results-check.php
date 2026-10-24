@@ -44,7 +44,7 @@ $db->exec("INSERT INTO GW001_IMC_Schedule VALUES (100,1,'2026-09-01','key','leag
 $db->exec("INSERT INTO GW001_IMC_Results VALUES (100,2,'2026-09-02','key','league',NULL,1,10,20,'Home','Away'),(101,1,'2026-09-01','key','league',NULL,1,10,20,'Home','Away')");
 $db->exec("INSERT INTO GW001_IMC_Match_Report VALUES (100,1,'2026-09-01','key','league',NULL,1,10,20,'Home','Away'),(102,1,'2026-09-01','key','league',NULL,1,10,20,'Home','Away')");
 $db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();
-$meta=rc_metadata($db,'GW001',1);ok($meta['seasons']===[2,1],'All seasons available');ok(count($meta['competitions'])===1,'Competition coverage');ok($meta['competitions'][0]['expected_report']===1&&$meta['competitions'][0]['missing_reports']===1,'Distinct required and missing MR coverage');
+$meta=rc_metadata($db,'GW001',1);ok($meta['seasons']===[2,1],'All seasons available');ok(count($meta['competitions'])===1,'Competition coverage');ok(count($meta['competitions'][0]['issue_days'])>0,'Issue dates exposed');$missingDays=array_filter($meta['competitions'][0]['issue_days'],fn($d)=>isset($d['issues']['Match Report mancante']));ok(count($missingDays)===1&&array_values($missingDays)[0]['date']==='2026-09-01','Missing report drilldown date');ok($meta['competitions'][0]['expected_report']===1&&$meta['competitions'][0]['missing_reports']===1,'Distinct required and missing MR coverage');
 $out=rc_check($db,'GW001','2026-09-01',1,'2026-09-29');ok(count($out['rows'])===3,'Fixture union includes orphans');
 $by=[];foreach($out['rows'] as $row)$by[$row['fixture_id']]=$row;
 ok(count($by[100]['results'])===1&&count($by[100]['issues'])===2,'Database cross-date/season matching');
