@@ -59,6 +59,23 @@ function showTransfers(){
  view.querySelectorAll('[data-direction]').forEach(button=>button.onclick=()=>{transferDirection=button.dataset.direction;showTransfers();view.querySelector('#transfer-'+transferDirection).focus();});
 }
 let rosterFilter='active',rosterData=null,rosterSeason='',rosterVersion=0,rosterLoading=false;
+function rosterMarketValue(value){
+ if(value==null||String(value).trim()==='')return null;
+ let text=String(value).trim().replace(/[€£$\s]/g,'').toUpperCase();
+ const compact=text.match(/^(\d+(?:[.,]\d+)?)\s*([KMB])$/);
+ if(compact)return Math.round(Number(compact[1].replace(',','.'))*({K:1e3,M:1e6,B:1e9}[compact[2]]));
+ if(/^\d{1,3}(?:[.,]\d{3})+$/.test(text))text=text.replace(/[.,]/g,'');
+ else if(/^\d+,\d{1,2}$/.test(text))text=text.replace(',','.');
+ if(!/^\d+(?:\.\d+)?$/.test(text))return null;
+ const number=Number(text);return Number.isFinite(number)?number:null;
+}
+function rosterSummary(rows){
+ const active=rows.filter(x=>x.roster_status==='active');
+ const values=active.map(x=>rosterMarketValue(x.market_value)),known=values.filter(x=>x!==null);
+ const total=known.reduce((sum,value)=>sum+value,0);
+ const label=known.length||!active.length?new Intl.NumberFormat('it-IT',{maximumFractionDigits:0}).format(total):'—';
+ return '<section class="card" aria-label="Riepilogo rosa attiva" style="margin-bottom:16px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><span class="muted">Giocatori attivi</span><strong style="display:block;font-size:26px">'+active.length+'</strong></div><div><span class="muted">Valore totale</span><strong style="display:block;font-size:clamp(18px,5vw,26px);overflow-wrap:anywhere">'+label+'</strong></div></div>'+(known.length<active.length?'<p class="muted" style="margin-bottom:0">Valore disponibile per '+known.length+' su '+active.length+' giocatori.</p>':'')+'</section>';
+}
 function rosterCard(x){
  const stat=(label,title,value)=>'<div class="nc-stat" title="'+title+'"><b>'+esc(value??'—')+'</b><span>'+label+'</span></div>';
  const status=type==='club'?'<span class="roster-status '+esc(x.roster_status||'unknown')+'">'+({active:'Attivo',departed:'Ceduto',unknown:'Da verificare'}[x.roster_status]||'Da verificare')+'</span>':'';
@@ -75,7 +92,7 @@ async function showRoster(background=false){
  try{
   const j=rosterData&&rosterData.season===selected&&background==='filter'?rosterData.data:await readClub('roster.php',!!selected,selected);rosterData={season:selected,data:j};
   if(activeTab!=='ROSTER'||version!==rosterVersion)return;
-  let html='<p class="nc-roster-note">'+(type==='nation'?'Convocati nell’ultimo Match Report disponibile'+(j.roster_date?' · '+esc(j.roster_date):''):'Rosa e storico · Stato aggiornato dai trasferimenti')+' · '+esc(period)+' · Statistiche dai '+esc(j.reports)+' Match Report disponibili per '+(type==='nation'?'questa nazionale':'questo club')+'.<br>Pres. = Tit. + Sub. · Panc. = non entrato · MVP = uomo partita.</p>';
+  let html=(type==='club'?rosterSummary(j.rows):'')+'<p class="nc-roster-note">'+(type==='nation'?'Convocati nell’ultimo Match Report disponibile'+(j.roster_date?' · '+esc(j.roster_date):''):'Rosa e storico · Stato aggiornato dai trasferimenti')+' · '+esc(period)+' · Statistiche dai '+esc(j.reports)+' Match Report disponibili per '+(type==='nation'?'questa nazionale':'questo club')+'.<br>Pres. = Tit. + Sub. · Panc. = non entrato · MVP = uomo partita.</p>';
   if(type==='club')html+='<div class="transfer-tabs" role="tablist" aria-label="Stato rosa">'+[['active','Attivi'],['departed','Ceduti']].map(([v,label])=>'<button type="button" role="tab" data-roster-state="'+v+'" aria-pressed="'+(rosterFilter===v)+'" aria-selected="'+(rosterFilter===v)+'">'+label+' ('+j.rows.filter(x=>(x.roster_status||'unknown')===v).length+')</button>').join('')+'</div>';
   const visibleRows=type==='club'?j.rows.filter(x=>(x.roster_status||'unknown')===rosterFilter):j.rows;
   const groups=['Portieri','Difensori','Centrocampisti','Attaccanti'];
@@ -84,7 +101,7 @@ async function showRoster(background=false){
   if(type==='club'&&j.rows.some(x=>x.roster_status==='unknown'))html+='<p class="nc-roster-note">'+j.rows.filter(x=>x.roster_status==='unknown').length+' giocatori storici con stato non verificabile dai dati disponibili.</p>';
   if(j.rows.some(x=>x.minutes_missing))html+='<p class="nc-roster-note">— nei minuti: dati di ingresso, uscita o fine partita incompleti nei report.</p>';
   if(j.invalid_reports)html+='<p class="nc-roster-note">'+esc(j.invalid_reports)+' report con dati giocatori non leggibili.</p>';
-  document.getElementById('roster-values').innerHTML=j.rows.length?html:'<div class="card empty">'+(type==='nation'?'Nessuna convocazione disponibile nei Match Report.':'Nessun giocatore associato a questo club nel Player Codex.')+'</div>';
+  document.getElementById('roster-values').innerHTML=j.rows.length||type==='club'?html:'<div class="card empty">'+(type==='nation'?'Nessuna convocazione disponibile nei Match Report.':'Nessun giocatore associato a questo club nel Player Codex.')+'</div>';
   view.querySelectorAll('[data-roster-state]').forEach(b=>b.onclick=()=>{rosterFilter=b.dataset.rosterState;showRoster('filter')});
   NexusCards.wireImages(view);
  }catch(e){if(activeTab==='ROSTER'&&version===rosterVersion)document.getElementById('roster-values').innerHTML='<div class="card empty">'+esc(e.message)+'</div>'}
