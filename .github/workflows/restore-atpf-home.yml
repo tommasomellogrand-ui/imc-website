@@ -5,13 +5,25 @@ on:
     paths: ['.github/workflows/restore-atpf-home.yml']
 permissions:
   contents: read
+  actions: write
 concurrency:
-  group: imc-public-website-production
+  group: restore-atpf-home
   cancel-in-progress: false
 jobs:
   restore:
     runs-on: ubuntu-latest
     steps:
+      - name: Stop the obsolete broad deployment before restoring
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method POST repos/${{ github.repository }}/actions/runs/40461244301/cancel || true
+          for attempt in $(seq 1 30); do
+            state=$(gh api repos/${{ github.repository }}/actions/runs/40461244301 --jq .status)
+            if [ "$state" = completed ]; then exit 0; fi
+            sleep 2
+          done
+          exit 1
       - name: Restore only ATPF home and layout
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
