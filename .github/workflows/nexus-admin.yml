@@ -28,6 +28,8 @@ jobs:
       - name: Test assignments without production writes
         run: |
           for file in nexus/admin/*.php; do php -l "$file"; done
+          node --check nexus/admin/site-analytics.js
+          python3 -m py_compile nexus/admin/deploy-tracking.py
           node --check nexus/admin/admin.js
           php tests/nexus-admin.php
           php tests/nexus-admin-results-check.php
@@ -99,3 +101,13 @@ jobs:
           print('Admin deployed, login and all worlds verified; no assignment writes')
           PY
 
+
+      - name: Extend GA4 tracking to current public pages
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: python3 nexus/admin/deploy-tracking.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: analytics-coverage
+          path: analytics-coverage.json
