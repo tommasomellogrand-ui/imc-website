@@ -39,6 +39,7 @@ jobs:
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p(); ftp.set_pasv(True)
           files=['nexus/club-house/white-gloss.css','nexus/club-house/white-gloss.js','nexus/club-house/portal.js','nexus/club-house/home.html','nexus/assets/competition-view.js','nexus/competitions/index.html','nexus/competitions/view.html','nexus/competitions/domestic.html','nexus/competitions/family.html','nexus/competitions/group.html','nexus/home/data.php','nexus/assets/home.css','nexus/assets/trophy-room.css','nexus/assets/trophy-room.js','nexus/assets/home.js','nexus/index.html']
+          files=[p for p in files if str(p) not in {'nexus/index.html','nexus/assets/home.js'}] # Home has its own publisher
           for path in files:
               local=Path(path); data=local.read_bytes()
               ftp.cwd('/www.italianmastersclub.it/'+str(local.parent))
@@ -46,6 +47,7 @@ jobs:
               check=io.BytesIO();ftp.retrbinary('RETR '+local.name,check.write)
               if check.getvalue()!=data:raise RuntimeError('Upload mismatch: '+path)
           ftp.quit()
+          files=[p for p in files if str(p) not in {'nexus/index.html','nexus/assets/home.js'}] # Home has its own publisher
           for path in files:
               if path.endswith('.php'):continue
               with urllib.request.urlopen('https://www.italianmastersclub.it/'+path+'?verify='+os.environ['GITHUB_SHA'],timeout=30) as response:

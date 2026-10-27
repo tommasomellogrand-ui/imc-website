@@ -54,6 +54,7 @@ jobs:
           ftp=FTP_TLS(context=ctx); ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p(); ftp.set_pasv(True)
           files=["nexus/teams/directory.php","nexus/managers/page.html","nexus/teams/page.html","nexus/teams/detail.html","nexus/teams/detail.php","nexus/teams/stats.php","nexus/teams/matches.php","nexus/teams/roster.php","nexus/teams/roster-stats.php","nexus/assets/home.js","nexus/assets/profiles-shell.js","nexus/h2h/index.php","nexus/h2h/engine.php","nexus/trophies/index.php","nexus/index.html"]
+          files=[p for p in files if str(p) not in {'nexus/index.html','nexus/assets/home.js'}] # Home has its own publisher
           for name in files:
               p=Path(name); data=p.read_bytes()
               ftp.cwd('/www.italianmastersclub.it/'+str(p.parent))
@@ -90,6 +91,7 @@ jobs:
           club=get('teams/directory.php',world='GW001',type='clubs')['rows'][0]
           get('teams/detail.php',world='GW001',type='club',id=club['world_id'])
           get('h2h/index.php',world='GW001',kind='club',id=club['world_id'],mode='overview')
+          files=[p for p in files if str(p) not in {'nexus/index.html','nexus/assets/home.js'}] # Home has its own publisher
           for name in files:
               if name.endswith('.php'): continue
               with urllib.request.urlopen('https://www.italianmastersclub.it/'+name+'?verify='+os.environ['GITHUB_SHA'],timeout=30) as r:

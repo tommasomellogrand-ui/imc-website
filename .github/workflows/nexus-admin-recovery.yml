@@ -26,6 +26,7 @@ jobs:
           f=FTP_TLS(context=ctx);f.connect('ftp.italianmastersclub.it',21,timeout=60);f.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);f.prot_p();f.cwd('/www.italianmastersclub.it')
           def read(p):
            b=io.BytesIO();f.retrbinary('RETR '+p,b.write);return b.getvalue()
+          items=[i for i in items if i['path'] not in {'nexus/index.html','nexus/assets/home.js'}]
           for item in items:
            assert read(item['path']) in [item['old'].encode(),item['new'].encode()],'Concurrent production change: '+item['path']
           for item in reversed(items):
@@ -33,6 +34,7 @@ jobs:
            assert read(p) in [item['old'].encode(),data],'Concurrent change'
            f.storbinary('STOR '+p,io.BytesIO(data));assert read(p)==data
           f.quit()
+          items=[i for i in items if i['path'] not in {'nexus/index.html','nexus/assets/home.js'}]
           for item in items:
            data=urllib.request.urlopen('https://www.italianmastersclub.it/'+item['path']+'?verify='+os.environ['GITHUB_SHA'],timeout=45).read()
            assert data==item['new'].encode()

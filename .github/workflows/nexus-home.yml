@@ -1,0 +1,37 @@
+name: Publish canonical GW home
+on:
+  push:
+    branches: [main]
+    paths: ['nexus/index.html', 'nexus/assets/home.js', '.github/workflows/nexus-home.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nexus-canonical-home
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check nexus/assets/home.js
+      - name: Publish only canonical home files
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os,io,ssl,urllib.request
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          f=FTP_TLS(context=ctx);f.connect('ftp.italianmastersclub.it',21,timeout=60)
+          f.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);f.prot_p()
+          for name in ['nexus/assets/home.js','nexus/index.html']:
+              data=Path(name).read_bytes()
+              f.storbinary('STOR /www.italianmastersclub.it/'+name,io.BytesIO(data))
+              check=io.BytesIO();f.retrbinary('RETR /www.italianmastersclub.it/'+name,check.write)
+              assert check.getvalue()==data
+              with urllib.request.urlopen('https://www.italianmastersclub.it/'+name+'?verify='+os.environ['GITHUB_SHA'],timeout=45) as r:assert r.read()==data
+          f.quit()
+          PY

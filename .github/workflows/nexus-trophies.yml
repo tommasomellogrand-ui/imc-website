@@ -75,6 +75,7 @@ jobs:
           ftp.prot_p(); ftp.set_pasv(True)
           files=[Path('nexus/trophies',name) for name in ['engine.php','sync.php','automation.php','index.php']]
           files += [Path('nexus/assets/home.js'),Path('nexus/index.html'),Path('nexus/teams/detail.html'),Path('nexus/managers/profile.html')]
+          files=[p for p in files if str(p) not in {'nexus/index.html','nexus/assets/home.js'}] # Home has its own publisher
           for local in files:
               ftp.cwd('/www.italianmastersclub.it/'+local.parent.as_posix())
               data=local.read_bytes()

@@ -66,6 +66,7 @@ jobs:
           except error_perm: ftp.cwd(root+'nexus/club-house')
           files=[*Path('nexus/club-house').glob('*'),Path('nexus/assets/h2h.js'),Path('nexus/assets/home.js'),Path('nexus/index.html'),Path('nexus/admin/admin.js'),Path('nexus/admin/results-check.js'),Path('nexus/assets/competition-ui.js'),Path('nexus/assets/directory.js'),Path('nexus/assets/navigation.js'),Path('nexus/assets/profiles-shell.js'),Path('nexus/core/bootstrap.php'),Path('nexus/trophies/index.php'),Path('nexus/admin/index.html'),Path('nexus/admin/results-check.html'),Path('nexus/competitions/domestic.html'),Path('nexus/competitions/family.html'),Path('nexus/competitions/group.html'),Path('nexus/competitions/index.html'),Path('nexus/competitions/match.html'),Path('nexus/competitions/view.html'),Path('nexus/managers/page.html'),Path('nexus/managers/profile.html'),Path('nexus/matchday/live.html'),Path('nexus/players/page.html'),Path('nexus/players/profile.html'),Path('nexus/teams/detail.html'),Path('nexus/teams/page.html'),Path('nexus/the-club/index.html'),Path('nexus/the-club/post.html'),Path('nexus/transfers/page.html')]
           files=sorted(files,key=lambda p:p.suffix=='.html')
+          files=[p for p in files if str(p) not in {'nexus/index.html','nexus/assets/home.js'}] # Home has its own publisher
           for local in files:
               if not local.is_file(): continue
               ftp.cwd(root+local.parent.as_posix()); data=local.read_bytes()
