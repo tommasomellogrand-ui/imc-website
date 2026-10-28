@@ -22,7 +22,7 @@ jobs:
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
         run: |
           python3 - <<'PY'
-          import io, os, ssl
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
           files=['assets/notte-allo-stadio.webp','index.html','index.php','.htaccess']
@@ -46,7 +46,38 @@ jobs:
               ftp.storbinary('STOR '+p.name,io.BytesIO(data))
               check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
               assert check.getvalue()==data,'Byte verification failed: '+name
-          ftp.quit()
+          # Aruba's official HiSpeed Cache purger uses localhost:8889/purge + Host.
+          # Limit this temporary authenticated helper to the three home URLs.
+          token=secrets.token_hex(32)
+          helper='cache-update-'+secrets.token_hex(16)+'.php'
+          php="""<?php
+          header('Cache-Control: no-store, no-cache, must-revalidate');
+          header('Content-Type: application/json');
+          if ($_SERVER['REQUEST_METHOD'] !== 'POST' || time() > DEADLINE ||
+              !hash_equals('TOKENHASH', hash('sha256', $_SERVER['HTTP_X_DEPLOY_TOKEN'] ?? ''))) {
+              http_response_code(403); exit;
+          }
+          $out=[];
+          foreach (['/roadtohistory/', '/roadtohistory/index.html', '/roadtohistory/index.php'] as $path) {
+              $c=curl_init('http://127.0.0.1:8889/purge'.$path);
+              curl_setopt_array($c, [CURLOPT_RETURNTRANSFER=>true, CURLOPT_TIMEOUT=>10,
+                  CURLOPT_HTTPHEADER=>['Host: www.italianmastersclub.it']]);
+              curl_exec($c);
+              $out[$path]=curl_getinfo($c, CURLINFO_HTTP_CODE);
+              curl_close($c);
+          }
+          echo json_encode($out);
+          """.replace('DEADLINE',str(int(time.time())+600)).replace('TOKENHASH',hashlib.sha256(token.encode()).hexdigest())
+          directory(root)
+          try:
+              ftp.storbinary('STOR '+helper,io.BytesIO(php.encode()))
+              request=urllib.request.Request('https://www.italianmastersclub.it/roadtohistory/'+helper,
+                  data=b'',headers={'X-Deploy-Token':token},method='POST')
+              with urllib.request.urlopen(request,timeout=45) as response:
+                  print('Home cache invalidation:',response.read().decode())
+          finally:
+              ftp.delete(helper)
+              ftp.quit()
           print('Published and byte verified Road To History mockup only.')
           PY
       - name: Verify public page and artwork
