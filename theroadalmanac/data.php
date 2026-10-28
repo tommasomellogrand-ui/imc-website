@@ -48,6 +48,13 @@ try {
             $matches[]=$m;
         }
     }
+    $reportStats=[];
+    foreach(nexus_rows($db,'SELECT sm_fixture_id,team_stats_json FROM `GW001_IMC_Match_Report` WHERE game_world_id=?',[$gw]) as $r){
+        $stats=json_decode((string)$r['team_stats_json'],true);
+        if(is_array($stats))$reportStats[(string)$r['sm_fixture_id']]=$stats;
+    }
+    foreach($matches as &$match)$match['team_stats']=$reportStats[$match['id']]??null;
+    unset($match);
     // Trophy Room is Nexus's historical authority; do not re-derive or overwrite past winners.
     $awards=[];
     foreach(nexus_rows($db,'SELECT * FROM `GW001_IMC_Trophy_Room` WHERE game_world_id=? ORDER BY imc_season DESC,won_date DESC,id',[$gw]) as $a){

@@ -46,12 +46,43 @@ if(typeof document!=='undefined'){
       target.innerHTML=groups.map(g=>`<div class="table-wrap" role="region" aria-label="Classifica ${escape(c.name)}" tabindex="0"><table><caption>${escape(g.group_name||c.name)} · Classifica dai risultati disponibili in Nexus</caption><thead><tr><th>Squadra</th><th>Pos.</th><th>G</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>DR</th><th>Pt</th></tr></thead><tbody>${g.rows.map(r=>`<tr><td>${escape(r.team_name)}</td><td>${r.position}</td><td>${r.played}</td><td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gd}</td><td>${r.points}</td></tr>`).join('')}</tbody></table></div>`).join('');
     }catch{target.innerHTML=empty('Classifica temporaneamente non disponibile. Chiudi e riapri per riprovare.');target.dataset.failed='1';}
   }
+  const pages={panoramica:'Panoramica',stagioni:'Stagioni',albo:'Albo d’oro',partite:'Partite',statistiche:'Statistiche',scontri:'Scontri diretti'};
+const metrics=[['possession','Possesso %'],['total_shots','Tiri'],['shots_on_target','Tiri in porta'],['corners','Angoli'],['yellow_cards','Ammonizioni'],['red_cards','Espulsioni']];
+const numeric=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))?Number(v):null;
+function pageHref(page){const q=new URLSearchParams(location.search);q.set('page',page);return '?'+q;}
+function reportTable(ms,first=null){
+ return '<div class="table-wrap"><table><caption>Medie per partita · N indica i report con il dato disponibile. — = dato assente.</caption><thead><tr><th>Dato</th><th>'+(first?'Primo':'Casa')+'</th><th>'+(first?'Secondo':'Trasferta')+'</th><th>N</th></tr></thead><tbody>'+metrics.map(([k,l])=>{let a=0,b=0,n=0;for(const m of ms){const side=first?first(m):'home',other=side==='home'?'away':'home',x=numeric(m.team_stats?.[side]?.[k]),y=numeric(m.team_stats?.[other]?.[k]);if(x===null||y===null)continue;a+=x;b+=y;n++;}return `<tr><td>${l}</td><td>${n?(a/n).toFixed(1):'—'}</td><td>${n?(b/n).toFixed(1):'—'}</td><td>${n}</td></tr>`;}).join('')+'</tbody></table></div>';
+}
+function matchList(ms){return ms.length?`<div class="match-grid">${ms.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(m=>`<article class="match-card"><small>${date(m.date)} · Stagione ${m.season} · ${escape(data.competitions.find(c=>c.key===m.key)?.name||'')}</small><h3>${escape(m.home_name)} <strong>${m.home_score}–${m.away_score}</strong> ${escape(m.away_name)}</h3><p>${escape(data.managers[m.home_manager]||'Manager non attribuibile')} / ${escape(data.managers[m.away_manager]||'Manager non attribuibile')}</p>${/^\d+$/.test(m.id)?`<a href="/nexus/competitions/match.html?world=GW001&fixture=${encodeURIComponent(m.id)}">Apri partita: statistiche, formazioni e voti ↗</a>`:'<p>Report non disponibile per questa partita custom.</p>'}${m.team_stats?`<details><summary>Numeri della partita</summary>${reportTable([m])}</details>`:''}</article>`).join('')}</div>`:empty('Nessuna partita disponibile per questa selezione.');}
+function renderPages(matches){
+ const q=new URLSearchParams(location.search),page=pages[q.get('page')]?q.get('page'):'panoramica';
+ $('pages').innerHTML=Object.entries(pages).map(([k,v])=>`<a href="${escape(pageHref(k))}" ${page===k?'aria-current="page"':''}>${v}</a>`).join('');
+ $('page-cards').innerHTML=Object.entries(pages).filter(([k])=>k!=='panoramica').map(([k,v])=>`<a class="award" href="${escape(pageHref(k))}"><h3>${v} →</h3></a>`).join('');
+ for(const id of [...Object.keys(pages),'club','manager','record'])$(id).hidden=id!==page&&!(page==='statistiche'&&['club','manager','record'].includes(id));
+ $('numbers').hidden=page!=='panoramica';document.querySelector('.legacy-section').hidden=page!=='panoramica';
+ $('match-list').innerHTML=page==='partite'?matchList(matches):'';
+ $('report-stats').innerHTML=page==='statistiche'?`<p>${matches.filter(m=>m.team_stats).length} report disponibili su ${matches.length} partite selezionate.</p>`+reportTable(matches):'';
+ if(page==='scontri')setupH2H(matches);
+}
+function setupH2H(matches){
+ const kind=$('h-kind').value,field=kind==='manager'?'_manager':'_id',names=new Map();
+ for(const m of matches)for(const side of ['home','away']){const id=m[side+field];if(id)names.set(String(id),kind==='manager'?data.managers[id]:m[side+'_name']);}
+ for(const id of ['h-a','h-b']){const previous=$(id).value;$(id).innerHTML='<option value="">Seleziona…</option>'+[...names].sort((a,b)=>a[1].localeCompare(b[1],'it')).map(([v,n])=>`<option value="${escape(v)}">${escape(n)}</option>`).join('');if(names.has(previous))$(id).value=previous;}
+ const draw=()=>{const a=$('h-a').value,b=$('h-b').value,v=$('h-venue').value;if(!a||!b||a===b){$('h-results').innerHTML=empty('Scegli due protagonisti diversi. I manager sono quelli attribuiti alla data della partita.');return;}
+ const side=m=>String(m['home'+field])===a?'home':'away';
+ const ms=matches.filter(m=>((String(m['home'+field])===a&&String(m['away'+field])===b)||(String(m['away'+field])===a&&String(m['home'+field])===b))&&(!v||side(m)===v));
+ let win=0,draws=0,gf=0,ga=0;for(const m of ms){const x=m[side(m)+'_score'],y=m[(side(m)==='home'?'away':'home')+'_score'];gf+=x;ga+=y;win+=x>y;draws+=x===y;}
+ $('h-results').innerHTML=`<h3>${escape(names.get(a))} / ${escape(names.get(b))}</h3><p>${ms.length} incontri · ${win} vittorie del primo · ${draws} pareggi · ${ms.length-win-draws} vittorie del secondo · Gol ${gf}–${ga}</p><p>Bilancio sul punteggio della partita, prima dei rigori.</p>`+reportTable(ms,side)+matchList(ms);
+ };
+ $('h-kind').onchange=()=>setupH2H(matches);for(const id of ['h-a','h-b','h-venue'])$(id).onchange=draw;draw();
+}
+
   function render(){
     const id=++renderId;const f=filters();const matches=data.matches.filter(r=>matching(r,f)),awards=data.awards.filter(r=>matching(r,f));
     const comps=data.competitions.filter(r=>matching(r,f));
     const clubs=aggregate(matches,awards,'club'),managers=aggregate(matches,awards,'manager',data.managers);
     const unknown=matches.reduce((n,m)=>n+Number(!m.home_manager)+Number(!m.away_manager),0);
-    const params=new URLSearchParams();if(f.scope!=='club')params.set('scope',f.scope);if(f.season)params.set('season',f.season);if(f.key)params.set('competition',f.key);history.replaceState(null,'',location.pathname+(params.size?'?'+params:''));
+    const params=new URLSearchParams(location.search);for(const [k,v] of [['scope',f.scope],['season',f.season],['competition',f.key]]){if(v)params.set(k,v);else params.delete(k);}history.replaceState(null,'',location.pathname+(params.size?'?'+params:''));
     $('numbers').innerHTML=[[new Set(comps.map(c=>c.season)).size,'Stagioni in archivio'],[matches.length,'Partite archiviate'],[clubs.length,f.scope==='nation'?'Nazionali':'Club'],[awards.length,'Titoli registrati']].map(([n,s])=>`<div><strong>${n}</strong><span>${s}</span></div>`).join('');
     $('awards').innerHTML=awards.length?awards.map(a=>`<article class="award"><span class="season">STAGIONE ${a.season}</span><p class="competition">${escape(a.name)}</p>${crest(a)}<h3>${escape(a.winner)}</h3><p class="manager">${escape(a.manager?data.managers[a.manager]:'Manager storico non disponibile')}</p><time>${date(a.date)}</time></article>`).join(''):empty('Nessun vincitore registrato in Nexus per questa selezione. Un’assenza non equivale a un titolo non assegnato.');
     $('club-title').textContent=f.scope==='nation'?'Nazionali':'Club';$('club-table').innerHTML=table(clubs,'club',f.scope);$('manager-table').innerHTML=table(managers,'manager',f.scope);
@@ -70,6 +101,7 @@ if(typeof document!=='undefined'){
       recordCards.push(`<article class="record"><h3>${title}</h3><strong>${max} gol</strong><ul>${matches.filter(m=>calc(m)===max).map(m=>`<li>${escape(m.home_name)} <b>${m.home_score}–${m.away_score}</b> ${escape(m.away_name)}<br>${date(m.date)} · Stagione ${m.season}</li>`).join('')}</ul></article>`);
     }}
     $('records').innerHTML=recordCards.join('')||empty('Risultati insufficienti per calcolare i record.');
+    renderPages(matches);
     $('status').textContent='Fonte: Nexus GW001 · Dati letti il '+new Date(data.generated_at).toLocaleString('it-IT',{timeZone:'Europe/Rome'})+' · Statistiche limitate ai risultati archiviati, inclusi gli avversari internazionali.';
   }
   async function load(){
