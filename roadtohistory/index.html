@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
 <meta name="theme-color" content="#020e1c">
 <title>Road To History · GW001</title>
 <meta name="description" content="Road To History · GW001. Anteprima della nuova home: The Road Almanac, le quattro Legacy e The Road Chronicle.">
@@ -12,8 +13,9 @@
 <meta property="og:image" content="https://www.italianmastersclub.it/roadtohistory/assets/notte-allo-stadio.webp">
 <style>
 *{box-sizing:border-box}html{color-scheme:dark;background:#020b15}body{margin:0;color:#eee6d5;font-family:Georgia,serif}main{position:relative;max-width:841px;margin:auto;background:#020e1c;box-shadow:0 0 100px #0008}img{display:block;width:100%;height:auto}footer{max-width:841px;margin:auto;padding:24px 20px 32px;text-align:center;font:14px/1.6 system-ui,sans-serif;color:#b8bdc5}footer p{margin:0 0 16px}nav{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}nav a{color:#f3d092;border:1px solid #b58a4e;border-radius:8px;padding:12px 18px;text-decoration:none;min-height:44px}a:hover{background:#172332}a:focus-visible{outline:3px solid #fff;outline-offset:4px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.almanac-link{position:absolute;left:3%;right:3%;top:21%;height:17.5%;border-radius:12px}.almanac-link:hover{background:#e7bd6c0d}.almanac-link:focus-visible{outline:3px solid #fff;outline-offset:-4px}
-.platinum-link{position:absolute;left:3%;width:46%;top:44.6%;height:11.3%;border-radius:12px}.platinum-link:hover{background:#e7bd6c0d}.platinum-link:focus-visible{outline:3px solid #fff;outline-offset:-4px}
+.almanac-link{position:absolute;z-index:2;display:block;cursor:pointer;touch-action:manipulation;left:3%;right:3%;top:21%;height:17.5%;border-radius:12px}.almanac-link:hover{background:#e7bd6c0d}.almanac-link:focus-visible{outline:3px solid #fff;outline-offset:-4px}
+.platinum-link{position:absolute;z-index:2;display:block;cursor:pointer;touch-action:manipulation;left:3%;width:46%;top:44.6%;height:11.3%;border-radius:12px}.platinum-link:hover{background:#e7bd6c0d}.platinum-link:focus-visible{outline:3px solid #fff;outline-offset:-4px}
+.nexus-link{position:absolute;z-index:2;display:block;left:3%;right:3%;top:89.8%;height:8.8%;border-radius:12px;cursor:pointer;touch-action:manipulation}.menu-link{position:absolute;z-index:2;right:3%;top:2.5%;width:10%;height:4%;cursor:pointer}
 </style>
 </head>
 <body>
@@ -22,10 +24,13 @@
 <img src="/roadtohistory/assets/notte-allo-stadio.webp" width="841" height="1870" fetchpriority="high" alt="Road To History — Ogni stagione lascia una storia. The Road Almanac: albo d’oro, stagioni e record. Le quattro Legacy: Platinum, Divisione 1; Gold, Divisione 2; Silver, Divisione 3; Bronze, Divisione 4. The Road Chronicle, il magazine di Road To History. Nexus: classifiche, risultati e competizioni.">
 <a class="almanac-link" href="/theroadalmanac/" aria-label="Apri The Road Almanac"><span class="sr-only">Apri The Road Almanac</span></a>
 <a class="platinum-link" href="/platinumlegacy/" aria-label="Apri Platinum Legacy"><span class="sr-only">Apri Platinum Legacy</span></a>
+<a class="nexus-link" href="/nexus/?world=GW001" aria-label="Apri Nexus GW001"><span class="sr-only">Apri Nexus GW001</span></a>
+<a class="menu-link" href="#collegamenti" aria-label="Vai ai collegamenti"><span class="sr-only">Vai ai collegamenti</span></a>
 </main>
 <footer>
 <p>The Road Almanac e Platinum Legacy sono online. Le altre sezioni sono in anteprima.</p>
-<nav aria-label="Collegamenti"><a href="/">Sito principale IMC</a><a href="/theroadalmanac/">The Road Almanac</a><a href="/platinumlegacy/">Platinum Legacy</a><a href="/nexus/?world=GW001">Entra in Nexus · GW001</a></nav>
+<nav id="collegamenti" aria-label="Collegamenti"><a href="/">Sito principale IMC</a><a href="/theroadalmanac/">The Road Almanac</a><a href="/platinumlegacy/">Platinum Legacy</a><a href="/nexus/?world=GW001">Entra in Nexus · GW001</a></nav>
 </footer>
 </body>
 </html>
+

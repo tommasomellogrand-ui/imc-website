@@ -1,7 +1,12 @@
-DirectoryIndex index.html
+DirectoryIndex index.php index.html
 Options -Indexes
 <IfModule mod_headers.c>
-<FilesMatch "\\.(html|mjs|css)$">
-Header set Cache-Control "no-cache, must-revalidate"
-</FilesMatch>
+Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+Header always set CDN-Cache-Control "no-store"
+Header always set Surrogate-Control "no-store"
+Header always set Pragma "no-cache"
+Header always set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+</IfModule>
+<IfModule mod_expires.c>
+ExpiresActive Off
 </IfModule>

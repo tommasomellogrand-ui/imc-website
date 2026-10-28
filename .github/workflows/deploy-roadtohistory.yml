@@ -25,7 +25,7 @@ jobs:
           import io, os, ssl
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
-          files=['assets/notte-allo-stadio.webp','.htaccess','index.html']
+          files=['assets/notte-allo-stadio.webp','index.html','index.php','.htaccess']
           root='/www.italianmastersclub.it/roadtohistory'
           ctx=ssl.create_default_context()
           ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
@@ -61,6 +61,10 @@ jobs:
                   data=response.read()
               assert hashlib.sha256(data).digest()==hashlib.sha256((Path('roadtohistory')/name).read_bytes()).digest(),name
           with urllib.request.urlopen(base,timeout=60) as response:
-              assert response.status==200 and b'Road To History' in response.read()
+              assert response.status==200
+              assert 'no-store' in response.headers.get('Cache-Control','')
+              html=response.read()
+              assert b'href="/theroadalmanac/"' in html and b'href="/platinumlegacy/"' in html
           print('Public URL and exact artwork verified.')
           PY
+
