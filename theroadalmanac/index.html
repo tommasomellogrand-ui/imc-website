@@ -5,31 +5,16 @@
 <title>The Road Almanac · Road To History</title>
 <meta name="description" content="L’archivio storico di Road To History, GW001: albo d’oro, stagioni, club, manager e record dai dati Nexus.">
 <link rel="canonical" href="https://www.italianmastersclub.it/theroadalmanac/">
-<link rel="stylesheet" href="/theroadalmanac/style.css?v=3">
-<script type="module" src="/theroadalmanac/app.mjs?v=3"></script>
+<link rel="stylesheet" href="/theroadalmanac/style.css?v=4">
+<script type="module" src="/theroadalmanac/app.mjs?v=4"></script>
 <style>.legacy-grid a{display:block;text-align:left;border-radius:10px;padding:22px;border:1px solid #d9e8fa;background:linear-gradient(140deg,#20354b,#061323);color:#d9e8fa;font:25px Georgia,serif}@media(max-width:700px){.legacy-grid a{font-size:20px;padding:18px 12px}}</style></head>
 <body>
 <header class="top"><a href="/roadtohistory/" class="brand">← <span>ROAD TO HISTORY<small>GW001 · THE ARCHIVES</small></span></a><a class="nexus" href="/nexus/?world=GW001">Nexus ↗</a></header>
 <main>
 <section class="hero"><img src="/theroadalmanac/assets/almanac.webp" width="2172" height="724" alt="The Road Almanac · Road To History · GW001" fetchpriority="high"><div class="hero-copy"><p class="eyebrow">LA MEMORIA DI ROAD TO HISTORY</p><h1>Stagioni, campioni e record.</h1><p>Ogni stagione lascia una storia. Qui la ritrovi.</p></div></section>
-<nav id="pages" class="sections" aria-label="Pagine Almanac"></nav>
-<div class="filters" aria-label="Filtri archivio"><label>Ambito<select id="scope"><option value="club">Club</option><option value="nation">Nazionali</option></select></label><label>Stagione<select id="season"><option value="">Tutte le stagioni</option></select></label><label class="competition-filter">Competizione<select id="competition"><option value="">Tutte le competizioni</option></select></label><button id="reset" type="button">Azzera filtri</button></div>
-<p id="status" class="source" role="status" aria-live="polite">Caricamento dell’archivio Nexus GW001…</p>
-<button id="retry" type="button" hidden>Riprova</button>
-<div id="content" hidden>
-<section id="panoramica"><h2>Esplora l’archivio</h2><p>Stagioni, titoli, partite e confronti: scegli una sezione per approfondire.</p><div id="page-cards" class="awards"></div></section>
-<section id="partite"><h2>Partite</h2><div id="match-list"></div></section>
-<section id="statistiche"><h2>Statistiche dai Match Report</h2><div id="report-stats"></div></section>
-<section id="scontri"><h2>Scontri diretti</h2><div class="filters"><label>Confronto<select id="h-kind"><option value="team">Squadre</option><option value="manager">Manager</option></select></label><label>Primo protagonista<select id="h-a"></select></label><label>Secondo protagonista<select id="h-b"></select></label><label>Campo del primo<select id="h-venue"><option value="">Tutti</option><option value="home">Casa</option><option value="away">Trasferta</option></select></label></div><div id="h-results"></div></section>
-<div id="numbers" class="numbers" aria-label="Riepilogo archivio"></div>
-
-<section id="albo"><div class="section-heading"><div><p class="eyebrow">I NOMI NELLA STORIA</p><h2>Albo d’oro</h2></div><span class="section-number">01</span></div><p class="intro">Vincitori registrati nella Trophy Room di Nexus. Il manager è quello associato alla squadra alla data del titolo, quando verificabile.</p><div id="awards" class="awards"></div></section>
-<section id="stagioni"><div class="section-heading"><div><p class="eyebrow">UN CAPITOLO ALLA VOLTA</p><h2>Archivio stagioni</h2></div><span class="section-number">02</span></div><p class="intro">Consulta le classifiche complete e i risultati disponibili. Promozioni e retrocessioni non vengono dedotte senza una registrazione verificata.</p><div id="seasons"></div></section>
-<section id="club"><div class="section-heading"><div><p class="eyebrow">LE SQUADRE PROTAGONISTE</p><h2 id="club-title">Club</h2></div><span class="section-number">03</span></div><p class="intro">Presenze = partite nei risultati archiviati. Stagioni = stagioni con almeno una presenza. V, N e P si riferiscono al punteggio della partita, prima dei rigori.</p><div id="club-table"></div></section>
-<section id="manager"><div class="section-heading"><div><p class="eyebrow">CHI HA SCRITTO LA STORIA</p><h2>Manager</h2></div><span class="section-number">04</span></div><p id="manager-note" class="intro"></p><div id="manager-table"></div></section>
-<section id="record"><div class="section-heading"><div><p class="eyebrow">TRAGUARDI DA SUPERARE</p><h2>Il libro dei record</h2></div><span class="section-number">05</span></div><p class="intro">Primati calcolati sui risultati disponibili per i filtri selezionati, inclusi gli ex aequo.</p><div id="records" class="records"></div></section>
-<section class="legacy-section"><p class="eyebrow">QUATTRO DIVISIONI. UN’UNICA STORIA.</p><h2>Le quattro Legacy</h2><p class="intro">Esplora nell’Almanac lo storico di ogni campionato.</p><div class="legacy-grid"><a href="/platinumlegacy/" class="platinum"><small>DIVISIONE 1</small>Platinum Legacy <span>↗</span></a><button data-division="2" class="gold"><small>DIVISIONE 2</small>Gold Legacy <span>↗</span></button><button data-division="3" class="silver"><small>DIVISIONE 3</small>Silver Legacy <span>↗</span></button><button data-division="4" class="bronze"><small>DIVISIONE 4</small>Bronze Legacy <span>↗</span></button></div></section>
-</div>
+<label class="section-menu">Sezioni<select id="page-menu" aria-label="Sezioni"></select></label>
+<p id="status" class="source" role="status">Caricamento archivio GW001…</p>
+<div id="view"></div>
 </main>
 <footer><p>THE ROAD ALMANAC <span>·</span> ROAD TO HISTORY · GW001</p><a href="/roadtohistory/">← Torna alla home</a><a href="/nexus/?world=GW001">Apri Nexus GW001 ↗</a></footer>
 </body></html>
