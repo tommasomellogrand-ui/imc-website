@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {aggregate,leaders} from './app.mjs';
+const matches=[{season:1,home_id:'1',home_name:'A',away_id:'2',away_name:'B',home_score:2,away_score:0,home_manager:'old',away_manager:null},{season:2,home_id:'1',home_name:'A',away_id:'2',away_name:'B',home_score:1,away_score:1,home_manager:'new',away_manager:'b'}];
+const awards=[{winner_id:'1',winner:'A',manager:'old'}];
+const clubs=aggregate(matches,awards,'club');
+assert.equal(clubs.reduce((n,r)=>n+r.played,0),4);
+assert.equal(clubs.reduce((n,r)=>n+r.gf,0),clubs.reduce((n,r)=>n+r.ga,0));
+assert.equal(clubs[0].titles,1);assert.equal(clubs[0].seasons.size,2);
+const managers=aggregate(matches,awards,'manager',{old:'Previous',new:'Current',b:'Other'});
+assert.equal(managers.find(r=>r.id==='old').titles,1);
+assert.equal(managers.find(r=>r.id==='new').titles,0);
+assert.equal(managers.reduce((n,r)=>n+r.played,0),3);
+assert.equal(leaders(clubs,'played').rows.length,2);
+assert.equal(leaders([],'played'),null);
+console.log('Aggregates, historical manager attribution, missing manager exclusion and ties verified.');

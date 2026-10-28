@@ -1,0 +1,79 @@
+name: Deploy The Road Almanac
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'theroadalmanac/**'
+      - '.github/workflows/deploy-theroadalmanac.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: theroadalmanac-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Almanac code and historical attribution
+        run: |
+          php -l theroadalmanac/data.php
+          php -l theroadalmanac/engine.php
+          php theroadalmanac/engine.test.php
+          node --check theroadalmanac/app.mjs
+          node theroadalmanac/stats.test.mjs
+      - name: Publish only The Road Almanac and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          files=['assets/almanac.webp','engine.php','data.php','style.css','app.mjs','.htaccess','index.html']
+          root='/www.italianmastersclub.it/theroadalmanac'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          for name in files:
+              p=Path('theroadalmanac')/name
+              data=p.read_bytes()
+              assert data, str(p)
+              directory(root+'/'+str(Path(name).parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+name
+          ftp.quit()
+          print('Published and byte verified The Road Almanac only.')
+          PY
+      - name: Verify public page and artwork
+        run: |
+          python3 - <<'PY'
+          import urllib.request,hashlib
+          from pathlib import Path
+          base='https://www.italianmastersclub.it/theroadalmanac/'
+          for name in ['assets/almanac.webp','index.html']:
+              with urllib.request.urlopen(base+name+'?release=${{ github.sha }}',timeout=60) as response:
+                  assert response.status==200
+                  data=response.read()
+              assert hashlib.sha256(data).digest()==hashlib.sha256((Path('theroadalmanac')/name).read_bytes()).digest(),name
+          with urllib.request.urlopen(base,timeout=60) as response:
+              assert response.status==200 and b'Road To History' in response.read()
+          import json
+          with urllib.request.urlopen(base+'data.php',timeout=60) as response:data=json.load(response)
+          assert data['ok'] and data['world']=='GW001'
+          assert data['seasons'] and data['awards'] and data['matches']
+          assert all(c['key'].startswith('GW001') for c in data['competitions'])
+          print('Live GW001 data verified:',len(data['awards']),'awards,',len(data['matches']),'matches')
+          print('Public URL and exact artwork verified.')
+          PY

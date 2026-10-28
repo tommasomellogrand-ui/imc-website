@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'theroadalmanac/**'
+      - '.github/workflows/deploy-theroadalmanac.yml'
       - 'roadtohistory/**'
       - '.github/workflows/deploy-roadtohistory.yml'
       - '.github/workflows/restore-atpf-home.yml'
