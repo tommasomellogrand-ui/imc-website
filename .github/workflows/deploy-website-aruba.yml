@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'roadtohistory/**'
+      - '.github/workflows/deploy-roadtohistory.yml'
       - '.github/workflows/restore-atpf-home.yml'
       - '.github/workflows/nexus-admin-recovery.yml'
       - '.github/workflows/deploy-website-aruba.yml'
