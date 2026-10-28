@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'platinumlegacy/**'
+      - '.github/workflows/deploy-platinumlegacy.yml'
       - 'theroadalmanac/**'
       - '.github/workflows/deploy-theroadalmanac.yml'
       - 'roadtohistory/**'
