@@ -31,7 +31,7 @@ if(typeof document!=='undefined'){
     if(!rows.length)return empty(kind==='manager'?'Nessuna presenza attribuibile con certezza a un manager IMC per questi filtri.':'Nessun risultato disponibile per questi filtri.');
     const heading=kind==='manager'?'Manager':scope==='nation'?'Nazionale':'Club';
     return `<div class="table-wrap" role="region" aria-label="Statistiche ${heading}" tabindex="0"><table><caption>Ordine: presenze, poi vittorie. GF = gol fatti · GS = gol subiti. Tutte le righe disponibili.</caption><thead><tr><th>${heading}</th><th>Stagioni</th>${kind==='manager'?'<th>Squadre</th>':''}<th>Presenze</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>Titoli</th></tr></thead><tbody>${rows.map(r=>{
-      const href=kind==='manager'?'/nexus/managers/profile.html?'+new URLSearchParams({world:'GW001',manager:r.id}):/^\d+$/.test(r.id)?'/nexus/teams/detail.html?'+new URLSearchParams({world:'GW001',type:scope==='nation'?'nation':'club',id:r.id}):null;
+      const href=kind==='manager'?'/nexus/managers/profile.html?'+new URLSearchParams({world:'GW001',manager:r.id}):/^\d+$/.test(r.id)&&data.teams[scope+':'+r.id]?'/nexus/teams/detail.html?'+new URLSearchParams({world:'GW001',type:scope==='nation'?'nation':'club',id:r.id}):null;
       return `<tr><td class="team">${href?`<a href="${escape(href)}">${escape(r.name)} ↗</a>`:escape(r.name)}</td><td>${r.seasons.size||'—'}</td>${kind==='manager'?`<td title="${escape([...r.teams].join(', '))}">${r.teams.size||'—'}</td>`:''}<td>${r.played||'—'}</td><td>${r.played?r.won:'—'}</td><td>${r.played?r.drawn:'—'}</td><td>${r.played?r.lost:'—'}</td><td>${r.played?r.gf:'—'}</td><td>${r.played?r.ga:'—'}</td><td>${r.titles}</td></tr>`;
     }).join('')}</tbody></table></div>`;
   }
@@ -70,7 +70,7 @@ if(typeof document!=='undefined'){
       recordCards.push(`<article class="record"><h3>${title}</h3><strong>${max} gol</strong><ul>${matches.filter(m=>calc(m)===max).map(m=>`<li>${escape(m.home_name)} <b>${m.home_score}–${m.away_score}</b> ${escape(m.away_name)}<br>${date(m.date)} · Stagione ${m.season}</li>`).join('')}</ul></article>`);
     }}
     $('records').innerHTML=recordCards.join('')||empty('Risultati insufficienti per calcolare i record.');
-    $('status').textContent='Fonte: Nexus GW001 · Dati letti il '+new Date(data.generated_at).toLocaleString('it-IT')+' · Statistiche limitate ai risultati archiviati.';
+    $('status').textContent='Fonte: Nexus GW001 · Dati letti il '+new Date(data.generated_at).toLocaleString('it-IT',{timeZone:'Europe/Rome'})+' · Statistiche limitate ai risultati archiviati, inclusi gli avversari internazionali.';
   }
   async function load(){
     $('retry').hidden=true;$('status').classList.remove('error');$('status').textContent='Caricamento dell’archivio Nexus GW001…';
