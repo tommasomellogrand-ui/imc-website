@@ -24,9 +24,13 @@ try {
         if($key===''||$season<1)continue;
         $scope=rth_scope($r); $name=rth_label($r,$labels);
         $catalog[$season.'|'.$key]=['season'=>$season,'key'=>$key,'name'=>$name,'scope'=>$scope,'action'=>$r['sm_action'],'division'=>$r['sm_division'],'custom'=>false];
-        if(!trophy_finished($r,$today))continue;
-        $fixture=(string)$r['sm_fixture_id']; if($fixture===''||isset($seen[$fixture]))continue; $seen[$fixture]=true;
-        $m=['id'=>$fixture,'season'=>$season,'key'=>$key,'scope'=>$scope,'date'=>substr((string)$r['match_date'],0,10),'home_score'=>(int)$r['home_score'],'away_score'=>(int)$r['away_score']];
+        $custom=($r['sm_action']??'')==='imc_custom'||str_starts_with($key,'GW001_IMC_');
+        $awarded=$custom&&strtoupper(trim((string)($r['result_status']??'')))==='AWARDED'&&isset($r['home_score'],$r['away_score'])&&!empty($r['match_date'])&&$r['match_date']<=$today;
+        if(!trophy_finished($r,$today)&&!$awarded)continue;
+        $fixture=(string)($r['sm_fixture_id']??'');
+        if($custom&&($fixture===''||$fixture==='0'))$fixture='custom:'.hash('sha256',json_encode([$season,$key,$r['match_date'],$r['competition_round']??'',(string)($r['home_sm_club_id']??$r['home_name']),(string)($r['away_sm_club_id']??$r['away_name'])]));
+        if($fixture==='' ||isset($seen[$fixture]))continue; $seen[$fixture]=true;
+        $m=['id'=>$fixture,'season'=>$season,'key'=>$key,'scope'=>$scope,'awarded'=>$awarded,'date'=>substr((string)$r['match_date'],0,10),'home_score'=>(int)$r['home_score'],'away_score'=>(int)$r['away_score']];
         foreach(['home','away'] as $side){
             $id=(string)($r[$side.'_sm_club_id']??''); $m[$side.'_id']=$id!==''&&$id!=='0'?$id:'name:'.$r[$side.'_name'];
             $m[$side.'_name']=$teams[$scope.':'.$id]['name']??$r[$side.'_name'];
