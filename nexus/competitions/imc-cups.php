@@ -25,15 +25,14 @@ try {
  }
  foreach($table as &$t)$t['gd']=$t['gf']-$t['ga'];unset($t);$table=array_values($table);
  usort($table,fn($a,$b)=>($b['points']<=>$a['points'])?:($b['gd']<=>$a['gd'])?:($b['gf']<=>$a['gf'])?:strcmp($a['team_name'],$b['team_name']));foreach($table as $i=>&$t)$t['position']=$i+1;unset($t);
- // Pilot GW001: only the latest imported match date for Champions / Europa.
+ // GW001: preserve legacy history before 2026-10-29; use MySQL Results from 2026-10-29 onward.
  // Keep the existing static schedule and standings unchanged.
  if($gw==='GW001' && $season===2 && $mode==='results' &&
     in_array($key,['GW001_IMC_CHAMPIONS_LEAGUE','GW001_IMC_EUROPA_LEAGUE'],true)){
   $custom=nexus_db($c,'custom');
-  $latest=nexus_rows($custom,'SELECT MAX(match_date) latest FROM `GW001_IMC_Results` WHERE game_world_id=? AND competition_key=? AND sm_fixture_id IS NOT NULL',[$gw,$key]);
-  $latestDate=$latest[0]['latest']??null;
-  if($latestDate){
-   $live=nexus_rows($custom,'SELECT r.sm_fixture_id,r.match_date,r.competition_key,r.competition_stage,r.competition_round,r.competition_group_name,r.sm_action,r.home_name,r.away_name,r.home_sm_club_id,r.away_sm_club_id,r.home_score,r.away_score,r.home_sm_manager_id,r.away_sm_manager_id,m.sm_fixture_id report_fixture_id FROM `GW001_IMC_Results` r LEFT JOIN `GW001_IMC_Match_Report` m ON m.game_world_id=r.game_world_id AND m.sm_fixture_id=r.sm_fixture_id AND m.competition_key=r.competition_key WHERE r.game_world_id=? AND r.competition_key=? AND r.match_date=? AND r.sm_fixture_id IS NOT NULL ORDER BY r.sm_fixture_id',[$gw,$key,$latestDate]);
+  $cutoff='2026-10-29';
+  {
+   $live=nexus_rows($custom,'SELECT r.sm_fixture_id,r.match_date,r.competition_key,r.competition_stage,r.competition_round,r.competition_group_name,r.sm_action,r.home_name,r.away_name,r.home_sm_club_id,r.away_sm_club_id,r.home_score,r.away_score,r.home_sm_manager_id,r.away_sm_manager_id,m.sm_fixture_id report_fixture_id FROM `GW001_IMC_Results` r LEFT JOIN `GW001_IMC_Match_Report` m ON m.game_world_id=r.game_world_id AND m.sm_fixture_id=r.sm_fixture_id AND m.competition_key=r.competition_key WHERE r.game_world_id=? AND r.competition_key=? AND r.match_date>=? AND r.sm_fixture_id IS NOT NULL ORDER BY r.match_date,r.sm_fixture_id',[$gw,$key,$cutoff]);
    $dedup=[];
    foreach($live as $r){
     $id=(string)$r['sm_fixture_id'];if(isset($dedup[$id]))continue;
@@ -57,10 +56,10 @@ try {
    }
    foreach($results as $old){
     $signature=(string)$old['match_date'].'|'.mb_strtolower(trim((string)$old['home_name']),'UTF-8').'|'.mb_strtolower(trim((string)$old['away_name']),'UTF-8');
-    if(!isset($latestSignatures[$signature]))$merged[]=$old;
+    if((string)$old['match_date']<$cutoff && !isset($latestSignatures[$signature]))$merged[]=$old;
    }
    foreach($dedup as $item)$merged[]=$item;
-   nexus_out(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'competition_key'=>$key,'rows'=>$merged,'groups'=>[],'source'=>'static_history_plus_mysql_latest_matchday','match_date'=>$latestDate]);
+   nexus_out(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'competition_key'=>$key,'rows'=>$merged,'groups'=>[],'source'=>'static_before_cutoff_mysql_from_cutoff','cutoff'=>$cutoff]);
   }
  }
  $rows=$mode==='standings'?($cup['format']==='league'?$table:[]):($mode==='results'?$results:$schedule);
