@@ -77,7 +77,7 @@
   const inClubHouse=location.pathname.includes('/club-house/');
   const params=new URLSearchParams(location.search),valid=w=>/^GW00[1-9]$|^GW01[01]$/.test(w||'');
   let remembered='';try{remembered=localStorage.getItem('imc_nexus_world')||''}catch(e){}
-  let world=location.pathname.startsWith('/nexus/alltoplayfor/')?'GW001':valid(params.get('world'))?params.get('world'):valid(remembered)?remembered:'GW001';
+  let world=(location.pathname.startsWith('/nexus/alltoplayfor/')||location.pathname.startsWith('/nexus/gw001/'))?'GW001':valid(params.get('world'))?params.get('world'):valid(remembered)?remembered:'GW001';
   const href=(path,w=world)=>'/nexus/'+path+'?'+new URLSearchParams({world:w});
   const header=document.createElement('header');header.id='nx-universal-header';
   header.innerHTML='<div class="nx-universal-top"><a class="nx-universal-brand" href="/nexus/club-house/"><img src="/site-assets/images/imc-logo.png" alt="IMC"><span>NEXUS</span></a><select id="nx-world-select" aria-label="Game World"><option value="clubhouse">Club House</option>'+Array.from({length:11},(_,i)=>{const w='GW'+String(i+1).padStart(3,'0');return '<option value="'+w+'">'+w+'</option>'}).join('')+'</select></div><div class="nx-universal-context" id="nx-universal-context"></div>';
@@ -101,6 +101,7 @@
   document.getElementById('nx-universal-more').onclick=()=>{
    const links=new Map();[['Club',href('teams/page.html')],['Nazionali',href('teams/page.html')+'&type=nations'],['Giocatori',href('players/page.html')],['Trasferimenti',href('transfers/page.html')]].forEach(([name,url])=>links.set(url,name));
    if(world==='GW001')links.set('/nexus/alltoplayfor/','ALL TO PLAY FOR · La serie');
+   if(world==='GW001')[['rth-champions-league','RTH Champions League'],['rth-europa-league','RTH Europa League'],['rth-conference-league','RTH Conference League'],['rth-club-world-cup','RTH Club World Cup']].forEach(([slug,name])=>links.set('/nexus/gw001/'+slug+'/',name));
    if(world==='GW011')links.set('/nexus/series/?world=GW011','Fuori dal Campo · La serie');
    document.querySelectorAll('#more-links a,#profile-more-links a').forEach(a=>{if(a.href&&!a.href.includes('/club-house/'))links.set(a.href,a.textContent.trim());});
    const section=dialog.querySelector('section');section.replaceChildren();for(const [url,name]of links){const a=document.createElement('a');a.href=url;a.textContent=name;section.append(a);}dialog.showModal();
