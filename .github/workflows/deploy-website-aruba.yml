@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/gw001/**'
+      - '.github/workflows/deploy-gw001-four-cups.yml'
       - 'platinumlegacy/**'
       - '.github/workflows/deploy-platinumlegacy.yml'
       - 'theroadalmanac/**'

@@ -1,0 +1,66 @@
+name: Publish GW001 four competition pages
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nexus/gw001/championsleague/**'
+      - 'nexus/gw001/europaleague/**'
+      - 'nexus/gw001/conferenceleague/**'
+      - 'nexus/gw001/clubworldcup/**'
+      - 'nexus/gw001/assets/**'
+      - '.github/workflows/deploy-gw001-four-cups.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-gw001-four-cups
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish and verify only four pages and four banners
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os,io,ssl,hashlib,urllib.request,time
+          from pathlib import Path
+          from ftplib import FTP_TLS,error_perm
+          pages=['championsleague','europaleague','conferenceleague','clubworldcup']
+          images=['champions-league-banner.jpg','europa-league-banner.jpg','conference-league-banner.jpg','club-world-cup-banner.png']
+          files=[Path('nexus/gw001/assets')/n for n in images]+[Path('nexus/gw001')/n/'index.html' for n in pages]
+          for p in files:
+              assert p.is_file() and p.stat().st_size>1000,p
+          ctx=ssl.create_default_context()
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p()
+          for p in files:
+              ftp.cwd('/')
+              for part in ('/www.italianmastersclub.it/'+str(p.parent)).split('/'):
+                  if not part: continue
+                  try: ftp.cwd(part)
+                  except error_perm: ftp.mkd(part);ftp.cwd(part)
+              data=p.read_bytes()
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,p
+              print('Uploaded and verified',p,len(data))
+          ftp.quit()
+          for p in files:
+              url='https://www.italianmastersclub.it/'+str(p)+'?verify='+os.environ['GITHUB_SHA']
+              for attempt in range(3):
+                  try:
+                      with urllib.request.urlopen(url,timeout=30) as r:
+                          data=r.read()
+                      assert data==p.read_bytes(),p
+                      print('HTTP verified',p)
+                      break
+                  except Exception:
+                      if attempt==2: raise
+                      time.sleep(3)
+          PY
