@@ -22,7 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Publish and verify only four pages and four banners
+      - run: node --check nexus/gw001/assets/cup.js
+      - name: Publish and verify competition pages and assets
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
@@ -33,7 +34,7 @@ jobs:
           from ftplib import FTP_TLS,error_perm
           pages=['rth-champions-league','rth-europa-league','rth-conference-league','rth-club-world-cup']
           images=['champions-league-banner.jpg','europa-league-banner.jpg','conference-league-banner.jpg','club-world-cup-banner.jpg']
-          files=[Path('nexus/gw001/assets')/n for n in images]+[Path('nexus/gw001')/n/'index.html' for n in pages]+[Path('nexus/competitions/catalog.php'),Path('nexus/assets/competition-ui.js'),Path('nexus/assets/home.js'),Path('nexus/assets/navigation.js'),Path('nexus/index.html')]
+          files=[Path('nexus/gw001/assets')/n for n in images+['cup.js','cup.css','cup-model.js']]+[Path('nexus/gw001')/n/'index.html' for n in pages]+[Path('nexus/competitions/catalog.php'),Path('nexus/assets/competition-ui.js'),Path('nexus/assets/home.js'),Path('nexus/assets/navigation.js'),Path('nexus/index.html')]
           for p in files:
               assert p.is_file() and p.stat().st_size>1000,p
           ctx=ssl.create_default_context(); ctx.check_hostname=False
