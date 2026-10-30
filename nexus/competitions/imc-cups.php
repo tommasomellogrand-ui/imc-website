@@ -25,6 +25,33 @@ try {
  }
  foreach($table as &$t)$t['gd']=$t['gf']-$t['ga'];unset($t);$table=array_values($table);
  usort($table,fn($a,$b)=>($b['points']<=>$a['points'])?:($b['gd']<=>$a['gd'])?:($b['gf']<=>$a['gf'])?:strcmp($a['team_name'],$b['team_name']));foreach($table as $i=>&$t)$t['position']=$i+1;unset($t);
+ // Pilot GW001: only the latest imported match date for Champions / Europa.
+ // Keep the existing static schedule and standings unchanged.
+ if($gw==='GW001' && $season===2 && $mode==='results' &&
+    in_array($key,['GW001_IMC_CHAMPIONS_LEAGUE','GW001_IMC_EUROPA_LEAGUE'],true)){
+  $custom=nexus_db($c,'custom');
+  $latest=nexus_rows($custom,'SELECT MAX(match_date) latest FROM `GW001_IMC_Results` WHERE game_world_id=? AND competition_key=? AND sm_fixture_id IS NOT NULL',[$gw,$key]);
+  $latestDate=$latest[0]['latest']??null;
+  if($latestDate){
+   $live=nexus_rows($custom,'SELECT r.sm_fixture_id,r.match_date,r.competition_key,r.competition_stage,r.competition_round,r.competition_group_name,r.sm_action,r.home_name,r.away_name,r.home_sm_club_id,r.away_sm_club_id,r.home_score,r.away_score,r.home_sm_manager_id,r.away_sm_manager_id,m.sm_fixture_id report_fixture_id FROM `GW001_IMC_Results` r LEFT JOIN `GW001_IMC_Match_Report` m ON m.game_world_id=r.game_world_id AND m.sm_fixture_id=r.sm_fixture_id AND m.competition_key=r.competition_key WHERE r.game_world_id=? AND r.competition_key=? AND r.match_date=? AND r.sm_fixture_id IS NOT NULL ORDER BY r.sm_fixture_id',[$gw,$key,$latestDate]);
+   $dedup=[];
+   foreach($live as $r){
+    $id=(string)$r['sm_fixture_id'];if(isset($dedup[$id]))continue;
+    $r['home_sm_team_id']=$r['home_sm_club_id'];$r['away_sm_team_id']=$r['away_sm_club_id'];
+    $r['home_logo_url']=$logos[(string)$r['home_sm_club_id']]??null;
+    $r['away_logo_url']=$logos[(string)$r['away_sm_club_id']]??null;
+    $r['home_imc_manager_id']=null;$r['away_imc_manager_id']=null;
+    foreach(['home','away'] as $side){
+     $a=$manager((string)$r[$side.'_sm_club_id'],(string)$r['match_date']);
+     $r[$side.'_imc_manager_id']=$a['manager_id']??null;
+     $r[$side.'_imc_manager_name']=$a['full_name']??null;
+    }
+    $r['has_match_report']=$r['report_fixture_id']!==null;
+    unset($r['report_fixture_id']);$dedup[$id]=$r;
+   }
+   nexus_out(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'competition_key'=>$key,'rows'=>array_values($dedup),'groups'=>[],'source'=>'mysql_aruba_latest_matchday','match_date'=>$latestDate]);
+  }
+ }
  $rows=$mode==='standings'?($cup['format']==='league'?$table:[]):($mode==='results'?$results:$schedule);
  nexus_out(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'competition_key'=>$key,'rows'=>$rows,'groups'=>$mode==='standings'&&$cup['format']==='league'&&count($table)?[['group_name'=>$cup['name'],'rows'=>$table]]:[]]);
 }catch(InvalidArgumentException $e){nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){nexus_out(['ok'=>false,'error'=>'imc_competition_error'],500);}
