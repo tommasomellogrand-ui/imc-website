@@ -49,7 +49,18 @@ try {
     $r['has_match_report']=$r['report_fixture_id']!==null;
     unset($r['report_fixture_id']);$dedup[$id]=$r;
    }
-   nexus_out(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'competition_key'=>$key,'rows'=>array_values($dedup),'groups'=>[],'source'=>'mysql_aruba_latest_matchday','match_date'=>$latestDate]);
+   // Preserve historical static results; replace only matching latest-day fixtures.
+   $merged=[];$latestSignatures=[];
+   foreach($dedup as $item){
+    $signature=(string)$item['match_date'].'|'.mb_strtolower(trim((string)$item['home_name']),'UTF-8').'|'.mb_strtolower(trim((string)$item['away_name']),'UTF-8');
+    $latestSignatures[$signature]=true;
+   }
+   foreach($results as $old){
+    $signature=(string)$old['match_date'].'|'.mb_strtolower(trim((string)$old['home_name']),'UTF-8').'|'.mb_strtolower(trim((string)$old['away_name']),'UTF-8');
+    if(!isset($latestSignatures[$signature]))$merged[]=$old;
+   }
+   foreach($dedup as $item)$merged[]=$item;
+   nexus_out(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'competition_key'=>$key,'rows'=>$merged,'groups'=>[],'source'=>'static_history_plus_mysql_latest_matchday','match_date'=>$latestDate]);
   }
  }
  $rows=$mode==='standings'?($cup['format']==='league'?$table:[]):($mode==='results'?$results:$schedule);
