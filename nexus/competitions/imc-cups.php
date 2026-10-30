@@ -26,9 +26,9 @@ try {
  foreach($table as &$t)$t['gd']=$t['gf']-$t['ga'];unset($t);$table=array_values($table);
  usort($table,fn($a,$b)=>($b['points']<=>$a['points'])?:($b['gd']<=>$a['gd'])?:($b['gf']<=>$a['gf'])?:strcmp($a['team_name'],$b['team_name']));foreach($table as $i=>&$t)$t['position']=$i+1;unset($t);
  // GW001: preserve legacy history before 2026-10-29; use MySQL Results from 2026-10-29 onward.
- // Keep the existing static schedule and standings unchanged.
- if($gw==='GW001' && $season===2 && $mode==='results' &&
-    in_array($key,['GW001_IMC_CHAMPIONS_LEAGUE','GW001_IMC_EUROPA_LEAGUE'],true)){
+ // Preserve legacy fixtures and schedules. Compute standings from merged results.
+ if($gw==='GW001' && $season===2 && in_array($mode,['results','standings'],true) &&
+    in_array($key,['GW001_IMC_CHAMPIONS_LEAGUE','GW001_IMC_EUROPA_LEAGUE','GW001_IMC_CONFERENCE_LEAGUE'],true)){
   $custom=nexus_db($c,'custom');
   $cutoff='2026-10-29';
   {
@@ -59,6 +59,27 @@ try {
     if((string)$old['match_date']<$cutoff && !isset($latestSignatures[$signature]))$merged[]=$old;
    }
    foreach($dedup as $item)$merged[]=$item;
+   if($mode==='standings'){
+    // Recalculate standings without altering historical rows or the database.
+    foreach($table as &$t){foreach(['points','played','won','drawn','lost','gf','ga','gd'] as $field)$t[$field]=0;}unset($t);
+    foreach($merged as $match){
+     $home=(string)($match['home_sm_club_id']??'');$away=(string)($match['away_sm_club_id']??'');
+     if(!isset($table[$home],$table[$away]))continue;
+     if(!is_numeric($match['home_score']??null)||!is_numeric($match['away_score']??null))continue;
+     $hs=(int)$match['home_score'];$as=(int)$match['away_score'];
+     $table[$home]['played']++;$table[$away]['played']++;
+     $table[$home]['gf']+=$hs;$table[$home]['ga']+=$as;
+     $table[$away]['gf']+=$as;$table[$away]['ga']+=$hs;
+     if($hs>$as){$table[$home]['won']++;$table[$home]['points']+=3;$table[$away]['lost']++;}
+     elseif($hs<$as){$table[$away]['won']++;$table[$away]['points']+=3;$table[$home]['lost']++;}
+     else{$table[$home]['drawn']++;$table[$away]['drawn']++;$table[$home]['points']++;$table[$away]['points']++;}
+    }
+    foreach($table as &$t)$t['gd']=$t['gf']-$t['ga'];unset($t);
+    $standings=array_values($table);
+    usort($standings,fn($a,$b)=>($b['points']<=>$a['points'])?:($b['gd']<=>$a['gd'])?:($b['gf']<=>$a['gf'])?:strcmp($a['team_name'],$b['team_name']));
+    foreach($standings as $i=>&$t)$t['position']=$i+1;unset($t);
+    nexus_out(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'competition_key'=>$key,'rows'=>$standings,'groups'=>count($standings)?[['group_name'=>$cup['name'],'rows'=>$standings]]:[],'source'=>'static_before_cutoff_mysql_from_cutoff','cutoff'=>$cutoff]);
+   }
    nexus_out(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'competition_key'=>$key,'rows'=>$merged,'groups'=>[],'source'=>'static_before_cutoff_mysql_from_cutoff','cutoff'=>$cutoff]);
   }
  }
