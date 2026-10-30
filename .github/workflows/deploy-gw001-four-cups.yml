@@ -3,11 +3,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'nexus/gw001/championsleague/**'
-      - 'nexus/gw001/europaleague/**'
-      - 'nexus/gw001/conferenceleague/**'
-      - 'nexus/gw001/clubworldcup/**'
+      - 'nexus/gw001/rth-champions-league/**'
+      - 'nexus/gw001/rth-europa-league/**'
+      - 'nexus/gw001/rth-conference-league/**'
+      - 'nexus/gw001/rth-club-world-cup/**'
       - 'nexus/gw001/assets/**'
+      - 'nexus/competitions/catalog.php'
+      - 'nexus/assets/competition-ui.js'
       - '.github/workflows/deploy-gw001-four-cups.yml'
   workflow_dispatch:
 permissions:
@@ -29,9 +31,9 @@ jobs:
           import os,io,ssl,hashlib,urllib.request,time
           from pathlib import Path
           from ftplib import FTP_TLS,error_perm
-          pages=['championsleague','europaleague','conferenceleague','clubworldcup']
-          images=['champions-league-banner.jpg','europa-league-banner.jpg','conference-league-banner.jpg','club-world-cup-banner.png']
-          files=[Path('nexus/gw001/assets')/n for n in images]+[Path('nexus/gw001')/n/'index.html' for n in pages]
+          pages=['rth-champions-league','rth-europa-league','rth-conference-league','rth-club-world-cup']
+          images=['champions-league-banner.jpg','europa-league-banner.jpg','conference-league-banner.jpg','club-world-cup-banner.jpg']
+          files=[Path('nexus/gw001/assets')/n for n in images]+[Path('nexus/gw001')/n/'index.html' for n in pages]+[Path('nexus/competitions/catalog.php'),Path('nexus/assets/competition-ui.js')]
           for p in files:
               assert p.is_file() and p.stat().st_size>1000,p
           ctx=ssl.create_default_context(); ctx.check_hostname=False
@@ -52,12 +54,17 @@ jobs:
               print('Uploaded and verified',p,len(data))
           ftp.quit()
           for p in files:
-              url='https://www.italianmastersclub.it/'+str(p)+'?verify='+os.environ['GITHUB_SHA']
+              url='https://www.italianmastersclub.it/'+str(p)+'?world=GW001&verify='+os.environ['GITHUB_SHA']
               for attempt in range(3):
                   try:
                       with urllib.request.urlopen(url,timeout=30) as r:
                           data=r.read()
-                      assert data==p.read_bytes(),p
+                      if p.suffix=='.php':
+                          import json
+                          payload=json.loads(data)
+                          assert payload.get('ok') is True,p
+                          assert all(r.get('competition_group')!='IMC' and r.get('sm_action')!='imc_custom' for r in payload['rows']),p
+                      else: assert data==p.read_bytes(),p
                       print('HTTP verified',p)
                       break
                   except Exception:
