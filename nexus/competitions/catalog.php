@@ -36,9 +36,22 @@ try{
     }unset($r);
     if(!$found)$rows[]=array_merge(array_diff_key($cup,['groups'=>true]),['result_count'=>0,'schedule_count'=>0]);
   }
+  // GW001 custom competition keys must be catalogued only as IMC, never as Domestic league.
+  if($gw==='GW001')foreach($rows as &$r){
+    if(in_array((string)$r['competition_key'],['GW001_IMC_CHAMPIONS_LEAGUE','GW001_IMC_EUROPA_LEAGUE','GW001_IMC_CONFERENCE_LEAGUE','GW001_IMC_CLUB_WORLD_CUP'],true)){
+      $r['sm_action']='imc_custom';$r['competition_group']='IMC';$r['sm_division']=null;
+      $r['sm_country']=null;$r['world_type']='SINGLE';
+    }
+  }unset($r);
   if($gw==='GW001')foreach(json_decode(file_get_contents(__DIR__.'/imc-cups.json'),true,512,JSON_THROW_ON_ERROR) as $cup){
     if((int)$cup['season']!==$season)continue;
     $played=count(array_filter($cup['matches'],fn($m)=>is_int($m['homeScore'])&&is_int($m['awayScore'])));
+    $already=array_search($cup['key'],array_column($rows,'competition_key'),true);
+    if($already!==false){
+      $rows[$already]['nexus_view']=$cup['name'];
+      $rows[$already]['imc_order']=array_search($cup['key'],array_column(json_decode(file_get_contents(__DIR__.'/imc-cups.json'),true),'key'));
+      continue;
+    }
     $rows[]=['competition_key'=>$cup['key'],'nexus_view'=>$cup['name'],'sm_action'=>'imc_custom','competition_group'=>'IMC','game_world_id'=>$gw,'imc_season'=>$season,'world_type'=>'SINGLE','sm_country'=>null,'sm_division'=>null,'result_count'=>$played,'schedule_count'=>count($cup['matches'])-$played,'imc_order'=>array_search($cup['key'],array_column(json_decode(file_get_contents(__DIR__.'/imc-cups.json'),true),'key'))];
   }
   usort($rows,fn($a,$b)=>[($order[$a['sm_action']]??99),$a['sm_country']??'',(int)$a['sm_division'],$a['competition_key']]<=>[($order[$b['sm_action']]??99),$b['sm_country']??'',(int)$b['sm_division'],$b['competition_key']]);
