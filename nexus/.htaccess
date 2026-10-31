@@ -7,3 +7,10 @@
 <IfModule mod_expires.c>
   ExpiresActive Off
 </IfModule>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^(gw00[1-9]|gw01[01])/?$ world-route.php?route_world=$1 [END,QSA,NC]
+RewriteRule ^(gw00[1-9]|gw01[01])/competitions(?:/([a-z0-9-]+))?/?$ world-route.php?route_world=$1&route_competitions=1 [END,QSA,NC]
+RewriteRule ^(gw00[1-9]|gw01[01])/competizioni/?$ /nexus/$1/competitions/ [R=302,L,NC]
+</IfModule>

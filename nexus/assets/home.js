@@ -7,7 +7,7 @@ const gw=valid(params.get('world'))?params.get('world'):valid(saved)?saved:'GW00
 if(params.get('section')==='players'){location.replace('players/page.html?'+new URLSearchParams({world:gw}));return;}
 const section=['players','trophies'].includes(params.get('section'))?params.get('section'):'';
 try{localStorage.setItem('imc_nexus_world',gw)}catch(e){}
-params.set('world',gw);history.replaceState(null,'','?'+params);
+params.set('world',gw);history.replaceState(null,'',location.pathname+'?'+params);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safe=v=>{let s=String(v||'').replace(/^http:/i,'https:');if(s.startsWith('//'))s='https:'+s;return /^(https:\/\/|\/(?!\/))/i.test(s)?s:''};
 const url=(path,extra={})=>path+'?'+new URLSearchParams({world:gw,...extra});

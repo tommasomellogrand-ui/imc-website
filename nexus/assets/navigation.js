@@ -18,7 +18,7 @@
  new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','aria-pressed','aria-selected','aria-current','hidden']});
  window.addEventListener('resize',()=>{for(const [nav,active] of known)reveal(nav,active);},{passive:true});
  function enhanceLayout(){
-  if(new URLSearchParams(location.search).get('world')==='GW001'&&['/nexus/','/nexus/index.html'].includes(location.pathname)){const shortcuts=document.getElementById('shortcuts');if(shortcuts&&!shortcuts.querySelector('[data-rth-entry]')){const ch=Array.from(shortcuts.querySelectorAll('a')).find(a=>a.href.includes('/club-house'));if(ch){const a=document.createElement('a');a.className='shortcut';a.dataset.rthEntry='1';a.href='/nexus/alltoplayfor/';a.innerHTML='<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>ALL TO PLAY FOR</span>';ch.after(a)}}}
+  if(new URLSearchParams(location.search).get('world')==='GW001'&&['/nexus/','/nexus/index.html','/nexus/gw001/'].includes(location.pathname)){const shortcuts=document.getElementById('shortcuts');if(shortcuts&&!shortcuts.querySelector('[data-rth-entry]')){const ch=Array.from(shortcuts.querySelectorAll('a')).find(a=>a.href.includes('/club-house'));if(ch){const a=document.createElement('a');a.className='shortcut';a.dataset.rthEntry='1';a.href='/nexus/alltoplayfor/';a.innerHTML='<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>ALL TO PLAY FOR</span>';ch.after(a)}}}
 
   enhanceCompetitions();
   if(!document.body.classList.contains('nx-linea-oro'))document.body.classList.add('nx-linea-oro');
@@ -77,14 +77,15 @@
   const inClubHouse=location.pathname.includes('/club-house/');
   const params=new URLSearchParams(location.search),valid=w=>/^GW00[1-9]$|^GW01[01]$/.test(w||'');
   let remembered='';try{remembered=localStorage.getItem('imc_nexus_world')||''}catch(e){}
-  let world=(location.pathname.startsWith('/nexus/alltoplayfor/')||location.pathname.startsWith('/nexus/gw001/'))?'GW001':valid(params.get('world'))?params.get('world'):valid(remembered)?remembered:'GW001';
-  const href=(path,w=world)=>'/nexus/'+path+'?'+new URLSearchParams({world:w});
+  const pathWorld=location.pathname.match(/^\/nexus\/(gw00[1-9]|gw01[01])(?:\/|$)/i)?.[1]?.toUpperCase();
+  let world=pathWorld|| (location.pathname.startsWith('/nexus/alltoplayfor/')?'GW001':null)||(valid(params.get('world'))?params.get('world'):valid(remembered)?remembered:'GW001');
+  const href=(path,w=world)=>(path===''?'/nexus/'+w.toLowerCase()+'/':path==='competitions/'?'/nexus/'+w.toLowerCase()+'/competitions/':'/nexus/'+path)+'?'+new URLSearchParams({world:w});
   const header=document.createElement('header');header.id='nx-universal-header';
   header.innerHTML='<div class="nx-universal-top"><a class="nx-universal-brand" href="/nexus/club-house/"><img src="/site-assets/images/imc-logo.png" alt="IMC"><span>NEXUS</span></a><select id="nx-world-select" aria-label="Game World"><option value="clubhouse">Club House</option>'+Array.from({length:11},(_,i)=>{const w='GW'+String(i+1).padStart(3,'0');return '<option value="'+w+'">'+w+'</option>'}).join('')+'</select></div><div class="nx-universal-context" id="nx-universal-context"></div>';
   document.body.prepend(header);const selector=header.querySelector('select');selector.value=inClubHouse?'clubhouse':world;
   if(['GW001','GW011'].includes(world)&&!inClubHouse){
    const seriesLink=document.createElement('a');seriesLink.href=world==='GW001'?'/nexus/alltoplayfor/':'/nexus/series/?world='+world;seriesLink.textContent=world==='GW001'?'ALL TO PLAY FOR · La serie del GW001 →':'Fuori dal Campo · La serie del GW011 →';seriesLink.style.cssText='display:block;padding:13px 20px;background:#153d32;color:#faf7ee;font-size:12px;font-weight:700;text-align:center;text-decoration:none';
-   if(location.pathname==='/nexus/'||location.pathname==='/nexus/index.html')header.after(seriesLink);
+   if(location.pathname==='/nexus/'||location.pathname==='/nexus/index.html'||/^\/nexus\/gw\d{3}\/$/.test(location.pathname))header.after(seriesLink);
   }
   fetch('/nexus/club-house/data.php',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(!d.ok||!Array.isArray(d.worlds))return;for(const w of d.worlds){const option=Array.from(selector.options).find(o=>o.value===w.id);if(option&&w.name)option.textContent=w.name;}}).catch(()=>{});
   const context=document.getElementById('nx-universal-context');
