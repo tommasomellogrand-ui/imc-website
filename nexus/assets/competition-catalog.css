@@ -19,3 +19,11 @@ html body.nx-competition #competition-nav[data-nx-nav]>button{min-width:0!import
 @media(max-width:650px){.competition-card{padding:15px 10px 12px;gap:7px}.competition-card strong{font-size:14px}.catalog-categories button{font-size:12px;padding:12px 2px}.catalog-match-tabs button{font-size:13px}}
 
 .catalog-country-flags{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.catalog-country-flags button{display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:8px 12px;border:1px solid #dce1e9;border-radius:9px;background:white;color:#526079;font:inherit;font-size:12px;cursor:pointer}.catalog-country-flags img{width:25px;height:19px;object-fit:cover;border-radius:2px}.catalog-country-flags [aria-pressed=true]{background:#f8edcf;border-color:#c5a352;color:#101238;font-weight:700}.catalog-imc-filter{display:flex;align-items:center;flex-wrap:wrap;gap:9px;min-height:44px;margin:12px 0;color:#18233c;font-size:13px;cursor:pointer}.catalog-imc-filter input{width:19px;height:19px;accent-color:#101238}.catalog-imc-filter small{color:#6c788d;font-size:11px}@media(max-width:650px){.catalog-country-flags{gap:6px}.catalog-country-flags button{padding:8px;font-size:11px}.catalog-imc-filter small{flex-basis:100%;padding-left:28px}}
+
+/* One swipeable country row and a domestic-only IMC toggle. */
+.catalog-country-flags{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:7px;scrollbar-width:thin;scrollbar-color:#b8c0cf transparent;-webkit-overflow-scrolling:touch}
+.catalog-country-flags button{flex:0 0 auto;white-space:nowrap}
+.catalog-country-flags img{flex-shrink:0}
+.catalog-imc-toggle{display:block;min-height:44px;margin:12px 0;padding:12px 20px;border:0;border-radius:10px;background:#eef1f6;color:#526079;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.catalog-imc-toggle[aria-pressed=true]{background:#101238;color:#fff;box-shadow:0 2px 7px #10123820}
+.catalog-imc-toggle:focus-visible,.catalog-country-flags button:focus-visible{outline:2px solid #b78b37;outline-offset:3px}
