@@ -18,6 +18,18 @@ try{
     .'SELECT '.$columns.',0 result_count,1 schedule_count FROM `'.$st.'` WHERE game_world_id=? AND imc_season=?'
     .') matches_by_season GROUP BY competition_key';
   $rows=nexus_rows($db,$sql,[$gw,$season,$gw,$season]);
+  // Filter competitions using current IMC assignments and participating world team IDs.
+  $assigned=['club'=>[],'national_team'=>[]];
+  $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
+  foreach(nexus_rows($core,"SELECT assignment_type,team_id,national_team_id FROM `IMC Manager Assignment Global` WHERE game_world_id=? AND (start_date IS NULL OR start_date<=?) AND (end_date IS NULL OR end_date>=?)",[$gw,$today,$today]) as $a){
+    $kind=$a['assignment_type'];$id=(int)($kind==='national_team'?$a['national_team_id']:$a['team_id']);if($id>0&&isset($assigned[$kind]))$assigned[$kind][$id]=true;
+  }
+  $imcKeys=[];
+  foreach([[$rt,'sm_club_id'],[$st,'sm_team_id']] as [$table,$idColumn]){
+    $participants=nexus_rows($db,'SELECT DISTINCT competition_key,competition_group,home_'.$idColumn.' home_id,away_'.$idColumn.' away_id FROM `'.$table.'` WHERE game_world_id=? AND imc_season=?',[$gw,$season]);
+    foreach($participants as $m){$kind=($m['competition_group']==='NATIONS'||strpos((string)$m['competition_key'],'|NATIONS|')!==false)?'national_team':'club';if(isset($assigned[$kind][(int)$m['home_id']])||isset($assigned[$kind][(int)$m['away_id']]))$imcKeys[$m['competition_key']]=true;}
+  }
+  foreach($rows as &$r)$r['has_imc_manager']=isset($imcKeys[$r['competition_key']]);unset($r);
   $labels=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$labels[(string)$m['competition_key']]=$m['nexus_view'];
   $names=['charityshield'=>'Charity Shield','leaguecup'=>'National Cup','nationalcup'=>'National Cup','leagueshield'=>'League Cup','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers','worldcup'=>'World Cup'];
   $order=['league'=>0,'playoff'=>1,'charityshield'=>2,'leaguecup'=>3,'nationalcup'=>3,'leagueshield'=>4,'smfacup'=>5,'smfashield'=>6,'supercup'=>7,'interqualifier'=>8,'worldcup'=>9];

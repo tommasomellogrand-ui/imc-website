@@ -17,6 +17,7 @@ jobs:
       - name: Validate routes and scripts
         run: |
           php -l nexus/world-route.php
+          php -l nexus/competitions/catalog.php
           node --check nexus/assets/world-route.js
           node --check nexus/assets/competition-catalog.js
           node --check nexus/assets/navigation.js
@@ -29,7 +30,7 @@ jobs:
           import os,io,ssl,urllib.request,time
           from pathlib import Path
           from ftplib import FTP_TLS
-          files=['nexus/assets/competition-ui.js', 'nexus/assets/competition-view.js', 'nexus/assets/home.js', 'nexus/assets/navigation.js', 'nexus/competitions/domestic.html', 'nexus/competitions/family.html', 'nexus/competitions/group.html', 'nexus/competitions/index.html', 'nexus/competitions/view.html', 'nexus/index.html', 'nexus/assets/competition-catalog.css', 'nexus/assets/competition-catalog.js', 'nexus/assets/world-route.js', 'nexus/world-route.php', 'nexus/.htaccess']
+          files=['nexus/competitions/catalog.php', 'nexus/assets/competition-ui.js', 'nexus/assets/competition-view.js', 'nexus/assets/home.js', 'nexus/assets/navigation.js', 'nexus/competitions/domestic.html', 'nexus/competitions/family.html', 'nexus/competitions/group.html', 'nexus/competitions/index.html', 'nexus/competitions/view.html', 'nexus/index.html', 'nexus/assets/competition-catalog.css', 'nexus/assets/competition-catalog.js', 'nexus/assets/world-route.js', 'nexus/world-route.php', 'nexus/.htaccess']
           ctx=ssl.create_default_context();ctx.check_hostname=False
           f=FTP_TLS(context=ctx);f.connect('ftp.italianmastersclub.it',21,timeout=60)
           f.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);f.prot_p()
