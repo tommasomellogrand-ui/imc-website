@@ -2,7 +2,7 @@ name: Publish Nexus world competition routes
 on:
   push:
     branches: [main]
-    paths: ['nexus/world-route.php', 'nexus/assets/world-route.js', 'nexus/assets/competition-catalog.*', '.github/workflows/nexus-world-routes.yml']
+    paths: ['nexus/.htaccess', 'nexus/world-route.php', 'nexus/assets/world-route.js', 'nexus/assets/competition-catalog.*', '.github/workflows/nexus-world-routes.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -44,4 +44,9 @@ jobs:
                   with urllib.request.urlopen('https://www.italianmastersclub.it/'+path+'?verify='+os.environ['GITHUB_SHA'],timeout=45) as r:
                       text=r.read().decode();assert r.status==200 and 'world-route.js' in text,path
                   print('Live route verified',path)
+          for suffix,marker in [('', 'Rising Stars'), ('club/', 'id="search"')]:
+              path='nexus/gw011/risingstarsleague/'+suffix
+              with urllib.request.urlopen('https://www.italianmastersclub.it/'+path+'?verify='+os.environ['GITHUB_SHA'],timeout=45) as r:
+                  text=r.read().decode();assert r.status==200 and marker in text,path
+              print('Original Rising Stars page verified',path)
           PYTHON
