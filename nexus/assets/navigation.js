@@ -20,6 +20,9 @@
  function enhanceLayout(){
   if(new URLSearchParams(location.search).get('world')==='GW001'&&['/nexus/','/nexus/index.html','/nexus/gw001/'].includes(location.pathname)){const shortcuts=document.getElementById('shortcuts');if(shortcuts&&!shortcuts.querySelector('[data-rth-entry]')){const ch=Array.from(shortcuts.querySelectorAll('a')).find(a=>a.href.includes('/club-house'));if(ch){const a=document.createElement('a');a.className='shortcut';a.dataset.rthEntry='1';a.href='/nexus/alltoplayfor/';a.innerHTML='<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/></svg><span>ALL TO PLAY FOR</span>';ch.after(a)}}}
 
+  const currentWorld=location.pathname.match(/^\/nexus\/(gw\d{3})(?:\/|$)/i)?.[1]?.toUpperCase()||new URLSearchParams(location.search).get('world');
+  const shortcuts=document.getElementById('shortcuts');
+  if(currentWorld==='GW011'&&shortcuts&&!shortcuts.querySelector('[data-rising-stars]')){const a=document.createElement('a');a.className='shortcut';a.dataset.risingStars='1';a.href='/nexus/gw011/risingstarsleague/';a.textContent='Rising Stars League';shortcuts.append(a);}
   enhanceCompetitions();
   if(!document.body.classList.contains('nx-linea-oro'))document.body.classList.add('nx-linea-oro');
   const header=document.querySelector('body>.profile-banner,body>header.hero,body.clubhouse-page>header:not(#nx-universal-header),body>.md-banner,body>.club-hero');
@@ -104,6 +107,7 @@
    if(world==='GW001')links.set('/nexus/alltoplayfor/','ALL TO PLAY FOR · La serie');
    if(world==='GW001')[['rth-champions-league','RTH Champions League'],['rth-europa-league','RTH Europa League'],['rth-conference-league','RTH Conference League'],['rth-club-world-cup','RTH Club World Cup']].forEach(([slug,name])=>links.set('/nexus/gw001/'+slug+'/',name));
    if(world==='GW011')links.set('/nexus/series/?world=GW011','Fuori dal Campo · La serie');
+   if(world==='GW011')links.set('/nexus/gw011/risingstarsleague/','Rising Stars League');
    document.querySelectorAll('#more-links a,#profile-more-links a').forEach(a=>{if(a.href&&!a.href.includes('/club-house/'))links.set(a.href,a.textContent.trim());});
    const section=dialog.querySelector('section');section.replaceChildren();for(const [url,name]of links){const a=document.createElement('a');a.href=url;a.textContent=name;section.append(a);}dialog.showModal();
   };
