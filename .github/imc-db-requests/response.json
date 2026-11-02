@@ -1,11 +1,11 @@
 {
-  "request_id": "fix-1860-logo-20261102-plan",
-  "completed_at": "2026-11-02T10:14:45.979560+00:00",
+  "request_id": "fix-1860-logo-20261102-execute",
+  "completed_at": "2026-11-02T10:15:24.014744+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "fix-1860-logo-20261102-plan",
+    "request_id": "fix-1860-logo-20261102-execute",
     "purpose": "Correct only club 415 logo assignment requested by owner",
-    "action": "plan_migration",
+    "action": "execute_migration",
     "target": "core",
     "migration_id": "fix_1860_logo_20261102",
     "data_migration": true,
@@ -15,27 +15,31 @@
   },
   "response": {
     "ok": true,
-    "action": "plan_migration",
-    "plan": {
-      "target": "core",
-      "database": "Sql1956795_1",
-      "migration_id": "fix_1860_logo_20261102",
-      "allow_destructive": false,
-      "data_migration": true,
-      "statements": [
-        "UPDATE `IMC Club Codex Global` SET image_url='https://raw.githubusercontent.com/tommasomellogrand-ui/imc-website/main/live-results/assets/clubs/monaco-1860.png' WHERE id=415 AND image_url='https://cdn.soccerwiki.org/images/logos/clubs/415.png'"
-      ]
-    },
-    "analysis": [
-      {
-        "sql": "UPDATE `IMC Club Codex Global` SET image_url='https://raw.githubusercontent.com/tommasomellogrand-ui/imc-website/main/live-results/assets/clubs/monaco-1860.png' WHERE id=415 AND image_url='https://cdn.soccerwiki.org/images/logos/clubs/415.png'",
-        "kind": "UPDATE",
-        "destructive": false,
-        "sha256": "7c9f8ca6f3b5d280cdebdeef5d4f1beee879ed9854e436f19034f6317c3c4132"
-      }
-    ],
+    "action": "execute_migration",
+    "target": "core",
+    "database": "Sql1956795_1",
+    "migration_id": "fix_1860_logo_20261102",
+    "data_migration": true,
     "plan_sha256": "660b6f87b47b505eff52147f0cd5cb3b902e54537622b9fcbc961e7db4e164da",
-    "expires_at": "2026-11-02T10:29:45+00:00",
-    "confirmation_token": "1793615385.02e55753e41b57b553c91bc9ffaacc71cc92e1abb6a18588a30379087ef1f52d"
+    "status": "success",
+    "statement_count": 1,
+    "duration_ms": 15,
+    "before": {
+      "tables": 17,
+      "columns": 116
+    },
+    "after": {
+      "tables": 17,
+      "columns": 116
+    },
+    "results": [
+      {
+        "statement": 1,
+        "sha256": "7c9f8ca6f3b5d280cdebdeef5d4f1beee879ed9854e436f19034f6317c3c4132",
+        "affected_rows": 1,
+        "insert_id": 0,
+        "duration_ms": 0
+      }
+    ]
   }
 }
