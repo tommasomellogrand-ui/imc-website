@@ -1,0 +1,54 @@
+name: Publish Nexus club display aliases
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nexus/core/bootstrap.php'
+      - 'nexus/core/club-display.php'
+      - 'tests/nexus-club-display*'
+      - '.github/workflows/nexus-club-display.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nexus-club-display
+  cancel-in-progress: false
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate presentation and identity regressions
+        run: |
+          php -l nexus/core/bootstrap.php
+          php -l nexus/core/club-display.php
+          php tests/nexus-club-display.php
+          php tests/nexus-matchday-identity.php
+          php tests/nexus-club-house-career-results.php
+          php tests/nexus-club-house-ranking.php
+      - name: Capture read-only baseline
+        run: python3 tests/nexus-club-display-live.py capture /tmp/nexus-club-labels-before.json
+      - name: Publish only alias display files
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          ctx=ssl.create_default_context(); ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx); ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']); ftp.prot_p()
+          # Publish the dependency before enabling the common response hook.
+          files=['nexus/core/club-display.php','nexus/club-house/engine.php','nexus/club-house/ranking.php','nexus/club-house/timeline.php','nexus/core/bootstrap.php']
+          for name in files:
+              data=Path(name).read_bytes(); remote='/www.italianmastersclub.it/'+name
+              ftp.storbinary('STOR '+remote,io.BytesIO(data))
+              check=io.BytesIO(); ftp.retrbinary('RETR '+remote,check.write)
+              assert check.getvalue()==data, name
+              print('Published and byte-verified',name)
+          ftp.quit()
+          PY
+      - name: Verify aliases and unchanged match facts live
+        run: python3 tests/nexus-club-display-live.py verify /tmp/nexus-club-labels-before.json

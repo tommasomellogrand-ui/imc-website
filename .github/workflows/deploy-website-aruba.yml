@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'nexus/core/bootstrap.php'
+      - 'nexus/core/club-display.php'
+      - 'tests/nexus-club-display*'
+      - '.github/workflows/nexus-club-display.yml'
+      - '.github/workflows/nexus-club-house.yml'
       - 'nexus/gw001/**'
       - '.github/workflows/deploy-gw001-four-cups.yml'
       - 'platinumlegacy/**'
@@ -294,6 +299,7 @@ jobs:
                   except Exception as e:last=e;time.sleep(5)
               else:raise SystemExit(f'Live verification failed: {url}: {last}')
           PY
+
 
 
 

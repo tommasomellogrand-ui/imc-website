@@ -1,7 +1,13 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__.'/club-display.php';
+
 function nexus_out(array $body,int $status=200): never {
+  if($status===200&&($body['ok']??false)===true){
+    try{$body=nexus_club_display($body,$_GET);header('X-Nexus-Club-Names: core-nexus-view-v1');}
+    catch(Throwable $e){error_log('Nexus club display: '.$e->getMessage());}
+  }
   http_response_code($status);
   header('Content-Type: application/json; charset=utf-8');
   header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -49,3 +55,4 @@ function nexus_table(string $gw,string $repository): string {
   if(!in_array($repository,$allowed,true)) throw new InvalidArgumentException('invalid_repository');
   return $gw.'_IMC_'.$repository;
 }
+

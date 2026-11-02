@@ -52,5 +52,6 @@ function imc_rank_award(array &$rank,array $t): void {
  $bonus=imc_rank_bonus($t);
  if($bonus===null)$rank['unscored_trophies']++;
  else {$rank['trophy_base']+=$bonus;$rank['trophy_points']+=$bonus*$rank['weight'];$rank['total']=$rank['match_points']+$rank['trophy_points'];}
- $rank['awards'][]=['competition'=>($t['nexus_view']??'')?:($t['competition_key']??$t['trophy_type']??''),'season'=>$t['imc_season']??null,'date'=>$t['won_date']??null,'team'=>$t['winner_name']??'','base'=>$bonus,'points'=>$bonus===null?null:$bonus*$rank['weight']];
+ $rank['awards'][]=['competition'=>($t['nexus_view']??'')?:($t['competition_key']??$t['trophy_type']??''),'season'=>$t['imc_season']??null,'date'=>$t['won_date']??null,'team'=>$t['winner_name']??'','team_id'=>$t['winner_sm_world_club_id']??null,'scope'=>(strtoupper((string)($t['competition_group']??''))==='NATIONS'||in_array(strtolower((string)($t['trophy_type']??'')),['worldcup','world cup','interqualifier'],true))?'national_team':'club','base'=>$bonus,'points'=>$bonus===null?null:$bonus*$rank['weight']];
 }
+

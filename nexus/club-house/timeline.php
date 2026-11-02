@@ -21,7 +21,7 @@ try{
  LEFT JOIN `IMC National Team Codex Global` nc ON nc.id=nm.`National Team ID`
  ORDER BY a.start_date,a.id");
  foreach($assign as $a){if(!isset($byId[$a['manager_id']]))continue;
-  $base=['manager_id'=>$a['manager_id'],'manager_name'=>$a['full_name'],'world'=>$a['game_world_id'],'team'=>$a['team_name'],'team_logo'=>$a['team_logo']??null,'assignment_type'=>$a['assignment_type']];
+  $base=['manager_id'=>$a['manager_id'],'manager_name'=>$a['full_name'],'world'=>$a['game_world_id'],'team'=>$a['team_name'],'team_id'=>$a['team_id']??null,'team_logo'=>$a['team_logo']??null,'assignment_type'=>$a['assignment_type']];
   if(!empty($a['start_date']))$events[]=$base+['type'=>'assignment_start','date'=>$a['start_date']];
   if(!empty($a['end_date']))$events[]=$base+['type'=>'assignment_end','date'=>$a['end_date']];
  }
@@ -47,7 +47,7 @@ try{
    }else{
     $logoRows=nexus_rows($core,'SELECT c.image_url FROM `IMC Game World Club Mapping` m LEFT JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=? AND m.`SM World Club ID`=? LIMIT 1',[$gw,(int)($t['winner_sm_world_club_id']??0)]);
    }
-   $events[]=['type'=>'trophy','assignment_type'=>$isNation?'national_team':'club','date'=>$day,'manager_id'=>$mid,'manager_name'=>$byId[$mid]['full_name'],'world'=>$gw,'season'=>$t['imc_season'],'competition'=>($t['nexus_view']??'')?:($t['trophy_type']??''),'team'=>$t['winner_name'],'team_logo'=>$logoRows[0]['image_url']??null,'base_points'=>$base,'multiplier'=>$weight,'ranking_points'=>$pts,'fixture'=>(string)($t['deciding_fixture_id']??'')];
+   $events[]=['type'=>'trophy','assignment_type'=>$isNation?'national_team':'club','date'=>$day,'manager_id'=>$mid,'manager_name'=>$byId[$mid]['full_name'],'world'=>$gw,'season'=>$t['imc_season'],'competition'=>($t['nexus_view']??'')?:($t['trophy_type']??''),'team'=>$t['winner_name'],'team_id'=>$t['winner_sm_world_club_id']??null,'team_logo'=>$logoRows[0]['image_url']??null,'base_points'=>$base,'multiplier'=>$weight,'ranking_points'=>$pts,'fixture'=>(string)($t['deciding_fixture_id']??'')];
   }
  }
  usort($scoreEvents,fn($a,$b)=>[$a['date'],$a['kind']==='trophy'?1:0]<=>[$b['date'],$b['kind']==='trophy'?1:0]);
@@ -57,3 +57,4 @@ try{
  usort($events,fn($a,$b)=>strcmp($b['date'],$a['date'])?:strcmp($b['type'],$a['type']));
  nexus_out(['ok'=>true,'events'=>$events,'generated_at'=>gmdate('c')]);
 }catch(Throwable $e){error_log('IMC Timeline: '.$e->getMessage());nexus_out(['ok'=>false,'error'=>'Timeline temporaneamente non disponibile.'],500);}
+
