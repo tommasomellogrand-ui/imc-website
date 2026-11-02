@@ -8,6 +8,8 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   if(u.pathname.endsWith('/club-house/data.php'))return route.fulfill({status:fail?503:200,json:{ok:!fail,worlds,managers:[]}});
   if(u.pathname.endsWith('/core/context.php'))return route.fulfill({json:{ok:true,world:{game_world_name:'Road To History'},current_season:2}});
   if(u.pathname.endsWith('/home/data.php'))return route.fulfill({json:{ok:true,results:[match],schedule:[{...match,sm_fixture_id:124,home_score:null,away_score:null,match_date:'2026-10-08'}],errors:[]}});
+  // Emulate the canonical GW rewrite served by nexus/world-route.php, including its base URL.
+  if(/^\/nexus\/(?:gw00[1-9]|gw01[01])\/$/i.test(u.pathname))return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(process.cwd(),'nexus/index.html'),'utf8').replace('<head>','<head><base href="/nexus/">')});
   if(u.pathname.endsWith('.php'))return route.fulfill({json:{ok:true,rows:[]}});
   const file=path.join(process.cwd(),u.pathname.endsWith('/')?u.pathname.slice(1)+'index.html':u.pathname.slice(1));
   if(!fs.existsSync(file))return route.abort();const ext=path.extname(file);return route.fulfill({contentType:ext==='.js'?'text/javascript':ext==='.css'?'text/css':ext==='.png'?'image/png':'text/html',body:fs.readFileSync(file)});
