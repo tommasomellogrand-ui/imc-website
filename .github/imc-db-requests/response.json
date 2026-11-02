@@ -1,71 +1,41 @@
 {
-  "request_id": "clear-transfers-004-006-009-010-20260922-exec",
-  "completed_at": "2026-09-22T07:47:51.389005+00:00",
+  "request_id": "fix-1860-logo-20261102-plan",
+  "completed_at": "2026-11-02T10:14:45.979560+00:00",
   "http_status": 200,
   "request": {
-    "request_id": "clear-transfers-004-006-009-010-20260922-exec",
-    "requested_at": "2026-09-22T07:48:00Z",
-    "purpose": "Clear all Transfers rows for GW004 GW006 GW009 GW010",
-    "action": "execute_migration",
-    "target": "custom",
-    "migration_id": "clear_transfers_004_006_009_010_20260922",
+    "request_id": "fix-1860-logo-20261102-plan",
+    "purpose": "Correct only club 415 logo assignment requested by owner",
+    "action": "plan_migration",
+    "target": "core",
+    "migration_id": "fix_1860_logo_20261102",
+    "data_migration": true,
     "statements": [
-      "DELETE FROM `GW004_IMC Transfers`",
-      "DELETE FROM `GW006_IMC Transfers`",
-      "DELETE FROM `GW009_IMC Transfers`",
-      "DELETE FROM `GW010_IMC Transfers`"
-    ],
-    "allow_destructive": true,
-    "data_migration": true
+      "UPDATE `IMC Club Codex Global` SET image_url='https://raw.githubusercontent.com/tommasomellogrand-ui/imc-website/main/live-results/assets/clubs/monaco-1860.png' WHERE id=415 AND image_url='https://cdn.soccerwiki.org/images/logos/clubs/415.png'"
+    ]
   },
   "response": {
     "ok": true,
-    "action": "execute_migration",
-    "target": "custom",
-    "database": "Sql1956795_3",
-    "migration_id": "clear_transfers_004_006_009_010_20260922",
-    "data_migration": true,
-    "plan_sha256": "3c7e7444dc6cb0209989f6bfb092ca694f90e9267f7bbeb721d444743205b0ca",
-    "status": "success",
-    "statement_count": 4,
-    "duration_ms": 346,
-    "before": {
-      "tables": 320,
-      "columns": 5628
+    "action": "plan_migration",
+    "plan": {
+      "target": "core",
+      "database": "Sql1956795_1",
+      "migration_id": "fix_1860_logo_20261102",
+      "allow_destructive": false,
+      "data_migration": true,
+      "statements": [
+        "UPDATE `IMC Club Codex Global` SET image_url='https://raw.githubusercontent.com/tommasomellogrand-ui/imc-website/main/live-results/assets/clubs/monaco-1860.png' WHERE id=415 AND image_url='https://cdn.soccerwiki.org/images/logos/clubs/415.png'"
+      ]
     },
-    "after": {
-      "tables": 320,
-      "columns": 5628
-    },
-    "results": [
+    "analysis": [
       {
-        "statement": 1,
-        "sha256": "d15a55d19cccc6380456cf3cff0cf35dcf92260fc419d79f30a721942f1f15c8",
-        "affected_rows": 2075,
-        "insert_id": 0,
-        "duration_ms": 18
-      },
-      {
-        "statement": 2,
-        "sha256": "57cb60b0d19fdd58bf1cdd2d57eacf97db80ac4a0e3bd9f12ca1d92231a73291",
-        "affected_rows": 1324,
-        "insert_id": 0,
-        "duration_ms": 12
-      },
-      {
-        "statement": 3,
-        "sha256": "16c67286555afb4bbfb29df842f59cb20642d95eb2250d6025b7803e6cde73ac",
-        "affected_rows": 1071,
-        "insert_id": 0,
-        "duration_ms": 11
-      },
-      {
-        "statement": 4,
-        "sha256": "bc9e6939b4ca2493dee5821e99e4ec15f9f6a81625f8b69301dfc2e683bd435f",
-        "affected_rows": 562,
-        "insert_id": 0,
-        "duration_ms": 5
+        "sql": "UPDATE `IMC Club Codex Global` SET image_url='https://raw.githubusercontent.com/tommasomellogrand-ui/imc-website/main/live-results/assets/clubs/monaco-1860.png' WHERE id=415 AND image_url='https://cdn.soccerwiki.org/images/logos/clubs/415.png'",
+        "kind": "UPDATE",
+        "destructive": false,
+        "sha256": "7c9f8ca6f3b5d280cdebdeef5d4f1beee879ed9854e436f19034f6317c3c4132"
       }
-    ]
+    ],
+    "plan_sha256": "660b6f87b47b505eff52147f0cd5cb3b902e54537622b9fcbc961e7db4e164da",
+    "expires_at": "2026-11-02T10:29:45+00:00",
+    "confirmation_token": "1793615385.02e55753e41b57b553c91bc9ffaacc71cc92e1abb6a18588a30379087ef1f52d"
   }
 }
