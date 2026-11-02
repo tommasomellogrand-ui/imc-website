@@ -1,16 +1,11 @@
 {
-  "request_id": "clear-transfers-004-006-009-010-20260922-exec",
-  "requested_at": "2026-09-22T07:48:00Z",
-  "purpose": "Clear all Transfers rows for GW004 GW006 GW009 GW010",
-  "action": "execute_migration",
-  "target": "custom",
-  "migration_id": "clear_transfers_004_006_009_010_20260922",
+  "request_id": "fix-1860-logo-20261102-plan",
+  "purpose": "Correct only club 415 logo assignment requested by owner",
+  "action": "plan_migration",
+  "target": "core",
+  "migration_id": "fix_1860_logo_20261102",
+  "data_migration": true,
   "statements": [
-    "DELETE FROM `GW004_IMC Transfers`",
-    "DELETE FROM `GW006_IMC Transfers`",
-    "DELETE FROM `GW009_IMC Transfers`",
-    "DELETE FROM `GW010_IMC Transfers`"
-  ],
-  "allow_destructive": true,
-  "data_migration": true
+    "UPDATE `IMC Club Codex Global` SET image_url='https://raw.githubusercontent.com/tommasomellogrand-ui/imc-website/main/live-results/assets/clubs/monaco-1860.png' WHERE id=415 AND image_url='https://cdn.soccerwiki.org/images/logos/clubs/415.png'"
+  ]
 }
