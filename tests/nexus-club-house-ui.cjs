@@ -54,7 +54,7 @@ function bundle(world){
    bundles.GW001.matches=[...previous,...['V','S','S'].map((outcome,i)=>({...previous[0],fixture_id:'sort-'+i,opponent_id:'MNG003',opponent_name:'Altro manager',outcome}))];
    h2h();const order=[...document.querySelectorAll('.rival')].map(el=>el.dataset.opponent);
    bundles.GW001.matches=previous;h2h();return order;
-  }),['MNG002','MNG003']);
+  }),['MNG003','MNG002']);
   await page.locator('[data-section="trophies"]').click();await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('11/11'));assert.equal(await page.locator('.trophy-tile').count(),2);assert.equal(await page.locator('.trophy-summary strong').first().textContent(),'2');
   assert.deepEqual(await page.evaluate(()=>['World Cup','SMFA Champions','Div 1','SMFA Shield','SMFA Super Cup','Charity Shield','National Cup','League Cup','Div 2','Div 3','Div 4','Div 5','Playoff Div 2','Playoff Div 3','Playoff Div 4','Playoff Div 5'].map(competition=>trophyImportance({competition}))),Array.from({length:16},(_,i)=>i));
   assert.equal(await page.locator('.trophy-tiles').first().evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),3);
