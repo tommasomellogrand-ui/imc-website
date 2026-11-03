@@ -82,7 +82,7 @@ jobs:
           national_total=0; report_id_total=0
           for i in range(1,12):
               gw=f'GW{i:03d}'; d=get('?world='+gw+'&manager=MNG001')
-              assert d['ok'] and d['scope']=='club' and d['source']=='Match Report'
+              assert d['ok'] and d['scope']=='club' and d['source']=='Results'
               assert not d['trophy_error'], gw+' trophy read failed'
               coverage=d['national_ranking_coverage']; report_id_total+=coverage['report_manager_sides']
               assert coverage['manager_source']=='Results'

@@ -5,7 +5,7 @@ const rankingView=section==='ranking';
 const timelineView=section==='timeline';
 document.body.classList.add('clubhouse-page','clubhouse-hub');
 let scope=['global','club','national_team'].includes(params.get('scope'))?params.get('scope'):'global';
-const sourceLabel=()=>section==='trophies'?'Trofei Nexus · data della vittoria':section==='career'?'Results · ID manager':scope==='club'?'Match Report · ID manager':scope==='national_team'?'Results · GW, nazionale e date incarico':'Club: Match Report · Nations: Results e date incarico';
+const sourceLabel=()=>section==='trophies'?'Trofei Nexus · data della vittoria':section==='career'?'Results · ID manager':scope==='club'?'Results · ID manager':scope==='national_team'?'Results · GW, nazionale e date incarico':'Club: Results · Nations: Results e date incarico';
 const scopeLabel=()=>scope==='club'?'Club':scope==='national_team'?'Nations':'Global';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fields=['played','won','drawn','lost','gf','ga','penalty_won','penalty_lost','matched_by_id','matched_by_assignment'];
@@ -149,8 +149,8 @@ function career(){
 function h2h(){
  const matches=allMatches().filter(m=>m.opponent_id&&m.opponent_id!==manager),groups=new Map();
  for(const m of matches){if(!groups.has(m.opponent_id))groups.set(m.opponent_id,[]);groups.get(m.opponent_id).push(m);}
- const rows=[...groups.values()].map(items=>({items,s:matchStats(items)})).sort((a,b)=>(b.s.won/b.s.played)-(a.s.won/a.s.played)||b.s.played-a.s.played||String(a.items[0].opponent_name).localeCompare(String(b.items[0].opponent_name),'it'));
- $('content').innerHTML='<div class="h2h-heading"><p class="eyebrow">IMC CONTRO IMC</p><h2>Head to Head · '+esc(scopeLabel())+'</h2><p>'+number(matches.length)+' scontri diretti · '+rows.length+' avversari</p><small>Ordinati per % vittorie · a parità, più partite giocate</small></div>'+
+ const rows=[...groups.values()].map(items=>({items,s:matchStats(items)})).sort((a,b)=>b.s.played-a.s.played||String(a.items[0].opponent_name).localeCompare(String(b.items[0].opponent_name),'it'));
+ $('content').innerHTML='<div class="h2h-heading"><p class="eyebrow">IMC CONTRO IMC</p><h2>Head to Head · '+esc(scopeLabel())+'</h2><p>'+number(matches.length)+' scontri diretti · '+rows.length+' avversari</p><small>Ordinati per partite giocate · dal più alto al più basso</small></div>'+
  (rows.map(({items,s})=>{
  const m=items[0],gws=[...new Set(items.map(x=>x.world))];
  return `<details class="rival h2h-rival" data-opponent="${esc(m.opponent_id)}" data-worlds="${esc(gws.join(','))}"><summary>
