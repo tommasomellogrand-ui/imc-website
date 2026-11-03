@@ -29,7 +29,7 @@ function imc_rank_start(array $s,string $gw,?array $national=null): array {
 function imc_rank_result_rows(array $rows,array $managers,bool $national): array {
  $map=ch_identity($managers);$out=ch_init($managers);$names=array_column($managers,'full_name','manager_id');
  $groups=[];$unidentified=0;
- foreach($rows as $r){if(ch_nation($r)!==$national)continue;$groups[(string)($r['sm_fixture_id']??'')][]=$r;}
+ foreach($rows as $r){$r=ch_result_identity($r);if(ch_nation($r)!==$national)continue;$groups[(string)($r['sm_fixture_id']??'')][]=$r;}
  foreach($groups as $items){
   $before=$out['coverage']['excluded_fixtures'];
   ch_group($out,$items,$map,$names,'',null,$national?'national_team':'club');
@@ -44,7 +44,7 @@ function imc_rank_national_rows(array $rows,array $managers): array {
  return imc_rank_result_rows($rows,$managers,true);
 }
 function imc_rank_results_read(PDO $db,string $gw,array $managers): array {
- $sql='SELECT sm_fixture_id,imc_season,match_date,competition_key,competition_group,sm_action,home_sm_club_id,away_sm_club_id,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id=?';
+ $sql='SELECT * FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id=?';
  $stmt=$db->prepare($sql);$stmt->execute([$gw]);$rows=$stmt->fetchAll(PDO::FETCH_ASSOC);$stmt->closeCursor();
  return ['club'=>imc_rank_result_rows($rows,$managers,false),'national'=>imc_rank_result_rows($rows,$managers,true)];
 }

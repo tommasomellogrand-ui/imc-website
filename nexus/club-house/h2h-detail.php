@@ -26,8 +26,9 @@ try {
   $nationMap=nexus_rows($core,'SELECT `National Team ID` entity_id,`SM World National Club ID` world_id,`SM National Team ID` sm_id FROM `IMC Game World National Team Mapping` WHERE `Game World`=?',[$gw]);
   $ctx['teams']['national_team']=nexus_team_lookup(nexus_rows($core,'SELECT id,name,image_url FROM `IMC National Team Codex Global`'),$nationMap);$ctx['competitions']=[];
   foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $row)$ctx['competitions'][$row['competition_key']]=$row['nexus_view'];
+  $resultRows=array_map('ch_result_identity',nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id=?',[$gw]));
   foreach(array_chunk($ids,300) as $batch){
-   $rows=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id=? AND sm_fixture_id IN ('.implode(',',array_fill(0,count($batch),'?')).')',array_merge([$gw],$batch));
+   $rows=array_values(array_filter($resultRows,static fn($r)=>in_array((string)$r['sm_fixture_id'],array_map('strval',$batch),true)));
    // Reports enrich statistics only; Results determine fixtures, scores and managers.
    $reportRows=nexus_rows($db,'SELECT sm_fixture_id,team_stats_json,players_json FROM `'.nexus_table($gw,'Match_Report').'` WHERE game_world_id=? AND sm_fixture_id IN ('.implode(',',array_fill(0,count($batch),'?')).')',array_merge([$gw],$batch));
    foreach($reportRows as $r)$reports[$gw.':'.$r['sm_fixture_id']]=$r;

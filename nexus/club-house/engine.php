@@ -59,10 +59,28 @@ function ch_read(PDO $db,string $gw,array $managers,?string $selected,string $sc
  ch_group($out,$group,$map,$names,$gw,$selected,$scope);$stmt->closeCursor();return $out;
 }
 
+
+// Manual competitions have no Soccer Manager fixture. Build a display-only identity
+// from the match coordinates; scores/managers are excluded so conflicts stay detectable.
+function ch_result_identity(array $r): array {
+ if((int)($r['sm_fixture_id']??0)!==0)return $r;
+ $gw=(string)($r['game_world_id']??'');$competition=(string)($r['competition_key']??'');
+ if(!preg_match('/^GW[0-9]{3}$/',$gw)||!str_starts_with($competition,$gw.'_')||
+    !preg_match('/^[a-f0-9]{64}$/i',(string)($r['fingerprint']??''))||
+    !preg_match('/^\\d{4}-\\d{2}-\\d{2}/',(string)($r['match_date']??''))||
+    (int)($r['home_sm_club_id']??0)<1||(int)($r['away_sm_club_id']??0)<1)return $r;
+ $fields=['game_world_id','competition_key','imc_season','match_date','home_sm_club_id','away_sm_club_id','competition_stage','competition_round','competition_group_name'];
+ $coordinates=array_map(static fn($k)=>(string)($r[$k]??''),$fields);
+ $r['sm_fixture_id']='-'.(string)(hexdec(substr(hash('sha256',json_encode($coordinates)),0,12))+1);
+ $r['_synthetic_fixture']=true;
+ return $r;
+}
+
 /** Career: Results only, by fixture and the manager IDs stored on each result. */
 function ch_results_rows(array $rows,string $gw,array $managers,?string $selected,string $scope='global'): array {
  $out=ch_init($managers);$groups=[];$map=ch_identity($managers);$names=array_column($managers,'full_name','manager_id');
  foreach($rows as $r){
+  $r=ch_result_identity($r);
   if(($r['game_world_id']??'')!==$gw)continue;
   if($scope!=='global'&&ch_nation($r)!==($scope==='national_team'))continue;
   $groups[(string)($r['sm_fixture_id']??'')][]=$r;

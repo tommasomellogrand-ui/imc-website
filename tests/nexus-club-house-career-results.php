@@ -26,4 +26,11 @@ $manualConflict=ch_results_rows([$manual,array_replace($manual,['home_score'=>3]
 check($manualConflict['managers']['M1']['stats']['played']===0,'Conflicting synthetic fixtures excluded');
 require __DIR__.'/../nexus/club-house/ranking.php';
 check(imc_rank_result_rows([$manual,$manual],$managers,false)['stats']['M1']['played']===1,'Ranking uses the same synthetic fixture validation');
+$screenshot=array_replace($base,['sm_fixture_id'=>null,'competition_key'=>'GW001_IMC_CHAMPIONS_LEAGUE','fingerprint'=>str_repeat('a',64),'competition_stage'=>'Finale']);
+$accepted=ch_results_rows([$screenshot,$screenshot,$base],'GW001',$managers,'M1','club');
+check($accepted['managers']['M1']['stats']['played']===2,'Screenshot without SM fixture counted once alongside imported result');
+check((int)$accepted['matches'][0]['fixture_id']<0,'Stable internal identity for screenshot');
+check(ch_result_identity($screenshot)['sm_fixture_id']===ch_result_identity(array_replace($screenshot,['fingerprint'=>str_repeat('b',64),'home_score'=>4]))['sm_fixture_id'],'Identity independent of scores and fingerprint');
+check(ch_results_rows([$screenshot,array_replace($screenshot,['home_score'=>4])],'GW001',$managers,'M1')['managers']['M1']['stats']['played']===0,'Screenshot score conflict excluded');
+check(imc_rank_result_rows([$screenshot,$screenshot],$managers,false)['stats']['M1']['played']===1,'Screenshot included once in ranking');
 echo "PASS: Career Results, club/nations, IDs, missing IDs, duplicate/conflict and GW isolation\n";

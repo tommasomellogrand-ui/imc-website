@@ -37,7 +37,7 @@ function ch_national_rows(array $rows,string $gw,array $managers,?string $select
  $out=ch_init($managers);foreach($out['managers'] as &$m)$m['stats']['matched_by_assignment']=0;unset($m);
  $out['accepted_results']=[];$out['national_coverage']=['source'=>'Results','identity_source'=>'assignment_dates','results'=>0,'fixtures'=>0,'duplicates'=>0,'excluded_fixtures'=>0,'unassigned_sides'=>0,'ambiguous_sides'=>0];
  $aliases=ch_nation_aliases($mapping);$index=ch_national_assignment_index($assignments,$aliases,$gw);$names=array_column($managers,'full_name','manager_id');$groups=[];
- foreach($rows as $r){if(($r['game_world_id']??'')!==$gw||!ch_nation($r))continue;$groups[(string)($r['sm_fixture_id']??'')][]=$r;}
+ foreach($rows as $r){$r=ch_result_identity($r);if(($r['game_world_id']??'')!==$gw||!ch_nation($r))continue;$groups[(string)($r['sm_fixture_id']??'')][]=$r;}
  foreach($groups as $items){
   $r=$items[0];$cov=&$out['national_coverage'];$cov['results']+=count($items);$cov['fixtures']++;$cov['duplicates']+=count($items)-1;
   $signatures=[];foreach($items as $item){$values=[];foreach(['match_date','home_sm_club_id','away_sm_club_id','home_score','away_score','penalty_home_score','penalty_away_score'] as $key)$values[]=(string)($item[$key]??'');$signatures[json_encode($values)]=true;}
