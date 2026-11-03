@@ -159,13 +159,13 @@ function h2h(){
  <div class="wg-outcomes" aria-hidden="true"><span style="flex:${s.won}"></span><span class="draw" style="flex:${s.drawn}"></span><span class="loss" style="flex:${s.lost}"></span></div>
 <div class="h2h-score"><span class="win"><strong>${number(s.won)}</strong><small>Vittorie</small></span><span><strong>${number(s.drawn)}</strong><small>Pareggi</small></span><span class="loss"><strong>${number(s.lost)}</strong><small>Sconfitte</small></span></div>
  <div class="h2h-goals"><div><strong>${number(s.gf)}</strong><span>Gol fatti</span></div><div><strong>${number(s.ga)}</strong><span>Gol subiti</span></div></div>
- <div class="h2h-rival-footer">${badges(gws)}<span>Dettaglio confronto</span></div>
+ <div class="h2h-rival-footer">${badges(gws)}<span>Partite · GW · competizioni</span></div>
  </summary><div class="rival-matches"><p><a href="${esc(hubURL('h2h',m.opponent_id))}">Apri H2H del manager →</a></p><div class="hh hh-global-detail">Apri per caricare il dettaglio completo.</div></div></details>`;
  }).join('')||'<p class="notice">Nessuno scontro diretto IMC disponibile.</p>')+'<p class="h2h-method">Percentuale e gol dalla prospettiva del manager selezionato. Vittorie calcolate sul risultato prima dei rigori.</p>';
  $('content').querySelectorAll('.rival[data-opponent]').forEach(el=>el.addEventListener('toggle',async()=>{
   if(!el.open||el.dataset.loaded==='true'||el.dataset.loading==='true')return;
   el.dataset.loading='true';const body=el.querySelector('.hh-global-detail');body.textContent='Caricamento dettaglio partite…';
-  try{const r=await fetch('h2h-detail.php?'+new URLSearchParams({manager,opponent:el.dataset.opponent,worlds:el.dataset.worlds,scope}),{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)throw Error('Dettaglio non disponibile. Chiudi e riapri per riprovare.');if(!el.isConnected)return;NexusH2H.renderDetail(body,d);el.dataset.loaded='true';}catch(e){if(el.isConnected)body.textContent=e.message;}finally{el.dataset.loading='false';}
+  try{const r=await fetch('h2h-detail.php?'+new URLSearchParams({manager,opponent:el.dataset.opponent,worlds:el.dataset.worlds,scope}),{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)throw Error('Dettaglio non disponibile. Chiudi e riapri per riprovare.');if(!el.isConnected)return;NexusH2H.renderDetail(body,d,'matches');el.dataset.loaded='true';}catch(e){if(el.isConnected)body.textContent=e.message;}finally{el.dataset.loading='false';}
  }));
 }
 function trophyImportance(t){
