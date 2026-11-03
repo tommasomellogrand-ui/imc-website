@@ -46,7 +46,7 @@ const clean=v=>String(v??'').trim();
 const groupName=r=>clean(r.competition_group_name)||(/^(?:group|gruppo|girone)\s+[A-Z0-9]+$/i.test(clean(r.competition_stage))?clean(r.competition_stage):'');
 const feedIsIMC=(r,s)=>!!r[s+'_imc_manager_id']&&!!r[s+'_imc_manager_name'];
 function matchdayEditorial(r,preview=false){
- const season=matchdaySeason,key=r.competition_key;
+ const season=r.imc_season||matchdaySeason,key=r.competition_key;
  function feedContext(r,roundLabel=''){
  const stage=clean(r.competition_stage),round=clean(r.competition_round),phase=(stage+' '+round).toLowerCase();
  const league=r.sm_action==='league',group=groupName(r);
@@ -176,7 +176,7 @@ function matchdayGroups(rows,kind){
   if(!feedIsIMC(r,'home')&&!feedIsIMC(r,'away')&&!r.matchday_league_complete)continue;
   const id=String(r.sm_fixture_id||[r.competition_key,r.match_date,r.home_name,r.away_name].join('|'));
   if(seen.has(id))continue;seen.add(id);
-  const token=JSON.stringify([clean(r.match_date).slice(0,10),r.competition_key]);
+  const token=JSON.stringify([clean(r.match_date).slice(0,10),r.competition_key,r.imc_season]);
   if(!groups.has(token))groups.set(token,{row:r,rows:[],day:clean(r.match_date).slice(0,10)});
   const g=groups.get(token);g.rows.push(r);
   if(kind==='results'&&r.match_date>g.day)g.day=clean(r.match_date).slice(0,10);
@@ -188,7 +188,7 @@ function matchdayMarkup(rows,kind){
  return matchdayGroups(rows,kind).map(g=>{
   const dayHeading=g.day!==previousDay?'<h3 class="matchday-date"><span>'+esc(/^\d{4}-\d{2}-\d{2}$/.test(g.day)?new Date(g.day+'T12:00:00Z').toLocaleDateString('it-IT',{weekday:'long',timeZone:'Europe/Rome'}):'Data')+'</span><time datetime="'+esc(g.day)+'">'+esc(/^\d{4}-\d{2}-\d{2}$/.test(g.day)?new Date(g.day+'T12:00:00Z').toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/Rome'}):date(g.day))+'</time></h3>':'';
   previousDay=g.day;
-  const r=g.row,href=url('competitions/view.html',{season:matchdaySeason,competition:r.competition_key,tab:kind==='results'?'overview':'schedule'});
+  const r=g.row,href=url('competitions/view.html',{season:r.imc_season||matchdaySeason,competition:r.competition_key,tab:kind==='results'?'overview':'schedule'});
   const dates=[...new Set(g.rows.map(x=>clean(x.match_date).slice(0,10)))].sort();
   return dayHeading+'<section class="matchday-competition"><header><div class="matchday-competition-heading">'+(r.sm_action!=='league'?'<span class="matchday-cup-icon">'+icon('cup')+'</span>':'')+'<h3>'+esc(r.nexus_view||r.competition_key)+'</h3><p>'+esc([...new Set(g.rows.map(round).filter(Boolean))].join(' · '))+'</p></div><a href="'+esc(href)+'">Vedi competizione →</a></header><div class="matchday-cards">'+g.rows.map(x=>{
    const story=matchdayEditorial(x,kind==='schedule');

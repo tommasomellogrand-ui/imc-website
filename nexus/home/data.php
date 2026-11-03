@@ -41,12 +41,17 @@ try {
     $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
     $labels=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$labels[$m['competition_key']]=$m['nexus_view'];
     $matchday=($_GET['mode']??'')==='matchday';
+    // World Cup editions can finish after the game world rolls into its next season.
+    // Only Matchday includes the previous season, and only for World Cup fixtures.
+    $seasonScope=$matchday?"(imc_season=? OR (imc_season=? AND sm_action='worldcup'))":'imc_season=?';
+    $scheduleScope=$matchday?"(s.imc_season=? OR (s.imc_season=? AND s.sm_action='worldcup'))":'s.imc_season=?';
+    $seasonParams=$matchday?[$gw,$season,max(0,$season-1)]:[$gw,$season];
     $out=['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'errors'=>[]];
     $allResults=[];$previewCache=[];
     foreach(['results','schedule'] as $kind){
         try {
-            if($kind==='results')$rows=nexus_rows($db,'SELECT * FROM `'.$rt.'` WHERE game_world_id=? AND imc_season=? AND home_score IS NOT NULL AND away_score IS NOT NULL ORDER BY match_date DESC,sm_fixture_id DESC '.($matchday?'':'LIMIT 6'),[$gw,$season]);
-            else $rows=nexus_rows($db,'SELECT s.* FROM `'.$st.'` s WHERE s.game_world_id=? AND s.imc_season=? AND s.match_date>=? AND NOT EXISTS (SELECT 1 FROM `'.$rt.'` r WHERE r.sm_fixture_id=s.sm_fixture_id AND r.game_world_id=s.game_world_id AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL) ORDER BY s.match_date ASC,s.match_time ASC,s.sm_fixture_id ASC '.($matchday?'':'LIMIT 6'),[$gw,$season,$today]);
+            if($kind==='results')$rows=nexus_rows($db,'SELECT * FROM `'.$rt.'` WHERE game_world_id=? AND '.$seasonScope.' AND home_score IS NOT NULL AND away_score IS NOT NULL ORDER BY match_date DESC,sm_fixture_id DESC '.($matchday?'':'LIMIT 6'),$seasonParams);
+            else $rows=nexus_rows($db,'SELECT s.* FROM `'.$st.'` s WHERE s.game_world_id=? AND '.$scheduleScope.' AND s.match_date>=? AND NOT EXISTS (SELECT 1 FROM `'.$rt.'` r WHERE r.sm_fixture_id=s.sm_fixture_id AND r.game_world_id=s.game_world_id AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL) ORDER BY s.match_date ASC,s.match_time ASC,s.sm_fixture_id ASC '.($matchday?'':'LIMIT 6'),array_merge($seasonParams,[$today]));
 
             if($kind==='results'&&$matchday)$allResults=$rows;
             $rows=nexus_enrich_match_teams($core,$gw,$rows);
@@ -99,7 +104,7 @@ try {
             
             if($matchday&&$kind==='results'){
                 $reports=[];
-                try{foreach(nexus_rows($db,'SELECT sm_fixture_id FROM `'.nexus_table($gw,'Match_Report').'` WHERE game_world_id=? AND imc_season=?',[$gw,$season]) as $report)$reports[(string)$report['sm_fixture_id']]=true;}
+                try{foreach(nexus_rows($db,'SELECT sm_fixture_id FROM `'.nexus_table($gw,'Match_Report').'` WHERE game_world_id=? AND '.$seasonScope,$seasonParams) as $report)$reports[(string)$report['sm_fixture_id']]=true;}
                 catch(Throwable $e){$out['errors']['reports']='data_unavailable';}
                 foreach($rows as &$r)$r['has_match_report']=isset($reports[(string)$r['sm_fixture_id']]);unset($r);
             }
