@@ -17,4 +17,13 @@ check(ch_results_rows($rows,'GW001',$managers,'M1','national_team')['managers'][
 $conflict=ch_results_rows([$base,array_replace($base,['home_sm_manager_id'=>20])],'GW001',$managers,'M1');
 check($conflict['managers']['M1']['stats']['played']===0,'Conflicting duplicates excluded');
 check($all['coverage']['source']==='Results'&&$all['coverage']['duplicate_rows']===1,'Coverage');
+$manual=array_replace($base,['sm_fixture_id'=>-900001,'competition_key'=>'GW001_IMC_CHAMPIONS_LEAGUE']);
+$synthetic=ch_results_rows([$base,$manual,$manual,array_replace($base,['sm_fixture_id'=>0]),array_replace($base,['sm_fixture_id'=>null])],'GW001',$managers,'M1','club');
+check($synthetic['managers']['M1']['stats']['played']===2,'Imported and synthetic Results accepted once each; missing/zero IDs rejected');
+check($synthetic['managers']['M1']['h2h_stats']['played']===2,'Synthetic fixture included in H2H');
+check($synthetic['matches'][1]['fixture_id']==='-900001','Synthetic fixture ID preserved');
+$manualConflict=ch_results_rows([$manual,array_replace($manual,['home_score'=>3])],'GW001',$managers,'M1','club');
+check($manualConflict['managers']['M1']['stats']['played']===0,'Conflicting synthetic fixtures excluded');
+require __DIR__.'/../nexus/club-house/ranking.php';
+check(imc_rank_result_rows([$manual,$manual],$managers,false)['stats']['M1']['played']===1,'Ranking uses the same synthetic fixture validation');
 echo "PASS: Career Results, club/nations, IDs, missing IDs, duplicate/conflict and GW isolation\n";

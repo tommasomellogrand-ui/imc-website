@@ -43,7 +43,7 @@ function ch_national_rows(array $rows,string $gw,array $managers,?string $select
   $signatures=[];foreach($items as $item){$values=[];foreach(['match_date','home_sm_club_id','away_sm_club_id','home_score','away_score','penalty_home_score','penalty_away_score'] as $key)$values[]=(string)($item[$key]??'');$signatures[json_encode($values)]=true;}
   $day=ch_assignment_day($r['match_date']??null);$reason=null;
   if(count($signatures)>1)$reason='Results duplicati discordanti';
-  elseif((int)($r['sm_fixture_id']??0)<1)$reason='Fixture ID mancante';
+  elseif((int)($r['sm_fixture_id']??0)===0)$reason='Fixture ID mancante';
   elseif(!$day)$reason='Data partita mancante o non valida';
   elseif(!is_numeric($r['home_score']??null)||!is_numeric($r['away_score']??null)||(int)$r['home_score']<0||(int)$r['away_score']<0)$reason='Punteggio non disponibile';
   $teams=[];$resolved=[];foreach(['home','away'] as $side){$teams[$side]=ch_nation_team($r[$side.'_sm_club_id']??null,$aliases);$resolved[$side]=$day?ch_national_manager($index,$teams[$side],$day):[];}

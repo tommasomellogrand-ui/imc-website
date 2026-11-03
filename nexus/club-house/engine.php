@@ -28,7 +28,7 @@ function ch_group(array &$out,array $rows,array $map,array $names,string $gw,?st
  $out['coverage']['reports']+=count($rows);$out['coverage']['fixtures']++;$out['coverage']['duplicate_rows']+=count($rows)-1;
  $reason=null;
  if(count($signatures)>1)$reason='Match Report duplicati con dati discordanti';
- elseif((int)($r['sm_fixture_id']??0)<1)$reason='Fixture ID mancante';
+ elseif((int)($r['sm_fixture_id']??0)===0)$reason='Fixture ID mancante';
  elseif(!is_numeric($r['home_score']??null)||!is_numeric($r['away_score']??null)||(int)$r['home_score']<0||(int)$r['away_score']<0)$reason='Punteggio non disponibile';
  elseif($scope!=='global'&&ch_nation($r)!==($scope==='national_team'))return;
  $resolved=['home'=>ch_resolve($r,'home',$map),'away'=>ch_resolve($r,'away',$map)];
@@ -53,7 +53,7 @@ function ch_read(PDO $db,string $gw,array $managers,?string $selected,string $sc
  $stmt=$db->query($sql);$group=[];$last=null;
  while($r=$stmt->fetch()){
   if($scope!=='global'&&ch_nation($r)!==($scope==='national_team'))continue;$key=(string)($r['sm_fixture_id']??'');
-  if($group&&($key!==$last||(int)$key<1)){ch_group($out,$group,$map,$names,$gw,$selected,$scope);$group=[];}
+  if($group&&($key!==$last||(int)$key===0)){ch_group($out,$group,$map,$names,$gw,$selected,$scope);$group=[];}
   $last=$key;$group[]=$r;
  }
  ch_group($out,$group,$map,$names,$gw,$selected,$scope);$stmt->closeCursor();return $out;
