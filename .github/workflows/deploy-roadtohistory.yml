@@ -25,6 +25,8 @@ jobs:
           for file in roadtohistory/competitions/*.js roadtohistory/transfers/*.js roadtohistory/players/*.js; do node --check "$file"; done
           find roadtohistory/alltoplayfor -name '*.php' -exec php -l {} \;
           find roadtohistory/alltoplayfor -name '*.js' -exec node --check {} \;
+          for file in roadtohistory/imc-cups/*.php; do php -l "$file"; done
+          for file in roadtohistory/imc-cups/*.js; do node --check "$file"; done
           node --check roadtohistory/clubs/directory.js
           node --check roadtohistory/clubs/detail.js
           node --check roadtohistory/managers/manager-profile.js
@@ -40,19 +42,21 @@ jobs:
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
           files=[str(p.relative_to('roadtohistory')) for p in Path('roadtohistory').rglob('*') if p.is_file()]
-          # Incremental uploads are safe only after a verified deployment of the parent.
-          previous=os.environ.get('PREVIOUS_SHA','')
-          if previous and set(previous)!={'0'}:
-              try:
-                  url='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']+'/actions/workflows/deploy-roadtohistory.yml/runs?head_sha='+previous
-                  req=urllib.request.Request(url,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
-                  with urllib.request.urlopen(req,timeout=30) as response: runs=json.load(response)['workflow_runs']
-                  if any(r.get('conclusion')=='success' for r in runs):
-                      diff=subprocess.check_output(['git','diff','--name-only','--diff-filter=ACMRT',previous,'HEAD','--','roadtohistory/'],text=True).splitlines()
-                      files=[str(Path(f).relative_to('roadtohistory')) for f in diff if Path(f).is_file()]
+          # Compare with the latest verified deployment, including intervening non-site commits.
+          try:
+              api='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+              headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'}
+              def gh(path):
+                  with urllib.request.urlopen(urllib.request.Request(api+path,headers=headers),timeout=30) as response:return json.load(response)
+              runs=gh('/actions/workflows/deploy-roadtohistory.yml/runs?status=success&branch=main&per_page=1')['workflow_runs']
+              if runs:
+                  baseline=runs[0]['head_sha']
+                  diff=gh('/compare/'+baseline+'...'+os.environ['GITHUB_SHA'])
+                  if diff.get('status') in ['ahead','identical'] and len(diff.get('files',[]))<300:
+                      files=[str(Path(f['filename']).relative_to('roadtohistory')) for f in diff.get('files',[]) if f['filename'].startswith('roadtohistory/') and Path(f['filename']).is_file()]
                       print('Incremental deployment:',len(files),'changed files',flush=True)
-              except Exception:
-                  print('Using full deployment',flush=True)
+          except Exception:
+              print('Using full deployment',flush=True)
           root='/www.italianmastersclub.it/roadtohistory'
           ctx=ssl.create_default_context()
           ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
@@ -224,4 +228,22 @@ jobs:
                   d=json.load(r)
                   assert d and d.get('ok',True),path
           print('All programme pages, archives, Club News and editorial feeds verified')
+          PY
+
+      - name: Verify dedicated IMC cups
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request,hashlib
+          from pathlib import Path
+          base='https://www.italianmastersclub.it/roadtohistory/'
+          for slug in ['champions-league','europa-league','conference-league','club-world-cup']:
+              path='rth-'+slug+'/index.html'
+              with urllib.request.urlopen(base+path+'?release=${{ github.sha }}',timeout=90) as r:
+                  assert hashlib.sha256(r.read()).digest()==hashlib.sha256((Path('roadtohistory')/path).read_bytes()).digest(),path
+              key='GW001_IMC_'+slug.upper().replace('-','_')
+              for endpoint in ['results.php','schedule.php']:
+                  with urllib.request.urlopen(base+'competitions/'+endpoint+'?season=2&competition='+key,timeout=90) as r:
+                      d=json.load(r)
+                      assert d.get('ok') and d.get('competition_key')==key
+          print('Four IMC cup pages and database-backed data endpoints verified')
           PY
