@@ -13,7 +13,7 @@ try{
  $where='t.game_world_id=?';$params=[$gw];
  if($mode==='results'){$where.=' AND t.home_score IS NOT NULL AND t.away_score IS NOT NULL AND DATE(t.match_date)<=?';$params[]=$today;}
  else{
-  $where.=' AND DATE(t.match_date)>=? AND NOT EXISTS (SELECT 1 FROM `'.$rt.'` r WHERE r.game_world_id=t.game_world_id AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND ((r.sm_fixture_id IS NOT NULL AND CAST(r.sm_fixture_id AS CHAR)<>'' AND CAST(r.sm_fixture_id AS CHAR)<>'0' AND r.sm_fixture_id=t.sm_fixture_id) OR (r.competition_key=t.competition_key AND DATE(r.match_date)=DATE(t.match_date) AND r.home_sm_club_id=t.home_sm_team_id AND r.away_sm_club_id=t.away_sm_team_id)))';
+  $where.=' AND DATE(t.match_date)>=? AND NOT EXISTS (SELECT 1 FROM `'.$rt.'` r WHERE r.game_world_id=t.game_world_id AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND ((r.sm_fixture_id IS NOT NULL AND CAST(r.sm_fixture_id AS CHAR)<>\'\' AND CAST(r.sm_fixture_id AS CHAR)<>\'0\' AND r.sm_fixture_id=t.sm_fixture_id) OR (r.competition_key=t.competition_key AND DATE(r.match_date)=DATE(t.match_date) AND r.home_sm_club_id=t.home_sm_team_id AND r.away_sm_club_id=t.away_sm_team_id)))';
   $params[]=$today;
  }
  $order=$mode==='results'?'DESC':'ASC';
