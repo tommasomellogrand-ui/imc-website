@@ -16,7 +16,7 @@ foreach (['gold','custom'] as $family) {
       $body=['game_world_id'=>$gw,'repository'=>$repo,'target_database'=>$family,'target_table'=>$gw.'_'.$suffix];
       check(imc_explicit_import_route($body,$cfg)['database']===$family);
       check(imc_ingress_route($body,$cfg)['database']===$family);
-      check(imc_ident($body['target_table'])===chr(96).$body['target_table'].chr(96));
+      check(imc_ident($body['target_table'])===chr(96).imc_physical_table($body['target_table']).chr(96));
       $bad=$body; $bad['target_database']=$family==='gold'?'custom':'gold';
       rejects(fn()=>imc_explicit_import_route($bad,$cfg));
       rejects(fn()=>imc_ingress_route($bad,$cfg));
@@ -79,3 +79,21 @@ rejects(fn()=>imc_normalize_world_request(['game_world_id'=>'IMC-002','rows'=>[[
 rejects(fn()=>imc_normalize_world_request(['game_world_id'=>'IMC-002','target_table'=>'GW001_IMC_Results'],$production,'IMPORT',$catalog));
 check(imc_normalize_world_request(['game_world_id'=>'GW002'],$production,'CHATGPT',$catalog)['game_world_id']==='GW002');
 echo "PASS: seven CORE aliases, legacy custom imports, payload/filter translation, preserved fingerprints, Gold/reserved/mismatched rejection.\n";
+
+// New physical table destinations, independent from row-key migration.
+foreach (imc_destination_pairs() as $logical=>$physical) {
+ check(imc_physical_table($logical)===$physical);
+ check(imc_logical_table($physical)===$logical);
+ check(imc_ident($logical)==='`'.$physical.'`');
+}
+$active=[['legacy_id'=>'GW001','imc_id'=>'IMC-001'],['legacy_id'=>'GW005','imc_id'=>'IMC-002'],['legacy_id'=>'GW009','imc_id'=>'IMC-003'],['legacy_id'=>'GW010','imc_id'=>'IMC-004'],['legacy_id'=>'GW011','imc_id'=>'IMC-005']];
+foreach(range(1,10) as $n) {
+ $alias=sprintf('IMC-%03d',$n); $physical=sprintf('IMC%03d_Results',$n);
+ $body=imc_normalize_world_request(['action'=>'read','game_world_id'=>$alias,'target_table'=>$physical,'target_database'=>'Sql1956795_3','repository'=>'IMC Results'],$production,'IMPORT',$active);
+ $route=imc_explicit_import_route($body,$production);
+ check(imc_physical_table($route['table'])===$physical);
+ check(imc_ingress_table_ident($route['table'],$body['game_world_id'])==='`'.$physical.'`');
+ if($n>5) rejects(fn()=>imc_normalize_world_request(['action'=>'insert_many','game_world_id'=>$alias],$production,'IMPORT',$active));
+}
+rejects(fn()=>imc_normalize_world_request(['action'=>'read','game_world_id'=>'IMC-002','target_table'=>'IMC001_Results'],$production,'IMPORT',$active));
+echo "PASS new physical destinations 001-010, cross-world rejection and unassigned write protection.\n";

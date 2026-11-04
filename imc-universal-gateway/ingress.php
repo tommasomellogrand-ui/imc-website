@@ -29,22 +29,22 @@ function imc_ingress_ident(string $value): string {
 
 function imc_ingress_table_ident(string $value, string $gw): string {
     if ($value === 'IMC_Game_World_Season') return '`IMC_Game_World_Season`';
-    if (!preg_match('/^GW(?:00[1-9]|01[0-5])_IMC_[A-Za-z0-9_-]{1,80}$/', $value) || !str_starts_with($value, $gw . '_IMC_')) {
+    if (!preg_match('/^(?:GW(?:00[1-9]|01[0-5])|IMC-00[6-9]|IMC-010)_IMC_[A-Za-z0-9_-]{1,80}$/', $value) || !str_starts_with($value, $gw . '_IMC_')) {
         throw new InvalidArgumentException('target_not_allowed');
     }
-    return '`' . str_replace('`', '', $value) . '`';
+    return '`' . str_replace('`', '', imc_physical_table($value)) . '`';
 }
 
 function imc_ingress_route(array $body, array $cfg): array {
     $gw = strtoupper(trim((string)($body['game_world_id'] ?? '')));
     $database = trim((string)($body['target_database'] ?? ''));
     $table = trim((string)($body['target_table'] ?? ''));
-    if (!preg_match('/^GW(?:00[1-9]|01[0-5])$/', $gw)) throw new InvalidArgumentException('invalid_game_world');
+    if (!preg_match('/^(?:GW(?:00[1-9]|01[0-5])|IMC-00[6-9]|IMC-010)$/', $gw)) throw new InvalidArgumentException('invalid_game_world');
 
     $gold = array_map('strtoupper', (array)($cfg['gold_worlds'] ?? []));
     $custom = array_map('strtoupper', (array)($cfg['custom_worlds'] ?? []));
     if (in_array($gw, $gold, true)) $expected = (string)($cfg['db']['gold'] ?? '');
-    elseif (in_array($gw, $custom, true)) $expected = (string)($cfg['db']['custom'] ?? '');
+    elseif (preg_match('/^IMC-(?:00[6-9]|010)$/D',$gw) || in_array($gw, $custom, true)) $expected = (string)($cfg['db']['custom'] ?? '');
     else throw new InvalidArgumentException('unsupported_game_world');
 
     if ($database === '' || !hash_equals($expected, $database)) throw new InvalidArgumentException('target_not_allowed');
@@ -135,10 +135,11 @@ function imc_ingress_run(array $body): never {
         if (strtolower(trim((string)($body['route_mode'] ?? ''))) !== 'explicit') throw new InvalidArgumentException('explicit_route_required');
 
         $cfg = imc_ingress_cfg();
+        $requestedTable=(string)($body['target_table']??'');
         $body = imc_normalize_world_request($body, $cfg, $channel);
         $route = imc_ingress_route($body, $cfg);
         $pdo = imc_ingress_db($cfg, $route['database']);
-        $base = ['ok' => true, 'IMC_WORLD_ID' => $body['IMC_WORLD_ID'] ?? null, 'service' => 'IMC Universal Gateway', 'mode' => 'INGRESS_ONLY', 'action' => $action, 'channel' => 'IMPORT', 'game_world_id' => $route['game_world_id'], 'database' => $route['database'], 'table' => $route['table'], 'trace_id' => $body['trace_id'] ?? null];
+        $base = ['ok' => true, 'IMC_WORLD_ID' => $body['IMC_WORLD_ID'] ?? null, 'service' => 'IMC Universal Gateway', 'mode' => 'INGRESS_ONLY', 'action' => $action, 'channel' => 'IMPORT', 'game_world_id' => $route['game_world_id'], 'database' => $route['database'], 'table' => (str_starts_with($requestedTable,'GW')?$requestedTable:imc_physical_table($route['table'])), 'physical_table'=>imc_physical_table($route['table']), 'trace_id' => $body['trace_id'] ?? null];
 
         if ($action === 'read') imc_ingress_out($base + imc_ingress_read($pdo, $route['table'], $route['game_world_id'], $body));
         $rows = $body['rows'] ?? $body['items'] ?? null;
