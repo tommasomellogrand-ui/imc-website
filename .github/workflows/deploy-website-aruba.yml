@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - 'clubhouse/**'
+      - '.github/workflows/deploy-clubhouse.yml'
       - 'nexus/core/bootstrap.php'
       - 'nexus/core/club-display.php'
       - 'tests/nexus-club-display*'
