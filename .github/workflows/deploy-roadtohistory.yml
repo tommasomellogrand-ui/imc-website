@@ -336,6 +336,9 @@ jobs:
               d=json.load(r)
               assert d['ok'] and d['game_world_id']=='GW001'
               assert isinstance(d['rows'],list)
+              imc=[x for x in d['competitions'] if x['competition_group']=='IMC']
+              assert len(imc)>=4,imc
+              assert all(x['nexus_view'] for x in imc)
               for row in d['rows']:
                   assert row['game_world_id']=='GW001'
                   assert 'winner_manager_id' in row and 'winner_logo_url' in row

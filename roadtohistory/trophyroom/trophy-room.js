@@ -1,10 +1,10 @@
 /* Display-only Trophy Room. Award records and attribution remain unchanged. */
 window.NexusTrophies={
- mount(container,rows,gw){
+ mount(container,rows,gw,competitions=[]){
   const root=document.createElement('section');root.className='trophy-page trophy-embedded';
   root.innerHTML='<input data-trophy="search" type="search" aria-label="Cerca squadra, manager o trofeo" placeholder="Cerca squadra, manager o trofeo…"><p data-trophy="directory-note" class="trophy-note"></p><div data-trophy="directory-list" class="trophy-grid" aria-live="polite"></div>';
   container.replaceChildren(root);
-  return this.render(rows,gw,{root,base:'/nexus/'});
+  return this.render(rows,gw,{root,base:'/nexus/',competitions});
  },
  async render(rows,gw,options={}){
  const root=options.root||document,base=options.base||'';
@@ -14,6 +14,7 @@ window.NexusTrophies={
  const grid=$('directory-list');grid.classList.add('trophy-grid');
  $('search').placeholder='Cerca squadra, manager o trofeo…';
  document.querySelectorAll('.shortcut').forEach(a=>{if(a.textContent==='Trophy Room')a.setAttribute('aria-current','page')});
+ const catalog=[...rows,...(options.competitions||[])];
  const filters=document.createElement('div');filters.className='trophy-filters';
  const specs=[['imc_season','Stagione','Tutte le stagioni'],['nexus_view','Competizione','Tutte le competizioni']];
  const selects=specs.map(([key,label,all])=>{const wrap=document.createElement('label');wrap.textContent=label;const select=document.createElement('select');select.add(new Option(all,''));[...new Set(rows.map(r=>String(r[key]??'')).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it',{numeric:true})).forEach(v=>select.add(new Option(key==='imc_season'?'Stagione '+v:v,v)));wrap.append(select);filters.append(wrap);return [key,select]});
@@ -28,7 +29,13 @@ window.NexusTrophies={
  const tabs=document.createElement('nav');tabs.className='trophy-groups';tabs.setAttribute('aria-label','Tipologia trofei');
  tabs.innerHTML=groups.map(([id,label])=>'<button type="button" data-group="'+id+'" aria-pressed="false">'+label+'</button>').join('');
  $('search').before(tabs);
- tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{activeGroup=b.dataset.group;selects.forEach(([,s])=>s.value='');draw()});
+ function refreshCompetitions(){
+  const select=selects.find(([key])=>key==='nexus_view')[1];
+  select.replaceChildren(new Option('Tutte le competizioni',''));
+  [...new Set(catalog.filter(r=>groupOf(r)===activeGroup).map(r=>r.nexus_view).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it',{numeric:true})).forEach(name=>select.add(new Option(name,name)));
+ }
+ refreshCompetitions();
+ tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>{activeGroup=b.dataset.group;selects.forEach(([,s])=>s.value='');refreshCompetitions();draw()});
  const emblems=new Map();
  const winnerManagers=new Map();
  for(const r of rows){
@@ -58,7 +65,7 @@ window.NexusTrophies={
    const day=String(r.won_date||'').slice(0,10),date=/^\d{4}-\d{2}-\d{2}$/.test(day)?new Date(day+'T12:00:00Z').toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'}):'Data non disponibile';
    return '<li class="trophy-honour">'+(teamUrl?'<a class="trophy-winner" href="'+esc(teamUrl)+'">':'<div class="trophy-winner">')+'<span class="trophy-crest"><span>'+esc(initials)+'</span>'+(src?'<img src="'+esc(src)+'" alt="" loading="lazy">':'')+'</span><strong>'+esc(name)+'</strong>'+(teamUrl?'</a>':'</div>')+'<p class="trophy-manager">'+managerHtml+'</p><div class="trophy-date"><strong>Stagione '+esc(r.imc_season||'—')+'</strong><time'+(/^\d{4}-\d{2}-\d{2}$/.test(day)?' datetime="'+esc(day)+'"':'')+'>'+esc(date)+'</time></div></li>';
   };
-  grid.innerHTML=filtered.length?[...honours.values()].map(history=>{history.sort((a,b)=>Number(b.imc_season)-Number(a.imc_season)||String(b.won_date).localeCompare(String(a.won_date)));const r=history[0];return '<article class="trophy-card"><div class="trophy-stage">'+art(action(r))+'</div><h3 class="trophy-competition">'+esc(r.nexus_view||r.trophy_type||r.competition_key)+'</h3><ul class="trophy-honours" aria-label="Albo d’oro">'+history.map(award).join('')+'</ul></article>'}).join(''):'<p class="empty">Nessun trofeo corrisponde ai filtri.</p>';
+  grid.innerHTML=filtered.length?[...honours.values()].map(history=>{history.sort((a,b)=>Number(b.imc_season)-Number(a.imc_season)||String(b.won_date).localeCompare(String(a.won_date)));const r=history[0];return '<article class="trophy-card"><div class="trophy-stage">'+art(action(r))+'</div><h3 class="trophy-competition">'+esc(r.nexus_view||r.trophy_type||r.competition_key)+'</h3><ul class="trophy-honours" aria-label="Albo d’oro">'+history.map(award).join('')+'</ul></article>'}).join(''):'<p class="empty">Nessun trofeo ancora assegnato per la selezione.</p>';
   grid.querySelectorAll('.trophy-crest img').forEach(img=>{img.addEventListener('error',()=>img.remove());img.addEventListener('load',()=>img.previousElementSibling.hidden=true)});
  }
  selects.forEach(([,s])=>s.addEventListener('change',draw));$('search').oninput=draw;draw();

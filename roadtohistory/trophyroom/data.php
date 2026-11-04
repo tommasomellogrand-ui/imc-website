@@ -7,6 +7,14 @@ try{
  // Display existing awards only. Synchronisation remains with the existing award automation.
  $rows=nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Trophy_Room` WHERE game_world_id=? ORDER BY imc_season DESC,won_date DESC,id',[$gw]);
  $labels=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $r)$labels[$r['competition_key']]=$r['nexus_view'];
+ $competitions=[];
+ foreach($labels as $key=>$label){
+  if(!$label)continue;
+  $group=null;
+  foreach(explode('|',$key) as $part)if(in_array(strtoupper($part),['DOMESTIC','INTERNATIONAL','NATIONS','IMC'],true)){$group=strtoupper($part);break;}
+  if(str_starts_with($key,'GW001_IMC_'))$group='IMC';
+  if($group)$competitions[]=['competition_key'=>$key,'nexus_view'=>$label,'competition_group'=>$group];
+ }
  $logos=['club'=>[],'national_team'=>[]];
  foreach(nexus_rows($core,'SELECT m.`SM World Club ID` world_id,c.image_url FROM `IMC Game World Club Mapping` m JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=?',[$gw]) as $r)$logos['club'][(string)$r['world_id']]=$r['image_url'];
  foreach(nexus_rows($core,'SELECT m.`SM World National Club ID` world_id,c.image_url FROM `IMC Game World National Team Mapping` m JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`=?',[$gw]) as $r)$logos['national_team'][(string)$r['world_id']]=$r['image_url'];
@@ -24,5 +32,5 @@ try{
   }
   if(count($matches)===1){$m=reset($matches);$r['winner_manager_id']=$m['manager_id'];$r['winner_manager_name']=$m['full_name'];}
  }unset($r);
- nexus_out(['ok'=>true,'game_world_id'=>$gw,'rows'=>$rows,'generated_at'=>gmdate('c')]);
+ nexus_out(['ok'=>true,'game_world_id'=>$gw,'rows'=>$rows,'competitions'=>$competitions,'generated_at'=>gmdate('c')]);
 }catch(Throwable $e){error_log('RTH trophy room: '.$e->getMessage());nexus_out(['ok'=>false,'error'=>'trophy_room_unavailable'],500);}
