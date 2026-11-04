@@ -250,6 +250,10 @@ jobs:
                   with urllib.request.urlopen(base+'competitions/'+endpoint+'?season=2&competition='+key,timeout=90) as r:
                       d=json.load(r)
                       assert d.get('ok') and d.get('competition_key')==key
+              legacy='GW001_IMC_'+slug.upper().replace('-','_')
+              with urllib.request.urlopen(base+'competitions/results.php?season=2&competition='+legacy,timeout=90) as r:
+                  d=json.load(r)
+                  assert d.get('ok') and d.get('competition_key')==key
           print('Four IMC cup pages and database-backed data endpoints verified')
           PY
 
