@@ -15,7 +15,6 @@ try{
  $clubMap=nexus_rows($core,'SELECT `Club ID` entity_id,`SM World Club ID` world_id FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]);
  $nationMap=nexus_rows($core,'SELECT `National Team ID` entity_id,`SM World National Club ID` world_id,`SM National Team ID` sm_id FROM `IMC Game World National Team Mapping` WHERE `Game World`=?',[$gw]);
  $ctx=['teams'=>['club'=>nexus_team_lookup(nexus_rows($core,'SELECT id,name,image_url FROM `IMC Club Codex Global`'),$clubMap),'national_team'=>nexus_team_lookup(nexus_rows($core,'SELECT id,name,image_url FROM `IMC National Team Codex Global`'),$nationMap)],'managers'=>[],'sm_managers'=>[],'assignments'=>[],'competitions'=>[]];
- foreach(nexus_rows($core,'SELECT sm_manager_id,manager_name FROM `EXT Manager Codex Global`') as $m){$sm=(int)$m['sm_manager_id'];if($sm>0)$ctx['sm_managers'][$sm]=['key'=>'sm:'.$sm,'name'=>$m['manager_name'],'sm_manager_id'=>$sm,'image_url'=>null];}
  foreach(nexus_rows($core,'SELECT manager_id,full_name,sm_manager_id FROM `IMC Manager Codex Global`') as $m){$item=['key'=>'imc:'.$m['manager_id'],'manager_id'=>$m['manager_id'],'name'=>$m['full_name'],'sm_manager_id'=>(int)$m['sm_manager_id'],'image_url'=>null];$ctx['managers'][$m['manager_id']]=$item;if($item['sm_manager_id']>0)$ctx['sm_managers'][$item['sm_manager_id']]=$item;}
  $nationAliases=[];foreach($nationMap as $n)foreach(['entity_id','world_id','sm_id'] as $f){if((int)$n[$f]>0)$nationAliases[(int)$n[$f]]=(int)$n['world_id'];}
  $assigned=[];
