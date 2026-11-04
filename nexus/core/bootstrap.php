@@ -56,3 +56,13 @@ function nexus_table(string $gw,string $repository): string {
   return $gw.'_IMC_'.$repository;
 }
 
+
+function nexus_rth_competition_key(string $key): string {
+    $slugs=['CHAMPIONS_LEAGUE'=>'championsleague','EUROPA_LEAGUE'=>'europaleague','CONFERENCE_LEAGUE'=>'conferenceleague','CLUB_WORLD_CUP'=>'clubworldcup'];
+    foreach($slugs as $old=>$slug) {
+        if(in_array($key,['GW001_IMC_'.$old,'IMC001_IMC_'.$old,'IMC-001_IMC_'.$old,'GW001|IMC|'.$slug,'IMC-001|IMC|'.$slug,'IMC001|IMC|'.$slug],true))return 'IMC001|IMC|'.$slug;
+    }
+    return $key;
+}
+
+if(isset($_GET['competition'])&&is_string($_GET['competition']))$_GET['competition']=nexus_rth_competition_key($_GET['competition']);

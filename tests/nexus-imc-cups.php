@@ -13,7 +13,7 @@ $code=file_get_contents(__DIR__.'/../nexus/competitions/imc-cups.php');
 $code=str_replace(["<?php", "declare(strict_types=1);", "require dirname(__DIR__).'/core/bootstrap.php';",'__DIR__'],['','','',var_export($dir,true)],$code);
 // nexus_out terminates a real response; let the test capture it outside the endpoint.
 $code=str_replace('catch(Throwable $e){','catch(CapturedResponse $e){throw $e;}catch(Throwable $e){',$code);
-function runCase($code,$dir,$data,$mode){file_put_contents($dir.'/imc-cups.json',json_encode($data));$_GET=['world'=>'GW001','season'=>'2','competition'=>'GW001_IMC_EUROPA_LEAGUE','mode'=>$mode];try{eval($code);}catch(CapturedResponse $e){return $e->body;}throw new Exception('No response');}
+function runCase($code,$dir,$data,$mode){file_put_contents($dir.'/imc-cups.json',json_encode($data));$_GET=['world'=>'GW001','season'=>'2','competition'=>'IMC001|IMC|europaleague','mode'=>$mode];try{eval($code);}catch(CapturedResponse $e){return $e->body;}throw new Exception('No response');}
 function check($v){if(!$v)throw new Exception('Assertion failed');}
 try{
  $s=runCase($code,$dir,$data,'schedule');check($s['ok']&&count($s['rows'])===7);

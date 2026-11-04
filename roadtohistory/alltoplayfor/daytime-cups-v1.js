@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const slug=document.body.dataset.cup,keys={champions:'GW001_IMC_CHAMPIONS_LEAGUE',europa:'GW001_IMC_EUROPA_LEAGUE',conference:'GW001_IMC_CONFERENCE_LEAGUE'},key=keys[slug];if(!key)return;
+const slug=document.body.dataset.cup,keys={champions:'IMC001|IMC|championsleague',europa:'IMC001|IMC|europaleague',conference:'IMC001|IMC|conferenceleague'},key=keys[slug];if(!key)return;
 const root=document.getElementById('cup-data'),status=document.getElementById('load-status'),refresh=document.getElementById('refresh');let controller,sequence=0,hasData=false;
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=String(text);if(cls)n.className=cls;return n};
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());

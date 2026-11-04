@@ -115,3 +115,13 @@ foreach ($active as $entry) {
  }
 }
 echo "PASS canonical Results IDs, keys, national competitions and season preservation.\n";
+
+foreach(['GW001_IMC_CHAMPIONS_LEAGUE','IMC001_IMC_CHAMPIONS_LEAGUE','GW001|IMC|championsleague'] as $key){
+ $r=imc_normalize_world_request(['action'=>'insert_many','repository'=>'IMC Results','game_world_id'=>'IMC001','rows'=>[['competition_key'=>$key]]],$production,'IMPORT',$active);
+ check($r['rows'][0]['competition_key']==='IMC001|IMC|championsleague');
+}
+$r=imc_normalize_world_request(['action'=>'update','repository'=>'IMC Results','game_world_id'=>'IMC001','where'=>['competition_key'=>'IMC001_IMC_CHAMPIONS_LEAGUE'],'set'=>['competition_key'=>'IMC001|IMC|championsleague']],$production,'CHATGPT',$active);
+check($r['where']['competition_key']==='IMC001_IMC_CHAMPIONS_LEAGUE');
+check($r['set']['competition_key']==='IMC001|IMC|championsleague');
+check(imc_rth_competition_key('IMC004|IMC|libertadores')==='IMC004|IMC|libertadores');
+echo "PASS RTH aliases and exact maintenance predicates.\n";

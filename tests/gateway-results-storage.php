@@ -35,3 +35,19 @@ $r=$p->query("SELECT * FROM IMC001_Results WHERE home_name='Porto'")->fetch(PDO:
 $p->exec("INSERT INTO IMC006_Results(game_world_id,competition_key) VALUES ('IMC-006','IMC-006|NATIONS|worldcup')");
 $r=$p->query('SELECT * FROM IMC006_Results')->fetch(PDO::FETCH_ASSOC);checkStorage($r['game_world_id']==='IMC006'&&$r['competition_key']==='IMC006|NATIONS|worldcup');
 echo "PASS MySQL: canonical storage, legacy views, club/nation assignments, MR manager update, playoff and guest triggers, reserved worlds.\n";
+
+// RTH cup migration: canonical cup keys, legacy views, guest awards and future writes.
+$p->exec('RENAME TABLE GW001_IMC_Match_Report TO IMC001_Match_Reports');
+$p->exec('ALTER TABLE IMC001_Match_Reports ADD competition_key VARCHAR(255)');
+$p->exec('CREATE VIEW GW001_IMC_Match_Report AS SELECT * FROM IMC001_Match_Reports');
+$p->exec('CREATE TABLE IMC001_Schedule (competition_key VARCHAR(255))');
+foreach(json_decode(file_get_contents(__DIR__.'/fixtures/rth-cup-key-schema.json'),true,512,JSON_THROW_ON_ERROR) as $sql)$p->exec($sql);
+foreach(['GW001_IMC_CHAMPIONS_LEAGUE','IMC001_IMC_CHAMPIONS_LEAGUE','IMC001|IMC|championsleague'] as $cupKey){
+ $s=$p->prepare("INSERT INTO IMC001_Results(game_world_id,competition_key,home_name,away_name,home_score,away_score) VALUES ('IMC001',?,'Newcastle','Roma',9,1)");$s->execute([$cupKey]);
+}
+checkStorage((int)$p->query("SELECT COUNT(*) FROM GW001_IMC_Results WHERE home_name='Newcastle' AND competition_key='IMC001|IMC|championsleague' AND home_score=0 AND away_score=3")->fetchColumn()===3);
+$p->exec("INSERT INTO IMC001_Match_Reports VALUES ('GW001',987,'GW001|IMC|europaleague')");
+checkStorage($p->query('SELECT competition_key FROM IMC001_Match_Reports WHERE sm_fixture_id=987')->fetchColumn()==='IMC001|IMC|europaleague');
+$p->exec("INSERT INTO IMC001_Schedule VALUES ('GW001_IMC_CONFERENCE_LEAGUE')");
+checkStorage($p->query('SELECT competition_key FROM IMC001_Schedule')->fetchColumn()==='IMC001|IMC|conferenceleague');
+echo "PASS RTH cup keys: old/new writes, legacy view reads, guest awards, Schedule and Match Report.\n";

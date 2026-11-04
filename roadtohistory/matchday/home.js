@@ -13,7 +13,7 @@ function team(r,s){
  return '<div class="md-team '+s+'">'+link+manager+'</div>';
 }
 function competitionUrl(r){
- const cups={'GW001_IMC_CHAMPIONS_LEAGUE':'rth-champions-league','GW001_IMC_EUROPA_LEAGUE':'rth-europa-league','GW001_IMC_CONFERENCE_LEAGUE':'rth-conference-league','GW001_IMC_CLUB_WORLD_CUP':'rth-club-world-cup'};
+ const cups={'IMC001|IMC|championsleague':'rth-champions-league','IMC001|IMC|europaleague':'rth-europa-league','IMC001|IMC|conferenceleague':'rth-conference-league','IMC001|IMC|clubworldcup':'rth-club-world-cup'};
  if(cups[r.competition_key])return '/roadtohistory/'+cups[r.competition_key]+'/';
  return '/roadtohistory/competitions/view.html?'+new URLSearchParams({world:'GW001',season:r.imc_season,competition:r.competition_key,group:r.competition_group||'DOMESTIC',tab:mode});
 }
