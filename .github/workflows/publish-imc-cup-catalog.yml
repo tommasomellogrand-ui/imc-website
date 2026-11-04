@@ -5,6 +5,7 @@ on:
     paths:
       - 'nexus/competitions/imc-cups.json'
       - 'tests/nexus-imc-cups.php'
+      - 'nexus/competitions/imc-cups.php'
       - '.github/workflows/publish-imc-cup-catalog.yml'
   workflow_dispatch:
 permissions:
@@ -37,6 +38,11 @@ jobs:
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p()
           ftp.cwd('/www.italianmastersclub.it/nexus/competitions')
+          php=Path('nexus/competitions/imc-cups.php').read_bytes()
+          ftp.storbinary('STOR imc-cups.php',io.BytesIO(php))
+          php_check=io.BytesIO()
+          ftp.retrbinary('RETR imc-cups.php',php_check.write)
+          assert php_check.getvalue()==php
           ftp.storbinary('STOR imc-cups.json',io.BytesIO(data))
           actual=io.BytesIO()
           ftp.retrbinary('RETR imc-cups.json',actual.write)
