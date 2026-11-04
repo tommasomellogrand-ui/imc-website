@@ -27,6 +27,9 @@ jobs:
           find roadtohistory/alltoplayfor -name '*.js' -exec node --check {} \;
           for file in roadtohistory/imc-cups/*.php; do php -l "$file"; done
           for file in roadtohistory/imc-cups/*.js; do node --check "$file"; done
+          php -l roadtohistory/trophyroom/data.php
+          node --check roadtohistory/trophyroom/trophy-room.js
+          node --check roadtohistory/trophyroom/page.js
           php -l roadtohistory/matchday/data.php
           node --check roadtohistory/matchday/home.js
           node --check roadtohistory/clubs/directory.js
@@ -242,7 +245,7 @@ jobs:
               path='rth-'+slug+'/index.html'
               with urllib.request.urlopen(base+path+'?release=${{ github.sha }}',timeout=90) as r:
                   assert hashlib.sha256(r.read()).digest()==hashlib.sha256((Path('roadtohistory')/path).read_bytes()).digest(),path
-              key='GW001_IMC_'+slug.upper().replace('-','_')
+              key='IMC001|IMC|'+slug.replace('-','')
               for endpoint in ['results.php','schedule.php']:
                   with urllib.request.urlopen(base+'competitions/'+endpoint+'?season=2&competition='+key,timeout=90) as r:
                       d=json.load(r)
@@ -314,4 +317,25 @@ jobs:
           with urllib.request.urlopen(base,timeout=90) as r:
               html=r.read().decode()
               assert 'matchday/home.js' in html and 'I risultati arriveranno qui' not in html
+          PY
+
+      - name: Verify Road to History Trophy Room
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request,hashlib
+          from pathlib import Path
+          base='https://www.italianmastersclub.it/roadtohistory/trophyroom/'
+          for name in ['index.html','style.css','trophy-room.js','page.js']:
+              with urllib.request.urlopen(base+name+'?release=${{ github.sha }}',timeout=90) as r:
+                  assert hashlib.sha256(r.read()).digest()==hashlib.sha256((Path('roadtohistory/trophyroom')/name).read_bytes()).digest(),name
+          with urllib.request.urlopen(base+'data.php?world=GW002',timeout=90) as r:
+              d=json.load(r)
+              assert d['ok'] and d['game_world_id']=='GW001'
+              assert isinstance(d['rows'],list)
+              for row in d['rows']:
+                  assert row['game_world_id']=='GW001'
+                  assert 'winner_manager_id' in row and 'winner_logo_url' in row
+              print('Trophy Room live data verified:',len(d['rows']),'awards')
+          with urllib.request.urlopen(base,timeout=90) as r:
+              assert r.status==200 and 'Trophy Room' in r.read().decode()
           PY
