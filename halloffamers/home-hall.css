@@ -1,0 +1,58 @@
+/* Hall Of Famers home: the golden hall. Scoped to this page. */
+html body.hof-home{--gold:#806020!important;--accent:#806020!important;--world-accent:#806020;--muted:#625d54;--line:#dfd8c9;color:#292820;background:#faf9f6!important;background-image:linear-gradient(118deg,transparent 30%,#d6cbb51a 30.1%,transparent 30.5%,transparent 69%,#d6cbb514 69.2%,transparent 70%)!important}
+.hof-home h2,.hof-home .brand>span{font-family:Cinzel,Georgia,serif;letter-spacing:.025em}
+html body.hof-home .top{background:#faf9f6fa!important;border-top:2px solid #b89b57!important;border-bottom:1px solid #ddd4be}
+.hof-home .brand{color:#352b1d}.hof-home .brand small{font-family:Inter,sans-serif;font-size:8px}
+.hof-home .top-links{color:#574730}.hof-home .menu nav{background:#faf9f6;border-color:#d5c7aa}
+html body.hof-home .hero{background:#191813!important;border-top:0;border-bottom:1px solid #b89b57;border-radius:0!important}
+html body.hof-home .hero .hero-inner{width:100%;max-width:1440px;padding:0!important}
+html body.hof-home .hero h1.hof-banner-title{margin:0!important}
+.hof-home .hof-welcome{max-width:1180px;margin:auto;padding:30px 24px;display:flex;justify-content:space-between;align-items:center;gap:24px;border-top:1px solid #b89b5745}
+.hof-home .hof-welcome .eyebrow{color:#dac48d!important;font-size:9px}
+.hof-home .hof-welcome p{font:400 clamp(22px,3vw,32px)/1.3 Cinzel,Georgia,serif;color:#f4eedd;margin:10px 0 0;max-width:none}
+.hof-home .hof-welcome p em{font-style:normal;color:#d1b578}
+.hof-home .hof-welcome .actions{margin:0}
+html body.hof-home .button{border-radius:0!important;min-height:46px;letter-spacing:.03em}
+html body.hof-home .button:not(.secondary){background:#c8aa68!important;border-color:#c8aa68!important;color:#211e16!important}
+html body.hof-home .hero .button.secondary{color:#eadfc5!important;border-color:#7b6944;background:transparent}
+html body.hof-home .nx-world-shortcuts{width:min(1180px,calc(100% - 48px));margin:32px auto 0;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid #d6cbb4}
+html body.hof-home .nx-world-shortcuts a{min-height:104px;background:#fffefa;border:0;border-right:1px solid #e5ddcd;border-bottom:1px solid #e5ddcd;border-radius:0!important;color:#443a28;font-size:12px;gap:10px;padding:16px 8px}
+html body.hof-home .nx-world-shortcuts a:hover{background:#f2ead9;color:#6d501d}
+html body.hof-home .nx-world-shortcuts svg{color:#957337;width:27px;height:27px}
+html body.hof-home .section{border-color:#dfd8c9;padding:42px 0;border-radius:0!important}
+.hof-home .section-head h2{font-size:clamp(28px,4vw,40px);font-weight:500;letter-spacing:.015em;color:#342c20}
+html body.hof-home .eyebrow,html body.hof-home .text-link{color:#806020!important}
+html body.hof-home #matchday .tabs{border-bottom-color:#d6cbb4!important;background:transparent!important}
+html body.hof-home #matchday .tabs button{background:transparent!important;color:#625943!important;border-radius:0!important}
+html body.hof-home #matchday .tabs button[aria-selected=true]{background:transparent!important;color:#634b1e!important;border-bottom-color:#987330!important}
+html body.hof-home #matchday .match-panel{background:transparent!important}
+html body.hof-home #matchday select{border-radius:0!important;border-color:#d6cbb4;background:#fffefa;color:#392f21;min-height:44px}
+.hof-home .md-game{background:#fffefa;border-color:#ded5c1;border-top:2px solid #b89b57;border-radius:0;box-shadow:none;color:#292820}
+.hof-home .md-score{color:#73551f}.hof-home .md-group-heading h3{font-family:Cinzel,Georgia,serif;font-weight:600}
+.hof-home .hof-legacy{display:grid;grid-template-columns:1.15fr 1fr;min-height:300px;margin:40px 0;border:1px solid #9a7c3d;background:#1c1b16;border-radius:0!important;overflow:hidden}
+.hof-home .hof-legacy-copy{padding:38px;align-self:center}
+html body.hof-home .hof-legacy .eyebrow{color:#d1b578!important}
+.hof-home .hof-legacy h2{font-size:clamp(26px,3vw,38px);font-weight:400;color:#f1e4c6;margin:16px 0}
+.hof-home .hof-legacy p{font-size:13px;color:#c9c0ac;line-height:1.8;max-width:330px}
+.hof-home .hof-legacy .button{margin-top:12px}
+.hof-home .hof-legacy-art{background-image:linear-gradient(90deg,#1c1b16,transparent 30%),url('/halloffamers/assets/hall-of-famers-banner.webp');background-size:auto 100%;background-position:82% center;min-height:260px}
+html body.hof-home #nx-universal-nav{background:#faf9f6!important;border-top:1px solid #cbb98e;color:#65573b}
+html body.hof-home #nx-universal-nav .nx-clubhouse-center .nx-nav-icon{background:#342d20!important;border-color:#b89b57;box-shadow:0 0 0 4px #faf9f6!important}
+html body.hof-home #nx-universal-nav [aria-current=page]{color:#806020!important}
+.hof-home footer{border-top:1px solid #dfd8c9;color:#746449}
+@media(max-width:680px){
+.hof-home .top-inner{gap:8px}.hof-home .top-links{font-size:11px}.hof-home .brand{gap:7px;max-width:58%}
+.hof-home .brand>span{font-size:10px!important}.hof-home .brand small{font-size:7px;letter-spacing:.1em}
+.hof-home .hof-welcome{padding:22px 16px;display:block}.hof-home .hof-welcome p{font-size:23px}
+.hof-home .hof-welcome .actions{margin-top:20px;gap:8px}.hof-home .button{padding:13px 14px;font-size:11px}
+html body.hof-home .nx-world-shortcuts{width:calc(100% - 32px);margin-top:24px;grid-template-columns:repeat(4,minmax(0,1fr))}
+html body.hof-home .nx-world-shortcuts a{font-size:10px;min-height:86px;padding:12px 3px;gap:9px}
+html body.hof-home .nx-world-shortcuts svg{width:23px;height:23px}
+html body.hof-home .section{padding:30px 0}.hof-home .section-head{align-items:center}.hof-home .section-head .eyebrow{font-size:8px;letter-spacing:.12em}
+.hof-home .hof-legacy{grid-template-columns:1fr;margin:28px 0}.hof-home .hof-legacy-copy{padding:28px 24px}.hof-home .hof-legacy-art{min-height:180px;background-size:auto 160%;background-position:82% 60%}
+.hof-home .md-group-heading{align-items:flex-start}.hof-home .md-group-heading h3{line-height:1.5;margin:0}
+}
+@media(prefers-reduced-motion:no-preference){.hof-home .nx-world-shortcuts a{transition:background .15s,color .15s}}
+
+/* Frame the trophy detail without repeating the banner lettering. */
+.hof-home .hof-legacy-art{background-size:auto 300%;background-position:82% 70%}@media(max-width:680px){.hof-home .hof-legacy-art{background-size:auto 420%;background-position:82% 70%}}
