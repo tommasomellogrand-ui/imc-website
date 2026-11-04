@@ -1,10 +1,10 @@
 /* IMC shared light palette. Artwork and club colours retain their own identity. */
-:root{color-scheme:light;--imc-paper:#f7f4ed;--imc-ink:#142b45;--imc-muted:#52647a;--imc-gold:#b48a38;--imc-line:#d9dfe5;--gold:#806020;--muted:#52647a;--line:#d9dfe5}
+:root{color-scheme:light;--imc-paper:#ffffff;--imc-ink:#142b45;--imc-muted:#52647a;--imc-gold:#b48a38;--imc-line:#d9dfe5;--gold:#806020;--muted:#52647a;--line:#d9dfe5}
 html,body{background-color:var(--imc-paper)!important;color:var(--imc-ink)!important}
-body{--m:#52647a;--l:#d9dfe5;--b:#fff;--s:#fff;--g:#806020;--ink:#142b45;--paper:#f7f4ed;--surface:#fff;--muted:#52647a;--line:#d9dfe5}
+body{--m:#52647a;--l:#d9dfe5;--b:#fff;--s:#fff;--g:#806020;--ink:#142b45;--paper:#ffffff;--surface:#fff;--muted:#52647a;--line:#d9dfe5}
 ::selection{background:#e8d5aa;color:#142b45}
 :focus-visible{outline-color:#806020!important}
-.top,.topbar,.nx-header,.nx-bottom-nav,.site-header,body.mx-journal .top,body.mx-journal footer,footer{background:#f7f4ed!important;color:#142b45!important;border-color:#d9dfe5!important}
+.top,.topbar,.nx-header,.nx-bottom-nav,.site-header,body.mx-journal .top,body.mx-journal footer,footer{background:#ffffff!important;color:#142b45!important;border-color:#d9dfe5!important}
 .top a,.top summary,.topbar a,.topbar button,.nx-header a,footer a{color:#142b45!important}
 .menu nav,.topbar+.menu,.catalog-dialog,dialog{background:#fff!important;color:#142b45!important;border-color:#d9dfe5!important;box-shadow:0 12px 40px #142b4514}
 input,select,textarea{color-scheme:light;background-color:#fff;color:#142b45;border-color:#d9dfe5}
@@ -14,7 +14,7 @@ button.primary,.button.primary,.btn-primary,.report-link{background:#142b45!impo
 .cup-summary strong,.competition-summary strong{color:#142b45!important}
 .cup-banner,img,video,canvas{filter:none}
 /* Transparent page chrome keeps the whole site on the same ivory canvas. */
-.imc-home .hero,.imc-home .identity,.imc-home .worlds,.imc-home .managers,.imc-home .legacy{background:#f7f4ed!important;color:#142b45}
+.imc-home .hero,.imc-home .identity,.imc-home .worlds,.imc-home .managers,.imc-home .legacy{background:#ffffff!important;color:#142b45}
 .imc-home .hero h1,.imc-home .hero h1 span{color:#142b45;-webkit-text-fill-color:#142b45;background:none}
 .imc-home .hero .scroll-cue{color:#52647a}.imc-home .world-orb{opacity:.1}.imc-home .stadium-light{opacity:.15}
 .imc-home .menu{background:#fff;color:#142b45}.imc-home .menu a{color:#142b45}.imc-home .menu-toggle span{background:#142b45}
@@ -30,7 +30,7 @@ body.competition-detail .page-heading{display:none}
 .competition-rail{display:flex;gap:10px;overflow-x:auto;padding:20px 0;border-bottom:1px solid #d9dfe5;margin-bottom:24px;scrollbar-width:thin}
 .competition-rail a{flex:none;display:flex;align-items:center;min-height:48px;padding:12px 18px;border:1px solid #d9dfe5;border-radius:8px;color:#52647a;font-weight:600;font-size:13px;white-space:nowrap}
 .competition-rail a[aria-current=page]{background:#e8d5aa;border-color:#b48a38;color:#142b45}
-.competition-banner{position:relative;display:flex;align-items:center;gap:22px;min-height:180px;margin:22px 0 18px;padding:32px;border:1px solid #d9dfe5;border-radius:16px;background:linear-gradient(120deg,#fff,#eee7d9);overflow:hidden}
+.competition-banner{position:relative;display:flex;align-items:center;gap:22px;min-height:180px;margin:22px 0 18px;padding:32px;border:1px solid #d9dfe5;border-radius:16px;background:linear-gradient(120deg,#fff,#ffffff);overflow:hidden}
 .competition-banner .icon{height:64px;width:64px;flex:none;color:#806020}
 .competition-banner h1{font-size:clamp(28px,5vw,48px);line-height:1.1;letter-spacing:-.04em;margin:8px 0;color:#142b45}
 .competition-banner p{margin:0;color:#52647a;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
@@ -44,8 +44,15 @@ body.competition-detail .page-heading{display:none}
 body.competition-detail #competition-nav{display:flex;gap:0;border-bottom:1px solid #d9dfe5;margin:24px 0}
 body.competition-detail #competition-nav button{flex:1;min-width:0;min-height:48px;padding:14px 8px;border:0;border-radius:0;border-bottom:3px solid transparent;background:transparent;color:#52647a;font-size:14px;font-weight:600}
 body.competition-detail .round-box{border-radius:14px;overflow:hidden;background:#fff}
-body.competition-detail .round-head{background:#f2efe8}
+body.competition-detail .round-head{background:#ffffff}
 @media(max-width:650px){.competition-banner{min-height:140px;padding:22px 18px;gap:16px}.competition-banner .icon{width:42px;height:42px}.competition-summary{gap:8px}.competition-summary strong{font-size:26px}.competition-summary span{font-size:11px}.competition-section-title h2{font-size:22px}body.competition-detail #competition-nav button{font-size:12px;padding:14px 3px}.competition-status{font-size:11px}}
 .actions .button:first-child{background:#142b45!important;border-color:#142b45!important;color:#fff!important}
 .hero h1 span{color:#142b45}
-.hero:has(>.hero-inner){background:#f7f4ed}
+.hero:has(>.hero-inner){background:#ffffff}
+
+/* White canvas and flat components across the public site. */
+html body :is(.card,.world-card,.manager-chip,.number-card,.shortcut,.cup,.round-box,.ranking-card,.competition-banner,.competition-summary>div,.feature,.manager-card,.club-card,.nx-report){border-radius:4px!important;box-shadow:none!important}
+html body .world-card{border-left-width:1px!important}html body .world-number{display:none!important}
+html body :is(.site-header,.top,.nx-header,footer,.nx-scope-band){background:#fff!important;background-image:none!important;box-shadow:none!important}
+html body .nx-masthead,html body .nx-masthead .nx-hero,html body .shell{background-color:#fff!important;border-radius:0!important;box-shadow:none!important}
+html body .nx-masthead .nx-hero::before{display:none!important}

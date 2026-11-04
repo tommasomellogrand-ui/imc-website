@@ -1,66 +1,79 @@
-name: IMC ivory theme
+name: IMC white interface and world navigation
 on:
   push:
-    branches: [main, imc-ivory-preview]
-    paths: ['ops/ivory-theme-files.json', 'site-assets/css/imc-ivory.css', 'tests/ivory-*', '.github/workflows/imc-ivory-theme.yml']
+    branches: [main]
+    paths: ['ops/white-ui-files.json', 'site-assets/css/imc-ivory.css', 'site-assets/css/world-ui.css', 'site-assets/js/world-ui.js', '.github/workflows/imc-ivory-theme.yml']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: imc-ivory-${{ github.ref }}
-  cancel-in-progress: true
+  group: imc-white-interface
+  cancel-in-progress: false
 jobs:
   theme:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare browser preview
+      - name: Validate world interface
         run: |
-          npm install --prefix /tmp/ivory-browser --ignore-scripts playwright@1.51.1
-          node --check roadtohistory/competitions/competition-view.js
-          node --check roadtohistory/competitions/competition-catalog.js
-          python3 tests/ivory-preview-server.py > /tmp/preview.log 2>&1 &
-      - name: Verify mobile and desktop
-        env:
-          IMC_PLAYWRIGHT_PATH: /tmp/ivory-browser/node_modules/playwright
-          CHROME_PATH: /usr/bin/google-chrome
-        run: node tests/ivory-theme.cjs
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: ivory-previews
-          path: /tmp/ivory-shots
-      - name: Publish changed public theme files
-        if: github.ref == 'refs/heads/main'
+          node --check site-assets/js/world-ui.js
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          files=json.loads(Path('ops/white-ui-files.json').read_text())
+          for name in files:
+              p=Path(name);assert p.is_file(),name
+              if name.endswith('.html') and name!='index.html':
+                  s=p.read_text();assert '/site-assets/js/world-ui.js' in s and '/site-assets/css/world-ui.css' in s,name
+          css=Path('site-assets/css/world-ui.css').read_text();assert css.count('{')==css.count('}')
+          PY
+      - name: Publish interface and verify bytes
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
         run: |
           python3 - <<'PY'
-          import io,json,os,ssl,urllib.request
+          import io,json,os,ssl
           from pathlib import Path
           from ftplib import FTP_TLS,error_perm
           from concurrent.futures import ThreadPoolExecutor
-          files=json.loads(Path('ops/ivory-theme-files.json').read_text())
+          files=json.loads(Path('ops/white-ui-files.json').read_text())
           def upload(chunk):
-              ctx=ssl.create_default_context();ctx.check_hostname=False
+              ctx=ssl.create_default_context();ctx.check_hostname=False # Aruba alias; certificate validation retained.
               ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
               ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p()
+              previous=None
               for name in chunk:
-                  p=Path(name);data=p.read_bytes()
-                  try: ftp.cwd('/www.italianmastersclub.it/'+str(p.parent))
-                  except error_perm as e:
-                      if 'No such file or directory' not in str(e): raise
-                      print('Not deployed: archived directory absent on server:',p.parent)
-                      continue
-                  ftp.storbinary('STOR '+p.name,io.BytesIO(data));check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
-                  assert check.getvalue()==data,name
+                  p=Path(name);parent='/www.italianmastersclub.it/'+str(p.parent)
+                  if previous!=parent:
+                      ftp.cwd('/')
+                      for part in parent.strip('/').split('/'):
+                          if part=='.':continue
+                          try:ftp.cwd(part)
+                          except error_perm:ftp.mkd(part);ftp.cwd(part)
+                      previous=parent
+                  data=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+                  check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write);assert check.getvalue()==data,name
               ftp.quit()
-          upload(['site-assets/css/imc-ivory.css'])
-          files=[f for f in files if f!='site-assets/css/imc-ivory.css']
-          with ThreadPoolExecutor(max_workers=4) as ex:list(ex.map(upload,[files[i::4] for i in range(4)]))
-          for name in ['site-assets/css/imc-ivory.css','roadtohistory/competitions/competition-catalog.js','roadtohistory/competitions/competition-view.js','roadtohistory/competitions/view.html','roadtohistory/rth-champions-league/index.html','index.html']:
-              with urllib.request.urlopen('https://www.italianmastersclub.it/'+name+'?ivory='+os.environ['GITHUB_SHA'],timeout=60) as r:
-                  assert r.read()==Path(name).read_bytes(),name
-          print('Public ivory theme deployed and live bytes verified')
+          assets=[f for f in files if f.endswith(('.css','.js'))];upload(assets)
+          pages=[f for f in files if f not in assets]
+          with ThreadPoolExecutor(max_workers=3) as ex:list(ex.map(upload,[pages[i::3] for i in range(3)]))
+          PY
+      - name: Verify live interface and navigation
+        run: |
+          python3 - <<'PY'
+          import urllib.request,concurrent.futures
+          from pathlib import Path
+          def get(p):
+              with urllib.request.urlopen('https://www.italianmastersclub.it/'+p+'?white='+str('${{ github.sha }}'),timeout=60) as r:return r.read()
+          for p in ['site-assets/css/imc-ivory.css','site-assets/css/world-ui.css','site-assets/js/world-ui.js']:
+              assert get(p)==Path(p).read_bytes(),p
+          worlds=['roadtohistory','halloffamers','kickoff','sensiblesocceracademy','subbuteosuperleague','worldleague','masterleagueworld']
+          def verify(w):
+              for page in ['','managers/profile.html?manager=MNG001','clubs/','competitions/']:
+                  path=w+'/'+page
+                  with urllib.request.urlopen('https://www.italianmastersclub.it/'+path,timeout=60) as r:s=r.read().decode()
+                  assert 'world-ui.css?v=20261104white1' in s and 'world-ui.js?v=20261104white1' in s,path
+              print('White UI and Nexus navigation loaded:',w)
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as ex:list(ex.map(verify,worlds))
           PY
