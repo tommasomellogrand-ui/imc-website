@@ -74,7 +74,7 @@ foreach ($catalog as $entry) {
     }
   }
 }
-foreach (['GW002','GW003','GW007','GW008','IMC-008','IMC-009','IMC-010','IMC-999','IMC001'] as $input) rejects(fn()=>imc_normalize_world_request(['game_world_id'=>$input],$production,'IMPORT',$catalog));
+foreach (['GW002','GW003','GW007','GW008','IMC-008','IMC-009','IMC-010','IMC-999','IMC000'] as $input) rejects(fn()=>imc_normalize_world_request(['game_world_id'=>$input],$production,'IMPORT',$catalog));
 rejects(fn()=>imc_normalize_world_request(['game_world_id'=>'IMC-002','rows'=>[['game_world_id'=>'IMC-001']]],$production,'IMPORT',$catalog));
 rejects(fn()=>imc_normalize_world_request(['game_world_id'=>'IMC-002','target_table'=>'GW001_IMC_Results'],$production,'IMPORT',$catalog));
 check(imc_normalize_world_request(['game_world_id'=>'GW002'],$production,'CHATGPT',$catalog)['game_world_id']==='GW002');
@@ -87,6 +87,7 @@ foreach (imc_destination_pairs() as $logical=>$physical) {
  check(imc_ident($logical)==='`'.$physical.'`');
 }
 $active=[['legacy_id'=>'GW001','imc_id'=>'IMC-001'],['legacy_id'=>'GW005','imc_id'=>'IMC-002'],['legacy_id'=>'GW009','imc_id'=>'IMC-003'],['legacy_id'=>'GW010','imc_id'=>'IMC-004'],['legacy_id'=>'GW011','imc_id'=>'IMC-005']];
+check(imc_normalize_world_request(['action'=>'read','game_world_id'=>'IMC001'],$production,'IMPORT',$active)['game_world_id']==='GW001');
 foreach(range(1,10) as $n) {
  $alias=sprintf('IMC-%03d',$n); $physical=sprintf('IMC%03d_Results',$n);
  $body=imc_normalize_world_request(['action'=>'read','game_world_id'=>$alias,'target_table'=>$physical,'target_database'=>'Sql1956795_3','repository'=>'IMC Results'],$production,'IMPORT',$active);
