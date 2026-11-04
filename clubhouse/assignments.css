@@ -21,3 +21,11 @@
 .assignments-page>footer{max-width:1120px;margin:auto;padding:24px}
 @media(max-width:600px){.assignments-page .worlds,.assignments-page .assignment-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.assignments-page .world>strong{font-size:14px}.assignments-page .assignment-card{padding:14px 10px}.assignments-page .team{gap:6px}.assignments-page .team img{width:26px;height:26px}}
 @media(max-width:360px){.assignments-page .assignment-grid{grid-template-columns:1fr}}
+
+.assignments-page>header{background:#111235;color:#fff}
+.assignments-page .hero h1{color:#fff}
+.assignments-page .manager-card:before{background:#c8aa59}
+.assignments-page .manager-card .avatar{background:#111235;color:#d5b55c;border-radius:50%}
+.assignments-page .hub-sections a[aria-current=page]{border-bottom-color:#c8aa59!important}
+.assignments-page #scope-tabs button[aria-pressed=true],.assignments-page .global-nav a[aria-current=page]{background:#111235;color:#fff}
+.assignments-page .controls{border-left:4px solid #c8aa59}
