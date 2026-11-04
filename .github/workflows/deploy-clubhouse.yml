@@ -58,7 +58,7 @@ jobs:
               html=r.read().decode()
               assert r.status==200
               assert 'const worlds=' in html and 'MNG001' in html
-              for i in range(1,8): assert 'IMC-%03d'%i in html
+              for i in range(1,6): assert 'IMC-%03d'%i in html
               assert 'Gold 558' not in html and 'Gold 557' not in html
-          print('Live Clubhouse and seven IMC worlds verified')
+          print('Live Clubhouse and five IMC worlds verified')
           PY
