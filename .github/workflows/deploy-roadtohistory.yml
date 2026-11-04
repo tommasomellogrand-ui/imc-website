@@ -20,6 +20,8 @@ jobs:
         run: |
           for file in roadtohistory/clubs/*.php roadtohistory/competitions/*.php roadtohistory/transfers/*.php roadtohistory/players/*.php; do php -l "$file"; done
           for file in roadtohistory/competitions/*.js roadtohistory/transfers/*.js roadtohistory/players/*.js; do node --check "$file"; done
+          find roadtohistory/alltoplayfor -name '*.php' -exec php -l {} \;
+          find roadtohistory/alltoplayfor -name '*.js' -exec node --check {} \;
           node --check roadtohistory/clubs/directory.js
           node --check roadtohistory/clubs/detail.js
           node --check roadtohistory/managers/manager-profile.js
@@ -180,4 +182,23 @@ jobs:
           assert p['world']=='GW001' and p['player']
           assert 'matches' in p and 'transfers' in p and 'rating_history' in p
           print('Player Codex and dedicated player profile verified')
+          PY
+
+      - name: Verify All To Play For pages and feeds
+        run: |
+          python3 - <<'PY'
+          import urllib.request,json,hashlib
+          from pathlib import Path
+          base='https://www.italianmastersclub.it/roadtohistory/alltoplayfor/'
+          root=Path('roadtohistory/alltoplayfor')
+          for file in root.rglob('*.html'):
+              name=str(file.relative_to(root))
+              with urllib.request.urlopen(base+name+'?release=${{ github.sha }}',timeout=90) as r:
+                  assert r.status==200
+                  assert hashlib.sha256(r.read()).digest()==hashlib.sha256(file.read_bytes()).digest(),name
+          for path in ['programmes-catalog.json','rth-24/flash-news.json','context.php','coffee-source.php?date=2026-11-03']:
+              with urllib.request.urlopen(base+path,timeout=120) as r:
+                  d=json.load(r)
+                  assert d and d.get('ok',True),path
+          print('All programme pages, archives, Club News and editorial feeds verified')
           PY

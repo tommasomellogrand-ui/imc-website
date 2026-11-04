@@ -1,0 +1,14 @@
+
+:root{color-scheme:dark;--gold:#d7b979;--ink:#f4f1e9;--muted:#aab5c1;--line:#ffffff20}
+body{background:#09131f;color:#f4f1e9;font-family:Inter,sans-serif}
+body .rth-site-header{padding:0;margin:0;background:#09131ff5;color:#f4f1e9;border-bottom:1px solid #ffffff20;position:sticky;top:0;z-index:100;width:100%;max-width:none;height:auto;display:block}
+.rth-site-header .top-inner{min-height:76px;display:flex;justify-content:space-between;align-items:center}.rth-site-header .brand img{width:38px;height:38px}.rth-site-header .brand{font-size:13px}.rth-site-header .brand small{color:#d7b979;font-size:9px}.rth-site-header .menu nav{background:#152333;color:#f4f1e9;z-index:101}.rth-site-header a{color:inherit}
+body main.atpf-pages{width:min(1180px,calc(100% - 48px));max-width:1180px;margin:auto;padding:0 0 60px;background:transparent;color:#f4f1e9;box-shadow:none;border:0;border-radius:0}
+.rth-programmes{display:flex;gap:8px;overflow-x:auto;padding:24px 0;margin:0 0 16px;border-bottom:1px solid #ffffff20}.rth-programmes a{flex:none;padding:12px 16px;border:1px solid #ffffff25;border-radius:4px;font-size:12px;font-weight:700;color:#c6d0dc;white-space:nowrap}.rth-programmes a:hover,.rth-programmes a[aria-current]{color:#09131f;background:#d7b979}
+.atpf-pages h1,.atpf-pages h2,.atpf-pages h3,.atpf-pages .series-intro h2{color:#f4f1e9}.atpf-pages .series-intro p,.atpf-pages .muted{color:#aab5c1}.atpf-pages .hero{background:transparent}.atpf-pages .hero:after{display:none}
+.atpf-pages .programme-card,.atpf-pages .edition-archive,.atpf-pages .archive-link,.atpf-pages .replay-note{background:#101e2c;color:#f4f1e9;border-color:#ffffff20}.atpf-pages .programme-card span{border-color:#ffffff20}.atpf-pages .edition-heading a,.atpf-pages .programme-return a{color:#d7b979}
+.atpf-pages button,.atpf-pages select,.atpf-pages input{font-family:Inter,sans-serif}.atpf-pages .section-banner{height:auto;object-fit:contain}.atpf-pages .programme-heading{margin:24px 0}
+/* Editorial cards retain their own contrast; the page itself remains full width. */
+.atpf-pages .cn,.atpf-pages .coffee-card,.atpf-pages .voice,.atpf-pages .fw-match,.atpf-pages .match,.atpf-pages .table-wrap{color:#14213b}.atpf-pages .cn h2,.atpf-pages .cn h3,.atpf-pages .voice h3,.atpf-pages .fw-match h3{color:inherit}
+body>footer{background:#09131f;color:#aab5c1;border-top:1px solid #ffffff20}body>footer .wrap{max-width:1180px}
+@media(max-width:680px){body main.atpf-pages{width:calc(100% - 32px)}.rth-site-header .top-inner{min-height:68px}.rth-site-header .brand{font-size:11px}.rth-site-header .brand img{width:30px;height:30px}.rth-programmes{padding:18px 0;gap:6px}.rth-programmes a{font-size:11px;padding:11px 13px}}

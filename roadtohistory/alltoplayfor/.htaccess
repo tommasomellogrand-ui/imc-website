@@ -1,0 +1,6 @@
+Options -Indexes
+DirectoryIndex index.html
+RewriteEngine On
+RewriteRule ^(programmes-catalog\.json|portraits\.json|2026-10-20-postmatch\.json|2026-10-22-coffee\.json|2026-10-23-coffee-editorial\.json|rth-24/flash-news\.json)$ editorial-data.php?file=$1 [L,QSA]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.+\.(?:png|jpg|jpeg|webp|svg|gif|mp4))$ /nexus/alltoplayfor/$1 [L,NC]

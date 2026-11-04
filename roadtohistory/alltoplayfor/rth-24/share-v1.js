@@ -1,0 +1,4 @@
+(()=>{'use strict';
+async function copy(box){const url=box.dataset.shareUrl,status=box.querySelector('[role=status]');try{await navigator.clipboard.writeText(url);status.textContent='Link copiato';}catch(e){const input=box.querySelector('input');input.hidden=false;input.value=url;input.focus();input.select();status.textContent='Seleziona e copia il link';}}
+document.addEventListener('click',async event=>{const button=event.target.closest('button[data-share]');if(!button)return;const box=button.closest('[data-share-url]');if(!box)return;button.disabled=true;try{if(button.dataset.share==='native'&&navigator.share){try{await navigator.share({title:box.dataset.shareTitle,url:box.dataset.shareUrl});}catch(e){if(e.name!=='AbortError')await copy(box);}}else await copy(box);}finally{button.disabled=false;}});
+})();
