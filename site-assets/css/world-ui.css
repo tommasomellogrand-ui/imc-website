@@ -28,3 +28,5 @@ html body #nx-universal-nav .nx-clubhouse-center .nx-nav-icon{background:#142b45
 html body #nx-universal-nav [aria-current=page]{color:var(--world-accent,#142b45)!important}
 html body #nx-universal-dialog{border-radius:4px!important;max-height:80dvh;overflow:auto;box-shadow:none!important}
 @media(max-width:380px){.nx-world-shortcuts{gap:8px}.nx-world-shortcuts a{font-size:11px;min-height:94px}.nx-world-shortcuts svg{width:26px;height:26px}html body .assign{gap:12px}html body .manager-team-link{font-size:12px}}
+
+html body :is(article,section,button,input,select,textarea,.nc-card,.competition-card,.md-match,.trophy-card,.result-round,.cup-card,.match-card){border-radius:4px!important;box-shadow:none!important}

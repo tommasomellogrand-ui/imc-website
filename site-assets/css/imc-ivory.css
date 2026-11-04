@@ -56,3 +56,5 @@ html body .world-card{border-left-width:1px!important}html body .world-number{di
 html body :is(.site-header,.top,.nx-header,footer,.nx-scope-band){background:#fff!important;background-image:none!important;box-shadow:none!important}
 html body .nx-masthead,html body .nx-masthead .nx-hero,html body .shell{background-color:#fff!important;border-radius:0!important;box-shadow:none!important}
 html body .nx-masthead .nx-hero::before{display:none!important}
+
+html body :is(article,section,button,input,select,textarea,.nc-card,.competition-card,.md-match,.trophy-card,.result-round,.cup-card,.match-card){border-radius:4px!important;box-shadow:none!important}

@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - name: Validate world interface
         run: |
           node --check site-assets/js/world-ui.js
@@ -29,15 +31,22 @@ jobs:
           PY
       - name: Publish interface and verify bytes
         env:
+          PREVIOUS_SHA: ${{ github.event.before }}
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
         run: |
           python3 - <<'PY'
-          import io,json,os,ssl
+          import io,json,os,ssl,subprocess
           from pathlib import Path
           from ftplib import FTP_TLS,error_perm
           from concurrent.futures import ThreadPoolExecutor
           files=json.loads(Path('ops/white-ui-files.json').read_text())
+          shared={'site-assets/css/imc-ivory.css','site-assets/css/world-ui.css','site-assets/js/world-ui.js'}
+          before=os.environ.get('PREVIOUS_SHA','')
+          if before and set(before)!={'0'}:
+              changed=set(subprocess.check_output(['git','diff','--name-only',before,'HEAD'],text=True).splitlines())
+              if changed and changed<=shared|{'.github/workflows/imc-ivory-theme.yml'}:
+                  files=[f for f in files if f in shared]
           def upload(chunk):
               ctx=ssl.create_default_context();ctx.check_hostname=False # Aruba alias; certificate validation retained.
               ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
