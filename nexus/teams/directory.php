@@ -10,8 +10,6 @@ try{
  $kind=$type==='clubs'?'club':'national_team';$managers=[];
  $imc=nexus_rows($core,"SELECT a.manager_id,m.full_name,a.team_id,a.national_team_id FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id WHERE a.game_world_id=? AND a.assignment_type=? AND a.end_date IS NULL AND (a.start_date IS NULL OR a.start_date<=CURRENT_DATE) ORDER BY a.start_date DESC,a.id DESC",[$gw,$kind]);
  foreach($imc as $a){$key=(string)($kind==='club'?$a['team_id']:$a['national_team_id']);if($key!==''&&!isset($managers[$key]))$managers[$key]=['manager_id'=>$a['manager_id'],'full_name'=>$a['full_name'],'is_imc'=>true];}
- $ext=nexus_rows($core,'SELECT a.sm_manager_id,m.manager_name,a.sm_world_team_id FROM `EXT Manager Assignment Global` a JOIN `EXT Manager Codex Global` m ON m.sm_manager_id=a.sm_manager_id WHERE a.game_world_id=? AND a.assignment_type=? ORDER BY a.sm_manager_id',[$gw,$kind]);
- foreach($ext as $a){$key=(string)$a['sm_world_team_id'];if($key!==''&&!isset($managers[$key]))$managers[$key]=['sm_manager_id'=>$a['sm_manager_id'],'full_name'=>$a['manager_name'],'is_imc'=>false];}
  foreach($rows as &$row)$row['manager']=$managers[(string)$row['world_id']]??null;unset($row);
  $countryFilter=$type==='clubs'&&in_array($gw,['GW002','GW003','GW007','GW008'],true);
  if($countryFilter){
@@ -26,3 +24,4 @@ try{
  }
  nexus_out(['ok'=>true,'game_world_id'=>$gw,'type'=>$type,'country_filter'=>$countryFilter,'count'=>count($rows),'rows'=>$rows]);
 }catch(InvalidArgumentException $e){nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){nexus_out(['ok'=>false,'error'=>'teams_directory_error'],500);}
+

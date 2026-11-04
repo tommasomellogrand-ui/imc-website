@@ -1,0 +1,43 @@
+name: Publish Single League data compatibility
+on:
+  push:
+    branches: [main]
+    paths: ['nexus/core/context.php', 'nexus/teams/directory.php', 'nexus/managers/index.php', '.github/workflows/deploy-world-data-compat.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: single-world-data-compat
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shared endpoints
+        run: |
+          php -l nexus/core/context.php
+          php -l nexus/teams/directory.php
+          php -l nexus/managers/index.php
+      - name: Publish and verify shared endpoints
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os,io,ssl,json,urllib.request
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          f=FTP_TLS(context=ctx);f.connect('ftp.italianmastersclub.it',21,timeout=60)
+          f.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);f.prot_p()
+          for name in ['nexus/core/context.php','nexus/teams/directory.php','nexus/managers/index.php']:
+              data=Path(name).read_bytes();f.storbinary('STOR /www.italianmastersclub.it/'+name,io.BytesIO(data))
+              check=io.BytesIO();f.retrbinary('RETR /www.italianmastersclub.it/'+name,check.write);assert check.getvalue()==data
+          f.quit()
+          for gw in ['GW001','GW005','GW009','GW010','GW011','GW004','GW006']:
+              for path in ['nexus/core/context.php','nexus/teams/directory.php']:
+                  with urllib.request.urlopen('https://www.italianmastersclub.it/'+path+'?world='+gw,timeout=45) as r:d=json.load(r)
+                  assert d.get('ok'),(path,gw,d)
+          print('All seven world contexts and club directories verified')
+          PY
