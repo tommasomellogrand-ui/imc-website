@@ -10,10 +10,10 @@ permissions:
   contents: read
 concurrency:
   group: roadtohistory-production
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate club PHP and JavaScript
