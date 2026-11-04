@@ -12,3 +12,5 @@ body main.atpf-pages{width:min(1180px,calc(100% - 48px));max-width:1180px;margin
 .atpf-pages .cn,.atpf-pages .coffee-card,.atpf-pages .voice,.atpf-pages .fw-match,.atpf-pages .match,.atpf-pages .table-wrap{color:#14213b}.atpf-pages .cn h2,.atpf-pages .cn h3,.atpf-pages .voice h3,.atpf-pages .fw-match h3{color:inherit}
 body>footer{background:#09131f;color:#aab5c1;border-top:1px solid #ffffff20}body>footer .wrap{max-width:1180px}
 @media(max-width:680px){body main.atpf-pages{width:calc(100% - 32px)}.rth-site-header .top-inner{min-height:68px}.rth-site-header .brand{font-size:11px}.rth-site-header .brand img{width:30px;height:30px}.rth-programmes{padding:18px 0;gap:6px}.rth-programmes a{font-size:11px;padding:11px 13px}}
+
+.club-news-page>article{background:transparent;color:#f4f1e9;border:0;padding:24px 0;border-radius:0}.club-news-page .article-text{max-width:850px;margin:auto;line-height:1.8}.club-news-page .turn{background:#101e2c;color:#f4f1e9}.club-news-page time{color:#aab5c1}.club-news-page .eyebrow,.club-news-page a{color:#d7b979}.club-news-page .cover{background:#101e2c}

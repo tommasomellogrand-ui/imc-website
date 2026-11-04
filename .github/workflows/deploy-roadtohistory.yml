@@ -42,11 +42,15 @@ jobs:
           ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
           ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
           ftp.prot_p();ftp.set_pasv(True)
+          last_directory=None
           def directory(path):
+              global last_directory
+              if last_directory==path:return
               ftp.cwd('/')
               for part in path.strip('/').split('/'):
                   try:ftp.cwd(part)
                   except error_perm:ftp.mkd(part);ftp.cwd(part)
+              last_directory=path
           for name in files:
               p=Path('roadtohistory')/name
               data=p.read_bytes()
@@ -55,6 +59,7 @@ jobs:
               ftp.storbinary('STOR '+p.name,io.BytesIO(data))
               check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
               assert check.getvalue()==data,'Byte verification failed: '+name
+              print('Verified:',name,flush=True)
           # Aruba's official HiSpeed Cache purger uses localhost:8889/purge + Host.
           # Limit this temporary authenticated helper to the three home URLs.
           token=secrets.token_hex(32)
