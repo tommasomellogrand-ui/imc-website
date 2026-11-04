@@ -21,8 +21,8 @@ jobs:
           fetch-depth: 2
       - name: Validate club PHP and JavaScript
         run: |
-          for file in roadtohistory/clubs/*.php roadtohistory/competitions/*.php roadtohistory/transfers/*.php roadtohistory/players/*.php; do php -l "$file"; done
-          for file in roadtohistory/competitions/*.js roadtohistory/transfers/*.js roadtohistory/players/*.js; do node --check "$file"; done
+          for file in roadtohistory/clubs/*.php roadtohistory/nations/*.php roadtohistory/competitions/*.php roadtohistory/transfers/*.php roadtohistory/players/*.php; do php -l "$file"; done
+          for file in roadtohistory/nations/*.js roadtohistory/competitions/*.js roadtohistory/transfers/*.js roadtohistory/players/*.js; do node --check "$file"; done
           find roadtohistory/alltoplayfor -name '*.php' -exec php -l {} \;
           find roadtohistory/alltoplayfor -name '*.js' -exec node --check {} \;
           for file in roadtohistory/imc-cups/*.php; do php -l "$file"; done
@@ -246,4 +246,34 @@ jobs:
                       d=json.load(r)
                       assert d.get('ok') and d.get('competition_key')==key
           print('Four IMC cup pages and database-backed data endpoints verified')
+          PY
+
+      - name: Verify Nations pages and data
+        run: |
+          python3 - <<'PY'
+          import urllib.request,json,hashlib
+          from pathlib import Path
+          base='https://www.italianmastersclub.it/roadtohistory/nations/'
+          for name in ['index.html','detail.html','directory.js','detail.js','style.css']:
+              with urllib.request.urlopen(base+name+'?release=${{ github.sha }}',timeout=90) as r:
+                  assert hashlib.sha256(r.read()).digest()==hashlib.sha256((Path('roadtohistory/nations')/name).read_bytes()).digest(),name
+          def get(path):
+              with urllib.request.urlopen(base+path,timeout=90) as r:
+                  d=json.load(r)
+                  assert d.get('ok'),d
+                  assert d.get('game_world_id')=='GW001',d
+                  return d
+          d=get('directory.php?world=GW002&type=clubs')
+          assert d['rows']
+          team=next((r for r in d['rows'] if r.get('manager',{} ) and r['manager'].get('is_imc')),d['rows'][0])
+          cid=str(team['world_id'])
+          detail=get('detail.php?id='+cid+'&world=GW002&type=club')
+          assert detail['type']=='nation' and detail['team']
+          get('stats.php?sm_club='+cid)
+          get('matches.php?sm_club='+cid)
+          roster=get('roster.php?sm_club='+cid)
+          assert roster['roster_source']=='match_reports_history'
+          assert len({str(p['player_id']) for p in roster['rows']})==len(roster['rows'])
+          assert 'TRANSFERS' not in Path('roadtohistory/nations/detail.js').read_text().split(":['OVERVIEW'")[1].split(';')[0]
+          print('Nations pages, fixed world/type, statistics, matches and historical roster verified')
           PY
