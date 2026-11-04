@@ -48,7 +48,7 @@ window.NexusTrophies={
    const name=r.winner_name||'Vincitore non disponibile';
    const initials=name.split(/\s+/).slice(0,2).map(s=>s[0]).join('');
    const manager=winnerManagers.get(r.id),teamId=Number(r.winner_sm_world_club_id);
-   const teamUrl=teamId>0?base+'teams/detail.html?'+new URLSearchParams({world:gw,type:national?'nation':'club',id:String(teamId)}):null;
+   const teamUrl=teamId>0?(national?base+'teams/detail.html?':'/roadtohistory/clubs/detail.html?')+new URLSearchParams({world:gw,type:national?'nation':'club',id:String(teamId)}):null;
    const managerHtml=manager?'<a href="'+esc('/roadtohistory/managers/profile.html?'+new URLSearchParams({world:gw,manager:manager.manager_id}))+'">'+esc(manager.full_name)+'</a>':'Manager non disponibile';
    const day=String(r.won_date||'').slice(0,10),date=/^\d{4}-\d{2}-\d{2}$/.test(day)?new Date(day+'T12:00:00Z').toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'}):'Data non disponibile';
    return '<li class="trophy-honour">'+(teamUrl?'<a class="trophy-winner" href="'+esc(teamUrl)+'">':'<div class="trophy-winner">')+'<span class="trophy-crest"><span>'+esc(initials)+'</span>'+(src?'<img src="'+esc(src)+'" alt="" loading="lazy">':'')+'</span><strong>'+esc(name)+'</strong>'+(teamUrl?'</a>':'</div>')+'<p class="trophy-manager">'+managerHtml+'</p><div class="trophy-date"><strong>Stagione '+esc(r.imc_season||'—')+'</strong><time'+(/^\d{4}-\d{2}-\d{2}$/.test(day)?' datetime="'+esc(day)+'"':'')+'>'+esc(date)+'</time></div></li>';

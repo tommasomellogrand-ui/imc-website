@@ -16,6 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Validate club PHP and JavaScript
+        run: |
+          for file in roadtohistory/clubs/*.php; do php -l "$file"; done
+          node --check roadtohistory/clubs/directory.js
+          node --check roadtohistory/clubs/detail.js
+          node --check roadtohistory/managers/manager-profile.js
       - name: Publish only Road To History and verify bytes
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -86,7 +92,7 @@ jobs:
           import urllib.request,hashlib
           from pathlib import Path
           base='https://www.italianmastersclub.it/roadtohistory/'
-          for name in ['assets/notte-allo-stadio.webp','index.html','managers/index.html','managers/profile.html','managers/directory.js']:
+          for name in ['assets/notte-allo-stadio.webp','index.html','managers/index.html','managers/profile.html','managers/directory.js','clubs/index.html','clubs/detail.html','clubs/directory.js','clubs/detail.js']:
               with urllib.request.urlopen(base+name+'?release=${{ github.sha }}',timeout=60) as response:
                   assert response.status==200
                   data=response.read()
@@ -99,3 +105,24 @@ jobs:
           print('Public URL and exact artwork verified.')
           PY
 
+
+      - name: Verify dedicated club data
+        run: |
+          python3 - <<'PY'
+          import urllib.request,json
+          base='https://www.italianmastersclub.it/roadtohistory/clubs/'
+          def get(path):
+              with urllib.request.urlopen(base+path,timeout=60) as r:
+                  assert r.status==200
+                  d=json.load(r)
+                  assert d['ok'],d
+                  return d
+          d=get('directory.php')
+          assert d['game_world_id']=='GW001' and len(d['rows'])>0
+          cid=d['rows'][0]['world_id']
+          detail=get('detail.php?id='+str(cid)+'&world=GW002')
+          assert detail['game_world_id']=='GW001' and detail['team']
+          get('stats.php?sm_club='+str(cid))
+          get('roster.php?sm_club='+str(cid))
+          print('Dedicated clubs directory, detail, stats and roster verified')
+          PY
