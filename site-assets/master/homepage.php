@@ -6,8 +6,8 @@ try {
     $db = nexus_db(nexus_config(), 'core');
     $today = (new DateTimeImmutable('now', new DateTimeZone('Europe/Rome')))->format('Y-m-d');
     $db->beginTransaction();
-    $worlds = nexus_rows($db, 'SELECT `IMC GW` game_world_id, `IMC GW Name` name, `SM Game World ID` sm_game_world_id FROM `IMC Game World Codex Global` ORDER BY `IMC GW`');
-    $assignments = nexus_rows($db, 'SELECT DISTINCT a.game_world_id, m.manager_id, m.full_name FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id JOIN `IMC Game World Codex Global` w ON w.`IMC GW`=a.game_world_id WHERE a.start_date<=? AND (a.end_date IS NULL OR a.end_date>=?) ORDER BY m.full_name, a.game_world_id', [$today, $today]);
+    $worlds = nexus_rows($db, 'SELECT `IMC GW` game_world_id, `IMC_WORLD_ID` code, `IMC GW Name` name, `SM Game World ID` sm_game_world_id FROM `IMC Game World Codex Global` WHERE `IMC_WORLD_ID` IS NOT NULL ORDER BY `IMC_WORLD_ID`');
+    $assignments = nexus_rows($db, 'SELECT DISTINCT a.game_world_id, m.manager_id, m.full_name FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id JOIN `IMC Game World Codex Global` w ON w.`IMC GW`=a.game_world_id WHERE w.`IMC_WORLD_ID` IS NOT NULL AND a.start_date<=? AND (a.end_date IS NULL OR a.end_date>=?) ORDER BY m.full_name, a.game_world_id', [$today, $today]);
     $db->commit();
     $managers = []; $counts = [];
     foreach ($assignments as $a) {
@@ -18,7 +18,7 @@ try {
     }
     foreach ($worlds as &$world) {
         $world['manager_count'] = $counts[$world['game_world_id']] ?? 0;
-        $world['href'] = '/nexus/?world='.rawurlencode($world['game_world_id']);
+        $world['href'] = $world['game_world_id']==='GW001' ? '/roadtohistory/' : '/nexus/?world='.rawurlencode($world['game_world_id']);
     }
     unset($world);
     nexus_out(['ok'=>true, 'worlds'=>$worlds, 'managers'=>array_values($managers), 'as_of'=>$today, 'updated_at'=>gmdate('c')]);
