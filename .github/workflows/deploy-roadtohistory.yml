@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: roadtohistory-production
   cancel-in-progress: true
@@ -16,6 +17,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - name: Validate club PHP and JavaScript
         run: |
           for file in roadtohistory/clubs/*.php roadtohistory/competitions/*.php roadtohistory/transfers/*.php roadtohistory/players/*.php; do php -l "$file"; done
@@ -27,14 +30,29 @@ jobs:
           node --check roadtohistory/managers/manager-profile.js
       - name: Publish only Road To History and verify bytes
         env:
+          PREVIOUS_SHA: ${{ github.event.before }}
+          GH_TOKEN: ${{ github.token }}
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
         run: |
           python3 - <<'PY'
-          import io, os, ssl, secrets, hashlib, time, urllib.request, json
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json, subprocess
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
           files=[str(p.relative_to('roadtohistory')) for p in Path('roadtohistory').rglob('*') if p.is_file()]
+          # Incremental uploads are safe only after a verified deployment of the parent.
+          previous=os.environ.get('PREVIOUS_SHA','')
+          if previous and set(previous)!={'0'}:
+              try:
+                  url='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']+'/actions/workflows/deploy-roadtohistory.yml/runs?head_sha='+previous
+                  req=urllib.request.Request(url,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+                  with urllib.request.urlopen(req,timeout=30) as response: runs=json.load(response)['workflow_runs']
+                  if any(r.get('conclusion')=='success' for r in runs):
+                      diff=subprocess.check_output(['git','diff','--name-only','--diff-filter=ACMRT',previous,'HEAD','--','roadtohistory/'],text=True).splitlines()
+                      files=[str(Path(f).relative_to('roadtohistory')) for f in diff if Path(f).is_file()]
+                      print('Incremental deployment:',len(files),'changed files',flush=True)
+              except Exception:
+                  print('Using full deployment',flush=True)
           root='/www.italianmastersclub.it/roadtohistory'
           ctx=ssl.create_default_context()
           ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.

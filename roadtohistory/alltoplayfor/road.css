@@ -14,3 +14,21 @@ body>footer{background:#09131f;color:#aab5c1;border-top:1px solid #ffffff20}body
 @media(max-width:680px){body main.atpf-pages{width:calc(100% - 32px)}.rth-site-header .top-inner{min-height:68px}.rth-site-header .brand{font-size:11px}.rth-site-header .brand img{width:30px;height:30px}.rth-programmes{padding:18px 0;gap:6px}.rth-programmes a{font-size:11px;padding:11px 13px}}
 
 .club-news-page>article{background:transparent;color:#f4f1e9;border:0;padding:24px 0;border-radius:0}.club-news-page .article-text{max-width:850px;margin:auto;line-height:1.8}.club-news-page .turn{background:#101e2c;color:#f4f1e9}.club-news-page time{color:#aab5c1}.club-news-page .eyebrow,.club-news-page a{color:#d7b979}.club-news-page .cover{background:#101e2c}
+
+/* Programme skins must not override the shared full-page background. */
+html body[data-programme]{background:#09131f;color:#f4f1e9}
+body[data-programme=daytime] .cup-content>section,body[data-programme=daytime] .standings,body[data-programme=daytime] .results,body[data-programme=daytime] .schedule{color:#f4f1e9}
+body[data-programme=daytime] .table-wrap,body[data-programme=daytime] .match,body[data-programme=daytime] .cup-card{background:#101e2c;color:#f4f1e9;border-color:#ffffff20}
+body[data-programme=daytime] th,body[data-programme=daytime] tbody th,body[data-programme=daytime] tbody tr:nth-child(even),body[data-programme=daytime] .group-title{background:#152333;color:#f4f1e9}
+body[data-programme=daytime] td,body[data-programme=daytime] th,body[data-programme=daytime] .match-group{border-color:#ffffff20}
+body[data-programme=daytime] .score,body[data-programme=daytime] .points{color:#d7b979}
+body[data-programme=daytime] caption,body[data-programme=daytime] #load-status,body[data-programme=daytime] small,body[data-programme=daytime] .hub-title p,body[data-programme=daytime] .cup-card>span>span{color:#aab5c1}
+body[data-programme=daytime] .bottom-nav a,body[data-programme=daytime] .empty{background:#101e2c;color:#d7b979;border-color:#ffffff20}
+
+.atpf-pages .cn{background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;box-shadow:none!important}
+.atpf-pages .cn-group>h2,.atpf-pages .cn>.table-note{color:#f4f1e9}
+.atpf-pages .series-disclosure,.atpf-pages .dg-intro{color:#aab5c1}
+.atpf-pages .cn-tabs{background:#09131ff5;top:76px}
+.atpf-pages #panel-final-whistle .fw-tabs{background:#09131ff5;top:76px}
+.atpf-pages .dg-daybar h2{color:#10233e}
+@media(max-width:680px){.atpf-pages .cn-tabs,.atpf-pages #panel-final-whistle .fw-tabs{top:68px}}
