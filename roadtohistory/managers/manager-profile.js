@@ -6,7 +6,7 @@ let D,scope=p.get('scope')==='national_team'?'national_team':'club',tab='overvie
 const assignments=()=> (D.assignments||[]).filter(a=>a.assignment_type===scope);
 const label=a=>a.assignment_name||a.club_name||a.national_name||a.team_name||'Squadra';
 function badge(a){const src=String(a.image_url||'').replace(/^http:/i,'https:');return /^(https:\/\/|\/(?!\/))/.test(src)?'<img src="'+esc(src)+'" alt="" onerror="this.hidden=true">':'<span class="manager-crest-placeholder" aria-hidden="true">'+esc(label(a).slice(0,2))+'</span>'}
-function teamLink(a,body){return a.world_team_id?'<a class="manager-team-link" href="'+(a.assignment_type==='club'?'/roadtohistory/clubs/detail.html?':'/nexus/teams/detail.html?')+''+esc(new URLSearchParams({world:gw,type:a.assignment_type==='club'?'club':'nation',id:a.world_team_id}))+'">'+body+'</a>':'<div class="manager-team-link">'+body+'</div>'}
+function teamLink(a,body){return a.world_team_id?'<a class="manager-team-link" href="'+(a.assignment_type==='club'?'/roadtohistory/clubs/detail.html?' :'/roadtohistory/nations/detail.html?')+''+esc(new URLSearchParams({world:gw,type:a.assignment_type==='club'?'club':'nation',id:a.world_team_id}))+'">'+body+'</a>':'<div class="manager-team-link">'+body+'</div>'}
 function show(next){
  tab=next;const call=++version;NexusH2H.stop(view);NexusHistory.stop(view);window.NexusDataRoom?.stop(view);
  document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===tab;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});
