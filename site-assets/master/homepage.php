@@ -18,7 +18,7 @@ try {
     }
     foreach ($worlds as &$world) {
         $world['manager_count'] = $counts[$world['game_world_id']] ?? 0;
-        $world['href'] = $world['game_world_id']==='GW001' ? '/roadtohistory/' : '/nexus/?world='.rawurlencode($world['game_world_id']);
+        $world['href'] = (['GW001'=>'/roadtohistory/','GW005'=>'/halloffamers/','GW009'=>'/kickoff/','GW010'=>'/sensiblesocceracademy/','GW011'=>'/subbuteosuperleague/','GW004'=>'/worldleague/','GW006'=>'/masterleagueworld/'])[$world['game_world_id']];
     }
     unset($world);
     nexus_out(['ok'=>true, 'worlds'=>$worlds, 'managers'=>array_values($managers), 'as_of'=>$today, 'updated_at'=>gmdate('c')]);
@@ -26,3 +26,4 @@ try {
     error_log('IMC homepage directory: '.$e->getMessage());
     nexus_out(['ok'=>false, 'error'=>'Community temporaneamente non disponibile.'], 503);
 }
+

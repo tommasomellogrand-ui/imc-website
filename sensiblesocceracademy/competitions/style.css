@@ -1,0 +1,63 @@
+
+body{background:#ffffff;color:#142b45;font-family:Inter,sans-serif;padding-bottom:0}button,input,select{font-family:inherit}.top{padding:0;display:block}.top .brand{color:#142b45}.top .brand img{border-radius:0}.page-heading{padding-top:40px;margin-bottom:24px}.page-heading h1{font-size:clamp(36px,7vw,64px);letter-spacing:-.05em;margin:12px 0}.page-heading p{color:#52647a}.content{padding-bottom:48px}.content .back{color:#142b45}.content #view{background:transparent;color:#142b45;border-radius:0;padding:0;--m:#52647a;--l:#d9dfe5}.content #view .section{padding:0}.content .filters select{background:#fff;color:#142b45}.content .selected-name{display:none}.group-tabs-wrap{display:none}.content .catalog-categories [aria-pressed=true],#competition-nav [aria-pressed=true]{background:#d7b979;border-color:#d9dfe5;color:#142b45}.content .catalog-categories button{font-weight:700}.mx-banner{margin-top:0}.mx-main{color:#142b45}.mx-main .mx-actions,.mx-main .mx-tabs{color:#142b45}footer{margin-top:32px}.top .menu nav{color:#142b45}.top .menu nav a{font-size:12px}.icon{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7}.catalog-dialog .competition-grid{color:#142b45}@media(max-width:650px){.content #view{padding:0}.page-heading{padding-top:26px}.wrap{width:calc(100% - 32px)}.top-inner{gap:10px}.top .brand{font-size:11px}.top-links{gap:10px}.content .catalog-categories{gap:5px}.content .catalog-categories button{padding:12px 7px;font-size:11px}.mx-banner .mx-top{display:none}}
+
+body.mx-journal .top{background:#ffffff}body.mx-journal .top a,body.mx-journal .top summary{color:#142b45}body.mx-journal .mx-top{display:none}body.mx-journal footer{background:#ffffff;color:#142b45;padding:24px 0}body.mx-journal footer a{color:#142b45}
+
+/* Full-page Sensible Soccer Academy layout, shared with Clubs and Managers. */
+body:not(.mx-journal){--b:#fff;--m:#52647a;--l:#d9dfe5;--g:#806020;--s:#fff}
+body:not(.mx-journal) .wrap{width:min(1180px,calc(100% - 48px));padding-left:0;padding-right:0}
+.content{padding-top:0}.content #view{border:0;box-shadow:none;min-height:0}
+.content .catalog-categories,.content .catalog-match-tabs,.content #competition-nav{background:transparent;padding:0;border-radius:0;gap:10px;border-color:#142b4520}
+.content .catalog-categories button,.content .catalog-match-tabs button,.content #competition-nav button,.content .change-competition{background:#ffffff;color:#142b45;border:1px solid #142b4520;border-radius:5px}
+.content .catalog-categories [aria-pressed=true],.content .catalog-match-tabs [aria-pressed=true],.content #competition-nav [aria-pressed=true]{background:#d7b979;color:#142b45;border-color:#d9dfe5;box-shadow:none}
+.competition-grid{gap:16px;margin:24px 0}
+.competition-card{background:#ffffff;color:#142b45;border:1px solid #142b4520;border-radius:8px;box-shadow:none;padding:28px 20px 20px}
+.competition-card:hover{background:#ffffff;border-color:#d9dfe5;box-shadow:none}
+.competition-card strong{font-size:21px;letter-spacing:-.03em}
+.competition-card small{background:transparent;color:#52647a}
+.competition-card span:not(.catalog-cup){color:#52647a}
+.competition-card b{color:#142b45;border-color:#142b4520;padding-top:18px}
+.catalog-cup{color:#142b45}
+.content #view :is(.round-box,.ranking-card,.feed-card,.card,.loading,.empty){background:#ffffff;color:#142b45;border-color:#142b4520;box-shadow:none}
+.content #view .feed-featured{background:linear-gradient(120deg,#d7b97912,#ffffff);border-top-color:#d9dfe5}
+.content #view :is(.ranking-head,.round-head){background:#ffffff}
+.content #view :is(.ranking-note,.muted,.team-manager,.loading,.empty){color:#52647a}
+.content #view a{color:#142b45}
+.content #view .stand :is(th,td){background:transparent;color:#142b45;border-color:#142b4520}
+.content #view .stand thead th{background:#ffffff;color:#52647a}
+.content #view .stand tbody tr:hover{background:#ffffff06}
+.content #view .ranking-value{background:#d7b97920;color:#142b45}
+.content #view :is(.ranking-position,.ranking-clubs,.ranking-note){color:#52647a}
+.content #view .match{border-color:#142b4520}
+.content #view .open-match-report{background:transparent;border-color:#142b4520;color:#142b45}
+.content #view .stat-tab{background:#ffffff;color:#142b45;border-color:#142b4520}
+.content #view .stat-tab.active{background:#d7b979;color:#142b45}
+.content #view .ranking-scroll{scrollbar-color:#aab5c1 #101e2c}
+.content .filters select{background:#ffffff;color:#142b45;border-color:#142b4520}
+.catalog-dialog{background:#ffffff;color:#142b45;border-color:#142b4520}
+.catalog-dialog .catalog-categories{background:#ffffff}.catalog-dialog .catalog-categories button{color:#142b45}.catalog-dialog .catalog-categories [aria-pressed=true]{background:#d7b979;color:#142b45}
+.catalog-dialog-head button{background:#ffffff;color:#142b45}
+@media(max-width:680px){body:not(.mx-journal) .wrap{width:calc(100% - 32px)}.competition-grid{gap:10px}.competition-card{padding:20px 12px 16px}.competition-card strong{font-size:17px}.content #competition-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.content #competition-nav button{padding:12px 4px;font-size:11px;min-width:0}.top{margin-bottom:0}}
+
+/* Competition detail: the same hierarchy as the dedicated IMC cups. */
+body.competition-detail .page-heading{display:none}
+.competition-rail{display:flex;gap:10px;overflow-x:auto;padding:20px 0;border-bottom:1px solid #d9dfe5;margin-bottom:24px;scrollbar-width:thin}
+.competition-rail a{flex:none;display:flex;align-items:center;min-height:48px;padding:12px 18px;border:1px solid #d9dfe5;border-radius:8px;color:#52647a;font-weight:600;font-size:13px;white-space:nowrap}
+.competition-rail a[aria-current=page]{background:#e8d5aa;border-color:#b48a38;color:#142b45}
+.competition-banner{position:relative;display:flex;align-items:center;gap:22px;min-height:180px;margin:22px 0 18px;padding:32px;border:1px solid #d9dfe5;border-radius:16px;background:linear-gradient(120deg,#fff,#eee7d9);overflow:hidden}
+.competition-banner .icon{height:64px;width:64px;flex:none;color:#806020}
+.competition-banner h1{font-size:clamp(28px,5vw,48px);line-height:1.1;letter-spacing:-.04em;margin:8px 0;color:#142b45}
+.competition-banner p{margin:0;color:#52647a;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.competition-context{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.competition-context .filters{margin:0}.competition-status{font-size:12px;color:#52647a}
+.competition-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 30px}
+.competition-summary>div{padding:22px 8px;text-align:center;border:1px solid #d9dfe5;border-radius:14px;background:#fff}
+.competition-summary strong{font-size:30px;display:block;margin-bottom:6px}.competition-summary span{font-size:12px;color:#52647a}
+.competition-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 14px}
+.competition-section-title h2{margin:0;font-size:24px;letter-spacing:-.04em}.competition-section-title button{border:0;background:transparent;color:#806020;padding:12px 0;cursor:pointer}
+body.competition-detail #competition-nav{display:flex;gap:0;border-bottom:1px solid #d9dfe5;margin:24px 0}
+body.competition-detail #competition-nav button{flex:1;min-width:0;min-height:48px;padding:14px 8px;border:0;border-radius:0;border-bottom:3px solid transparent;background:transparent;color:#52647a;font-size:14px;font-weight:600}
+body.competition-detail .round-box{border-radius:14px;overflow:hidden;background:#fff}
+body.competition-detail .round-head{background:#f2efe8}
+@media(max-width:650px){.competition-banner{min-height:140px;padding:22px 18px;gap:16px}.competition-banner .icon{width:42px;height:42px}.competition-summary{gap:8px}.competition-summary strong{font-size:26px}.competition-summary span{font-size:11px}.competition-section-title h2{font-size:22px}body.competition-detail #competition-nav button{font-size:12px;padding:14px 3px}.competition-status{font-size:11px}}
+

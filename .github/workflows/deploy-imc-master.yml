@@ -63,7 +63,7 @@ jobs:
           assert [w['code'] for w in data['worlds']]==['IMC-%03d'%i for i in range(1,8)]
           for world in data['worlds']:
               gw=world['game_world_id']
-              assert world['href']==('/roadtohistory/' if gw=='GW001' else '/nexus/?world='+gw)
+              assert world['href']=={'GW001': '/roadtohistory/', 'GW005': '/halloffamers/', 'GW009': '/kickoff/', 'GW010': '/sensiblesocceracademy/', 'GW011': '/subbuteosuperleague/', 'GW004': '/worldleague/', 'GW006': '/masterleagueworld/'}[gw]
               assert world['manager_count']==sum(gw in m['worlds'] for m in data['managers'])
           print('Live directory verified:',len(data['worlds']),'worlds,',len(ids),'active managers')
           PYCODE
@@ -100,3 +100,4 @@ jobs:
           assert '/gameworld001/' not in html
           print('Public homepage verified')
           PYCODE
+

@@ -1,0 +1,38 @@
+[
+  {
+    "slug": "halloffamers",
+    "name": "Hall Of Famers",
+    "legacy": "GW005",
+    "code": "IMC-002"
+  },
+  {
+    "slug": "kickoff",
+    "name": "Kick Off",
+    "legacy": "GW009",
+    "code": "IMC-003"
+  },
+  {
+    "slug": "sensiblesocceracademy",
+    "name": "Sensible Soccer Academy",
+    "legacy": "GW010",
+    "code": "IMC-004"
+  },
+  {
+    "slug": "subbuteosuperleague",
+    "name": "Subbuteo Super League",
+    "legacy": "GW011",
+    "code": "IMC-005"
+  },
+  {
+    "slug": "worldleague",
+    "name": "World League",
+    "legacy": "GW004",
+    "code": "IMC-006"
+  },
+  {
+    "slug": "masterleagueworld",
+    "name": "Master League World",
+    "legacy": "GW006",
+    "code": "IMC-007"
+  }
+]

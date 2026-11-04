@@ -1,0 +1,67 @@
+name: Deploy IMC Single League Worlds
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'halloffamers/**'
+      - 'kickoff/**'
+      - 'sensiblesocceracademy/**'
+      - 'subbuteosuperleague/**'
+      - 'worldleague/**'
+      - 'masterleagueworld/**'
+      - 'scripts/verify-single-worlds.py'
+      - 'scripts/single-worlds.json'
+      - '.github/workflows/deploy-single-worlds.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: single-worlds-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        world: [halloffamers, kickoff, sensiblesocceracademy, subbuteosuperleague, worldleague, masterleagueworld]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PHP and JavaScript
+        env:
+          WORLD: ${{ matrix.world }}
+        run: |
+          find "$WORLD" -name '*.php' -exec php -l {} \;
+          find "$WORLD" -name '*.js' -exec node --check {} \;
+      - name: Publish world and verify file bytes
+        env:
+          WORLD: ${{ matrix.world }}
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl
+          from pathlib import Path
+          from ftplib import FTP_TLS,error_perm
+          world=os.environ['WORLD'];root='/www.italianmastersclub.it/'
+          ctx=ssl.create_default_context();ctx.check_hostname=False # Existing Aruba alias; CA verification retained.
+          ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p();ftp.set_pasv(True)
+          previous=None
+          for p in sorted(Path(world).rglob('*')):
+              if not p.is_file():continue
+              parent=root+p.parent.as_posix()
+              if previous!=parent:
+                  ftp.cwd('/')
+                  for part in parent.strip('/').split('/'):
+                      try:ftp.cwd(part)
+                      except error_perm:ftp.mkd(part);ftp.cwd(part)
+                  previous=parent
+              data=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+str(p)
+          ftp.quit();print('Published and byte verified',world)
+          PY
+      - name: Verify live pages, profiles and world data
+        run: python3 scripts/verify-single-worlds.py '${{ matrix.world }}'
