@@ -77,10 +77,10 @@ jobs:
               table=api('standings.php?world=GW010&season=1&competition='+key)
               assert table['ok'] and len(table['groups'])==4 and len(table['rows'])==12
           print('GW010 custom cups and all 24 group entries verified live.')
-          imc=api('imc-cups.php?world=GW001&season=2&competition=GW001_IMC_EUROPA_LEAGUE&mode=schedule')
+          imc=api('imc-cups.php?world=GW001&season=2&competition=IMC001%7CIMC%7Ceuropaleague&mode=schedule')
           assert imc['ok'] and len(imc['rows'])==7
           assert all(r['home_imc_manager_name'] and r['away_imc_manager_name'] for r in imc['rows'])
-          table=api('imc-cups.php?world=GW001&season=2&competition=GW001_IMC_EUROPA_LEAGUE&mode=standings')
+          table=api('imc-cups.php?world=GW001&season=2&competition=IMC001%7CIMC%7Ceuropaleague&mode=standings')
           assert table['ok'] and len(table['rows'])==14
           print('GW001 IMC: 7 fixtures, 14 managers and standings verified live.')
           print('All round design uploaded and verified live. No database changes.')
