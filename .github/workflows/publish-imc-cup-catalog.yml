@@ -1,0 +1,54 @@
+name: Publish IMC cup catalog
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nexus/competitions/imc-cups.json'
+      - 'tests/nexus-imc-cups.php'
+      - '.github/workflows/publish-imc-cup-catalog.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-cup-catalog-production
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate catalog
+        run: php tests/nexus-imc-cups.php
+      - name: Publish catalog and verify live
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, json, urllib.request, urllib.parse
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          local=Path('nexus/competitions/imc-cups.json')
+          data=local.read_bytes()
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False  # Existing Aruba FTPS certificate exception.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p()
+          ftp.cwd('/www.italianmastersclub.it/nexus/competitions')
+          ftp.storbinary('STOR imc-cups.json',io.BytesIO(data))
+          actual=io.BytesIO()
+          ftp.retrbinary('RETR imc-cups.json',actual.write)
+          ftp.quit()
+          assert actual.getvalue()==data
+          base='https://www.italianmastersclub.it/nexus/competitions/'
+          with urllib.request.urlopen(base+'imc-cups.json?release='+os.environ['GITHUB_SHA'],timeout=60) as r:
+              assert r.read()==data
+          for cup in json.loads(data):
+              params=urllib.parse.urlencode({'world':cup['world'],'season':cup['season'],'competition':cup['key'],'mode':'schedule'})
+              with urllib.request.urlopen(base+'imc-cups.php?'+params,timeout=60) as r:
+                  response=json.load(r)
+                  assert response.get('ok') and response.get('competition_key')==cup['key']
+          print('IMC cup catalog published and live endpoints verified')
+          PY
