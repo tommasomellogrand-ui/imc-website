@@ -119,7 +119,34 @@ function imc_normalize_world_request(array $body, array $cfg, string $channel, ?
     return $body;
 }
 
-function imc_run():never{try{$c=imc_cfg();if(($_SERVER['REQUEST_METHOD']??'')!=='POST')imc_out(['ok'=>false,'error'=>'method_not_allowed'],405);$b=json_decode(file_get_contents('php://input')?:'',true,64,JSON_THROW_ON_ERROR);if(!is_array($b))throw new InvalidArgumentException('invalid_payload');$a=strtolower(trim((string)($b['action']??'health')));$ch=strtoupper((string)($b['channel']??($_SERVER['HTTP_X_IMC_CHANNEL']??'CHATGPT')));if(!in_array($ch,['IMPORT','CHATGPT'],true))throw new InvalidArgumentException('invalid_channel');$repository=trim((string)($b['repository']??''));$tokenlessImport=in_array($repository,['IMC Results','IMC SM Player Stats','IMC Schedule','IMC_Game_World_Season'],true)||($repository==='IMC Transfer'&&in_array($a,['read','insert_many'],true))||($repository==='IMC Match Report'&&in_array($a,['read','insert_many'],true))||($repository==='IMC Player Codex'&&in_array($a,['read','insert_many'],true));if($a==='list_imc_worlds'&&$ch==='IMPORT'){
+function imc_competition_catalog(array $cfg, array $body): array {
+    $catalog=imc_world_catalog($cfg);
+    $body=imc_normalize_world_request($body,$cfg,'IMPORT',$catalog);
+    $alias=(string)($body['IMC_WORLD_ID']??'');
+    $legacy=(string)($body['game_world_id']??'');
+    if (!preg_match('/^IMC-(?:00[1-9]|010)$/D',$alias)) throw new InvalidArgumentException('invalid_game_world');
+    $compact=str_replace('-','',$alias);
+    $pdo=imc_db($cfg,$cfg['db']['core']);
+    $stmt=$pdo->prepare("SELECT competition_key,custom_competition FROM `IMC Competition Codex Global` WHERE game_world_id IN (?,?,?) AND UPPER(TRIM(sm_action_group))='IMC'");
+    $stmt->execute([$legacy,$alias,$compact]);
+    $rows=[];$seen=[];
+    foreach($stmt->fetchAll() as $row) {
+        $key=trim((string)$row['competition_key']);$name=trim((string)$row['custom_competition']);
+        if($key===''||$name==='') throw new InvalidArgumentException('invalid_payload:incomplete_competition');
+        $valid=false;
+        foreach(array_unique([$legacy,$alias,$compact]) as $prefix) {
+            if(str_starts_with($key,$prefix.'_')||str_starts_with($key,$prefix.'|')) {
+                $key=$compact.substr($key,strlen($prefix));$valid=true;break;
+            }
+        }
+        if(!$valid||isset($seen[$key])) throw new InvalidArgumentException('invalid_payload:competition_key');
+        $seen[$key]=true;$rows[]=['key'=>$key,'name'=>$name,'group'=>'IMC'];
+    }
+    usort($rows,fn($a,$b)=>strcmp($a['name'],$b['name']));
+    return ['ok'=>true,'action'=>'list_imc_competitions','source'=>'core','game_world_id'=>$compact,'competitions'=>$rows];
+}
+
+function imc_run():never{try{$c=imc_cfg();if(($_SERVER['REQUEST_METHOD']??'')!=='POST')imc_out(['ok'=>false,'error'=>'method_not_allowed'],405);$b=json_decode(file_get_contents('php://input')?:'',true,64,JSON_THROW_ON_ERROR);if(!is_array($b))throw new InvalidArgumentException('invalid_payload');$a=strtolower(trim((string)($b['action']??'health')));$ch=strtoupper((string)($b['channel']??($_SERVER['HTTP_X_IMC_CHANNEL']??'CHATGPT')));if(!in_array($ch,['IMPORT','CHATGPT'],true))throw new InvalidArgumentException('invalid_channel');$repository=trim((string)($b['repository']??''));$tokenlessImport=in_array($repository,['IMC Results','IMC SM Player Stats','IMC Schedule','IMC_Game_World_Season'],true)||($repository==='IMC Transfer'&&in_array($a,['read','insert_many'],true))||($repository==='IMC Match Report'&&in_array($a,['read','insert_many'],true))||($repository==='IMC Player Codex'&&in_array($a,['read','insert_many'],true));if($a==='list_imc_competitions'&&$ch==='IMPORT')imc_out(imc_competition_catalog($c,$b));if($a==='list_imc_worlds'&&$ch==='IMPORT'){
 $rows=[];$seen=[];
 foreach(imc_world_catalog($c) as $w){
  if(!preg_match('/^IMC-(?:00[1-9]|010)$/D',(string)$w['imc_id']))continue;
