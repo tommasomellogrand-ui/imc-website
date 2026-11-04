@@ -1,4 +1,4 @@
-name: Deploy Road To History mockup
+name: Deploy Road To History
 on:
   push:
     branches: [main]
@@ -18,7 +18,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate club PHP and JavaScript
         run: |
-          for file in roadtohistory/clubs/*.php; do php -l "$file"; done
+          for file in roadtohistory/clubs/*.php roadtohistory/competitions/*.php; do php -l "$file"; done
+          for file in roadtohistory/competitions/*.js; do node --check "$file"; done
           node --check roadtohistory/clubs/directory.js
           node --check roadtohistory/clubs/detail.js
           node --check roadtohistory/managers/manager-profile.js
@@ -92,7 +93,7 @@ jobs:
           import urllib.request,hashlib
           from pathlib import Path
           base='https://www.italianmastersclub.it/roadtohistory/'
-          for name in ['assets/notte-allo-stadio.webp','index.html','managers/index.html','managers/profile.html','managers/directory.js','clubs/index.html','clubs/detail.html','clubs/directory.js','clubs/detail.js']:
+          for name in ['assets/notte-allo-stadio.webp','index.html','managers/index.html','managers/profile.html','managers/directory.js','clubs/index.html','clubs/detail.html','clubs/directory.js','clubs/detail.js','competitions/index.html','competitions/view.html','competitions/competition-catalog.js','competitions/competition-view.js','competitions/match.html']:
               with urllib.request.urlopen(base+name+'?release=${{ github.sha }}',timeout=60) as response:
                   assert response.status==200
                   data=response.read()
@@ -101,7 +102,7 @@ jobs:
               assert response.status==200
               assert 'no-store' in response.headers.get('Cache-Control','')
               html=response.read()
-              assert b'href="/theroadalmanac/"' in html and b'href="/platinumlegacy/"' in html
+              assert b'href="/theroadalmanac/"' in html and b'href="/roadtohistory/competitions/?division=1"' in html
           print('Public URL and exact artwork verified.')
           PY
 
@@ -125,4 +126,23 @@ jobs:
           get('stats.php?sm_club='+str(cid))
           get('roster.php?sm_club='+str(cid))
           print('Dedicated clubs directory, detail, stats and roster verified')
+          PY
+
+      - name: Verify dedicated competition data
+        run: |
+          python3 - <<'PY'
+          import urllib.request,json
+          base='https://www.italianmastersclub.it/roadtohistory/competitions/'
+          def get(path):
+              with urllib.request.urlopen(base+path,timeout=90) as r:
+                  d=json.load(r)
+                  assert d.get('ok'),d
+                  return d
+          d=get('catalog.php?world=GW002&season=2')
+          assert d['game_world_id']=='GW001' and d['rows']
+          key=urllib.parse.quote(d['rows'][0]['competition_key'])
+          for endpoint in ['results','schedule','standings']:
+              get(endpoint+'.php?season=2&competition='+key)
+          get('match-report.php?season=2&competition='+key+'&mode=stats')
+          print('Road to History competition catalog, results, schedule, standings and statistics verified')
           PY
