@@ -8,6 +8,8 @@ on:
       - '__imc_private_gateway/**'
       - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
       - 'tests/gateway-world-*'
+      - 'tests/gateway-results-storage.php'
+      - 'tests/fixtures/rth-cup-key-schema.json'
   workflow_dispatch:
 
 permissions:
