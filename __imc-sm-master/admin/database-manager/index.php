@@ -69,6 +69,17 @@ function dbm_payload(): array {
 }
 
 function dbm_storage(string $target): array {
+    // Isolated destination for the new IMC world registry; legacy routing is unchanged.
+    if ($target === 'imc') {
+        static $imcDb = null;
+        if (!$imcDb instanceof mysqli) {
+            $c = smm_config()['db'];
+            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+            $imcDb = new mysqli($c['host'], $c['user'], $c['password'], 'Sql1956795_5');
+            $imcDb->set_charset('utf8mb4');
+        }
+        return ['Sql1956795_5', $imcDb];
+    }
     $registry = smm_storage_registry();
     if (!isset($registry[$target])) throw new InvalidArgumentException('Unknown database target.');
     return [$registry[$target]['database'], smm_storage_db($target)];
@@ -407,7 +418,7 @@ function dbm_data_route(array $p): array {
         $table = $gw !== '' ? $gw . '_' . $repo : $repo;
     }
     dbm_data_ident($table);
-    if (!in_array($target, ['core','gold','custom'], true)) throw new InvalidArgumentException('target or known game_world_id required.');
+    if (!in_array($target, ['core','gold','custom','imc'], true)) throw new InvalidArgumentException('target or known game_world_id required.');
     return [$target, $table, $gw];
 }
 
@@ -526,7 +537,7 @@ function dbm_data_tools(): array {
         'clear_repository'=>'Delete ALL rows in the selected repository, preserving its table and triggers. Use only for an explicit request to empty that repository.'
     ];
     foreach ($descriptions as $name=>$description) {
-        $properties = ['target'=>['type'=>'string','enum'=>['core','gold','custom']],'game_world_id'=>['type'=>'string'],'table'=>['type'=>'string'],'repository'=>['type'=>'string']];
+        $properties = ['target'=>['type'=>'string','enum'=>['core','gold','custom','imc']],'game_world_id'=>['type'=>'string'],'table'=>['type'=>'string'],'repository'=>['type'=>'string']];
         $required = [];
         if (in_array($name,['read','count','update','delete','delete_one'],true)) $properties['where']=['type'=>'object','additionalProperties'=>true];
         if (in_array($name,['update','delete','delete_one'],true)) $required[]='where';
@@ -543,12 +554,12 @@ function dbm_data_tools(): array {
 function dbm_mcp_tools(): array {
     return array_merge(dbm_data_tools(), [
         ['name'=>'health','description'=>'Read-only connectivity check for the three authorized IMC MySQL databases.','inputSchema'=>['type'=>'object','properties'=>(object)[],'additionalProperties'=>false]],
-        ['name'=>'schema','description'=>'Read the authoritative MySQL structure of one authorized database, including tables, columns, keys, indexes, foreign keys, triggers and optional table DDL.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'include_ddl'=>['type'=>'boolean','default'=>false]],'required'=>['target'],'additionalProperties'=>false]],
-        ['name'=>'schema_diff','description'=>'Read-only structural comparison between MySQL schemas/tables or an explicitly supplied reference schema. Reports IDENTICAL, MISSING, EXTRA and DIFFERENT without applying corrections.','inputSchema'=>['type'=>'object','properties'=>['left_target'=>['type'=>'string','enum'=>['core','gold','custom']],'left_table'=>['type'=>'string'],'right_target'=>['type'=>'string','enum'=>['core','gold','custom']],'right_table'=>['type'=>'string'],'reference_schema'=>['type'=>'object']], 'required'=>['left_target'],'additionalProperties'=>false]],
-        ['name'=>'data_audit','description'=>'Read-only data consistency and anomaly audit using structural, relational and objectively verifiable rules. Never corrects data.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'table'=>['type'=>'string'],'tables'=>['type'=>'array','items'=>['type'=>'string']],'gw'=>['type'=>'string','pattern'=>'^GW[0-9]{3}$'],'repository'=>['type'=>'string'],'sample_limit'=>['type'=>'integer','minimum'=>1,'maximum'=>100,'default'=>20]],'required'=>['target'],'additionalProperties'=>false]],
-        ['name'=>'read_query','description'=>'Execute one read-only SELECT, SHOW, DESCRIBE or EXPLAIN query.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'sql'=>['type'=>'string'],'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>500]],'required'=>['target','sql'],'additionalProperties'=>false]],
-        ['name'=>'plan_migration','description'=>'Validate a controlled MySQL migration and return a short-lived confirmation token. Does not modify the database. INSERT, UPDATE and DELETE require data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false]],'required'=>['target','migration_id','statements'],'additionalProperties'=>false]],
-        ['name'=>'execute_migration','description'=>'Execute the exact previously planned migration. This modifies MySQL and requires its confirmation token. DML plans must preserve data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false],'confirmation_token'=>['type'=>'string']],'required'=>['target','migration_id','statements','confirmation_token'],'additionalProperties'=>false]],
+        ['name'=>'schema','description'=>'Read the authoritative MySQL structure of one authorized database, including tables, columns, keys, indexes, foreign keys, triggers and optional table DDL.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom','imc']],'include_ddl'=>['type'=>'boolean','default'=>false]],'required'=>['target'],'additionalProperties'=>false]],
+        ['name'=>'schema_diff','description'=>'Read-only structural comparison between MySQL schemas/tables or an explicitly supplied reference schema. Reports IDENTICAL, MISSING, EXTRA and DIFFERENT without applying corrections.','inputSchema'=>['type'=>'object','properties'=>['left_target'=>['type'=>'string','enum'=>['core','gold','custom','imc']],'left_table'=>['type'=>'string'],'right_target'=>['type'=>'string','enum'=>['core','gold','custom','imc']],'right_table'=>['type'=>'string'],'reference_schema'=>['type'=>'object']], 'required'=>['left_target'],'additionalProperties'=>false]],
+        ['name'=>'data_audit','description'=>'Read-only data consistency and anomaly audit using structural, relational and objectively verifiable rules. Never corrects data.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom','imc']],'table'=>['type'=>'string'],'tables'=>['type'=>'array','items'=>['type'=>'string']],'gw'=>['type'=>'string','pattern'=>'^GW[0-9]{3}$'],'repository'=>['type'=>'string'],'sample_limit'=>['type'=>'integer','minimum'=>1,'maximum'=>100,'default'=>20]],'required'=>['target'],'additionalProperties'=>false]],
+        ['name'=>'read_query','description'=>'Execute one read-only SELECT, SHOW, DESCRIBE or EXPLAIN query.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom','imc']],'sql'=>['type'=>'string'],'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>500]],'required'=>['target','sql'],'additionalProperties'=>false]],
+        ['name'=>'plan_migration','description'=>'Validate a controlled MySQL migration and return a short-lived confirmation token. Does not modify the database. INSERT, UPDATE and DELETE require data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom','imc']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false]],'required'=>['target','migration_id','statements'],'additionalProperties'=>false]],
+        ['name'=>'execute_migration','description'=>'Execute the exact previously planned migration. This modifies MySQL and requires its confirmation token. DML plans must preserve data_migration=true.','inputSchema'=>['type'=>'object','properties'=>['target'=>['type'=>'string','enum'=>['core','gold','custom','imc']],'migration_id'=>['type'=>'string'],'statements'=>['type'=>'array','minItems'=>1,'maxItems'=>50,'items'=>['type'=>'string']],'allow_destructive'=>['type'=>'boolean','default'=>false],'data_migration'=>['type'=>'boolean','default'=>false],'confirmation_token'=>['type'=>'string']],'required'=>['target','migration_id','statements','confirmation_token'],'additionalProperties'=>false]],
         ['name'=>'history','description'=>'Read the protected Database Manager audit history.','inputSchema'=>['type'=>'object','properties'=>['limit'=>['type'=>'integer','minimum'=>1,'maximum'=>200]],'additionalProperties'=>false]],
     ]);
 }
@@ -619,7 +630,7 @@ function dbm_cleanup_unused_gw_tables(array $payload): array {
 
 function dbm_cleanup_empty_non_imc_tables(array $payload): array {
     $target = trim((string)($payload['target'] ?? ''));
-    if (!in_array($target, ['core','gold','custom'], true)) throw new InvalidArgumentException('Cleanup target must be core, gold or custom.');
+    if (!in_array($target, ['core','gold','custom','imc'], true)) throw new InvalidArgumentException('Cleanup target must be core, gold or custom.');
     if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_EMPTY_NON_IMC_CLEANUP') throw new InvalidArgumentException('Explicit cleanup confirmation required.');
     [$database, $db] = dbm_storage($target);
     $result = $db->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'");
