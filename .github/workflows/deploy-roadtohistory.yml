@@ -27,6 +27,8 @@ jobs:
           find roadtohistory/alltoplayfor -name '*.js' -exec node --check {} \;
           for file in roadtohistory/imc-cups/*.php; do php -l "$file"; done
           for file in roadtohistory/imc-cups/*.js; do node --check "$file"; done
+          php -l roadtohistory/matchday/data.php
+          node --check roadtohistory/matchday/home.js
           node --check roadtohistory/clubs/directory.js
           node --check roadtohistory/clubs/detail.js
           node --check roadtohistory/managers/manager-profile.js
@@ -276,4 +278,40 @@ jobs:
           assert len({str(p['player_id']) for p in roster['rows']})==len(roster['rows'])
           assert 'TRANSFERS' not in Path('roadtohistory/nations/detail.js').read_text().split(":['OVERVIEW'")[1].split(';')[0]
           print('Nations pages, fixed world/type, statistics, matches and historical roster verified')
+          PY
+
+      - name: Verify home Matchday
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request,hashlib
+          from pathlib import Path
+          base='https://www.italianmastersclub.it/roadtohistory/'
+          for path in ['matchday/home.js','matchday/home.css']:
+              with urllib.request.urlopen(base+path+'?release=${{ github.sha }}',timeout=90) as r:
+                  assert hashlib.sha256(r.read()).digest()==hashlib.sha256((Path('roadtohistory')/path).read_bytes()).digest(),path
+          def get(mode,date=None):
+              url=base+'matchday/data.php?world=GW002&mode='+mode
+              if date:url+='&date='+date
+              with urllib.request.urlopen(url,timeout=90) as r:
+                  d=json.load(r)
+                  assert d.get('ok') and d['game_world_id']=='GW001' and d['mode']==mode,d
+                  return d
+          for mode in ['results','schedule']:
+              d=get(mode)
+              assert d['dates']==sorted(set(d['dates']),reverse=mode=='results')
+              for r in d['rows']:
+                  assert r['match_date'][:10]==d['date']
+                  assert r.get('competition_name')
+                  if mode=='results':
+                      assert r['home_score'] is not None and r['away_score'] is not None
+                  else:assert r['match_date'][:10]>=d['today']
+              ids=[(r['competition_key'],str(r['sm_fixture_id'])) for r in d['rows'] if r.get('sm_fixture_id')]
+              assert len(ids)==len(set(ids))
+              if len(d['dates'])>1:
+                  other=get(mode,d['dates'][1])
+                  assert other['date']==d['dates'][1]
+              print(mode+': date navigation, data scope and fixtures verified')
+          with urllib.request.urlopen(base,timeout=90) as r:
+              html=r.read().decode()
+              assert 'matchday/home.js' in html and 'I risultati arriveranno qui' not in html
           PY
