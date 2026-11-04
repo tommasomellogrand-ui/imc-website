@@ -104,7 +104,7 @@ jobs:
           with urllib.request.urlopen(base+'data.php',timeout=60) as response:data=json.load(response)
           assert data['ok'] and data['world']=='GW001'
           assert data['seasons'] and data['awards'] and data['matches']
-          assert all(c['key'].startswith('GW001') for c in data['competitions'])
+          assert all(c['key'].startswith(('GW001', 'IMC001|')) for c in data['competitions'])
           print('Live GW001 data verified:',len(data['awards']),'awards,',len(data['matches']),'matches')
           print('Public URL and exact artwork verified.')
           PY
