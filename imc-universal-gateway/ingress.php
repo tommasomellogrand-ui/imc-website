@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/core.php';
 /* IMC Universal Gateway · ingress-only path
  * Technical boundary only: envelope, target namespace, transport/persistence.
  * Payload row fields are intentionally opaque to the Gateway.
@@ -134,9 +135,10 @@ function imc_ingress_run(array $body): never {
         if (strtolower(trim((string)($body['route_mode'] ?? ''))) !== 'explicit') throw new InvalidArgumentException('explicit_route_required');
 
         $cfg = imc_ingress_cfg();
+        $body = imc_normalize_world_request($body, $cfg, $channel);
         $route = imc_ingress_route($body, $cfg);
         $pdo = imc_ingress_db($cfg, $route['database']);
-        $base = ['ok' => true, 'service' => 'IMC Universal Gateway', 'mode' => 'INGRESS_ONLY', 'action' => $action, 'channel' => 'IMPORT', 'game_world_id' => $route['game_world_id'], 'database' => $route['database'], 'table' => $route['table'], 'trace_id' => $body['trace_id'] ?? null];
+        $base = ['ok' => true, 'IMC_WORLD_ID' => $body['IMC_WORLD_ID'] ?? null, 'service' => 'IMC Universal Gateway', 'mode' => 'INGRESS_ONLY', 'action' => $action, 'channel' => 'IMPORT', 'game_world_id' => $route['game_world_id'], 'database' => $route['database'], 'table' => $route['table'], 'trace_id' => $body['trace_id'] ?? null];
 
         if ($action === 'read') imc_ingress_out($base + imc_ingress_read($pdo, $route['table'], $route['game_world_id'], $body));
         $rows = $body['rows'] ?? $body['items'] ?? null;

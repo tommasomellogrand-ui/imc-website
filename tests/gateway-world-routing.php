@@ -55,3 +55,27 @@ foreach (range(12,15) as $n) {
   rejects(fn()=>imc_ingress_route(['game_world_id'=>$gw,'target_database'=>'Sql1956795_3','target_table'=>$gw.'_IMC_Transfers'],$production));
 }
 echo "PASS: production GW010-GW011 Custom; GW012-GW015 pending.\n";
+
+$catalog=[];
+foreach (['GW001','GW004','GW005','GW006','GW009','GW010','GW011'] as $i=>$gw) $catalog[]=['legacy_id'=>$gw,'imc_id'=>sprintf('IMC-%03d',$i+1)];
+foreach ($catalog as $entry) {
+  foreach ([$entry['legacy_id'],$entry['imc_id']] as $input) {
+    foreach ($repos as $repo=>$suffix) {
+      $body=['game_world_id'=>$input,'repository'=>$repo,'target_database'=>'Sql1956795_3','target_table'=>$input.'_'.$suffix,'where'=>['game_world_id'=>$input],'rows'=>[['game_world_id'=>$input,'fingerprint'=>'original','sm_fixture_id'=>'123']]];
+      $normalized=imc_normalize_world_request($body,$production,'IMPORT',$catalog);
+      check($normalized['IMC_WORLD_ID']===$entry['imc_id']);
+      check($normalized['rows'][0]['game_world_id']===$entry['legacy_id']);
+      check($normalized['where']['game_world_id']===$entry['legacy_id']);
+      check($normalized['rows'][0]['fingerprint']==='original');
+      check($normalized['rows'][0]['sm_fixture_id']==='123');
+      check(imc_ingress_route($normalized,$production)['table']===$entry['legacy_id'].'_'.$suffix);
+      check(imc_explicit_import_route($normalized,$production)['table']===$entry['legacy_id'].'_'.$suffix);
+      check(imc_route($normalized,$production)['database']==='Sql1956795_3');
+    }
+  }
+}
+foreach (['GW002','GW003','GW007','GW008','IMC-008','IMC-009','IMC-010','IMC-999','IMC001'] as $input) rejects(fn()=>imc_normalize_world_request(['game_world_id'=>$input],$production,'IMPORT',$catalog));
+rejects(fn()=>imc_normalize_world_request(['game_world_id'=>'IMC-002','rows'=>[['game_world_id'=>'IMC-001']]],$production,'IMPORT',$catalog));
+rejects(fn()=>imc_normalize_world_request(['game_world_id'=>'IMC-002','target_table'=>'GW001_IMC_Results'],$production,'IMPORT',$catalog));
+check(imc_normalize_world_request(['game_world_id'=>'GW002'],$production,'CHATGPT',$catalog)['game_world_id']==='GW002');
+echo "PASS: seven CORE aliases, legacy custom imports, payload/filter translation, preserved fingerprints, Gold/reserved/mismatched rejection.\n";
