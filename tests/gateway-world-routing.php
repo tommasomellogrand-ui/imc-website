@@ -98,3 +98,10 @@ foreach(range(1,10) as $n) {
 }
 rejects(fn()=>imc_normalize_world_request(['action'=>'read','game_world_id'=>'IMC-002','target_table'=>'IMC001_Results'],$production,'IMPORT',$active));
 echo "PASS new physical destinations 001-010, cross-world rejection and unassigned write protection.\n";
+
+$future=array_merge($active,[['legacy_id'=>'GW012','imc_id'=>'IMC-006']]);
+$body=imc_normalize_world_request(['action'=>'insert_many','game_world_id'=>'IMC-006','repository'=>'IMC Transfer','target_database'=>'Sql1956795_3','target_table'=>'IMC006_Transfers','rows'=>[['game_world_id'=>'IMC-006']]],$production,'IMPORT',$future);
+check($body['rows'][0]['game_world_id']==='GW012');
+check(imc_physical_table(imc_ingress_route($body,$production)['table'])==='IMC006_Transfers');
+check(imc_physical_table(imc_explicit_import_route($body,$production)['table'])==='IMC006_Transfers');
+echo "PASS: future CORE registration enables custom transfer route without configuration edits.\n";

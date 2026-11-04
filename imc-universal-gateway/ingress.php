@@ -44,7 +44,7 @@ function imc_ingress_route(array $body, array $cfg): array {
     $gold = array_map('strtoupper', (array)($cfg['gold_worlds'] ?? []));
     $custom = array_map('strtoupper', (array)($cfg['custom_worlds'] ?? []));
     if (in_array($gw, $gold, true)) $expected = (string)($cfg['db']['gold'] ?? '');
-    elseif (preg_match('/^IMC-(?:00[6-9]|010)$/D',$gw) || in_array($gw, $custom, true)) $expected = (string)($cfg['db']['custom'] ?? '');
+    elseif (preg_match('/^IMC-(?:00[6-9]|010)$/D',$gw) || isset($GLOBALS['imc_dynamic_worlds'][$gw]) || in_array($gw, $custom, true)) $expected = (string)($cfg['db']['custom'] ?? '');
     else throw new InvalidArgumentException('unsupported_game_world');
 
     if ($database === '' || !hash_equals($expected, $database)) throw new InvalidArgumentException('target_not_allowed');
