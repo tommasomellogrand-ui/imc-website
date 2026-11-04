@@ -1,0 +1,23 @@
+/* Assignments uses Career's shared header, navigation, filters and cards. */
+.assignments-page .worlds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0 28px}
+.assignments-page .world{justify-content:space-between;min-height:145px;text-align:left}
+.assignments-page .world>strong{font-size:16px;line-height:1.35;overflow-wrap:anywhere}
+.assignments-page .world>small{font-size:11px}
+.assignments-page .world-counts{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid #d9dfe5;padding-top:12px}
+.assignments-page .world-counts span{font-size:11px;color:#52647a}
+.assignments-page .world-counts b{display:block;font-size:24px;color:#142b45;margin-bottom:4px}
+.assignments-page #scope-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.assignments-page #summary{font-size:12px;color:#52647a;margin:18px 0}
+.assignments-page .assignment-grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+.assignments-page .assignment-card .group{text-align:left;border-top:1px solid #d9dfe5;padding-top:12px}
+.assignments-page .group h4{font-size:11px;line-height:1.5;margin:0 0 10px;color:#8b6a27}
+.assignments-page .team{display:flex;align-items:center;gap:10px;margin:12px 0}
+.assignments-page .team img{width:34px;height:34px;object-fit:contain;flex:none}
+.assignments-page .team div{min-width:0}
+.assignments-page .team strong{font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.assignments-page .team small{display:block;font-size:10px;line-height:1.5;margin-top:4px}
+.assignments-page .status{color:#208455;font-weight:700}
+.assignments-page .status.ended{color:#a30000}
+.assignments-page>footer{max-width:1120px;margin:auto;padding:24px}
+@media(max-width:600px){.assignments-page .worlds,.assignments-page .assignment-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.assignments-page .world>strong{font-size:14px}.assignments-page .assignment-card{padding:14px 10px}.assignments-page .team{gap:6px}.assignments-page .team img{width:26px;height:26px}}
+@media(max-width:360px){.assignments-page .assignment-grid{grid-template-columns:1fr}}
