@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-const IMC_VERSION='2.3.2'; const IMC_MAX_ROWS=100000;
+const IMC_VERSION='2.4.0'; const IMC_MAX_ROWS=100000;
 $GLOBALS['imc_started']=microtime(true);
 function imc_out(array $x,int $s=200):never{http_response_code($s);$x['duration_ms']??=(int)round((microtime(true)-$GLOBALS['imc_started'])*1000);echo json_encode($x,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);exit;}
 
@@ -39,7 +39,7 @@ function imc_count(PDO$p,string$t,array$w=[]):int{$v=[];$q='SELECT COUNT(*) FROM
 function imc_import_table(string$t):bool{return preg_match('/^GW(?:00[1-9]|01[0-5])_IMC_(?:Results|SM_Player_Stats|Schedule|Transfers|Match_Report|Player_Codex)$/',$t)===1;}
 function imc_valid_date(string$v,string$f):bool{$d=DateTimeImmutable::createFromFormat('!'.$f,$v);return$d!==false&&$d->format($f)===$v;}
 function imc_validate_import_value(string$k,mixed$v,array$c):void{if($v===null){if(strtoupper((string)($c['Null']??'YES'))==='NO')throw new InvalidArgumentException('null_not_allowed:'.$k);return;}$type=strtolower((string)($c['Type']??''));if(preg_match('/^(tinyint|smallint|mediumint|int|bigint)( unsigned)?$/',$type,$m)){if(!(is_int($v)||(is_string($v)&&preg_match('/^-?[0-9]+$/',$v))))throw new InvalidArgumentException('invalid_type:'.$k);if(isset($m[2])&&$m[2]!==''&&(string)$v!==''&&str_starts_with((string)$v,'-'))throw new InvalidArgumentException('invalid_type:'.$k);return;}if(preg_match('/^(decimal|float|double)/',$type)){if(!(is_int($v)||is_float($v)||(is_string($v)&&is_numeric($v))))throw new InvalidArgumentException('invalid_type:'.$k);return;}if(preg_match('/^(?:var)?char\(([0-9]+)\)/',$type,$m)){if(!is_string($v)&&!is_int($v)&&!is_float($v))throw new InvalidArgumentException('invalid_type:'.$k);if(mb_strlen((string)$v)>(int)$m[1])throw new InvalidArgumentException('value_too_long:'.$k);return;}if($type==='date'){if(!is_string($v)||!imc_valid_date($v,'Y-m-d'))throw new InvalidArgumentException('invalid_format:'.$k);return;}if($type==='time'){if(!is_string($v)||!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/',$v))throw new InvalidArgumentException('invalid_format:'.$k);return;}if(str_starts_with($type,'datetime')||str_starts_with($type,'timestamp')){if(!is_string($v)||!(imc_valid_date($v,'Y-m-d H:i:s')||preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/',$v)))throw new InvalidArgumentException('invalid_format:'.$k);return;}}
-function imc_row(PDO$p,string$t,array$r):array{$c=imc_cols($p,$t);foreach($r as$k=>$v){if(!isset($c[$k]))throw new InvalidArgumentException('column_not_found:'.$k);if(imc_import_table($t))imc_validate_import_value((string)$k,$v,$c[$k]);if(str_starts_with(strtolower((string)$c[$k]['Type']),'json')){if(is_array($v))$r[$k]=json_encode($v,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);elseif(is_string($v)&&json_decode($v,true)===null&&strtolower($v)!=='null')throw new InvalidArgumentException('invalid_json');}}if(imc_import_table($t)){foreach($c as$k=>$col){$required=strtoupper((string)($col['Null']??'YES'))==='NO'&&$col['Default']===null&&!str_contains(strtolower((string)($col['Extra']??'')),'auto_increment');if($required&&!array_key_exists($k,$r))throw new InvalidArgumentException('required_field_missing:'.$k);}$gw=substr($t,0,5);if(array_key_exists('game_world_id',$r)&&$r['game_world_id']!==null&&strtoupper(trim((string)$r['game_world_id']))!==$gw)throw new InvalidArgumentException('game_world_mismatch');}return$r;}
+function imc_row(PDO$p,string$t,array$r):array{$c=imc_cols($p,$t);foreach($r as$k=>$v){if(!isset($c[$k]))throw new InvalidArgumentException('column_not_found:'.$k);if(imc_import_table($t))imc_validate_import_value((string)$k,$v,$c[$k]);if(str_starts_with(strtolower((string)$c[$k]['Type']),'json')){if(is_array($v))$r[$k]=json_encode($v,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);elseif(is_string($v)&&json_decode($v,true)===null&&strtolower($v)!=='null')throw new InvalidArgumentException('invalid_json');}}if(imc_import_table($t)){foreach($c as$k=>$col){$required=strtoupper((string)($col['Null']??'YES'))==='NO'&&$col['Default']===null&&!str_contains(strtolower((string)($col['Extra']??'')),'auto_increment');if($required&&!array_key_exists($k,$r))throw new InvalidArgumentException('required_field_missing:'.$k);}$gw=substr($t,0,5);if(str_ends_with($t,'_IMC_Results')&&preg_match('/^(IMC[0-9]{3})_Results$/',imc_physical_table($t),$m))$gw=$m[1];if(array_key_exists('game_world_id',$r)&&$r['game_world_id']!==null&&strtoupper(trim((string)$r['game_world_id']))!==$gw)throw new InvalidArgumentException('game_world_mismatch');}return$r;}
 function imc_type(string$x):string{$x=strtoupper(trim($x));if(!preg_match('/^(TINYINT|SMALLINT|MEDIUMINT|INT|BIGINT|FLOAT|DOUBLE|DECIMAL\([0-9]+,[0-9]+\)|CHAR\([0-9]+\)|VARCHAR\([0-9]+\)|TEXT|MEDIUMTEXT|LONGTEXT|DATE|DATETIME|TIMESTAMP|TIME|JSON|BOOLEAN)( UNSIGNED)?$/',$x))throw new InvalidArgumentException('invalid_column_type');return$x;}
 function imc_peer():array{$f=dirname(__DIR__).'/imc-database-manager/index.php';if(!is_file($f))return['reachable'=>false,'status'=>'unavailable'];$j=json_decode((string)@file_get_contents($f),true);return is_array($j)?['reachable'=>true,'service'=>$j['service']??null,'status'=>$j['status']??null,'version'=>$j['version']??null,'role_version'=>$j['role_version']??null,'current_role'=>$j['current_role']??null,'capabilities'=>$j['capabilities']??[]]:['reachable'=>false,'status'=>'invalid_response'];}
 function imc_log(array$r,string$a,?string$t,array$e=[]):void{$f=dirname(__DIR__).'/__imc_private_gateway/universal-gateway-audit.jsonl';@file_put_contents($f,json_encode(array_merge(['timestamp'=>gmdate('c'),'action'=>$a,'source'=>$r['source']??null,'game_world_id'=>$r['game_world_id']??null,'database'=>$r['database']??null,'table'=>$t],$e),JSON_UNESCAPED_SLASHES)."\n",FILE_APPEND|LOCK_EX);}
@@ -54,8 +54,9 @@ function imc_normalize_world_request(array $body, array $cfg, string $channel, ?
     $world = strtoupper(trim((string)($body['game_world_id'] ?? '')));
     if (preg_match('/^IMC(00[1-9]|010)$/D',$world,$m)) $world='IMC-'.$m[1];
     if ($world === '' || $world === 'CORE' || strtolower((string)($body['source'] ?? '')) === 'core') return $body;
+    $isResults = ($body['repository']??'')==='IMC Results' || preg_match('/^(?:GW[0-9]{3}_IMC_Results|IMC[0-9]{3}_Results)$/D',(string)($body['target_table']??$body['table']??''));
     $isAlias = str_starts_with($world, 'IMC-');
-    if (!$isAlias && $channel !== 'IMPORT') return $body;
+    if (!$isAlias && $channel !== 'IMPORT' && !$isResults) return $body;
     if (!preg_match('/^(?:IMC-[0-9]{3}|GW[0-9]{3})$/D', $world)) throw new InvalidArgumentException('invalid_game_world');
     $catalog ??= imc_world_catalog($cfg);
     $GLOBALS['imc_dynamic_worlds']=[];
@@ -87,11 +88,21 @@ function imc_normalize_world_request(array $body, array $cfg, string $channel, ?
         if (preg_match('/^(?:IMC-[0-9]{3}|GW[0-9]{3})_/', $value) && !str_starts_with($value, $legacy.'_')) throw new InvalidArgumentException('game_world_mismatch');
         $body[$key] = $value;
     }
-    $normalize = static function(array $row) use ($legacy, $alias): array {
+    $compact=str_replace('-','',$alias);
+    $normalize = static function(array $row) use ($legacy, $alias, $compact, $isResults): array {
         if (array_key_exists('game_world_id', $row)) {
             $value = strtoupper(trim((string)$row['game_world_id']));
-            if ($value !== $legacy && $value !== $alias) throw new InvalidArgumentException('game_world_mismatch');
-            $row['game_world_id'] = $legacy;
+            if ($value !== $legacy && $value !== $alias && $value !== $compact) throw new InvalidArgumentException('game_world_mismatch');
+            $row['game_world_id'] = $isResults ? $compact : $legacy;
+        }
+        if ($isResults && isset($row['competition_key'])) {
+            $key=(string)$row['competition_key'];
+            foreach ([$legacy,$alias] as $prefix) {
+                if (str_starts_with($key,$prefix.'|') || str_starts_with($key,$prefix.'_')) {
+                    $key=$compact.substr($key,strlen($prefix)); break;
+                }
+            }
+            $row['competition_key']=$key;
         }
         return $row;
     };

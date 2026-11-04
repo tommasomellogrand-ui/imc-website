@@ -49,6 +49,9 @@ jobs:
         run: php tests/gateway-world-routing.php
 
 
+      - name: Test canonical Results storage
+        run: php tests/gateway-results-storage.php
+
       - name: Deploy complete IMC Universal Gateway
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}

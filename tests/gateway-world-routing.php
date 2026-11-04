@@ -64,8 +64,8 @@ foreach ($catalog as $entry) {
       $body=['game_world_id'=>$input,'repository'=>$repo,'target_database'=>'Sql1956795_3','target_table'=>$input.'_'.$suffix,'where'=>['game_world_id'=>$input],'rows'=>[['game_world_id'=>$input,'fingerprint'=>'original','sm_fixture_id'=>'123']]];
       $normalized=imc_normalize_world_request($body,$production,'IMPORT',$catalog);
       check($normalized['IMC_WORLD_ID']===$entry['imc_id']);
-      check($normalized['rows'][0]['game_world_id']===$entry['legacy_id']);
-      check($normalized['where']['game_world_id']===$entry['legacy_id']);
+      check($normalized['rows'][0]['game_world_id']===($repo==='IMC Results'?str_replace('-','',$entry['imc_id']):$entry['legacy_id']));
+      check($normalized['where']['game_world_id']===($repo==='IMC Results'?str_replace('-','',$entry['imc_id']):$entry['legacy_id']));
       check($normalized['rows'][0]['fingerprint']==='original');
       check($normalized['rows'][0]['sm_fixture_id']==='123');
       check(imc_ingress_route($normalized,$production)['table']===$entry['legacy_id'].'_'.$suffix);
@@ -105,3 +105,13 @@ check($body['rows'][0]['game_world_id']==='GW012');
 check(imc_physical_table(imc_ingress_route($body,$production)['table'])==='IMC006_Transfers');
 check(imc_physical_table(imc_explicit_import_route($body,$production)['table'])==='IMC006_Transfers');
 echo "PASS: future CORE registration enables custom transfer route without configuration edits.\n";
+
+foreach ($active as $entry) {
+ foreach ([$entry['legacy_id'],$entry['imc_id'],str_replace('-','',$entry['imc_id'])] as $id) {
+  $r=imc_normalize_world_request(['action'=>'insert_many','repository'=>'IMC Results','game_world_id'=>$id,'rows'=>[['game_world_id'=>$id,'competition_key'=>$id.'|NATIONS|worldcup','imc_season'=>2]]],$production,'IMPORT',$active);
+  check($r['rows'][0]['game_world_id']===str_replace('-','',$entry['imc_id']));
+  check($r['rows'][0]['competition_key']===str_replace('-','',$entry['imc_id']).'|NATIONS|worldcup');
+  check($r['rows'][0]['imc_season']===2);
+ }
+}
+echo "PASS canonical Results IDs, keys, national competitions and season preservation.\n";
