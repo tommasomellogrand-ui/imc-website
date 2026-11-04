@@ -94,7 +94,7 @@ jobs:
           import urllib.request
           with urllib.request.urlopen('https://www.italianmastersclub.it/?release=${{ github.sha }}',timeout=45) as r:html=r.read().decode()
           assert 'site-assets/master/homepage.js?v=20261007a' in html
-          assert 'site-assets/master/homepage.css?v=20261007a' in html
+          assert 'site-assets/master/homepage.css?v=20261104ivory1' in html
           assert 'THE WORLD IS' in html and 'OUR PLAYGROUND.' in html
           assert '/gameworld001/' not in html
           print('Public homepage verified')
