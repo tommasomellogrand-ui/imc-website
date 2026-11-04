@@ -1,0 +1,10 @@
+
+body{background:#fff!important;font-family:Inter,sans-serif}
+.imc-hub-tabs,.hub-sections{display:flex;gap:20px;overflow-x:auto;border-bottom:1px solid #d9dfe5;margin-bottom:24px;white-space:nowrap}
+.imc-hub-tabs a,.hub-sections a{padding:14px 0;min-height:44px;font-size:13px;font-weight:700;text-decoration:none;border-radius:0!important}
+.hub-sections a[aria-current=page]{border-bottom:3px solid #142b45;background:white!important;color:#142b45!important}
+body .hero{padding-top:20px;padding-bottom:20px}.hero-mark{display:none}
+body :is(.world,.card,.manager-card,.panel,.rival,.controls,.ranking-row,.timeline-card,.career-summary,.trophy-tile){border-radius:4px!important;box-shadow:none!important}
+.clubhouse-hub .controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
+.clubhouse-hub .controls #search-label{display:flex!important}
+@media(max-width:520px){.clubhouse-hub .controls{grid-template-columns:minmax(0,1fr) 44px}.clubhouse-hub .controls #search-label{grid-column:1/-1}}

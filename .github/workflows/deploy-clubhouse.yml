@@ -17,7 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate PHP
-        run: php -l clubhouse/index.php
+        run: |
+          find clubhouse -name '*.php' -print0 | xargs -0 -n1 php -l
+          node --check clubhouse/club-house.js
+          node --check clubhouse/h2h.js
       - name: Publish only Clubhouse and verify bytes
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -61,4 +64,32 @@ jobs:
               for i in range(1,8): assert 'IMC-%03d'%i in html
               assert 'Gold 558' not in html and 'Gold 557' not in html
           print('Live Clubhouse and seven IMC worlds verified')
+          PY
+
+      - name: Verify restored tabs and seven-world data boundary
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, urllib.error, concurrent.futures
+          base='https://www.italianmastersclub.it/clubhouse/'
+          worlds=['GW001','GW005','GW009','GW010','GW011','GW004','GW006']
+          def get(path):
+              with urllib.request.urlopen(base+path,timeout=120) as r: return r.read().decode()
+          meta=json.loads(get('data.php'))
+          assert meta['ok'] and set(w['id'] for w in meta['worlds'])==set(worlds)
+          for view in ['career','ranking','timeline','trophies','h2h']:
+              html=get('?view='+view)
+              assert 'data-section="'+view+'"' in html and '/clubhouse/club-house.js' in html
+          def check(w):
+              d=json.loads(get('data.php?world='+w+'&manager=MNG001&scope=global&source=results&view=trophies'))
+              assert d['ok'] and d['world']==w and d['source']=='Results', (w,d)
+              assert not d.get('ranking_error') and not d.get('trophy_error'), (w,d)
+              return w
+          with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool: print(list(pool.map(check,worlds)))
+          timeline=json.loads(get('timeline.php'))
+          assert timeline['ok']
+          assert all(not e.get('world') or e['world'] in worlds for e in timeline['events'])
+          for path in ['data.php?world=GW002','h2h-detail.php?manager=MNG001&opponent=MNG002&worlds=GW002']:
+              try: get(path); raise AssertionError('Excluded world accepted')
+              except urllib.error.HTTPError as error: assert error.code==422
+          print('All five tabs and seven-world server filtering verified')
           PY
