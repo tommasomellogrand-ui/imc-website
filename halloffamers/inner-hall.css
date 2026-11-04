@@ -1,0 +1,53 @@
+/* Hall Of Famers internal pages. Visual layer only. */
+html body.hof-inner{--gold:#806020!important;--accent:#806020!important;--world-accent:#806020;--muted:#625d54;--line:#dfd8c9;--g:#806020;--l:#dfd8c9;--m:#625d54;--b:#faf9f6;--s:#fffefa;background:#faf9f6!important;color:#292820;background-image:linear-gradient(118deg,transparent 30%,#d6cbb51a 30.1%,transparent 30.5%,transparent 69%,#d6cbb514 69.2%,transparent 70%)!important}
+.hof-inner :is(h1,h2,.brand>span){font-family:Cinzel,Georgia,serif!important;letter-spacing:.02em!important}
+.hof-inner h1{overflow-wrap:anywhere}.hof-inner h2{line-height:1.35}
+html body.hof-inner .top{background:#faf9f6fa!important;border-top:2px solid #b89b57!important;border-bottom:1px solid #ddd4be}
+html body.hof-inner .brand{color:#352b1d}.hof-inner .brand small{font-family:Inter,sans-serif;font-size:8px}
+.hof-inner .top-links{color:#574730}.hof-inner .menu nav{background:#faf9f6;border-color:#d5c7aa}
+html body.hof-inner :is(.eyebrow,.text-link,.back){color:#806020!important}
+html body.hof-inner :is(.page-heading,.club-hero,.player-hero,.competition-banner,.mx-banner){background:linear-gradient(115deg,#191813 15%,#302a1c 75%,#191813)!important;border:1px solid #9a7c3d!important;border-left:3px solid #b89b57!important;border-radius:0!important;padding:30px!important;color:#f4eedd!important;margin-top:22px;margin-bottom:24px;min-width:0}
+html body.hof-inner :is(.page-heading,.club-hero,.player-hero,.competition-banner,.mx-banner) :is(h1,h2){color:#f4eedd!important;font-weight:500;line-height:1.2}
+html body.hof-inner :is(.page-heading,.club-hero,.player-hero,.competition-banner,.mx-banner) :is(p,small,.eyebrow,.icon){color:#dac48d!important}
+html body.hof-inner :is(.club-hero,.player-hero) a{color:#f1dfb4!important}
+.hof-inner :is(.club-hero,.player-hero)>div{min-width:0}
+html body.hof-inner .club-hero #image{background:#fffefa;padding:12px;border:1px solid #c8aa68;flex-shrink:0}
+.hof-inner .club-hero #image img{width:64px;height:64px;object-fit:contain}
+html body.hof-inner :is(.manager-card,.club-card,.competition-card,.trophy-card){background:#fffefa!important;border:1px solid #ded5c1!important;border-top:3px solid #b89b57!important;border-radius:0!important;box-shadow:none!important;color:#292820}
+.hof-inner :is(.manager-card,.club-card) h2{font-size:20px;font-weight:600}
+.hof-inner :is(.club-manager,.team,.trophy-winner){border-color:#dfd8c9}
+html body.hof-inner .competition-card strong{font-family:Cinzel,Georgia,serif;font-weight:600;color:#49391d}
+html body.hof-inner .catalog-cup{color:#957337!important}
+html body.hof-inner :is(input[type=search],select){background:#fffefa!important;color:#392f21!important;border:1px solid #d6cbb4!important;border-radius:0!important;min-height:44px;max-width:100%}
+html body.hof-inner :is(.tabs,.manager-scope,.catalog-match-tabs,.trophy-groups,.mx-tabs,.selection-tabs){background:transparent!important;border-bottom-color:#d6cbb4!important;border-radius:0!important}
+html body.hof-inner :is(.tabs,.manager-scope,.catalog-match-tabs,.trophy-groups,.mx-tabs,.selection-tabs)>:is(button,a){background:transparent!important;color:#625943!important;border-radius:0!important;min-height:44px}
+html body.hof-inner :is(.tabs,.manager-scope,.catalog-match-tabs,.trophy-groups,.mx-tabs,.selection-tabs)>:is(.active,[aria-selected=true],[aria-pressed=true],[aria-current=page]){color:#634b1e!important;border-bottom:3px solid #987330!important;background:#f3ecdD!important}
+html body.hof-inner :is(.filters,.catalog-categories,.competition-rail) :is(button,a)[aria-pressed=true],html body.hof-inner .competition-rail [aria-current=page]{background:#e8d8b4!important;border-color:#a8843c!important;color:#49391d!important}
+html body.hof-inner .button:not(.secondary){background:#c8aa68!important;border-color:#c8aa68!important;color:#211e16!important;border-radius:0!important}
+html body.hof-inner :is(.button.secondary,.load-more,.change-competition){border-color:#bba77b!important;color:#644c20!important;border-radius:0!important}
+html body.hof-inner #view{background:transparent!important}
+html body.hof-inner #view :is(.card,.history-block,.history-match,.round-box,.ranking-card),html body.hof-inner .competition-summary>div{background:#fffefa!important;border-color:#ded5c1!important;border-radius:0!important}
+html body.hof-inner :is(.round-head,.ranking-head){background:#f2ecdf!important;color:#49391d!important}
+html body.hof-inner :is(.stand thead th,table thead th){background:#f2ecdf!important;color:#5e4a25!important;border-color:#ded5c1!important}
+html body.hof-inner :is(.history-kpis,.kpis){border-color:#ded5c1!important;background:#ded5c1!important}
+html body.hof-inner :is(.kpi,.competition-summary>div){background:#fffefa!important}
+html body.hof-inner :is(.kpi b,.competition-summary strong,.ranking-value){color:#73551f!important}
+html body.hof-inner .trophy-stage{background:radial-gradient(ellipse at center,#d6b35c33,transparent 70%);border-bottom:2px solid #c8aa68}
+html body.hof-inner .trophy-art{color:#a47c2b!important;filter:drop-shadow(0 3px 3px #9a7c3d33)}
+html body.hof-inner .trophy-competition{font-family:Cinzel,Georgia,serif;color:#57401b!important}
+html body.hof-inner :is(.catalog-dialog,#nx-universal-dialog){background:#faf9f6!important;border-color:#bba77b!important}
+html body.hof-inner #nx-universal-nav{background:#faf9f6!important;border-top:1px solid #cbb98e;color:#65573b}
+html body.hof-inner #nx-universal-nav .nx-clubhouse-center .nx-nav-icon{background:#342d20!important;border-color:#b89b57;box-shadow:0 0 0 4px #faf9f6!important}
+html body.hof-inner #nx-universal-nav [aria-current=page]{color:#806020!important}
+html body.hof-inner footer{background:#faf9f6!important;border-top:1px solid #dfd8c9;color:#746449!important}
+@media(max-width:680px){
+.hof-inner .top-inner{gap:8px}.hof-inner .top-links{font-size:11px}.hof-inner .brand{gap:7px;max-width:58%}
+.hof-inner .brand>span{font-size:10px!important}.hof-inner .brand small{font-size:7px;letter-spacing:.1em}
+html body.hof-inner :is(.page-heading,.club-hero,.player-hero,.competition-banner,.mx-banner){padding:22px 16px!important;margin-top:16px;margin-bottom:20px}
+html body.hof-inner :is(.page-heading,.club-hero,.player-hero,.competition-banner) h1{font-size:clamp(25px,7vw,34px)!important}
+.hof-inner :is(.club-hero,.player-hero){gap:14px;flex-wrap:wrap}
+.hof-inner :is(.manager-card,.club-card) h2{font-size:16px}
+.hof-inner :is(.manager-card,.club-card,.competition-card){overflow-wrap:anywhere}
+.hof-inner .section-head{flex-wrap:wrap;gap:10px}
+.hof-inner :is(.tabs,.mx-tabs){max-width:100%;overflow-x:auto}
+}
