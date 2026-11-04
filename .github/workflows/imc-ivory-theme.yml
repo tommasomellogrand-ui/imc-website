@@ -39,7 +39,7 @@ jobs:
           python3 - <<'PY'
           import io,json,os,ssl,urllib.request
           from pathlib import Path
-          from ftplib import FTP_TLS
+          from ftplib import FTP_TLS,error_perm
           from concurrent.futures import ThreadPoolExecutor
           files=json.loads(Path('ops/ivory-theme-files.json').read_text())
           def upload(chunk):
@@ -47,7 +47,12 @@ jobs:
               ftp=FTP_TLS(context=ctx);ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
               ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);ftp.prot_p()
               for name in chunk:
-                  p=Path(name);data=p.read_bytes();ftp.cwd('/www.italianmastersclub.it/'+str(p.parent))
+                  p=Path(name);data=p.read_bytes()
+                  try: ftp.cwd('/www.italianmastersclub.it/'+str(p.parent))
+                  except error_perm as e:
+                      if 'No such file or directory' not in str(e): raise
+                      print('Not deployed: archived directory absent on server:',p.parent)
+                      continue
                   ftp.storbinary('STOR '+p.name,io.BytesIO(data));check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
                   assert check.getvalue()==data,name
               ftp.quit()
