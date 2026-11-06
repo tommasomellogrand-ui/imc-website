@@ -8,5 +8,15 @@
       "path": "manager-photos-upload/inbox/busts/8919533B-86E4-4496-B520-5FB8A19FBA3D.png",
       "sha": "e5f4f85e08c093895144417e7c921f456414b4be"
     }
+  },
+  "giuseppe-trovato": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/54789151-762A-49D8-9A1D-2EDFF7E097B9.png",
+      "sha": "d0a48c78c3a5fe53b205571365e77b643a91c7b1"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/C8EF4C63-A611-4574-AA08-5652D0CDBADC.png",
+      "sha": "bc518e674550706aa6fd154ce7c6dcf3a376e8c2"
+    }
   }
 }
