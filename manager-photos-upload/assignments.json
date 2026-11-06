@@ -48,5 +48,15 @@
       "path": "manager-photos-upload/inbox/busts/B24372C6-5B7B-401B-89F6-8FF3A39A8D7B.png",
       "sha": "7bdfb949a2a7db476f5399b39b9f8dc66f8e98d5"
     }
+  },
+  "vardan-minasyan": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/E799E804-A315-4142-9646-BC7BD6999331.png",
+      "sha": "eafc009ee6665fd0153af788adbec11e1c1de91a"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/4686BEA5-AA91-41B2-B6E1-804B72486AE4.png",
+      "sha": "b6930307033d2fa2474722260ef1d6772a6dbe87"
+    }
   }
 }
