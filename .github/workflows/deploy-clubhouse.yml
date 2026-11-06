@@ -21,6 +21,7 @@ jobs:
           find clubhouse -name '*.php' -print0 | xargs -0 -n1 php -l
           node --check clubhouse/club-house.js
           node --check clubhouse/h2h.js
+          node --check clubhouse/imc-passport/passport.js
       - name: Publish only Clubhouse and verify bytes
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
