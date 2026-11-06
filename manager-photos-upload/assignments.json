@@ -88,5 +88,15 @@
       "path": "manager-photos-upload/inbox/busts/216D54A7-142F-4482-B207-D8A59A824184.png",
       "sha": "45511324986f2015c75415f72f7e46657a94b797"
     }
+  },
+  "chicco-belin": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/1EC2CF53-EBC0-4046-971B-5D2A62C661F6.png",
+      "sha": "52aaa1b9d6997ce4e71744f45705562dfbdcbbf5"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/A61C3327-CD81-41FE-ACFB-94A5E4A3D368.png",
+      "sha": "10d9407e7e524ffcd43ba2bcd2648abea4dd39c8"
+    }
   }
 }
