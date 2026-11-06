@@ -7,3 +7,38 @@
 .trophy-page{font-family:Inter,sans-serif}.trophy-page .trophy-groups{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.trophy-page .trophy-groups button,.trophy-page .trophy-filters select,.trophy-embedded input[type=search]{font-family:inherit;background:#ffffff;color:#142b45;border-color:var(--line);border-radius:6px}.trophy-page .trophy-groups button[aria-pressed=true]{background:#e8d5aa;color:#142b45}.trophy-page .trophy-filters{grid-template-columns:1fr 2fr}.trophy-page .trophy-filters label,.trophy-embedded .trophy-note{color:var(--muted)}.trophy-page .trophy-card{background:#ffffff;border-color:#142b4544;padding:22px 18px;border-radius:8px}.trophy-page .trophy-stage{height:100px}.trophy-page .trophy-art{width:80px;height:90px}.trophy-page .trophy-competition{font-size:18px;min-height:0;margin:16px 0}.trophy-page .trophy-grid{gap:18px}.trophy-page .trophy-winner strong{font-size:17px}.trophy-page .trophy-manager{font-size:12px}.trophy-page .trophy-date{font-size:12px;margin-top:12px}.trophy-honour+.trophy-honour{margin-top:22px}.trophy-page .trophy-crest{width:50px;height:50px;flex-basis:50px;background:#ffffff0c}.trophy-page .trophy-crest img{inset:5px;width:40px;height:40px}.trophy-page .trophy-filters select:focus-visible,.trophy-page button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @media(max-width:760px){.trophy-page .trophy-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.trophy-page .trophy-card{padding:16px 10px}.trophy-page .trophy-competition{font-size:15px}.trophy-page .trophy-winner strong{font-size:14px}.trophy-page .trophy-manager{font-size:11px}.trophy-page .trophy-groups{grid-template-columns:repeat(2,minmax(0,1fr))}.trophy-page .trophy-filters{grid-template-columns:1fr}.trophy-page .trophy-filters label:last-child{grid-column:auto}}
 
+
+/* Season rows: three equal columns, one season per row. */
+.trophy-page .trophy-grid{display:grid;grid-template-columns:minmax(0,1fr)!important;gap:24px}
+.trophy-page .trophy-card{padding:0!important;overflow:hidden}
+.trophy-page .trophy-title{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line,#d9dfe5)}
+.trophy-page .trophy-title .trophy-art{width:34px;height:38px;flex:0 0 34px;filter:none}
+.trophy-page .trophy-competition{margin:0!important;min-height:0!important;text-align:left;font-size:19px}
+.trophy-page .trophy-columns,.trophy-page .trophy-honour{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.trophy-page .trophy-columns{padding:10px 0;background:var(--world-tint,#f7f7f4);font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.trophy-page .trophy-columns>span{padding:0 20px}
+.trophy-page .trophy-honour{margin:0;align-items:stretch}
+.trophy-page .trophy-honour+.trophy-honour{margin:0;border-top:1px solid var(--line,#d9dfe5)}
+.trophy-page .trophy-season,.trophy-page .trophy-winner,.trophy-page .trophy-manager{min-width:0;padding:18px 20px;margin:0;display:flex;align-items:center;gap:12px;text-align:left;border:0;flex-direction:row}
+.trophy-page .trophy-season{flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;font-size:15px}
+.trophy-page .trophy-season time{font-size:11px;color:var(--muted,#52647a)}
+.trophy-page .trophy-winner,.trophy-page .trophy-manager{border-left:1px solid var(--line,#d9dfe5);color:inherit;text-decoration:none;font-size:15px;line-height:1.4;overflow-wrap:anywhere}
+.trophy-page .trophy-winner strong{font-size:15px;line-height:1.4;min-width:0}
+.trophy-page .trophy-manager a{color:inherit;font-size:inherit}
+.trophy-page .trophy-crest,.trophy-page .trophy-portrait{display:grid;place-items:center;position:relative;width:56px;height:56px;flex:0 0 56px;box-sizing:border-box;border-radius:4px;background:transparent;font-size:12px}
+.trophy-page .trophy-crest img,.trophy-page .trophy-portrait img{position:absolute;inset:0;width:56px;height:56px;object-fit:contain}
+.trophy-page .trophy-portrait{border:1px dashed var(--line,#d9dfe5);color:var(--muted,#52647a);background:var(--world-tint,#f7f7f4)}
+.trophy-page .trophy-portrait svg{width:28px;height:28px;opacity:.5}
+.trophy-page .trophy-portrait img{object-fit:cover;border-radius:4px}
+@media(max-width:600px){
+.trophy-page .trophy-title{padding:12px;gap:8px}
+.trophy-page .trophy-competition{font-size:16px}
+.trophy-page .trophy-columns{font-size:9px;letter-spacing:.03em}
+.trophy-page .trophy-columns>span{padding:0 8px}
+.trophy-page .trophy-season,.trophy-page .trophy-winner,.trophy-page .trophy-manager{padding:14px 8px;font-size:12px;gap:8px}
+.trophy-page .trophy-winner,.trophy-page .trophy-manager{flex-direction:column;align-items:flex-start;justify-content:flex-start}
+.trophy-page .trophy-winner strong{font-size:12px}
+.trophy-page .trophy-season time{font-size:10px}
+.trophy-page .trophy-crest,.trophy-page .trophy-portrait{width:44px;height:44px;flex:0 0 44px}
+.trophy-page .trophy-crest img,.trophy-page .trophy-portrait img{width:44px;height:44px}
+}
