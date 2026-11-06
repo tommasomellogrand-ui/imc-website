@@ -29,3 +29,20 @@
 .assignments-page .hub-sections a[aria-current=page]{border-bottom-color:#c8aa59!important}
 .assignments-page #scope-tabs button[aria-pressed=true],.assignments-page .global-nav a[aria-current=page]{background:#111235;color:#fff}
 .assignments-page .controls{border-left:4px solid #c8aa59}
+
+/* Assignment identity: half portrait, half four-line manager details. */
+body.assignments-page .assignment-card .assignment-identity{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;text-align:left;min-height:136px;margin-bottom:12px}
+body.assignments-page .assignment-identity .manager-portrait--bust{width:100%;height:136px;align-self:end}
+body.assignments-page .assignment-identity .manager-portrait img{object-fit:contain;object-position:center bottom}
+body.assignments-page .assignment-person{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+body.assignments-page .assignment-person h2{font-size:16px;line-height:1.3;margin:0;text-align:left;overflow-wrap:anywhere}
+body.assignments-page .assignment-person h2 span{display:block;min-height:1.3em}
+body.assignments-page .assignment-person .assignment-id-label{font-size:10px;line-height:1.3;margin:7px 0 0;text-transform:uppercase;letter-spacing:.04em;color:#52647a}
+body.assignments-page .assignment-person .assignment-id{font-size:13px;line-height:1.3;color:#142b45}
+@media(max-width:600px){
+body.assignments-page .assignment-card .assignment-identity{gap:6px;min-height:110px}
+body.assignments-page .assignment-identity .manager-portrait--bust{height:110px}
+body.assignments-page .assignment-person h2{font-size:12px}
+body.assignments-page .assignment-person .assignment-id-label{font-size:8px}
+body.assignments-page .assignment-person .assignment-id{font-size:11px}
+}
