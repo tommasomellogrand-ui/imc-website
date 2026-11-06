@@ -16,7 +16,7 @@ try{
  if($slug!==''&&!$person)http_response_code(404);
  if($person){
   $worlds=nexus_rows($core,"SELECT `IMC GW` id,`IMC_WORLD_ID` code,`IMC GW Name` name FROM `IMC Game World Codex Global` WHERE `IMC_WORLD_ID` IN ('IMC-001','IMC-002','IMC-003','IMC-004','IMC-005','IMC-006','IMC-007') ORDER BY `IMC_WORLD_ID`");
-  $assign=nexus_rows($core,'SELECT game_world_id,assignment_type,team_name,team_id,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE manager_id=? ORDER BY start_date,id',[$person['manager_id']]);
+  $assign=nexus_rows($core,"SELECT a.game_world_id,a.assignment_type,COALESCE(NULLIF(n.name,''),a.team_name) team_name,a.team_id,a.national_team_id,a.start_date,a.end_date FROM `IMC Manager Assignment Global` a LEFT JOIN `IMC Game World National Team Mapping` nm ON a.assignment_type='national_team' AND nm.`Game World`=a.game_world_id AND nm.`SM World National Club ID`=a.national_team_id LEFT JOIN `IMC National Team Codex Global` n ON n.id=nm.`National Team ID` WHERE a.manager_id=? ORDER BY a.start_date,a.id",[$person['manager_id']]);
   $assign=array_values(array_filter($assign,fn($a)=>in_array($a['game_world_id'],CLUBHOUSE_WORLDS,true)));
  }
 }catch(Throwable $e){error_log('IMC Passport: '.$e->getMessage());http_response_code(503);$error=true;}
