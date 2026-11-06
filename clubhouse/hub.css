@@ -30,3 +30,20 @@ body .manager-portrait--bust{width:90px;height:120px}
 .assignments-page .manager-portrait--face{width:26px;height:26px}
 body .manager-with-photo{gap:6px}
 }
+
+/* Directory card portraits */
+body.clubhouse-hub .manager-card .directory-identity{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;text-align:left;min-height:136px;margin-bottom:12px}
+body.clubhouse-hub .directory-identity .manager-portrait--bust{width:100%;height:136px;align-self:end}
+body.clubhouse-hub .directory-identity .manager-portrait img{object-fit:contain;object-position:center bottom}
+body.clubhouse-hub .directory-person{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+body.clubhouse-hub .directory-person h2{font-size:16px;line-height:1.3;margin:0;text-align:left;overflow-wrap:anywhere}
+body.clubhouse-hub .directory-person h2 span{display:block;min-height:1.3em}
+body.clubhouse-hub .directory-person .directory-id-label{font-size:10px;line-height:1.3;margin:7px 0 0;text-transform:uppercase;letter-spacing:.04em;color:#52647a}
+body.clubhouse-hub .directory-person .directory-id{font-size:13px;line-height:1.3;color:#142b45}
+@media(max-width:600px){
+body.clubhouse-hub .manager-card .directory-identity{gap:6px;min-height:110px}
+body.clubhouse-hub .directory-identity .manager-portrait--bust{height:110px}
+body.clubhouse-hub .directory-person h2{font-size:12px}
+body.clubhouse-hub .directory-person .directory-id-label{font-size:8px}
+body.clubhouse-hub .directory-person .directory-id{font-size:11px}
+}
