@@ -7,9 +7,10 @@ require dirname(__DIR__).'/nexus/club-house/national-results.php';
 require dirname(__DIR__).'/nexus/club-house/ranking.php';
 require dirname(__DIR__).'/nexus/trophies/engine.php';
 clubhouse_check_worlds(isset($_GET['world'])&&$_GET['world']!==''?[(string)$_GET['world']]:[]);
+header('Cache-Control: no-store, max-age=0');
 try {
  $c=nexus_config();$core=nexus_db($c,'core');
- $managers=nexus_rows($core,'SELECT manager_id,full_name,sm_manager_id FROM `IMC Manager Codex Global` ORDER BY full_name');
+ $managers=nexus_rows($core,'SELECT manager_id,full_name,sm_manager_id,face_image_url,bust_image_url FROM `IMC Manager Codex Global` ORDER BY full_name');
  if(empty($_GET['world'])){
   $worlds=nexus_rows($core,'SELECT `IMC GW` id,`IMC GW Name` name FROM `IMC Game World Codex Global` ORDER BY `IMC GW`');
   nexus_out(['ok'=>true,'managers'=>$managers,'worlds'=>array_values(array_filter($worlds,fn($w)=>in_array($w['id'],CLUBHOUSE_WORLDS,true))),'source'=>'Results']);

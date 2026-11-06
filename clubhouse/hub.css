@@ -8,3 +8,25 @@ body :is(.world,.card,.manager-card,.panel,.rival,.controls,.ranking-row,.timeli
 .clubhouse-hub .controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
 .clubhouse-hub .controls #search-label{display:flex!important}
 @media(max-width:520px){.clubhouse-hub .controls{grid-template-columns:minmax(0,1fr) 44px}.clubhouse-hub .controls #search-label{grid-column:1/-1}}
+
+/* Core manager portraits: empty slots preserve alignment when a URL is absent. */
+body .manager-portrait{display:inline-flex;flex:none;align-items:center;justify-content:center;overflow:hidden;background:transparent;border:0;border-radius:0;vertical-align:middle}
+body .manager-portrait--face{width:40px;height:40px}
+body .manager-portrait img{display:block;width:100%;height:100%;object-fit:contain}
+body .manager-portrait--bust{width:130px;height:170px}
+body #profile-avatar.hero-avatar{width:auto;height:auto;flex:none;background:transparent;border:0;border-radius:0}
+body #profile-avatar[hidden]{display:none}
+body .manager-with-photo{display:inline-flex;align-items:center;gap:8px;min-width:0}
+body .manager-with-photo>span:last-child{min-width:0;overflow-wrap:anywhere}
+body .rank-name{min-width:0}
+body .rank-name .manager-with-photo{font-size:inherit}
+body .trophy-winner.manager-with-photo{justify-content:center}
+body .hh-team small.manager-with-photo{display:flex}
+body .hh-team .manager-portrait--face,body .match-copy .manager-portrait--face{width:26px;height:26px}
+body .assignments-page .manager-portrait--face,.assignments-page .manager-portrait--face{width:34px;height:34px}
+@media(max-width:600px){
+body .manager-portrait--face{width:34px;height:34px}
+body .manager-portrait--bust{width:90px;height:120px}
+.assignments-page .manager-portrait--face{width:26px;height:26px}
+body .manager-with-photo{gap:6px}
+}
