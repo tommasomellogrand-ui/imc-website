@@ -1,0 +1,39 @@
+name: Prepare manager portrait folders
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/manager-portrait-folders.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create and verify manager image directories on Aruba
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False
+          with FTP_TLS(context=ctx) as ftp:
+              ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+              ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+              ftp.prot_p()
+              ftp.set_pasv(True)
+              root='/www.italianmastersclub.it'
+              for path in ['assets','assets/managers','assets/managers/faces','assets/managers/busts']:
+                  absolute=root+'/'+path
+                  try:
+                      ftp.cwd(absolute)
+                  except error_perm as e:
+                      if not str(e).startswith('550'): raise
+                      ftp.mkd(absolute)
+                      ftp.cwd(absolute)
+                  assert ftp.pwd().rstrip('/')==absolute
+                  print('Verified directory:',path)
+          PY

@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - '.github/workflows/manager-portrait-folders.yml'
       - 'clubhouse/**'
       - '.github/workflows/deploy-clubhouse.yml'
       - 'nexus/core/bootstrap.php'
