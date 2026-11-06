@@ -18,5 +18,15 @@
       "path": "manager-photos-upload/inbox/busts/C8EF4C63-A611-4574-AA08-5652D0CDBADC.png",
       "sha": "bc518e674550706aa6fd154ce7c6dcf3a376e8c2"
     }
+  },
+  "luca-nudo": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/EB30F480-897D-4258-A014-A059C85A3DDE.png",
+      "sha": "e0b09c3b140068de1594b97de5607227cbb2d1d2"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/901BA797-8384-49FD-AB94-51A29D405F18.png",
+      "sha": "5360e9c5cacd47f43b08ce7fdec1bd325ff39450"
+    }
   }
 }
