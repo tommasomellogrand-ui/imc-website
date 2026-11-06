@@ -58,5 +58,15 @@
       "path": "manager-photos-upload/inbox/busts/4686BEA5-AA91-41B2-B6E1-804B72486AE4.png",
       "sha": "b6930307033d2fa2474722260ef1d6772a6dbe87"
     }
+  },
+  "giovanni-iodice": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/F2710A89-4A9A-429B-9012-A391F6449EC4.png",
+      "sha": "5eb6f34dfd24812765c0ac988519bf11e2d294a7"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/B792FF05-3E9C-4186-A2D0-FCFF6A1DEE9F.png",
+      "sha": "0d7d262afc370edfb0fe61032c39adb3e139edc9"
+    }
   }
 }
