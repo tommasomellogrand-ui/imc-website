@@ -188,11 +188,17 @@ function trophyImportance(t){
 function trophyRoom(){
  const rows=available().flatMap(w=>bundles[w].trophies||[]),national=rows.filter(t=>t.scope==='national_team').length;
  $('compact-count').textContent=number(rows.length)+' trofei';$('manager-count').textContent=number(rows.length)+' trofei';
- const tile=t=>'<article class="trophy-tile"><div class="trophy-face">'+cup+'<strong class="trophy-competition">'+esc(t.competition)+'</strong><div class="trophy-team">'+clubLogo(t.world,t.team_id,t.scope||'club')+'<span>'+esc(t.team)+'</span></div>'+(t.manager_name?'<strong class="trophy-winner manager-with-photo">'+ClubhousePortraits.portrait(t.manager_id)+esc(t.manager_name)+'</strong>':'')+'<span class="trophy-season">Stagione '+esc(t.season)+'</span></div></article>';
+ const honour=t=>'<li class="ch-honour"><div class="ch-season"><strong>'+esc(t.season??'—')+'</strong></div><div class="ch-winner"><span class="ch-crest">'+clubLogo(t.world,t.team_id,t.scope||'club')+'</span><span class="ch-name-divider" aria-hidden="true"></span><strong>'+esc(t.team)+'</strong></div><div class="ch-manager">'+ClubhousePortraits.portrait(t.manager_id)+'<span class="ch-name-divider" aria-hidden="true"></span>'+(t.manager_id?'<a href="'+esc(hubURL('trophies',t.manager_id))+'">'+esc(t.manager_name||'Manager non disponibile')+'</a>':'<span>Manager non disponibile</span>')+'</div></li>';
  const groups=available().map(w=>{
-  const items=rows.filter(t=>t.world===w).sort((a,b)=>trophyImportance(a)-trophyImportance(b)||String(b.date||'').localeCompare(String(a.date||''))||String(a.competition).localeCompare(String(b.competition),'it'));
+  const items=rows.filter(t=>t.world===w).sort((a,b)=>trophyImportance(a)-trophyImportance(b)||String(a.competition).localeCompare(String(b.competition),'it'));
   if(!items.length)return '';
-  return '<section class="trophy-world-section"><div class="career-world-heading"><span>'+esc(worldCode(w))+'</span><h2>'+esc(worldNames[w]||w)+'</h2><small>'+number(items.length)+' trofei</small></div><div class="trophy-tiles">'+items.map(tile).join('')+'</div></section>';
+  const competitions=new Map();
+  for(const t of items){const key=JSON.stringify([t.scope,t.trophy_type,t.division,t.country,t.competition]);if(!competitions.has(key))competitions.set(key,[]);competitions.get(key).push(t);}
+  const sections=[...competitions.values()].map(history=>{
+   history.sort((a,b)=>Number(b.season)-Number(a.season)||String(b.date||'').localeCompare(String(a.date||'')));
+   return '<article class="ch-trophy-section"><header class="ch-trophy-title">'+cup+'<h3>'+esc(history[0].competition)+'</h3></header><div class="ch-trophy-columns"><span>Stagione</span><span>Squadra</span><span>Manager</span></div><ul class="ch-honours">'+history.map(honour).join('')+'</ul></article>';
+  }).join('');
+  return '<section class="trophy-world-section"><div class="career-world-heading"><span>'+esc(worldCode(w))+'</span><h2>'+esc(worldNames[w]||w)+'</h2><small>'+number(items.length)+' trofei</small></div><div class="ch-trophy-list">'+sections+'</div></section>';
  }).join('');
  $('content').innerHTML='<section class="trophy-summary" aria-label="Riepilogo trofei">'+[['Totale trofei',rows.length],['Club',rows.length-national],['Nazionali',national]].map(([label,value])=>'<div><strong>'+number(value)+'</strong><span>'+label+'</span></div>').join('')+'</section>'+groups+(rows.length?'':'<p class="notice">'+(loading?'Caricamento trofei…':'Nessun trofeo per i filtri selezionati.')+'</p>');
 }

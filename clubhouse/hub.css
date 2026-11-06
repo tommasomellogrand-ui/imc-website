@@ -47,3 +47,30 @@ body.clubhouse-hub .directory-person h2{font-size:12px}
 body.clubhouse-hub .directory-person .directory-id-label{font-size:8px}
 body.clubhouse-hub .directory-person .directory-id{font-size:11px}
 }
+
+/* Trophy honours: one season per row, 20/40/40 columns. */
+.ch-trophy-list{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+.ch-trophy-section{border:1px solid #d9dfe5;background:#fff;overflow:hidden}
+.ch-trophy-title{display:flex;justify-content:center;align-items:center;gap:12px;padding:18px 12px;border-top:3px solid #c8aa59;border-bottom:1px solid #c8aa59}
+.ch-trophy-title h3{margin:0;font-size:18px;text-align:center;color:#142b45}
+.ch-trophy-title .trophy-icon{width:30px;height:34px;flex:none;margin:0;color:#b39552}
+.ch-trophy-columns,.ch-honour{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,2fr);text-align:center}
+.ch-trophy-columns{padding:12px 0;background:#f7f5ef;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.ch-honours{list-style:none;padding:0;margin:0}
+.ch-honour:nth-child(even){background:#faf9f5}
+.ch-honour+.ch-honour{border-top:1px solid #d9dfe5}
+.ch-season,.ch-winner,.ch-manager{display:flex;flex-direction:column;align-items:center;min-width:0;padding:20px 12px;gap:10px;font-size:15px;line-height:1.4;overflow-wrap:anywhere}
+.ch-season{justify-content:center;font-size:26px;font-variant-numeric:tabular-nums}
+.ch-manager a{color:inherit;text-decoration:none}
+.ch-manager a:hover{text-decoration:underline}
+.ch-name-divider{width:30px;height:2px;flex:none;background:#b39552;opacity:.7}
+body .ch-honour .manager-portrait--face,.ch-crest{width:56px;height:56px;display:flex;align-items:center;justify-content:center;flex:none}
+body .ch-crest .club-logo{width:56px;height:56px;object-fit:contain;margin:0}
+.ch-crest .club-placeholder{visibility:hidden}
+@media(max-width:600px){
+.ch-trophy-title h3{font-size:16px}
+.ch-trophy-columns{font-size:9px;letter-spacing:.03em}
+.ch-season,.ch-winner,.ch-manager{padding:16px 8px;gap:9px;font-size:12px}
+.ch-season{font-size:23px}
+body .ch-honour .manager-portrait--face,.ch-crest,body .ch-crest .club-logo{width:44px;height:44px}
+}
