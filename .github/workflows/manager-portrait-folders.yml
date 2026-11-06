@@ -1,23 +1,46 @@
-name: Prepare manager portrait folders
+name: Publish manager photos to Aruba
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/manager-portrait-folders.yml']
+    paths:
+      - 'manager-photos-upload/**'
+      - '.github/workflows/manager-portrait-folders.yml'
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: imc-manager-photos
+  cancel-in-progress: false
 jobs:
-  prepare:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Create and verify manager image directories on Aruba
+      - uses: actions/checkout@v4
+      - name: Validate, name and publish manager photos
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
         run: |
           python3 - <<'PY'
-          import os, ssl
+          import os, ssl, io, hashlib, urllib.request
+          from pathlib import Path
           from ftplib import FTP_TLS, error_perm
+          root='/www.italianmastersclub.it'
+          uploads=[]
+          for kind in ('faces','busts'):
+              folder=Path('manager-photos-upload/tommaso-mello')/kind
+              files=[p for p in folder.glob('*') if p.is_file() and p.name != '.gitkeep']
+              if len(files)>1:
+                  raise SystemExit(f'{folder}: caricare una sola foto per cartella')
+              if not files: continue
+              p=files[0]
+              data=p.read_bytes()
+              if not data.startswith(b'\xff\xd8\xff'):
+                  raise SystemExit(f'{p}: serve una foto JPEG')
+              uploads.append((kind,data))
+          if not uploads:
+              print('Cartelle pronte: nessuna foto ancora caricata')
+              raise SystemExit(0)
           ctx=ssl.create_default_context()
           ctx.check_hostname=False
           with FTP_TLS(context=ctx) as ftp:
@@ -25,15 +48,25 @@ jobs:
               ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
               ftp.prot_p()
               ftp.set_pasv(True)
-              root='/www.italianmastersclub.it'
-              for path in ['assets','assets/managers','assets/managers/faces','assets/managers/busts']:
-                  absolute=root+'/'+path
-                  try:
-                      ftp.cwd(absolute)
-                  except error_perm as e:
-                      if not str(e).startswith('550'): raise
-                      ftp.mkd(absolute)
-                      ftp.cwd(absolute)
-                  assert ftp.pwd().rstrip('/')==absolute
-                  print('Verified directory:',path)
+              for kind,data in uploads:
+                  ftp.cwd(root)
+                  for part in ('assets','managers',kind):
+                      try: ftp.cwd(part)
+                      except error_perm as e:
+                          if not str(e).startswith('550'): raise
+                          ftp.mkd(part)
+                          ftp.cwd(part)
+                  name='tommaso-mello.jpg'
+                  ftp.storbinary('STOR '+name,io.BytesIO(data))
+                  check=io.BytesIO()
+                  ftp.retrbinary('RETR '+name,check.write)
+                  if check.getvalue()!=data: raise SystemExit('Verifica FTPS fallita')
+                  url=f'https://www.italianmastersclub.it/assets/managers/{kind}/{name}'
+                  req=urllib.request.Request(url+'?verify='+hashlib.sha256(data).hexdigest()[:16],headers={'User-Agent':'IMC-Manager-Photo-Verify'})
+                  with urllib.request.urlopen(req,timeout=60) as response:
+                      if response.status!=200 or response.read()!=data:
+                          raise SystemExit('Verifica pubblica fallita: '+url)
+                  print('Pubblicata e verificata:',url)
+                  with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as summary:
+                      summary.write(f'- {kind}: [{url}]({url})\n')
           PY
