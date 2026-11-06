@@ -78,5 +78,15 @@
       "path": "manager-photos-upload/inbox/busts/378CFCB8-AF3F-4B4E-A557-A1639DF01F2C.png",
       "sha": "2a878517501c3acba44a03a725a058a9642c417d"
     }
+  },
+  "nicky-pepe": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/94E40ED5-DC34-4A6C-8EE0-92210BDE92E0.png",
+      "sha": "96dded27b6c0a00ff850657a6730352346307280"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/216D54A7-142F-4482-B207-D8A59A824184.png",
+      "sha": "45511324986f2015c75415f72f7e46657a94b797"
+    }
   }
 }
