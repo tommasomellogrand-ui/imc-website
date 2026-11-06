@@ -28,7 +28,7 @@
 .trophy-page .trophy-name-divider{display:block;width:30px;height:2px;flex:0 0 2px;background:var(--gold,var(--accent,#b39552));opacity:.7}
 .trophy-page .trophy-crest,.trophy-page .trophy-portrait{display:grid;place-items:center;position:relative;width:56px;height:56px;flex:0 0 56px;box-sizing:border-box;border-radius:4px;background:transparent;font-size:12px}
 .trophy-page .trophy-crest img,.trophy-page .trophy-portrait img{position:absolute;inset:0;width:56px;height:56px;object-fit:contain}
-.trophy-page .trophy-portrait{border:1px dashed var(--line,#d9dfe5);color:var(--muted,#52647a);background:var(--world-tint,#f7f7f4)}
+.trophy-page .trophy-portrait{border:0;background:transparent}
 .trophy-page .trophy-portrait svg{width:28px;height:28px;opacity:.5}
 .trophy-page .trophy-portrait img{object-fit:cover;border-radius:4px}
 @media(max-width:600px){

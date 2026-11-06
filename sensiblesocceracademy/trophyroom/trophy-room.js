@@ -62,13 +62,13 @@ window.NexusTrophies={
    const manager=winnerManagers.get(r.id),teamId=Number(r.winner_sm_world_club_id);
    const teamUrl=teamId>0?(national?'/sensiblesocceracademy/nations/detail.html?':'/sensiblesocceracademy/clubs/detail.html?')+new URLSearchParams({world:gw,type:national?'nation':'club',id:String(teamId)}):null;
    const managerHtml=manager?'<a href="'+esc('/sensiblesocceracademy/managers/profile.html?'+new URLSearchParams({world:gw,manager:manager.manager_id}))+'">'+esc(manager.full_name)+'</a>':'Manager non disponibile';
-   const portraitRaw=String(r.winner_manager_photo_url||'').replace(/^http:/,'https:');
+   const portraitRaw=String(r.winner_manager_photo_url||'').trim().replace(/^http:/,'https:');
    const portraitSrc=/^(https:\/\/|\/(?!\/))/.test(portraitRaw)?portraitRaw:'';
-   const portrait='<span class="trophy-portrait" aria-label="Foto manager"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="16" cy="10" r="5"/><path d="M6 29v-4a10 10 0 0 1 20 0v4"/></svg>'+(portraitSrc?'<img src="'+esc(portraitSrc)+'" alt="" loading="lazy">':'')+'</span>';
+   const portrait='<span class="trophy-portrait" aria-label="Foto manager">'+(portraitSrc?'<img src="'+esc(portraitSrc)+'" alt="" loading="lazy">':'')+'</span>';
    return '<li class="trophy-honour"><div class="trophy-season"><strong>'+esc(r.imc_season||'—')+'</strong></div>'+(teamUrl?'<a class="trophy-winner" href="'+esc(teamUrl)+'">':'<div class="trophy-winner">')+'<span class="trophy-crest"><span>'+esc(initials)+'</span>'+(src?'<img src="'+esc(src)+'" alt="" loading="lazy">':'')+'</span><span class="trophy-name-divider" aria-hidden="true"></span><strong>'+esc(name)+'</strong>'+(teamUrl?'</a>':'</div>')+'<div class="trophy-manager">'+portrait+'<span class="trophy-name-divider" aria-hidden="true"></span><span>'+managerHtml+'</span></div></li>';
   };
   grid.innerHTML=filtered.length?[...honours.values()].map(history=>{history.sort((a,b)=>Number(b.imc_season)-Number(a.imc_season)||String(b.won_date).localeCompare(String(a.won_date)));const r=history[0];return '<article class="trophy-card"><header class="trophy-title">'+art(action(r))+'<h3 class="trophy-competition">'+esc(r.nexus_view||r.trophy_type||r.competition_key)+'</h3></header><div class="trophy-columns" aria-hidden="true"><span>Stagione</span><span>Squadra</span><span>Manager</span></div><ul class="trophy-honours" aria-label="Albo d’oro">'+history.map(award).join('')+'</ul></article>'}).join(''):'<p class="empty">Nessun trofeo ancora assegnato per la selezione.</p>';
-  grid.querySelectorAll('.trophy-crest img,.trophy-portrait img').forEach(img=>{img.addEventListener('error',()=>img.remove());img.addEventListener('load',()=>img.previousElementSibling.hidden=true)});
+  grid.querySelectorAll('.trophy-crest img,.trophy-portrait img').forEach(img=>{img.addEventListener('error',()=>img.remove());img.addEventListener('load',()=>{if(img.previousElementSibling)img.previousElementSibling.hidden=true})});
  }
  selects.forEach(([,s])=>s.addEventListener('change',draw));$('search').oninput=draw;draw();
 
