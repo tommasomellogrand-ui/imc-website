@@ -22,7 +22,7 @@ jobs:
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
         run: |
           python3 - <<'PY'
-          import os, ssl, io, hashlib, urllib.request
+          import os, ssl, io, hashlib, urllib.request, json, re
           from pathlib import Path
           from ftplib import FTP_TLS, error_perm
           root='/www.italianmastersclub.it'
@@ -38,7 +38,24 @@ jobs:
               if data.startswith(b'\xff\xd8\xff'): ext='jpg'
               elif data.startswith(b'\x89PNG\r\n\x1a\n'): ext='png'
               else: raise SystemExit(f'{p}: formato non supportato, usare JPEG o PNG')
-              uploads.append((kind,data,ext))
+              uploads.append(('tommaso-mello',kind,data,ext))
+          manifest=Path('manager-photos-upload/assignments.json')
+          assignments=json.loads(manifest.read_text()) if manifest.exists() else {}
+          for slug, photos in assignments.items():
+              if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*',slug):
+                  raise SystemExit('Nome manager non valido')
+              for kind, photo in photos.items():
+                  if kind not in ('faces','busts'): raise SystemExit('Tipo foto non valido')
+                  p=Path(photo['path'])
+                  if not p.as_posix().startswith('manager-photos-upload/inbox/'+kind+'/') or '..' in p.parts:
+                      raise SystemExit('Percorso foto non valido')
+                  data=p.read_bytes()
+                  blob=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+                  if blob!=photo['sha']: raise SystemExit('Foto cambiata: riconfermare abbinamento')
+                  if data.startswith(b'\xff\xd8\xff'): ext='jpg'
+                  elif data.startswith(b'\x89PNG\r\n\x1a\n'): ext='png'
+                  else: raise SystemExit('Formato foto non supportato')
+                  uploads.append((slug,kind,data,ext))
           if not uploads:
               print('Cartelle pronte: nessuna foto ancora caricata')
               raise SystemExit(0)
@@ -49,7 +66,7 @@ jobs:
               ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
               ftp.prot_p()
               ftp.set_pasv(True)
-              for kind,data,ext in uploads:
+              for slug,kind,data,ext in uploads:
                   ftp.cwd(root)
                   for part in ('assets','managers',kind):
                       try: ftp.cwd(part)
@@ -57,7 +74,7 @@ jobs:
                           if not str(e).startswith('550'): raise
                           ftp.mkd(part)
                           ftp.cwd(part)
-                  name='tommaso-mello.'+ext
+                  name=slug+'.'+ext
                   ftp.storbinary('STOR '+name,io.BytesIO(data))
                   check=io.BytesIO()
                   ftp.retrbinary('RETR '+name,check.write)
