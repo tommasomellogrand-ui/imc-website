@@ -38,5 +38,15 @@
       "path": "manager-photos-upload/inbox/busts/C222AA95-3294-4200-A8B0-81DB5A04BC2E.png",
       "sha": "36973e6e35f56e3d1979776d25bfe405dd7dff72"
     }
+  },
+  "luciano-catalano": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/9276EDFA-8864-4C17-BB4D-510EE309A3B6.png",
+      "sha": "fe1da6d2cd1941e7e8f3c2b06d1c2620e860d6e2"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/B24372C6-5B7B-401B-89F6-8FF3A39A8D7B.png",
+      "sha": "7bdfb949a2a7db476f5399b39b9f8dc66f8e98d5"
+    }
   }
 }
