@@ -68,5 +68,15 @@
       "path": "manager-photos-upload/inbox/busts/B792FF05-3E9C-4186-A2D0-FCFF6A1DEE9F.png",
       "sha": "0d7d262afc370edfb0fe61032c39adb3e139edc9"
     }
+  },
+  "vincenzo-martorano": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/9C6DF3F8-156A-4660-9BC7-F413B259133A.png",
+      "sha": "375c886c6b02d03d1b76ac1d33749ec3a7004b59"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/378CFCB8-AF3F-4B4E-A557-A1639DF01F2C.png",
+      "sha": "2a878517501c3acba44a03a725a058a9642c417d"
+    }
   }
 }
