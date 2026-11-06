@@ -35,9 +35,10 @@ jobs:
               if not files: continue
               p=files[0]
               data=p.read_bytes()
-              if not data.startswith(b'\xff\xd8\xff'):
-                  raise SystemExit(f'{p}: serve una foto JPEG')
-              uploads.append((kind,data))
+              if data.startswith(b'\xff\xd8\xff'): ext='jpg'
+              elif data.startswith(b'\x89PNG\r\n\x1a\n'): ext='png'
+              else: raise SystemExit(f'{p}: formato non supportato, usare JPEG o PNG')
+              uploads.append((kind,data,ext))
           if not uploads:
               print('Cartelle pronte: nessuna foto ancora caricata')
               raise SystemExit(0)
@@ -48,7 +49,7 @@ jobs:
               ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
               ftp.prot_p()
               ftp.set_pasv(True)
-              for kind,data in uploads:
+              for kind,data,ext in uploads:
                   ftp.cwd(root)
                   for part in ('assets','managers',kind):
                       try: ftp.cwd(part)
@@ -56,7 +57,7 @@ jobs:
                           if not str(e).startswith('550'): raise
                           ftp.mkd(part)
                           ftp.cwd(part)
-                  name='tommaso-mello.jpg'
+                  name='tommaso-mello.'+ext
                   ftp.storbinary('STOR '+name,io.BytesIO(data))
                   check=io.BytesIO()
                   ftp.retrbinary('RETR '+name,check.write)
