@@ -28,5 +28,15 @@
       "path": "manager-photos-upload/inbox/busts/901BA797-8384-49FD-AB94-51A29D405F18.png",
       "sha": "5360e9c5cacd47f43b08ce7fdec1bd325ff39450"
     }
+  },
+  "max-palace": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/AC4B78AD-32D1-4FF6-96B7-FAAFDDD457C4.png",
+      "sha": "a3edad03d0dc242e5b1ee8738685c0f9db948f83"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/C222AA95-3294-4200-A8B0-81DB5A04BC2E.png",
+      "sha": "36973e6e35f56e3d1979776d25bfe405dd7dff72"
+    }
   }
 }
