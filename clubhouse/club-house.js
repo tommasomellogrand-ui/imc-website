@@ -193,7 +193,7 @@ function trophyRoom(){
   const items=rows.filter(t=>t.world===w).sort((a,b)=>trophyImportance(a)-trophyImportance(b)||String(a.competition).localeCompare(String(b.competition),'it'));
   if(!items.length)return '';
   const competitions=new Map();
-  for(const t of items){const key=JSON.stringify([t.scope,t.trophy_type,t.division,t.country,t.competition]);if(!competitions.has(key))competitions.set(key,[]);competitions.get(key).push(t);}
+  for(const t of items){const key=JSON.stringify([t.scope,String(t.competition||'').trim()]);if(!competitions.has(key))competitions.set(key,[]);competitions.get(key).push(t);}
   const sections=[...competitions.values()].map(history=>{
    history.sort((a,b)=>Number(b.season)-Number(a.season)||String(b.date||'').localeCompare(String(a.date||'')));
    return '<article class="ch-trophy-section"><header class="ch-trophy-title">'+cup+'<h3>'+esc(history[0].competition)+'</h3></header><div class="ch-trophy-columns"><span>Stagione</span><span>Squadra</span><span>Manager</span></div><ul class="ch-honours">'+history.map(honour).join('')+'</ul></article>';

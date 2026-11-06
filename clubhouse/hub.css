@@ -74,3 +74,5 @@ body .ch-crest .club-logo{width:56px;height:56px;object-fit:contain;margin:0}
 .ch-season{font-size:23px}
 body .ch-honour .manager-portrait--face,.ch-crest,body .ch-crest .club-logo{width:44px;height:44px}
 }
+
+body.clubhouse-hub .ch-trophy-title{background:#fff;color:#142b45}
