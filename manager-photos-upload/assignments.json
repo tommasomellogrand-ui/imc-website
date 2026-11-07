@@ -98,5 +98,15 @@
       "path": "manager-photos-upload/inbox/busts/A61C3327-CD81-41FE-ACFB-94A5E4A3D368.png",
       "sha": "10d9407e7e524ffcd43ba2bcd2648abea4dd39c8"
     }
+  },
+  "simone-campanella": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/simone-campanella.jpg",
+      "sha": "6ffe44063fb5ce39db125605c4775b6b2e444046"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/simone-campanella.jpg",
+      "sha": "bcb87dac9da3afc23bd308b50bac11d9dd0e6636"
+    }
   }
 }
