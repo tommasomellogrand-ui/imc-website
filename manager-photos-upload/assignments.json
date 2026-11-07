@@ -298,5 +298,15 @@
       "path": "manager-photos-upload/inbox/busts/chris-fenech.jpg",
       "sha": "6666b00491723cdd2df6c72e11b65e796ee79473"
     }
+  },
+  "cosimo-lonoce": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/cosimo-lonoce.jpg",
+      "sha": "41332189bc0b3753bef573e00615ab3610976f6d"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/cosimo-lonoce.jpg",
+      "sha": "a2bd42600f94d64e1cbf48fee916e2f5e83da226"
+    }
   }
 }
