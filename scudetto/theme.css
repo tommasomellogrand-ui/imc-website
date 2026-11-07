@@ -27,3 +27,18 @@ body.imc-world-ui :is(.world-section,.club-card,.manager-card):is(:focus-visible
 body.manager-album #cards .team {border-bottom:2px solid var(--stripe,#c8aa56)}
 body.manager-album #cards .team:has(img[src*="/115."]) {--stripe:#bb1733}
 body.manager-album #cards .team:has(img[src*="/123."]) {--stripe:#882438}
+
+#scudetto-game body{background:#fffaf0!important;--gold:#735400!important;--accent:#735400!important}
+#scudetto-game .stadium-hero{margin:0;background:#071b2b;text-align:center;line-height:0}
+#scudetto-game .stadium-hero img{width:min(100%,700px);height:auto;margin:auto}
+#scudetto-game .stadium-controls{display:flex;justify-content:center;gap:8px;background:#081e31;padding:12px}
+#scudetto-game .stadium-controls a{flex:1;max-width:220px;text-align:center;padding:12px 4px;font-weight:800;color:white;border:1px solid #99a9b4;border-radius:3px}
+#scudetto-game .stadium-controls a:first-child,#scudetto-game .stadium-controls a:focus-visible{background:#ffcc12;color:#081e31}
+#scudetto-game .top,#scudetto-game #nx-universal-nav,#scudetto-game .top .menu nav{background:#081e31!important;color:white!important;border-color:#354c60!important}
+#scudetto-game .top :is(a,small,span,summary),#scudetto-game #nx-universal-nav :is(a,button){color:white!important}
+#scudetto-game #nx-universal-nav .nx-clubhouse-center{color:#ffcc12!important}
+#scudetto-game .section,#scudetto-game .match-panel,#scudetto-game .shell,#scudetto-game .world-section{background:#fffaf0!important;border-radius:2px}
+#scudetto-game .text-link,#scudetto-game .eyebrow{color:#384c5c!important}
+#scudetto-game .tabs{background:#081e31!important;padding:5px!important}
+#scudetto-game .tabs button{color:#fff!important;background:#081e31!important}
+#scudetto-game button[aria-selected=true],#scudetto-game button[aria-pressed=true]{background:#ffcc12!important;color:#081e31!important;border-color:#ffcc12!important}
