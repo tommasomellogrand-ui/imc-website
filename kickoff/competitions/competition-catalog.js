@@ -20,11 +20,19 @@ function domesticRows(rows){
   const name=award.winner_name||p.leader;
   const logo=award.winner_logo_url||p.logos?.[name];
   const label=/^Div (\d+)$/.test(r.nexus_view)?'Divisione '+r.sm_division:r.nexus_view;
-  const info=name?'<small>'+(finished?'Vincitore':'Prima in classifica')+'</small><strong>'+(logo?'<img width="22" height="22" style="object-fit:contain;vertical-align:middle" src="'+esc(logo)+'" alt=""> ':'')+esc(name)+'</strong>'+(!finished && p.points!=null?'<small>'+esc(p.points)+' punti</small>':''):'<small>In attesa dei risultati</small>';
-  return '<button class="gw-cup" data-key="'+esc(r.competition_key)+'"><span class="gw-name">'+esc(label)+'</span><span class="gw-state">'+info+'</span></button>';
+  const points=!finished && p.points!=null?'<small class="league-points">'+esc(p.points)+' pt</small>':'';
+  const info=name?'<small>'+(finished?'Vincitore':'Prima in classifica')+'</small><span class="league-side">'+(logo?'<img width="24" height="24" src="'+esc(logo)+'" alt="">':'')+'<strong>'+esc(name)+'</strong>'+points+'</span>':'<small>In attesa dei risultati</small>';
+  return '<button class="gw-cup league-card" data-key="'+esc(r.competition_key)+'"><span class="gw-name">'+IMCCompetitionRow.symbol(true)+'<b>'+esc(label)+'</b></span><span class="gw-state">'+info+'</span></button>';
  }).join('');
  const gauge='<div class="gw-gauge"><svg viewBox="0 0 120 68" aria-hidden="true"><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="#dedee5" stroke-width="9"/><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="var(--world-accent,#7656a0)" stroke-width="9" pathLength="100" stroke-dasharray="'+(pct??0)+' 100"/></svg><b>'+(pct===null?'':pct+'%')+'</b><small>'+esc(caption)+'</small></div>';
- return (leagues.length?'<h3 class="cups-title">Leagues</h3><div style="display:grid;padding:10px 0">'+gauge+'</div>'+links+'':'')+(cups.length?'<h3 class="cups-title">Cups</h3>'+cups.map(card).join(''):'');
+ function turnLine(slot,title){
+  const dates=stats.map(p=>p[slot]).filter(t=>t?.date).sort((a,b)=>a.date.localeCompare(b.date));
+  const t=slot==='last_turn'?dates[dates.length-1]:dates[0];
+  const value=t?[(t.number?'Giornata '+t.number:''),t.date.split('-').reverse().join('/')].filter(Boolean).join(' · '):'—';
+  return '<div><small>'+title+'</small><strong>'+esc(value)+'</strong></div>';
+ }
+ const turns='<div class="league-turns">'+turnLine('last_turn','Ultimo turno giocato')+turnLine('next_turn','Prossimo turno')+'</div>';
+ return (leagues.length?'<h3 class="cups-title">Leagues</h3><div class="league-overview">'+gauge+turns+'</div>'+links+'':'')+(cups.length?'<h3 class="cups-title">Cups</h3>'+cups.map(card).join(''):'');
 }
 function seasonBar(){
  const source=$('season-select'),bar=document.createElement('div');bar.className='season-bar';

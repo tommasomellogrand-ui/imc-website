@@ -2,3 +2,14 @@
 #view .competition-card.cr-three,.cr-three{height:110px;min-height:110px;max-height:110px;grid-template-columns:minmax(72px,25%) minmax(0,1fr)!important;padding:7px 6px;gap:8px;align-items:center;overflow:hidden}
 .cr-id{display:grid;align-content:center;gap:5px}.cr-three .cr-id strong{line-height:1.1;font-size:14px}.cr-three .cr-lines{display:grid!important;grid-template-rows:repeat(3,32px);gap:0!important}.cr-line{display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden;white-space:nowrap;font-size:12px}.cr-line+.cr-line{border-top:1px solid #eee}.cr-line small,.cr-line strong{flex:none}.cr-team{display:inline-flex;align-items:center;gap:4px;min-width:0;vertical-align:middle}.cr-team>span{overflow:hidden;text-overflow:ellipsis}.cr-team i{display:inline-grid;place-items:center;position:relative;width:18px;height:20px;flex:none;clip-path:polygon(0 0,100% 0,100% 68%,50% 100%,0 68%);background:#e5ebef;color:#263849;font:700 8px sans-serif}.cr-team i img{position:absolute;inset:0;width:100%;height:100%;margin:0;background:white;object-fit:contain}
 .cr-team i:has(img){clip-path:none;background:transparent}.cr-team i:has(img) img{background:white}
+
+.gw-cup.league-card{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);min-height:74px}
+.league-card .gw-name b,.league-side strong{overflow-wrap:anywhere}
+.league-side{display:flex;align-items:center;gap:5px;min-width:0}
+.league-side img{object-fit:contain;flex:none}
+.league-side .league-points{margin-left:auto;white-space:nowrap;font-weight:700}
+.league-overview{display:grid;grid-template-columns:minmax(90px,1fr) minmax(0,1.25fr);align-items:center;gap:12px;padding:14px 8px}
+.league-turns{display:grid;gap:10px;border-left:1px solid #ddd;padding-left:12px}
+.league-turns small,.league-turns strong{display:block}
+.league-turns small,.league-card .gw-state>small{color:#536277;font-size:12px}
+.league-turns strong{font-size:14px}
