@@ -136,6 +136,17 @@ try {
    }
   }
   $out[$key]=['final_played'=>!$isLeague && $final && $final['played'] && cupPhase($final)[1]!=='Andata' && $finished,'logos'=>$logos,'ranking'=>$ranking,'upcoming'=>$upcoming,'leader'=>$leader,'points'=>$leader!==null?$table[$leader][0]:null,'finalists'=>$pair($final),'next_match'=>$pair($next),'next_date'=>$next?substr($next['match_date'],0,10):null,'label'=>$label,'detail'=>$detail,'percent'=>$pct,'played'=>$played,'expected'=>$isLeague&&$complete?$total:null,'complete'=>$finished,'format'=>$path,'position'=>$position];
+  if($isLeague){
+   foreach(['last_turn'=>$latest,'next_turn'=>$next] as $slot=>$fixture){
+    if(!$fixture)continue;
+    $day=substr((string)$fixture['match_date'],0,10);
+    $number=$fixture['competition_round'];
+    if(!is_numeric($number) && $complete && count($days)===2*($n-1) && max($days)===min($days)){
+     $number=array_search($day,array_keys($days),true)+1;
+    }
+    $out[$key][$slot]=['date'=>$day,'number'=>is_numeric($number)?(int)$number:null];
+   }
+  }
 
  }
  $awards=nexus_rows($db,"SELECT t.winner_sm_world_club_id team,t.won_date day,t.competition_group,t.competition_key,t.winner_name,t.nexus_view,cm.sm_club_id logo_id,CASE WHEN BINARY t.winner_name=BINARY m.home_name THEN m.home_manager_name WHEN BINARY t.winner_name=BINARY m.away_name THEN m.away_manager_name END winner_manager_name FROM {$prefix}_Trophy_Room t LEFT JOIN {$prefix}_Match_Reports m ON m.sm_fixture_id=BINARY t.deciding_fixture_id AND m.imc_season=t.imc_season AND BINARY m.competition_key=BINARY t.competition_key LEFT JOIN IMC_Game_World_Club_Mapping cm ON cm.game_world_id=? AND cm.sm_world_club_id=BINARY t.winner_sm_world_club_id AND t.competition_group<>'NATIONS' WHERE t.imc_season=?",[$gw,$season]);
