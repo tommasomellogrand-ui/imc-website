@@ -118,5 +118,15 @@
       "path": "manager-photos-upload/inbox/busts/carlo-colombo.jpg",
       "sha": "434b3f796d2177593899bd0ff4d2352a9f4d3c54"
     }
+  },
+  "sir-simone": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/sir-simone.jpg",
+      "sha": "919885d0a37ec54f96f250cb490b208f007d9435"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/sir-simone.jpg",
+      "sha": "52ff4c4b313613e83e8621e15a602f6c39b747cc"
+    }
   }
 }
