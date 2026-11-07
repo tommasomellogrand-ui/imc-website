@@ -318,5 +318,15 @@
       "path": "manager-photos-upload/inbox/busts/daniele-ravanini.jpg",
       "sha": "d370bae35c0968ffe658f9c32320d9a553dae5eb"
     }
+  },
+  "manlio-bosco": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/manlio-bosco.jpg",
+      "sha": "98283e6c684f43aca51de540261ef490f9ee27f0"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/manlio-bosco.jpg",
+      "sha": "987af3e104427d6131c481e84d5b326cda09570d"
+    }
   }
 }
