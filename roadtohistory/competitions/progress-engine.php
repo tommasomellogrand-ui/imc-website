@@ -48,6 +48,7 @@ try {
  }
  $nameLogos=[];
  foreach(nexus_rows($db,"SELECT LOWER(TRIM(club_name)) name,MIN(sm_club_id) club_id FROM IMC_Game_World_Club_Mapping WHERE sm_club_id>0 GROUP BY LOWER(TRIM(club_name)) HAVING COUNT(DISTINCT sm_club_id)=1") as $club)$nameLogos[$club['name']]='https://cdn.soccerwiki.org/images/logos/clubs/'.$club['club_id'].'.png';
+ $crestAssets=json_decode(file_get_contents(__DIR__.'/crest-assets.json'),true);
  $out=[];
  foreach($groups as $key=>$fixtures){
   usort($fixtures,fn($a,$b)=>strcmp((string)$a['match_date'],(string)$b['match_date']));
@@ -122,8 +123,8 @@ try {
    if(!$match['played'] && substr((string)$match['match_date'],0,10)===substr((string)$next['match_date'],0,10))$upcoming[]=$pair($match);
   }
   $logos=[];
-  if($row['competition_group']!=='NATIONS')foreach($fixtures as $match){
-   foreach(['h'=>'home_name','a'=>'away_name'] as $id=>$name){$logo=$clubLogos[$match[$id]]??$nameLogos[strtolower(trim((string)$match[$name]))]??null;if($logo)$logos[$match[$name]]=$logo;}
+  foreach($fixtures as $match){
+   foreach(['h'=>'home_name','a'=>'away_name'] as $id=>$name){$kind=$row['competition_group']==='NATIONS'?'nations':'clubs';$logo=$crestAssets[$gw.'|'.$kind.'|'.$match[$id]]??($kind==='clubs'?($clubLogos[$match[$id]]??$nameLogos[strtolower(trim((string)$match[$name]))]??null):null);if($logo)$logos[$match[$name]]=$logo;}
   }
   $out[$key]=['logos'=>$logos,'ranking'=>$ranking,'upcoming'=>$upcoming,'leader'=>$leader,'points'=>$leader!==null?$table[$leader][0]:null,'finalists'=>$pair($final),'next_match'=>$pair($next),'next_date'=>$next?substr($next['match_date'],0,10):null,'label'=>$label,'detail'=>$detail,'percent'=>$pct,'played'=>$played,'expected'=>$isLeague&&$complete?$total:null,'complete'=>$finished,'format'=>$path,'position'=>$position];
 
