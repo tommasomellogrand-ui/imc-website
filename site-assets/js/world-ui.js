@@ -38,7 +38,7 @@ if(home){
   const old=document.querySelector('.world-sections');
   if(old)old.closest('section').hidden=true;
  }
-}else{
+}else if(!document.querySelector('.world-entry-static')){
  mountWorldHeader().catch(error=>console.error('World header:',error));
 }
 async function mountWorldHeader(){
