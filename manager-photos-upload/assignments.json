@@ -248,5 +248,15 @@
       "path": "manager-photos-upload/inbox/busts/al-zubeidi.jpg",
       "sha": "5be45f52d0f9e1a67c078ebd00dc58189c4ddff7"
     }
+  },
+  "alessio-gambato": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/alessio-gambato.jpg",
+      "sha": "2b2b04cd7a82defdf4435b346e74d5e81f6295c6"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/alessio-gambato.jpg",
+      "sha": "1ce7c759b23cad3e0e2fa7360170c1aa28ef8872"
+    }
   }
 }
