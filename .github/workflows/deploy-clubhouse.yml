@@ -66,7 +66,7 @@ jobs:
               for i in range(1,9): assert 'IMC-%03d'%i in html
               assert 'Gold 558' not in html and 'Gold 557' not in html
           with urllib.request.urlopen('https://www.italianmastersclub.it/imc_village/?release=${{ github.sha }}',timeout=60) as r:
-              assert b'<h1>IMC Village</h1>' in r.read()
+              assert b'campus-mobile.webp' in r.read()
           print('Live Clubhouse and eight IMC worlds verified')
           PY
 
