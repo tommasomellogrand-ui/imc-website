@@ -148,5 +148,15 @@
       "path": "manager-photos-upload/inbox/busts/clemente-liggi.jpg",
       "sha": "5e31653a9d4d69d613d20988a844a2f4ad900335"
     }
+  },
+  "lauro-crasti": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/lauro-crasti.jpg",
+      "sha": "82123d5466e309faf503e16a4a32959b7adb51c8"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/lauro-crasti.jpg",
+      "sha": "483671fac7acdf6e7258786ace447d1ab12ad396"
+    }
   }
 }
