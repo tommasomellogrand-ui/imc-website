@@ -218,5 +218,15 @@
       "path": "manager-photos-upload/inbox/busts/igor-zanotto.jpg",
       "sha": "b5f0fb6c4d9f1419f58d3039feff9662d1693bce"
     }
+  },
+  "lorenzo-errico": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/lorenzo-errico.jpg",
+      "sha": "779e5d29191aaffefcbbeecd1b46d61fb42024c9"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/lorenzo-errico.jpg",
+      "sha": "e0b20675e04024899a92588638d6c00a5524db3a"
+    }
   }
 }
