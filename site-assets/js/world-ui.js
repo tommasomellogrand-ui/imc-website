@@ -14,26 +14,64 @@ icons.flag=icon('<path d="M5 21V3c5-4 9 4 15 0v10c-6 4-10-4-15 0"/>');
 const links=[['Competizioni','cup',base+'competitions/'],['Manager','manager',base+'managers/'],['Club','shield',base+'clubs/'],['Nations','flag',base+'nations/'],['Transfers','transfer',base+'transfers/'],['Player Codex','book',base+world[1]+'/'],['Trophy Room','star',base+'trophyroom/'],['Club House','club','/clubhouse/']];
 if(slug==='roadtohistory')links.push(['All To Play For','tv',base+'alltoplayfor/']);
 if(slug==='subbuteosuperleague')links.push(['Rising Stars League','star',base+'risingstarsleague/']);
-if(home){
- const banner=document.querySelector('main>.hero, .stadium-hero');
- if(banner){
-  const primary=[['Matchday','calendar','#matchday'],...links.slice(0,7)];
+function addWorldMenu(banner){
+  const primary=[['Matchday','calendar',base+'#matchday'],...links.slice(0,7)];
   const grid=document.createElement('nav');
   grid.className='nx-world-shortcuts compact-world-menu';
   grid.setAttribute('aria-label','Sezioni '+world[0]);
   grid.innerHTML=primary.map(([label,id,url])=>'<a href="'+url+'">'+icons[id]+'<span>'+label+'</span></a>').join('');
   banner.after(grid);
-  document.querySelector('.stadium-controls')?.remove();
-  const old=document.querySelector('.world-sections');
-  if(old)old.closest('section').hidden=true;
+
   if(slug==='roadtohistory'){
    const feature=document.createElement('a');
    feature.className='top-magazine';feature.href=base+'alltoplayfor/';
    feature.innerHTML=icons.tv+'<span>All To Play For</span><span aria-hidden="true">↗</span>';
    banner.after(feature);
   }
- }
 }
+const bannerSelector='main>.hero, .stadium-hero';
+if(home){
+ const banner=document.querySelector(bannerSelector);
+ if(banner){
+  addWorldMenu(banner);
+  document.querySelector('.stadium-controls')?.remove();
+  const old=document.querySelector('.world-sections');
+  if(old)old.closest('section').hidden=true;
+ }
+}else{
+ mountWorldHeader().catch(error=>console.error('World header:',error));
+}
+async function mountWorldHeader(){
+ const response=await fetch(base+'index.html');
+ if(!response.ok)throw Error(response.status);
+ const layout=new DOMParser().parseFromString(await response.text(),'text/html');
+ const banner=layout.querySelector(bannerSelector);
+ if(!banner)throw Error('Missing home banner');
+ // Isolate the home typography and banner rules from the section's own theme.
+ const head=layout.head;
+ head.querySelectorAll(':not(style):not(link[rel="stylesheet"]):not(meta[name="viewport"])').forEach(el=>el.remove());
+ const target=layout.createElement('base');target.href=new URL(base,location.origin).href;target.target='_top';head.prepend(target);
+ const style=layout.createElement('style');
+ style.textContent='html, html body.imc-world-ui{margin:0!important;padding:0!important;min-height:0!important;height:auto!important;overflow:hidden}main{display:flow-root}';
+ head.append(style);
+ const main=layout.createElement('main');main.append(banner);
+ layout.body.replaceChildren(main);layout.body.classList.add('imc-world-ui');
+ addWorldMenu(banner);
+ main.querySelectorAll('a[href^="#"]').forEach(a=>a.href=base+a.getAttribute('href'));
+ const frame=document.createElement('iframe');
+ frame.title='Banner e sezioni · '+world[0];frame.className='world-entry-block';
+ frame.style.cssText='display:block;width:100%;border:0;height:1px;margin:0';
+ frame.addEventListener('load',()=>{
+  const content=frame.contentDocument?.querySelector('main');if(!content)return;
+  const resize=()=>{frame.style.height=Math.ceil(content.getBoundingClientRect().height)+'px'};
+  new ResizeObserver(resize).observe(content);resize();
+ });
+ frame.srcdoc='<!doctype html>'+layout.documentElement.outerHTML;
+ const header=document.querySelector('header.top')||document.querySelector('body>header');
+ if(header)header.after(frame);else document.body.prepend(frame);
+ document.querySelector('.arc-board')?.remove();
+}
+
 if(!document.getElementById('nx-universal-nav')){
  const nav=document.createElement('nav');nav.id='nx-universal-nav';nav.setAttribute('aria-label','Navigazione '+world[0]);
  const active=home?'home':page.includes('/competitions/')?'cup':page.includes('/managers/')?'manager':'more';
