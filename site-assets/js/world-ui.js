@@ -22,3 +22,34 @@ if(!document.getElementById('nx-universal-nav')){
  document.body.append(nav,dialog);const more=nav.querySelector('button');more.onclick=()=>{dialog.showModal();more.setAttribute('aria-expanded','true')};dialog.querySelector('button').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{more.setAttribute('aria-expanded','false');more.focus()});dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close()}});
 }
 })();
+
+(async function showManagerPortraits() {
+  const cards = document.querySelector('#cards');
+  if (!cards || !/\/managers\/(?:index\.html)?$/.test(location.pathname)) return;
+  const response = await fetch('/clubhouse/data.php', {cache:'no-store'});
+  if (!response.ok) return;
+  const directory = await response.json();
+  const portraits = new Map((directory.managers || []).map(manager => [
+    manager.manager_id, manager.face_image_url || manager.bust_image_url
+  ]));
+  function addPortrait(card) {
+    const id = new URL(card.href).searchParams.get('manager');
+    const src = portraits.get(id);
+    if (!src || card.querySelector('.imc-manager-portrait')) return;
+    const url = new URL(src, location.origin);
+    if (url.protocol !== 'https:') return;
+    const photo = document.createElement('img');
+    photo.className = 'imc-manager-portrait';
+    photo.alt = '';
+    photo.loading = 'lazy';
+    photo.width = 76;
+    photo.height = 76;
+    photo.style.cssText = 'display:block;width:76px;height:76px;object-fit:cover;object-position:center 30%;margin:0 0 10px';
+    photo.addEventListener('error', () => photo.remove(), {once:true});
+    photo.src = url.href;
+    card.prepend(photo);
+  }
+  function refresh() { cards.querySelectorAll('a.manager-card').forEach(addPortrait); }
+  new MutationObserver(refresh).observe(cards, {childList:true});
+  refresh();
+})().catch(() => {});
