@@ -5,14 +5,30 @@ const slug=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerC
 function route(r){return slug(r.competition_key.replace(gw+'|',''))}
 function url(r,tab){return base+(r?'view.html':'')+'?'+new URLSearchParams({season,...(r?{competition:r.competition_key,tab:tab||'overview'}:{}),...(country?{country}:{}),...(imcOnly&&category==='DOMESTIC'?{imc:'1'}:{}),group:category})}
 function go(r,tab){location.href=url(r,tab)}
-let progress={};
+let progress={},awards={};
 function card(r){
  const p=progress[r.competition_key]||{};
  const league=r.sm_action==='league';
+ const trophy=awards[r.competition_key];
+ const identity='<span><strong>'+esc(r.nexus_view)+'</strong><small>'+esc(league?'Divisione '+r.sm_division:r.sm_action==='playoff'?'Playoff':'Coppa')+'</small></span>';
+ const open='<button class="competition-card" data-key="'+esc(r.competition_key)+'">';
+ if(trophy||p.complete){
+  const logo=trophy?.winner_logo_url;
+  const image=logo&&/^(https?:\/\/|\/(?!\/))/.test(logo)?'<img width="24" height="24" alt="" src="'+esc(logo.replace(/^http:/,'https:'))+'">':'';
+  return open+identity+'<span><b>'+image+esc(trophy?.winner_name||'Competizione completa')+'</b><small>'+esc(trophy?.winner_manager_name||(trophy?.winner_name?'Vincitore':''))+'</small></span></button>';
+ }
+ if(league&&category==='DOMESTIC')return open+identity+'<span aria-hidden="true">›</span></button>';
  const kind=league?'Divisione '+r.sm_division:r.sm_action==='playoff'?'Playoff':'Coppa';
  const label=p.label||(r.result_count?'In corso':'In programma');
  const info=Number.isFinite(p.percent)?'<span class="round-progress"><progress aria-label="Avanzamento" max="100" value="'+p.percent+'"></progress>'+p.percent+'%</span>':(p.detail?'<small>'+esc(p.detail)+'</small>':'');
- return '<button class="competition-card" data-key="'+esc(r.competition_key)+'"><span><strong>'+esc(r.nexus_view)+'</strong><small>'+esc(kind)+'</small></span><span><span class="row-stage">'+esc(label)+'</span>'+info+'</span></button>';
+ return '<button class="competition-card" data-key="'+esc(r.competition_key)+'"><span><strong>'+esc(r.nexus_view)+'</strong><small>'+esc(kind)+'</small></span><span><span class="row-stage">'+esc(label)+'</span>'+info+(p.position?'<small>'+esc(p.position)+'</small>':'')+(p.format?.length?'<small class="cup-format">'+esc(p.format.map(f=>f.phase==='Gironi'?'Gironi ('+f.days+' giornate)':f.phase).join(' · '))+'</small>':'')+'</span></button>';
+}
+function domesticRows(rows){
+ const leagues=rows.filter(r=>r.sm_action==='league'),cups=rows.filter(r=>r.sm_action!=='league');
+ const stats=leagues.map(r=>progress[r.competition_key]||{}),known=stats.length&&stats.every(p=>p.expected>0);
+ const pct=known?Math.round(100*stats.reduce((v,p)=>v+p.played,0)/stats.reduce((v,p)=>v+p.expected,0)):null;
+ const label=stats.find(p=>p.label?.startsWith('Giornata'))?.label||'';
+ return (leagues.length?'<div class="league-summary"><h3>Leagues</h3><span>'+esc(label)+'</span>'+(pct!==null?'<label><progress max="100" value="'+pct+'"></progress> '+pct+'%</label>':'')+'</div>'+leagues.map(card).join(''):'')+(cups.length?'<h3 class="cups-title">Cups</h3>'+cups.map(card).join(''):'');
 }
 function seasonBar(){
  const source=$('season-select'),bar=document.createElement('div');bar.className='season-bar';
@@ -24,13 +40,13 @@ function seasonBar(){
 
 const countryFlags={KSA:['Arabia Saudita',79],ARG:['Argentina',46],BEL:['Belgio',27],BRA:['Brasile',47],CZE:['Cechia',5],DEN:['Danimarca',17],ENG:['Inghilterra',1],ESP:['Spagna',8],FRA:['Francia',2],GER:['Germania',3],GRE:['Grecia',9],ITA:['Italia',4],JPN:['Giappone',76],NED:['Paesi Bassi',7],POR:['Portogallo',6],SCO:['Scozia',23],SUI:['Svizzera',16],SWE:['Svezia',10],TUR:['Turchia',14],USA:['Stati Uniti',57],MEX:['Messico',58],RUS:['Russia',15],AUT:['Austria',29],POL:['Polonia',13],UKR:['Ucraina',22],CRO:['Croazia',11],SRB:['Serbia',19],NOR:['Norvegia',20],ROU:['Romania',12],AUS:['Australia',74],CHN:['Cina',75],KOR:['Corea del Sud',77],URU:['Uruguay',53],COL:['Colombia',49],CHI:['Cile',48]};
 function catalog(container,modal=false){const flagScroll=container.querySelector('.catalog-country-flags')?.scrollLeft||0;const categories=[['DOMESTIC','Domestic'],['INTERNATIONAL','International'],['NATIONS','Nations'],...(all.some(r=>r.competition_group==='IMC')?[['IMC','IMC']]:[])];let rows=all.filter(r=>r.competition_group===category);const countries=[...new Set(rows.filter(r=>r.world_type==='MULTI').map(r=>r.sm_country).filter(Boolean))].sort();if(country&&!countries.includes(country))country='';if(country)rows=rows.filter(r=>r.sm_country===country);if(imcOnly&&category==='DOMESTIC')rows=rows.filter(r=>r.has_imc_manager);
-container.innerHTML='<div class="catalog-categories">'+categories.map(([id,label])=>'<button data-category="'+id+'" aria-pressed="'+(id===category)+'">'+label+'</button>').join('')+'</div>'+(countries.length?'<div class="catalog-country-flags" role="group" aria-label="Filtro paese"><button data-country="" aria-pressed="'+(!country)+'">Tutti i paesi</button>'+countries.map(c=>{const f=countryFlags[c];return '<button data-country="'+esc(c)+'" aria-pressed="'+(country===c)+'" aria-label="'+esc(f?.[0]||c)+'">'+(f?'<img src="/nexus/assets/flags/nations/'+f[1]+'.svg" alt="">':'')+'<span>'+esc(f?.[0]||c)+'</span></button>'}).join('')+'</div>':'')+'' +'<div class="competition-grid">'+(rows.length?rows.map(card).join(''):'<p>Nessuna competizione disponibile per questa categoria e stagione.</p>')+'</div>';
+container.innerHTML='<div class="catalog-categories">'+categories.map(([id,label])=>'<button data-category="'+id+'" aria-pressed="'+(id===category)+'">'+label+'</button>').join('')+'</div>'+(countries.length?'<div class="catalog-country-flags" role="group" aria-label="Filtro paese"><button data-country="" aria-pressed="'+(!country)+'">Tutti i paesi</button>'+countries.map(c=>{const f=countryFlags[c];return '<button data-country="'+esc(c)+'" aria-pressed="'+(country===c)+'" aria-label="'+esc(f?.[0]||c)+'">'+(f?'<img src="/nexus/assets/flags/nations/'+f[1]+'.svg" alt="">':'')+'<span>'+esc(f?.[0]||c)+'</span></button>'}).join('')+'</div>':'')+'' +'<div class="competition-grid">'+(rows.length?(category==='DOMESTIC'?domesticRows(rows):rows.map(card).join('')):'<p>Nessuna competizione disponibile per questa categoria e stagione.</p>')+'</div>';
 container.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{category=b.dataset.category;country='';catalog(container,modal)});container.querySelectorAll('[data-country]').forEach(b=>b.onclick=()=>{country=b.dataset.country;catalog(container,modal)});const imcButton=container.querySelector('[data-imc]');if(imcButton)imcButton.onclick=()=>{imcOnly=!imcOnly;catalog(container,modal)};const flagRail=container.querySelector('.catalog-country-flags');if(flagRail)flagRail.scrollLeft=flagScroll;container.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>go(all.find(r=>r.competition_key===b.dataset.key),modal?new URLSearchParams(location.search).get('tab'):'overview'))}
 try{const c=await ready;season=c.season;if(!season)throw Error('Nessuna stagione disponibile.');const d=await get('catalog.php?'+new URLSearchParams({world:gw,season}));all=d.rows||[];
 const requested=params.get('division');current=all.find(r=>r.competition_key===params.get('competition'))||all.find(r=>r.sm_action==='league'&&String(r.sm_division)===requested);
 $('back').href='/halloffamers/';$('back').textContent='← '+(c.world?.game_world_name||gw);for(const id of ['group-tabs','family-tabs','competition-tabs','country-filter'])$(id).hidden=true;
 $('season-select').onchange=()=>{const next=new URLSearchParams(location.search);next.set('season',$('season-select').value);location.href=location.pathname+'?'+next};
-if(!current){seasonBar();try{progress=(await get('progress.php?season='+encodeURIComponent(season))).progress||{}}catch{}$('title').textContent='Competizioni';$('competition-nav').hidden=true;$('competition-tools').hidden=true;$('group-filter').hidden=true;if(requested)$('meta').textContent='Competizione non disponibile nella stagione selezionata · Scegli dal catalogo';catalog($('view'));history.replaceState(null,'',base+'?'+new URLSearchParams({season,group:category}));return}
+if(!current){seasonBar();const [metrics,trophies]=await Promise.all([get('progress.php?season='+encodeURIComponent(season)).catch(()=>({})),get('../trophyroom/data.php').catch(()=>({}))]);progress=metrics.progress||{};awards=Object.fromEntries((trophies.rows||[]).filter(r=>String(r.imc_season)===String(season)).map(r=>[r.competition_key,r]));$('title').textContent='Competizioni';$('competition-nav').hidden=true;$('competition-tools').hidden=true;$('group-filter').hidden=true;if(requested)$('meta').textContent='Competizione non disponibile nella stagione selezionata · Scegli dal catalogo';catalog($('view'));history.replaceState(null,'',base+'?'+new URLSearchParams({season,group:category}));return}
 document.body.classList.add('competition-detail');
 const rail=document.createElement('nav');rail.className='competition-rail';rail.setAttribute('aria-label','Competizioni');
 rail.innerHTML=all.filter(r=>r.competition_group===current.competition_group).map(r=>'<a href="'+esc(url(r))+'"'+(r.competition_key===current.competition_key?' aria-current="page"':'')+'>'+esc(r.nexus_view)+'</a>').join('');
