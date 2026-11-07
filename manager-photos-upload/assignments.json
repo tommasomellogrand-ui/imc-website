@@ -238,5 +238,15 @@
       "path": "manager-photos-upload/inbox/busts/alessandro-berardi.jpg",
       "sha": "d2a5ac6018a5b433c5baa38413ea90876ed168e9"
     }
+  },
+  "al-zubeidi": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/al-zubeidi.jpg",
+      "sha": "72c3e7e87ee7ab86ba0c4f0887492e6f0ddb263c"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/al-zubeidi.jpg",
+      "sha": "5be45f52d0f9e1a67c078ebd00dc58189c4ddff7"
+    }
   }
 }
