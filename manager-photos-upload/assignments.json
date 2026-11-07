@@ -138,5 +138,15 @@
       "path": "manager-photos-upload/inbox/busts/giovanni-cabrioli.jpg",
       "sha": "bcc8795430dbd8068a2193e0cd04a982e8f5d441"
     }
+  },
+  "clemente-liggi": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/clemente-liggi.jpg",
+      "sha": "ba1959bd5f29a5234a0f0790b4acf395a89b8b8c"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/clemente-liggi.jpg",
+      "sha": "5e31653a9d4d69d613d20988a844a2f4ad900335"
+    }
   }
 }
