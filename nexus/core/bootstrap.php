@@ -25,10 +25,12 @@ function nexus_config(): array {
 }
 function nexus_world(?string $value): string {
   $gw=strtoupper(trim((string)$value));
+  if($gw==='IMC-008') return $gw;
   if(!preg_match('/^GW00[1-9]$|^GW01[01]$/',$gw)) throw new InvalidArgumentException('invalid_game_world');
   return $gw;
 }
 function nexus_target(array $c,string $gw): string {
+  if($gw==='IMC-008') return 'custom';
   if(in_array($gw,$c['gold_worlds']??[],true)) return 'gold';
   if($gw==='GW011'||in_array($gw,$c['custom_worlds']??[],true)) return 'custom';
   throw new InvalidArgumentException('unsupported_game_world');
@@ -51,8 +53,9 @@ function nexus_season(mixed $value): ?int {
   return (int)$value;
 }
 function nexus_table(string $gw,string $repository): string {
-  $allowed=['Results','Schedule','Match_Report','Transfers','Player_Codex'];
+  $allowed=['Results','Schedule','Match_Report','Transfers','Player_Codex','Trophy_Room'];
   if(!in_array($repository,$allowed,true)) throw new InvalidArgumentException('invalid_repository');
+  if($gw==='IMC-008') return 'IMC008_'.($repository==='Match_Report'?'Match_Reports':$repository);
   return $gw.'_IMC_'.$repository;
 }
 

@@ -15,7 +15,7 @@ const visits=d.worlds.map(w=>({w,items:d.assignments.filter(a=>a.game_world_id==
 $('world-stamps').innerHTML=visits.map(({w,items})=>{
 const live=items.some(active),starts=items.map(a=>a.start_date).filter(valid).sort(),ends=items.map(a=>a.end_date).filter(valid).sort();
 return '<article class="stamp '+(live?'green':'red')+'"><small>'+esc(w.code)+'</small><h3>'+esc(w.name)+'</h3><strong class="stamp-word">'+(live?'ADMITTED':'ABANDONED')+'</strong><span>Ingresso · '+date(starts[0])+'</span>'+(!live?'<span>Uscita · '+date(ends.at(-1))+'</span>':'')+'<p>'+items.filter(a=>live?active(a):true).map(a=>esc(a.team_name)).filter((v,i,a)=>a.indexOf(v)===i).join(' · ')+'</p></article>';
-}).join('')||'<p>Nessun ingresso registrato nei sette mondi IMC.</p>';
+}).join('')||'<p>Nessun ingresso registrato nei otto mondi IMC.</p>';
 $('assignment-history').innerHTML=visits.map(({w})=>'<section class="history-world"><h3>'+esc(w.code+' · '+w.name)+'</h3>'+d.assignments.filter(a=>a.game_world_id===w.id).map(a=>'<article class="tenure"><div><strong>'+esc(a.team_name||'Squadra non disponibile')+'</strong><small>'+(a.assignment_type==='national_team'?'Nazionale':'Club')+'</small></div><div><span>'+date(a.start_date)+' — '+(valid(a.end_date)?date(a.end_date):'oggi')+'</span><b class="'+(active(a)?'green-text':'red-text')+'">'+(active(a)?'ACTIVE':valid(a.start_date)&&a.start_date>d.today?'SCHEDULED':'ENDED')+'</b></div></article>').join('')+'</section>').join('')||'<p>Nessun incarico registrato.</p>';
 const stats={played:0,won:0,drawn:0,lost:0},trophies=[],failures=[];let next=0;
 async function worker(){while(next<d.worlds.length){const w=d.worlds[next++];try{
