@@ -328,5 +328,15 @@
       "path": "manager-photos-upload/inbox/busts/manlio-bosco.jpg",
       "sha": "987af3e104427d6131c481e84d5b326cda09570d"
     }
+  },
+  "giuseppe-esposito": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/giuseppe-esposito.jpg",
+      "sha": "babe725b09b8e1d00e0878e678a1db55c081bdb4"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/giuseppe-esposito.jpg",
+      "sha": "53ddbf01924f6213dca46bd8b1a82ad2dce18190"
+    }
   }
 }
