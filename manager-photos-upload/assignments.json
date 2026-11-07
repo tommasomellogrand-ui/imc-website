@@ -198,5 +198,15 @@
       "path": "manager-photos-upload/inbox/busts/mattia-bertonati.jpg",
       "sha": "ba828be469cf1961378d96ce7b49c92778046361"
     }
+  },
+  "pep-buitre": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/pep-buitre.jpg",
+      "sha": "2a94895161f354ea8cad3362ccbeec0606c47fa4"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/pep-buitre.jpg",
+      "sha": "3e92c88cde1f5b4565f3bfa426fcc13dcb75cdd4"
+    }
   }
 }
