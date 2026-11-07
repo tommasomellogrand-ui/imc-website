@@ -228,5 +228,15 @@
       "path": "manager-photos-upload/inbox/busts/lorenzo-errico.jpg",
       "sha": "e0b20675e04024899a92588638d6c00a5524db3a"
     }
+  },
+  "alessandro-berardi": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/alessandro-berardi.jpg",
+      "sha": "c3eb04e490a57e5dbafb590649e87b274e276bba"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/alessandro-berardi.jpg",
+      "sha": "d2a5ac6018a5b433c5baa38413ea90876ed168e9"
+    }
   }
 }
