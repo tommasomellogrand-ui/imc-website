@@ -83,8 +83,12 @@ try {
         $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
         $scope=in_array($gw,['GW002','GW003','GW007','GW008'],true)?rc_scope(nexus_db($c,'core'),$gw):null;
         $checkDb->exec('SET TRANSACTION READ ONLY');$checkDb->beginTransaction();
-        $result=$action==='check-meta'?rc_metadata($checkDb,$code,$season,$scope):rc_check($checkDb,$code,(string)($_GET['date']??''),$season,$today,$scope);
+        $result=$action==='check-meta'?rc_metadata($checkDb,$code,$season,$scope,$gw):rc_check($checkDb,$code,(string)($_GET['date']??''),$season,$today,$scope,$gw);
         $checkDb->commit();
+        if ($action==='check-meta') {
+            $cups=nexus_rows($core,"SELECT competition_key,custom_competition FROM `IMC Competition Codex Global` WHERE game_world_id IN (?,?,?) AND UPPER(sm_action_group)='IMC'",[$gw,$code,'IMC-'.substr($code,3)]);
+            foreach ($cups as $cup) $result['cup_names'][rc_key($cup['competition_key'],$code,$gw)]=$cup['custom_competition'];
+        }
         nexus_out(['ok'=>true,'world'=>$code,'world_names'=>$names,'season'=>$season,'today'=>$today]+$result);
     }
     $db=nexus_db(nexus_config(),'core');
