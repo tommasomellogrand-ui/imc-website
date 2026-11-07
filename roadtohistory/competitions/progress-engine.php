@@ -21,15 +21,21 @@ function phaseSequence(array $fixtures):array {
 }
 
 try {
- $config=nexus_config();$db=nexus_db($config,nexus_target($config,$gw));$season=nexus_season($_GET['season']??null);
- if(!$season)throw new InvalidArgumentException('invalid_season');
+ $prefix=['GW001'=>'IMC001','GW005'=>'IMC002','GW009'=>'IMC003','GW010'=>'IMC004','GW011'=>'IMC005','GW004'=>'IMC006','GW006'=>'IMC007','IMC-008'=>'IMC008'][$gw];
+ $db=nexus_db(nexus_config(),'custom');
+ $seasons=array_column(nexus_rows($db,"SELECT imc_season FROM `{$prefix}_Results` UNION SELECT imc_season FROM `{$prefix}_Schedule` ORDER BY imc_season"),'imc_season');
+ $season=nexus_season($_GET['season']??null)?:max($seasons?:[1]);
+ $uiKey=static fn($key)=>preg_replace('/^[^|]+(?=\|)/',$gw,(string)$key);
+ $rows=[];$awards=[];
  $groups=[];$history=[];
  foreach(['Schedule'=>'team','Results'=>'club'] as $repository=>$idType){
-  $table=nexus_table($gw,$repository);
+  $table=$prefix.'_'.$repository;
   $score=$repository==='Results'?' AND home_score IS NOT NULL AND away_score IS NOT NULL':'';
   $groupColumn=$repository==='Results'?'competition_group_name':'NULL AS competition_group_name';
-  $sql="SELECT imc_season,competition_key,sm_action,sm_fixture_id,competition_round,competition_stage,{$groupColumn},match_date,home_sm_{$idType}_id h,away_sm_{$idType}_id a,home_name,away_name FROM `$table` WHERE game_world_id=? AND imc_season IN (?,?) $score ORDER BY match_date,sm_fixture_id";
-  foreach(nexus_rows($db,$sql,[$gw,$season,max(0,$season-1)]) as $r){
+  $scores=$repository==='Results'?'home_score,away_score':'NULL home_score,NULL away_score';
+  $sql="SELECT {$scores}, imc_season,competition_key,sm_action,sm_division,sm_country,competition_group,sm_fixture_id,competition_round,competition_stage,{$groupColumn},match_date,home_sm_{$idType}_id h,away_sm_{$idType}_id a,home_name,away_name FROM `$table` WHERE imc_season IN (?,?) $score ORDER BY match_date,sm_fixture_id";
+  foreach(nexus_rows($db,$sql,[$season,max(0,$season-1)]) as $r){
+   $r['competition_key']=$uiKey($r['competition_key']);
    $r['played']=$repository==='Results';
    $id=$r['sm_fixture_id']?:($r['match_date'].'|'.$r['home_name'].'|'.$r['away_name']);
    if((int)$r['imc_season']===$season)$groups[$r['competition_key']][$id]=$r;
@@ -85,8 +91,30 @@ try {
    $phases=array_column($path,'phase');$idx=array_search($phase,$phases,true);if($idx!==false)$position='Turno '.($idx+1).' di '.count($path);
    if(!$next && $latest){[$last,$lastLeg]=cupPhase($latest);$finished=($last==='Finale'&&$lastLeg!=='Andata')||$single;}
   }
-  $out[$key]=['label'=>$label,'detail'=>$detail,'percent'=>$pct,'played'=>$played,'expected'=>$isLeague&&$complete?$total:null,'complete'=>$finished,'format'=>$path,'position'=>$position];
+  $table=[];$final=null;
+  foreach($fixtures as $match){
+   if(!$isLeague){
+    if(cupPhase($match)[0]==='Finale'||$single)$final=$match;
+    continue;
+   }
+   if(!$match['played'])continue;
+   foreach([['home','away'],['away','home']] as [$side,$opponent]){
+    $name=$match[$side.'_name'];$gf=(int)$match[$side.'_score'];$ga=(int)$match[$opponent.'_score'];
+    $entry=$table[$name]??[0,0,0];
+    $table[$name]=[$entry[0]+($gf>$ga?3:($gf===$ga?1:0)),$entry[1]+$gf-$ga,$entry[2]+$gf];
+   }
+  }
+  arsort($table);$leader=array_key_first($table);
+  $pair=static fn($match)=>$match?[$match['home_name'],$match['away_name']]:null;
+  $row=$fixtures[0];$action=$row['sm_action'];$division=$row['sm_division'];
+  $names=['league'=>'Div '.$division,'playoff'=>'Playoff','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers','worldcup'=>'World Cup','charityshield'=>'Charity Shield','leaguecup'=>'National Cup','nationalcup'=>'National Cup','leagueshield'=>'League Cup'];
+  $rows[]=['competition_key'=>$key,'sm_action'=>$action,'sm_division'=>$division,'competition_group'=>$row['competition_group'],'sm_country'=>$row['sm_country'],'nexus_view'=>$names[$action]??$action,'result_count'=>$played,'schedule_count'=>$total-$played];
+  $out[$key]=['leader'=>$leader,'points'=>$leader!==null?$table[$leader][0]:null,'finalists'=>$pair($final),'next_match'=>$pair($next),'next_date'=>$next?substr($next['match_date'],0,10):null,'label'=>$label,'detail'=>$detail,'percent'=>$pct,'played'=>$played,'expected'=>$isLeague&&$complete?$total:null,'complete'=>$finished,'format'=>$path,'position'=>$position];
 
  }
- nexus_out(['ok'=>true,'progress'=>$out]);
+ $awards=nexus_rows($db,"SELECT t.competition_key,t.winner_name,t.nexus_view,CASE WHEN t.winner_name=m.home_name THEN m.home_manager_name WHEN t.winner_name=m.away_name THEN m.away_manager_name END winner_manager_name FROM {$prefix}_Trophy_Room t LEFT JOIN {$prefix}_Match_Reports m ON m.sm_fixture_id=t.deciding_fixture_id AND m.imc_season=t.imc_season AND m.competition_key=t.competition_key WHERE t.imc_season=?",[$season]);
+ $byKey=[];foreach($awards as $award)$byKey[$uiKey($award['competition_key'])]=$award;
+ foreach($rows as &$row)if(!empty($byKey[$row['competition_key']]['nexus_view']))$row['nexus_view']=$byKey[$row['competition_key']]['nexus_view'];unset($row);
+ usort($rows,fn($a,$b)=>[(int)$a['sm_division'],$a['nexus_view']]<=>[(int)$b['sm_division'],$b['nexus_view']]);
+ nexus_out(['ok'=>true,'progress'=>$out,'rows'=>$rows,'awards'=>$byKey,'season'=>$season,'seasons'=>$seasons]);
 }catch(Throwable $e){error_log('Competition progress: '.$e->getMessage());nexus_out(['ok'=>false,'error'=>'progress_unavailable'],503);}
