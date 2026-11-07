@@ -278,5 +278,15 @@
       "path": "manager-photos-upload/inbox/busts/attilio-bonnici.jpg",
       "sha": "c1b024264b3416514176c8e32ca5f54be8697de2"
     }
+  },
+  "carlo-ancelotti": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/carlo-ancelotti.jpg",
+      "sha": "5dfcfe382a3f7a0438dea05677639a6b0b88860e"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/carlo-ancelotti.jpg",
+      "sha": "ad92112f138add243e7c809b4bcf8138b20ee16d"
+    }
   }
 }
