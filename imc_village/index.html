@@ -6,15 +6,14 @@
 <style>
 * { box-sizing:border-box }
 body { margin:0; font-family:Inter,system-ui,sans-serif; background:#10182a }
-header { height:64px; display:flex; align-items:center; justify-content:center; gap:10px; background:white; color:#182943 }
-header img { width:44px; height:44px; object-fit:contain }
-h1 { margin:0; font-size:21px }
-main { position:relative; height:calc(100vh - 64px); height:calc(100dvh - 64px); overflow:hidden; display:grid; place-items:center; container-type:size; isolation:isolate }
+header { position:absolute; inset:0 0 auto; height:12%; display:flex; align-items:center; justify-content:center; gap:8px; color:#102541 }
+header img { height:98%; width:auto; object-fit:contain }
+h1 { margin:0; font-size:clamp(22px,7cqi,48px); font-weight:800; letter-spacing:-.045em; text-shadow:0 1px 3px #ffffffbd }
+main { position:relative; height:100vh; height:100dvh; overflow:hidden; display:grid; place-items:center; container-type:size; isolation:isolate }
 main::before { content:""; position:absolute; inset:-20px; background:center/cover url(village.webp); filter:blur(18px) brightness(.6); z-index:-1 }
-.scene { position:relative; width:min(100cqw, calc(100cqh * 1122 / 1402)); aspect-ratio:1122/1402; background:center/100% 100% url(village.webp) }
+.scene { position:relative; container-type:inline-size; width:min(100cqw, calc(100cqh * 1122 / 1402)); aspect-ratio:1122/1402; background:center/100% 100% url(village.webp) }
 a { position:absolute; left:49%; top:87%; transform:translate(-50%,-50%); padding:12px 22px; background:#131d32; color:white; border:2px solid #c8ae69; border-radius:5px; font-weight:750; text-decoration:none; letter-spacing:.08em }
 a:focus-visible { outline:3px solid white; outline-offset:3px }
 </style>
-<header><img src="/site-assets/images/imc-logo.png" alt=""><h1>IMC Village</h1></header>
-<main><div class="scene"><a href="/clubhouse/">ENTRA</a></div></main>
+<main><div class="scene"><header><img src="/site-assets/images/imc-logo.png" alt=""><h1>IMC Village</h1></header><a href="/clubhouse/">ENTRA</a></div></main>
 </html>
