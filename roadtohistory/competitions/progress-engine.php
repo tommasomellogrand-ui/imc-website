@@ -109,7 +109,13 @@ try {
   $row=$fixtures[0];$action=$row['sm_action'];$division=$row['sm_division'];
   $names=['league'=>'Div '.$division,'playoff'=>'Playoff','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers','worldcup'=>'World Cup','charityshield'=>'Charity Shield','leaguecup'=>'National Cup','nationalcup'=>'National Cup','leagueshield'=>'League Cup'];
   $rows[]=['competition_key'=>$key,'sm_action'=>$action,'sm_division'=>$division,'competition_group'=>$row['competition_group'],'sm_country'=>$row['sm_country'],'nexus_view'=>$names[$action]??$action,'result_count'=>$played,'schedule_count'=>$total-$played];
-  $out[$key]=['leader'=>$leader,'points'=>$leader!==null?$table[$leader][0]:null,'finalists'=>$pair($final),'next_match'=>$pair($next),'next_date'=>$next?substr($next['match_date'],0,10):null,'label'=>$label,'detail'=>$detail,'percent'=>$pct,'played'=>$played,'expected'=>$isLeague&&$complete?$total:null,'complete'=>$finished,'format'=>$path,'position'=>$position];
+  $ranking=[];
+  foreach(array_slice($table,0,2,true) as $name=>$stats)$ranking[]=['name'=>$name,'points'=>$stats[0]];
+  $upcoming=[];
+  if($next)foreach($fixtures as $match){
+   if(!$match['played'] && substr((string)$match['match_date'],0,10)===substr((string)$next['match_date'],0,10))$upcoming[]=$pair($match);
+  }
+  $out[$key]=['ranking'=>$ranking,'upcoming'=>$upcoming,'leader'=>$leader,'points'=>$leader!==null?$table[$leader][0]:null,'finalists'=>$pair($final),'next_match'=>$pair($next),'next_date'=>$next?substr($next['match_date'],0,10):null,'label'=>$label,'detail'=>$detail,'percent'=>$pct,'played'=>$played,'expected'=>$isLeague&&$complete?$total:null,'complete'=>$finished,'format'=>$path,'position'=>$position];
 
  }
  $awards=nexus_rows($db,"SELECT t.competition_key,t.winner_name,t.nexus_view,cm.sm_club_id logo_id,CASE WHEN BINARY t.winner_name=BINARY m.home_name THEN m.home_manager_name WHEN BINARY t.winner_name=BINARY m.away_name THEN m.away_manager_name END winner_manager_name FROM {$prefix}_Trophy_Room t LEFT JOIN {$prefix}_Match_Reports m ON m.sm_fixture_id=BINARY t.deciding_fixture_id AND m.imc_season=t.imc_season AND BINARY m.competition_key=BINARY t.competition_key LEFT JOIN IMC_Game_World_Club_Mapping cm ON cm.game_world_id=? AND cm.sm_world_club_id=BINARY t.winner_sm_world_club_id AND t.competition_group<>'NATIONS' WHERE t.imc_season=?",[$gw,$season]);

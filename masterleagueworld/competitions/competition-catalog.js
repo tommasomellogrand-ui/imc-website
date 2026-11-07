@@ -6,30 +6,7 @@ function route(r){return slug(r.competition_key.replace(gw+'|',''))}
 function url(r,tab){return base+(r?'view.html':'')+'?'+new URLSearchParams({season,...(r?{competition:r.competition_key,tab:tab||'overview'}:{}),...(country?{country}:{}),...(imcOnly&&category==='DOMESTIC'?{imc:'1'}:{}),group:category})}
 function go(r,tab){location.href=url(r,tab)}
 let progress={},awards={};
-function card(r){
- const p=progress[r.competition_key]||{};
- const league=r.sm_action==='league';
- const trophy=awards[r.competition_key];
- const icon=league?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20V4h14v16l-7-3zM8 9l4-2 4 2m-8 4 4-2 4 2"/></svg>':NexusUI.icon('cup');
- const lines=[];
- const line=(title,value)=>{if(value)lines.push('<small>'+esc(title)+'</small><b>'+esc(value)+'</b>')};
- if(trophy?.winner_name){
-  const logo=trophy.winner_logo_url;
-  const image=logo&&/^(https?:\/\/|\/(?!\/))/.test(logo)?'<img width="24" height="24" alt="" src="'+esc(logo.replace(/^http:/,'https:'))+'">':'';
-  lines.push('<small>Vincitore</small><b>'+image+esc(trophy.winner_name)+'</b>');
-  if(trophy.winner_manager_name)lines.push('<small>'+esc(trophy.winner_manager_name)+'</small>');
- }else if(p.complete)line('Stato','Competizione completa');
- if(league&&!trophy&&p.leader)line(p.complete?'Prima classificata':'In testa',p.leader+' · '+p.points+' pt');
- if(!league&&p.finalists)line('Finalisti',p.finalists.join(' – '));
- if(!league&&!p.complete&&!trophy)line('Turno',[p.label,p.detail,p.position].filter(Boolean).join(' · '));
- if(p.next_match&&!p.complete&&!trophy){
-  const date=(p.next_date||'').split('-').reverse().join('/');
-  line('Prossima partita'+(date?' · '+date:''),p.next_match.join(' – '));
- }
- if(!lines.length)line('Stato',p.label||(r.result_count?'In corso':'In programma'));
- if(!league&&p.format?.length&&!p.complete&&!trophy)lines.push('<small>'+esc(p.format.map(f=>f.phase==='Gironi'?'Gironi ('+f.days+' giornate)':f.phase).join(' · '))+'</small>');
- return '<button class="competition-card" data-key="'+esc(r.competition_key)+'"><span><i aria-hidden="true" style="display:block;width:24px;height:24px;color:var(--world-accent,currentColor)">'+icon+'</i><strong>'+esc(r.nexus_view)+'</strong><small>'+esc(league?'Divisione '+r.sm_division:r.sm_action==='playoff'?'Playoff':'Coppa')+'</small></span><span>'+lines.join('')+'</span></button>';
-}
+function card(r){return IMCCompetitionRow.render(r,progress[r.competition_key],awards[r.competition_key])}
 function domesticRows(rows){
  const leagues=rows.filter(r=>r.sm_action==='league'),cups=rows.filter(r=>r.sm_action!=='league');
  const stats=leagues.map(r=>progress[r.competition_key]||{}),known=stats.length&&stats.every(p=>p.expected>0);
@@ -59,9 +36,10 @@ const rail=document.createElement('nav');rail.className='competition-rail';rail.
 rail.innerHTML=all.filter(r=>r.competition_group===current.competition_group).map(r=>'<a href="'+esc(url(r))+'"'+(r.competition_key===current.competition_key?' aria-current="page"':'')+'>'+esc(r.nexus_view)+'</a>').join('');
 $('back').closest('.back-row').before(rail);
 const banner=document.createElement('section');banner.className='competition-banner';banner.setAttribute('aria-label',current.nexus_view);
-banner.innerHTML=NexusUI.icon('cup')+'<div><p>Master League World · '+esc(current.competition_group)+'</p><h1>'+esc(current.nexus_view)+'</h1></div>';
+banner.innerHTML=IMCCompetitionRow.symbol(current.sm_action==='league')+'<div><p>Master League World · '+esc(current.competition_group)+'</p><h1>'+esc(current.nexus_view)+'</h1></div>';
 $('back').closest('.back-row').after(banner);
-const context=document.createElement('div');context.className='competition-context';banner.after(context);context.append($('season-select').closest('.filters'));
+const summary=document.createElement('div');summary.innerHTML=IMCCompetitionRow.render(current,progress[current.competition_key],awards[current.competition_key],true);banner.after(summary);
+const context=document.createElement('div');context.className='competition-context';summary.after(context);context.append($('season-select').closest('.filters'));
 const status=document.createElement('span');status.id='competition-status';status.className='competition-status';status.textContent='Caricamento stato…';context.append(status);
 category=current.competition_group;const initial=['overview','results','schedule','standings','stats'].includes(params.get('tab'))?params.get('tab'):'overview';history.replaceState(null,'',url(current,initial));$('title').textContent=current.nexus_view;document.title=current.nexus_view+' · Master League World';$('group').textContent=category;$('competition-tools').hidden=false;$('selected-name').textContent=current.nexus_view;
 const changer=document.createElement('button');changer.className='change-competition';changer.textContent='Cambia competizione';$('back').after(changer);const dialog=document.createElement('dialog');dialog.className='catalog-dialog';dialog.innerHTML='<div class="catalog-dialog-head"><h2>Cambia competizione</h2><button aria-label="Chiudi">×</button></div><div id="switch-catalog"></div>';document.body.append(dialog);dialog.querySelector('button').onclick=()=>dialog.close();changer.onclick=()=>{catalog($('switch-catalog'),true);dialog.showModal()};
