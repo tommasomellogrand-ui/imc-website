@@ -2,11 +2,16 @@
 declare(strict_types=1);
 
 function rc_sources(): array {return ['schedule'=>'Schedule','results'=>'Results','report'=>'Match_Report'];}
+function rc_table(string $world,string $repository): string {
+    if (!in_array($repository,rc_sources(),true)) throw new InvalidArgumentException('Archivio non valido.');
+    if (preg_match('/^IMC(?:00[1-9]|010)$/D',$world)) return $world.'_'.$repository.($repository==='Match_Report'?'s':'');
+    return nexus_table($world,$repository);
+}
 function rc_select(string $source,?PDO $db=null,?string $gw=null): string {
     $club=$source==='schedule'?'team':'club';
     $round='NULL';
     if ($db && $gw) {
-        static $columns=[];$table=nexus_table($gw,rc_sources()[$source]);
+        static $columns=[];$table=rc_table($gw,rc_sources()[$source]);
         if (!isset($columns[$table])) $columns[$table]=array_column(nexus_rows($db,'SHOW COLUMNS FROM `'.$table.'`'),'Field');
         if (in_array('competition_round',$columns[$table],true)) $round='competition_round';
     }
@@ -113,7 +118,7 @@ function rc_metadata(PDO $db,string $gw,?int $season,?array $scope=null): array 
     $seasons=[];$dates=[];$competitions=[];$expected=[];$reportIds=[];$invalid=0;$sourceIds=[];$signatures=[];
     $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
     foreach (['results'=>'Results','report'=>'Match_Report','schedule'=>'Schedule'] as $kind=>$repository) {
-        $scan=$db->query('SELECT '.rc_select($kind,$db,$gw).' FROM `'.nexus_table($gw,$repository).'` WHERE sm_fixture_id>0');
+        $scan=$db->query('SELECT '.rc_select($kind,$db,$gw).' FROM `'.rc_table($gw,$repository).'` WHERE sm_fixture_id>0');
         while ($record=$scan->fetch()) {
             $id=rc_fixture($record['sm_fixture_id']);
             if ($kind==='schedule'&&isset($sourceIds['results'][$id])) continue;
@@ -129,10 +134,10 @@ function rc_metadata(PDO $db,string $gw,?int $season,?array $scope=null): array 
         }
     }
     // The existence check deliberately includes reports stored under another date/season.
-    $stmt=$db->query('SELECT sm_fixture_id FROM `'.nexus_table($gw,'Match_Report').'` WHERE sm_fixture_id>0');
+    $stmt=$db->query('SELECT sm_fixture_id FROM `'.rc_table($gw,'Match_Report').'` WHERE sm_fixture_id>0');
     while ($row=$stmt->fetch()) $reportIds[rc_fixture($row['sm_fixture_id'])]=true;
     foreach (rc_sources() as $source=>$repo) {
-        $table=nexus_table($gw,$repo);
+        $table=rc_table($gw,$repo);
         foreach (nexus_rows($db,'SELECT DISTINCT imc_season FROM `'.$table.'` WHERE imc_season>0') as $row) $seasons[(int)$row['imc_season']]=true;
         $stmt=$db->prepare('SELECT '.rc_select($source,$db,$gw).' FROM `'.$table.'`'.($season!==null?' WHERE imc_season=?':''));
         $stmt->execute($season!==null?[$season]:[]);
@@ -188,7 +193,7 @@ function rc_check(PDO $db,string $gw,string $date,?int $season,string $today,?ar
     if ($date!=='undated') na_date($date);
     $sets=[];$ids=[];$missing=[];
     foreach (rc_sources() as $source=>$repo) {
-        $table=nexus_table($gw,$repo);
+        $table=rc_table($gw,$repo);
         $where=$date==='undated'?"(match_date IS NULL OR LEFT(CAST(match_date AS CHAR),10)='0000-00-00')":'match_date>=? AND match_date<DATE_ADD(?, INTERVAL 1 DAY)';
         $params=$date==='undated'?[]:[$date,$date];
         if ($season!==null) {$where.=' AND imc_season=?';$params[]=$season;}
@@ -201,7 +206,7 @@ function rc_check(PDO $db,string $gw,string $date,?int $season,string $today,?ar
     }
     // Match across dates and seasons, but never outside the selected Game World.
     foreach (rc_sources() as $source=>$repo) {
-        $table=nexus_table($gw,$repo);$sets[$source]=$missing[$source];
+        $table=rc_table($gw,$repo);$sets[$source]=$missing[$source];
         foreach (array_chunk(array_keys($ids),400) as $batch) {
             $rows=nexus_rows($db,'SELECT '.rc_select($source,$db,$gw).' FROM `'.$table.'` WHERE sm_fixture_id IN ('.implode(',',array_fill(0,count($batch),'?')).')',$batch);
             $sets[$source]=array_merge($sets[$source],$rows);

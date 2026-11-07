@@ -1,12 +1,10 @@
 'use strict';
 (() => {
  const $=id=>document.getElementById(id);let csrf='',rows=[],busy=false;
- const worlds=Array.from({length:11},(_,i)=>'GW'+String(i+1).padStart(3,'0'));
- for(const gw of worlds)$('world').add(new Option(gw,gw));
- const requested=new URLSearchParams(location.search).get('world');if(worlds.includes(requested))$('world').value=requested;
+adminWorldSelect();
  function authenticated(value){$('login').hidden=value;$('workspace').hidden=!value;$('logout').hidden=!value;}
  function lock(value){busy=value;$('world').disabled=value;$('reload').disabled=value;$('add').disabled=value;$('logout').disabled=value;document.querySelectorAll('#seasons input,#seasons button').forEach(e=>e.disabled=value);}
- async function api(action,body){const url='api.php?action='+encodeURIComponent(action)+'&world='+encodeURIComponent($('world').value);const response=await fetch(url,{credentials:'same-origin',cache:'no-store',method:body?'POST':'GET',headers:body?{'Content-Type':'application/json','X-CSRF-Token':csrf}:{},body:body?JSON.stringify({action,world:$('world').value,...body}):undefined});const data=await response.json();if(!response.ok||!data.ok){if(response.status===401)authenticated(false);throw Error(data.error||'Operazione non riuscita.');}return data;}
+ async function api(action,body){const url='api.php?action='+encodeURIComponent(action)+'&world='+encodeURIComponent($('world').value);const response=await fetch(url,{credentials:'same-origin',cache:'no-store',method:body?'POST':'GET',headers:body?{'Content-Type':'application/json','X-CSRF-Token':csrf}:{},body:body?JSON.stringify({action,world:$('world').value,...body}):undefined});const data=await response.json();adminWorldNames(data.world_names);if(!response.ok||!data.ok){if(response.status===401)authenticated(false);throw Error(data.error||'Operazione non riuscita.');}return data;}
  function card(row,isNew=false){
   const article=document.createElement('article');article.className='season-card';
   const form=document.createElement('form');article.append(form);

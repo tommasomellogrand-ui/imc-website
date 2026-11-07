@@ -2,7 +2,7 @@
 declare(strict_types=1);
 const NS_CORE='`IMC Game World Season`';
 function ns_local_table(array $config,string $gw): string {
-    $database=$config['db'][nexus_target($config,$gw)]??'';
+    $database=$config['db']['custom']??'';
     if (!is_string($database)||!preg_match('/^[A-Za-z0-9_]+$/D',$database)) throw new RuntimeException('Archivio stagioni non configurato.',503);
     return '`'.$database.'`.`IMC_Game_World_Season`';
 }

@@ -60,31 +60,39 @@ try {
     if ($action==='visits' && $method==='GET') { require __DIR__.'/visits-service.php'; nexus_out(nv_read((string)($_GET['period']??'30d'),(string)($_GET['view']??'daily'))); }
     if ($action==='session' && $method==='GET') nexus_out(['ok'=>true,'csrf'=>$_SESSION['csrf']]);
     if ($method==='POST' && !in_array($action,['save','close','replace','season-save'],true)) throw new InvalidArgumentException('Operazione non valida.');
-    $gw=nexus_world($method==='GET'?($_GET['world']??''):($input['world']??''));
+    $code=strtoupper((string)($method==='GET'?($_GET['world']??''):($input['world']??'')));
+    if (!preg_match('/^IMC(?:00[1-9]|010)$/D',$code)) throw new InvalidArgumentException('Codice mondo IMC non valido.');
+    $c=nexus_config();
+    $core=nexus_db($c,'core');
+    $catalog=nexus_rows($core,"SELECT REPLACE(IMC_WORLD_ID,'-','') code, `IMC GW` gw, `IMC GW Name` name FROM `IMC Game World Codex Global` WHERE IMC_WORLD_ID IS NOT NULL");
+    $names=array_column($catalog,'name','code');
+    $keys=array_column($catalog,'gw','code');
+    if (!isset($keys[$code])) nexus_out(['ok'=>false,'world_names'=>$names,'error'=>$code.' non ancora assegnato.'],422);
+    $gw=$keys[$code];
     if (($method==='GET' && $action==='seasons') || ($method==='POST' && $action==='season-save')) {
         require __DIR__.'/seasons-service.php';
         $c=nexus_config();$seasonDb=nexus_db($c,'core');
         $local=ns_local_table($c,$gw);
         if ($method==='POST') ns_save($seasonDb,$local,$gw,$input);
-        nexus_out(['ok'=>true,'world'=>$gw,'rows'=>ns_list($seasonDb,$local,$gw)]);
+        nexus_out(['ok'=>true,'world'=>$code,'world_names'=>$names,'rows'=>ns_list($seasonDb,$local,$gw)]);
     }
     if ($method==='GET' && in_array($action,['check-meta','results-check'],true)) {
         require __DIR__.'/results-check-service.php';
-        $c=nexus_config();$checkDb=nexus_db($c,nexus_target($c,$gw));
+        $c=nexus_config();$checkDb=nexus_db($c,'custom');
         $season=nexus_season($_GET['season']??null);
         $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
         $scope=in_array($gw,['GW002','GW003','GW007','GW008'],true)?rc_scope(nexus_db($c,'core'),$gw):null;
         $checkDb->exec('SET TRANSACTION READ ONLY');$checkDb->beginTransaction();
-        $result=$action==='check-meta'?rc_metadata($checkDb,$gw,$season,$scope):rc_check($checkDb,$gw,(string)($_GET['date']??''),$season,$today,$scope);
+        $result=$action==='check-meta'?rc_metadata($checkDb,$code,$season,$scope):rc_check($checkDb,$code,(string)($_GET['date']??''),$season,$today,$scope);
         $checkDb->commit();
-        nexus_out(['ok'=>true,'world'=>$gw,'season'=>$season,'today'=>$today]+$result);
+        nexus_out(['ok'=>true,'world'=>$code,'world_names'=>$names,'season'=>$season,'today'=>$today]+$result);
     }
     $db=nexus_db(nexus_config(),'core');
     if ($method==='GET' && $action==='list') {
         $rows=nexus_rows($db,'SELECT * FROM '.NA_TABLE.' WHERE game_world_id=? ORDER BY full_name,start_date DESC,id DESC',[$gw]);
         foreach ($rows as &$row) $row['version']=na_version($row);
         unset($row);
-        nexus_out(['ok'=>true,'rows'=>$rows,'teams'=>na_options($db,$gw),'managers'=>nexus_rows($db,'SELECT manager_id,full_name FROM `IMC Manager Codex Global` ORDER BY full_name'),'today'=>(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d')]);
+        nexus_out(['ok'=>true,'world_names'=>$names,'rows'=>$rows,'teams'=>na_options($db,$gw),'managers'=>nexus_rows($db,'SELECT manager_id,full_name FROM `IMC Manager Codex Global` ORDER BY full_name'),'today'=>(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d')]);
     }
     if ($method==='POST') nexus_out(['ok'=>true,'row'=>na_save($db,$gw,$input)]);
     throw new InvalidArgumentException('Operazione non valida.');

@@ -3,11 +3,10 @@ const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const labels={complete:'Completa',pending:'Da giocare',today:'In programma oggi',missing_results:'Risultato mancante',missing_report:'Report mancante',orphan_report:'Report senza Results',anomaly:'Dati da verificare'};
 let csrf='',meta=null,report=null,serial=0,limit=100,period='past',dateLimit=7,drillFocus=null;
-for(let i=1;i<=11;i++){const gw='GW'+String(i).padStart(3,'0');$('world').add(new Option(gw,gw));}
-const initial=new URLSearchParams(location.search).get('world');if(/^GW00[1-9]$|^GW01[01]$/.test(initial||''))$('world').value=initial;
+adminWorldSelect();
 async function request(query='',body=null){
  const response=await fetch('api.php'+query,{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify(body)}:{})});
- const data=await response.json();
+ const data=await response.json();adminWorldNames(data.world_names);
  if(!response.ok||!data.ok){if(response.status===401){$('workspace').hidden=true;$('login').hidden=false;$('logout').hidden=true;}throw Error(data.error||'Controllo non riuscito.');}return data;
 }
 function clear(){report=null;$('summary').replaceChildren();$('checks').replaceChildren();$('filters').hidden=true;$('more').hidden=true;$('check-count').textContent='';}
