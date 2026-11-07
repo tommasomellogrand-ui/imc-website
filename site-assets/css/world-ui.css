@@ -54,3 +54,9 @@ html body :is(article,section,button,input,select,textarea,.nc-card,.competition
 .manager-album #cards .team small {font-size:11px}
 .manager-album #cards .status-active {display:none}
 @media(min-width:800px){.manager-album #cards {grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}}
+html body .compact-world-menu{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:min(720px,calc(100% - 24px));margin:10px auto 14px;padding:0;gap:5px;border:0}
+html body .compact-world-menu a{box-sizing:border-box;min-height:48px;padding:5px 1px;gap:3px;border:1px solid #d8dade;background:#fff;color:#172b3b;font-size:clamp(10px,2.9vw,12px);line-height:1.15}
+html body .compact-world-menu svg{width:18px;height:18px}
+html body .compact-world-menu a:is(:focus-visible,:active){outline:2px solid currentColor;outline-offset:-2px}
+html body .top-magazine{display:flex;align-items:center;justify-content:center;gap:9px;background:#191814;color:#f6d99e;padding:8px 12px;font:700 13px Inter,sans-serif;text-decoration:none}
+.top-magazine svg{width:17px;height:17px}

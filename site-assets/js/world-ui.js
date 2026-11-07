@@ -9,10 +9,31 @@ document.body.classList.add('imc-world-ui');
 
 
 icons.shield=icon('<path d="m12 2 9 4v7c0 5-9 9-9 9S3 18 3 13V6z"/>');icons.transfer=icon('<path d="M4 7h16m-5-5 5 5-5 5M20 17H4m5-5-5 5 5 5"/>');icons.book=icon('<path d="M12 4v17M12 4C8 1 4 2 2 3v17c4-2 7-2 10 1 3-3 6-3 10-1V3c-2-1-6-2-10 1Z"/>');icons.star=icon('<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>');icons.tv=icon('<rect x="3" y="5" width="18" height="15" rx="1"/><path d="m10 9 5 3-5 3zM8 2l4 3 4-3"/>');
-const links=[['Competizioni','cup',base+'competitions/'],['Manager','manager',base+'managers/'],['Club','shield',base+'clubs/'],['Nations','shield',base+'nations/'],['Transfers','transfer',base+'transfers/'],['Player Codex','book',base+world[1]+'/'],['Trophy Room','star',base+'trophyroom/'],['Club House','club','/clubhouse/']];
+icons.calendar=icon('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-13 5h3"/>');
+icons.flag=icon('<path d="M5 21V3c5-4 9 4 15 0v10c-6 4-10-4-15 0"/>');
+const links=[['Competizioni','cup',base+'competitions/'],['Manager','manager',base+'managers/'],['Club','shield',base+'clubs/'],['Nations','flag',base+'nations/'],['Transfers','transfer',base+'transfers/'],['Player Codex','book',base+world[1]+'/'],['Trophy Room','star',base+'trophyroom/'],['Club House','club','/clubhouse/']];
 if(slug==='roadtohistory')links.push(['All To Play For','tv',base+'alltoplayfor/']);
 if(slug==='subbuteosuperleague')links.push(['Rising Stars League','star',base+'risingstarsleague/']);
-if(home){const hero=document.querySelector('main>.hero');if(hero){const grid=document.createElement('nav');grid.className='nx-world-shortcuts';grid.setAttribute('aria-label','Sezioni '+world[0]);grid.innerHTML=links.map(([label,id,url])=>'<a href="'+url+'">'+icons[id]+'<span>'+label+'</span></a>').join('');hero.after(grid);const old=document.querySelector('.world-sections');if(old)old.closest('section').hidden=true;}}
+if(home){
+ const banner=document.querySelector('main>.hero, .stadium-hero');
+ if(banner){
+  const primary=[['Matchday','calendar','#matchday'],...links.slice(0,7)];
+  const grid=document.createElement('nav');
+  grid.className='nx-world-shortcuts compact-world-menu';
+  grid.setAttribute('aria-label','Sezioni '+world[0]);
+  grid.innerHTML=primary.map(([label,id,url])=>'<a href="'+url+'">'+icons[id]+'<span>'+label+'</span></a>').join('');
+  banner.after(grid);
+  document.querySelector('.stadium-controls')?.remove();
+  const old=document.querySelector('.world-sections');
+  if(old)old.closest('section').hidden=true;
+  if(slug==='roadtohistory'){
+   const feature=document.createElement('a');
+   feature.className='top-magazine';feature.href=base+'alltoplayfor/';
+   feature.innerHTML=icons.tv+'<span>All To Play For</span><span aria-hidden="true">↗</span>';
+   banner.after(feature);
+  }
+ }
+}
 if(!document.getElementById('nx-universal-nav')){
  const nav=document.createElement('nav');nav.id='nx-universal-nav';nav.setAttribute('aria-label','Navigazione '+world[0]);
  const active=home?'home':page.includes('/competitions/')?'cup':page.includes('/managers/')?'manager':'more';
