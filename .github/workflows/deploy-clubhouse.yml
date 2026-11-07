@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'clubhouse/**'
+      - 'imc_village/**'
       - '.github/workflows/deploy-clubhouse.yml'
   workflow_dispatch:
 permissions:
@@ -31,8 +32,8 @@ jobs:
           import io, os, ssl, secrets, hashlib, time, urllib.request, json
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
-          files=[str(p.relative_to('clubhouse')) for p in Path('clubhouse').rglob('*') if p.is_file()]
-          root='/www.italianmastersclub.it/clubhouse'
+          files=[str(p) for folder in ('clubhouse','imc_village') for p in Path(folder).rglob('*') if p.is_file()]
+          root='/www.italianmastersclub.it'
           ctx=ssl.create_default_context()
           ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
           ftp=FTP_TLS(context=ctx)
@@ -45,7 +46,7 @@ jobs:
                   try:ftp.cwd(part)
                   except error_perm:ftp.mkd(part);ftp.cwd(part)
           for name in files:
-              p=Path('clubhouse')/name
+              p=Path(name)
               data=p.read_bytes()
               assert data, str(p)
               directory(root+'/'+str(Path(name).parent))
@@ -64,6 +65,8 @@ jobs:
               assert 'const worlds=' in html and 'MNG001' in html
               for i in range(1,9): assert 'IMC-%03d'%i in html
               assert 'Gold 558' not in html and 'Gold 557' not in html
+          with urllib.request.urlopen('https://www.italianmastersclub.it/imc_village/?release=${{ github.sha }}',timeout=60) as r:
+              assert b'<h1>IMC Village</h1>' in r.read()
           print('Live Clubhouse and eight IMC worlds verified')
           PY
 
