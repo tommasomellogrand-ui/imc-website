@@ -5,7 +5,23 @@ const slug=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerC
 function route(r){return slug(r.competition_key.replace(gw+'|',''))}
 function url(r,tab){return base+(r?'view.html':'')+'?'+new URLSearchParams({season,...(r?{competition:r.competition_key,tab:tab||'overview'}:{}),...(country?{country}:{}),...(imcOnly&&category==='DOMESTIC'?{imc:'1'}:{}),group:category})}
 function go(r,tab){location.href=url(r,tab)}
-function card(r){return '<button class="competition-card" data-key="'+esc(r.competition_key)+'"><span class="catalog-cup" aria-hidden="true">'+NexusUI.icon('cup')+'</span><strong>'+esc(r.nexus_view)+'</strong><small>'+esc(r.sm_country||r.competition_group)+'</small><span>'+Number(r.result_count||0)+' risultati · '+Number(r.schedule_count||0)+' partite in calendario</span><b>Apri →</b></button>'}
+let progress={};
+function card(r){
+ const p=progress[r.competition_key]||{};
+ const league=r.sm_action==='league';
+ const kind=league?'Divisione '+r.sm_division:r.sm_action==='playoff'?'Playoff':'Coppa';
+ const label=p.label||(r.result_count?'In corso':'In programma');
+ const info=Number.isFinite(p.percent)?'<span class="round-progress"><progress aria-label="Avanzamento" max="100" value="'+p.percent+'"></progress>'+p.percent+'%</span>':(p.detail?'<small>'+esc(p.detail)+'</small>':'');
+ return '<button class="competition-card" data-key="'+esc(r.competition_key)+'"><span><strong>'+esc(r.nexus_view)+'</strong><small>'+esc(kind)+'</small></span><span><span class="row-stage">'+esc(label)+'</span>'+info+'</span></button>';
+}
+function seasonBar(){
+ const source=$('season-select'),bar=document.createElement('div');bar.className='season-bar';
+ const picker=source.cloneNode(true);picker.id='catalog-season';picker.hidden=false;picker.value=season;picker.setAttribute('aria-label','Scegli stagione');
+ const move=(step,label,arrow)=>{const btn=document.createElement('button');btn.textContent=arrow;btn.setAttribute('aria-label',label);btn.disabled=!picker.options[picker.selectedIndex+step];btn.onclick=()=>{picker.selectedIndex+=step;picker.onchange()};return btn};
+ picker.onchange=()=>{const q=new URLSearchParams(location.search);q.set('season',picker.value);q.set('group',category);location.href=location.pathname+'?'+q};
+ const filters=source.closest('.filters');filters.hidden=true;filters.style.display='none';bar.append(move(-1,'Stagione precedente','‹'),picker,move(1,'Stagione successiva','›'));filters.before(bar);
+}
+
 const countryFlags={KSA:['Arabia Saudita',79],ARG:['Argentina',46],BEL:['Belgio',27],BRA:['Brasile',47],CZE:['Cechia',5],DEN:['Danimarca',17],ENG:['Inghilterra',1],ESP:['Spagna',8],FRA:['Francia',2],GER:['Germania',3],GRE:['Grecia',9],ITA:['Italia',4],JPN:['Giappone',76],NED:['Paesi Bassi',7],POR:['Portogallo',6],SCO:['Scozia',23],SUI:['Svizzera',16],SWE:['Svezia',10],TUR:['Turchia',14],USA:['Stati Uniti',57],MEX:['Messico',58],RUS:['Russia',15],AUT:['Austria',29],POL:['Polonia',13],UKR:['Ucraina',22],CRO:['Croazia',11],SRB:['Serbia',19],NOR:['Norvegia',20],ROU:['Romania',12],AUS:['Australia',74],CHN:['Cina',75],KOR:['Corea del Sud',77],URU:['Uruguay',53],COL:['Colombia',49],CHI:['Cile',48]};
 function catalog(container,modal=false){const flagScroll=container.querySelector('.catalog-country-flags')?.scrollLeft||0;const categories=[['DOMESTIC','Domestic'],['INTERNATIONAL','International'],['NATIONS','Nations'],...(all.some(r=>r.competition_group==='IMC')?[['IMC','IMC']]:[])];let rows=all.filter(r=>r.competition_group===category);const countries=[...new Set(rows.filter(r=>r.world_type==='MULTI').map(r=>r.sm_country).filter(Boolean))].sort();if(country&&!countries.includes(country))country='';if(country)rows=rows.filter(r=>r.sm_country===country);if(imcOnly&&category==='DOMESTIC')rows=rows.filter(r=>r.has_imc_manager);
 container.innerHTML='<div class="catalog-categories">'+categories.map(([id,label])=>'<button data-category="'+id+'" aria-pressed="'+(id===category)+'">'+label+'</button>').join('')+'</div>'+(countries.length?'<div class="catalog-country-flags" role="group" aria-label="Filtro paese"><button data-country="" aria-pressed="'+(!country)+'">Tutti i paesi</button>'+countries.map(c=>{const f=countryFlags[c];return '<button data-country="'+esc(c)+'" aria-pressed="'+(country===c)+'" aria-label="'+esc(f?.[0]||c)+'">'+(f?'<img src="/nexus/assets/flags/nations/'+f[1]+'.svg" alt="">':'')+'<span>'+esc(f?.[0]||c)+'</span></button>'}).join('')+'</div>':'')+'' +'<div class="competition-grid">'+(rows.length?rows.map(card).join(''):'<p>Nessuna competizione disponibile per questa categoria e stagione.</p>')+'</div>';
@@ -14,7 +30,7 @@ try{const c=await ready;season=c.season;if(!season)throw Error('Nessuna stagione
 const requested=params.get('division');current=all.find(r=>r.competition_key===params.get('competition'))||all.find(r=>r.sm_action==='league'&&String(r.sm_division)===requested);
 $('back').href='/scudetto/';$('back').textContent='← '+(c.world?.game_world_name||gw);for(const id of ['group-tabs','family-tabs','competition-tabs','country-filter'])$(id).hidden=true;
 $('season-select').onchange=()=>{const next=new URLSearchParams(location.search);next.set('season',$('season-select').value);location.href=location.pathname+'?'+next};
-if(!current){$('title').textContent='Competizioni';$('competition-nav').hidden=true;$('competition-tools').hidden=true;$('group-filter').hidden=true;if(requested)$('meta').textContent='Competizione non disponibile nella stagione selezionata · Scegli dal catalogo';catalog($('view'));history.replaceState(null,'',base+'?'+new URLSearchParams({season,group:category}));return}
+if(!current){seasonBar();try{progress=(await get('progress.php?season='+encodeURIComponent(season))).progress||{}}catch{}$('title').textContent='Competizioni';$('competition-nav').hidden=true;$('competition-tools').hidden=true;$('group-filter').hidden=true;if(requested)$('meta').textContent='Competizione non disponibile nella stagione selezionata · Scegli dal catalogo';catalog($('view'));history.replaceState(null,'',base+'?'+new URLSearchParams({season,group:category}));return}
 document.body.classList.add('competition-detail');
 const rail=document.createElement('nav');rail.className='competition-rail';rail.setAttribute('aria-label','Competizioni');
 rail.innerHTML=all.filter(r=>r.competition_group===current.competition_group).map(r=>'<a href="'+esc(url(r))+'"'+(r.competition_key===current.competition_key?' aria-current="page"':'')+'>'+esc(r.nexus_view)+'</a>').join('');
