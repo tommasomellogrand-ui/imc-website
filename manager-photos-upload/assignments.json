@@ -308,5 +308,15 @@
       "path": "manager-photos-upload/inbox/busts/cosimo-lonoce.jpg",
       "sha": "a2bd42600f94d64e1cbf48fee916e2f5e83da226"
     }
+  },
+  "daniele-ravanini": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/daniele-ravanini.jpg",
+      "sha": "e4ce8d226ab4dd7e8063bbab1eab4f34e4b49900"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/daniele-ravanini.jpg",
+      "sha": "d370bae35c0968ffe658f9c32320d9a553dae5eb"
+    }
   }
 }
