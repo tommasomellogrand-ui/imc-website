@@ -18,7 +18,7 @@ try {
     }
     foreach ($worlds as &$world) {
         $world['manager_count'] = $counts[$world['game_world_id']] ?? 0;
-        $world['href'] = (['GW001'=>'/roadtohistory/','GW005'=>'/halloffamers/','GW009'=>'/kickoff/','GW010'=>'/sensiblesocceracademy/','GW011'=>'/subbuteosuperleague/','GW004'=>'/worldleague/','GW006'=>'/masterleagueworld/','IMC-008'=>'/scudetto/'])[$world['game_world_id']];
+        $world['href'] = (['GW001'=>'/roadtohistory/home/','GW005'=>'/halloffamers/home/','GW009'=>'/kickoff/home/','GW010'=>'/sensiblesocceracademy/home/','GW011'=>'/subbuteosuperleague/home/','GW004'=>'/worldleague/home/','GW006'=>'/masterleagueworld/home/','IMC-008'=>'/scudetto/home/'])[$world['game_world_id']];
     }
     unset($world);
     nexus_out(['ok'=>true, 'worlds'=>$worlds, 'managers'=>array_values($managers), 'as_of'=>$today, 'updated_at'=>gmdate('c')]);

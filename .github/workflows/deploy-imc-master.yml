@@ -63,7 +63,7 @@ jobs:
           assert [w['code'] for w in data['worlds']]==['IMC-%03d'%i for i in range(1,9)]
           for world in data['worlds']:
               gw=world['game_world_id']
-              assert world['href']=={'GW001': '/roadtohistory/', 'GW005': '/halloffamers/', 'GW009': '/kickoff/', 'GW010': '/sensiblesocceracademy/', 'GW011': '/subbuteosuperleague/', 'GW004': '/worldleague/', 'GW006': '/masterleagueworld/', 'IMC-008': '/scudetto/'}[gw]
+              assert world['href']=={'GW001': '/roadtohistory/home/', 'GW005': '/halloffamers/home/', 'GW009': '/kickoff/home/', 'GW010': '/sensiblesocceracademy/home/', 'GW011': '/subbuteosuperleague/home/', 'GW004': '/worldleague/home/', 'GW006': '/masterleagueworld/home/', 'IMC-008': '/scudetto/home/'}[gw]
               assert world['manager_count']==sum(gw in m['worlds'] for m in data['managers'])
           print('Live directory verified:',len(data['worlds']),'worlds,',len(ids),'active managers')
           PYCODE
