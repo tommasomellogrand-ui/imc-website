@@ -40,23 +40,16 @@
   if(!items.length)field('Stato',[esc(p.label||'In programma')]);
   const kind=league?'Divisione '+r.sm_division:r.sm_action==='playoff'?'Playoff':'Coppa';
   if(!detail){
-   const rows=[];
-   const next=p.upcoming?.[0];
-   const fixture=next?next.map(team).join('<span>–</span>'):'';
-   const date=(p.next_date||'').split('-').reverse().join('/');
-   if(p.finalists){
-    rows.push(['Finale',award.winner_name?'Conclusa':date||'In calendario']);
-    for(const name of p.finalists)rows.push([name===award.winner_name?'Vincitore':'Finalista',team(name)]);
-   }else if(league&&p.ranking?.length){
-    for(const [i,t] of p.ranking.entries())rows.push([(i+1)+'ª',team(t.name)+' <strong>'+esc(t.points)+' pt</strong>']);
-    rows.push([date||'Stato',fixture||esc(p.complete?'Conclusa':p.label)]);
+   let body='';
+   if(!league&&p.final_played&&p.finalists){
+    const names=[...p.finalists].sort((a,b)=>Number(b===award.winner_name)-Number(a===award.winner_name));
+    body=names.map(name=>{const won=name===award.winner_name;return '<span class="gw-final '+(won?'won':'')+'"><span>'+team(name)+(won&&award.winner_manager_name?'<em>'+esc(award.winner_manager_name)+'</em>':'')+'</span><small>'+(won?'Vincitore':'Finalista')+'</small></span>'}).join('');
    }else{
-    rows.push(['Turno',esc(p.label||'In programma')]);
-    if(next){rows.push([date,team(next[0])],['Ospite',team(next[1])]);}
-    else if(award.winner_name){rows.push(['Vincitore',team(award.winner_name)],['Manager',esc(award.winner_manager_name||'—')]);}
+    const label=p.label==='Finale'?'Finale da disputare':p.label||'In programma';
+    body='<strong>'+esc(label)+'</strong>';
+    if(p.position){body+='<small>'+esc(p.position)+'</small>';const n=p.position.match(/(\d+) di (\d+)/);if(n)body+='<span class="gw-stages">'+Array.from({length:Number(n[2])},(_,i)=>'<i class="'+(i<Number(n[1])?'on':'')+'"></i>').join('')+'</span>';}
    }
-   while(rows.length<3)rows.push(['','—']);
-   return '<button class="competition-card cr-row cr-three" data-key="'+esc(r.competition_key)+'"><span class="cr-id">'+symbol(league)+'<strong>'+esc(r.nexus_view)+'</strong></span><span class="cr-lines">'+rows.slice(0,3).map(([l,v])=>'<span class="cr-line"><small>'+esc(l)+'</small>'+v+'</span>').join('')+'</span></button>';
+   return '<button class="gw-cup" data-key="'+esc(r.competition_key)+'"><span class="gw-name">'+symbol(league)+'<b>'+esc(r.nexus_view)+'</b></span><span class="gw-state">'+body+'</span></button>';
   }
   const content='<span class="cr-identity">'+symbol(league)+'<strong>'+esc(r.nexus_view)+'</strong><small>'+esc(kind)+'</small></span><span class="cr-data">'+items.join('')+'</span>';
   return detail?'<section class="cr-row" aria-label="Situazione competizione">'+content+'</section>':'<button class="competition-card cr-row" data-key="'+esc(r.competition_key)+'">'+content+'</button>';

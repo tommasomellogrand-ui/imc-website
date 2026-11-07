@@ -12,7 +12,11 @@ function domesticRows(rows){
  const stats=leagues.map(r=>progress[r.competition_key]||{}),known=stats.length&&stats.every(p=>p.expected>0);
  const pct=known?Math.round(100*stats.reduce((v,p)=>v+p.played,0)/stats.reduce((v,p)=>v+p.expected,0)):null;
  const label=stats.find(p=>p.label?.startsWith('Giornata'))?.label||'';
- return (leagues.length?'<div class="league-summary"><h3>Leagues</h3><span>'+esc(label)+'</span>'+(pct!==null?'<label><progress max="100" value="'+pct+'"></progress> '+pct+'%</label>':'')+'</div>'+leagues.map(card).join(''):'')+(cups.length?'<h3 class="cups-title">Cups</h3>'+cups.map(card).join(''):'');
+ const rounds=label.match(/Giornata (\d+) di (\d+)/);
+ const caption=rounds?(pct===0?'0':rounds[1])+' giornate su '+rounds[2]:label;
+ const links=leagues.map(r=>'<button data-key="'+esc(r.competition_key)+'"><i>❯</i>'+esc(/^Div (\d+)$/.test(r.nexus_view)?'Divisione '+r.sm_division:r.nexus_view)+'<span>›</span></button>').join('');
+ const gauge='<div class="gw-gauge"><svg viewBox="0 0 120 68" aria-hidden="true"><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="#dedee5" stroke-width="9"/><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="var(--world-accent,#7656a0)" stroke-width="9" pathLength="100" stroke-dasharray="'+(pct??0)+' 100"/></svg><b>'+(pct===null?'':pct+'%')+'</b><small>'+esc(caption)+'</small></div>';
+ return (leagues.length?'<h3 class="cups-title">Leagues</h3><div class="gw-leagues"><div>'+links+'</div>'+gauge+'</div>':'')+(cups.length?'<h3 class="cups-title">Cups</h3>'+cups.map(card).join(''):'');
 }
 function seasonBar(){
  const source=$('season-select'),bar=document.createElement('div');bar.className='season-bar';
