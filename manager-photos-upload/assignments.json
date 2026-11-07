@@ -158,5 +158,15 @@
       "path": "manager-photos-upload/inbox/busts/lauro-crasti.jpg",
       "sha": "483671fac7acdf6e7258786ace447d1ab12ad396"
     }
+  },
+  "saverio-cordiano": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/saverio-cordiano.jpg",
+      "sha": "92efd1f3346d7599d55001e56e77bb8107dd2396"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/saverio-cordiano.jpg",
+      "sha": "1ca28e27b654ef5f61b780f83f13ef2fc273d98f"
+    }
   }
 }
