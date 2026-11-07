@@ -168,5 +168,15 @@
       "path": "manager-photos-upload/inbox/busts/saverio-cordiano.jpg",
       "sha": "1ca28e27b654ef5f61b780f83f13ef2fc273d98f"
     }
+  },
+  "oleksandr-medvid": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/oleksandr-medvid.jpg",
+      "sha": "ab5d6674139f2c54cbe6bc0132cedf9b23301f44"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/oleksandr-medvid.jpg",
+      "sha": "33b3bda207a392aeefa8fd8f0f332058c5cc2e6e"
+    }
   }
 }
