@@ -1,5 +1,17 @@
 /* IMC-006 · World League: shared navigation, individual colour identity. */
-:root,body{--gold:#245e86!important;--accent:#245e86!important;--world-accent:#245e86;--world-tint:#e7f2f8;font-family:Inter,sans-serif!important}
-body .hero{background:linear-gradient(120deg,#e7f2f8,#fff)!important;border-top:5px solid #245e86}body .hero h1{color:#245e86!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}
-body .brand small,body .eyebrow,body .text-link{color:#245e86!important}body .top{border-top:4px solid #245e86}body .button:not(.secondary),body .tabs button[aria-selected=true]{background:#245e86!important;color:#fff!important;border-color:#245e86!important}
-body .competition-banner{background:#e7f2f8!important;border-left:5px solid #245e86}.world-sections{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.world-section{padding:26px;border:1px solid #d9dfe5;border-top:3px solid #245e86;border-radius:8px;background:#fff}.world-section>span{font-size:12px;color:#245e86;font-weight:800}.world-section h2{font-size:24px;margin:20px 0 12px}.world-section p{font-size:14px;color:#52647a;line-height:1.6}.world-section b{font-size:12px;color:#245e86}.brand span{white-space:normal}@media(max-width:700px){.world-sections{grid-template-columns:1fr 1fr}.brand{max-width:66%}.brand span{font-size:10px}.hero h1{font-size:46px!important}}@media(max-width:420px){.world-sections{grid-template-columns:1fr}.top-links{gap:8px}}
+:root,body{--gold:#16577d!important;--accent:#16577d!important;--world-accent:#16577d;--world-tint:#e6f5ff;font-family:Inter,sans-serif!important}
+body .hero{background:linear-gradient(120deg,#e6f5ff,#fff)!important;border-top:5px solid #16577d}body .hero h1{color:#16577d!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}
+body .brand small,body .eyebrow,body .text-link{color:#16577d!important}body .top{border-top:4px solid #16577d}body .button:not(.secondary),body .tabs button[aria-selected=true]{background:#16577d!important;color:#fff!important;border-color:#16577d!important}
+body .competition-banner{background:#e6f5ff!important;border-left:5px solid #16577d}.world-sections{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.world-section{padding:26px;border:1px solid #d9dfe5;border-top:3px solid #16577d;border-radius:8px;background:#fff}.world-section>span{font-size:12px;color:#16577d;font-weight:800}.world-section h2{font-size:24px;margin:20px 0 12px}.world-section p{font-size:14px;color:#52647a;line-height:1.6}.world-section b{font-size:12px;color:#16577d}.brand span{white-space:normal}@media(max-width:700px){.world-sections{grid-template-columns:1fr 1fr}.brand{max-width:66%}.brand span{font-size:10px}.hero h1{font-size:46px!important}}@media(max-width:420px){.world-sections{grid-template-columns:1fr}.top-links{gap:8px}}
+
+html body.imc-world-ui {--world-accent:#16577d;--world-tint:#e6f5ff;--gold:#ad7528!important;color:#102744}
+html body.imc-world-ui .wl-scoreboard {background:#071932!important;margin:0!important;padding:0!important;border:0;border-bottom:3px solid #dba957}
+.wl-scoreboard img {display:block;width:100%;height:auto}
+html body.imc-world-ui :is(.top,.top .menu nav,.imc-section-plate) {background:#071932!important;color:#fff1d3!important;border-color:#dba957!important}
+html body.imc-world-ui .top :is(a,summary,small) {color:#fff1d3!important}
+html body.imc-world-ui .imc-section-plate {border-bottom:3px solid #dba957!important}
+html body.imc-world-ui .nx-world-shortcuts a {background:#f1f8fc!important;color:#102744!important;border-color:#b9d6e6!important}
+html body.imc-world-ui .nx-world-shortcuts svg {color:#16577d}
+html body.imc-world-ui :is(.catalog-categories,.tabs,.manager-scope,.cup-tabs,.trophy-groups,.catalog-match-tabs) :is([aria-pressed=true],[aria-selected=true],.active) {background:#103252!important;color:#fff1d3!important;border-color:#66c9ef!important}
+html body.imc-world-ui .nx-clubhouse-center {background:#071932!important;color:#fff1d3!important;border-color:#dba957!important}
+html body.imc-world-ui .cups-title {background:#e6f5ff;color:#102744;border-left-color:#dba957}
