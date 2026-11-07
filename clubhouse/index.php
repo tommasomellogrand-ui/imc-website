@@ -9,7 +9,8 @@ $worlds=[];$assignments=[];$failed=false;
 try {
  $db=nexus_db(nexus_config(),'core');
  $worlds=nexus_rows($db,"SELECT `IMC GW` gw,`IMC_WORLD_ID` code,`IMC GW Name` name,`Active Club` active_clubs FROM `IMC Game World Codex Global` WHERE `IMC_WORLD_ID` IN ('IMC-001','IMC-002','IMC-003','IMC-004','IMC-005','IMC-006','IMC-007','IMC-008') ORDER BY `IMC_WORLD_ID`");
- if(count($worlds)!==7) throw new RuntimeException('worlds_incomplete');
+ require_once __DIR__.'/scope.php';
+ if(count($worlds)!==count(CLUBHOUSE_WORLDS)) throw new RuntimeException('worlds_incomplete');
  $assignments=nexus_rows($db,"SELECT a.id,a.team_id,a.game_world_id,a.manager_id,m.full_name,m.face_image_url,m.bust_image_url,a.assignment_type,a.start_date,a.end_date,COALESCE(NULLIF(c.nexus_view,''),c.name,n.name,a.team_name) team_name,COALESCE(c.image_url,n.image_url) image_url FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id JOIN `IMC Game World Codex Global` w ON w.`IMC GW`=a.game_world_id LEFT JOIN `IMC Game World Club Mapping` cm ON a.assignment_type='club' AND cm.`Game World`=a.game_world_id AND cm.`SM World Club ID`=a.team_id LEFT JOIN `IMC Club Codex Global` c ON c.id=cm.`Club ID` LEFT JOIN `IMC Game World National Team Mapping` nm ON a.assignment_type='national_team' AND nm.`Game World`=a.game_world_id AND nm.`SM World National Club ID`=a.national_team_id LEFT JOIN `IMC National Team Codex Global` n ON n.id=nm.`National Team ID` WHERE w.`IMC_WORLD_ID` IN ('IMC-001','IMC-002','IMC-003','IMC-004','IMC-005','IMC-006','IMC-007','IMC-008') ORDER BY m.full_name,w.`IMC_WORLD_ID`,a.assignment_type,a.start_date");
 } catch(Throwable $e) {$failed=true;http_response_code(503);error_log('Clubhouse: '.$e->getMessage());}
 $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
