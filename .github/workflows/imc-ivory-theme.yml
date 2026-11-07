@@ -83,7 +83,7 @@ jobs:
                   path=w+'/'+page
                   with urllib.request.urlopen('https://www.italianmastersclub.it/'+path,timeout=60) as r:s=r.read().decode()
                   version='standard8' if not page else 'entry3'
-                  assert f'world-ui.css?v={version}' in s and f'world-ui.js?v={version}' in s,path
+                  assert f'world-ui.css?v={version}' in s and ('world-ui.js?v=matchday-page' if not page else f'world-ui.js?v={version}') in s,path
               print('White UI and Nexus navigation loaded:',w)
           with concurrent.futures.ThreadPoolExecutor(max_workers=3) as ex:list(ex.map(verify,worlds))
           PY

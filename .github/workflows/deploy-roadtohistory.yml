@@ -136,7 +136,7 @@ jobs:
               assert response.status==200
               assert 'no-store' in response.headers.get('Cache-Control','')
               html=response.read()
-              assert b'href="/theroadalmanac/"' in html and b'href="/roadtohistory/competitions/?division=1"' in html
+              assert b'href="/roadtohistory/matchday/"' in html and b'id="match-content"' not in html
           print('Public URL and exact artwork verified.')
           PY
 
@@ -318,7 +318,7 @@ jobs:
                   other=get(mode,d['dates'][1])
                   assert other['date']==d['dates'][1]
               print(mode+': date navigation, data scope and fixtures verified')
-          with urllib.request.urlopen(base,timeout=90) as r:
+          with urllib.request.urlopen(base+'matchday/',timeout=90) as r:
               html=r.read().decode()
               assert 'matchday/home.js' in html and 'I risultati arriveranno qui' not in html
           PY

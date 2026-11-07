@@ -15,7 +15,7 @@ const links=[['Competizioni','cup',base+'competitions/'],['Manager','manager',ba
 if(slug==='roadtohistory')links.push(['All To Play For','tv',base+'alltoplayfor/']);
 if(slug==='subbuteosuperleague')links.push(['Rising Stars League','star',base+'risingstarsleague/']);
 function addWorldMenu(banner){
-  const primary=[['Matchday','calendar',base+'#matchday'],...links.slice(0,7)];
+  const primary=[['Matchday','calendar',base+'matchday/'],...links.slice(0,7)];
   const grid=document.createElement('nav');
   grid.className='nx-world-shortcuts compact-world-menu';
   grid.setAttribute('aria-label','Sezioni '+world[0]);
@@ -30,7 +30,7 @@ function addWorldMenu(banner){
   }
 }
 const bannerSelector='main>.hero, .stadium-hero';
-if(home){
+if(home&&!document.querySelector('.world-entry-static')){
  const banner=document.querySelector(bannerSelector);
  if(banner){
   addWorldMenu(banner);

@@ -11,7 +11,7 @@ def get(path):
    if attempt==2:raise
 def check(w):
  slug=w['slug'];prefix='/'+slug+'/'
- for section in ['', 'managers/','clubs/','nations/','competitions/','transfers/','playercodex/','trophyroom/']:
+ for section in ['', 'matchday/', 'managers/','clubs/','nations/','competitions/','transfers/','playercodex/','trophyroom/']:
   h=get(prefix+section);assert w['name'].lower() in h.lower(),(slug,section,'identity');assert '/roadtohistory/' not in h,(slug,section,'cross-world link');assert 'Inter' in h
  endpoints=['clubs/directory.php','nations/directory.php','managers/api.php','playercodex/world.php','transfers/data.php','trophyroom/data.php','matchday/data.php','matchday/data.php?mode=schedule']
  for endpoint in endpoints:
