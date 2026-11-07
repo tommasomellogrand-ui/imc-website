@@ -268,5 +268,15 @@
       "path": "manager-photos-upload/inbox/busts/armando-de-giulio.jpg",
       "sha": "82783fdadc60117c03776eef2dc5bc8aac2453c2"
     }
+  },
+  "attilio-bonnici": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/attilio-bonnici.jpg",
+      "sha": "efca543ede3aeb9014070ed312246f13a5c4d6bd"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/attilio-bonnici.jpg",
+      "sha": "c1b024264b3416514176c8e32ca5f54be8697de2"
+    }
   }
 }
