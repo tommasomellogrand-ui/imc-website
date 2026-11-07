@@ -1,0 +1,20 @@
+#rth-home body{--ink:#151511;--gold:#986b1b;--line:#ddcfb9;background:#fffcf5!important;color:#211e17}
+#rth-home .top,#rth-home .menu nav,#rth-home #nx-universal-nav{background:#141410!important;border-color:#b38c49!important}
+#rth-home .top :is(a,summary,small),#rth-home #nx-universal-nav :is(a,button){color:#fff9df!important}
+#rth-home #nx-universal-nav .nx-clubhouse-center{color:#edc164!important}
+#rth-home .legacy-hero{background:#080805!important;border:0;border-bottom:3px solid #c59a48}
+#rth-home .legacy-hero h1{margin:0!important;padding:0;max-width:none;line-height:0!important}
+.legacy-hero img{display:block;width:100%;height:clamp(205px,38vw,535px);object-fit:cover;object-position:center}
+#rth-home .nx-world-shortcuts{background:#fffcf5!important;border-bottom:1px solid #ba974d}
+#rth-home .section-head{background:#171711;color:#fff7e3;padding:14px 16px;border-left:5px solid #cb9d41;gap:10px}
+#rth-home .section-head h2{font:900 italic clamp(23px,4vw,38px)/1.1 Impact,'Arial Narrow',Inter,sans-serif;text-transform:uppercase;letter-spacing:-.025em;color:#fff7e3}
+#rth-home .section-head :is(.eyebrow,.text-link){color:#e6bd70!important}
+#rth-home .section,#rth-home .match-panel{background:#fffcf5!important}
+#rth-home .section{padding-block:24px}
+#rth-home .chapter-strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;padding:0 0 8px;scrollbar-color:#bb923f #eee5d5}
+.chapter-strip a{flex:0 0 clamp(165px,43vw,250px);position:relative;scroll-snap-align:start;background:#12120f;border:1px solid #b99b64}
+.chapter-strip img{width:100%;aspect-ratio:1.6;object-fit:cover;object-position:top}
+.chapter-strip span{display:block;padding:6px 10px;color:#f1d08a;font:700 12px Inter,sans-serif;text-transform:uppercase;letter-spacing:.08em}
+#rth-home .world-strip strong{color:#82550b}
+#rth-home .tabs button[aria-selected=true]{border-color:#ac7c26!important;color:#553600!important}
+@media(max-width:500px){#rth-home .wrap{width:calc(100% - 28px)}.legacy-hero img{height:auto;aspect-ratio:2.15;object-fit:cover}}
