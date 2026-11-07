@@ -88,3 +88,6 @@ body.clubhouse-hub #content>.manager-grid>.manager-card{padding:14px 8px}
 body.clubhouse-hub .directory-person h2{font-size:12px;line-height:1.4}
 body.clubhouse-hub .directory-person .directory-id-label{font-size:8px}
 }
+
+body header .ch-village-banner{display:block;width:100%;height:auto;margin:0}
+body header .ch-village-banner+.hero{position:absolute!important;clip-path:inset(50%);width:1px!important;height:1px!important;min-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}
