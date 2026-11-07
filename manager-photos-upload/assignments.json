@@ -128,5 +128,15 @@
       "path": "manager-photos-upload/inbox/busts/sir-simone.jpg",
       "sha": "52ff4c4b313613e83e8621e15a602f6c39b747cc"
     }
+  },
+  "giovanni-cabrioli": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/giovanni-cabrioli.jpg",
+      "sha": "8ecbaadc4c64db065440c6b9b3d85d2c577476c1"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/giovanni-cabrioli.jpg",
+      "sha": "bcc8795430dbd8068a2193e0cd04a982e8f5d441"
+    }
   }
 }
