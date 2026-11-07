@@ -3,3 +3,27 @@
 body .hero{background:linear-gradient(120deg,#f1eafa,#fff)!important;border-top:5px solid #684285}body .hero h1{color:#684285!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}
 body .brand small,body .eyebrow,body .text-link{color:#684285!important}body .top{border-top:4px solid #684285}body .button:not(.secondary),body .tabs button[aria-selected=true]{background:#684285!important;color:#fff!important;border-color:#684285!important}
 body .competition-banner{background:#f1eafa!important;border-left:5px solid #684285}.world-sections{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.world-section{padding:26px;border:1px solid #d9dfe5;border-top:3px solid #684285;border-radius:8px;background:#fff}.world-section>span{font-size:12px;color:#684285;font-weight:800}.world-section h2{font-size:24px;margin:20px 0 12px}.world-section p{font-size:14px;color:#52647a;line-height:1.6}.world-section b{font-size:12px;color:#684285}.brand span{white-space:normal}@media(max-width:700px){.world-sections{grid-template-columns:1fr 1fr}.brand{max-width:66%}.brand span{font-size:10px}.hero h1{font-size:46px!important}}@media(max-width:420px){.world-sections{grid-template-columns:1fr}.top-links{gap:8px}}
+
+/* Scudetto arcade stadium and controls */
+body.imc-world-ui {--night:#081e31;--lamp:#ffcc12;--paper:#fffaf0;--accent:#735400!important;--gold:#735400!important;background:var(--paper)!important;color:#102335}
+body.imc-world-ui .top,body.imc-world-ui #nx-universal-nav {background:var(--night)!important;color:white!important;border-color:#385066!important}
+body.imc-world-ui .top :is(a,summary),body.imc-world-ui .brand small,body.imc-world-ui #nx-universal-nav :is(a,button){color:#fff!important}
+body.imc-world-ui .top .menu nav {background:var(--night)}
+body.imc-world-ui #nx-universal-nav .nx-clubhouse-center {color:var(--lamp)!important}
+.arc-board {background:repeating-linear-gradient(0deg,#ffffff08 0 1px,transparent 1px 4px),linear-gradient(110deg,#061726,#14354c 67%,#071823);border-block:3px solid #526274;display:flex;align-items:center;justify-content:space-between;padding:8px max(18px,calc((100vw - 1120px)/2));box-shadow:inset 0 -3px #ffc900}
+.arc-display {border-left:5px solid #ffcb12;padding-left:12px}
+.arc-display strong {display:block;color:#fff9e9;font:italic 900 clamp(30px,6vw,62px)/1 Inter,sans-serif;letter-spacing:-.055em;text-shadow:2px 2px #506270}
+.arc-display span {display:block;color:#ffd151;font:700 13px/1.6 ui-monospace,monospace;letter-spacing:.12em}
+.arc-board img {width:clamp(78px,16vw,126px);aspect-ratio:1;object-fit:contain}
+body.imc-world-ui :is(.section,.shell,.content,.manager-card,.club-card,.world-section){background-color:var(--paper)!important}
+body.imc-world-ui .hero {background:var(--paper)!important;border-top:0}
+body.imc-world-ui :is(.hero h1,.eyebrow,.text-link){color:#223c50!important}
+body.imc-world-ui :is(.button:not(.secondary),button[aria-pressed=true],button[aria-selected=true]) {background:var(--lamp)!important;color:#102335!important;border-color:#b38c0b!important}
+body.imc-world-ui .competition-banner {background:#fff3c0!important;border-left-color:#edb900}
+body.imc-world-ui :is(.world-section,.club-card,.manager-card):is(:focus-visible,:active){outline:3px solid #dfac00;outline-offset:-3px}
+.arc-divisions {display:flex;gap:7px;padding:8px;background:#081e31}
+.arc-divisions[hidden]{display:none}
+.arc-divisions button {flex:1;background:#102d42;color:#fff;border:1px solid #ccc;border-radius:3px;min-height:40px;font-weight:750}
+body.manager-album #cards .team {border-bottom:2px solid var(--stripe,#c8aa56)}
+body.manager-album #cards .team:has(img[src*="/115."]) {--stripe:#bb1733}
+body.manager-album #cards .team:has(img[src*="/123."]) {--stripe:#882438}
