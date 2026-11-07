@@ -288,5 +288,15 @@
       "path": "manager-photos-upload/inbox/busts/carlo-ancelotti.jpg",
       "sha": "ad92112f138add243e7c809b4bcf8138b20ee16d"
     }
+  },
+  "chris-fenech": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/chris-fenech.jpg",
+      "sha": "fae7ebf3678c9fdcbd842fa23384232f09815e4c"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/chris-fenech.jpg",
+      "sha": "6666b00491723cdd2df6c72e11b65e796ee79473"
+    }
   }
 }
