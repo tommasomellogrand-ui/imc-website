@@ -188,5 +188,15 @@
       "path": "manager-photos-upload/inbox/busts/luciano-tana.jpg",
       "sha": "7124e1f46a5f0bbc8dc83b4a98843fdcff05a3ab"
     }
+  },
+  "mattia-bertonati": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/mattia-bertonati.jpg",
+      "sha": "4b6712f8233c7dec36ded4fc4e6a3cf3139ad280"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/mattia-bertonati.jpg",
+      "sha": "ba828be469cf1961378d96ce7b49c92778046361"
+    }
   }
 }
