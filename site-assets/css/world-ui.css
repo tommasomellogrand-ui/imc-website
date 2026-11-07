@@ -30,3 +30,26 @@ html body #nx-universal-dialog{border-radius:4px!important;max-height:80dvh;over
 @media(max-width:380px){.nx-world-shortcuts{gap:8px}.nx-world-shortcuts a{font-size:11px;min-height:94px}.nx-world-shortcuts svg{width:26px;height:26px}html body .assign{gap:12px}html body .manager-team-link{font-size:12px}}
 
 html body :is(article,section,button,input,select,textarea,.nc-card,.competition-card,.md-match,.trophy-card,.result-round,.cup-card,.match-card){border-radius:4px!important;box-shadow:none!important}
+
+/* World's manager directory: portrait album. */
+.manager-album .shell {padding-top:18px}
+.manager-album .back,.manager-album .page-heading > :not(h1) {display:none}
+.manager-album .page-heading {padding:0;margin:0 0 12px}
+.manager-album .page-heading h1 {font-size:32px;line-height:1.1;margin:0}
+.manager-album .page-heading h1 span {font-size:17px;color:#596579;font-weight:500;letter-spacing:0}
+.manager-album .filters {display:flex;gap:16px;margin:0 0 12px;border-bottom:1px solid #d9dfe5}
+.manager-album .filters button {min-height:44px;background:transparent!important;border:0!important;border-radius:0;padding:6px 2px}
+.manager-album .filters button[aria-pressed=true] {box-shadow:inset 0 -3px currentColor;color:var(--accent,#60487e)!important;font-weight:700}
+.manager-album label[for=search] {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.manager-album #search {height:44px;min-height:44px;margin:0 0 14px;padding:8px 12px}
+.manager-album #cards {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
+.manager-album #cards .manager-card {display:flex;flex-direction:column;align-items:stretch;padding:0!important;overflow:hidden;min-width:0;border:1px solid #cfd5dd;border-radius:4px;background:white}
+.manager-album #cards .imc-manager-portrait,.manager-album #cards .manager-card:not(:has(>.imc-manager-portrait))::before {order:0;display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;object-position:center 28%}
+.manager-album #cards .manager-card:not(:has(>.imc-manager-portrait))::before {content:'';background:#f7f8fa}
+.manager-album #cards h2 {order:1;margin:8px 9px 4px;font-size:clamp(15px,3.9vw,20px);line-height:1.14}
+.manager-album #cards .team {order:2;display:flex;flex-direction:row;align-items:center!important;gap:7px;margin:0;padding:2px 9px}
+.manager-album #cards .team img {width:23px;height:25px;object-fit:contain}
+.manager-album #cards .team p {font-size:13px;line-height:1.25}
+.manager-album #cards .manager-card>small {order:3;margin:3px 9px 9px;color:#52647a;font-size:11px}
+.manager-album #cards .team small:first-of-type,.manager-album:has([data-mode=active][aria-pressed=true]) #cards .team small {display:none}
+@media(min-width:700px){.manager-album #cards {grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}}

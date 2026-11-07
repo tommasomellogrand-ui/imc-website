@@ -26,6 +26,20 @@ if(!document.getElementById('nx-universal-nav')){
 (async function showManagerPortraits() {
   const cards = document.querySelector('#cards');
   if (!cards || !/\/managers\/(?:index\.html)?$/.test(location.pathname)) return;
+  document.body.classList.add('manager-album');
+  const heading = document.querySelector('.page-heading h1');
+  const count = document.createElement('span');
+  const summary = document.querySelector('#summary');
+  heading.append(' ', count);
+  const updateCount = () => {
+    const match = summary.textContent.match(/^([0-9]+) manager/);
+    count.textContent = match ? match[1] : '';
+    summary.hidden = Boolean(match);
+  };
+  new MutationObserver(updateCount).observe(summary, {childList:true, subtree:true, characterData:true});
+  updateCount();
+  document.querySelector('[data-mode="active"]').textContent = 'Attivi';
+  document.querySelector('#search').placeholder = 'Cerca manager o squadra';
   const response = await fetch('/clubhouse/data.php', {cache:'no-store'});
   if (!response.ok) return;
   const directory = await response.json();
@@ -44,7 +58,6 @@ if(!document.getElementById('nx-universal-nav')){
     photo.loading = 'lazy';
     photo.width = 76;
     photo.height = 76;
-    photo.style.cssText = 'display:block;width:76px;height:76px;object-fit:cover;object-position:center 30%;margin:0 0 10px';
     photo.addEventListener('error', () => photo.remove(), {once:true});
     photo.src = url.href;
     card.prepend(photo);
