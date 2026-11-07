@@ -108,5 +108,15 @@
       "path": "manager-photos-upload/inbox/busts/simone-campanella.jpg",
       "sha": "bcb87dac9da3afc23bd308b50bac11d9dd0e6636"
     }
+  },
+  "carlo-colombo": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/carlo-colombo.jpg",
+      "sha": "b43d5b0db99b79eb9af61fb2aed9c05592c0e575"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/carlo-colombo.jpg",
+      "sha": "434b3f796d2177593899bd0ff4d2352a9f4d3c54"
+    }
   }
 }
