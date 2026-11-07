@@ -1,6 +1,6 @@
 /* Dedicated worlds: Nexus navigation, with routes scoped to the current world. */
 (()=>{'use strict';
-const worlds={roadtohistory:['Road To History','players'],halloffamers:['Hall Of Famers','playercodex'],kickoff:['Kick Off','playercodex'],sensiblesocceracademy:['Sensible Soccer Academy','playercodex'],subbuteosuperleague:['Subbuteo Super League','playercodex'],worldleague:['World League','playercodex'],masterleagueworld:['Master League World','playercodex']};
+const worlds={roadtohistory:['Road To History','players'],halloffamers:['Hall Of Famers','playercodex'],kickoff:['Kick Off','playercodex'],sensiblesocceracademy:['Sensible Soccer Academy','playercodex'],subbuteosuperleague:['Subbuteo Super League','playercodex'],worldleague:['World League','playercodex'],masterleagueworld:['Master League World','playercodex'],scudetto:['Scudetto','playercodex']};
 const slug=location.pathname.split('/')[1],world=worlds[slug];if(!world)return;
 const base='/'+slug+'/',page=location.pathname,home=page===base||page===base+'index.html'||page===base+'index.php';
 document.body.classList.add('imc-world-ui');
