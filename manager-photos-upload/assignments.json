@@ -208,5 +208,15 @@
       "path": "manager-photos-upload/inbox/busts/pep-buitre.jpg",
       "sha": "3e92c88cde1f5b4565f3bfa426fcc13dcb75cdd4"
     }
+  },
+  "igor-zanotto": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/igor-zanotto.jpg",
+      "sha": "6ec6873623ef3a51170e8b5579259b234023a658"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/igor-zanotto.jpg",
+      "sha": "b5f0fb6c4d9f1419f58d3039feff9662d1693bce"
+    }
   }
 }
