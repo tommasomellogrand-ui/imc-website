@@ -41,12 +41,14 @@
   const kind=league?'Divisione '+r.sm_division:r.sm_action==='playoff'?'Playoff':'Coppa';
   if(!detail){
    let body='';
-   if(!league&&p.final_played&&p.finalists){
-    const names=[...p.finalists].sort((a,b)=>Number(b===award.winner_name)-Number(a===award.winner_name));
-    body=names.map(name=>{const won=name===award.winner_name;return '<span class="gw-final '+(won?'won':'')+'"><span>'+team(name)+(won&&award.winner_manager_name?'<em>'+esc(award.winner_manager_name)+'</em>':'')+'</span><small>'+(won?'Vincitore':'Finalista')+'</small></span>'}).join('');
+   if(!league&&award.winner_name){
+    const photo=String(award.winner_manager_photo_url||'');
+    const portrait=/^(https?:\/\/|\/(?!\/))/.test(photo)?'<img src="'+esc(photo)+'" alt="" width="34" height="34" style="object-fit:cover;border-radius:50%;flex:none">':'';
+    body='<span class="gw-final won" style="display:grid;gap:.3rem"><small>Vincitore</small>'+team(award.winner_name)+(award.winner_manager_name?'<span style="display:flex;align-items:center;gap:.4rem">'+portrait+esc(award.winner_manager_name)+'</span>':'')+'</span>';
    }else{
     const label=p.label==='Finale'?'Finale da disputare':p.label||'In programma';
     body='<strong>'+esc(label)+'</strong>';
+    if(p.next_date)body+='<small>'+esc(p.next_date.split('-').reverse().join('/'))+'</small>';
     if(p.position){body+='<small>'+esc(p.position)+'</small>';const n=p.position.match(/(\d+) di (\d+)/);if(n)body+='<span class="gw-stages">'+Array.from({length:Number(n[2])},(_,i)=>'<i class="'+(i<Number(n[1])?'on':'')+'"></i>').join('')+'</span>';}
    }
    return '<button class="gw-cup" data-key="'+esc(r.competition_key)+'"><span class="gw-name">'+symbol(league)+'<b>'+esc(r.nexus_view)+'</b></span><span class="gw-state">'+body+'</span></button>';
