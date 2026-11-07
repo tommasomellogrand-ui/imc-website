@@ -72,6 +72,29 @@ async function mountWorldHeader(){
  document.querySelector('.arc-board')?.remove();
 }
 
+const entry=document.querySelector('.world-entry-static');
+if(entry){
+ const card=document.createElement('div');
+ card.className='imc-section-plate';
+ if(slug==='roadtohistory') card.classList.add('rth-section-plate');
+ const heading=document.querySelector('.page-heading h1, main h1:not(.world-entry-static h1), #matchday .section-head h2');
+ const directory=page.endsWith('/')||page.endsWith('/index.html');
+ const primarySection=page.slice(base.length).split('/')[0];
+ const labels={home:'Home',matchday:'Matchday',competitions:'Competizioni',managers:'Manager',clubs:'Club',nations:'Nations',transfers:'Transfers',players:'Player Codex',playercodex:'Player Codex',trophyroom:'Trophy Room'};
+ const isDirectory=directory&&page.slice(base.length).replace(/index\.html$/,'').split('/').filter(Boolean).length===1;
+ const update=()=>{
+  const name=isDirectory&&labels[primarySection]||heading?.childNodes[0]?.textContent?.trim()||document.title.split(/[|·]/)[0];
+  card.textContent=name.replace(/\.$/,'').trim();
+ };
+ update();entry.after(card);
+ document.body.classList.add('has-section-plate');
+ if(heading){
+  heading.classList.add('plate-original-title');
+  if(heading.closest('.page-heading')&&isDirectory)heading.closest('.page-heading').classList.add('plate-original-heading');
+  new MutationObserver(update).observe(heading,{childList:true,characterData:true,subtree:true});
+ }
+ if(isDirectory)document.body.classList.add('plate-directory');
+}
 if(!document.getElementById('nx-universal-nav')){
  const nav=document.createElement('nav');nav.id='nx-universal-nav';nav.setAttribute('aria-label','Navigazione '+world[0]);
  const active=home?'home':page.includes('/competitions/')?'cup':page.includes('/managers/')?'manager':'more';

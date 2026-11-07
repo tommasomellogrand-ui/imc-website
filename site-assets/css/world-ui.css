@@ -77,3 +77,12 @@ html body .top .top-links .menu > summary::after {
  content:"MENU";display:block;font:750 10px/1 Inter,sans-serif;letter-spacing:.08em
 }
 html body .top .menu > summary:focus-visible {outline:2px solid currentColor;outline-offset:3px}
+
+html body .imc-section-plate{box-sizing:border-box;width:min(1180px,calc(100% - 24px));min-height:56px;margin:8px auto 12px;padding:6px 12px;display:grid;place-items:center;text-align:center;background:var(--section-plate-bg,#172a38);border-bottom:2px solid var(--world-accent,#b99a56);color:var(--section-plate-text,#fff);font:800 28px/1.08 Inter,sans-serif;text-transform:uppercase;overflow-wrap:anywhere}
+html body .rth-section-plate{background:#191813;border-color:#bc974e;color:#fff3d7;font:900 italic 30px/1.05 Impact,'Arial Narrow',Inter,sans-serif;letter-spacing:-.035em}
+html body.has-section-plate .world-entry-static .compact-world-menu{margin-bottom:0}
+html body.has-section-plate .plate-original-title{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);margin:0!important}
+html body.has-section-plate .plate-original-heading,html body.plate-directory main>.back-row,html body.plate-directory main>a.back,html body.plate-directory #matchday>.section-head{display:none!important}
+html body.plate-directory main.shell,html body.plate-directory main.content,html body.plate-directory #matchday{padding-top:0!important;margin-top:0!important}
+html body.plate-directory #division-filter{margin-top:0}
+@media(min-width:800px){html body .imc-section-plate{min-height:64px}}
