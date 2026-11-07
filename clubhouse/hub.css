@@ -91,3 +91,15 @@ body.clubhouse-hub .directory-person .directory-id-label{font-size:8px}
 
 body header .ch-village-banner{display:block;width:100%;height:auto;margin:0}
 body header .ch-village-banner+.hero{position:absolute!important;clip-path:inset(50%);width:1px!important;height:1px!important;min-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}
+
+.ch-world-top{position:sticky;top:0;z-index:20;background:#101b33;color:#fff9eb;border-bottom:2px solid #c8aa59}
+.ch-top-inner{width:min(1180px,calc(100% - 32px));margin:auto;min-height:64px;display:flex;align-items:center;justify-content:space-between}
+.ch-top-brand{display:flex;align-items:center;gap:12px;color:inherit;font:800 13px Inter,sans-serif;letter-spacing:.08em;text-decoration:none}
+.ch-top-brand img{width:36px;height:36px;object-fit:contain}
+.ch-top-brand small{display:block;font-size:9px;letter-spacing:.2em;margin-top:4px}
+.ch-top-menu{position:relative}
+.ch-top-menu summary{list-style:none;display:grid;place-items:center;min-width:48px;min-height:44px;cursor:pointer;border:1px solid currentColor;border-radius:5px;font:700 10px Inter,sans-serif}
+.ch-top-menu summary::-webkit-details-marker{display:none}
+.ch-top-menu summary span{font-size:21px;line-height:1}
+.ch-top-menu nav{position:absolute;right:0;top:calc(100% + 6px);background:#101b33;color:#fff9eb;width:210px;max-height:72vh;overflow:auto;padding:6px}
+.ch-top-menu nav :is(a,button){display:block;width:100%;padding:12px;text-align:left;background:transparent;color:inherit;border:0;text-decoration:none;font:600 14px Inter,sans-serif}
