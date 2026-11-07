@@ -37,6 +37,11 @@ try {
    $r=$next??$latest;$stage=trim((string)($r['competition_stage']??''));$round=trim((string)($r['competition_round']??''));
    $label=$round!==''?(is_numeric($round)?'Turno '.$round:$round):$stage;
    if($stage!==$label && $round!=='')$detail=$stage;
+   $label=preg_replace('/finalee\b/iu','finale',$label);
+   if(preg_match('/^(.+?)\s*[-·:]?\s+(andata|ritorno)$/iu',$label,$leg)){
+    $label=trim($leg[1]);$detail=ucfirst(strtolower($leg[2]));
+   }
+   if($total===1 && in_array($r['sm_action'],['charityshield','supercup'],true))$pct=$played?100:0;
   }
   if($label==='')$label=$played?'In corso':'In programma';
   $out[$key]=['label'=>$label,'detail'=>$detail,'percent'=>$pct];
