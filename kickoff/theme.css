@@ -1,5 +1,19 @@
 /* IMC-003 · Kick Off: shared navigation, individual colour identity. */
-:root,body{--gold:#274c9b!important;--accent:#274c9b!important;--world-accent:#274c9b;--world-tint:#e9efff;font-family:Inter,sans-serif!important}
-body .hero{background:linear-gradient(120deg,#e9efff,#fff)!important;border-top:5px solid #274c9b}body .hero h1{color:#274c9b!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}
-body .brand small,body .eyebrow,body .text-link{color:#274c9b!important}body .top{border-top:4px solid #274c9b}body .button:not(.secondary),body .tabs button[aria-selected=true]{background:#274c9b!important;color:#fff!important;border-color:#274c9b!important}
-body .competition-banner{background:#e9efff!important;border-left:5px solid #274c9b}.world-sections{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.world-section{padding:26px;border:1px solid #d9dfe5;border-top:3px solid #274c9b;border-radius:8px;background:#fff}.world-section>span{font-size:12px;color:#274c9b;font-weight:800}.world-section h2{font-size:24px;margin:20px 0 12px}.world-section p{font-size:14px;color:#52647a;line-height:1.6}.world-section b{font-size:12px;color:#274c9b}.brand span{white-space:normal}@media(max-width:700px){.world-sections{grid-template-columns:1fr 1fr}.brand{max-width:66%}.brand span{font-size:10px}.hero h1{font-size:46px!important}}@media(max-width:420px){.world-sections{grid-template-columns:1fr}.top-links{gap:8px}}
+:root,body{--gold:#92352b!important;--accent:#92352b!important;--world-accent:#92352b;--world-tint:#f3e8ce;font-family:Inter,sans-serif!important}
+body .hero{background:linear-gradient(120deg,#f3e8ce,#fff)!important;border-top:5px solid #92352b}body .hero h1{color:#92352b!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}
+body .brand small,body .eyebrow,body .text-link{color:#92352b!important}body .top{border-top:4px solid #92352b}body .button:not(.secondary),body .tabs button[aria-selected=true]{background:#92352b!important;color:#fff!important;border-color:#92352b!important}
+body .competition-banner{background:#f3e8ce!important;border-left:5px solid #92352b}.world-sections{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.world-section{padding:26px;border:1px solid #d1c4ac;border-top:3px solid #92352b;border-radius:8px;background:#fff}.world-section>span{font-size:12px;color:#92352b;font-weight:800}.world-section h2{font-size:24px;margin:20px 0 12px}.world-section p{font-size:14px;color:#5c5148;line-height:1.6}.world-section b{font-size:12px;color:#92352b}.brand span{white-space:normal}@media(max-width:700px){.world-sections{grid-template-columns:1fr 1fr}.brand{max-width:66%}.brand span{font-size:10px}.hero h1{font-size:46px!important}}@media(max-width:420px){.world-sections{grid-template-columns:1fr}.top-links{gap:8px}}
+
+:root,body.imc-world-ui{--ink:#201d18;--muted:#635a4e;--line:#d5c9b6;--world-accent:#9a3028;--world-tint:#f4e9cc;--gold:#ab751d!important;--accent:#9a3028!important}
+html,body.imc-world-ui{background:#faf6ec!important;color:#201d18}
+body .top,body #nx-universal-nav,body .page-heading,body .competition-banner{background:#191713!important;color:#fff4d9!important;border-color:#c59135!important}
+body .top :is(a,summary,button,.brand span),body #nx-universal-nav :is(a,button),body .page-heading h1,body .competition-banner h1{color:#fff4d9!important}
+body .top .brand small,body .page-heading .eyebrow,body #nx-universal-nav [aria-current=page]{color:#f5c354!important}
+body .ko-cover{background:#191713;border-bottom:3px solid #b17b28}
+body .world-entry-static .ko-cover img{display:block;width:100%;max-width:1600px;height:auto;margin:auto}
+body .compact-world-menu a,body .gw-cup,body .gw-leagues button,body .season-bar,body table{background-color:#fffcf4!important;color:#27221d!important;border-color:#d1c4ac!important}
+body .compact-world-menu svg,body .gw-name svg{color:#975c19!important}
+body .catalog-categories button[aria-pressed=true],body button[aria-selected=true],body .tabs .active,body .compact-world-menu a[aria-current=page]{background:#efbd46!important;color:#231e17!important;border-color:#a87421!important}
+body .cups-title,body thead th{background-color:#f1e4c8!important;color:#37281e!important;border-color:#a83a2e!important}
+body .gw-stages .on{background:#a5362a}body .gw-final.won{background:#fae8ad}
+body .top nav a{color:inherit!important}
