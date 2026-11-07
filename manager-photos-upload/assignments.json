@@ -178,5 +178,15 @@
       "path": "manager-photos-upload/inbox/busts/oleksandr-medvid.jpg",
       "sha": "33b3bda207a392aeefa8fd8f0f332058c5cc2e6e"
     }
+  },
+  "luciano-tana": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/luciano-tana.jpg",
+      "sha": "65bcbfbdd5a2665239f127d4b15ee2571cadc8ad"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/luciano-tana.jpg",
+      "sha": "7124e1f46a5f0bbc8dc83b4a98843fdcff05a3ab"
+    }
   }
 }
