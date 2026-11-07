@@ -32,7 +32,7 @@ try {
   $table=$prefix.'_'.$repository;
   $score=$repository==='Results'?' AND home_score IS NOT NULL AND away_score IS NOT NULL':'';
   $groupColumn=$repository==='Results'?'competition_group_name':'NULL AS competition_group_name';
-  $scores=$repository==='Results'?'home_score,away_score':'NULL home_score,NULL away_score';
+  $scores=$repository==='Results'?'home_score,away_score,aggregate_home_score,aggregate_away_score,penalty_home_score,penalty_away_score':'NULL home_score,NULL away_score';
   $sql="SELECT {$scores}, imc_season,competition_key,sm_action,sm_division,sm_country,competition_group,sm_fixture_id,competition_round,competition_stage,{$groupColumn},match_date,home_sm_{$idType}_id h,away_sm_{$idType}_id a,home_name,away_name FROM `$table` WHERE imc_season IN (?,?) $score ORDER BY match_date,sm_fixture_id";
   foreach(nexus_rows($db,$sql,[$season,max(0,$season-1)]) as $r){
    $r['competition_key']=$uiKey($r['competition_key']);
@@ -49,7 +49,7 @@ try {
  $nameLogos=[];
  foreach(nexus_rows($db,"SELECT LOWER(TRIM(club_name)) name,MIN(sm_club_id) club_id FROM IMC_Game_World_Club_Mapping WHERE sm_club_id>0 GROUP BY LOWER(TRIM(club_name)) HAVING COUNT(DISTINCT sm_club_id)=1") as $club)$nameLogos[$club['name']]='https://cdn.soccerwiki.org/images/logos/clubs/'.$club['club_id'].'.png';
  $crestAssets=json_decode(file_get_contents(__DIR__.'/crest-assets.json'),true);
- $out=[];
+ $out=[];$finalAwards=[];
  foreach($groups as $key=>$fixtures){
   usort($fixtures,fn($a,$b)=>strcmp((string)$a['match_date'],(string)$b['match_date']));
   $teams=[];$pairs=[];$days=[];$played=0;$latest=null;$next=null;
@@ -126,11 +126,34 @@ try {
   foreach($fixtures as $match){
    foreach(['h'=>'home_name','a'=>'away_name'] as $id=>$name){$kind=$row['competition_group']==='NATIONS'?'nations':'clubs';$logo=$crestAssets[$gw.'|'.$kind.'|'.$match[$id]]??($kind==='clubs'?($clubLogos[$match[$id]]??$nameLogos[strtolower(trim((string)$match[$name]))]??null):null);if($logo)$logos[$match[$name]]=$logo;}
   }
+  if(!$isLeague && $finished && $final && $final['played']){
+   foreach([['penalty_home_score','penalty_away_score'],['aggregate_home_score','aggregate_away_score'],['home_score','away_score']] as [$h,$a]){
+    if($final[$h]===null || $final[$a]===null || (int)$final[$h]===(int)$final[$a])continue;
+    if($h==='home_score' && cupPhase($final)[1]==='Ritorno')break;
+    $home=(int)$final[$h]>(int)$final[$a];
+    $finalAwards[$key]=['winner_name'=>$final[$home?'home_name':'away_name'],'team'=>$final[$home?'h':'a'],'day'=>$final['match_date'],'kind'=>$row['competition_group']==='NATIONS'?'national_team':'club'];
+    break;
+   }
+  }
   $out[$key]=['final_played'=>!$isLeague && $final && $final['played'] && cupPhase($final)[1]!=='Andata' && $finished,'logos'=>$logos,'ranking'=>$ranking,'upcoming'=>$upcoming,'leader'=>$leader,'points'=>$leader!==null?$table[$leader][0]:null,'finalists'=>$pair($final),'next_match'=>$pair($next),'next_date'=>$next?substr($next['match_date'],0,10):null,'label'=>$label,'detail'=>$detail,'percent'=>$pct,'played'=>$played,'expected'=>$isLeague&&$complete?$total:null,'complete'=>$finished,'format'=>$path,'position'=>$position];
 
  }
- $awards=nexus_rows($db,"SELECT t.competition_key,t.winner_name,t.nexus_view,cm.sm_club_id logo_id,CASE WHEN BINARY t.winner_name=BINARY m.home_name THEN m.home_manager_name WHEN BINARY t.winner_name=BINARY m.away_name THEN m.away_manager_name END winner_manager_name FROM {$prefix}_Trophy_Room t LEFT JOIN {$prefix}_Match_Reports m ON m.sm_fixture_id=BINARY t.deciding_fixture_id AND m.imc_season=t.imc_season AND BINARY m.competition_key=BINARY t.competition_key LEFT JOIN IMC_Game_World_Club_Mapping cm ON cm.game_world_id=? AND cm.sm_world_club_id=BINARY t.winner_sm_world_club_id AND t.competition_group<>'NATIONS' WHERE t.imc_season=?",[$gw,$season]);
+ $awards=nexus_rows($db,"SELECT t.winner_sm_world_club_id team,t.won_date day,t.competition_group,t.competition_key,t.winner_name,t.nexus_view,cm.sm_club_id logo_id,CASE WHEN BINARY t.winner_name=BINARY m.home_name THEN m.home_manager_name WHEN BINARY t.winner_name=BINARY m.away_name THEN m.away_manager_name END winner_manager_name FROM {$prefix}_Trophy_Room t LEFT JOIN {$prefix}_Match_Reports m ON m.sm_fixture_id=BINARY t.deciding_fixture_id AND m.imc_season=t.imc_season AND BINARY m.competition_key=BINARY t.competition_key LEFT JOIN IMC_Game_World_Club_Mapping cm ON cm.game_world_id=? AND cm.sm_world_club_id=BINARY t.winner_sm_world_club_id AND t.competition_group<>'NATIONS' WHERE t.imc_season=?",[$gw,$season]);
  $byKey=[];foreach($awards as $award){if((int)$award['logo_id']>0)$award['winner_logo_url']='https://cdn.soccerwiki.org/images/logos/clubs/'.(int)$award['logo_id'].'.png';$byKey[$uiKey($award['competition_key'])]=$award;}
+ $byKey+=$finalAwards;
+ $core=nexus_db(nexus_config(),'core');
+ $managers=nexus_rows($core,'SELECT a.assignment_type,a.team_id,a.national_team_id,a.start_date,a.end_date,m.manager_id,m.full_name,m.face_image_url FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id WHERE a.game_world_id=?',[$gw]);
+ foreach($byKey as &$award){
+  $kind=$award['kind']??(($award['competition_group']??'')==='NATIONS'?'national_team':'club');
+  $matches=[];
+  foreach($managers as $m){
+   if(empty($award['team']) || empty($award['day']) || $m['assignment_type']!==$kind || (string)$m[$kind==='club'?'team_id':'national_team_id']!==(string)$award['team'])continue;
+   if(!$m['start_date'] || $m['start_date']>$award['day'] || ($m['end_date'] && $m['end_date']<$award['day']))continue;
+   $matches[$m['manager_id']]=$m;
+  }
+  if(count($matches)===1){$m=reset($matches);$award['winner_manager_name']=$m['full_name'];$award['winner_manager_photo_url']=$m['face_image_url'];}
+ }
+ unset($award);
  foreach($rows as &$row)if(!empty($byKey[$row['competition_key']]['nexus_view']))$row['nexus_view']=$byKey[$row['competition_key']]['nexus_view'];unset($row);
  usort($rows,fn($a,$b)=>[(int)$a['sm_division'],$a['nexus_view']]<=>[(int)$b['sm_division'],$b['nexus_view']]);
  header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');
