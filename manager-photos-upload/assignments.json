@@ -258,5 +258,15 @@
       "path": "manager-photos-upload/inbox/busts/alessio-gambato.jpg",
       "sha": "1ce7c759b23cad3e0e2fa7360170c1aa28ef8872"
     }
+  },
+  "armando-de-giulio": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/armando-de-giulio.jpg",
+      "sha": "a2d58bba314bd7bd550b760e00bd2b4263778558"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/armando-de-giulio.jpg",
+      "sha": "82783fdadc60117c03776eef2dc5bc8aac2453c2"
+    }
   }
 }
