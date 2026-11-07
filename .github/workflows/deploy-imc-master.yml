@@ -60,10 +60,10 @@ jobs:
           assert data.get('ok') and data['worlds'] and data['managers'], 'Directory unavailable'
           ids=[m['manager_id'] for m in data['managers']]
           assert len(ids)==len(set(ids)), 'Duplicate managers'
-          assert [w['code'] for w in data['worlds']]==['IMC-%03d'%i for i in range(1,8)]
+          assert [w['code'] for w in data['worlds']]==['IMC-%03d'%i for i in range(1,9)]
           for world in data['worlds']:
               gw=world['game_world_id']
-              assert world['href']=={'GW001': '/roadtohistory/', 'GW005': '/halloffamers/', 'GW009': '/kickoff/', 'GW010': '/sensiblesocceracademy/', 'GW011': '/subbuteosuperleague/', 'GW004': '/worldleague/', 'GW006': '/masterleagueworld/'}[gw]
+              assert world['href']=={'GW001': '/roadtohistory/', 'GW005': '/halloffamers/', 'GW009': '/kickoff/', 'GW010': '/sensiblesocceracademy/', 'GW011': '/subbuteosuperleague/', 'GW004': '/worldleague/', 'GW006': '/masterleagueworld/', 'IMC-008': '/scudetto/'}[gw]
               assert world['manager_count']==sum(gw in m['worlds'] for m in data['managers'])
           print('Live directory verified:',len(data['worlds']),'worlds,',len(ids),'active managers')
           PYCODE

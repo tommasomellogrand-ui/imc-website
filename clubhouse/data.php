@@ -56,12 +56,12 @@ try {
   if($selected!==null)$out['assignments']=array_values(array_filter($assignments,fn($a)=>$a['manager_id']===$selected&&($scope==='global'||$a['assignment_type']===$scope)));
   $codex=[];foreach($managers as $m)if((int)($m['sm_manager_id']??0)>0)$codex[(string)$m['sm_manager_id']]=$m['manager_id'];
   $nationalManagers=[];
-  foreach(nexus_rows($db,'SELECT sm_fixture_id,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.$gw.'_IMC_Match_Report` WHERE game_world_id=? AND competition_group=?',[$gw,'NATIONS']) as $r){
+  foreach(nexus_rows($db,'SELECT sm_fixture_id,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.nexus_table($gw,'Match_Report').'` WHERE game_world_id=? AND competition_group=?',[$gw,'NATIONS']) as $r){
    $home=(int)($r['home_score']??0);$away=(int)($r['away_score']??0);$ph=$r['penalty_home_score']??null;$pa=$r['penalty_away_score']??null;
    $side=($ph!==null&&$pa!==null&&(int)$ph!==(int)$pa)?((int)$ph>(int)$pa?'home':'away'):($home!==$away?($home>$away?'home':'away'):null);
    if($side===null)continue;$sm=(string)($r[$side.'_sm_manager_id']??'');if(isset($codex[$sm]))$nationalManagers[(string)$r['sm_fixture_id']]=$codex[$sm];
   }
-  foreach(nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Trophy_Room` WHERE game_world_id=?',[$gw]) as $t){
+  foreach(nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Trophy_Room').'` WHERE game_world_id=?',[$gw]) as $t){
    $isNation=($t['competition_group']??'')==='NATIONS'||strtolower((string)($t['trophy_type']??''))==='worldcup';
    if(isset($_GET['scope'])&&$scope!=='global'&&$isNation!==($scope==='national_team'))continue;
    $id=trophy_manager_at_win($t,$assignments,$nationalManagers);if($id===null||!isset($out['managers'][$id]))continue;$out['managers'][$id]['trophies']++;

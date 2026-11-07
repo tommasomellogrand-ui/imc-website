@@ -34,5 +34,11 @@
     "name": "Master League World",
     "legacy": "GW006",
     "code": "IMC-007"
+  },
+  {
+    "slug": "scudetto",
+    "name": "Scudetto",
+    "legacy": "IMC-008",
+    "code": "IMC-008"
   }
 ]

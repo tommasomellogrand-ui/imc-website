@@ -20,7 +20,7 @@ try{
    ON a.assignment_type='national_team' AND nm.`Game World`=a.game_world_id
    AND (nm.`National Team ID`=a.national_team_id OR nm.`SM National Team ID`=a.national_team_id OR nm.`SM World National Club ID`=a.national_team_id)
  LEFT JOIN `IMC National Team Codex Global` nc ON nc.id=nm.`National Team ID`
- WHERE a.game_world_id IN ('GW001','GW005','GW009','GW010','GW011','GW004','GW006') ORDER BY a.start_date,a.id");
+ WHERE a.game_world_id IN ('GW001','GW005','GW009','GW010','GW011','GW004','GW006','IMC-008') ORDER BY a.start_date,a.id");
  foreach($assign as $a){if(!isset($byId[$a['manager_id']]))continue;
   $base=['manager_id'=>$a['manager_id'],'manager_name'=>$a['full_name'],'world'=>$a['game_world_id'],'team'=>$a['team_name'],'team_id'=>$a['team_id']??null,'team_logo'=>$a['team_logo']??null,'assignment_type'=>$a['assignment_type']];
   if(!empty($a['start_date']))$events[]=$base+['type'=>'assignment_start','date'=>$a['start_date']];
@@ -29,7 +29,7 @@ try{
  $worlds=CLUBHOUSE_WORLDS;
  foreach($worlds as $gw){
   $db=nexus_db($c,nexus_target($c,$gw));$weight=imc_rank_weight($gw);
-  $reports=nexus_rows($db,'SELECT sm_fixture_id,imc_season,competition_group,match_date,home_name,away_name,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.$gw.'_IMC_Match_Report` WHERE game_world_id=?',[$gw]);
+  $reports=nexus_rows($db,'SELECT sm_fixture_id,imc_season,competition_group,match_date,home_name,away_name,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score FROM `'.nexus_table($gw,'Match_Report').'` WHERE game_world_id=?',[$gw]);
   $national=[];
   foreach($reports as $r){
    $day=(string)($r['match_date']??'');if(!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/',$day))continue;
@@ -38,7 +38,7 @@ try{
    if(($r['competition_group']??'')==='NATIONS'){$ph=$r['penalty_home_score']??null;$pa=$r['penalty_away_score']??null;$side=($ph!==null&&$pa!==null&&(int)$ph!==(int)$pa)?((int)$ph>(int)$pa?'home':'away'):($hs!==$as?($hs>$as?'home':'away'):null);if($side){$sm=(string)($r[$side.'_sm_manager_id']??'');if(isset($bySm[$sm]))$national[(string)$r['sm_fixture_id']]=$bySm[$sm];}}
   }
   $worldAssign=array_values(array_filter($assign,fn($a)=>$a['game_world_id']===$gw));
-  $trophies=nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Trophy_Room` WHERE game_world_id=?',[$gw]);
+  $trophies=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Trophy_Room').'` WHERE game_world_id=?',[$gw]);
   foreach($trophies as $t){
    $mid=trophy_manager_at_win($t,$worldAssign);if(!$mid||!isset($byId[$mid]))continue;$base=imc_rank_bonus($t);if($base===null)continue;$pts=$base*$weight;$day=(string)$t['won_date'];
    $scoreEvents[]=['date'=>$day,'manager_id'=>$mid,'delta'=>$pts,'kind'=>'trophy','fixture'=>(string)($t['deciding_fixture_id']??'')];
