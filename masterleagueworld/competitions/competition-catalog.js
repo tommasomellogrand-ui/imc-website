@@ -11,13 +11,20 @@ function domesticRows(rows){
  const leagues=rows.filter(r=>r.sm_action==='league'),cups=rows.filter(r=>r.sm_action!=='league');
  const stats=leagues.map(r=>progress[r.competition_key]||{}),known=stats.length&&stats.every(p=>p.expected>0);
  let pct=known?Math.round(100*stats.reduce((v,p)=>v+p.played,0)/stats.reduce((v,p)=>v+p.expected,0)):null;
- const label=stats.find(p=>p.label?.startsWith('Giornata'))?.label||'';
- const rounds=label.match(/Giornata (\d+) di (\d+)/);
- if(rounds&&Number(rounds[2])>0)pct=stats.some(p=>p.played>0)?Math.min(100,Math.round(100*Number(rounds[1])/Number(rounds[2]))):0;
- const caption=rounds?(pct===0?'0':rounds[1])+' giornate su '+rounds[2]:label;
- const links=leagues.map(r=>'<button data-key="'+esc(r.competition_key)+'"><i>❯</i>'+esc(/^Div (\d+)$/.test(r.nexus_view)?'Divisione '+r.sm_division:r.nexus_view)+'<span>›</span></button>').join('');
+ const commonRound=stats.length && stats.every(p=>p.label===stats[0].label) && stats[0].label?.match(/^Giornata (\d+) di (\d+)$/);
+ const caption=commonRound?(stats.some(p=>p.played>0)?commonRound[1]:'0')+' giornate su '+commonRound[2]:'Avanzamento campionati';
+ if(pct===null && commonRound && Number(commonRound[2])>0)pct=stats.some(p=>p.played>0)?Math.round(100*Number(commonRound[1])/Number(commonRound[2])):0;
+ const links=leagues.map(r=>{
+  const p=progress[r.competition_key]||{}, award=awards[r.competition_key]||{};
+  const finished=Boolean(award.winner_name||p.complete);
+  const name=award.winner_name||p.leader;
+  const logo=award.winner_logo_url||p.logos?.[name];
+  const label=/^Div (\d+)$/.test(r.nexus_view)?'Divisione '+r.sm_division:r.nexus_view;
+  const info=name?'<small>'+(finished?'Vincitore':'Prima in classifica')+'</small><strong>'+(logo?'<img width="22" height="22" style="object-fit:contain;vertical-align:middle" src="'+esc(logo)+'" alt=""> ':'')+esc(name)+'</strong>'+(!finished && p.points!=null?'<small>'+esc(p.points)+' punti</small>':''):'<small>In attesa dei risultati</small>';
+  return '<button class="gw-cup" data-key="'+esc(r.competition_key)+'"><span class="gw-name">'+esc(label)+'</span><span class="gw-state">'+info+'</span></button>';
+ }).join('');
  const gauge='<div class="gw-gauge"><svg viewBox="0 0 120 68" aria-hidden="true"><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="#dedee5" stroke-width="9"/><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="var(--world-accent,#7656a0)" stroke-width="9" pathLength="100" stroke-dasharray="'+(pct??0)+' 100"/></svg><b>'+(pct===null?'':pct+'%')+'</b><small>'+esc(caption)+'</small></div>';
- return (leagues.length?'<h3 class="cups-title">Leagues</h3><div class="gw-leagues"><div>'+links+'</div>'+gauge+'</div>':'')+(cups.length?'<h3 class="cups-title">Cups</h3>'+cups.map(card).join(''):'');
+ return (leagues.length?'<h3 class="cups-title">Leagues</h3><div style="display:grid;padding:10px 0">'+gauge+'</div>'+links+'':'')+(cups.length?'<h3 class="cups-title">Cups</h3>'+cups.map(card).join(''):'');
 }
 function seasonBar(){
  const source=$('season-select'),bar=document.createElement('div');bar.className='season-bar';
