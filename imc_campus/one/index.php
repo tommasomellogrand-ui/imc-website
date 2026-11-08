@@ -35,7 +35,8 @@ if(isset($_GET['api'])){
             $read->execute([$channel]);
             $rows=$read->fetchAll();
         }
-        echo json_encode(['online'=>$online,'rows'=>$rows],JSON_THROW_ON_ERROR);
+        $latest=$channel==='board' ? ($rows[0]['body']??'') : $db->query("SELECT LEFT(body,90) FROM $table WHERE channel='board' ORDER BY id DESC LIMIT 1")->fetchColumn();
+        echo json_encode(['latest'=>(string)$latest,'online'=>$online,'rows'=>$rows],JSON_THROW_ON_ERROR);
     }catch(Throwable $e){error_log('ONE guest area: '.$e->getMessage());http_response_code(503);echo '{}';}
     exit;
 }
@@ -49,15 +50,19 @@ if(isset($_GET['api'])){
 .back{left:0;top:39%;width:13%;height:9%}.board{left:13%;top:36%;width:22%;height:15%}.chat{left:43%;top:56%;width:27%;height:3.5%}.online{left:46%;top:59.2%;width:22%;height:2.2%;min-height:0;background:#29272a;color:white;font:500 2.4cqw Inter,system-ui;transform:skew(-7deg)}.online:before{content:'● ';color:#44df64}.inbox{left:65%;top:67%;width:32%;height:11%}
 dialog{width:min(100%,620px);max-width:100%;max-height:84dvh;margin:auto auto 0;border:0;border-radius:18px 18px 0 0;background:#f7f4ed;color:inherit;padding:20px 20px max(20px,env(safe-area-inset-bottom));overflow:auto}dialog::backdrop{background:#21190f70}dialog[open]{animation:rise .2s ease-out}@keyframes rise{from{transform:translateY(20%)}}@media(prefers-reduced-motion:reduce){dialog[open]{animation:none}}
 .bar{display:flex;align-items:center;justify-content:space-between}.bar h2{margin:0}.bar button,form button{border:0;padding:12px;border-radius:6px;cursor:pointer;font:inherit}.bar button{background:#e8e1d4}form button{background:#44392e;color:white}textarea{display:block;width:100%;margin:8px 0;padding:12px;font:inherit}article{background:white;padding:12px;margin:8px 0}article p{white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:0}small{color:#625545}details{margin:16px 0}
+
+#preview{position:absolute;left:13%;right:10%;top:35%;height:49%;padding:8% 3%;overflow:hidden;background:linear-gradient(115deg,#d7bc98,#e3cba9);color:#2c2016;font:600 2.25cqw/1.18 Inter,system-ui;overflow-wrap:anywhere;transform:rotate(-2deg)}
+dialog.wall{inset:0;margin:0;width:100%;height:100dvh;max-width:none;max-height:none;border:7px ridge #aa8756;border-radius:0;padding:0;background:linear-gradient(115deg,#39302a,#221e1b 70%,#302722);color:#fff5e1}
+.wall[open]{display:flex;flex-direction:column}.wall .bar{padding:max(18px,env(safe-area-inset-top)) 18px 16px;border-bottom:1px solid #94734c}.wall .bar button{order:-1;color:#34291e}.wall .bar h2{font:600 1.5rem Georgia,serif}.wall #feed{overflow:auto;flex:1;padding:0 20px 20px}.wall article,.wall #form{position:relative;margin:18px auto;padding:33px 20px 18px;max-width:550px;background:linear-gradient(114deg,#f9f1dd,#e8dabe);box-shadow:1px 5px 12px #0006;color:#33291e}.wall article:before,.wall article:after{content:'';position:absolute;top:10px;width:8px;height:8px;border-radius:50%;background:radial-gradient(at 30% 25%,#ffdfa0,#94703e 65%);box-shadow:1px 2px 3px #5e452e}.wall article:before{left:12px}.wall article:after{right:12px}.wall article p{margin:0 0 14px;line-height:1.5}.wall #status{margin:8px 20px}.wall footer{padding:12px 16px max(12px,env(safe-area-inset-bottom));text-align:center}.wall footer button{background:#ebd7ae;border:0;border-radius:4px;color:#34291e;padding:14px 24px;font:600 1rem Inter,system-ui}.wall #form{width:min(90%,550px);padding:18px}.wall textarea{background:transparent;color:inherit;border:1px solid #ab9877}.wall [hidden]{display:none}
 </style><main class="room"><div class="scene"><img src="lounge-one.webp" width="899" height="1750" alt="Salotto ONE sul lago con lo stemma IMC all’ingresso">
 <a class="spot back" href="./" aria-label="Torna alla reception"></a>
-<button class="spot board" data-view="board" aria-label="Bacheca"></button>
+<button class="spot board" data-view="board" aria-label="Bacheca"><span id="preview" hidden></span></button>
 <button class="spot chat" data-view="chat" aria-label="Chat"></button>
 <button class="spot online" data-view="online" aria-label="Ospiti online" id="live">… online</button>
 <button class="spot inbox" data-view="inbox" aria-label="Inbox"></button></div></main>
 <dialog id="panel" aria-labelledby="title"><div class="bar"><h2 id="title"></h2><button id="close">Torna alla sala</button></div>
 <details id="presence"><summary id="count">Online ora</summary><ul id="people"></ul></details>
-<form id="form"><label for="body">Messaggio pubblico</label><textarea id="body" required maxlength="1000" rows="2"></textarea><button>Invia</button></form><p role="status" id="status"></p><div id="feed"></div></dialog>
+<form id="form"><label for="body">Messaggio pubblico</label><textarea id="body" required maxlength="1000" rows="2"></textarea><button>Invia</button></form><p role="status" id="status"></p><div id="feed"></div><footer id="actions" hidden><button id="write">+ Scrivi un avviso</button></footer></dialog>
 <script>
 const get=id=>document.getElementById(id), headers={'X-One-Token':<?=json_encode($_SESSION['token'])?>};
 let view='online';
@@ -69,13 +74,14 @@ async function refresh(){
   if(!res.ok)throw Error();
   const data=await res.json();
   if(current!==view)return;
+  const preview=get('preview');preview.textContent=(data.latest||'').trim().split(/\r?\n/)[0].slice(0,55);preview.hidden=!preview.textContent;
   get('live').textContent=data.online.length+' online';
   get('count').textContent='Online ora · '+data.online.length;
   get('people').replaceChildren(...data.online.map(name=>{const li=document.createElement('li');li.textContent='Ospite '+name;return li}));
   if(current==='inbox'||current==='online')return;
   get('feed').replaceChildren(...data.rows.map(row=>{
    const item=document.createElement('article'),meta=document.createElement('small'),body=document.createElement('p');
-   meta.textContent='Ospite '+row.guest+' · '+new Date(row.ts*1000).toLocaleString('it-IT');body.textContent=row.body;item.append(meta,body);return item;
+   meta.textContent='Ospite '+row.guest+' · '+new Date(row.ts*1000).toLocaleString('it-IT');body.textContent=row.body;if(current==='board')item.append(body,meta);else item.append(meta,body);return item;
   }));
   get('status').textContent=data.rows.length?'':current==='chat'?'Scrivi il primo messaggio.':'La bacheca è ancora vuota.';
  }catch{if(current===view)get('status').textContent='Connessione non disponibile. Riprovo tra poco.'}
@@ -84,14 +90,21 @@ function select(button){
  view=button.dataset.view;buttons.forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
  get('panel').showModal();get('presence').open=view==='online';get('title').textContent=button.getAttribute('aria-label');get('form').hidden=['online','inbox'].includes(view);get('feed').replaceChildren();
  get('status').textContent=view==='inbox'?'La casella personale sarà disponibile con il tuo accesso manager.':'';
+ const board=view==='board';
+ get('panel').classList.toggle('wall',board);get('actions').hidden=!board;get('presence').hidden=board;
+ get('close').textContent=board?'‹ Sala':'Torna alla sala';
+ get('form').querySelector('label').textContent=board?'Il tuo avviso':'Messaggio pubblico';
+ get('form').querySelector('button').textContent=board?'Affiggi':'Invia';
+ if(board){get('title').textContent='Bacheca ONE';get('form').hidden=true;}
  get('body').value='';refresh();
 }
+get('write').onclick=()=>{get('form').hidden=false;get('actions').hidden=true;get('body').focus()};
 buttons.forEach(b=>b.onclick=()=>select(b));get('close').onclick=()=>get('panel').close();get('panel').onclose=()=>{view='online';refresh()};refresh();
 get('form').onsubmit=async e=>{
  e.preventDefault();const button=e.target.querySelector('button'),current=view;button.disabled=true;
  try{const res=await fetch('?area&api='+current,{method:'POST',headers,body:new URLSearchParams({body:get('body').value})});
  if(!res.ok)throw Error(res.status===429?'Attendi qualche secondo prima di inviare.':'Invio non riuscito. Riprova.');
- if(current===view)get('body').value='';await refresh();
+ if(current===view){get('body').value='';if(view==='board'){get('form').hidden=true;get('actions').hidden=false;get('feed').scrollTop=0;get('write').focus()}}await refresh();
  }catch(err){get('status').textContent=err.message}finally{button.disabled=false}
 };
 setInterval(()=>{if(!document.hidden)refresh()},10000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
