@@ -19,18 +19,20 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $password=(string)($_POST['password']??'');
         if($activate && ($password!==($_POST['confirm']??'') || strlen($password)<12 || strlen($password)>72)){
             $error='Scegli una password di almeno 12 caratteri (massimo 72 byte) e ripetila uguale.';
-        }elseif(one_authenticate(nexus_db(nexus_config(),'core'),strtoupper(trim((string)($_POST['manager']??''))),$password,$activate?(string)($_POST['invite']??''):null)){
+        }elseif(one_authenticate(nexus_db(nexus_config(),'core'),trim((string)($_POST['username']??'')),$password,$activate?(string)($_POST['invite']??''):null,$activate?trim((string)($_POST['birth']??'')):'')){
             header('Location: ?area',true,303);exit;
         }else{$error=$activate?'Invito scaduto, già usato o non valido.':'Accesso non riuscito. Verifica le credenziali o riprova più tardi.';}
-    }catch(Throwable $e){http_response_code(503);$error='Servizio temporaneamente non disponibile.';}
+    }catch(DomainException $e){$error=$e->getMessage();}
+    catch(PDOException $e){if(($e->errorInfo[1]??0)==1062){$error='Username già in uso. Scegline un altro.';}else{http_response_code(503);$error='Servizio temporaneamente non disponibile.';}}
+    catch(Throwable $e){http_response_code(503);$error='Servizio temporaneamente non disponibile.';}
 }
 ?><!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ONE · IMC Passport</title>
 <style>*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;background:linear-gradient(#221a17a8,#201817d9),url(reception.webp) center/cover;color:#29241e;font:16px Inter,system-ui}main{width:min(90%,390px);padding:26px;background:#f5efdf;border-top:3px solid #b19057}label,input{display:block;width:100%}label{margin:16px 0}input,button{font:inherit;padding:12px;border:1px solid #a79779;border-radius:4px}button{background:#392f25;color:white;width:100%}a{color:#514637;display:inline-block;margin-top:18px}h1{font-size:25px}</style>
-<main><small>ONE · IMC Passport</small><h1><?=$activate?'Scegli la tua password':'Accesso manager'?></h1><form method="post">
+<main><small>ONE · IMC Passport</small><h1><?=$activate?'Scegli username e password':'Accesso manager'?></h1><form method="post">
 <input type="hidden" name="csrf" value="<?=htmlspecialchars($_SESSION['token'])?>">
-<label>Manager ID<input name="manager" required autocomplete="username" <?=$activate?'value="MNG001" readonly':'placeholder="MNG001"'?>></label>
+<label>Username<input name="username" required maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" value="<?=htmlspecialchars((string)($_POST['username']??''),ENT_QUOTES)?>" <?=$activate?'pattern="[A-Za-z0-9._\\-]{3,32}" minlength="3"':''?>></label>
 <label>Password<input name="password" required type="password" autocomplete="<?=$activate?'new-password':'current-password'?>" <?=$activate?'minlength="12"':''?>></label>
-<?php if($activate):?><label>Ripeti password<input type="password" name="confirm" required autocomplete="new-password"></label><small>Almeno 12 caratteri.</small><input name="invite" type="hidden" id="invite"><script>let key=location.hash.slice(1);if(key){sessionStorage.setItem('one-invite',key);history.replaceState(null,'',location.pathname+location.search)}document.getElementById('invite').value=sessionStorage.getItem('one-invite')||'';</script><?php endif;?>
+<?php if($activate):?><label>Ripeti password<input type="password" name="confirm" required autocomplete="new-password"></label><small>Almeno 12 caratteri.</small><label>Data di nascita (facoltativa)<input type="date" name="birth" autocomplete="bday" max="<?=date('Y-m-d')?>"></label><input name="invite" type="hidden" id="invite"><script>let key=location.hash.slice(1);if(key){sessionStorage.setItem('one-invite',key);history.replaceState(null,'',location.pathname+location.search)}document.getElementById('invite').value=sessionStorage.getItem('one-invite')||'';</script><?php endif;?>
 <p role="status"><?=htmlspecialchars($error)?></p><button><?=$activate?'Salva ed entra in ONE':'Entra in ONE'?></button></form><a href="?area">Continua come ospite</a></main></html>
 <?php exit; }
 $guest=$_SESSION['guest'];

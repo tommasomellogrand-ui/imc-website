@@ -17,7 +17,16 @@ function one_issue(PDO $db,string $id): string {
     $db->commit();
     return 'https://www.italianmastersclub.it/imc_campus/one/?access=activate#'.$token;
 }
-function one_authenticate(PDO $db,string $id,string $password,?string $token): bool {
+function one_authenticate(PDO $db,string $username,string $password,?string $token,string $birth): bool {
+    if($token!==null){
+        if(!preg_match('/^[a-f0-9]{64}$/D',$token))return false;
+        $lookup=$db->prepare("SELECT manager_id FROM `IMC ONE Access Tokens` WHERE token_hash=? AND used_at IS NULL AND expires_at>UTC_TIMESTAMP()");
+        $lookup->execute([hash('sha256',$token)]);
+    }else{
+        $lookup=$db->prepare("SELECT manager_id FROM `IMC ONE Accounts` WHERE username=? OR (username IS NULL AND manager_id=?)");
+        $lookup->execute([$username,$username]);
+    }
+    $id=$lookup->fetchColumn();
     if ($id!=='MNG001' || !one_manager($db,$id) || strlen($password)>72) return false;
     $db->beginTransaction();
     try {
@@ -30,7 +39,12 @@ function one_authenticate(PDO $db,string $id,string $password,?string $token): b
             $q=$db->prepare("UPDATE `IMC ONE Access Tokens` SET used_at=UTC_TIMESTAMP() WHERE manager_id=? AND token_hash=? AND used_at IS NULL AND expires_at>UTC_TIMESTAMP()");
             $q->execute([$id,hash('sha256',$token)]);
             if($q->rowCount()!==1){$db->rollBack();return false;}
-            $db->prepare("UPDATE `IMC ONE Accounts` SET password_hash=?,activated_at=COALESCE(activated_at,UTC_TIMESTAMP()),auth_version=auth_version+1 WHERE manager_id=?")->execute([password_hash($password,PASSWORD_DEFAULT),$id]);
+            if(!preg_match('/^[a-zA-Z0-9._-]{3,32}$/D',$username))throw new DomainException('Usa da 3 a 32 lettere, numeri, punti, trattini o underscore per lo username.');
+            if($birth!==''){
+                $date=DateTimeImmutable::createFromFormat('!Y-m-d',$birth);
+                if(!$date || $date->format('Y-m-d')!==$birth || $birth>date('Y-m-d') || $birth<'1000-01-01')throw new DomainException('Verifica la data di nascita.');
+            }
+            $db->prepare("UPDATE `IMC ONE Accounts` SET username=?,birth_date=COALESCE(birth_date,?),password_hash=?,activated_at=COALESCE(activated_at,UTC_TIMESTAMP()),auth_version=auth_version+1 WHERE manager_id=?")->execute([$username,$birth===''?null:$birth,password_hash($password,PASSWORD_DEFAULT),$id]);
             $version++;
         }else{
             if($a['recent'] && $a['failed_count']>=8){$db->rollBack();return false;}
