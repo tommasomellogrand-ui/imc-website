@@ -23,9 +23,9 @@ try{
 $title=$person?$person['full_name'].' · IMC Passport':'IMC Passport';
 ?>
 <!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=pp_e($title)?></title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"><link rel="stylesheet" href="/clubhouse/imc-passport/passport.css?v=1"><script defer src="/clubhouse/imc-passport/passport.js?v=1"></script></head>
-<body><header class="top"><a href="/imc_campus/">← IMC Campus</a><a href="/imc_campus/one/">IMC Passport</a><img src="/site-assets/images/imc-logo.png" alt="IMC"></header><main>
+<body><header class="top"><a href="/imc_campus/">← IMC Campus</a><a href="/clubhouse/imc-passport/">IMC Passport</a><img src="/site-assets/images/imc-logo.png" alt="IMC"></header><main>
 <?php if($error):?><h1>IMC Passport</h1><p>Passaporti temporaneamente non disponibili.</p><a href="">Riprova</a>
-<?php elseif($slug!==''&&!$person):?><h1>Passaporto non trovato</h1><a href="/imc_campus/one/">Tutti i manager</a>
+<?php elseif($slug!==''&&!$person):?><h1>Passaporto non trovato</h1><a href="/clubhouse/imc-passport/">Tutti i manager</a>
 <?php elseif(!$person):?>
 <section class="intro"><p class="eyebrow">ITALIAN MASTERS CLUB</p><h1>Ogni manager.<br>Una storia da timbrare.</h1><p>Identità, mondi attraversati e titoli conquistati. Il tuo passaporto IMC.</p></section>
 <label class="search-label">Trova un manager<input id="passport-search" type="search" placeholder="Nome, cognome o codice MNG"></label><div class="passport-directory">
