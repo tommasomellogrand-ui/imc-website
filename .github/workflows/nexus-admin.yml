@@ -28,6 +28,7 @@ jobs:
       - name: Test assignments without production writes
         run: |
           for file in nexus/admin/*.php; do php -l "$file"; done
+          node --check nexus/admin/one-access.js
           node --check nexus/admin/visits.js
           node --check nexus/admin/site-analytics.js
           python3 -m py_compile nexus/admin/deploy-tracking.py
@@ -70,7 +71,7 @@ jobs:
           root='/www.italianmastersclub.it/'
           try: ftp.mkd(root+'nexus/admin')
           except error_perm: ftp.cwd(root+'nexus/admin')
-          for local in [Path('nexus/admin')/n for n in ['worlds.js','admin.js','results-check.js','seasons.js','seasons-service.php','results-check-service.php','api.php','index.html','seasons.html','results-check.html','visits.html','visits.js','visits-service.php']]:
+          for local in [Path('nexus/admin')/n for n in ['one.html','one-access.js','worlds.js','admin.js','results-check.js','seasons.js','seasons-service.php','results-check-service.php','api.php','index.html','seasons.html','results-check.html','visits.html','visits.js','visits-service.php']]:
               if not local.is_file(): continue
               ftp.cwd(root+local.parent.as_posix())
               data=local.read_bytes(); ftp.storbinary('STOR '+local.name,io.BytesIO(data))
