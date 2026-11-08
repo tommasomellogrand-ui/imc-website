@@ -1,0 +1,28 @@
+.trophy-gallery .gallery-cover{position:relative;isolation:isolate;background:#302923;color:#fff}
+.trophy-gallery .gallery-cover img{display:block;width:100%;height:clamp(145px,30vw,360px);object-fit:cover;object-position:70% 50%}
+.trophy-gallery .gallery-cover strong{position:absolute;left:clamp(18px,6vw,90px);top:50%;transform:translateY(-50%);font:750 clamp(27px,5vw,72px)/1 Inter,sans-serif;letter-spacing:-.05em;color:#fff}
+.trophy-gallery header .gallery-cover+.hero{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden;padding:0}
+.trophy-gallery .hub-context{display:none}
+.trophy-gallery main .controls{background:#f6f4ef;border:1px solid #ded9cf;border-radius:4px;padding:12px;gap:10px}
+.trophy-gallery .controls input,.trophy-gallery .controls select{min-height:44px;max-width:100%}
+.trophy-gallery main .trophy-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid #d8c8ac;border-top:3px solid #ab8853;background:#faf8f3}
+.trophy-gallery main .trophy-summary>div{background:transparent;border:0;border-radius:0;text-align:center;padding:14px 4px}
+.trophy-gallery main .trophy-summary>div+div{border-left:1px solid #ded9cf}
+.trophy-gallery .trophy-world-section{margin-block:30px}
+.trophy-gallery .trophy-world-section .career-world-heading{background:#242a30;color:#fff;display:flex;align-items:center;gap:10px;padding:12px 14px;border-left:4px solid #b89a69}
+.trophy-gallery .career-world-heading h2{color:inherit;font-size:clamp(16px,3vw,22px);line-height:1.2;margin:0}
+.trophy-gallery .career-world-heading small{margin-left:auto;white-space:nowrap;color:#eee}
+.trophy-gallery .ch-trophy-list{gap:14px}
+body.trophy-gallery.clubhouse-hub .ch-trophy-title{justify-content:flex-start;padding:12px 16px;border:0;background:#f4efe5}
+.trophy-gallery .ch-trophy-title h3{color:#272724;text-align:left}
+.trophy-gallery .ch-trophy-title .trophy-icon{width:20px;height:24px;color:#91692e}
+.trophy-gallery .ch-trophy-columns{background:#fff;border-bottom:1px solid #e5ded3;color:#62594d}
+.trophy-gallery .ch-season{justify-content:center;font-variant-numeric:tabular-nums}
+.trophy-gallery .ch-honour:nth-child(even){background:#faf9f6}
+@media(max-width:600px){
+ .trophy-gallery .ch-trophy-columns,.trophy-gallery .ch-honour{grid-template-columns:18% 41% 41%}
+ .trophy-gallery .ch-season,.trophy-gallery .ch-winner,.trophy-gallery .ch-manager{padding:10px 5px;gap:5px}
+ .trophy-gallery .ch-trophy-columns{font-size:10px}
+}
+
+.trophy-gallery .career-world-heading>span{color:#e5c998}
