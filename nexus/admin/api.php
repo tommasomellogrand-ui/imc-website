@@ -58,6 +58,10 @@ try {
     $_SESSION['last_activity']=time();
     setcookie(session_name(),session_id(),['expires'=>time()+NA_SESSION_TTL,'path'=>'/nexus/admin/','secure'=>true,'httponly'=>true,'samesite'=>'Strict']);
     if ($action==='visits' && $method==='GET') { require __DIR__.'/visits-service.php'; nexus_out(nv_read((string)($_GET['period']??'30d'),(string)($_GET['view']??'daily'))); }
+    if ($action==='one-invite' && $method==='POST'){
+        require_once dirname(__DIR__,2).'/imc_campus/one/manager-access.php';
+        nexus_out(['ok'=>true,'invite'=>one_issue(nexus_db(nexus_config(),'core'),'MNG001')]);
+    }
     if ($action==='session' && $method==='GET') nexus_out(['ok'=>true,'csrf'=>$_SESSION['csrf']]);
     if ($method==='POST' && !in_array($action,['save','close','replace','season-save'],true)) throw new InvalidArgumentException('Operazione non valida.');
     $code=strtoupper((string)($method==='GET'?($_GET['world']??''):($input['world']??'')));

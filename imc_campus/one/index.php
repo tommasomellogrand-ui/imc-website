@@ -1,12 +1,54 @@
 <?php
 header('Cache-Control: no-store, max-age=0');
-if(isset($_GET['area'])){ ?>
-<?php
+if(isset($_GET['area']) || isset($_GET['access'])){
 session_name('imc_one_guest');
 session_start(['use_strict_mode'=>1,'cookie_path'=>'/imc_campus/one/','cookie_secure'=>true,'cookie_httponly'=>true,'cookie_samesite'=>'Lax']);
 $_SESSION['guest'] ??= strtoupper(bin2hex(random_bytes(6)));
 $_SESSION['token'] ??= bin2hex(random_bytes(24));
+require_once dirname(__DIR__,2).'/nexus/core/bootstrap.php';
+require_once __DIR__.'/manager-access.php';
+if(isset($_GET['access'])){ ?>
+<?php
+header('Referrer-Policy: no-referrer');
+$activate=$_GET['access']==='activate';
+$error='';
+if($_SERVER['REQUEST_METHOD']==='POST'){
+    if(!hash_equals($_SESSION['token'],(string)($_POST['csrf']??''))){http_response_code(403);exit('Sessione scaduta. Riapri la pagina.');}
+    if($_GET['access']==='logout'){$_SESSION=[];session_destroy();header('Location: ./',true,303);exit;}
+    try{
+        $password=(string)($_POST['password']??'');
+        if($activate && ($password!==($_POST['confirm']??'') || strlen($password)<12 || strlen($password)>72)){
+            $error='Scegli una password di almeno 12 caratteri (massimo 72 byte) e ripetila uguale.';
+        }elseif(one_authenticate(nexus_db(nexus_config(),'core'),strtoupper(trim((string)($_POST['manager']??''))),$password,$activate?(string)($_POST['invite']??''):null)){
+            header('Location: ?area',true,303);exit;
+        }else{$error=$activate?'Invito scaduto, già usato o non valido.':'Accesso non riuscito. Verifica le credenziali o riprova più tardi.';}
+    }catch(Throwable $e){http_response_code(503);$error='Servizio temporaneamente non disponibile.';}
+}
+?><!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ONE · IMC Passport</title>
+<style>*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;background:linear-gradient(#221a17a8,#201817d9),url(reception.webp) center/cover;color:#29241e;font:16px Inter,system-ui}main{width:min(90%,390px);padding:26px;background:#f5efdf;border-top:3px solid #b19057}label,input{display:block;width:100%}label{margin:16px 0}input,button{font:inherit;padding:12px;border:1px solid #a79779;border-radius:4px}button{background:#392f25;color:white;width:100%}a{color:#514637;display:inline-block;margin-top:18px}h1{font-size:25px}</style>
+<main><small>ONE · IMC Passport</small><h1><?=$activate?'Scegli la tua password':'Accesso manager'?></h1><form method="post">
+<input type="hidden" name="csrf" value="<?=htmlspecialchars($_SESSION['token'])?>">
+<label>Manager ID<input name="manager" required autocomplete="username" <?=$activate?'value="MNG001" readonly':'placeholder="MNG001"'?>></label>
+<label>Password<input name="password" required type="password" autocomplete="<?=$activate?'new-password':'current-password'?>" <?=$activate?'minlength="12"':''?>></label>
+<?php if($activate):?><label>Ripeti password<input type="password" name="confirm" required autocomplete="new-password"></label><small>Almeno 12 caratteri.</small><input name="invite" type="hidden" id="invite"><script>let key=location.hash.slice(1);if(key){sessionStorage.setItem('one-invite',key);history.replaceState(null,'',location.pathname+location.search)}document.getElementById('invite').value=sessionStorage.getItem('one-invite')||'';</script><?php endif;?>
+<p role="status"><?=htmlspecialchars($error)?></p><button><?=$activate?'Salva ed entra in ONE':'Entra in ONE'?></button></form><a href="?area">Continua come ospite</a></main></html>
+<?php exit; }
 $guest=$_SESSION['guest'];
+$identity='';
+if(isset($_SESSION['manager'])){
+    $id=$_SESSION['manager'];
+    $db=nexus_db(nexus_config(),'core');
+    $q=$db->prepare('SELECT auth_version FROM `IMC ONE Accounts` WHERE manager_id=?');
+    $q->execute([$id]);
+    $ver=$q->fetchColumn();
+    $identity=one_manager($db,$id);
+    if(!$identity || $ver===false || (int)$ver!==$_SESSION['version']){
+        $_SESSION=[];session_destroy();
+        if(isset($_GET['api'])){http_response_code(401);exit('{}');}
+        header('Location: ?access=login');exit;
+    }
+    $guest=$id;
+}
 if(isset($_GET['api'])){
     header('Content-Type: application/json; charset=utf-8');
     try {
@@ -36,7 +78,10 @@ if(isset($_GET['api'])){
             $rows=$read->fetchAll();
         }
         $latest=$channel==='board' ? ($rows[0]['body']??'') : $db->query("SELECT LEFT(body,90) FROM $table WHERE channel='board' ORDER BY id DESC LIMIT 1")->fetchColumn();
-        echo json_encode(['latest'=>(string)$latest,'online'=>$online,'rows'=>$rows],JSON_THROW_ON_ERROR);
+        $names=[];
+        $profile=$db->query("SELECT a.manager_id,(SELECT m.full_name FROM `IMC Manager Assignment Global` m WHERE m.manager_id=a.manager_id ORDER BY m.start_date DESC LIMIT 1) name FROM `IMC ONE Accounts` a WHERE a.activated_at IS NOT NULL");
+        $names=$profile->fetchAll(PDO::FETCH_KEY_PAIR);
+        echo json_encode(['names'=>(object)$names,'latest'=>(string)$latest,'online'=>$online,'rows'=>$rows],JSON_THROW_ON_ERROR);
     }catch(Throwable $e){error_log('ONE guest area: '.$e->getMessage());http_response_code(503);echo '{}';}
     exit;
 }
@@ -54,7 +99,7 @@ dialog{width:min(100%,620px);max-width:100%;max-height:84dvh;margin:auto auto 0;
 #preview{position:absolute;left:13%;right:10%;top:35%;height:49%;padding:8% 3%;overflow:hidden;background:linear-gradient(115deg,#d7bc98,#e3cba9);color:#2c2016;font:600 2.25cqw/1.18 Inter,system-ui;overflow-wrap:anywhere;transform:rotate(-2deg)}
 dialog.wall{inset:0;margin:0;width:100%;height:100dvh;max-width:none;max-height:none;border:7px ridge #aa8756;border-radius:0;padding:0;background:linear-gradient(115deg,#39302a,#221e1b 70%,#302722);color:#fff5e1}
 .wall[open]{display:flex;flex-direction:column}.wall .bar{padding:max(18px,env(safe-area-inset-top)) 18px 16px;border-bottom:1px solid #94734c}.wall .bar button{order:-1;color:#34291e}.wall .bar h2{font:600 1.5rem Georgia,serif}.wall #feed{overflow:auto;flex:1;padding:0 20px 20px}.wall article,.wall #form{position:relative;margin:18px auto;padding:33px 20px 18px;max-width:550px;background:linear-gradient(114deg,#f9f1dd,#e8dabe);box-shadow:1px 5px 12px #0006;color:#33291e}.wall article:before,.wall article:after{content:'';position:absolute;top:10px;width:8px;height:8px;border-radius:50%;background:radial-gradient(at 30% 25%,#ffdfa0,#94703e 65%);box-shadow:1px 2px 3px #5e452e}.wall article:before{left:12px}.wall article:after{right:12px}.wall article p{margin:0 0 14px;line-height:1.5}.wall #status{margin:8px 20px}.wall footer{padding:12px 16px max(12px,env(safe-area-inset-bottom));text-align:center}.wall footer button{background:#ebd7ae;border:0;border-radius:4px;color:#34291e;padding:14px 24px;font:600 1rem Inter,system-ui}.wall #form{width:min(90%,550px);padding:18px}.wall textarea{background:transparent;color:inherit;border:1px solid #ab9877}.wall [hidden]{display:none}
-</style><main class="room"><div class="scene"><img src="lounge-one.webp" width="899" height="1750" alt="Salotto ONE sul lago con lo stemma IMC all’ingresso">
+</style><?php if($identity):?><form method="post" action="?access=logout" style="position:fixed;z-index:2;top:8px;right:8px"><input type="hidden" name="csrf" value="<?=htmlspecialchars($_SESSION['token'])?>"><button><?=htmlspecialchars($identity)?> · Esci</button></form><script>sessionStorage.removeItem('one-invite')</script><?php endif;?><main class="room"><div class="scene"><img src="lounge-one.webp" width="899" height="1750" alt="Salotto ONE sul lago con lo stemma IMC all’ingresso">
 <a class="spot back" href="./" aria-label="Torna alla reception"></a>
 <button class="spot board" data-view="board" aria-label="Bacheca"><span id="preview" hidden></span></button>
 <button class="spot chat" data-view="chat" aria-label="Chat"></button>
@@ -71,17 +116,17 @@ async function refresh(){
  const current=view;
  try{
   const res=await fetch('?area&api='+(current==='inbox'?'online':current),{headers});
-  if(!res.ok)throw Error();
+  if(res.status===401){location.replace('?access=login');return}if(!res.ok)throw Error();
   const data=await res.json();
   if(current!==view)return;
   const preview=get('preview');preview.textContent=(data.latest||'').trim().split(/\r?\n/)[0].slice(0,55);preview.hidden=!preview.textContent;
   get('live').textContent=data.online.length+' online';
   get('count').textContent='Online ora · '+data.online.length;
-  get('people').replaceChildren(...data.online.map(name=>{const li=document.createElement('li');li.textContent='Ospite '+name;return li}));
+  get('people').replaceChildren(...data.online.map(name=>{const li=document.createElement('li');li.textContent=data.names?.[name]||'Ospite '+name;return li}));
   if(current==='inbox'||current==='online')return;
   get('feed').replaceChildren(...data.rows.map(row=>{
    const item=document.createElement('article'),meta=document.createElement('small'),body=document.createElement('p');
-   meta.textContent='Ospite '+row.guest+' · '+new Date(row.ts*1000).toLocaleString('it-IT');body.textContent=row.body;if(current==='board')item.append(body,meta);else item.append(meta,body);return item;
+   meta.textContent=(data.names?.[row.guest]||'Ospite '+row.guest)+' · '+new Date(row.ts*1000).toLocaleString('it-IT');body.textContent=row.body;if(current==='board')item.append(body,meta);else item.append(meta,body);return item;
   }));
   get('status').textContent=data.rows.length?'':current==='chat'?'Scrivi il primo messaggio.':'La bacheca è ancora vuota.';
  }catch{if(current===view)get('status').textContent='Connessione non disponibile. Riprovo tra poco.'}
@@ -131,5 +176,5 @@ a:focus-visible{outline:3px solid ivory;outline-offset:-3px;border-radius:8px}
 </style></head><body><main aria-label="Reception di ONE"><div class="scene">
 <img src="/imc_campus/one/reception.webp" width="852" height="1846" alt="Reception di ONE sul lago">
 <a class="back" href="/imc_campus/" aria-label="Torna al Campus"></a>
-<a class="passport" href="?area" aria-label="Scansiona IMC Passport"></a>
+<a class="passport" href="?access=login" aria-label="Scansiona IMC Passport"></a>
 </div></main></body></html>
