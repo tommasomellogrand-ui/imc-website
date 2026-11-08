@@ -14,22 +14,25 @@ picture,img.photo{display:block;width:100%}
 .building span{font-weight:700;font-size:clamp(12px,3.5vw,18px);padding:.45em .65em;background:#142436f5;border-bottom:2px solid #c6ab65;box-shadow:0 2px 6px #0008}
 .building:is(:hover,:focus-visible) span{background:#f5e9cb;color:#172338}
 @media(orientation:portrait){
-  header{display:none}
-  main{min-height:100vh;min-height:100dvh}
-  img.photo{height:100vh;height:100dvh;object-fit:fill}
-  .building span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);padding:0;border:0}
-  .building:focus-visible{outline:3px solid ivory;outline-offset:-3px}
-  .building:first-of-type{width:60%;height:21%;top:15%}
+ header{display:none}
+ main{height:100vh;height:100dvh;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
+ .map{width:min(100vw,55dvh);flex:none;container-type:inline-size}
+ img.photo{height:auto;aspect-ratio:852/1846}
+ .building{height:8%;width:30%}
+ .building span,.building:is(:hover,:focus-visible) span{background:transparent;padding:0;border:0;box-shadow:none;color:#fff;text-transform:uppercase;font-size:clamp(10px,2.8cqw,18px);line-height:1;font-weight:650}
+ .building:first-of-type{height:13%;width:54%}
+ .building:first-of-type span{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+ .building:focus-visible{outline:2px solid ivory}
 }
 @media(orientation:landscape){.map{width:min(100%,calc((100svh - 64px)*var(--ratio)))}.building{left:var(--dx);top:var(--dy);width:22%;height:12%}}
 </style></head>
 <body><header><img src="/site-assets/images/imc-logo.png" alt=""><h1>IMC Campus</h1></header>
-<main><nav class="map" aria-label="Edifici del campus" style="--ratio:1.777"><picture><source media="(orientation:landscape)" srcset="campus-landscape.webp"><img class="photo" src="campus-piazzetta.webp" alt=""></picture>
-<a class="building" href="/imc_campus/one/" style="--x:50%;--y:16%;--dx:50%;--dy:26%"><span>ONE</span></a>
-<a class="building" href="/imc_campus/nexus_lab/" style="--x:23%;--y:36%;--dx:36%;--dy:39%"><span>Nexus Lab</span></a>
-<a class="building" href="/imc_campus/the_dugout/" style="--x:78%;--y:36%;--dx:62%;--dy:39%"><span>The Dugout</span></a>
-<a class="building" href="/imc_campus/world_center/" style="--x:21%;--y:57%;--dx:32%;--dy:57%"><span>World Center</span></a>
-<a class="building" href="/imc_campus/media_center/" style="--x:80%;--y:57%;--dx:66%;--dy:57%"><span>Media Center</span></a>
-<a class="building" href="/imc_campus/trophy_room/" style="--x:18%;--y:82%;--dx:30%;--dy:78%"><span>Trophy Room</span></a>
-<a class="building" href="/imc_campus/club_house/" style="--x:82%;--y:82%;--dx:69%;--dy:78%"><span>Club House</span></a>
+<main><nav class="map" aria-label="Edifici del campus" style="--ratio:1.777"><picture><source media="(orientation:landscape)" srcset="campus-landscape.webp"><img class="photo" src="campus-isola.webp" alt=""></picture>
+<a class="building" href="/imc_campus/one/" style="--x:50%;--y:25%;--dx:50%;--dy:26%"><span>ONE</span></a>
+<a class="building" href="/imc_campus/nexus_lab/" style="--x:24.5%;--y:51.7%;--dx:36%;--dy:39%"><span>Nexus Lab</span></a>
+<a class="building" href="/imc_campus/the_dugout/" style="--x:76%;--y:51.7%;--dx:62%;--dy:39%"><span>The Dugout</span></a>
+<a class="building" href="/imc_campus/world_center/" style="--x:21.5%;--y:61%;--dx:32%;--dy:57%"><span>World Center</span></a>
+<a class="building" href="/imc_campus/media_center/" style="--x:79%;--y:61%;--dx:66%;--dy:57%"><span>Media Center</span></a>
+<a class="building" href="/imc_campus/trophy_room/" style="--x:18%;--y:71.7%;--dx:30%;--dy:78%"><span>Trophy Room</span></a>
+<a class="building" href="/imc_campus/club_house/" style="--x:82%;--y:71.7%;--dx:69%;--dy:78%"><span>Club House</span></a>
 </nav></main></body></html>
