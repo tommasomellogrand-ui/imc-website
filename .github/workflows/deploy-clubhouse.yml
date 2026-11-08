@@ -98,3 +98,13 @@ jobs:
               except urllib.error.HTTPError as error: assert error.code==422
           print('All five tabs and eight-world server filtering verified')
           PY
+      - name: Verify canonical campus map and illustration
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          from pathlib import Path
+          base = 'https://www.italianmastersclub.it/imc_campus/'
+          for url, path in [(base, 'index.html'), (base + 'campus-arco.webp', 'campus-arco.webp')]:
+              with urllib.request.urlopen(url, timeout=60) as response:
+                  assert response.read() == (Path('imc_campus') / path).read_bytes(), url
+          PY
