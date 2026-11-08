@@ -1,7 +1,7 @@
 RewriteEngine On
 RewriteCond %{REQUEST_URI} ^/imc_campus/(index\.html)?$
 RewriteCond %{QUERY_STRING} ^$
-RewriteRule ^(index\.html)?$ /imc_campus/?mobile=full [R=302,L]
+RewriteRule ^(index\.html)?$ https://www.italianmastersclub.it/imc_campus/?mobile=full [R=302,L]
 
 <IfModule mod_headers.c>
   <If "%{REQUEST_URI} =~ m#^/imc_campus/(index\.html)?$#">
