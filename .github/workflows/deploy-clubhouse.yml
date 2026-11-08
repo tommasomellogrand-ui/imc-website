@@ -54,6 +54,24 @@ jobs:
               ftp.storbinary('STOR '+p.name,io.BytesIO(data))
               check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
               assert check.getvalue()==data,'Byte verification failed: '+name
+          # Invalidate only the campus entrance and island image in Aruba HiSpeed Cache.
+          directory(root+'/imc_campus')
+          helper='release-'+secrets.token_hex(24)+'.php'
+          code=b"""<?php
+          header('Cache-Control: private, no-store');
+          foreach (['/imc_campus/', '/imc_campus/?mobile=full', '/imc_campus/campus-arco.webp'] as $path) {
+            $request=curl_init('http://127.0.0.1:8889/purge'.$path);
+            curl_setopt_array($request,[CURLOPT_HTTPHEADER=>['Host: www.italianmastersclub.it'],CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>5]);
+            curl_exec($request);
+            curl_close($request);
+          }
+          echo 'done';"""
+          try:
+              ftp.storbinary('STOR '+helper,io.BytesIO(code))
+              with urllib.request.urlopen('https://www.italianmastersclub.it/imc_campus/'+helper,timeout=25) as response:
+                  assert response.read()==b'done'
+          finally:
+              ftp.delete(helper)
           ftp.quit()
           PY
       - name: Verify live Clubhouse and CORE data
