@@ -26,3 +26,8 @@ body.trophy-gallery.clubhouse-hub .ch-trophy-title{justify-content:flex-start;pa
 }
 
 .trophy-gallery .career-world-heading>span{color:#e5c998}
+
+@media(prefers-reduced-motion:no-preference){
+ .trophy-gallery main{transform-origin:left center;animation:open-register .32s ease-out}
+ @keyframes open-register{from{opacity:.3;transform:perspective(1100px) rotateY(-5deg)}to{opacity:1;transform:none}}
+}

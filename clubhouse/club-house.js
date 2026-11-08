@@ -30,9 +30,11 @@ const initials=name=>String(name||'?').split(/\s+/).slice(0,2).map(x=>x[0]).join
 const badges=ws=>'<div class="world-badges">'+ws.map(w=>'<span class="world-badge">'+esc(worldCode(w))+'</span>').join('')+'</div>';
 const cup='<svg class="trophy-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v5a5 5 0 0 1-10 0zM12 13v6M8 21h8M7 5H3v3a4 4 0 0 0 4 4M17 5h4v3a4 4 0 0 1-4 4"/></svg>';
 function clubLogo(world,id,kind='club'){const src=String(bundles[world]?.[kind==='national_team'?'nations':'clubs']?.[id]?.logo||'');return /^(https:\/\/|\/(?!\/))/i.test(src)?'<img class="club-logo" src="'+esc(src)+'" alt="" loading="lazy">':'<span class="club-placeholder" aria-hidden="true">◇</span>';}
-function worldLinks(){ $('world-links').innerHTML=worlds.map(w=>'<a href="'+worldHome(w)+'home/"><small>'+worldCode(w)+' ↗</small><strong>'+esc(worldNames[w]||w)+'</strong></a>').join('');}
+function worldLinks(){ if(!$('world-links'))return; $('world-links').innerHTML=worlds.map(w=>'<a href="'+worldHome(w)+'home/"><small>'+worldCode(w)+' ↗</small><strong>'+esc(worldNames[w]||w)+'</strong></a>').join('');}
 function wireLogos(){document.querySelectorAll('.club-logo').forEach(img=>{img.onerror=()=>img.hidden=true;if(img.complete&&!img.naturalWidth)img.hidden=true;});}
+if($('world-dialog')){
 $('open-worlds').onclick=$('nav-worlds').onclick=()=>$('world-dialog').showModal();$('close-worlds').onclick=()=>$('world-dialog').close();$('world-dialog').addEventListener('click',e=>{if(e.target===$('world-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});worldLinks();
+}
 
 async function get(q=''){const r=await fetch('/clubhouse/data.php'+q,{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Dati non disponibili');return d;}
 function stats(id){return sum(available().map(w=>bundles[w].managers[id]?.stats||zero()));}
@@ -208,7 +210,7 @@ $('world').addEventListener('change',()=>{limit=25;const url=new URL(location.hr
 function updateScope(){
  document.querySelectorAll('#scope-tabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scope===scope)));
  document.querySelector('.hero-tags').innerHTML='<span>'+scopeLabel()+'</span><span>IMC-001–IMC-008</span>';
- document.querySelector('footer p').textContent=section==='career'?'Fonte partite: Results dei singoli GW. Attribuzione esclusivamente tramite ID manager registrati nei Results; nessuna riattribuzione dalle date degli incarichi. Esito prima dei rigori; rigori separati.':'Fonte partite: '+sourceLabel()+'. Esiti prima dei rigori; rigori separati.';
+ if(document.querySelector('footer p'))document.querySelector('footer p').textContent=section==='career'?'Fonte partite: Results dei singoli GW. Attribuzione esclusivamente tramite ID manager registrati nei Results; nessuna riattribuzione dalle date degli incarichi. Esito prima dei rigori; rigori separati.':'Fonte partite: '+sourceLabel()+'. Esiti prima dei rigori; rigori separati.';
  document.querySelector('.source-badge').textContent=sourceLabel();
  $('subtitle').textContent=manager?manager+' · Carriera '+scopeLabel():'Tutti i manager IMC · '+scopeLabel();
  $('back').href=hubURL(section,'');
@@ -228,10 +230,11 @@ function hubURL(view,id=manager){
  const q=new URLSearchParams(location.search);q.delete('view');q.set('scope',scope);
  if(view==='h2h'&&id&&!manager)q.set('scope','global');
  if(id)q.set('manager',id);else q.delete('manager');
+ if(view==='trophies')q.set('book','1');
  return campusRoutes[view]+'?'+q.toString();
 }
 function syncHubLinks(){
- document.querySelectorAll('[data-section]').forEach(a=>{a.href=hubURL(a.dataset.section);if(a.dataset.section===section)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+ document.querySelectorAll('a[data-section]').forEach(a=>{a.href=hubURL(a.dataset.section);if(a.dataset.section===section)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
  $('back').href=hubURL(section,'');
 }
 function initHub(){
