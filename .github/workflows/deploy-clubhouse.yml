@@ -59,7 +59,7 @@ jobs:
           helper='release-'+secrets.token_hex(24)+'.php'
           code=b"""<?php
           header('Cache-Control: private, no-store');
-          foreach (['/imc_campus/', '/imc_campus/?mobile=full', '/imc_campus/campus-arco.webp'] as $path) {
+          foreach (['/imc_campus', '/imc_campus/', '/imc_campus/?mobile=full', '/imc_campus/campus-arco.webp'] as $path) {
             $request=curl_init('http://127.0.0.1:8889/purge'.$path);
             curl_setopt_array($request,[CURLOPT_HTTPHEADER=>['Host: www.italianmastersclub.it'],CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>5]);
             curl_exec($request);
@@ -122,7 +122,7 @@ jobs:
           import urllib.request
           from pathlib import Path
           base = 'https://www.italianmastersclub.it/imc_campus/'
-          for url, path in [(base, 'index.html'), (base + 'campus-arco.webp', 'campus-arco.webp')]:
+          for url, path in [(base.rstrip('/'), 'index.html'), (base, 'index.html'), (base+'?mobile=full', 'index.html'), (base+'isola.html', 'index.html'), (base+'campus-arco.webp?v=isola-arco-1', 'campus-arco.webp')]:
               with urllib.request.urlopen(url, timeout=60) as response:
                   assert response.read() == (Path('imc_campus') / path).read_bytes(), url
           PY
