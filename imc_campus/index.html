@@ -3,36 +3,24 @@
 <title>IMC Campus · Italian Masters Club</title><meta name="theme-color" content="#142436">
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#142436;color:white;font-family:Inter,system-ui,sans-serif}
-header{height:64px;display:flex;justify-content:center;align-items:center;gap:10px}
-header img{height:54px;width:54px;object-fit:contain}
-h1{font-size:21px;margin:0;letter-spacing:.02em}
-main{min-height:calc(100svh - 64px);display:grid;place-items:center;background:#223324}
-.map{width:100%;position:relative;isolation:isolate}
-picture,img.photo{display:block;width:100%}
-.building{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);width:32%;height:15%;display:grid;place-items:center;color:white;text-decoration:none;text-align:center}
-.building span{font-weight:700;font-size:clamp(12px,3.5vw,18px);padding:.45em .65em;background:#142436f5;border-bottom:2px solid #c6ab65;box-shadow:0 2px 6px #0008}
-.building:is(:hover,:focus-visible) span{background:#f5e9cb;color:#172338}
-@media(orientation:portrait){
- header{display:none}
- main{height:100vh;height:100dvh;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
- .map{width:min(100vw,55dvh);flex:none;container-type:inline-size}
- img.photo{height:auto;aspect-ratio:852/1846}
- .building{height:8%;width:30%}
- .building span,.building:is(:hover,:focus-visible) span{background:transparent;padding:0;border:0;box-shadow:none;color:#fff;text-transform:uppercase;font-size:clamp(10px,2.8cqw,18px);line-height:1;font-weight:650}
- .building:first-of-type{height:13%;width:54%}
- .building:first-of-type span{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
- .building:focus-visible{outline:2px solid ivory}
-}
-@media(orientation:landscape){.map{width:min(100%,calc((100svh - 64px)*var(--ratio)))}.building{left:var(--dx);top:var(--dy);width:22%;height:12%}}
+body{margin:0;background:#142436}
+main{height:100vh;height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.map{position:relative;width:min(100vw,52vh);width:min(100vw,52dvh);flex:none}
+.photo{display:block;width:100%;height:auto;aspect-ratio:852/1846}
+.crest{position:absolute;left:49.4%;top:85.5%;width:20.5%;height:auto;transform:translate(-50%,-50%);pointer-events:none}
+.building{position:absolute;left:var(--x);top:var(--y);width:39%;height:9%;transform:translate(-50%,-50%)}
+.building:first-of-type{width:57%;height:14%}
+.building span{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+.building:focus-visible{outline:3px solid ivory;border-radius:4px}
+@media(orientation:landscape){.map{width:calc(100vh * 852 / 1846);width:calc(100dvh * 852 / 1846)}}
 </style></head>
-<body><header><img src="/site-assets/images/imc-logo.png" alt=""><h1>IMC Campus</h1></header>
-<main><nav class="map" aria-label="Edifici del campus" style="--ratio:1.777"><picture><source media="(orientation:landscape)" srcset="campus-landscape.webp"><img class="photo" src="campus-isola.webp" alt=""></picture>
-<a class="building" href="/imc_campus/one/" style="--x:50%;--y:25%;--dx:50%;--dy:26%"><span>ONE</span></a>
-<a class="building" href="/imc_campus/nexus_lab/" style="--x:24.5%;--y:51.7%;--dx:36%;--dy:39%"><span>Nexus Lab</span></a>
-<a class="building" href="/imc_campus/the_dugout/" style="--x:76%;--y:51.7%;--dx:62%;--dy:39%"><span>The Dugout</span></a>
-<a class="building" href="/imc_campus/world_center/" style="--x:21.5%;--y:61%;--dx:32%;--dy:57%"><span>World Center</span></a>
-<a class="building" href="/imc_campus/media_center/" style="--x:79%;--y:61%;--dx:66%;--dy:57%"><span>Media Center</span></a>
-<a class="building" href="/imc_campus/trophy_room/" style="--x:18%;--y:71.7%;--dx:30%;--dy:78%"><span>Trophy Room</span></a>
-<a class="building" href="/imc_campus/club_house/" style="--x:82%;--y:71.7%;--dx:69%;--dy:78%"><span>Club House</span></a>
+<body>
+<main><nav class="map" aria-label="Edifici del campus"><img class="photo" src="campus-arco.webp" width="852" height="1846" alt=""><img class="crest" src="/site-assets/images/imc-logo.png" alt="">
+<a class="building" href="/imc_campus/one/" style="--x:50%;--y:25%"><span>ONE</span></a>
+<a class="building" href="/imc_campus/nexus_lab/" style="--x:25%;--y:51%"><span>Nexus Lab</span></a>
+<a class="building" href="/imc_campus/the_dugout/" style="--x:76%;--y:51%"><span>The Dugout</span></a>
+<a class="building" href="/imc_campus/world_center/" style="--x:23%;--y:61.5%"><span>World Center</span></a>
+<a class="building" href="/imc_campus/media_center/" style="--x:78%;--y:61.5%"><span>Media Center</span></a>
+<a class="building" href="/imc_campus/trophy_room/" style="--x:21%;--y:73%"><span>Trophy Room</span></a>
+<a class="building" href="/imc_campus/club_house/" style="--x:79%;--y:74%"><span>Club House</span></a>
 </nav></main></body></html>
