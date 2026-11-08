@@ -8,6 +8,7 @@ on:
       - '.github/workflows/manager-portrait-folders.yml'
       - 'clubhouse/**'
       - 'imc_village/**'
+      - 'imc_campus/**'
       - '.github/workflows/deploy-clubhouse.yml'
       - 'nexus/core/bootstrap.php'
       - 'nexus/core/club-display.php'

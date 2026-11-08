@@ -1,6 +1,7 @@
 'use strict';
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),manager=params.get('manager')||'';
-const section=['career','ranking','timeline','trophies','h2h'].includes(params.get('view'))?params.get('view'):'career';
+const campusRoutes={'career': '/imc_campus/club_house/', 'trophies': '/imc_campus/trophy_room/', 'timeline': '/imc_campus/media_center/', 'ranking': '/imc_campus/ranking/', 'h2h': '/imc_campus/h2h/'};
+const section=Object.keys(campusRoutes).find(key=>campusRoutes[key]===location.pathname) || (['career','ranking','timeline','trophies','h2h'].includes(params.get('view'))?params.get('view'):'career');
 const rankingView=section==='ranking';
 const timelineView=section==='timeline';
 document.body.classList.add('clubhouse-page','clubhouse-hub');
@@ -33,7 +34,7 @@ function worldLinks(){ $('world-links').innerHTML=worlds.map(w=>'<a href="'+worl
 function wireLogos(){document.querySelectorAll('.club-logo').forEach(img=>{img.onerror=()=>img.hidden=true;if(img.complete&&!img.naturalWidth)img.hidden=true;});}
 $('open-worlds').onclick=$('nav-worlds').onclick=()=>$('world-dialog').showModal();$('close-worlds').onclick=()=>$('world-dialog').close();$('world-dialog').addEventListener('click',e=>{if(e.target===$('world-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});worldLinks();
 
-async function get(q=''){const r=await fetch('data.php'+q,{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Dati non disponibili');return d;}
+async function get(q=''){const r=await fetch('/clubhouse/data.php'+q,{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Dati non disponibili');return d;}
 function stats(id){return sum(available().map(w=>bundles[w].managers[id]?.stats||zero()));}
 function h2hStats(id){return sum(available().map(w=>bundles[w].managers[id]?.h2h_stats||zero()));}
 function trophies(id){return available().reduce((n,w)=>n+(bundles[w].managers[id]?.trophies||0),0);}
@@ -55,8 +56,8 @@ function timelineCard(e){
 async function timeline(){
  const token=++timelineRun;
  try{
-  $('loading').textContent='Caricamento IMC Timeline…';
-  const d=await fetch('timeline.php',{cache:'no-store'}).then(r=>r.json());
+  $('loading').textContent='Caricamento Media Center…';
+  const d=await fetch('/clubhouse/timeline.php',{cache:'no-store'}).then(r=>r.json());
   if(token!==timelineRun)return;if(!d.ok)throw Error(d.error||'Timeline non disponibile');
   const rows=d.events.filter(e=>(!manager||e.manager_id===manager)&&(!$('world').value||e.world===$('world').value)).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.world||'').localeCompare(String(b.world||'')));
   const draw=()=>{
@@ -81,7 +82,7 @@ function ranking(){
  const q=$('search').value.toLocaleLowerCase('it').trim(),filtered=rows.filter(m=>(!manager||m.manager_id===manager)&&(m.full_name+' '+m.manager_id).toLocaleLowerCase('it').includes(q));
  $('manager-count').textContent=filtered.length+' manager';$('compact-count').textContent=filtered.length+' manager';
  $('content').innerHTML='<p class="rank-status">'+(incomplete?'Classifica provvisoria: caricamento o dati incompleti.':'Classifica aggiornata sui dati disponibili.')+' Club + Nazionali · Tutte le stagioni · Pari punti, pari posizione.</p>'+rankRules()+
- '<div class="ranking-list">'+filtered.map(m=>'<details class="ranking-row'+(m.position<=3?' ranking-podium':'')+'" data-manager="'+esc(m.manager_id)+'"'+(opened.has(m.manager_id)?' open':'')+'><summary><span class="rank-position">'+m.position+'</span><span class="rank-name"><strong class="manager-with-photo">'+ClubhousePortraits.portrait(m.manager_id)+'<span>'+esc(m.full_name)+'</span></strong><small>'+number(m.games.played)+' partite · '+number(m.games.won)+' V · '+number(m.games.drawn)+' P · '+number(m.games.lost)+' S</small></span><span class="rank-total">'+number(m.rank.total)+'<small>PUNTI</small></span><span class="rank-chevron" aria-hidden="true">⌄</span></summary><div class="rank-detail"><div class="rank-split">'+[['Club',m.rank.clubs],['Nazionali',m.rank.nations],['Trofei',m.rank.trophies]].map(([label,value])=>'<div><small>'+label+'</small><strong>'+number(value)+'<span> pt</span></strong></div>').join('')+'</div><div class="rank-detail-heading"><h3>Punti per Game World</h3><a href="?manager='+encodeURIComponent(m.manager_id)+'">IMC Career ↗</a></div><div class="rank-world-grid">'+rankWorlds(m.manager_id)+'</div>'+(m.rank.unscored?'<p class="notice">'+m.rank.unscored+' trofei senza regola riconosciuta: bonus non assegnato.</p>':'')+'</div></details>').join('')+'</div>'+(filtered.length?'':'<p class="notice">Nessun manager trovato.</p>');
+ '<div class="ranking-list">'+filtered.map(m=>'<details class="ranking-row'+(m.position<=3?' ranking-podium':'')+'" data-manager="'+esc(m.manager_id)+'"'+(opened.has(m.manager_id)?' open':'')+'><summary><span class="rank-position">'+m.position+'</span><span class="rank-name"><strong class="manager-with-photo">'+ClubhousePortraits.portrait(m.manager_id)+'<span>'+esc(m.full_name)+'</span></strong><small>'+number(m.games.played)+' partite · '+number(m.games.won)+' V · '+number(m.games.drawn)+' P · '+number(m.games.lost)+' S</small></span><span class="rank-total">'+number(m.rank.total)+'<small>PUNTI</small></span><span class="rank-chevron" aria-hidden="true">⌄</span></summary><div class="rank-detail"><div class="rank-split">'+[['Club',m.rank.clubs],['Nazionali',m.rank.nations],['Trofei',m.rank.trophies]].map(([label,value])=>'<div><small>'+label+'</small><strong>'+number(value)+'<span> pt</span></strong></div>').join('')+'</div><div class="rank-detail-heading"><h3>Punti per Game World</h3><a href="?manager='+encodeURIComponent(m.manager_id)+'">Club House ↗</a></div><div class="rank-world-grid">'+rankWorlds(m.manager_id)+'</div>'+(m.rank.unscored?'<p class="notice">'+m.rank.unscored+' trofei senza regola riconosciuta: bonus non assegnato.</p>':'')+'</div></details>').join('')+'</div>'+(filtered.length?'':'<p class="notice">Nessun manager trovato.</p>');
 }
 function rankWorlds(id){return available().map(w=>{const m=bundles[w].managers[id],r=m?.ranking;if(!r)return '<p class="notice">'+esc(worldCode(w))+': ranking non disponibile.</p>';const s=m.ranking_club_stats||zero(),n=m.national_stats||zero();
  const line=(label,v,points,source)=>'<tr><th scope="row">'+label+'<small>'+source+'</small></th><td>'+number(v.played)+'</td><td>'+number(v.won)+'</td><td>'+number(v.drawn)+'</td><td>'+number(v.lost)+'</td><td><strong>'+number(points)+'</strong></td></tr>';
@@ -168,7 +169,7 @@ function h2h(){
  $('content').querySelectorAll('.rival[data-opponent]').forEach(el=>el.addEventListener('toggle',async()=>{
   if(!el.open||el.dataset.loaded==='true'||el.dataset.loading==='true')return;
   el.dataset.loading='true';const body=el.querySelector('.hh-global-detail');body.textContent='Caricamento dettaglio partite…';
-  try{const r=await fetch('h2h-detail.php?'+new URLSearchParams({manager,opponent:el.dataset.opponent,worlds:el.dataset.worlds,scope}),{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)throw Error('Dettaglio non disponibile. Chiudi e riapri per riprovare.');if(!el.isConnected)return;NexusH2H.renderDetail(body,d,'matches');el.dataset.loaded='true';}catch(e){if(el.isConnected)body.textContent=e.message;}finally{el.dataset.loading='false';}
+  try{const r=await fetch('/clubhouse/h2h-detail.php?'+new URLSearchParams({manager,opponent:el.dataset.opponent,worlds:el.dataset.worlds,scope}),{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)throw Error('Dettaglio non disponibile. Chiudi e riapri per riprovare.');if(!el.isConnected)return;NexusH2H.renderDetail(body,d,'matches');el.dataset.loaded='true';}catch(e){if(el.isConnected)body.textContent=e.message;}finally{el.dataset.loading='false';}
  }));
 }
 function trophyImportance(t){
@@ -222,12 +223,12 @@ if(!rankingView&&!timelineView){
 async function start(){try{const meta=await get();people=meta.managers;ClubhousePortraits.setPeople(people);worldNames=Object.fromEntries(meta.worlds.map(w=>[w.id,w.name]));worldLinks();if($('world').options.length===1)worlds.forEach(w=>$('world').add(new Option(worldName(w),w)));initHub();if(manager){const m=people.find(x=>x.manager_id===manager);if(!m){$('loading').textContent='Manager IMC non trovato.';$('content').replaceChildren();return;}$('directory-heading').hidden=true;$('compact-count').textContent=m.full_name;$('profile-avatar').hidden=false;$('profile-avatar').innerHTML=ClubhousePortraits.portrait(m.manager_id,'bust');$('title').textContent='Club House';document.title='Club House · '+sectionNames[section]+' · '+m.full_name;$('subtitle').textContent=m.full_name+' · '+m.manager_id;$('tabs').hidden=true;$('back').hidden=false;$('search-label').hidden=false;$('search').value=m.full_name;}if(timelineView){await timeline();return;}await load();}catch(e){$('loading').textContent=e.message;$('retry').disabled=false;}}
 
 $('search').addEventListener('change',()=>{const value=$('search').value.trim();if(value==='Tutti i manager'){location.href=hubURL(section,'');return;}const m=directoryPeople().find(m=>m.full_name.toLocaleLowerCase('it')===value.toLocaleLowerCase('it')||m.manager_id===value);if(m&&m.manager_id!==manager)location.href=hubURL(section,m.manager_id);});
-const sectionNames={career:'IMC Career',ranking:'IMC Ranking',timeline:'IMC Timeline',trophies:'IMC Trophy Room',h2h:'IMC H2H'};
+const sectionNames={career:'Club House',ranking:'IMC Ranking',timeline:'Media Center',trophies:'Trophy Room',h2h:'IMC H2H'};
 function hubURL(view,id=manager){
- const q=new URLSearchParams(location.search);q.set('view',view);q.set('scope',scope);
+ const q=new URLSearchParams(location.search);q.delete('view');q.set('scope',scope);
  if(view==='h2h'&&id&&!manager)q.set('scope','global');
  if(id)q.set('manager',id);else q.delete('manager');
- return '?'+q.toString();
+ return campusRoutes[view]+'?'+q.toString();
 }
 function syncHubLinks(){
  document.querySelectorAll('[data-section]').forEach(a=>{a.href=hubURL(a.dataset.section);if(a.dataset.section===section)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});

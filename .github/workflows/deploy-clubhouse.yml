@@ -5,6 +5,7 @@ on:
     paths:
       - 'clubhouse/**'
       - 'imc_village/**'
+      - 'imc_campus/**'
       - '.github/workflows/deploy-clubhouse.yml'
   workflow_dispatch:
 permissions:
@@ -19,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate PHP
         run: |
-          find clubhouse -name '*.php' -print0 | xargs -0 -n1 php -l
+          find clubhouse imc_campus -name '*.php' -print0 | xargs -0 -n1 php -l
           node --check clubhouse/club-house.js
           node --check clubhouse/h2h.js
           node --check clubhouse/imc-passport/passport.js
@@ -32,7 +33,7 @@ jobs:
           import io, os, ssl, secrets, hashlib, time, urllib.request, json
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
-          files=[str(p) for folder in ('clubhouse','imc_village') for p in Path(folder).rglob('*') if p.is_file()]
+          files=[str(p) for folder in ('clubhouse','imc_village','imc_campus') for p in Path(folder).rglob('*') if p.is_file()]
           root='/www.italianmastersclub.it'
           ctx=ssl.create_default_context()
           ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.

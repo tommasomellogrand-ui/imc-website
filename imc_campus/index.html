@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IMC Campus · Italian Masters Club</title><meta name="theme-color" content="#142436">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#142436;color:white;font-family:Inter,system-ui,sans-serif}
+header{height:64px;display:flex;justify-content:center;align-items:center;gap:10px}
+header img{height:54px;width:54px;object-fit:contain}
+h1{font-size:21px;margin:0;letter-spacing:.02em}
+main{min-height:calc(100svh - 64px);display:grid;place-items:center;background:#223324}
+.map{width:100%;position:relative;isolation:isolate}
+picture,img.photo{display:block;width:100%}
+.building{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);width:32%;height:15%;display:grid;place-items:center;color:white;text-decoration:none;text-align:center}
+.building span{font-weight:700;font-size:clamp(12px,3.5vw,18px);padding:.45em .65em;background:#142436f5;border-bottom:2px solid #c6ab65;box-shadow:0 2px 6px #0008}
+.building:is(:hover,:focus-visible) span{background:#f5e9cb;color:#172338}
+@media(orientation:portrait){img.photo{height:max(149vw,calc(100svh - 64px));object-fit:fill}}
+@media(orientation:landscape){.map{width:min(100%,calc((100svh - 64px)*var(--ratio)))}.building{left:var(--dx);top:var(--dy);width:22%}}
+</style></head>
+<body><header><img src="/site-assets/images/imc-logo.png" alt=""><h1>IMC Campus</h1></header>
+<main><nav class="map" aria-label="Edifici del campus" style="--ratio:1.777"><picture><source media="(orientation:landscape)" srcset="campus-landscape.webp"><img class="photo" src="campus-portrait.webp" alt=""></picture>
+<a class="building" href="/imc_campus/one/" style="--x:50%;--y:16%;--dx:50%;--dy:26%"><span>ONE</span></a>
+<a class="building" href="/imc_campus/nexus_lab/" style="--x:23%;--y:36%;--dx:36%;--dy:39%"><span>Nexus Lab</span></a>
+<a class="building" href="/imc_campus/the_dugout/" style="--x:78%;--y:36%;--dx:62%;--dy:39%"><span>The Dugout</span></a>
+<a class="building" href="/imc_campus/world_center/" style="--x:21%;--y:57%;--dx:32%;--dy:57%"><span>World Center</span></a>
+<a class="building" href="/imc_campus/media_center/" style="--x:80%;--y:57%;--dx:66%;--dy:57%"><span>Media Center</span></a>
+<a class="building" href="/imc_campus/trophy_room/" style="--x:18%;--y:82%;--dx:30%;--dy:78%"><span>Trophy Room</span></a>
+<a class="building" href="/imc_campus/club_house/" style="--x:82%;--y:82%;--dx:69%;--dy:78%"><span>Club House</span></a>
+</nav></main></body></html>
