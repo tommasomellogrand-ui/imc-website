@@ -42,14 +42,25 @@ if(isset($_GET['api'])){
 ?>
 <!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#173a34"><title>ONE · Area ospiti</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f6f5ef;color:#182d29;font:16px Inter,system-ui,sans-serif}header{background:#173a34;color:white;padding:max(22px,env(safe-area-inset-top)) max(6vw,20px) 20px}header a{color:#d2e6dc}h1{font-size:36px;margin:16px 0 6px}main,nav{max-width:720px;margin:auto;padding:18px}details{margin:0 0 16px;padding:12px;background:white}summary{cursor:pointer}nav{position:sticky;bottom:0;display:flex;background:#fff;border-top:1px solid #ccc;padding-bottom:max(12px,env(safe-area-inset-bottom))}button{font:inherit;cursor:pointer;padding:12px;border:0;border-radius:5px}nav button{flex:1;background:white}button[aria-pressed=true],form button{background:#173a34;color:white}textarea{width:100%;padding:12px;font:inherit;margin:7px 0;border:1px solid #a9b8af;border-radius:5px}article{background:white;padding:14px;margin:8px 0}article p{white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:0}small{color:#50675e}body{min-height:100dvh;display:flex;flex-direction:column}main{width:100%;flex:1}nav{width:100%}
-</style><header><a href="./">‹ Reception</a><h1>ONE</h1>Accesso ospite · <?=htmlspecialchars($guest)?></header><main>
-<details><summary id="count">Online ora</summary><ul id="people"></ul></details>
-<h2 id="title">Chat</h2><form id="form"><label for="body">Messaggio pubblico</label><textarea id="body" required maxlength="1000" rows="2"></textarea><button>Invia</button></form><p role="status" id="status"></p><div id="feed"></div></main>
-<nav aria-label="Area ONE"><button data-view="chat">Chat</button><button data-view="board">Bacheca</button><button data-view="inbox">Inbox</button></nav>
+*{box-sizing:border-box}body{margin:0;background:#261e19;color:#33291e;font:16px Inter,system-ui,sans-serif}
+.room{height:100vh;height:100dvh;display:grid;place-items:center;overflow:hidden}.scene{position:relative;width:min(100vw,51.37dvh);aspect-ratio:899/1750;container-type:inline-size}.scene img{display:block;width:100%;height:100%}
+@media(max-width:700px) and (orientation:portrait){.scene{width:100vw;height:100dvh}.scene img{object-fit:fill}}
+.spot{position:absolute;background:transparent;border:0;cursor:pointer;min-height:26px}.spot:focus-visible{outline:3px solid white}
+.back{left:0;top:39%;width:13%;height:9%}.board{left:13%;top:36%;width:22%;height:15%}.chat{left:43%;top:56%;width:27%;height:3.5%}.online{left:46%;top:59.2%;width:22%;height:2.2%;min-height:0;background:#29272a;color:white;font:500 2.4cqw Inter,system-ui;transform:skew(-7deg)}.online:before{content:'● ';color:#44df64}.inbox{left:65%;top:67%;width:32%;height:11%}
+dialog{width:min(100%,620px);max-width:100%;max-height:84dvh;margin:auto auto 0;border:0;border-radius:18px 18px 0 0;background:#f7f4ed;color:inherit;padding:20px 20px max(20px,env(safe-area-inset-bottom));overflow:auto}dialog::backdrop{background:#21190f70}dialog[open]{animation:rise .2s ease-out}@keyframes rise{from{transform:translateY(20%)}}@media(prefers-reduced-motion:reduce){dialog[open]{animation:none}}
+.bar{display:flex;align-items:center;justify-content:space-between}.bar h2{margin:0}.bar button,form button{border:0;padding:12px;border-radius:6px;cursor:pointer;font:inherit}.bar button{background:#e8e1d4}form button{background:#44392e;color:white}textarea{display:block;width:100%;margin:8px 0;padding:12px;font:inherit}article{background:white;padding:12px;margin:8px 0}article p{white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:0}small{color:#625545}details{margin:16px 0}
+</style><main class="room"><div class="scene"><img src="lounge-one.webp" width="899" height="1750" alt="Salotto ONE sul lago con lo stemma IMC all’ingresso">
+<a class="spot back" href="./" aria-label="Torna alla reception"></a>
+<button class="spot board" data-view="board" aria-label="Bacheca"></button>
+<button class="spot chat" data-view="chat" aria-label="Chat"></button>
+<button class="spot online" data-view="online" aria-label="Ospiti online" id="live">… online</button>
+<button class="spot inbox" data-view="inbox" aria-label="Inbox"></button></div></main>
+<dialog id="panel" aria-labelledby="title"><div class="bar"><h2 id="title"></h2><button id="close">Torna alla sala</button></div>
+<details id="presence"><summary id="count">Online ora</summary><ul id="people"></ul></details>
+<form id="form"><label for="body">Messaggio pubblico</label><textarea id="body" required maxlength="1000" rows="2"></textarea><button>Invia</button></form><p role="status" id="status"></p><div id="feed"></div></dialog>
 <script>
 const get=id=>document.getElementById(id), headers={'X-One-Token':<?=json_encode($_SESSION['token'])?>};
-let view='chat';
+let view='online';
 const buttons=[...document.querySelectorAll('[data-view]')];
 async function refresh(){
  const current=view;
@@ -58,9 +69,10 @@ async function refresh(){
   if(!res.ok)throw Error();
   const data=await res.json();
   if(current!==view)return;
+  get('live').textContent=data.online.length+' online';
   get('count').textContent='Online ora · '+data.online.length;
   get('people').replaceChildren(...data.online.map(name=>{const li=document.createElement('li');li.textContent='Ospite '+name;return li}));
-  if(current==='inbox')return;
+  if(current==='inbox'||current==='online')return;
   get('feed').replaceChildren(...data.rows.map(row=>{
    const item=document.createElement('article'),meta=document.createElement('small'),body=document.createElement('p');
    meta.textContent='Ospite '+row.guest+' · '+new Date(row.ts*1000).toLocaleString('it-IT');body.textContent=row.body;item.append(meta,body);return item;
@@ -70,11 +82,11 @@ async function refresh(){
 }
 function select(button){
  view=button.dataset.view;buttons.forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
- get('title').textContent=button.textContent;get('form').hidden=view==='inbox';get('feed').replaceChildren();
+ get('panel').showModal();get('presence').open=view==='online';get('title').textContent=button.getAttribute('aria-label');get('form').hidden=['online','inbox'].includes(view);get('feed').replaceChildren();
  get('status').textContent=view==='inbox'?'La casella personale sarà disponibile con il tuo accesso manager.':'';
  get('body').value='';refresh();
 }
-buttons.forEach(b=>b.onclick=()=>select(b));select(buttons[0]);
+buttons.forEach(b=>b.onclick=()=>select(b));get('close').onclick=()=>get('panel').close();get('panel').onclose=()=>{view='online';refresh()};refresh();
 get('form').onsubmit=async e=>{
  e.preventDefault();const button=e.target.querySelector('button'),current=view;button.disabled=true;
  try{const res=await fetch('?area&api='+current,{method:'POST',headers,body:new URLSearchParams({body:get('body').value})});
