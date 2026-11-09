@@ -1,0 +1,77 @@
+name: Publish world Player Codex directories
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site-data/players/world.php'
+      - 'site-data/players/daily.php'
+      - '.github/workflows/player-codex-directory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: player-codex-directory
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate data services
+        run: find site-data -name "*.php" -exec php -l {} \;
+      - name: Publish Player Codex rows and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          files=["site-data/players/world.php","site-data/players/daily.php","roadtohistory/players/world.php","roadtohistory/players/daily.php","roadtohistory/players/index.html","halloffamers/playercodex/world.php","halloffamers/playercodex/daily.php","halloffamers/playercodex/index.html","kickoff/playercodex/world.php","kickoff/playercodex/daily.php","kickoff/playercodex/index.html","sensiblesocceracademy/playercodex/world.php","sensiblesocceracademy/playercodex/daily.php","sensiblesocceracademy/playercodex/index.html","subbuteosuperleague/playercodex/world.php","subbuteosuperleague/playercodex/daily.php","subbuteosuperleague/playercodex/index.html","worldleague/playercodex/world.php","worldleague/playercodex/daily.php","worldleague/playercodex/index.html","masterleagueworld/playercodex/world.php","masterleagueworld/playercodex/daily.php","masterleagueworld/playercodex/index.html","scudetto/playercodex/world.php","scudetto/playercodex/daily.php","scudetto/playercodex/index.html"]
+          root='/www.italianmastersclub.it'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          for name in files:
+              p=Path(name)
+              data=p.read_bytes()
+              assert data, str(p)
+              directory(root+'/'+str(Path(name).parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+name
+          ftp.quit()
+          PY
+      - name: Verify eight public directories against CORE daily entries
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          from concurrent.futures import ThreadPoolExecutor
+          def verify(route):
+              base='https://www.italianmastersclub.it/'+route+'/'
+              def get(path):
+                  with urllib.request.urlopen(base+path,timeout=100) as response:
+                      assert response.headers.get('X-IMC-Club-Names'),route
+                      data=json.load(response)
+                      assert data['ok'],route
+                      return data
+              roster=get('world.php')['rows']
+              ids={int(p['player_id']) for p in roster if p['player_id']}
+              assert ids,route
+              for tab,expected in [('changes',41),('new',18)]:
+                  data=get('daily.php?day=2026-11-09&tab='+tab)
+                  assert len(data['rows'])==expected and all(int(p['player_id']) in ids for p in data['rows']),route
+              html=urllib.request.urlopen(base+'?release=${{ github.sha }}',timeout=60).read().decode()
+              assert '/nexus/' not in html and 'Nuovi giocatori in DB' in html,route
+              print(route,len(roster))
+          with ThreadPoolExecutor(3) as pool:list(pool.map(verify,["roadtohistory/players","halloffamers/playercodex","kickoff/playercodex","sensiblesocceracademy/playercodex","subbuteosuperleague/playercodex","worldleague/playercodex","masterleagueworld/playercodex","scudetto/playercodex"]))
+          PY
