@@ -1,0 +1,72 @@
+name: Publish world club roster data
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site-data/**'
+      - '.github/workflows/club-site-data.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: club-site-data
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate data services
+        run: find site-data -name "*.php" -exec php -l {} \;
+      - name: Publish Player Codex rows and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          files=["site-data/core/bootstrap.php","site-data/core/person-display.php","site-data/core/club-display.php","site-data/core/context.php","site-data/teams/detail.php","site-data/teams/roster.php","site-data/teams/roster-stats.php","site-data/players/media.php","site-data/transfers/index.php","site-data/competitions/match-teams.php","roadtohistory/clubs/roster.php","roadtohistory/clubs/detail.php","roadtohistory/transfers/data.php","roadtohistory/clubs/context.php","roadtohistory/clubs/detail.js","roadtohistory/clubs/detail.html","halloffamers/clubs/roster.php","halloffamers/clubs/detail.php","halloffamers/transfers/data.php","halloffamers/clubs/context.php","halloffamers/clubs/detail.js","halloffamers/clubs/detail.html","kickoff/clubs/roster.php","kickoff/clubs/detail.php","kickoff/transfers/data.php","kickoff/clubs/context.php","kickoff/clubs/detail.js","kickoff/clubs/detail.html","sensiblesocceracademy/clubs/roster.php","sensiblesocceracademy/clubs/detail.php","sensiblesocceracademy/transfers/data.php","sensiblesocceracademy/clubs/context.php","sensiblesocceracademy/clubs/detail.js","sensiblesocceracademy/clubs/detail.html","subbuteosuperleague/clubs/roster.php","subbuteosuperleague/clubs/detail.php","subbuteosuperleague/transfers/data.php","subbuteosuperleague/clubs/context.php","subbuteosuperleague/clubs/detail.js","subbuteosuperleague/clubs/detail.html","worldleague/clubs/roster.php","worldleague/clubs/detail.php","worldleague/transfers/data.php","worldleague/clubs/context.php","worldleague/clubs/detail.js","worldleague/clubs/detail.html","masterleagueworld/clubs/roster.php","masterleagueworld/clubs/detail.php","masterleagueworld/transfers/data.php","masterleagueworld/clubs/context.php","masterleagueworld/clubs/detail.js","masterleagueworld/clubs/detail.html","scudetto/clubs/roster.php","scudetto/clubs/detail.php","scudetto/transfers/data.php","scudetto/clubs/context.php","scudetto/clubs/detail.js","scudetto/clubs/detail.html"]
+          root='/www.italianmastersclub.it'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          for name in files:
+              p=Path(name)
+              data=p.read_bytes()
+              assert data, str(p)
+              directory(root+'/'+str(Path(name).parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+name
+          ftp.quit()
+          PY
+      - name: Verify eight live world rosters and transfer feeds
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          from concurrent.futures import ThreadPoolExecutor
+          def verify(item):
+              world,club=item
+              base='https://www.italianmastersclub.it/'+world+'/'
+              def get(path):
+                  return urllib.request.urlopen(base+path,timeout=100).read().decode()
+              roster=json.loads(get('clubs/roster.php?sm_club='+club))
+              assert roster['ok'] and roster['rows'] and all('roster_status' in r for r in roster['rows']),world
+              context=json.loads(get('clubs/context.php'))
+              assert context['ok'],world
+              transfers=json.loads(get('transfers/data.php?sm_club='+club))
+              assert transfers['ok'] and all(club in (str(r['from_sm_world_club_id']),str(r['to_sm_world_club_id'])) for r in transfers['rows']),world
+              assert '/'+world+'/transfers/cards.js' in get('clubs/detail.html?release=${{ github.sha }}'),world
+              print(world,len(roster['rows']),len(transfers['rows']))
+          with ThreadPoolExecutor(3) as pool:list(pool.map(verify,[["roadtohistory","94079073"],["halloffamers","96537299"],["kickoff","94012702"],["sensiblesocceracademy","92317614"],["subbuteosuperleague","93399549"],["worldleague","21145248"],["masterleagueworld","94061920"],["scudetto","94703258"]]))
+          PY
