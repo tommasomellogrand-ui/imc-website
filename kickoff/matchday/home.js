@@ -34,10 +34,10 @@ function render(d){
  status.hidden=true;
  if(!d.rows.length){panel.innerHTML='<p class="md-empty">'+(mode==='results'?'Nessun risultato disponibile.':'Nessuna partita in programma.')+'</p>';return}
  const groups=new Map;
- for(const r of d.rows){const k=r.competition_key+'|'+r.imc_season+'|'+roundLabel(r);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
+ for(const r of d.rows){const k=r.competition_key+'|'+r.imc_season+'|'+roundLabel(r)+'|'+(r.competition_group_name||'');if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
  panel.innerHTML=[...groups.values()].map(rows=>{
   const first=rows[0];
-  return '<section class="md-group"><div class="md-group-heading"><h3><a href="'+esc(competitionUrl(first))+'">'+esc(first.competition_name)+'</a></h3><span>'+esc(roundLabel(first))+'</span></div><div class="md-games">'+rows.map(r=>{
+  return '<section class="md-group"><div class="md-group-heading"><h3><a href="'+esc(competitionUrl(first))+'">'+esc(first.competition_name)+'</a></h3><span>'+esc([first.competition_group_name,roundLabel(first)].filter(Boolean).join(' · '))+'</span></div><div class="md-games">'+rows.map(r=>{
    const played=mode==='results';let score=played?esc(r.home_score)+' – '+esc(r.away_score):esc(String(r.match_time||'').slice(0,5)||'—');
    if(played)for(const [p,label] of [['penalty','Rigori'],['aggregate','Totale']])if(r[p+'_home_score']!=null&&r[p+'_away_score']!=null)score+='<small>'+label+' '+esc(r[p+'_home_score'])+' – '+esc(r[p+'_away_score'])+'</small>';
    const report=played&&r.has_report?'<a class="md-report" aria-label="Match report: '+esc(r.home_name)+' – '+esc(r.away_name)+'" href="/kickoff/competitions/match.html?fixture='+encodeURIComponent(r.sm_fixture_id)+'"></a>':'';

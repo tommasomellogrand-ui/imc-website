@@ -35,7 +35,7 @@ try{
   $action=strtolower((string)$r['sm_action']);$div=(int)($r['sm_division']??0);
   $label=$labels[$key]??null;
   if(!$label)$label=in_array($action,['league','playoff'],true)?($divisions[$div]??'Divisione '.$div).($action==='playoff'?' · Playoff':''):($names[$action]??ucwords(str_replace('_',' ',preg_replace('/^GW009_IMC_/','',$key))));
-  $fields=['sm_fixture_id','competition_key','competition_group','sm_action','sm_division','imc_season','match_date','match_time','home_name','away_name','home_score','away_score','home_sm_club_id','away_sm_club_id','home_sm_team_id','away_sm_team_id','home_sm_manager_id','away_sm_manager_id','aggregate_home_score','aggregate_away_score','penalty_home_score','penalty_away_score','sm_matchday','matchday','round'];
+  $fields=['sm_fixture_id','competition_key','competition_group','competition_group_name','sm_action','sm_division','imc_season','match_date','match_time','home_name','away_name','home_score','away_score','home_sm_club_id','away_sm_club_id','home_sm_team_id','away_sm_team_id','home_sm_manager_id','away_sm_manager_id','aggregate_home_score','aggregate_away_score','penalty_home_score','penalty_away_score','sm_matchday','matchday','round'];
   $r=array_intersect_key($r,array_flip($fields));$r['competition_name']=$label;$r['has_report']=isset($reports[$fixture]);$clean[]=$r;
  }
  $clean=imc_site_enrich_match_teams($core,$gw,$clean);
