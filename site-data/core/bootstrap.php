@@ -40,7 +40,33 @@ function imc_site_db(array $c,string $target): PDO {
   ]);
 }
 function imc_site_rows(PDO $db,string $sql,array $params=[]): array {
-  $s=$db->prepare($sql);$s->execute($params);return $s->fetchAll();
+  // Sporting tables are partitioned by world. Imports use both the route ID
+  // and the IMC partition ID, sometimes within the same season.
+  if(preg_match('/\b(IMC00[1-8])_(?:Results|Schedule|Match_Reports)\b/i',$sql,$partition)){
+    $world=$partition[1];
+    $route=array_search($world,SITE_WORLD_TABLES,true);
+    // Public competition links may carry either prefix. Compare both forms
+    // using the physical world ID while retaining one bound parameter.
+    if($route!==false){
+      $sql=preg_replace('/\b((?:[a-z]+\.)?competition_key)\s*=\s*\?/i',
+        "REPLACE($1,'$route','$world')=REPLACE(?,'$route','$world')",$sql);
+    }
+    $sql=preg_replace('/\b((?:[a-z]+\.)?game_world_id)\s*=\s*\?/i', "$1 IN (?, '$world')", $sql);
+    // Both sides already refer to the same physical world partition.
+    $sql=preg_replace('/\b[a-z]+\.game_world_id\s*=\s*[a-z]+\.game_world_id\b/i','1=1',$sql);
+  }
+  $s=$db->prepare($sql);$s->execute($params);
+  $rows=$s->fetchAll();
+  if(isset($route)&&$route!==false){
+    foreach($rows as &$row){
+      $key=$row['competition_key']??'';
+      if(str_starts_with($key,$world.'|')||str_starts_with($key,$world.'_')){
+        $row['competition_key']=imc_site_rth_competition_key($route.substr($key,strlen($world)));
+      }
+    }
+    unset($row);
+  }
+  return $rows;
 }
 function imc_site_season(mixed $value): ?int {
   if($value===null||$value==='') return null;

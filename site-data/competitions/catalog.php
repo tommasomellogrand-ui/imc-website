@@ -18,6 +18,15 @@ try{
     .'SELECT '.$columns.',0 result_count,1 schedule_count FROM `'.$st.'` WHERE game_world_id=? AND imc_season=?'
     .') matches_by_season GROUP BY competition_key';
   $rows=imc_site_rows($db,$sql,[$gw,$season,$gw,$season]);
+  $combined=[];
+  foreach($rows as $row){
+    $key=$row['competition_key'];
+    if(isset($combined[$key])){
+      $combined[$key]['result_count']+=(int)$row['result_count'];
+      $combined[$key]['schedule_count']+=(int)$row['schedule_count'];
+    }else{$combined[$key]=$row;}
+  }
+  $rows=array_values($combined);
   // Filter competitions using current IMC assignments and participating world team IDs.
   $assigned=['club'=>[],'national_team'=>[]];
   $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
