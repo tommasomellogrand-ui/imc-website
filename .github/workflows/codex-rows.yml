@@ -25,7 +25,7 @@ jobs:
           import io, os, ssl, secrets, hashlib, time, urllib.request, json
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
-          files=["site-assets/css/codex-rows.css","roadtohistory/players/index.html","halloffamers/playercodex/index.html","kickoff/playercodex/index.html","sensiblesocceracademy/playercodex/index.html","subbuteosuperleague/playercodex/index.html","worldleague/playercodex/index.html","masterleagueworld/playercodex/index.html","scudetto/playercodex/index.html"]
+          files=["roadtohistory/players/directory.js","roadtohistory/players/daily.php","halloffamers/playercodex/directory.js","halloffamers/playercodex/daily.php","kickoff/playercodex/directory.js","kickoff/playercodex/daily.php","sensiblesocceracademy/playercodex/directory.js","sensiblesocceracademy/playercodex/daily.php","subbuteosuperleague/playercodex/directory.js","subbuteosuperleague/playercodex/daily.php","worldleague/playercodex/directory.js","worldleague/playercodex/daily.php","masterleagueworld/playercodex/directory.js","masterleagueworld/playercodex/daily.php","scudetto/playercodex/directory.js","scudetto/playercodex/daily.php","site-assets/css/codex-rows.css","roadtohistory/players/index.html","halloffamers/playercodex/index.html","kickoff/playercodex/index.html","sensiblesocceracademy/playercodex/index.html","subbuteosuperleague/playercodex/index.html","worldleague/playercodex/index.html","masterleagueworld/playercodex/index.html","scudetto/playercodex/index.html"]
           root='/www.italianmastersclub.it'
           ctx=ssl.create_default_context()
           ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
@@ -55,7 +55,13 @@ jobs:
           base='https://www.italianmastersclub.it/'
           for route in ["roadtohistory/players","halloffamers/playercodex","kickoff/playercodex","sensiblesocceracademy/playercodex","subbuteosuperleague/playercodex","worldleague/playercodex","masterleagueworld/playercodex","scudetto/playercodex"]:
               html=urllib.request.urlopen(base+route+'/?release=${{ github.sha }}',timeout=45).read().decode()
-              assert '/site-assets/css/codex-rows.css?v=1' in html,route
-          css=urllib.request.urlopen(base+'site-assets/css/codex-rows.css?v=1',timeout=45).read().decode()
+              assert '/site-assets/css/codex-rows.css?v=4' in html and 'directory.js?v=clubrow4' in html,route
+              import json
+              data=json.load(urllib.request.urlopen(base+route+'/daily.php?day=2026-11-09&tab=changes',timeout=60))
+              assert data['ok'] and all('club_logo_url' in r for r in data['rows']),route
+              if route.startswith('sensiblesocceracademy'):
+                  player=next(r for r in data['rows'] if int(r['player_id'])==133061)
+                  assert player['current_club'] and player['club_logo_url'],player
+          css=urllib.request.urlopen(base+'site-assets/css/codex-rows.css?v=4',timeout=45).read().decode()
           assert 'min-height:66px' in css
           PY
