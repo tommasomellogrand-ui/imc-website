@@ -55,7 +55,7 @@ jobs:
           base='https://www.italianmastersclub.it/'
           for route in ["roadtohistory/players","halloffamers/playercodex","kickoff/playercodex","sensiblesocceracademy/playercodex","subbuteosuperleague/playercodex","worldleague/playercodex","masterleagueworld/playercodex","scudetto/playercodex"]:
               html=urllib.request.urlopen(base+route+'/?release=${{ github.sha }}',timeout=45).read().decode()
-              assert '/site-assets/js/codex-nationality.js?v=1' in html and 'directory.js?v=flags1' in html,route
+              assert '/site-assets/js/codex-nationality.js?v=2' in html and 'directory.js?v=flags1' in html,route
           css=urllib.request.urlopen(base+'site-assets/css/codex-rows.css?v=1',timeout=45).read().decode()
           assert 'min-height:66px' in css
           for path in ['nexus/assets/flags/nations/1.svg','nexus/assets/flags/nations/4.svg']:

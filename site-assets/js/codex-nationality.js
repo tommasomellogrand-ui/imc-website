@@ -369,6 +369,16 @@
     const label = String(name || '').trim();
     if (!label) return '';
     const code = codes[label.toLowerCase()];
+    if (/^[a-z]{2}$/.test(code || '')) {
+      const flag = document.createElement('span');
+      flag.className = 'player-flag';
+      flag.setAttribute('role','img');
+      flag.setAttribute('aria-label',label);
+      flag.title = label;
+      flag.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:22px;height:20px;line-height:1;font:16px/1 "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+      flag.textContent = [...code.toUpperCase()].map(letter => String.fromCodePoint(letter.charCodeAt(0)+127397)).join('');
+      return flag.outerHTML;
+    }
     const element = document.createElement(code ? 'img' : 'span');
     if (code) {
       element.className = 'player-flag';
