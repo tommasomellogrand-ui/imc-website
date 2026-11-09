@@ -12,8 +12,11 @@ day.onchange=()=>{shown=60;refresh()};
 const roles=['Portieri','Difensori','Centrocampisti','Attaccanti','Ruolo non indicato'];
 function role(r){const s=String(r.position||'').toUpperCase().trim();if(/^(PT|GK|POR)(\b|\()/.test(s))return roles[0];if(/^(D|DC|DS|DD|DF|DEF)(\b|\()/.test(s))return roles[1];if(/^(C|CC|CD|CS|CO|M|MC|DM|AM|TRQ)(\b|\()/.test(s))return roles[2];if(/^(A|AC|AS|AD|F|FC|ST|ATT)(\b|\()/.test(s))return roles[3];return roles[4]}
 const nationality = window.codexNationality;
+function displayPlayerName(value) {
+ return String(value || 'Giocatore').trim().toLocaleLowerCase('it').replace(/(^|[\s'’\p{Pd}])(\p{L})/gu, (_, prefix, initial) => prefix + initial.toLocaleUpperCase('it'));
+}
 function card(r){
- const name=r.full_name||'Giocatore', images=[r.image_url];
+ const name=displayPlayerName(r.full_name), images=[r.image_url];
  if(Number(r.player_id)>0) images.push('https://cdn.soccerwiki.org/images/player/'+Number(r.player_id)+'.png');
  const club=String(r.current_club||'').trim();
  const hasClub=club&&!/^(?:club non assegnato|svincolato|free agent|nessuno(?:\/a)?|—|-)$/i.test(club);
