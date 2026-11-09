@@ -1,0 +1,89 @@
+name: Publish club lists fixtures and statistics
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site-data/teams/directory.php'
+      - 'site-data/teams/matches.php'
+      - 'site-data/teams/stats.php'
+      - '.github/workflows/world-club-directory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: world-club-directory
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate data services
+        run: find site-data -name "*.php" -exec php -l {} \;
+      - name: Publish Player Codex rows and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          files=["site-data/core/bootstrap.php","site-data/teams/directory.php","roadtohistory/clubs/directory.php","halloffamers/clubs/directory.php","kickoff/clubs/directory.php","sensiblesocceracademy/clubs/directory.php","subbuteosuperleague/clubs/directory.php","worldleague/clubs/directory.php","masterleagueworld/clubs/directory.php","scudetto/clubs/directory.php","site-data/teams/matches.php","roadtohistory/clubs/matches.php","halloffamers/clubs/matches.php","kickoff/clubs/matches.php","sensiblesocceracademy/clubs/matches.php","subbuteosuperleague/clubs/matches.php","worldleague/clubs/matches.php","masterleagueworld/clubs/matches.php","scudetto/clubs/matches.php","site-data/teams/stats.php","roadtohistory/clubs/stats.php","halloffamers/clubs/stats.php","kickoff/clubs/stats.php","sensiblesocceracademy/clubs/stats.php","subbuteosuperleague/clubs/stats.php","worldleague/clubs/stats.php","masterleagueworld/clubs/stats.php","scudetto/clubs/stats.php"]
+          root='/www.italianmastersclub.it'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          for name in files:
+              p=Path(name)
+              data=p.read_bytes()
+              assert data, str(p)
+              directory(root+'/'+str(Path(name).parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+name
+          ftp.quit()
+          PY
+      - name: Verify directories, results, schedules and statistics live
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          from concurrent.futures import ThreadPoolExecutor
+          def verify(pair):
+              world,club=pair
+              def get(path):
+                  with urllib.request.urlopen('https://www.italianmastersclub.it/'+world+'/clubs/'+path,timeout=90) as r:
+                      assert r.headers.get('X-IMC-Club-Names'),(world,path)
+                      data=json.load(r)
+                      assert data['ok'],(world,path)
+                      return data
+              directory=get('directory.php')
+              assert directory['rows'] and directory['count']==len(directory['rows'])
+              games=get('matches.php?sm_club='+str(club))
+              for season in [None]+list({r['imc_season'] for r in games['results'] if r['imc_season']})[:1]:
+                  query='?sm_club='+str(club)+('&season='+str(season) if season else '')
+                  matches=games if not season else get('matches.php'+query)
+                  stats=get('stats.php'+query)['stats']
+                  seen=set()
+                  totals=dict(played=0,won=0,drawn=0,lost=0,gf=0,ga=0)
+                  for r in matches['results']:
+                      if season:assert int(r['imc_season'])==int(season)
+                      fixture=r['sm_fixture_id']
+                      if r['home_score'] is None or r['away_score'] is None or fixture and fixture in seen:continue
+                      seen.add(fixture)
+                      a,b=int(r['home_score']),int(r['away_score'])
+                      if int(r['home_sm_club_id'])!=club:a,b=b,a
+                      totals['played']+=1;totals['gf']+=a;totals['ga']+=b
+                      totals['won' if a>b else 'lost' if a<b else 'drawn']+=1
+                  assert all(int(stats[k])==v for k,v in totals.items()),(world,stats,totals)
+              print(world,directory['count'],len(games['results']),len(games['schedule']))
+          with ThreadPoolExecutor(3) as pool:list(pool.map(verify,[["roadtohistory",94079073],["halloffamers",96537299],["kickoff",94012702],["sensiblesocceracademy",92317614],["subbuteosuperleague",93399549],["worldleague",21145248],["masterleagueworld",94061920],["scudetto",94703258]]))
+          PY
