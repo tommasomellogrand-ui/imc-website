@@ -358,5 +358,15 @@
       "path": "manager-photos-upload/inbox/busts/matteo-sartori.jpg",
       "sha": "623b6b00b37b0d61c84ee630bc2cacbc49f2ad74"
     }
+  },
+  "max-zanoni": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/max-zanoni.jpg",
+      "sha": "3c8e281b37e6516041f4aa1aa55f7243900d7c20"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/max-zanoni.jpg",
+      "sha": "131e787598c37760d1d46b6c4d195fcc3e4026c7"
+    }
   }
 }
