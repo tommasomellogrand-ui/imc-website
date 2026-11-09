@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate data services
         run: find site-data -name "*.php" -exec php -l {} \;
-      - name: Publish Player Codex rows and verify bytes
+      - name: Publish club services and verify bytes
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
@@ -80,7 +80,7 @@ jobs:
                       if r['home_score'] is None or r['away_score'] is None or fixture and fixture in seen:continue
                       seen.add(fixture)
                       a,b=int(r['home_score']),int(r['away_score'])
-                      if int(r['home_sm_club_id'])!=club:a,b=b,a
+                      if int(r['home_sm_club_id'] or 0)!=club:a,b=b,a
                       totals['played']+=1;totals['gf']+=a;totals['ga']+=b
                       totals['won' if a>b else 'lost' if a<b else 'drawn']+=1
                   assert all(int(stats[k])==v for k,v in totals.items()),(world,stats,totals)
