@@ -55,9 +55,20 @@ jobs:
           base='https://www.italianmastersclub.it/'
           for route in ["roadtohistory/players","halloffamers/playercodex","kickoff/playercodex","sensiblesocceracademy/playercodex","subbuteosuperleague/playercodex","worldleague/playercodex","masterleagueworld/playercodex","scudetto/playercodex"]:
               html=urllib.request.urlopen(base+route+'/?release=${{ github.sha }}',timeout=45).read().decode()
-              assert '/site-assets/js/codex-nationality.js?v=2' in html and 'directory.js?v=flags1' in html,route
+              assert '/site-assets/js/codex-nationality.js?v=3' in html and 'directory.js?v=flags1' in html,route
           css=urllib.request.urlopen(base+'site-assets/css/codex-rows.css?v=1',timeout=45).read().decode()
           assert 'min-height:66px' in css
           for path in ['nexus/assets/flags/nations/1.svg','nexus/assets/flags/nations/4.svg']:
               assert '<svg' in urllib.request.urlopen(base+path,timeout=40).read().decode()
           PY
+      - name: Verify published flag glyphs for reported players
+        run: |
+          curl -fsS 'https://www.italianmastersclub.it/site-assets/js/codex-nationality.js?v=3' > /tmp/codex-flags.cjs
+          node <<'JS'
+          global.window=global;
+          global.document={createElement:()=>({style:{},setAttribute(){},get outerHTML(){return this.textContent;}})};
+          require('/tmp/codex-flags.cjs');
+          for(const [name,want] of Object.entries({'France':'🇫🇷','Burkina Faso':'🇧🇫','Guinea':'🇬🇳','Mali':'🇲🇱','Ivory Coast':'🇨🇮'})){
+            if(codexNationality(name)!==want)throw Error(name);
+          }
+          JS
