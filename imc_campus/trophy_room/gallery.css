@@ -31,3 +31,19 @@ body.trophy-gallery.clubhouse-hub .ch-trophy-title{justify-content:flex-start;pa
  .trophy-gallery main{transform-origin:left center;animation:open-register .32s ease-out}
  @keyframes open-register{from{opacity:.3;transform:perspective(1100px) rotateY(-5deg)}to{opacity:1;transform:none}}
 }
+
+body.trophy-gallery {background:#f7f4ec;color:#252b29}
+body.trophy-gallery main {box-sizing:border-box;width:100%;max-width:none;margin:0;padding:clamp(16px,4vw,64px)}
+.trophy-gallery .gallery-cover h1 {position:absolute;bottom:12%;left:4%;margin:0;color:white;font:700 clamp(32px,5vw,76px)/1 Inter,sans-serif;letter-spacing:-.05em;text-shadow:0 2px 12px #171b18}
+.trophy-gallery .honours-index {margin-block:32px;background:#fffdf8;border-block:2px solid #92734c}
+.trophy-gallery .honours-index>h2 {margin:0;padding:18px;color:#f8f3e6;background:#273732;font-size:18px}
+.honours-chapter {border-bottom:1px solid #d7cebf}
+.honours-chapter summary {display:grid;grid-template-columns:auto 1fr auto auto;gap:clamp(6px,2vw,24px);align-items:center;padding:18px 12px;cursor:pointer;list-style:none}
+.honours-chapter summary::-webkit-details-marker {display:none}
+.honours-chapter summary:after {content:'+';font-size:20px;color:#785e37}
+.honours-chapter[open] summary:after {content:'−'}
+.honours-chapter[open] summary {background:#ebe6d9}
+.chapter-code {font-size:11px;letter-spacing:.05em;color:#695337}
+.honours-chapter summary small {white-space:nowrap}
+.trophy-gallery .honours-chapter .ch-trophy-list {padding:clamp(6px,2vw,24px)}
+@media(min-width:850px){.trophy-gallery .honours-chapter .ch-trophy-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
