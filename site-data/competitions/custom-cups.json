@@ -1,0 +1,164 @@
+[
+  {
+    "competition_key": "GW010_COPA_LIBERTADORES",
+    "nexus_view": "Copa Libertadores",
+    "sm_action": "copa_libertadores",
+    "game_world_id": "GW010",
+    "imc_season": 1,
+    "competition_group": "INTERNATIONAL",
+    "world_type": "SINGLE",
+    "sm_country": null,
+    "sm_division": null,
+    "groups": [
+      {
+        "group_name": "Girone A",
+        "teams": [
+          {
+            "team_id": "92317287",
+            "team_name": "Newell’s Old Boys"
+          },
+          {
+            "team_id": "92317313",
+            "team_name": "Santos FC"
+          },
+          {
+            "team_id": "92317276",
+            "team_name": "Argentinos Juniors"
+          }
+        ]
+      },
+      {
+        "group_name": "Girone B",
+        "teams": [
+          {
+            "team_id": "92317622",
+            "team_name": "Alianza Lima"
+          },
+          {
+            "team_id": "92317603",
+            "team_name": "Grêmio"
+          },
+          {
+            "team_id": "92317614",
+            "team_name": "Club Olimpia"
+          }
+        ]
+      },
+      {
+        "group_name": "Girone C",
+        "teams": [
+          {
+            "team_id": "92317619",
+            "team_name": "Millonarios"
+          },
+          {
+            "team_id": "92317315",
+            "team_name": "São Paulo FC"
+          },
+          {
+            "team_id": "92317371",
+            "team_name": "Colo-Colo"
+          }
+        ]
+      },
+      {
+        "group_name": "Girone D",
+        "teams": [
+          {
+            "team_id": "92318232",
+            "team_name": "Bolívar"
+          },
+          {
+            "team_id": "92317385",
+            "team_name": "Peñarol"
+          },
+          {
+            "team_id": "92317294",
+            "team_name": "Vélez Sársfield"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "competition_key": "GW010_COPPA_DEI_CAMPIONI",
+    "nexus_view": "Coppa dei Campioni",
+    "sm_action": "coppa_dei_campioni",
+    "game_world_id": "GW010",
+    "imc_season": 1,
+    "competition_group": "INTERNATIONAL",
+    "world_type": "SINGLE",
+    "sm_country": null,
+    "sm_division": null,
+    "groups": [
+      {
+        "group_name": "Girone A",
+        "teams": [
+          {
+            "team_id": "92317426",
+            "team_name": "VfB Stuttgart"
+          },
+          {
+            "team_id": "92317429",
+            "team_name": "Aberdeen"
+          },
+          {
+            "team_id": "92317227",
+            "team_name": "SL Benfica"
+          }
+        ]
+      },
+      {
+        "group_name": "Girone B",
+        "teams": [
+          {
+            "team_id": "92317374",
+            "team_name": "Dinamo Zagreb"
+          },
+          {
+            "team_id": "92317105",
+            "team_name": "Atalanta BC"
+          },
+          {
+            "team_id": "92317338",
+            "team_name": "Olympique Lyonnais"
+          }
+        ]
+      },
+      {
+        "group_name": "Girone C",
+        "teams": [
+          {
+            "team_id": "92318410",
+            "team_name": "Ferencvárosi TC"
+          },
+          {
+            "team_id": "92317189",
+            "team_name": "Ajax"
+          },
+          {
+            "team_id": "92317362",
+            "team_name": "RSC Anderlecht"
+          }
+        ]
+      },
+      {
+        "group_name": "Girone D",
+        "teams": [
+          {
+            "team_id": "92317177",
+            "team_name": "Sevilla FC"
+          },
+          {
+            "team_id": "92317094",
+            "team_name": "West Ham United"
+          },
+          {
+            "team_id": "92317475",
+            "team_name": "IFK Göteborg"
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__,2).'/nexus/core/person-display.php';
+require_once dirname(__DIR__,2).'/site-data/core/person-display.php';
 /* IMC master website. Public editorial reads only. No gateway or schema mutation. */
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');

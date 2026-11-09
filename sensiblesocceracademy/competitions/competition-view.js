@@ -11,7 +11,7 @@ let teamDirectory;
 const teamById=new Map(),teamByName=new Map();
 const teamNameKey=v=>String(v||'').trim().toLocaleLowerCase();
 async function loadTeamDirectory(){
- if(!teamDirectory)teamDirectory=fetch('/nexus/teams/directory.php?'+new URLSearchParams({world:gw,type:key.includes('|NATIONS|')?'nations':'clubs'}),{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('directory');return r.json()}).then(j=>{
+ if(!teamDirectory)teamDirectory=fetch('/site-data/teams/directory.php?'+new URLSearchParams({world:gw,type:key.includes('|NATIONS|')?'nations':'clubs'}),{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('directory');return r.json()}).then(j=>{
   for(const t of j.rows||[]){if(t.world_id)teamById.set(String(t.world_id),t);const n=teamNameKey(t.name);if(n)teamByName.set(n,teamByName.has(n)?null:t)}
  }).catch(()=>{teamDirectory=null});
  return teamDirectory;

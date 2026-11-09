@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 // Public, read-only directory. No credentials or private assignment fields returned.
-require dirname(__DIR__, 2).'/nexus/core/bootstrap.php';
+require dirname(__DIR__, 2).'/site-data/core/bootstrap.php';
 try {
-    $db = nexus_db(nexus_config(), 'core');
+    $db = imc_site_db(imc_site_config(), 'core');
     $today = (new DateTimeImmutable('now', new DateTimeZone('Europe/Rome')))->format('Y-m-d');
     $db->beginTransaction();
-    $worlds = nexus_rows($db, 'SELECT `IMC GW` game_world_id, `IMC_WORLD_ID` code, `IMC GW Name` name, `SM Game World ID` sm_game_world_id FROM `IMC Game World Codex Global` WHERE `IMC_WORLD_ID` IS NOT NULL ORDER BY `IMC_WORLD_ID`');
-    $assignments = nexus_rows($db, 'SELECT DISTINCT a.game_world_id, m.manager_id, m.full_name FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id JOIN `IMC Game World Codex Global` w ON w.`IMC GW`=a.game_world_id WHERE w.`IMC_WORLD_ID` IS NOT NULL AND a.start_date<=? AND (a.end_date IS NULL OR a.end_date>=?) ORDER BY m.full_name, a.game_world_id', [$today, $today]);
+    $worlds = imc_site_rows($db, 'SELECT `IMC GW` game_world_id, `IMC_WORLD_ID` code, `IMC GW Name` name, `SM Game World ID` sm_game_world_id FROM `IMC Game World Codex Global` WHERE `IMC_WORLD_ID` IS NOT NULL ORDER BY `IMC_WORLD_ID`');
+    $assignments = imc_site_rows($db, 'SELECT DISTINCT a.game_world_id, m.manager_id, m.full_name FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id JOIN `IMC Game World Codex Global` w ON w.`IMC GW`=a.game_world_id WHERE w.`IMC_WORLD_ID` IS NOT NULL AND a.start_date<=? AND (a.end_date IS NULL OR a.end_date>=?) ORDER BY m.full_name, a.game_world_id', [$today, $today]);
     $db->commit();
     $managers = []; $counts = [];
     foreach ($assignments as $a) {
@@ -21,9 +21,9 @@ try {
         $world['href'] = (['GW001'=>'/roadtohistory/home/','GW005'=>'/halloffamers/home/','GW009'=>'/kickoff/home/','GW010'=>'/sensiblesocceracademy/home/','GW011'=>'/subbuteosuperleague/home/','GW004'=>'/worldleague/home/','GW006'=>'/masterleagueworld/home/','IMC-008'=>'/scudetto/home/'])[$world['game_world_id']];
     }
     unset($world);
-    nexus_out(['ok'=>true, 'worlds'=>$worlds, 'managers'=>array_values($managers), 'as_of'=>$today, 'updated_at'=>gmdate('c')]);
+    imc_site_out(['ok'=>true, 'worlds'=>$worlds, 'managers'=>array_values($managers), 'as_of'=>$today, 'updated_at'=>gmdate('c')]);
 } catch (Throwable $e) {
     error_log('IMC homepage directory: '.$e->getMessage());
-    nexus_out(['ok'=>false, 'error'=>'Community temporaneamente non disponibile.'], 503);
+    imc_site_out(['ok'=>false, 'error'=>'Community temporaneamente non disponibile.'], 503);
 }
 

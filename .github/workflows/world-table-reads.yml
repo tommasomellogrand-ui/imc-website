@@ -1,0 +1,72 @@
+name: Publish world table reads
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/world-table-reads.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: world-table-reads
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate data services
+        run: find site-data -name "*.php" -print0 | xargs -0 -n1 php -l
+      - name: Publish club services and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          files=['site-data/competitions/catalog.php', 'site-data/competitions/custom-cups.json', 'site-data/competitions/custom-cups.php', 'site-data/competitions/groups.php', 'site-data/competitions/match-report.php', 'site-data/competitions/match.php', 'site-data/competitions/overview.php', 'site-data/competitions/results.php', 'site-data/competitions/schedule.php', 'site-data/competitions/standings-engine.php', 'site-data/competitions/standings.php', 'site-data/core/bootstrap.php', 'site-data/h2h/data-room-engine.php', 'site-data/h2h/engine.php', 'site-data/h2h/index.php', 'site-data/h2h/overview-engine.php', 'site-data/managers/index.php', 'site-data/managers/stats.php', 'site-data/matchday/data.php', 'site-data/matchday/engine.php', 'site-data/matchday/identity.php', 'site-data/teams/matches.php', 'site-data/teams/stats.php', 'site-data/trophies/engine.php', 'site-data/trophies/index.php', 'halloffamers/competitions/catalog.php', 'halloffamers/competitions/competition-ui.js', 'halloffamers/competitions/competition-view.js', 'halloffamers/competitions/match-report.php', 'halloffamers/competitions/match.php', 'halloffamers/competitions/results.php', 'halloffamers/competitions/schedule.php', 'halloffamers/competitions/standings.php', 'halloffamers/managers/api.php', 'halloffamers/managers/data-room.js', 'halloffamers/managers/h2h.js', 'halloffamers/managers/history-overview.js', 'halloffamers/managers/manager-profile.js', 'halloffamers/managers/trophy-room.js', 'halloffamers/matchday/data.php', 'halloffamers/nations/detail.js', 'halloffamers/nations/detail.php', 'halloffamers/nations/directory.php', 'halloffamers/nations/matches.php', 'halloffamers/nations/roster.php', 'halloffamers/nations/stats.php', 'halloffamers/trophyroom/data.php', 'halloffamers/trophyroom/trophy-room.js', 'kickoff/competitions/catalog.php', 'kickoff/competitions/competition-ui.js', 'kickoff/competitions/competition-view.js', 'kickoff/competitions/match-report.php', 'kickoff/competitions/match.php', 'kickoff/competitions/results.php', 'kickoff/competitions/schedule.php', 'kickoff/competitions/standings.php', 'kickoff/managers/api.php', 'kickoff/managers/data-room.js', 'kickoff/managers/h2h.js', 'kickoff/managers/history-overview.js', 'kickoff/managers/manager-profile.js', 'kickoff/managers/trophy-room.js', 'kickoff/matchday/data.php', 'kickoff/nations/detail.js', 'kickoff/nations/detail.php', 'kickoff/nations/directory.php', 'kickoff/nations/matches.php', 'kickoff/nations/roster.php', 'kickoff/nations/stats.php', 'kickoff/trophyroom/data.php', 'kickoff/trophyroom/trophy-room.js', 'masterleagueworld/competitions/catalog.php', 'masterleagueworld/competitions/competition-ui.js', 'masterleagueworld/competitions/competition-view.js', 'masterleagueworld/competitions/match-report.php', 'masterleagueworld/competitions/match.php', 'masterleagueworld/competitions/results.php', 'masterleagueworld/competitions/schedule.php', 'masterleagueworld/competitions/standings.php', 'masterleagueworld/managers/api.php', 'masterleagueworld/managers/data-room.js', 'masterleagueworld/managers/h2h.js', 'masterleagueworld/managers/history-overview.js', 'masterleagueworld/managers/manager-profile.js', 'masterleagueworld/managers/trophy-room.js', 'masterleagueworld/matchday/data.php', 'masterleagueworld/nations/detail.js', 'masterleagueworld/nations/detail.php', 'masterleagueworld/nations/directory.php', 'masterleagueworld/nations/matches.php', 'masterleagueworld/nations/roster.php', 'masterleagueworld/nations/stats.php', 'masterleagueworld/trophyroom/data.php', 'masterleagueworld/trophyroom/trophy-room.js', 'roadtohistory/alltoplayfor/context.php', 'roadtohistory/alltoplayfor/diretta-gol/replay/data.php', 'roadtohistory/competitions/catalog.php', 'roadtohistory/competitions/competition-ui.js', 'roadtohistory/competitions/competition-view.js', 'roadtohistory/competitions/match-report.php', 'roadtohistory/competitions/match.php', 'roadtohistory/competitions/progress-engine.php', 'roadtohistory/competitions/results.php', 'roadtohistory/competitions/schedule.php', 'roadtohistory/competitions/standings.php', 'roadtohistory/imc-cups/context.php', 'roadtohistory/managers/api.php', 'roadtohistory/managers/data-room.js', 'roadtohistory/managers/h2h.js', 'roadtohistory/managers/history-overview.js', 'roadtohistory/managers/manager-profile.js', 'roadtohistory/managers/trophy-room.js', 'roadtohistory/managers/world-roster.php', 'roadtohistory/matchday/data.php', 'roadtohistory/nations/detail.js', 'roadtohistory/nations/detail.php', 'roadtohistory/nations/directory.php', 'roadtohistory/nations/matches.php', 'roadtohistory/nations/roster.php', 'roadtohistory/nations/stats.php', 'roadtohistory/trophyroom/data.php', 'roadtohistory/trophyroom/trophy-room.js', 'scudetto/competitions/catalog.php', 'scudetto/competitions/competition-ui.js', 'scudetto/competitions/competition-view.js', 'scudetto/competitions/match-report.php', 'scudetto/competitions/match.php', 'scudetto/competitions/results.php', 'scudetto/competitions/schedule.php', 'scudetto/competitions/standings.php', 'scudetto/managers/api.php', 'scudetto/managers/data-room.js', 'scudetto/managers/divisions.php', 'scudetto/managers/h2h.js', 'scudetto/managers/history-overview.js', 'scudetto/managers/manager-profile.js', 'scudetto/managers/trophy-room.js', 'scudetto/matchday/data.php', 'scudetto/nations/detail.js', 'scudetto/nations/detail.php', 'scudetto/nations/directory.php', 'scudetto/nations/matches.php', 'scudetto/nations/roster.php', 'scudetto/nations/stats.php', 'scudetto/trophyroom/data.php', 'scudetto/trophyroom/trophy-room.js', 'sensiblesocceracademy/competitions/catalog.php', 'sensiblesocceracademy/competitions/competition-ui.js', 'sensiblesocceracademy/competitions/competition-view.js', 'sensiblesocceracademy/competitions/match-report.php', 'sensiblesocceracademy/competitions/match.php', 'sensiblesocceracademy/competitions/results.php', 'sensiblesocceracademy/competitions/schedule.php', 'sensiblesocceracademy/competitions/standings.php', 'sensiblesocceracademy/managers/api.php', 'sensiblesocceracademy/managers/data-room.js', 'sensiblesocceracademy/managers/h2h.js', 'sensiblesocceracademy/managers/history-overview.js', 'sensiblesocceracademy/managers/manager-profile.js', 'sensiblesocceracademy/managers/trophy-room.js', 'sensiblesocceracademy/matchday/data.php', 'sensiblesocceracademy/nations/detail.js', 'sensiblesocceracademy/nations/detail.php', 'sensiblesocceracademy/nations/directory.php', 'sensiblesocceracademy/nations/matches.php', 'sensiblesocceracademy/nations/roster.php', 'sensiblesocceracademy/nations/stats.php', 'sensiblesocceracademy/trophyroom/data.php', 'sensiblesocceracademy/trophyroom/trophy-room.js', 'site-assets/master/api.php', 'site-assets/master/homepage.php', 'site-assets/names/list.php', 'subbuteosuperleague/competitions/catalog.php', 'subbuteosuperleague/competitions/competition-ui.js', 'subbuteosuperleague/competitions/competition-view.js', 'subbuteosuperleague/competitions/match-report.php', 'subbuteosuperleague/competitions/match.php', 'subbuteosuperleague/competitions/results.php', 'subbuteosuperleague/competitions/schedule.php', 'subbuteosuperleague/competitions/standings.php', 'subbuteosuperleague/managers/api.php', 'subbuteosuperleague/managers/data-room.js', 'subbuteosuperleague/managers/h2h.js', 'subbuteosuperleague/managers/history-overview.js', 'subbuteosuperleague/managers/manager-profile.js', 'subbuteosuperleague/managers/trophy-room.js', 'subbuteosuperleague/matchday/data.php', 'subbuteosuperleague/nations/detail.js', 'subbuteosuperleague/nations/detail.php', 'subbuteosuperleague/nations/directory.php', 'subbuteosuperleague/nations/matches.php', 'subbuteosuperleague/nations/roster.php', 'subbuteosuperleague/nations/stats.php', 'subbuteosuperleague/risingstarsleague/club/app.js', 'subbuteosuperleague/trophyroom/data.php', 'subbuteosuperleague/trophyroom/trophy-room.js', 'worldleague/competitions/catalog.php', 'worldleague/competitions/competition-ui.js', 'worldleague/competitions/competition-view.js', 'worldleague/competitions/match-report.php', 'worldleague/competitions/match.php', 'worldleague/competitions/results.php', 'worldleague/competitions/schedule.php', 'worldleague/competitions/standings.php', 'worldleague/managers/api.php', 'worldleague/managers/data-room.js', 'worldleague/managers/h2h.js', 'worldleague/managers/history-overview.js', 'worldleague/managers/manager-profile.js', 'worldleague/managers/trophy-room.js', 'worldleague/matchday/data.php', 'worldleague/nations/detail.js', 'worldleague/nations/detail.php', 'worldleague/nations/directory.php', 'worldleague/nations/matches.php', 'worldleague/nations/roster.php', 'worldleague/nations/stats.php', 'worldleague/trophyroom/data.php', 'worldleague/trophyroom/trophy-room.js']
+          root='/www.italianmastersclub.it'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          for name in files:
+              p=Path(name)
+              data=p.read_bytes()
+              assert data, str(p)
+              directory(root+'/'+str(Path(name).parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+name
+          ftp.quit()
+          PY
+
+      - name: Verify public feeds for every world
+        run: |
+          python3 - <<'PYTEST'
+          import json, urllib.request
+          from concurrent.futures import ThreadPoolExecutor
+          worlds=['roadtohistory','halloffamers','kickoff','sensiblesocceracademy','subbuteosuperleague','worldleague','masterleagueworld','scudetto']
+          def verify(item):
+              w,gw=item
+              base='https://www.italianmastersclub.it/'
+              paths=[w+'/competitions/catalog.php',w+'/matchday/data.php',w+'/matchday/data.php?mode=schedule',w+'/nations/directory.php',w+'/trophyroom/data.php','site-data/managers/index.php?world='+gw]
+              for mode in ('overview','data-room','h2h'):
+                  paths.append('site-data/h2h/index.php?world='+gw+'&kind=manager&id=MNG001&scope=club&mode='+mode)
+              for path in paths:
+                  with urllib.request.urlopen(base+path,timeout=120) as r:
+                      data=json.load(r)
+                      assert data.get('ok'),(path,data.get('error'))
+                      assert r.headers.get('X-IMC-Club-Names'),path
+              print(w,len(paths),'verified',flush=True)
+          with ThreadPoolExecutor(4) as pool:list(pool.map(verify,zip(worlds,['GW001','GW005','GW009','GW010','GW011','GW004','GW006','IMC-008'])))
+          PYTEST

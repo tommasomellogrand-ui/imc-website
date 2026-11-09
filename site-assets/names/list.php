@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
-require dirname(__DIR__,2).'/nexus/core/bootstrap.php';
+require dirname(__DIR__,2).'/site-data/core/bootstrap.php';
 header('Content-Type: application/json; charset=utf-8');
 try {
- $cfg=nexus_config();
- $core=nexus_db($cfg,'core');
- $world=nexus_db($cfg,'custom');
+ $cfg=imc_site_config();
+ $core=imc_site_db($cfg,'core');
+ $world=imc_site_db($cfg,'custom');
  $select=[];
  for($i=1;$i<=8;$i++) $select[]=sprintf("SELECT full_name FROM IMC%03d_Player_Codex WHERE full_name IS NOT NULL",$i);
  $names=$world->query(implode(' UNION ',$select))->fetchAll(PDO::FETCH_COLUMN);

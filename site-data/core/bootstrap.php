@@ -48,7 +48,17 @@ function imc_site_season(mixed $value): ?int {
   return (int)$value;
 }
 function imc_site_table(string $world,string $repository):string {
- $suffix=['Schedule'=>'Schedule','Results'=>'Results','Player_Codex'=>'Player_Codex','Transfers'=>'Transfers','Match_Report'=>'Match_Reports'];
+ $suffix=['Trophy_Room'=>'Trophy_Room','Schedule'=>'Schedule','Results'=>'Results','Player_Codex'=>'Player_Codex','Transfers'=>'Transfers','Match_Report'=>'Match_Reports'];
  if(!isset($suffix[$repository]))throw new InvalidArgumentException('invalid_repository');
  return SITE_WORLD_TABLES[imc_site_world($world)].'_'.$suffix[$repository];
 }
+
+function imc_site_rth_competition_key(string $key): string {
+    $slugs=['CHAMPIONS_LEAGUE'=>'championsleague','EUROPA_LEAGUE'=>'europaleague','CONFERENCE_LEAGUE'=>'conferenceleague','CLUB_WORLD_CUP'=>'clubworldcup'];
+    foreach($slugs as $old=>$slug) {
+        if(in_array($key,['GW001_IMC_'.$old,'IMC001_IMC_'.$old,'IMC-001_IMC_'.$old,'GW001|IMC|'.$slug,'IMC-001|IMC|'.$slug,'IMC001|IMC|'.$slug],true))return 'IMC001|IMC|'.$slug;
+    }
+    return $key;
+}
+
+if(isset($_GET['competition'])&&is_string($_GET['competition']))$_GET['competition']=imc_site_rth_competition_key($_GET['competition']);

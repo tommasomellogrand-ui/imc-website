@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require dirname(__DIR__,2).'/nexus/core/bootstrap.php';
+require dirname(__DIR__,2).'/site-data/core/bootstrap.php';
 function cupPhase(array $r): array {
  $stage=trim((string)$r['competition_stage']);$round=trim((string)$r['competition_round']);
  $text=trim($stage.' '.$round);$leg='';
@@ -22,9 +22,9 @@ function phaseSequence(array $fixtures):array {
 
 try {
  $prefix=['GW001'=>'IMC001','GW005'=>'IMC002','GW009'=>'IMC003','GW010'=>'IMC004','GW011'=>'IMC005','GW004'=>'IMC006','GW006'=>'IMC007','IMC-008'=>'IMC008'][$gw];
- $db=nexus_db(nexus_config(),'custom');
- $seasons=array_column(nexus_rows($db,"SELECT imc_season FROM `{$prefix}_Results` UNION SELECT imc_season FROM `{$prefix}_Schedule` ORDER BY imc_season"),'imc_season');
- $season=nexus_season($_GET['season']??null)?:(int)max($seasons?:[1]);
+ $db=imc_site_db(imc_site_config(),'custom');
+ $seasons=array_column(imc_site_rows($db,"SELECT imc_season FROM `{$prefix}_Results` UNION SELECT imc_season FROM `{$prefix}_Schedule` ORDER BY imc_season"),'imc_season');
+ $season=imc_site_season($_GET['season']??null)?:(int)max($seasons?:[1]);
  $uiKey=static fn($key)=>preg_replace('/^[^|]+(?=\|)/',$gw,(string)$key);
  $rows=[];$awards=[];
  $groups=[];$history=[];
@@ -34,7 +34,7 @@ try {
   $groupColumn=$repository==='Results'?'competition_group_name':'NULL AS competition_group_name';
   $scores=$repository==='Results'?'home_score,away_score,aggregate_home_score,aggregate_away_score,penalty_home_score,penalty_away_score':'NULL home_score,NULL away_score';
   $sql="SELECT {$scores}, imc_season,competition_key,sm_action,sm_division,sm_country,competition_group,sm_fixture_id,competition_round,competition_stage,{$groupColumn},match_date,home_sm_{$idType}_id h,away_sm_{$idType}_id a,home_name,away_name FROM `$table` WHERE imc_season IN (?,?) $score ORDER BY match_date,sm_fixture_id";
-  foreach(nexus_rows($db,$sql,[$season,max(0,$season-1)]) as $r){
+  foreach(imc_site_rows($db,$sql,[$season,max(0,$season-1)]) as $r){
    $r['competition_key']=$uiKey($r['competition_key']);
    $r['played']=$repository==='Results';
    $id=$r['sm_fixture_id']?:($r['match_date'].'|'.$r['home_name'].'|'.$r['away_name']);
@@ -43,11 +43,11 @@ try {
   }
  }
  $clubLogos=[];
- foreach(nexus_rows($db,"SELECT sm_world_club_id,sm_club_id FROM IMC_Game_World_Club_Mapping WHERE game_world_id IN (?,?)",[$gw,$prefix]) as $club){
+ foreach(imc_site_rows($db,"SELECT sm_world_club_id,sm_club_id FROM IMC_Game_World_Club_Mapping WHERE game_world_id IN (?,?)",[$gw,$prefix]) as $club){
   if((int)$club['sm_club_id']>0)$clubLogos[$club['sm_world_club_id']]='https://cdn.soccerwiki.org/images/logos/clubs/'.(int)$club['sm_club_id'].'.png';
  }
  $nameLogos=[];
- foreach(nexus_rows($db,"SELECT LOWER(TRIM(club_name)) name,MIN(sm_club_id) club_id FROM IMC_Game_World_Club_Mapping WHERE sm_club_id>0 GROUP BY LOWER(TRIM(club_name)) HAVING COUNT(DISTINCT sm_club_id)=1") as $club)$nameLogos[$club['name']]='https://cdn.soccerwiki.org/images/logos/clubs/'.$club['club_id'].'.png';
+ foreach(imc_site_rows($db,"SELECT LOWER(TRIM(club_name)) name,MIN(sm_club_id) club_id FROM IMC_Game_World_Club_Mapping WHERE sm_club_id>0 GROUP BY LOWER(TRIM(club_name)) HAVING COUNT(DISTINCT sm_club_id)=1") as $club)$nameLogos[$club['name']]='https://cdn.soccerwiki.org/images/logos/clubs/'.$club['club_id'].'.png';
  $crestAssets=json_decode(file_get_contents(__DIR__.'/crest-assets.json'),true);
  $out=[];$finalAwards=[];
  foreach($groups as $key=>$fixtures){
@@ -149,11 +149,11 @@ try {
   }
 
  }
- $awards=nexus_rows($db,"SELECT t.winner_sm_world_club_id team,t.won_date day,t.competition_group,t.competition_key,t.winner_name,t.nexus_view,cm.sm_club_id logo_id,CASE WHEN BINARY t.winner_name=BINARY m.home_name THEN m.home_manager_name WHEN BINARY t.winner_name=BINARY m.away_name THEN m.away_manager_name END winner_manager_name FROM {$prefix}_Trophy_Room t LEFT JOIN {$prefix}_Match_Reports m ON m.sm_fixture_id=BINARY t.deciding_fixture_id AND m.imc_season=t.imc_season AND BINARY m.competition_key=BINARY t.competition_key LEFT JOIN IMC_Game_World_Club_Mapping cm ON cm.game_world_id=? AND cm.sm_world_club_id=BINARY t.winner_sm_world_club_id AND t.competition_group<>'NATIONS' WHERE t.imc_season=?",[$gw,$season]);
+ $awards=imc_site_rows($db,"SELECT t.winner_sm_world_club_id team,t.won_date day,t.competition_group,t.competition_key,t.winner_name,t.nexus_view,cm.sm_club_id logo_id,CASE WHEN BINARY t.winner_name=BINARY m.home_name THEN m.home_manager_name WHEN BINARY t.winner_name=BINARY m.away_name THEN m.away_manager_name END winner_manager_name FROM {$prefix}_Trophy_Room t LEFT JOIN {$prefix}_Match_Reports m ON m.sm_fixture_id=BINARY t.deciding_fixture_id AND m.imc_season=t.imc_season AND BINARY m.competition_key=BINARY t.competition_key LEFT JOIN IMC_Game_World_Club_Mapping cm ON cm.game_world_id=? AND cm.sm_world_club_id=BINARY t.winner_sm_world_club_id AND t.competition_group<>'NATIONS' WHERE t.imc_season=?",[$gw,$season]);
  $byKey=[];foreach($awards as $award){if((int)$award['logo_id']>0)$award['winner_logo_url']='https://cdn.soccerwiki.org/images/logos/clubs/'.(int)$award['logo_id'].'.png';$byKey[$uiKey($award['competition_key'])]=$award;}
  $byKey+=$finalAwards;
- $core=nexus_db(nexus_config(),'core');
- $managers=nexus_rows($core,'SELECT a.assignment_type,a.team_id,a.national_team_id,a.start_date,a.end_date,m.manager_id,m.full_name,m.face_image_url FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id WHERE a.game_world_id=?',[$gw]);
+ $core=imc_site_db(imc_site_config(),'core');
+ $managers=imc_site_rows($core,'SELECT a.assignment_type,a.team_id,a.national_team_id,a.start_date,a.end_date,m.manager_id,m.full_name,m.face_image_url FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id WHERE a.game_world_id=?',[$gw]);
  foreach($byKey as &$award){
   $kind=$award['kind']??(($award['competition_group']??'')==='NATIONS'?'national_team':'club');
   $matches=[];
@@ -169,4 +169,4 @@ try {
  usort($rows,fn($a,$b)=>[(int)$a['sm_division'],$a['nexus_view']]<=>[(int)$b['sm_division'],$b['nexus_view']]);
  header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');
  echo json_encode(['ok'=>true,'progress'=>$out,'rows'=>$rows,'awards'=>$byKey,'season'=>$season,'seasons'=>$seasons],JSON_INVALID_UTF8_SUBSTITUTE|JSON_UNESCAPED_UNICODE);
-}catch(Throwable $e){error_log('Competition progress: '.$e->getMessage());nexus_out(['ok'=>false,'error'=>'progress_unavailable'],503);}
+}catch(Throwable $e){error_log('Competition progress: '.$e->getMessage());imc_site_out(['ok'=>false,'error'=>'progress_unavailable'],503);}

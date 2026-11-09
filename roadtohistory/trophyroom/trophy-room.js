@@ -4,7 +4,7 @@ window.NexusTrophies={
   const root=document.createElement('section');root.className='trophy-page trophy-embedded';
   root.innerHTML='<input data-trophy="search" type="search" aria-label="Cerca squadra, manager o trofeo" placeholder="Cerca squadra, manager o trofeo…"><p data-trophy="directory-note" class="trophy-note"></p><div data-trophy="directory-list" class="trophy-grid" aria-live="polite"></div>';
   container.replaceChildren(root);
-  return this.render(rows,gw,{root,base:'/nexus/',competitions});
+  return this.render(rows,gw,{root,base:'/site-data/',competitions});
  },
  async render(rows,gw,options={}){
  const root=options.root||document,base=options.base||'';

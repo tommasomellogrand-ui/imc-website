@@ -1,0 +1,33 @@
+<?php
+declare(strict_types=1);
+require dirname(__DIR__).'/core/bootstrap.php';
+require __DIR__.'/match-teams.php';
+require dirname(__DIR__).'/teams/roster-stats.php';
+require dirname(__DIR__).'/players/media.php';
+try {
+ $c=imc_site_config();$gw=imc_site_world($_GET['world']??'');$fixture=filter_var($_GET['fixture']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ if(!$fixture)throw new InvalidArgumentException('invalid_fixture');
+ $db=imc_site_db($c,imc_site_target($c,$gw));$core=imc_site_db($c,'core');
+ // The world and fixture ID are the complete join key. Never match by team names or dates.
+ $rows=imc_site_rows($db,'SELECT game_world_id,imc_season,sm_fixture_id,competition_key,competition_stage,competition_round,competition_group_name,match_date,home_sm_club_id,away_sm_club_id,home_name,away_name,home_sm_manager_id,away_sm_manager_id,home_score,away_score,penalty_home_score,penalty_away_score,aggregate_home_score,aggregate_away_score FROM `'.imc_site_table($gw,'Results').'` WHERE game_world_id=? AND sm_fixture_id=? LIMIT 1',[$gw,$fixture]);
+ if(!$rows)imc_site_out(['ok'=>false,'error'=>'match_not_found'],404);
+ $match=$rows[0];
+ $reports=imc_site_rows($db,'SELECT sm_fixture_id,home_score,away_score,home_sm_club_id,away_sm_club_id,home_manager_name,away_manager_name,stadium_name,attendance,players_json,team_stats_json,commentary_json FROM `'.imc_site_table($gw,'Match_Report').'` WHERE game_world_id=? AND sm_fixture_id=? LIMIT 1',[$gw,$fixture]);
+ $report=$reports[0]??null;$players=[];$teamStats=[];
+ if($report){
+  $entries=json_decode((string)$report['players_json'],true);$seen=[];
+  if(is_array($entries)&&array_is_list($entries))foreach($entries as $p){if(!is_array($p)||!in_array($p['team_side']??'',['home','away'],true))continue;$id=(int)($p['sm_player_id']??0);$key=$p['team_side'].'|'.$id;if($id>0&&isset($seen[$key]))continue;$seen[$key]=true;$players[]=$p;}
+  foreach(['home','away'] as $side){$roster=[];foreach($players as $p)if($p['team_side']===$side)$roster[]=['player_id'=>$p['sm_player_id']??0];$stats=imc_site_roster_stats($roster,[$report],(int)$report[$side.'_sm_club_id']);$byId=[];foreach($stats['rows'] as $s)$byId[(int)$s['player_id']]=$s;foreach($players as &$p)if($p['team_side']===$side)$p['minutes']=$byId[(int)($p['sm_player_id']??0)]['minutes']??null;unset($p);}
+  $decoded=json_decode((string)$report['team_stats_json'],true);if(is_array($decoded))$teamStats=$decoded;
+  foreach(['home_manager_name','away_manager_name','stadium_name','attendance'] as $field)$match[$field]=$report[$field];
+ }
+ // One batch for identity photos; image availability never blocks the match report.
+ $identities=[];
+ try{$identities=imc_site_player_identity($core,array_column($players,'sm_player_id'));}catch(Throwable $e){}
+ foreach($players as &$p){$id=(int)($p['sm_player_id']??0);$identity=$identities[$id]??[];$p['image_urls']=imc_site_player_images($id,$identity);$fullName=trim((string)($identity['forename']??'').' '.(string)($identity['surname']??''));$p['display_name']=$fullName!==''?$fullName:(trim((string)($identity['full_name']??''))?:($p['player_name']??''));}unset($p);
+ $match=imc_site_enrich_match_teams($core,$gw,[$match])[0];
+ $names=imc_site_rows($core,'SELECT nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND competition_key=? LIMIT 1',[$gw,$match['competition_key']]);
+ $match['competition_name']=$names[0]['nexus_view']??$match['competition_key'];
+ imc_site_out(['ok'=>true,'world'=>$gw,'match'=>$match,'report_available'=>$report!==null,'players'=>$players,'team_stats'=>$teamStats,'generated_at'=>gmdate('c')]);
+}catch(InvalidArgumentException $e){imc_site_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){imc_site_out(['ok'=>false,'error'=>'match_detail_error'],500);}
+

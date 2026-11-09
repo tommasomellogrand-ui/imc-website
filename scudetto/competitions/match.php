@@ -1,5 +1,5 @@
 <?php
 declare(strict_types=1);
 $_GET['world'] = 'IMC-008';
-require dirname(__DIR__, 2) . '/nexus/competitions/match.php';
+require dirname(__DIR__, 2) . '/site-data/competitions/match.php';
 
