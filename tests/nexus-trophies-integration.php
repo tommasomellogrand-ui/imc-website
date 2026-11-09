@@ -71,6 +71,12 @@ for($i=1;$i<=10;$i++) {
     $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$gw'");
     trophy_sync($config,$db,$gw);
     check(nexus_rows($db,'SELECT * FROM '.$gw.'_IMC_Trophy_Room WHERE imc_season=2')===$official,$gw.' current Honours not deleted');
+    // Reproduce a just-committed, decisive Super Cup result without a Match Report.
+    $db->prepare("INSERT INTO ".$gw."_IMC_Results (game_world_id,imc_season,competition_key,sm_action,competition_group,competition_stage,sm_fixture_id,home_sm_club_id,away_sm_club_id,home_name,away_name,home_score,away_score,match_date,result_status) VALUES (?,2,?,'supercup','INTERNATIONAL','Finale',310099463,94014771,94010151,'SSD Casarano Calcio','FC Famalicão',3,2,'2020-11-07','COMPLETED')")
+        ->execute([$gw,$gw.'|INTERNATIONAL|supercup']);
+    $sync=trophy_sync($config,$db,$gw,false,true);
+    check($sync['changes']['inserted']===1,$gw.' final awards immediately after import');
+    check($db->query("SELECT winner_name FROM ".$gw."_IMC_Trophy_Room WHERE deciding_fixture_id=310099463")->fetchColumn()==='SSD Casarano Calcio',$gw.' Super Cup belongs to winning team');
     $db->prepare('DELETE FROM IMC_Game_World_Season WHERE game_world_id=?')->execute([$gw]);
     $preview=trophy_sync($config,$db,$gw,true);
     check($preview['state']==='current_season_unavailable',$gw.' missing local mapping never falls back to CORE');
