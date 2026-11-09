@@ -23,7 +23,7 @@ jobs:
           php -l sensiblesocceracademy/playercodex/daily.php
           node --check sensiblesocceracademy/playercodex/directory.js
           node --check site-assets/js/daily-player-import.js
-      - name: Publish transfer rows and verify bytes
+      - name: Publish daily updates and verify bytes
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
@@ -32,7 +32,7 @@ jobs:
           import io, os, ssl, secrets, hashlib, time, urllib.request, json
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
-          files=["imc-universal-gateway/daily-player.php","site-assets/js/daily-player-import.js","sensiblesocceracademy/playercodex/index.html","sensiblesocceracademy/playercodex/directory.js","sensiblesocceracademy/playercodex/daily.php"]
+          files=["imc-universal-gateway/daily-player.php","roadtohistory/players/index.html","roadtohistory/players/directory.js","roadtohistory/players/daily.php","halloffamers/playercodex/index.html","halloffamers/playercodex/directory.js","halloffamers/playercodex/daily.php","kickoff/playercodex/index.html","kickoff/playercodex/directory.js","kickoff/playercodex/daily.php","subbuteosuperleague/playercodex/index.html","subbuteosuperleague/playercodex/directory.js","subbuteosuperleague/playercodex/daily.php","worldleague/playercodex/index.html","worldleague/playercodex/directory.js","worldleague/playercodex/daily.php","masterleagueworld/playercodex/index.html","masterleagueworld/playercodex/directory.js","masterleagueworld/playercodex/daily.php","scudetto/playercodex/index.html","scudetto/playercodex/directory.js","scudetto/playercodex/daily.php","site-assets/js/daily-player-import.js","sensiblesocceracademy/playercodex/daily.php","sensiblesocceracademy/playercodex/directory.js","sensiblesocceracademy/playercodex/index.html"]
           root='/www.italianmastersclub.it'
           ctx=ssl.create_default_context()
           ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
@@ -54,4 +54,16 @@ jobs:
               check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
               assert check.getvalue()==data,'Byte verification failed: '+name
           ftp.quit()
+          PY
+      - name: Check daily tabs on all eight public directories
+        run: |
+          python3 - <<'PY'
+          import urllib.request,json
+          for route in ["roadtohistory/players","halloffamers/playercodex","kickoff/playercodex","sensiblesocceracademy/playercodex","subbuteosuperleague/playercodex","worldleague/playercodex","masterleagueworld/playercodex","scudetto/playercodex"]:
+              url='https://www.italianmastersclub.it/'+route+'/'
+              html=urllib.request.urlopen(url+'?tab=new&release=${{ github.sha }}',timeout=60).read().decode()
+              assert 'Nuovi giocatori in DB' in html and '?tab=changes' in html, route
+              for tab in ['changes','new']:
+                  data=json.load(urllib.request.urlopen(url+'daily.php?day=2026-11-09&tab='+tab,timeout=60))
+                  assert data['ok'] and len(data['rows'])==({'changes':41,'new':18}[tab]),(route,tab)
           PY

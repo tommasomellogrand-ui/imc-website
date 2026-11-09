@@ -46,13 +46,16 @@ try {
  $quoted=array_map(fn($f)=>chr(96).$f.chr(96),$common);
  $values=array_map(fn($f)=>$row[$f],$common);
  $world->beginTransaction();
- $lookup=$world->prepare('SELECT player_id FROM IMC004_Player_Codex WHERE player_id=? FOR UPDATE');
+ foreach(range(1,8) as $worldNumber){
+  $codex=sprintf('IMC%03d_Player_Codex',$worldNumber);
+ $lookup=$world->prepare('SELECT player_id FROM '.$codex.' WHERE player_id=? FOR UPDATE');
  $lookup->execute([$row['player_id']]);
  if($lookup->fetchColumn()!==false){
   $set=implode(',',array_map(fn($f)=>$f.'=?',$quoted));
-  $world->prepare('UPDATE IMC004_Player_Codex SET '.$set.' WHERE player_id=?')->execute([...$values,$row['player_id']]);
+  $world->prepare('UPDATE '.$codex.' SET '.$set.' WHERE player_id=?')->execute([...$values,$row['player_id']]);
  }else{
-  $world->prepare('INSERT INTO IMC004_Player_Codex (player_id,'.implode(',',$quoted).',transfer_history) VALUES ('.implode(',',array_fill(0,count($values)+1,'?')).',JSON_ARRAY())')->execute([$row['player_id'],...$values]);
+  $world->prepare('INSERT INTO '.$codex.' (player_id,'.implode(',',$quoted).',transfer_history) VALUES ('.implode(',',array_fill(0,count($values)+1,'?')).',JSON_ARRAY())')->execute([$row['player_id'],...$values]);
+ }
  }
  $world->commit();daily_reply(['ok'=>true,'state'=>$same?'Invariato':'Salvato','player_id'=>(int)$row['player_id']]);
-}catch(Throwable $e){if(isset($db)&&$db->inTransaction())$db->rollBack();error_log('IMC Daily: '.$e->getMessage());daily_reply(['ok'=>false,'error'=>'Scrittura o verifica Daily Updates fallita'],500);}
+}catch(Throwable $e){if(isset($world)&&$world->inTransaction())$world->rollBack();if(isset($db)&&$db->inTransaction())$db->rollBack();error_log('IMC Daily: '.$e->getMessage());daily_reply(['ok'=>false,'error'=>'Scrittura o verifica Daily Updates fallita'],500);}
