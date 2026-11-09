@@ -1,0 +1,63 @@
+name: Publish Player Codex flags
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site-assets/js/codex-nationality.js'
+      - '.github/workflows/codex-nationality.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: codex-nationality
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish Player Codex rows and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          files=["site-assets/js/codex-nationality.js","roadtohistory/players/directory.js","roadtohistory/players/index.html","halloffamers/playercodex/directory.js","halloffamers/playercodex/index.html","kickoff/playercodex/directory.js","kickoff/playercodex/index.html","sensiblesocceracademy/playercodex/directory.js","sensiblesocceracademy/playercodex/index.html","subbuteosuperleague/playercodex/directory.js","subbuteosuperleague/playercodex/index.html","worldleague/playercodex/directory.js","worldleague/playercodex/index.html","masterleagueworld/playercodex/directory.js","masterleagueworld/playercodex/index.html","scudetto/playercodex/directory.js","scudetto/playercodex/index.html"]
+          root='/www.italianmastersclub.it'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          for name in files:
+              p=Path(name)
+              data=p.read_bytes()
+              assert data, str(p)
+              directory(root+'/'+str(Path(name).parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+name
+          ftp.quit()
+          PY
+      - name: Verify live Codex layout
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          base='https://www.italianmastersclub.it/'
+          for route in ["roadtohistory/players","halloffamers/playercodex","kickoff/playercodex","sensiblesocceracademy/playercodex","subbuteosuperleague/playercodex","worldleague/playercodex","masterleagueworld/playercodex","scudetto/playercodex"]:
+              html=urllib.request.urlopen(base+route+'/?release=${{ github.sha }}',timeout=45).read().decode()
+              assert '/site-assets/js/codex-nationality.js?v=1' in html and 'directory.js?v=flags1' in html,route
+          css=urllib.request.urlopen(base+'site-assets/css/codex-rows.css?v=1',timeout=45).read().decode()
+          assert 'min-height:66px' in css
+          for path in ['nexus/assets/flags/nations/1.svg','nexus/assets/flags/nations/4.svg']:
+              assert '<svg' in urllib.request.urlopen(base+path,timeout=40).read().decode()
+          PY
