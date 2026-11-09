@@ -144,7 +144,9 @@ function imc_ingress_run(array $body): never {
         if ($action === 'read') imc_ingress_out($base + imc_ingress_read($pdo, $route['table'], $route['game_world_id'], $body));
         $rows = $body['rows'] ?? $body['items'] ?? null;
         if (!is_array($rows)) throw new InvalidArgumentException('rows_required');
-        imc_ingress_out($base + imc_ingress_insert_many($pdo, $route['table'], $route['game_world_id'], $rows, ($body['atomic'] ?? true) !== false));
+        $written = imc_ingress_insert_many($pdo, $route['table'], $route['game_world_id'], $rows, ($body['atomic'] ?? true) !== false);
+        $refresh = imc_after_results_import($pdo, $route['table'], $route['game_world_id'], $rows);
+        imc_ingress_out($base + $written + $refresh);
     } catch (Throwable $e) {
         $status = $e instanceof InvalidArgumentException ? 422 : 500;
         imc_ingress_out(['ok' => false, 'mode' => 'INGRESS_ONLY', 'error' => $e->getMessage()], $status);

@@ -156,6 +156,23 @@ function imc_competition_catalog(array $cfg, array $body): array {
     return ['ok'=>true,'action'=>'list_imc_competitions','source'=>'core','game_world_id'=>$compact,'competitions'=>$rows];
 }
 
+function imc_after_results_import(PDO $db,string $table,string $world,array $rows): array {
+    if (!preg_match('/_Results$/D', $table)) return [];
+    try {
+        require_once dirname(__DIR__).'/nexus/trophies/sync.php';
+        foreach ($rows as $row) {
+            if (!isset($row['home_score'], $row['away_score']) || !trophy_final($row)) continue;
+            require_once dirname(__DIR__).'/nexus/core/bootstrap.php';
+            $sync = trophy_sync(nexus_config(), $db, $world, false, true);
+            return ['trophy_sync' => $sync['state']];
+        }
+    } catch (Throwable $e) {
+        error_log('Trophy refresh after Results import: '.$world.' '.$e->getMessage());
+        return ['trophy_sync' => 'pending_retry'];
+    }
+    return [];
+}
+
 function imc_run():never{try{$c=imc_cfg();if(($_SERVER['REQUEST_METHOD']??'')!=='POST')imc_out(['ok'=>false,'error'=>'method_not_allowed'],405);$b=json_decode(file_get_contents('php://input')?:'',true,64,JSON_THROW_ON_ERROR);if(!is_array($b))throw new InvalidArgumentException('invalid_payload');$a=strtolower(trim((string)($b['action']??'health')));$ch=strtoupper((string)($b['channel']??($_SERVER['HTTP_X_IMC_CHANNEL']??'CHATGPT')));if(!in_array($ch,['IMPORT','CHATGPT'],true))throw new InvalidArgumentException('invalid_channel');$repository=trim((string)($b['repository']??''));$tokenlessImport=in_array($repository,['IMC Results','IMC SM Player Stats','IMC Schedule','IMC_Game_World_Season'],true)||($repository==='IMC Transfer'&&in_array($a,['read','insert_many'],true))||($repository==='IMC Match Report'&&in_array($a,['read','insert_many'],true))||($repository==='IMC Player Codex'&&in_array($a,['read','insert_many'],true));if($a==='list_imc_competitions'&&$ch==='IMPORT')imc_out(imc_competition_catalog($c,$b));if($a==='list_imc_worlds'&&$ch==='IMPORT'){
 $rows=[];$seen=[];
 foreach(imc_world_catalog($c) as $w){

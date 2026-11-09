@@ -4,10 +4,10 @@ require_once __DIR__.'/engine.php';
 
 const TROPHY_SYNC_VERSION = TROPHY_ENGINE_VERSION.'.h3';
 
-function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false): array {
+function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $completedImport=false): array {
     $gw=nexus_world($gw);
     $lock='imc_trophies_'.$gw;
-    $q=$db->prepare('SELECT GET_LOCK(?,0)');$q->execute([$lock]);
+    $q=$db->prepare('SELECT GET_LOCK(?,'.($completedImport ? '10' : '0').')');$q->execute([$lock]);
     if ((int)$q->fetchColumn()!==1) return ['state'=>'busy'];
     try {
         $state=nexus_rows($db,'SELECT * FROM IMC_Trophy_Sync_State WHERE game_world_id=?',[$gw])[0]??null;
@@ -16,7 +16,7 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false): arra
         if (!$preview) {
             if (!(int)$state['enabled']) return ['state'=>'disabled'];
             if ($state['revision']===$state['processed_revision'] && $state['engine_version']===TROPHY_SYNC_VERSION && substr((string)$state['checked_at'],0,10)===$today) return ['state'=>'current','version'=>TROPHY_SYNC_VERSION];
-            if ((int)$db->query("SELECT TIMESTAMPDIFF(SECOND,touched_at,NOW()) FROM IMC_Trophy_Sync_State WHERE game_world_id=".$db->quote($gw))->fetchColumn()<30) return ['state'=>'waiting_for_import'];
+            if (!$completedImport && (int)$db->query("SELECT TIMESTAMPDIFF(SECOND,touched_at,NOW()) FROM IMC_Trophy_Sync_State WHERE game_world_id=".$db->quote($gw))->fetchColumn()<30) return ['state'=>'waiting_for_import'];
         }
         // Historical Trophy Room rows are authoritative, regardless of their source.
         // Only an explicitly active season from the local mapping can enable automatic reconciliation.
