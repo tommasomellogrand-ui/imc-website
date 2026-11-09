@@ -156,8 +156,8 @@ function imc_competition_catalog(array $cfg, array $body): array {
     return ['ok'=>true,'action'=>'list_imc_competitions','source'=>'core','game_world_id'=>$compact,'competitions'=>$rows];
 }
 
-function imc_after_results_import(PDO $db,string $table,string $world,array $rows): array {
-    if (!preg_match('/_Results$/D', $table)) return [];
+function imc_after_results_import(PDO $db,string $table,?string $world,array $rows): array {
+    if ($world === null || !preg_match('/_Results$/D', $table)) return [];
     try {
         require_once dirname(__DIR__).'/nexus/trophies/sync.php';
         foreach ($rows as $row) {
