@@ -58,7 +58,7 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
         }
         $summary=['state'=>'synced','version'=>TROPHY_SYNC_VERSION,'current_season'=>$currentSeason,'historical_preserved'=>count(array_filter($before,fn($r)=>(int)($r['imc_season']??0)<$currentSeason)),'awards'=>count($wanted),'changes'=>$changes,'pending'=>$derived['pending'],'unassigned_source_rows'=>$derived['unassigned_source_rows']];
         if (array_sum($changes)>0) $db->prepare('INSERT INTO IMC_Trophy_Sync_Log (game_world_id,engine_version,source_revision,before_json,summary_json) VALUES (?,?,?,?,?)')->execute([$gw,TROPHY_SYNC_VERSION,$state['revision'],json_encode($before,JSON_UNESCAPED_UNICODE),json_encode($summary,JSON_UNESCAPED_UNICODE)]);
-        $db->prepare('UPDATE IMC_Trophy_Sync_State SET processed_revision=?,engine_version=?,checked_at=NOW(),last_summary=? WHERE game_world_id=?')->execute([$state['revision'],TROPHY_SYNC_VERSION,json_encode($summary,JSON_UNESCAPED_UNICODE),$gw]);
+        $db->prepare('UPDATE IMC_Trophy_Sync_State SET processed_revision=?,engine_version=?,checked_at=?,last_summary=? WHERE game_world_id=?')->execute([$state['revision'],TROPHY_SYNC_VERSION,(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d H:i:s'),json_encode($summary,JSON_UNESCAPED_UNICODE),$gw]);
         $db->commit();return $summary;
     } catch (Throwable $e) {
         if ($db->inTransaction())$db->rollBack();
