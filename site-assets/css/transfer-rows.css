@@ -1,0 +1,13 @@
+.transfer-grid { gap: 5px; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.transfer-grid .nc-transfer { display:grid; grid-template-columns:36px minmax(0,1fr); align-items:center; gap:9px; min-height:66px; padding:6px 10px; }
+.nc-transfer .nc-photo { width:36px; height:36px; min-height:0; border:0; }
+.nc-transfer .nc-photo-empty { font-size:13px; }
+.nc-transfer .nc-data { padding:0; }
+.nc-transfer .transfer-heading { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.nc-transfer .nc-name { font-size:14px; margin:0; line-height:1.25; }
+.nc-transfer .nc-amount { font-size:12px; margin:0; }
+.nc-transfer .transfer-clubs { display:flex; align-items:center; gap:5px; margin:2px 0; }
+.nc-transfer .nc-club { min-height:16px; min-width:0; font-size:11px; gap:3px; }
+.nc-transfer .nc-club img { width:15px; height:15px; }
+.nc-transfer .nc-meta { font-size:10px; line-height:1.4; margin:0; }
+@media(max-width:700px){ .transfer-grid { grid-template-columns:1fr; } }

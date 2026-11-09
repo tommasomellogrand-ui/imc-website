@@ -1,0 +1,65 @@
+name: Publish compact transfer rows
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compact-transfer-rows.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compact-transfer-rows
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PHP
+        run: |
+          php -l nexus/transfers/index.php
+          for world in roadtohistory halloffamers kickoff sensiblesocceracademy subbuteosuperleague worldleague masterleagueworld scudetto; do node --check "$world/transfers/cards.js"; done
+      - name: Publish transfer rows and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          files=["nexus/transfers/index.php","site-assets/css/transfer-rows.css","roadtohistory/transfers/cards.js","halloffamers/transfers/cards.js","kickoff/transfers/cards.js","sensiblesocceracademy/transfers/cards.js","subbuteosuperleague/transfers/cards.js","worldleague/transfers/cards.js","masterleagueworld/transfers/cards.js","scudetto/transfers/cards.js","roadtohistory/transfers/index.html","halloffamers/transfers/index.html","kickoff/transfers/index.html","sensiblesocceracademy/transfers/index.html","subbuteosuperleague/transfers/index.html","worldleague/transfers/index.html","masterleagueworld/transfers/index.html","scudetto/transfers/index.html"]
+          root='/www.italianmastersclub.it'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          for name in files:
+              p=Path(name)
+              data=p.read_bytes()
+              assert data, str(p)
+              directory(root+'/'+str(Path(name).parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+name
+          ftp.quit()
+          PY
+      - name: Check published pages and player data
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          for world in ["roadtohistory","halloffamers","kickoff","sensiblesocceracademy","subbuteosuperleague","worldleague","masterleagueworld","scudetto"]:
+              base='https://www.italianmastersclub.it/'+world+'/transfers/'
+              html=urllib.request.urlopen(base+'?release=${{ github.sha }}', timeout=60).read().decode()
+              assert 'transfer-rows.css' in html and '20261109compact' in html, world
+              data=json.load(urllib.request.urlopen(base+'data.php',timeout=90))
+              assert data['ok'] and all('codex_age' in row and 'codex_rating' in row for row in data['rows']),world
+              print(world,len(data['rows']))
+          PY

@@ -12,6 +12,14 @@ try{
   $core=nexus_db($c,'core');$identities=nexus_player_identity($core,array_column($rows,'player_id'));
   $lookup=nexus_team_lookup(nexus_rows($core,'SELECT id,name,image_url FROM `IMC Club Codex Global`'),nexus_rows($core,'SELECT `Club ID` entity_id,`SM World Club ID` world_id FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]));
   foreach($rows as &$row){
+   $identity = $identities[(int)($row['player_id'] ?? 0)] ?? [];
+   $name = trim((string)($identity['full_name'] ?? ''));
+   if ($name === '') {
+    $name = trim(($identity['forename'] ?? '').' '.($identity['surname'] ?? ''));
+   }
+   if ($name !== '') $row['player_name'] = $name;
+   $row['codex_age'] = $identity['age'] ?? null;
+   $row['codex_rating'] = $identity['rating'] ?? null;
    $row['player_images']=nexus_player_images((int)($row['player_id']??0),$identities[(int)($row['player_id']??0)]??[],$row['player_image']??null);
    foreach(['from','to'] as $side){
     $id=$lookup['world'][(int)($row[$side.'_sm_world_club_id']??0)]??$lookup['name'][nexus_team_name_key((string)($row['club_'.$side]??''))]??null;
