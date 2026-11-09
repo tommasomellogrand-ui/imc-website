@@ -348,5 +348,15 @@
       "path": "manager-photos-upload/inbox/busts/kubanito-silvestri.jpg",
       "sha": "1bb02a2a9249dcc241200d9117a8fd85d5a4c713"
     }
+  },
+  "matteo-sartori": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/matteo-sartori.jpg",
+      "sha": "79653c92b9f9d6751bde8ca68147c2cf036ff16b"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/matteo-sartori.jpg",
+      "sha": "623b6b00b37b0d61c84ee630bc2cacbc49f2ad74"
+    }
   }
 }
