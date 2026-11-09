@@ -148,3 +148,5 @@ if(!document.getElementById('nx-universal-nav')){
   new MutationObserver(refresh).observe(cards, {childList:true});
   refresh();
 })().catch(() => {});
+
+;(()=>{if(document.querySelector('script[src*="/site-assets/names/display.js"]'))return;const s=document.createElement('script');s.src='/site-assets/names/display.js?v=1';document.head.append(s)})();

@@ -39,3 +39,4 @@
   const parts=location.pathname.split('/').filter(Boolean);const current=parts.length>1?parts[1].toLowerCase():'';
   if(modules.some(x=>x[0]===current))subpage(current);else home();
 })();
+;(()=>{if(document.querySelector('script[src*="/site-assets/names/display.js"]'))return;const s=document.createElement('script');s.src='/site-assets/names/display.js?v=1';document.head.append(s)})();

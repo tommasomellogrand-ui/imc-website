@@ -40,3 +40,5 @@ const list=document.querySelector("[data-feed-list]");
 if(!rows.length){list.innerHTML='<div class="feed-empty"><strong>NESSUNA NEWS DISPONIBILE</strong><span>Il feed pubblico di questo Game World è pronto.</span></div>';return;}
 list.innerHTML=rows.map(r=>{const pens=r[7]!=null?` · RIGORI ${r[7]}-${r[8]}`:"";return `<article class="beta-story" id="news-${r[0]}"><div class="story-visual"><img src="../site-assets/images/game-worlds/${code.toLowerCase()}.webp" alt=""><span>${code}</span></div><div class="story-copy"><div class="story-meta"><span>IMC | KICK OFF CUP · TURNO 1</span><time datetime="2026-09-01">01.09.2026</time></div><h3>${esc(r[1])} ${r[3]}-${r[4]} ${esc(r[2])}</h3><div class="story-score">${r[3]}<i>—</i>${r[4]}${esc(pens)}</div><p class="story-manager">${esc(r[5])} · ${esc(r[6])}</p><span class="story-label">MATCH REPORT · ${r[0]}</span></div></article>`}).join("");
 })();
+
+;(()=>{if(document.querySelector('script[src*="/site-assets/names/display.js"]'))return;const s=document.createElement('script');s.src='/site-assets/names/display.js?v=1';document.head.append(s)})();

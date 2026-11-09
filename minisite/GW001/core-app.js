@@ -38,3 +38,5 @@ async function load(){
 window.addEventListener('pagehide',()=>active?.abort());
 window.addEventListener('pageshow',e=>{if(e.persisted)load();});
 load();
+
+;(()=>{if(document.querySelector('script[src*="/site-assets/names/display.js"]'))return;const s=document.createElement('script');s.src='/site-assets/names/display.js?v=1';document.head.append(s)})();

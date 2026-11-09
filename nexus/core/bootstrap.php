@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__.'/club-display.php';
+require_once __DIR__.'/person-display.php';
 
 function nexus_out(array $body,int $status=200): never {
   if($status===200&&($body['ok']??false)===true){
@@ -13,7 +14,7 @@ function nexus_out(array $body,int $status=200): never {
   header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   header('Pragma: no-cache');
   header('Expires: 0');
-  echo json_encode($body,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);
+  echo json_encode(imc_person_display_fields($body),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);
   exit;
 }
 function nexus_config(): array {

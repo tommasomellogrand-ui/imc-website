@@ -49,3 +49,5 @@ const iconPaths=[
 'M2 2H10V10H2ZM14 2H22V10H14ZM2 14H10V22H2ZM14 14H22V22H14Z'
 ];
 document.querySelectorAll('#system-nav a').forEach((a,i)=>{const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 24 24');s.setAttribute('class','sprite-icon');s.setAttribute('aria-hidden','true');const p=document.createElementNS(s.namespaceURI,'path');p.setAttribute('d',iconPaths[i]);p.setAttribute('fill','currentColor');p.setAttribute('fill-rule','evenodd');s.append(p);a.prepend(s)});
+
+;(()=>{if(document.querySelector('script[src*="/site-assets/names/display.js"]'))return;const s=document.createElement('script');s.src='/site-assets/names/display.js?v=1';document.head.append(s)})();

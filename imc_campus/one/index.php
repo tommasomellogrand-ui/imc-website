@@ -175,7 +175,7 @@ a:focus-visible{outline:3px solid ivory;outline-offset:-3px;border-radius:8px}
   main{display:flex;align-items:flex-start;justify-content:center;width:100%;height:100vh;height:100dvh;overflow-x:hidden;overflow-y:auto}
   .scene{flex:none;width:max(100%,calc(100vh * 852 / 1846));width:max(100%,calc(100dvh * 852 / 1846))}
 }
-</style></head><body><main aria-label="Reception di ONE"><div class="scene">
+</style><script defer src="/site-assets/names/display.js?v=1"></script></head><body><main aria-label="Reception di ONE"><div class="scene">
 <img src="/imc_campus/one/reception.webp" width="852" height="1846" alt="Reception di ONE sul lago">
 <a class="back" href="/imc_campus/" aria-label="Torna al Campus"></a>
 <a class="passport" href="?access=login" aria-label="Scansiona IMC Passport"></a>

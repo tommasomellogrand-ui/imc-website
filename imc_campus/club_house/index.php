@@ -18,7 +18,7 @@ main{height:100vh;height:100dvh;display:grid;place-items:center;overflow:hidden;
 .folder{position:absolute;left:0;right:0;top:58%;bottom:6%}
 .folder:focus-visible{outline:3px solid #ffe2a1;outline-offset:-5px}
 @media(orientation:portrait){.scene{height:auto;width:max(100vw,45.946dvh);align-self:end;}}
-</style></head><body><main aria-label="Ingresso della Club House"><div class="scene">
+</style><script defer src="/site-assets/names/display.js?v=1"></script></head><body><main aria-label="Ingresso della Club House"><div class="scene">
 <img src="ingresso.webp" width="850" height="1850" fetchpriority="high" alt="Salotto della Club House con la cartella verde Carriere dei manager sul tavolino">
 <a class="folder" href="?career=1" aria-label="Apri Carriere dei manager"></a>
 </div></main></body></html>

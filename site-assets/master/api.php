@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__,2).'/nexus/core/person-display.php';
 /* IMC master website. Public editorial reads only. No gateway or schema mutation. */
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: public, max-age=30, stale-while-revalidate=30');
 function respond(array $data, int $status=200): never {
   http_response_code($status);
-  echo json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE); exit;
+  echo json_encode(imc_person_display_fields($data), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE); exit;
 }
 if (($_SERVER['REQUEST_METHOD']??'GET')!=='GET') respond(['ok'=>false,'error'=>'Metodo non disponibile.'],405);
 function rows(PDO $db,string $sql,array $args=[]): array { $s=$db->prepare($sql); $s->execute($args); return $s->fetchAll(); }

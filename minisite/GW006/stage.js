@@ -46,3 +46,5 @@ const dialog=document.getElementById('navigation');document.getElementById('menu
 const input=document.getElementById('search');if(input)input.addEventListener('input',()=>{let n=0;document.querySelectorAll('[data-search]').forEach(el=>{el.hidden=!el.dataset.search.toLowerCase().includes(input.value.trim().toLowerCase());if(!el.hidden)n++});document.getElementById('search-status').textContent=`${n} profili dimostrativi trovati`;});
 const filter=document.getElementById('result-filter');if(filter)filter.addEventListener('change',()=>document.querySelectorAll('[data-group]').forEach(el=>{el.hidden=filter.value!=='all'&&el.dataset.group!==filter.value}));
 })();
+
+;(()=>{if(document.querySelector('script[src*="/site-assets/names/display.js"]'))return;const s=document.createElement('script');s.src='/site-assets/names/display.js?v=1';document.head.append(s)})();

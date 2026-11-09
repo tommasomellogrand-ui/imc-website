@@ -9,3 +9,4 @@ function portrait(id,kind='face'){
 document.addEventListener('error',e=>{if(e.target.matches?.('.manager-portrait img'))e.target.remove();},true);
 window.ClubhousePortraits={setPeople(rows){people.clear();for(const m of rows)people.set(String(m.manager_id),m);},portrait};
 })();
+;(()=>{if(document.querySelector('script[src*="/site-assets/names/display.js"]'))return;const s=document.createElement('script');s.src='/site-assets/names/display.js?v=1';document.head.append(s)})();

@@ -29,3 +29,4 @@ function patchStory(){var m=(location.hash||'').match(/^#match-(\d)-(\d)$/);if(!
 function refresh(){routeButtons();patchStory();}
 var obs=new MutationObserver(refresh);obs.observe(document.documentElement,{childList:true,subtree:true});window.addEventListener('hashchange',function(){setTimeout(refresh,0)});setTimeout(refresh,0);
 })();
+;(()=>{if(document.querySelector('script[src*="/site-assets/names/display.js"]'))return;const s=document.createElement('script');s.src='/site-assets/names/display.js?v=1';document.head.append(s)})();
