@@ -1,0 +1,69 @@
+name: Publish world player profiles
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site-data/players/profile.php'
+      - 'site-data/players/stats-engine.php'
+      - '.github/workflows/world-player-profiles.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: world-player-profiles
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate data services
+        run: find site-data -name "*.php" -exec php -l {} \;
+      - name: Publish Player Codex rows and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          files=["site-data/core/bootstrap.php","site-assets/css/player-profile/player-cards.css","site-assets/css/player-profile/directory.css","site-assets/css/player-profile/player-profile.css","site-data/players/stats-engine.php","site-data/players/profile.php","roadtohistory/players/profile.php","roadtohistory/players/context.php","roadtohistory/players/profile.html","halloffamers/playercodex/profile.php","halloffamers/playercodex/context.php","halloffamers/playercodex/profile.html","kickoff/playercodex/profile.php","kickoff/playercodex/context.php","kickoff/playercodex/profile.html","sensiblesocceracademy/playercodex/profile.php","sensiblesocceracademy/playercodex/context.php","sensiblesocceracademy/playercodex/profile.html","subbuteosuperleague/playercodex/profile.php","subbuteosuperleague/playercodex/context.php","subbuteosuperleague/playercodex/profile.html","worldleague/playercodex/profile.php","worldleague/playercodex/context.php","worldleague/playercodex/profile.html","masterleagueworld/playercodex/profile.php","masterleagueworld/playercodex/context.php","masterleagueworld/playercodex/profile.html","scudetto/playercodex/profile.php","scudetto/playercodex/context.php","scudetto/playercodex/profile.html"]
+          root='/www.italianmastersclub.it'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          for name in files:
+              p=Path(name)
+              data=p.read_bytes()
+              assert data, str(p)
+              directory(root+'/'+str(Path(name).parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+name
+          ftp.quit()
+          PY
+      - name: Verify public profiles in every world
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          from concurrent.futures import ThreadPoolExecutor
+          def verify(pair):
+              route,player=pair
+              base='https://www.italianmastersclub.it/'+route+'/'
+              def get(url):return urllib.request.urlopen(base+url,timeout=90).read().decode()
+              d=json.loads(get('profile.php?player='+player))
+              assert d['ok'] and int(d['player']['player_id'])==int(player) and not d['errors'],(route,d.get('errors'))
+              assert json.loads(get('context.php'))['ok']
+              assert '/nexus/' not in get('profile.html?release=${{ github.sha }}')
+              print(route,len(d['matches']),len(d['transfers']))
+          with ThreadPoolExecutor(3) as pool:list(pool.map(verify,[["roadtohistory/players","1131"],["halloffamers/playercodex","1131"],["kickoff/playercodex","2989"],["sensiblesocceracademy/playercodex","28178"],["subbuteosuperleague/playercodex","1131"],["worldleague/playercodex","2989"],["masterleagueworld/playercodex","1131"],["scudetto/playercodex","2586"]]))
+          PY

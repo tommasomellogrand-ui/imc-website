@@ -48,7 +48,7 @@ function imc_site_season(mixed $value): ?int {
   return (int)$value;
 }
 function imc_site_table(string $world,string $repository):string {
- $suffix=['Player_Codex'=>'Player_Codex','Transfers'=>'Transfers','Match_Report'=>'Match_Reports'];
+ $suffix=['Results'=>'Results','Player_Codex'=>'Player_Codex','Transfers'=>'Transfers','Match_Report'=>'Match_Reports'];
  if(!isset($suffix[$repository]))throw new InvalidArgumentException('invalid_repository');
  return SITE_WORLD_TABLES[imc_site_world($world)].'_'.$suffix[$repository];
 }
