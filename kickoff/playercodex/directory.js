@@ -24,11 +24,11 @@ function card(r){
  const delta=Number(r.rating_delta);
  const moved=update&&Number.isFinite(delta)&&delta!==0&&r.rating!=null;
  const newRole=update&&r.position&&(r.previous_position ? r.previous_position!==r.position : r.rating_delta==null);
- const badge=moved?'<strong class="codex-rating-change '+(delta>0?'up':'down')+'">Rating '+esc(Number(r.rating)-delta)+' → '+esc(r.rating)+'</strong>':'';
+ const badge=moved?'<strong class="codex-rating-change '+(delta>0?'up':'down')+'">R '+esc(Number(r.rating)-delta)+' → '+esc(r.rating)+'</strong>':'';
  const role=(newRole?'Nuova posizione · ':'')+esc(r.position||'—');
  const metric=(key,value)=>'<span>'+key+' <b>'+esc(value??'—')+'</b></span>';
  const url='profile.html?'+esc(new URLSearchParams({world:gw,player:String(r.player_id)}));
- return '<a class="nc-card" href="'+url+'">'+NexusCards.photo(images,name)+'<div class="nc-data"><div class="player-name-row"><strong class="nc-name">'+esc(name)+'</strong>'+badge+nationality(r.nationality)+'</div><div class="codex-facts"><span>'+role+'</span>'+(moved?'':metric('Rating',r.rating))+metric('Età',r.age)+metric('Valore',r.market_value)+'</div>'+clubLine+'</div></a>';
+ return '<a class="nc-card" href="'+url+'">'+NexusCards.photo(images,name)+'<div class="nc-data"><div class="player-name-row"><strong class="nc-name">'+esc(name)+'</strong>'+badge+nationality(r.nationality)+'</div><div class="codex-facts"><span>'+role+'</span>'+(moved?'':metric('R',r.rating))+metric('E',r.age)+metric('V',r.market_value)+'</div>'+clubLine+'</div></a>';
 }
 let rows=[],shown=60,loading=false;
 function render(){const q=$('search').value.trim().toLocaleLowerCase('it'),club=$('club').value;let a=rows.filter(r=>(!q||[r.player_name,r.full_name,r.club_from,r.club_to,r.current_club,r.nationality,r.player_id].some(v=>String(v??'').toLocaleLowerCase('it').includes(q)))&&(!club||(isPlayers?r.current_club===club:r.club_from===club||r.club_to===club))&&(!isPlayers||!$('role').value||role(r)===$('role').value));if(isPlayers){a.sort((a,b)=>$('sort').value==='rating'?Number(b.rating)-Number(a.rating)||String(a.full_name).localeCompare(String(b.full_name)):$('sort').value==='age'?Number(a.age??999)-Number(b.age??999):String(a.full_name).localeCompare(String(b.full_name),'it'))}$('count').textContent=a.length+(isPlayers?' giocatori':' trasferimenti');const slice=a.slice(0,shown);$('list').innerHTML=!a.length?'<p class="empty">Nessun risultato per questi filtri.</p>':isPlayers?'<div class="cards-grid">'+slice.map(card).join('')+'</div>':'<div class="cards-grid">'+slice.map(NexusCards.transfer).join('')+'</div>';$('load-more').hidden=shown>=a.length;NexusCards.wireImages($('list'))}
