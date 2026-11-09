@@ -20,6 +20,8 @@ jobs:
       - name: Validate PHP
         run: |
           php -l imc-universal-gateway/daily-player.php
+          php -l sensiblesocceracademy/playercodex/daily.php
+          node --check sensiblesocceracademy/playercodex/directory.js
           node --check site-assets/js/daily-player-import.js
       - name: Publish transfer rows and verify bytes
         env:
@@ -30,7 +32,7 @@ jobs:
           import io, os, ssl, secrets, hashlib, time, urllib.request, json
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
-          files=["imc-universal-gateway/daily-player.php","site-assets/js/daily-player-import.js"]
+          files=["imc-universal-gateway/daily-player.php","site-assets/js/daily-player-import.js","sensiblesocceracademy/playercodex/index.html","sensiblesocceracademy/playercodex/directory.js","sensiblesocceracademy/playercodex/daily.php"]
           root='/www.italianmastersclub.it'
           ctx=ssl.create_default_context()
           ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.

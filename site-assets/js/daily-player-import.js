@@ -150,7 +150,7 @@ function active(type){let t=rt().querySelector('#ratingchangestabs-'+type);retur
 async function list(type){
  const t=rt().querySelector('#ratingchangestabs-'+type);if(!vis(t))throw Error('Apri Database giocatori');if(!active(type))click(t);
  let prev='',since=0;const found=await wait(()=>{const table=rt().querySelector('#rating-table');if(!active(type)||!vis(table))return null;
- const items=[...table.querySelectorAll('tbody tr[onclick*="PLAYER_downloadPlayer"]')].filter(vis).map(r=>({id:idcb(r,'PLAYER_downloadPlayer'),name:cl(r.querySelector('[data-id="playerName"]')?.textContent)}));
+ const items=[...table.querySelectorAll('tbody tr[onclick*="PLAYER_downloadPlayer"]')].filter(vis).map(r=>({id:idcb(r,'PLAYER_downloadPlayer'),delta:r.querySelector('.rateup,.ratedown') ? (r.querySelector('.ratedown')?-1:1)*Number(cl(r.querySelector('[data-id="change"]')?.textContent)) : null,name:cl(r.querySelector('[data-id="playerName"]')?.textContent)}));
  if(items.some(x=>!x.id||!x.name)||(!items.length&&!/nessun giocatore|nessuna variazione|no players/i.test(table.innerText)))return null;
  const sig=JSON.stringify(items);if(sig!==prev){prev=sig;since=Date.now()}return Date.now()-since>=2500?items:null},30000);
  if(!found)throw Error('Elenco incompleto '+type);return found}
@@ -160,7 +160,7 @@ try{await api({check:true});const saved=new Set();for(const type of ['changes','
  for(const item of items){ck();if(saved.has(item.id))continue;let row;
  try{await openP(item.id,item.name);const p=prof(item.id);const h=await hist();row={...p,rating_history:JSON.stringify(h.rating),transfer_history:JSON.stringify(h.transfers),imported_at:new Date().toISOString().slice(0,19).replace('T',' ')}}
  catch(e){if(S.stop)throw e;errors++;log(item.name+' · '+e.message)}
- if(row){const d=await api({row});saved.add(item.id);count++;log(item.name+' · '+d.state)}
+ if(row){const d=await api({row,source_tab:type,rating_delta:item.delta});saved.add(item.id);count++;log(item.name+' · '+d.state)}
  await back(type);paint('Elaborazione')}}
  paint('Completato')}catch(e){paint('Fermo · '+e.message)}finally{window.imcDailyActive=false;const b=panel.querySelector('button');b.textContent='Chiudi';b.onclick=()=>panel.remove()}
 };

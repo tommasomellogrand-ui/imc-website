@@ -33,5 +33,26 @@ try {
  if(in_array($f,['rating_history','transfer_history'],true)){$same=normalize_json(json_decode($a??'[]',true))===normalize_json(json_decode($v,true));}
  else $same=$a===null||$v===null?$a===$v:(string)$a===(string)$v;}
  if(!$same){$q=$db->prepare('INSERT INTO '.$table.' ('.implode(',',$fields).') VALUES ('.implode(',',array_fill(0,count($fields),'?')).')');$q->execute(array_map(fn($f)=>$row[$f],$fields));}
- $db->commit();daily_reply(['ok'=>true,'state'=>$same?'Invariato':'Salvato','player_id'=>(int)$row['player_id']]);
+ $source=$b['source_tab']??null;
+ if(in_array($source,['new','changes'],true)){
+  $stamp=$same?$old['imported_at']:$row['imported_at'];
+  $delta=isset($b['rating_delta'])&&is_int($b['rating_delta'])?$b['rating_delta']:null;
+  $db->prepare('UPDATE '.$table.' SET source_tab=?,rating_delta=? WHERE player_id=? AND imported_at=? AND source_tab IS NULL')->execute([$source,$delta,$row['player_id'],$stamp]);
+ }
+ $db->commit();
+ if($same)$row=$old;
+ $world=imc_db($cfg,$cfg['db']['custom']);
+ $common=array_values(array_diff($fields,['player_id','current_club','current_sm_club_id','transfer_history']));
+ $quoted=array_map(fn($f)=>chr(96).$f.chr(96),$common);
+ $values=array_map(fn($f)=>$row[$f],$common);
+ $world->beginTransaction();
+ $lookup=$world->prepare('SELECT player_id FROM IMC004_Player_Codex WHERE player_id=? FOR UPDATE');
+ $lookup->execute([$row['player_id']]);
+ if($lookup->fetchColumn()!==false){
+  $set=implode(',',array_map(fn($f)=>$f.'=?',$quoted));
+  $world->prepare('UPDATE IMC004_Player_Codex SET '.$set.' WHERE player_id=?')->execute([...$values,$row['player_id']]);
+ }else{
+  $world->prepare('INSERT INTO IMC004_Player_Codex (player_id,'.implode(',',$quoted).',transfer_history) VALUES ('.implode(',',array_fill(0,count($values)+1,'?')).',JSON_ARRAY())')->execute([$row['player_id'],...$values]);
+ }
+ $world->commit();daily_reply(['ok'=>true,'state'=>$same?'Invariato':'Salvato','player_id'=>(int)$row['player_id']]);
 }catch(Throwable $e){if(isset($db)&&$db->inTransaction())$db->rollBack();error_log('IMC Daily: '.$e->getMessage());daily_reply(['ok'=>false,'error'=>'Scrittura o verifica Daily Updates fallita'],500);}
