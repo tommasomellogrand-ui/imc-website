@@ -1,49 +1,21 @@
-.trophy-gallery .gallery-cover{position:relative;isolation:isolate;background:#302923;color:#fff}
-.trophy-gallery .gallery-cover img{display:block;width:100%;height:clamp(145px,30vw,360px);object-fit:cover;object-position:70% 50%}
-.trophy-gallery .gallery-cover strong{position:absolute;left:clamp(18px,6vw,90px);top:50%;transform:translateY(-50%);font:750 clamp(27px,5vw,72px)/1 Inter,sans-serif;letter-spacing:-.05em;color:#fff}
-.trophy-gallery header .gallery-cover+.hero{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden;padding:0}
-.trophy-gallery .hub-context{display:none}
-.trophy-gallery main .controls{background:#f6f4ef;border:1px solid #ded9cf;border-radius:4px;padding:12px;gap:10px}
-.trophy-gallery .controls input,.trophy-gallery .controls select{min-height:44px;max-width:100%}
-.trophy-gallery main .trophy-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid #d8c8ac;border-top:3px solid #ab8853;background:#faf8f3}
-.trophy-gallery main .trophy-summary>div{background:transparent;border:0;border-radius:0;text-align:center;padding:14px 4px}
-.trophy-gallery main .trophy-summary>div+div{border-left:1px solid #ded9cf}
-.trophy-gallery .trophy-world-section{margin-block:30px}
-.trophy-gallery .trophy-world-section .career-world-heading{background:#242a30;color:#fff;display:flex;align-items:center;gap:10px;padding:12px 14px;border-left:4px solid #b89a69}
-.trophy-gallery .career-world-heading h2{color:inherit;font-size:clamp(16px,3vw,22px);line-height:1.2;margin:0}
-.trophy-gallery .career-world-heading small{margin-left:auto;white-space:nowrap;color:#eee}
-.trophy-gallery .ch-trophy-list{gap:14px}
-body.trophy-gallery.clubhouse-hub .ch-trophy-title{justify-content:flex-start;padding:12px 16px;border:0;background:#f4efe5}
-.trophy-gallery .ch-trophy-title h3{color:#272724;text-align:left}
-.trophy-gallery .ch-trophy-title .trophy-icon{width:20px;height:24px;color:#91692e}
-.trophy-gallery .ch-trophy-columns{background:#fff;border-bottom:1px solid #e5ded3;color:#62594d}
-.trophy-gallery .ch-season{justify-content:center;font-variant-numeric:tabular-nums}
-.trophy-gallery .ch-honour:nth-child(even){background:#faf9f6}
-@media(max-width:600px){
- .trophy-gallery .ch-trophy-columns,.trophy-gallery .ch-honour{grid-template-columns:18% 41% 41%}
- .trophy-gallery .ch-season,.trophy-gallery .ch-winner,.trophy-gallery .ch-manager{padding:10px 5px;gap:5px}
- .trophy-gallery .ch-trophy-columns{font-size:10px}
-}
-
-.trophy-gallery .career-world-heading>span{color:#e5c998}
-
-@media(prefers-reduced-motion:no-preference){
- .trophy-gallery main{transform-origin:left center;animation:open-register .32s ease-out}
- @keyframes open-register{from{opacity:.3;transform:perspective(1100px) rotateY(-5deg)}to{opacity:1;transform:none}}
-}
-
-body.trophy-gallery {background:#f7f4ec;color:#252b29}
-body.trophy-gallery main {box-sizing:border-box;width:100%;max-width:none;margin:0;padding:clamp(16px,4vw,64px)}
-.trophy-gallery .gallery-cover h1 {position:absolute;bottom:12%;left:4%;margin:0;color:white;font:700 clamp(32px,5vw,76px)/1 Inter,sans-serif;letter-spacing:-.05em;text-shadow:0 2px 12px #171b18}
-.trophy-gallery .honours-index {margin-block:32px;background:#fffdf8;border-block:2px solid #92734c}
-.trophy-gallery .honours-index>h2 {margin:0;padding:18px;color:#f8f3e6;background:#273732;font-size:18px}
-.honours-chapter {border-bottom:1px solid #d7cebf}
-.honours-chapter summary {display:grid;grid-template-columns:auto 1fr auto auto;gap:clamp(6px,2vw,24px);align-items:center;padding:18px 12px;cursor:pointer;list-style:none}
-.honours-chapter summary::-webkit-details-marker {display:none}
-.honours-chapter summary:after {content:'+';font-size:20px;color:#785e37}
-.honours-chapter[open] summary:after {content:'−'}
-.honours-chapter[open] summary {background:#ebe6d9}
-.chapter-code {font-size:11px;letter-spacing:.05em;color:#695337}
-.honours-chapter summary small {white-space:nowrap}
-.trophy-gallery .honours-chapter .ch-trophy-list {padding:clamp(6px,2vw,24px)}
-@media(min-width:850px){.trophy-gallery .honours-chapter .ch-trophy-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
+body.trophy-gallery{margin:0;min-height:100dvh;background:linear-gradient(#19120dcb,#19120dee),url(sala.webp) center/cover fixed;color:#f7edd8;font-family:Inter,sans-serif}
+body.trophy-gallery>header,.trophy-gallery .hub-context,.trophy-gallery #directory-heading{display:none}
+body.trophy-gallery main{width:min(100%,1080px);max-width:none;margin:auto;padding:clamp(12px,3vw,40px);box-sizing:border-box}
+.trophy-gallery main>a.back-link,.book-filters>summary{color:#f1dfb7;background:transparent;border:none;font-size:14px;cursor:pointer}
+.book-filters{margin:8px 0 16px}.book-filters[open]{background:#312923;padding:12px}.book-filters .controls{color:#34291d}.book-filters .data-status{color:#30261d}
+.leather{display:grid;grid-template-columns:1fr 1fr;padding:10px;border:1px solid #83613a;border-radius:9px;background:linear-gradient(100deg,#42281d,#20130f 49%,#583727);box-shadow:0 24px 45px #0008;perspective:1500px}
+.frontispiece,.paper{box-sizing:border-box;color:#382b23;background:#f5ead2;font-family:Georgia,serif}
+.frontispiece{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;outline:1px solid #bda377;outline-offset:-18px;background:linear-gradient(90deg,#eaddbf,#faf1dc 78%,#c5af89);border-radius:3px 8px 8px 3px}
+.frontispiece span,.paper>small,.inscription small{font:600 11px/1.5 Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#795a37}
+.frontispiece strong{font:normal clamp(58px,7vw,98px)/.95 Georgia,serif;letter-spacing:-.07em}.frontispiece i{color:#96753a}
+.leaf-stack{display:grid;perspective:1300px;min-width:0;touch-action:pan-y;box-shadow:3px 3px #cbb999,5px 5px #847155}
+.paper{grid-area:1/1;min-width:0;position:relative;padding:clamp(18px,3.8vw,48px);padding-bottom:42px;min-height:clamp(495px,68dvh,700px);transform-origin:left center;background:linear-gradient(90deg,#c7b38e,#f2e6ce 6%,#fbf3e1 50%,#efe2c8);border-radius:4px}
+.paper h2,.paper h3{font-family:Georgia,serif;color:#32251c;font-weight:normal;margin:0}.paper h2{font-size:clamp(29px,4vw,49px);line-height:1.04;margin:8px 0 18px;letter-spacing:-.045em}
+.paper .tally{font:13px Inter,sans-serif;color:#675341}
+.paper .toc-line{display:flex;align-items:baseline;gap:8px;text-align:left;width:100%;padding:13px 0;background:none;border:none;border-radius:0;color:#362920;font:18px Georgia,serif;cursor:pointer}.toc-line i{flex:1;border-bottom:1px dotted #aa9776}.toc-line b{font-size:15px}
+.inscription{padding:10px 0;border-top:1px solid #c5b089}.inscription h3{font-size:23px;line-height:1.2;margin:2px 0 6px}
+.laureate,.signatory{display:flex;align-items:center;gap:7px;font:14px Inter,sans-serif}.signatory{margin-top:4px;color:#67523d}.signatory a{color:inherit}.laureate img,.signatory img,.signatory .portrait{width:24px;height:24px;object-fit:contain}
+.paper footer{display:block;position:absolute;bottom:13px;left:0;width:100%;margin:0;padding:0;text-align:center;color:#856d4e;background:none;border:0;font:14px Georgia,serif}
+.folio-nav{display:flex;justify-content:center;align-items:center;gap:14px;margin:16px auto;color:#ebd8b6}.folio-nav button{min-height:44px;padding:0 14px;background:#352a21;border:1px solid #826e50;color:#fff2d5;border-radius:4px;cursor:pointer}.folio-nav button:disabled{opacity:.35}
+@media(max-width:680px){.leather{grid-template-columns:1fr;padding:6px 9px 8px 6px}.frontispiece{display:none}.paper{padding:24px 20px 42px}.paper h2{font-size:35px}}
+@media(prefers-reduced-motion:no-preference){.leather{animation:unbind .55s ease-out;transform-origin:left center}@keyframes unbind{from{transform:perspective(1300px) rotateY(-28deg);opacity:.45}to{transform:none;opacity:1}}}

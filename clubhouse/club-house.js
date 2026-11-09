@@ -188,9 +188,61 @@ function trophyImportance(t){
  if(type==='leaguecup'||name.includes('leaguecup'))return 7;
  return 99;
 }
+let folioKey = 'index';
+let folioFilter = '';
+function renderHonoursBook(rows){
+ const filter = [manager,scope,$('world').value].join('|');
+ if(filter !== folioFilter){folioKey='index';folioFilter=filter;}
+ const pages = [];
+ const chapters = [];
+ for(const world of available()){
+  const records=rows.filter(t=>t.world===world).sort((a,b)=>trophyImportance(a)-trophyImportance(b)||String(a.competition).localeCompare(String(b.competition),'it')||Number(b.season)-Number(a.season));
+  if(!records.length)continue;
+  const name=esc(worldNames[world]||world);
+  chapters.push({world,name,count:records.length,page:pages.length+2});
+  for(let offset=0;offset<records.length;offset+=3){
+   const entries=records.slice(offset,offset+3).map(t=>{
+    const winner=t.manager_id?'<a href="'+esc(hubURL('trophies',t.manager_id))+'">'+esc(t.manager_name||'Manager non disponibile')+'</a>':'Manager non disponibile';
+    return '<article class="inscription"><small>Stagione '+esc(t.season??'—')+'</small><h3>'+esc(t.competition)+'</h3><div class="laureate">'+clubLogo(world,t.team_id,t.scope)+'<strong>'+esc(t.team)+'</strong></div><div class="signatory">'+ClubhousePortraits.portrait(t.manager_id)+winner+'</div></article>';
+   }).join('');
+   pages.push({key:world+'-'+offset,html:'<small>'+esc(worldCode(world))+'</small><h2>'+name+'</h2>'+entries});
+  }
+ }
+ const index=chapters.map(c=>'<button class="toc-line" data-leaf="'+esc(c.world)+'-0"><span>'+c.name+'</span><i></i><b>'+c.page+'</b></button>').join('');
+ pages.unshift({key:'index',html:'<small>Albo d’oro</small><h2>Indice dei mondi</h2><p class="tally">'+number(rows.length)+' trofei · '+number(rows.filter(t=>t.scope!=='national_team').length)+' club · '+number(rows.filter(t=>t.scope==='national_team').length)+' nazionali</p>'+ (index||'<p>'+ (loading?'Caricamento trofei…':'Nessun trofeo per i filtri selezionati.')+'</p>')});
+ const content=$('content');
+ content.innerHTML='<div class="leather"><aside class="frontispiece"><span>Italian Masters Club</span><strong>Albo<br>d’oro</strong><i>✦</i></aside><div class="leaf-stack"></div></div><nav class="folio-nav" aria-label="Sfoglia il libro"><button data-step="-1" aria-label="Pagina precedente">←</button><button data-leaf="index">Indice</button><output aria-live="polite"></output><button data-step="1" aria-label="Pagina successiva">→</button></nav>';
+ const stack=content.querySelector('.leaf-stack');
+ let pos=Math.max(0,pages.findIndex(p=>p.key===folioKey));
+ function show(next,animate){
+  if(next<0||next>=pages.length)return;
+  const old=stack.querySelector('.paper');
+  const paper=document.createElement('section');
+  paper.className='paper';paper.innerHTML=pages[next].html+'<footer>— '+(next+1)+' —</footer>';
+  stack.replaceChildren(paper);
+  if(old&&animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+   const forward=next>pos, turning=forward?old:paper;
+   old.inert=true;old.setAttribute('aria-hidden','true');stack.prepend(old);
+   turning.style.zIndex='2';
+   const frames=[{transform:'rotateY(0deg)',filter:'brightness(1)'},{transform:'rotateY(-94deg)',filter:'brightness(.69)'}];
+   const anim=turning.animate(forward?frames:frames.reverse(),{duration:430,easing:'ease-in-out'});
+   anim.onfinish=()=>{old.remove();turning.style.zIndex='';};
+  }
+  pos=next;folioKey=pages[pos].key;
+  content.querySelector('output').textContent=(pos+1)+' / '+pages.length;
+  content.querySelector('[data-step="-1"]').disabled=pos===0;
+  content.querySelector('[data-step="1"]').disabled=pos===pages.length-1;
+ }
+ show(pos,false);
+ content.onclick=e=>{const b=e.target.closest('button');if(!b)return;const next=b.dataset.leaf?pages.findIndex(p=>p.key===b.dataset.leaf):pos+Number(b.dataset.step);if(Number.isInteger(next)&&next!==pos)show(next,true);};
+ let start;
+ stack.ontouchstart=e=>{start=e.touches.length===1?e.touches[0]:null;};
+ stack.ontouchend=e=>{if(!start)return;const dx=e.changedTouches[0].clientX-start.clientX,dy=e.changedTouches[0].clientY-start.clientY;start=null;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5)show(pos+(dx<0?1:-1),true);};
+}
 function trophyRoom(){
  const rows=available().flatMap(w=>bundles[w].trophies||[]),national=rows.filter(t=>t.scope==='national_team').length;
  $('compact-count').textContent=number(rows.length)+' trofei';$('manager-count').textContent=number(rows.length)+' trofei';
+ if(document.body.classList.contains('trophy-gallery')){renderHonoursBook(rows);return;}
  const honour=t=>'<li class="ch-honour"><div class="ch-season"><strong>'+esc(t.season??'—')+'</strong></div><div class="ch-winner"><span class="ch-crest">'+clubLogo(t.world,t.team_id,t.scope||'club')+'</span><span class="ch-name-divider" aria-hidden="true"></span><strong>'+esc(t.team)+'</strong></div><div class="ch-manager">'+ClubhousePortraits.portrait(t.manager_id)+'<span class="ch-name-divider" aria-hidden="true"></span>'+(t.manager_id?'<a href="'+esc(hubURL('trophies',t.manager_id))+'">'+esc(t.manager_name||'Manager non disponibile')+'</a>':'<span>Manager non disponibile</span>')+'</div></li>';
  const book=document.body.classList.contains('trophy-gallery');
  const openWorlds=new Set([...document.querySelectorAll('.honours-chapter[open]')].map(el=>el.dataset.world));
