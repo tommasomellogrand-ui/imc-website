@@ -338,5 +338,15 @@
       "path": "manager-photos-upload/inbox/busts/giuseppe-esposito.jpg",
       "sha": "53ddbf01924f6213dca46bd8b1a82ad2dce18190"
     }
+  },
+  "kubanito-silvestri": {
+    "faces": {
+      "path": "manager-photos-upload/inbox/faces/kubanito-silvestri.jpg",
+      "sha": "3e6caa50542b5576318571a9b56ff691136bde93"
+    },
+    "busts": {
+      "path": "manager-photos-upload/inbox/busts/kubanito-silvestri.jpg",
+      "sha": "1bb02a2a9249dcc241200d9117a8fd85d5a4c713"
+    }
   }
 }
