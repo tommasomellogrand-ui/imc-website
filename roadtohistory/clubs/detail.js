@@ -17,7 +17,7 @@ async function showClubTrophies(){
  view.innerHTML='<div class="card empty" aria-live="polite">Caricamento trofei…</div>';
  try{
   if(!D.team?.world_id)throw Error('Squadra non disponibile.');
-  const j=await readClub('/nexus/trophies/index.php',false);
+  const j=await readClub('trophies.php',false);
   if(activeTab!=='TROPHY ROOM'||version!==trophyRequestVersion)return;
   const rows=j.rows||[];
   await NexusTrophies.mount(view,rows,gw);
@@ -40,7 +40,7 @@ async function showClubStats(){
  }catch(e){if(activeTab==='STATS'&&version===clubStatsVersion)document.getElementById('club-stats-values').innerHTML='<div class="card empty">'+esc(e.message)+'</div>'}
 }
 async function readClub(file,withSeason=true,selectedSeason=season){
- const q=new URLSearchParams({world:gw,[type==='nation'&&file==='/nexus/trophies/index.php'?'sm_nation':'sm_club']:String(D.team.world_id)});if(type==='nation')q.set('type','nation');if(withSeason&&selectedSeason)q.set('season',selectedSeason);
+ const q=new URLSearchParams({world:gw,[type==='nation'&&file==='trophies.php'?'sm_nation':'sm_club']:String(D.team.world_id)});if(type==='nation')q.set('type','nation');if(withSeason&&selectedSeason)q.set('season',selectedSeason);
  const r=await fetch(file+'?'+q,{cache:'no-store'}),j=await r.json();if(!r.ok||j.ok===false)throw Error('Impossibile caricare i dati. Riprova.');return j;
 }
 function loadStats(){

@@ -1,0 +1,73 @@
+name: Publish club awards
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/club-awards-direct.yml'
+      - 'site-data/teams/trophies.php'
+      - '*/clubs/trophies.php'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: world-club-awards
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate data services
+        run: find site-data -name "*.php" -exec php -l {} \;
+      - name: Publish club services and verify bytes
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, secrets, hashlib, time, urllib.request, json
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
+          files=["site-data/teams/trophies.php","roadtohistory/clubs/detail.js","roadtohistory/clubs/detail.html","roadtohistory/clubs/trophies.php","halloffamers/clubs/detail.js","halloffamers/clubs/detail.html","halloffamers/clubs/trophies.php","kickoff/clubs/detail.js","kickoff/clubs/detail.html","kickoff/clubs/trophies.php","sensiblesocceracademy/clubs/detail.js","sensiblesocceracademy/clubs/detail.html","sensiblesocceracademy/clubs/trophies.php","subbuteosuperleague/clubs/detail.js","subbuteosuperleague/clubs/detail.html","subbuteosuperleague/clubs/trophies.php","worldleague/clubs/detail.js","worldleague/clubs/detail.html","worldleague/clubs/trophies.php","masterleagueworld/clubs/detail.js","masterleagueworld/clubs/detail.html","masterleagueworld/clubs/trophies.php","scudetto/clubs/detail.js","scudetto/clubs/detail.html","scudetto/clubs/trophies.php"]
+          root='/www.italianmastersclub.it'
+          ctx=ssl.create_default_context()
+          ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def directory(path):
+              ftp.cwd('/')
+              for part in path.strip('/').split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          for name in files:
+              p=Path(name)
+              data=p.read_bytes()
+              assert data, str(p)
+              directory(root+'/'+str(Path(name).parent))
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              assert check.getvalue()==data,'Byte verification failed: '+name
+          ftp.quit()
+          PY
+      - name: Verify club awards in eight worlds
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          from concurrent.futures import ThreadPoolExecutor
+          def verify(test):
+              world,club=test
+              base='https://www.italianmastersclub.it/'+world+'/'
+              def read(path):
+                  with urllib.request.urlopen(base+path,timeout=90) as r:return r.read()
+              assert b'/trophyroom/trophy-room.js' in read('clubs/detail.html')
+              assert b"readClub('trophies.php',false)" in read('clubs/detail.js?v=club-awards1')
+              awards=json.loads(read('trophyroom/data.php'))
+              actual=json.loads(read('clubs/trophies.php?sm_club='+str(club)))
+              assert awards['ok'] and actual['ok']
+              expected=[r for r in awards['rows'] if str(r['winner_sm_world_club_id'])==str(club) and r['competition_group']!='NATIONS' and r['trophy_type'] not in ('worldcup','interqualifier')]
+              assert sorted(str(r['id']) for r in actual['rows'])==sorted(str(r['id']) for r in expected),world
+              print(world,club,len(expected))
+          with ThreadPoolExecutor(4) as pool:list(pool.map(verify,[["roadtohistory",94078847],["halloffamers",96537115],["kickoff",94009173],["sensiblesocceracademy",92317287],["subbuteosuperleague",93399549],["worldleague",21145095],["masterleagueworld",94061609],["scudetto",94703258]]))
+          PY
