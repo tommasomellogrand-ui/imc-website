@@ -7,7 +7,8 @@ try{
  $c=nexus_config();$gw=nexus_world($_GET['world']??'');$season=nexus_season($_GET['season']??null);$db=nexus_db($c,nexus_target($c,$gw));$table=nexus_table($gw,'Transfers');
  $limit=isset($_GET['limit'])?max(1,min(2000,(int)$_GET['limit'])):null;
  $club=null;if(isset($_GET['sm_club'])){$value=(string)$_GET['sm_club'];if(!ctype_digit($value)||(int)$value<1)throw new InvalidArgumentException('invalid_club');$club=(int)$value;}
- $w=['game_world_id=?'];$p=[$gw];if($season!==null){$w[]='imc_season=?';$p[]=$season;}if($club!==null){$w[]='(from_sm_world_club_id=? OR to_sm_world_club_id=?)';$p[]=$club;$p[]=$club;}$rows=nexus_rows($db,'SELECT * FROM `'.$table.'` WHERE '.implode(' AND ',$w).' ORDER BY (normalized_transfer_date IS NULL) ASC, normalized_transfer_date DESC, imc_transfer_number DESC'.($club===null&&$limit!==null?' LIMIT '.$limit:''),$p);
+ $worldCodex = nexus_table($gw, 'Player_Codex');
+ $w=['t.game_world_id=?'];$p=[$gw];if($season!==null){$w[]='t.imc_season=?';$p[]=$season;}if($club!==null){$w[]='(from_sm_world_club_id=? OR to_sm_world_club_id=?)';$p[]=$club;$p[]=$club;}$rows=nexus_rows($db,'SELECT t.*, pc.full_name AS world_name, pc.age AS world_age, pc.rating AS world_rating, pc.image_url AS world_photo FROM `'.$table.'` t LEFT JOIN `'.$worldCodex.'` pc ON pc.player_id=t.player_id WHERE '.implode(' AND ',$w).' ORDER BY (normalized_transfer_date IS NULL) ASC, normalized_transfer_date DESC, imc_transfer_number DESC'.($club===null&&$limit!==null?' LIMIT '.$limit:''),$p);
  if($rows){
   $core=nexus_db($c,'core');$identities=nexus_player_identity($core,array_column($rows,'player_id'));
   $lookup=nexus_team_lookup(nexus_rows($core,'SELECT id,name,image_url FROM `IMC Club Codex Global`'),nexus_rows($core,'SELECT `Club ID` entity_id,`SM World Club ID` world_id FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]));
@@ -17,10 +18,14 @@ try{
    if ($name === '') {
     $name = trim(($identity['forename'] ?? '').' '.($identity['surname'] ?? ''));
    }
+   $worldName = trim((string)($row['world_name'] ?? ''));
+   if ($worldName !== '') $name = $worldName;
    if ($name !== '') $row['player_name'] = $name;
-   $row['codex_age'] = $identity['age'] ?? null;
-   $row['codex_rating'] = $identity['rating'] ?? null;
-   $row['player_images']=nexus_player_images((int)($row['player_id']??0),$identities[(int)($row['player_id']??0)]??[],$row['player_image']??null);
+   $row['codex_age'] = $row['world_age'] ?? $identity['age'] ?? null;
+   $row['codex_rating'] = $row['world_rating'] ?? $identity['rating'] ?? null;
+   if (!empty($row['world_photo'])) $identity['image_url'] = $row['world_photo'];
+   unset($row['world_name'], $row['world_age'], $row['world_rating'], $row['world_photo']);
+   $row['player_images']=nexus_player_images((int)($row['player_id']??0),$identity,$row['player_image']??null);
    foreach(['from','to'] as $side){
     $id=$lookup['world'][(int)($row[$side.'_sm_world_club_id']??0)]??$lookup['name'][nexus_team_name_key((string)($row['club_'.$side]??''))]??null;
     $row[$side.'_logo_url']=$id!==null?nexus_player_image_url($lookup['id'][$id]['image_url']??null):null;

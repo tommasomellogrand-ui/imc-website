@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'nexus/transfers/index.php'
       - '.github/workflows/compact-transfer-rows.yml'
   workflow_dispatch:
 permissions:
