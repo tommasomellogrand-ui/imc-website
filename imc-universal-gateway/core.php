@@ -137,7 +137,12 @@ function imc_competition_catalog(array $cfg, array $body): array {
     if (!preg_match('/^IMC-(?:00[1-9]|010)$/D',$alias)) throw new InvalidArgumentException('invalid_game_world');
     $compact=str_replace('-','',$alias);
     $pdo=imc_db($cfg,$cfg['db']['core']);
-    $stmt=$pdo->prepare("SELECT competition_key,custom_competition FROM `IMC Competition Codex Global` WHERE game_world_id IN (?,?,?) AND UPPER(TRIM(sm_action_group))='IMC'");
+    $sql = "SELECT c.competition_key,c.custom_competition FROM `IMC Competition Codex Global` c WHERE c.game_world_id IN (?,?,?) AND UPPER(TRIM(c.sm_action_group))='IMC'";
+    if ($compact === 'IMC005') {
+        // Each Subbuteo pool has its own import key. Exclude the umbrella competitions.
+        $sql .= " AND NOT EXISTS (SELECT 1 FROM `IMC Competition Pools` p WHERE p.competition_id=c.id)";
+    }
+    $stmt=$pdo->prepare($sql);
     $stmt->execute([$legacy,$alias,$compact]);
     $rows=[];$seen=[];
     foreach($stmt->fetchAll() as $row) {
