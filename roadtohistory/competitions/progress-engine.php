@@ -180,7 +180,7 @@ try {
  }
  unset($award);
  foreach($rows as &$row)if(!empty($byKey[$row['competition_key']]['nexus_view']))$row['nexus_view']=$byKey[$row['competition_key']]['nexus_view'];unset($row);
- if($gw==='GW001'){
+ if(in_array($gw,['GW001','GW010'],true)){
   $definitions=imc_site_rows($core,"SELECT competition_key,custom_competition,expected_match,expected_matchdays FROM `IMC Competition Codex Global` WHERE game_world_id=? AND sm_action_group='IMC'",[$gw]);
   $indexes=array_flip(array_column($rows,'competition_key'));
   foreach($definitions as $definition){
@@ -206,6 +206,7 @@ try {
    }
    if(isset($indexes[$key])){
     $rows[$indexes[$key]]['nexus_view']=$name;
+    $rows[$indexes[$key]]['competition_group']='IMC';
    }else{
     $rows[]=['competition_key'=>$key,'sm_action'=>'imc_custom','sm_division'=>null,'competition_group'=>'IMC','sm_country'=>null,'nexus_view'=>$name,'result_count'=>0,'schedule_count'=>0];
    }
