@@ -166,6 +166,19 @@ try {
  }
  unset($award);
  foreach($rows as &$row)if(!empty($byKey[$row['competition_key']]['nexus_view']))$row['nexus_view']=$byKey[$row['competition_key']]['nexus_view'];unset($row);
+ if($gw==='GW001'){
+  $definitions=imc_site_rows($core,"SELECT competition_key,custom_competition FROM `IMC Competition Codex Global` WHERE game_world_id=? AND sm_action_group='IMC'",[$gw]);
+  $indexes=array_flip(array_column($rows,'competition_key'));
+  foreach($definitions as $definition){
+   $key=$uiKey($definition['competition_key']);
+   $name=$definition['custom_competition'];
+   if(isset($indexes[$key])){
+    $rows[$indexes[$key]]['nexus_view']=$name;
+   }else{
+    $rows[]=['competition_key'=>$key,'sm_action'=>'imc_custom','sm_division'=>null,'competition_group'=>'IMC','sm_country'=>null,'nexus_view'=>$name,'result_count'=>0,'schedule_count'=>0];
+   }
+  }
+ }
  usort($rows,fn($a,$b)=>[(int)$a['sm_division'],$a['nexus_view']]<=>[(int)$b['sm_division'],$b['nexus_view']]);
  header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');
  echo json_encode(['ok'=>true,'progress'=>$out,'rows'=>$rows,'awards'=>$byKey,'season'=>$season,'seasons'=>$seasons],JSON_INVALID_UTF8_SUBSTITUTE|JSON_UNESCAPED_UNICODE);
