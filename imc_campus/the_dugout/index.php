@@ -23,7 +23,7 @@ a:focus-visible { outline: 3px solid white; outline-offset: 4px; }
 </style>
 </head>
 <body><main aria-label="Ingresso a The Dugout">
-<img class="scene" src="dugout-v1.webp" alt="La sala tecnica del Campus con la lavagna degli allenatori" fetchpriority="high">
+<img class="scene" src="dugout-tattico.webp" alt="La sala tecnica del Campus con la lavagna degli allenatori" fetchpriority="high">
 <img class="crest" src="/site-assets/images/imc-logo.png" alt="Italian Masters Club">
 <a href="?assegnazioni=1">Vedi le assegnazioni <span aria-hidden="true">→</span></a>
 </main></body></html>
