@@ -5,6 +5,14 @@ let mode='results',version=0,controller,loading=false;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dayLabel=v=>new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(v+'T12:00:00'));
 const image=v=>/^(https:\/\/|\/(?!\/))/i.test(String(v||''))?'<img src="'+esc(v)+'" alt="" loading="lazy" width="30" height="30">':'';
+function playerCheck(r){
+ if(!r.youth_lines?.length)return '';
+ const style='text-align:center;font-family:inherit;font-size:.82rem;font-weight:500;line-height:1.35;white-space:normal;color:inherit';
+ const heading='<strong style="grid-column:1/-1;border-top:1px solid #d8dfe6;padding-top:.45rem;margin-top:.25rem;text-align:center;font-family:inherit;font-size:.82rem">Player Check</strong>';
+ const sides=r.player_check?['home','away'].map((side,i)=>'<span style="grid-column:'+(i?3:1)+';'+style+'">'+esc(r.player_check[side])+'</span>').join(''):'';
+ const notes=r.player_check?r.youth_lines.slice(1):r.youth_lines;
+ return heading+sides+notes.map(note=>'<small style="grid-column:1/-1;'+style+'">'+esc(note)+'</small>').join('');
+}
 function team(r,s){
  const national=r.competition_group==='NATIONS'||String(r.competition_key).includes('|NATIONS|'),id=r[s+'_sm_club_id']||r[s+'_sm_team_id'];
  const name='<span>'+esc(r[s+'_name']||'—')+'</span>',badge=image(r[s+'_logo_url'])+name;
@@ -41,7 +49,7 @@ function render(d){
    const played=mode==='results';let score=played?esc(r.home_score)+' – '+esc(r.away_score):esc(String(r.match_time||'').slice(0,5)||'—');
    if(played)for(const [p,label] of [['penalty','Rigori'],['aggregate','Totale']])if(r[p+'_home_score']!=null&&r[p+'_away_score']!=null)score+='<small>'+label+' '+esc(r[p+'_home_score'])+' – '+esc(r[p+'_away_score'])+'</small>';
    const report=played&&r.has_report?'<a class="md-report" aria-label="Match report: '+esc(r.home_name)+' – '+esc(r.away_name)+'" href="/subbuteosuperleague/competitions/match.html?fixture='+encodeURIComponent(r.sm_fixture_id)+'"></a>':'';
-   return '<article class="md-game">'+team(r,'home')+'<div class="md-score">'+score+'</div>'+team(r,'away')+report+(r.youth_lines||[]).map(line=>'<small style="display:block;grid-column:1/-1;white-space:normal">'+esc(line)+'</small>').join('')+'</article>';
+   return '<article class="md-game">'+team(r,'home')+'<div class="md-score">'+score+'</div>'+team(r,'away')+report+playerCheck(r)+'</article>';
   }).join('')+'</div></section>';
  }).join('');
  panel.querySelectorAll('img').forEach(i=>i.onerror=()=>{i.hidden=true});

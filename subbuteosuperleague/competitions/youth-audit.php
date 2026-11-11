@@ -35,6 +35,7 @@ function subbuteo_youth_results(PDO $db, array $rows): array {
             if ($value === 'Irregolare' && !empty($team['players'])) {
                 $value = (string)count(explode(', ', $team['players']));
             }
+            $row['player_check'][$side] = is_numeric($value) ? $value.' fuori elenco' : $value;
             $teams[] = $row[$side.'_name'].' '.$value;
         }
         $lines = ['Fuori elenco · '.implode(' / ', $teams)];
