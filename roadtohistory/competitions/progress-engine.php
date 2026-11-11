@@ -211,6 +211,25 @@ try {
    }
   }
  }
+ $clubs=imc_site_rows($core,'SELECT id,name,nexus_view FROM `IMC Club Codex Global`');
+ $mapping=imc_site_rows($core,'SELECT `Game World` game_world_id,`Club ID` entity_id,`SM World Club ID` world_id,`Club Name` name FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]);
+ $index=imc_site_club_label_index($clubs,$mapping);
+ $label=static fn(string $name)=>imc_site_club_label($name,$index,$gw);
+ foreach($rows as $competition){
+  if($competition['competition_group']==='NATIONS')continue;
+  $key=$competition['competition_key'];
+  if(isset($byKey[$key]['winner_name']))$byKey[$key]['winner_name']=imc_site_club_label($byKey[$key]['winner_name'],$index,$gw,$byKey[$key]['team']??null);
+  if(!isset($out[$key]))continue;
+  $summary=&$out[$key];
+  if(isset($summary['leader']))$summary['leader']=$label($summary['leader']);
+  foreach($summary['ranking']??[] as $i=>$team)$summary['ranking'][$i]['name']=$label($team['name']);
+  foreach(['finalists','next_match'] as $field)if(isset($summary[$field]))$summary[$field]=array_map($label,$summary[$field]);
+  foreach($summary['upcoming']??[] as $i=>$match)$summary['upcoming'][$i]=array_map($label,$match);
+  $displayLogos=[];
+  foreach($summary['logos']??[] as $name=>$logo)$displayLogos[$label((string)$name)]=$logo;
+  $summary['logos']=$displayLogos;
+  unset($summary);
+ }
  usort($rows,fn($a,$b)=>[(int)$a['sm_division'],$a['nexus_view']]<=>[(int)$b['sm_division'],$b['nexus_view']]);
  header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');
  echo json_encode(['ok'=>true,'progress'=>$out,'rows'=>$rows,'awards'=>$byKey,'season'=>$season,'seasons'=>$seasons],JSON_INVALID_UTF8_SUBSTITUTE|JSON_UNESCAPED_UNICODE);
