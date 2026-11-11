@@ -51,6 +51,15 @@ $('back').href='/subbuteosuperleague/';$('back').textContent='← '+(c.world?.ga
 $('season-select').onchange=()=>{const next=new URLSearchParams(location.search);next.set('season',$('season-select').value);location.href=location.pathname+'?'+next};
 if(!current){seasonBar();$('title').textContent='Competizioni';$('competition-nav').hidden=true;$('competition-tools').hidden=true;$('group-filter').hidden=true;if(requested)$('meta').textContent='Competizione non disponibile nella stagione selezionata · Scegli dal catalogo';catalog($('view'));history.replaceState(null,'',base+'?'+new URLSearchParams({season,group:category}));return}
  const dedicated={championsleague:'rth-champions-league',europaleague:'rth-europa-league',conferenceleague:'rth-conference-league',clubworldcup:'rth-club-world-cup'};
+ if(current.competition_group==='IMC' && gw==='GW011'){
+  const [, , event, pool]=current.competition_key.split('|');
+  const routes={risingstarsleague:'rising-stars-league',nextgenleague:'next-gen-league',clubworldcup:'club-world-cup'};
+  if(routes[event]){
+   const query=new URLSearchParams({season,tab:params.get('tab')||'overview'});
+   if(pool)query.set('pool',pool);
+   location.replace('/subbuteosuperleague/'+routes[event]+'/?'+query);return;
+  }
+ }
  const target=gw==='GW001'&&current.competition_group==='IMC'&&dedicated[current.competition_key.split('|').pop()];
  if(target){const query=new URLSearchParams({season,tab:params.get('tab')||'overview'});location.replace('/roadtohistory/'+target+'/?'+query);return;}
  await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/roadtohistory/imc-cups/league-page.js?v=allcups3';script.onload=resolve;script.onerror=reject;document.head.append(script);});
