@@ -21,11 +21,11 @@ try{
     foreach($roster as &$p){foreach($worldPlayers[$p['player_id']]??[] as $field=>$value)if($value!==null&&$value!=='')$p[$field]=$value;}unset($p);
     if($season!==null)$reports=array_values(array_filter($reports,static fn($r)=>(int)$r['imc_season']===$season));
   }else{
-    $roster=imc_site_rows($db,'SELECT player_id,full_name,position,rating,age,nationality,market_value,image_url FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE current_sm_club_id=? ORDER BY full_name,player_id',[$club]);
+    $roster=imc_site_rows($db,'SELECT player_id,full_name,position,`Posizione` AS codex_position,rating,age,nationality,market_value,image_url FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE current_sm_club_id=? ORDER BY full_name,player_id',[$club]);
     $transfers=imc_site_rows($db,'SELECT * FROM `'.imc_site_table($gw,'Transfers').'` WHERE (from_sm_world_club_id=? OR to_sm_world_club_id=?)',[$club,$club]);
     $roster=imc_site_club_roster($roster,$reports,$transfers,$club);
     $ids=array_column($roster,'player_id');$worldPlayers=[];
-    foreach(array_chunk($ids,500) as $chunk)foreach(imc_site_rows($db,'SELECT player_id,full_name,position,rating,age,nationality,market_value,image_url,current_sm_club_id FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE player_id IN ('.implode(',',array_fill(0,count($chunk),'?')).')',$chunk) as $p)$worldPlayers[(int)$p['player_id']]=$p;
+    foreach(array_chunk($ids,500) as $chunk)foreach(imc_site_rows($db,'SELECT player_id,full_name,position,`Posizione` AS codex_position,rating,age,nationality,market_value,image_url,current_sm_club_id FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE player_id IN ('.implode(',',array_fill(0,count($chunk),'?')).')',$chunk) as $p)$worldPlayers[(int)$p['player_id']]=$p;
     foreach($roster as &$p){foreach($worldPlayers[$p['player_id']]??[] as $field=>$value)if($value!==null&&$value!=='')$p[$field]=$value;}unset($p);
     foreach($roster as &$p){if(!isset($p['status_transfer_number'])&&(int)($p['current_sm_club_id']??0)>0)$p['roster_status']=(int)$p['current_sm_club_id']===$club?'active':'departed';unset($p['current_sm_club_id']);}unset($p);
     $source=['roster_source'=>'match_reports_player_codex_transfers'];

@@ -110,9 +110,20 @@ async function showRoster(background=false){
   let html=(type==='club'?rosterSummary(j.rows):'')+'<p class="nc-roster-note">'+(type==='nation'?'Convocati nell’ultimo Match Report disponibile'+(j.roster_date?' · '+esc(j.roster_date):''):'Rosa e storico · Stato aggiornato dai trasferimenti')+' · '+esc(period)+' · Statistiche dai '+esc(j.reports)+' Match Report disponibili per '+(type==='nation'?'questa nazionale':'questo club')+'.<br>Pres. = Tit. + Sub. · Panc. = non entrato · MVP = uomo partita.</p>';
   if(type==='club')html+='<div class="transfer-tabs" role="tablist" aria-label="Stato rosa">'+[['active','Attivi'],['departed','Ceduti']].map(([v,label])=>'<button type="button" role="tab" data-roster-state="'+v+'" aria-pressed="'+(rosterFilter===v)+'" aria-selected="'+(rosterFilter===v)+'">'+label+' ('+j.rows.filter(x=>(x.roster_status||'unknown')===v).length+')</button>').join('')+'</div>';
   const visibleRows=type==='club'?j.rows.filter(x=>(x.roster_status||'unknown')===rosterFilter):j.rows;
-  const groups=['Portieri','Difensori','Centrocampisti','Attaccanti'];
-  if(j.rows.some(x=>!groups.includes(x.role_group)))groups.push('Ruolo non disponibile');
-  for(const group of groups){const rows=visibleRows.filter(x=>x.role_group===group);html+='<h3 class="role-title">'+esc(group)+' ('+rows.length+')</h3><div class="roster-grid">'+(rows.length?rows.map(rosterCard).join(''):'<p class="muted">Nessun giocatore.</p>')+'</div>'}
+  const positionGroups = new Map([
+   ['portiere', 'Portieri'], ['difensore', 'Difensori'], ['centrocampista', 'Centrocampisti'],
+   ['centrocampista offensivo', 'Centrocampisti offensivi'], ['attaccante', 'Attaccanti']
+  ]);
+  const grouped = new Map([...positionGroups.values()].map(label => [label, []]));
+  for (const player of visibleRows) {
+   const position = String(player.codex_position ?? '').trim().toLowerCase();
+   const label = positionGroups.get(position) || 'Posizione da assegnare';
+   if (!grouped.has(label)) grouped.set(label, []);
+   grouped.get(label).push(player);
+  }
+  for (const [label, rows] of grouped) {
+   html += '<h3 class="role-title">'+esc(label)+' ('+rows.length+')</h3><div class="roster-grid">'+(rows.length?rows.map(rosterCard).join(''):'<p class="muted">Nessun giocatore.</p>')+'</div>';
+  }
   if(type==='club'&&j.rows.some(x=>x.roster_status==='unknown'))html+='<p class="nc-roster-note">'+j.rows.filter(x=>x.roster_status==='unknown').length+' giocatori storici con stato non verificabile dai dati disponibili.</p>';
   if(j.rows.some(x=>x.minutes_missing))html+='<p class="nc-roster-note">— nei minuti: dati di ingresso, uscita o fine partita incompleti nei report.</p>';
   if(j.invalid_reports)html+='<p class="nc-roster-note">'+esc(j.invalid_reports)+' report con dati giocatori non leggibili.</p>';
