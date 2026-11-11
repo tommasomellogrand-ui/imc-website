@@ -38,6 +38,9 @@ try {
    $r['competition_key']=$uiKey($r['competition_key']);
    $r['played']=$repository==='Results';
    $id=$r['sm_fixture_id']?:($r['match_date'].'|'.$r['home_name'].'|'.$r['away_name']);
+   if($gw==='GW001' && $r['competition_group']==='IMC'){
+    $id=serialize([$r['match_date'],mb_strtolower(trim($r['home_name']),'UTF-8'),mb_strtolower(trim($r['away_name']),'UTF-8')]);
+   }
    if((int)$r['imc_season']===$season)$groups[$r['competition_key']][$id]=$r;
    else $history[$r['competition_key']][$id]=$r;
   }
