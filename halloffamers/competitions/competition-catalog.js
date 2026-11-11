@@ -9,11 +9,10 @@ let progress={},awards={};
 function card(r){return IMCCompetitionRow.render(r,progress[r.competition_key],awards[r.competition_key])}
 function domesticRows(rows){
  const leagues=rows.filter(r=>r.sm_action==='league'),cups=rows.filter(r=>r.sm_action!=='league');
- const stats=leagues.map(r=>progress[r.competition_key]||{}),known=stats.length&&stats.every(p=>p.expected>0);
- let pct=known?Math.round(100*stats.reduce((v,p)=>v+p.played,0)/stats.reduce((v,p)=>v+p.expected,0)):null;
- const commonRound=stats.length && stats.every(p=>p.label===stats[0].label) && stats[0].label?.match(/^Giornata (\d+) di (\d+)$/);
- const caption=commonRound?(stats.some(p=>p.played>0)?commonRound[1]:'0')+' giornate su '+commonRound[2]:'Avanzamento campionati';
- if(pct===null && commonRound && Number(commonRound[2])>0)pct=stats.some(p=>p.played>0)?Math.round(100*Number(commonRound[1])/Number(commonRound[2])):0;
+ const stats=leagues.map(r=>progress[r.competition_key]||{}),known=stats.length&&stats.every(p=>p.total_days>0);
+ let pct=known?Math.round(100*stats.reduce((v,p)=>v+p.played_days,0)/stats.reduce((v,p)=>v+p.total_days,0)):null;
+ const commonRound=known && stats.every(p=>p.played_days===stats[0].played_days && p.total_days===stats[0].total_days);
+ const caption=commonRound?stats[0].played_days+' giornate su '+stats[0].total_days:'Avanzamento campionati';
  const links=leagues.map(r=>{
   const p=progress[r.competition_key]||{}, award=awards[r.competition_key]||{};
   const finished=Boolean(award.winner_name||p.complete);
@@ -31,7 +30,7 @@ function domesticRows(rows){
   const value=t?[(t.number?'Giornata '+t.number:''),t.date.split('-').reverse().join('/')].filter(Boolean).join(' · '):'—';
   return '<div><small>'+title+'</small><strong>'+esc(value)+'</strong></div>';
  }
- const turns='<div class="league-turns">'+turnLine('last_turn','Ultimo turno giocato')+turnLine('next_turn','Prossimo turno')+'</div>';
+ const turns='<div class="league-turns">'+turnLine('last_turn','Ultima giornata giocata')+turnLine('next_turn','Prossima giornata')+'</div>';
  return (leagues.length?'<h3 class="cups-title">Leagues</h3><div class="league-overview">'+gauge+turns+'</div>'+links+'':'')+(cups.length?'<h3 class="cups-title">Cups</h3>'+cups.map(card).join(''):'');
 }
 function seasonBar(){

@@ -23,7 +23,7 @@
   }
   const league=p.league_summary||r.sm_action==='league',items=[];
   function field(label,values){if(values.length)items.push('<span class="cr-field"><small>'+esc(label)+'</small>'+values.map(v=>'<b>'+v+'</b>').join('')+'</span>')}
-  const meter=p.league_summary?gauge(p.percent,p.played+' partite su '+p.expected):'';
+  const meter=p.league_summary?gauge(p.percent,p.played_days+' giornate su '+p.total_days):'';
   if(p.finalists)field('Finalisti',p.finalists.map(team));
   if(award.winner_name){
    const logo=award.winner_logo_url;
@@ -38,7 +38,7 @@
    const games=p.upcoming||[], shown=detail?games:games.slice(0,2);
    const lines=shown.map(g=>g.map(team).join(' – '));
    if(games.length>shown.length)lines.push('<em>Altre '+(games.length-shown.length)+' partite</em>');
-   field('Prossimo turno · '+p.next_date.split('-').reverse().join('/'),lines);
+   field((league?'Prossima giornata · ':'Prossimo turno · ')+p.next_date.split('-').reverse().join('/'),lines);
   }
   if(!league&&p.format?.length&&!award.winner_name&&!p.complete)field('Formula',[p.format.map(f=>esc(f.phase==='Gironi'?'Gironi ('+f.days+' giornate)':f.phase)).join(' · ')]);
   if(!items.length)field('Stato',[esc(p.label||'In programma')]);

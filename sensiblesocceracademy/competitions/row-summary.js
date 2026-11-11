@@ -34,7 +34,7 @@
    const games=p.upcoming||[], shown=detail?games:games.slice(0,2);
    const lines=shown.map(g=>g.map(team).join(' – '));
    if(games.length>shown.length)lines.push('<em>Altre '+(games.length-shown.length)+' partite</em>');
-   field('Prossimo turno · '+p.next_date.split('-').reverse().join('/'),lines);
+   field((league?'Prossima giornata · ':'Prossimo turno · ')+p.next_date.split('-').reverse().join('/'),lines);
   }
   if(!league&&p.format?.length&&!award.winner_name&&!p.complete)field('Formula',[p.format.map(f=>esc(f.phase==='Gironi'?'Gironi ('+f.days+' giornate)':f.phase)).join(' · ')]);
   if(!items.length)field('Stato',[esc(p.label||'In programma')]);

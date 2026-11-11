@@ -61,10 +61,13 @@ try {
  $out=[];$finalAwards=[];
  foreach($groups as $key=>$fixtures){
   usort($fixtures,fn($a,$b)=>strcmp((string)$a['match_date'],(string)$b['match_date']));
+  $playedRounds=[];$scheduledRounds=[];
   $teams=[];$pairs=[];$days=[];$played=0;$latest=null;$next=null;
   foreach($fixtures as $r){
    $h=$r['h']?:$r['home_name'];$a=$r['a']?:$r['away_name'];$teams[$h]=true;$teams[$a]=true;$pairs[$h.'|'.$a]=true;
    $day=substr((string)$r['match_date'],0,10);$days[$day]=($days[$day]??0)+1;
+   $roundKey=trim((string)$r['competition_round'])?:$day;
+   if($r['played'])$playedRounds[$roundKey]=true;else $scheduledRounds[$roundKey]=true;
    if($r['played']){$played++;$latest=$r;}elseif($next===null){$next=$r;}
   }
   $total=count($fixtures);$n=count($teams);$pct=null;$label='';$detail='';
@@ -146,6 +149,8 @@ try {
   }
   $out[$key]=['final_played'=>!$isLeague && $final && $final['played'] && cupPhase($final)[1]!=='Andata' && $finished,'logos'=>$logos,'ranking'=>$ranking,'upcoming'=>$upcoming,'leader'=>$leader,'points'=>$leader!==null?$table[$leader][0]:null,'finalists'=>$pair($final),'next_match'=>$pair($next),'next_date'=>$next?substr($next['match_date'],0,10):null,'label'=>$label,'detail'=>$detail,'percent'=>$pct,'played'=>$played,'expected'=>$isLeague&&$complete?$total:null,'complete'=>$finished,'format'=>$path,'position'=>$position];
   if($isLeague){
+   $out[$key]['played_days']=count(array_diff_key($playedRounds,$scheduledRounds));
+   $out[$key]['total_days']=$complete?2*($n-1):null;
    foreach(['last_turn'=>$latest,'next_turn'=>$next] as $slot=>$fixture){
     if(!$fixture)continue;
     $day=substr((string)$fixture['match_date'],0,10);
@@ -189,7 +194,13 @@ try {
     $out[$key]['league_summary']=true;
     $out[$key]['expected']=$expected;
     $out[$key]['played']=$played;
-    $out[$key]['percent']=(int)round(100*$played/$expected);
+    $expectedDays=(int)$definition['expected_matchdays'];
+    $perDay=(int)($expected/$expectedDays);
+    $byDay=array_count_values(array_column($results,'match_date'));
+    $playedDays=count(array_filter($byDay,static fn($count)=>$count>=$perDay));
+    $out[$key]['played_days']=$playedDays;
+    $out[$key]['total_days']=$expectedDays;
+    $out[$key]['percent']=(int)round(100*$playedDays/$expectedDays);
     $out[$key]['complete']=$played===$expected;
     $out[$key]['ranking']=array_map(static fn($t)=>['name'=>$t['team_name'],'points'=>$t['points']],array_slice($table,0,2));
    }
