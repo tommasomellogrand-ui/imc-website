@@ -92,6 +92,7 @@ if(isset($_GET['competition'])&&is_string($_GET['competition']))$_GET['competiti
 function imc_site_codex_position(string $role, ?string $stored): ?string {
   $role = strtoupper(preg_replace('/\s+/', '', $role));
   if ($role === 'PT') return 'Portiere';
+  if (preg_match('/^(?:CC(?:\([A-Z]+\))?,CO(?:\([A-Z]+\))?|CO(?:\([A-Z]+\))?,CC(?:\([A-Z]+\))?)$/', $role)) return 'Centrocampista';
   if (preg_match('/(?:^|,)A(?:\(|,|$)/', $role)) return $stored;
   // Central defence, either alone or paired only with defensive midfield.
   if (preg_match('/^(?:D(?:\((?:C|D(?:X)?C|S(?:X)?C)\)|(?:D|S)?C)(?:,CD(?:\([A-Z]+\))?)?|D,CD\((?:C|D(?:X)?C|S(?:X)?C)\)|CD(?:\([A-Z]+\))?,D(?:\((?:C|D(?:X)?C|S(?:X)?C)\)|(?:D|S)?C))$/', $role)) return 'Difensore';
