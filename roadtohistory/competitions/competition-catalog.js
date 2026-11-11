@@ -24,7 +24,7 @@ function domesticRows(rows){
   const info=name?'<small>'+(finished?'Vincitore':'Prima in classifica')+'</small><span class="league-side">'+(logo?'<img width="24" height="24" src="'+esc(logo)+'" alt="">':'')+'<strong>'+esc(name)+'</strong>'+points+'</span>':'<small>In attesa dei risultati</small>';
   return '<button class="gw-cup league-card" data-key="'+esc(r.competition_key)+'"><span class="gw-name">'+IMCCompetitionRow.symbol(true)+'<b>'+esc(label)+'</b></span><span class="gw-state">'+info+'</span></button>';
  }).join('');
- const gauge='<div class="gw-gauge"><svg viewBox="0 0 120 68" aria-hidden="true"><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="#dedee5" stroke-width="9"/><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="var(--world-accent,#7656a0)" stroke-width="9" pathLength="100" stroke-dasharray="'+(pct??0)+' 100"/></svg><b>'+(pct===null?'':pct+'%')+'</b><small>'+esc(caption)+'</small></div>';
+ const gauge=IMCCompetitionRow.gauge(pct,caption);
  function turnLine(slot,title){
   const dates=stats.map(p=>p[slot]).filter(t=>t?.date).sort((a,b)=>a.date.localeCompare(b.date));
   const t=slot==='last_turn'?dates[dates.length-1]:dates[0];

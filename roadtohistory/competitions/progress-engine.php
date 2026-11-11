@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__,2).'/site-data/core/bootstrap.php';
+require_once dirname(__DIR__,2).'/site-data/competitions/result-identity.php';
+require_once dirname(__DIR__,2).'/site-data/competitions/standings-engine.php';
 function cupPhase(array $r): array {
  $stage=trim((string)$r['competition_stage']);$round=trim((string)$r['competition_round']);
  $text=trim($stage.' '.$round);$leg='';
@@ -27,6 +29,7 @@ try {
  $season=imc_site_season($_GET['season']??null)?:(int)max($seasons?:[1]);
  $uiKey=static fn($key)=>preg_replace('/^[^|]+(?=\|)/',$gw,(string)$key);
  $rows=[];$awards=[];
+ $imcResults=[];
  $groups=[];$history=[];
  foreach(['Schedule'=>'team','Results'=>'club'] as $repository=>$idType){
   $table=$prefix.'_'.$repository;
@@ -39,6 +42,9 @@ try {
    $r['played']=$repository==='Results';
    $id=$r['sm_fixture_id']?:($r['match_date'].'|'.$r['home_name'].'|'.$r['away_name']);
    if($gw==='GW001' && $r['competition_group']==='IMC'){
+    if($r['played'] && (int)$r['imc_season']===$season){
+     $imcResults[$r['competition_key']][]=$r+['home_sm_club_id'=>$r['h'],'away_sm_club_id'=>$r['a']];
+    }
     $id=serialize([$r['match_date'],mb_strtolower(trim($r['home_name']),'UTF-8'),mb_strtolower(trim($r['away_name']),'UTF-8')]);
    }
    if((int)$r['imc_season']===$season)$groups[$r['competition_key']][$id]=$r;
@@ -170,11 +176,23 @@ try {
  unset($award);
  foreach($rows as &$row)if(!empty($byKey[$row['competition_key']]['nexus_view']))$row['nexus_view']=$byKey[$row['competition_key']]['nexus_view'];unset($row);
  if($gw==='GW001'){
-  $definitions=imc_site_rows($core,"SELECT competition_key,custom_competition FROM `IMC Competition Codex Global` WHERE game_world_id=? AND sm_action_group='IMC'",[$gw]);
+  $definitions=imc_site_rows($core,"SELECT competition_key,custom_competition,expected_match,expected_matchdays FROM `IMC Competition Codex Global` WHERE game_world_id=? AND sm_action_group='IMC'",[$gw]);
   $indexes=array_flip(array_column($rows,'competition_key'));
   foreach($definitions as $definition){
    $key=$uiKey($definition['competition_key']);
    $name=$definition['custom_competition'];
+   if($definition['expected_matchdays']>0 && $definition['expected_match']>0){
+    $results=imc_site_result_identity($gw,$imcResults[$key]??[]);
+    $table=imc_site_standings_tables($results)['rows'];
+    $played=(int)(array_sum(array_column($table,'played'))/2);
+    $expected=(int)$definition['expected_match'];
+    $out[$key]['league_summary']=true;
+    $out[$key]['expected']=$expected;
+    $out[$key]['played']=$played;
+    $out[$key]['percent']=(int)round(100*$played/$expected);
+    $out[$key]['complete']=$played===$expected;
+    $out[$key]['ranking']=array_map(static fn($t)=>['name'=>$t['team_name'],'points'=>$t['points']],array_slice($table,0,2));
+   }
    if(isset($indexes[$key])){
     $rows[$indexes[$key]]['nexus_view']=$name;
    }else{

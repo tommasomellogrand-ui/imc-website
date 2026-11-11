@@ -12,6 +12,7 @@
  }
  for(const [name,code] of Object.entries({england:'gbeng',scotland:'gbsct',wales:'gbwls'}))flags.set(name,String.fromCodePoint(0x1f3f4,...Array.from(code,c=>0xe0000+c.charCodeAt(0)),0xe007f));
  flags.set('northern ireland','🇬🇧');
+ function gauge(pct,caption){return '<div class="gw-gauge"><svg viewBox="0 0 120 68" aria-hidden="true"><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="#dedee5" stroke-width="9"/><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="var(--world-accent,#7656a0)" stroke-width="9" pathLength="100" stroke-dasharray="'+(pct??0)+' 100"/></svg><b>'+(pct===null?'':pct+'%')+'</b><small>'+esc(caption)+'</small></div>';}
  function render(r,p={},award={},detail=false){
   function team(name){
    const src=p.logos?.[name]||(name===award.winner_name?award.winner_logo_url:'');
@@ -20,16 +21,19 @@
    const initials=name.trim().split(/\s+/).slice(0,2).map(v=>v[0]).join('');
    return '<span class="cr-team"><i>'+esc(initials)+(src?'<img alt="" src="'+esc(src)+'" onerror="this.remove()">':'')+'</i><span>'+esc(name)+'</span></span>';
   }
-  const league=r.sm_action==='league',items=[];
+  const league=p.league_summary||r.sm_action==='league',items=[];
   function field(label,values){if(values.length)items.push('<span class="cr-field"><small>'+esc(label)+'</small>'+values.map(v=>'<b>'+v+'</b>').join('')+'</span>')}
+  const meter=p.league_summary?gauge(p.percent,p.played+' partite su '+p.expected):'';
   if(p.finalists)field('Finalisti',p.finalists.map(team));
   if(award.winner_name){
    const logo=award.winner_logo_url;
    const img=logo&&/^https:\/\//.test(logo)?'<img width="24" height="24" src="'+esc(logo)+'" alt="">':'';
    field('Vincitore',[team(award.winner_name)+(award.winner_manager_name?'<em>'+esc(award.winner_manager_name)+'</em>':'')]);
   }else if(p.complete)field('Stato',['Competizione completa']);
+  const rankingStart=items.length;
   if(league)field(p.complete?'Classifica finale':'Prime in classifica',(p.ranking||[]).map((t,i)=>(i+1)+'ª '+team(t.name)+' · '+esc(t.points)+' pt'));
   else if(!p.complete&&!award.winner_name)field('Turno',[[p.label,p.detail,p.position].filter(Boolean).map(esc).join(' · ')].filter(Boolean));
+  const rankingField=league?items[rankingStart]||'':'';
   if(p.next_date&&!p.complete&&!award.winner_name){
    const games=p.upcoming||[], shown=detail?games:games.slice(0,2);
    const lines=shown.map(g=>g.map(team).join(' – '));
@@ -38,10 +42,12 @@
   }
   if(!league&&p.format?.length&&!award.winner_name&&!p.complete)field('Formula',[p.format.map(f=>esc(f.phase==='Gironi'?'Gironi ('+f.days+' giornate)':f.phase)).join(' · ')]);
   if(!items.length)field('Stato',[esc(p.label||'In programma')]);
-  const kind=league?'Divisione '+r.sm_division:r.sm_action==='playoff'?'Playoff':'Coppa';
+  const kind=p.league_summary?'Campionato IMC':league?'Divisione '+r.sm_division:r.sm_action==='playoff'?'Playoff':'Coppa';
   if(!detail){
    let body='';
-   if(!league&&award.winner_name){
+   if(p.league_summary){
+    body=meter+rankingField;
+   }else if(!league&&award.winner_name){
     const photo=String(award.winner_manager_photo_url||'');
     const portrait=/^(https?:\/\/|\/(?!\/))/.test(photo)?'<img src="'+esc(photo)+'" alt="" width="34" height="34" style="object-fit:cover;border-radius:50%;flex:none">':'';
     body='<span class="gw-final won" style="display:grid;gap:.3rem"><small>Vincitore</small>'+team(award.winner_name)+(award.winner_manager_name?'<span style="display:flex;align-items:center;gap:.4rem">'+portrait+esc(award.winner_manager_name)+'</span>':'')+'</span>';
@@ -53,8 +59,8 @@
    }
    return '<button class="gw-cup" data-key="'+esc(r.competition_key)+'"><span class="gw-name">'+symbol(league)+'<b>'+esc(r.nexus_view)+'</b></span><span class="gw-state">'+body+'</span></button>';
   }
-  const content='<span class="cr-identity">'+symbol(league)+'<strong>'+esc(r.nexus_view)+'</strong><small>'+esc(kind)+'</small></span><span class="cr-data">'+items.join('')+'</span>';
+  const content='<span class="cr-identity">'+symbol(league)+'<strong>'+esc(r.nexus_view)+'</strong><small>'+esc(kind)+'</small></span><span class="cr-data">'+meter+items.join('')+'</span>';
   return detail?'<section class="cr-row" aria-label="Situazione competizione">'+content+'</section>':'<button class="competition-card cr-row" data-key="'+esc(r.competition_key)+'">'+content+'</button>';
  }
- window.IMCCompetitionRow={render,symbol};
+ window.IMCCompetitionRow={render,symbol,gauge};
 })();
