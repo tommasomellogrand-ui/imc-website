@@ -27,11 +27,17 @@ function subbuteo_youth_results(PDO $db, array $rows): array {
             $row['youth_lines'] = ['Verifica formazioni in attesa'];
             continue;
         }
-        $lines = [];
+        $teams = [];
         foreach (['home','away'] as $side) {
             $team = $audit[$side];
-            $lines[] = $row[$side.'_name'].' · '.$team['status'].($team['players'] ? ' · '.$team['players'] : '');
+            $value = $team['status'];
+            if ($value === 'Regolare') $value = '0';
+            if ($value === 'Irregolare' && !empty($team['players'])) {
+                $value = (string)count(explode(', ', $team['players']));
+            }
+            $teams[] = $row[$side.'_name'].' '.$value;
         }
+        $lines = ['Fuori elenco · '.implode(' / ', $teams)];
         if ($audit['note']) $lines[] = $audit['note'];
         if (in_array('Irregolare',[$audit['home']['status'],$audit['away']['status']],true)
             && !in_array('Da verificare',[$audit['home']['status'],$audit['away']['status']],true)) {
