@@ -50,6 +50,13 @@ const requested=params.get('division');current=all.find(r=>r.competition_key===p
 $('back').href='/masterleagueworld/';$('back').textContent='← '+(c.world?.game_world_name||gw);for(const id of ['group-tabs','family-tabs','competition-tabs','country-filter'])$(id).hidden=true;
 $('season-select').onchange=()=>{const next=new URLSearchParams(location.search);next.set('season',$('season-select').value);location.href=location.pathname+'?'+next};
 if(!current){seasonBar();$('title').textContent='Competizioni';$('competition-nav').hidden=true;$('competition-tools').hidden=true;$('group-filter').hidden=true;if(requested)$('meta').textContent='Competizione non disponibile nella stagione selezionata · Scegli dal catalogo';catalog($('view'));history.replaceState(null,'',base+'?'+new URLSearchParams({season,group:category}));return}
+if(current.sm_action==='league'||/\|IMC\|(championsleague|europaleague|conferenceleague|risingstarsleague|nextgenleague)(\||$)/i.test(current.competition_key)){
+ const dedicated={championsleague:'rth-champions-league',europaleague:'rth-europa-league',conferenceleague:'rth-conference-league'};
+ const target=gw==='GW001'&&dedicated[current.competition_key.split('|').pop()];
+ if(target){const query=new URLSearchParams({season,tab:params.get('tab')||'overview'});location.replace('/roadtohistory/'+target+'/?'+query);return;}
+ await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/roadtohistory/imc-cups/league-page.js?v=2';script.onload=resolve;script.onerror=reject;document.head.append(script);});
+ await showLeaguePage({world:gw,base,competition:current,seasons:d.seasons,season});return;
+}
 document.body.classList.add('competition-detail');
 const rail=document.createElement('nav');rail.className='competition-rail';rail.setAttribute('aria-label','Competizioni');
 rail.innerHTML=all.filter(r=>r.competition_group===current.competition_group).map(r=>'<a href="'+esc(url(r))+'"'+(r.competition_key===current.competition_key?' aria-current="page"':'')+'>'+esc(r.nexus_view)+'</a>').join('');
