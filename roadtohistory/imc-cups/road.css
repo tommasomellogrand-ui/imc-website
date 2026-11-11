@@ -10,3 +10,14 @@
 th,td,.cup-result-row+.cup-result-row,.details{border-color:var(--line)}thead{color:#52647a}.report-link{color:#142b45}
 .cup-wrap h2{font-size:24px}.cup-banner{border:1px solid var(--line)}#match-dialog{max-height:90dvh;overflow:auto}#match-dialog::backdrop{background:#ffffffaa}
 @media(max-width:680px){.cup-wrap{width:calc(100% - 32px);padding:18px 0 40px}.cup-world-nav a{font-size:11px;padding:11px 13px}.cup-tabs{gap:0}.cup-tabs button{padding:14px 10px}.cup-summary{gap:8px}.cup-summary div{padding:16px 5px}.cup-wrap h2{font-size:21px}}
+
+.fixture-line{display:grid;grid-template-columns:minmax(0,1fr) 4em minmax(0,1fr);align-items:center;gap:clamp(6px,2vw,22px);padding:12px clamp(6px,2vw,20px)}
+.fixture-line+.fixture-line{border-top:1px solid var(--line)}
+.fixture-side{display:flex;align-items:center;gap:clamp(4px,1vw,10px);min-width:0}
+.fixture-side.home{flex-direction:row-reverse;text-align:right}
+.fixture-crest{display:grid;place-items:center;flex:0 0 clamp(22px,4vw,32px)}
+.fixture-crest img{width:100%;height:32px;object-fit:contain}
+.fixture-names{min-width:0;overflow-wrap:anywhere;line-height:1.25}
+.fixture-names strong,.fixture-names small{display:block}
+.fixture-names small{font-size:.82em;color:#52647a;margin-top:3px}
+.fixture-center{text-align:center;font:700 1em Inter,sans-serif;font-variant-numeric:tabular-nums;color:#142b45;padding:6px 0;border:1px solid var(--line);background:white;border-radius:4px}
