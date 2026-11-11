@@ -56,8 +56,32 @@ const millionFormat = new Intl.NumberFormat('it-IT', {maximumFractionDigits: 1})
 function formatMillions(amount) {
  return millionFormat.format(amount / 1000000) + ' M €';
 }
+function hasExchangePlayer(players) {
+ if (Array.isArray(players)) return players.some(hasExchangePlayer);
+ if (players && typeof players === 'object') return Object.values(players).some(hasExchangePlayer);
+ if (typeof players === 'number') return players > 0;
+ const text = typeof players === 'string' ? players.trim() : '';
+ if (!text || /^(?:null|false|0|none|nessuno|n\/a|[-–—])$/i.test(text)) return false;
+ if (/^[\[{]/.test(text)) {
+  try { return hasExchangePlayer(JSON.parse(text)); } catch { return false; }
+ }
+ return true;
+}
 function transferFee(row) {
  const raw = String(row.amount_text ?? '').normalize('NFKC').trim().toLowerCase();
+ const direct = parseCash(raw);
+ if (direct !== null) return direct;
+ const exchange = hasExchangePlayer(row.exchange_players);
+ const parts = raw.split(/\s*\+\s*/);
+ if (parts.length > 1) {
+  const amounts = parts.map(parseCash).filter(amount => amount !== null);
+  if (amounts.length === 1) return amounts[0];
+  if (amounts.length > 1) return null;
+ }
+ if (exchange && !/[\d€£$]/.test(raw)) return 0;
+ return null;
+}
+function parseCash(raw) {
  const value = raw.replace(/^(?:euro|eur|[€£$])\s*|\s*(?:euro|eur|[€£$])$/g, '').trim();
  if (/^(?:gratis|gratuito|free(?: transfer)?|(?:a )?parametro\s*zero|svincolato|scambio|player exchange)$/.test(value)) return 0;
  const match = /^([\d][\d.,'’\s]*)(milioni|milione|mln\.?|millions?|mil|m|mila|mille|thousand|k)?$/.exec(value);
