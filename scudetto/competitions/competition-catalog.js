@@ -50,29 +50,11 @@ const requested=params.get('division');current=all.find(r=>r.competition_key===p
 $('back').href='/scudetto/';$('back').textContent='← '+(c.world?.game_world_name||gw);for(const id of ['group-tabs','family-tabs','competition-tabs','country-filter'])$(id).hidden=true;
 $('season-select').onchange=()=>{const next=new URLSearchParams(location.search);next.set('season',$('season-select').value);location.href=location.pathname+'?'+next};
 if(!current){seasonBar();$('title').textContent='Competizioni';$('competition-nav').hidden=true;$('competition-tools').hidden=true;$('group-filter').hidden=true;if(requested)$('meta').textContent='Competizione non disponibile nella stagione selezionata · Scegli dal catalogo';catalog($('view'));history.replaceState(null,'',base+'?'+new URLSearchParams({season,group:category}));return}
-if(current.sm_action==='league'||/\|IMC\|(championsleague|europaleague|conferenceleague|risingstarsleague|nextgenleague)(\||$)/i.test(current.competition_key)){
- const dedicated={championsleague:'rth-champions-league',europaleague:'rth-europa-league',conferenceleague:'rth-conference-league'};
- const target=gw==='GW001'&&dedicated[current.competition_key.split('|').pop()];
+ const dedicated={championsleague:'rth-champions-league',europaleague:'rth-europa-league',conferenceleague:'rth-conference-league',clubworldcup:'rth-club-world-cup'};
+ const target=gw==='GW001'&&current.competition_group==='IMC'&&dedicated[current.competition_key.split('|').pop()];
  if(target){const query=new URLSearchParams({season,tab:params.get('tab')||'overview'});location.replace('/roadtohistory/'+target+'/?'+query);return;}
- await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/roadtohistory/imc-cups/league-page.js?v=2';script.onload=resolve;script.onerror=reject;document.head.append(script);});
+ await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/roadtohistory/imc-cups/league-page.js?v=allcups3';script.onload=resolve;script.onerror=reject;document.head.append(script);});
  await showLeaguePage({world:gw,base,competition:current,seasons:d.seasons,season});return;
-}
-document.body.classList.add('competition-detail');
-const rail=document.createElement('nav');rail.className='competition-rail';rail.setAttribute('aria-label','Competizioni');
-rail.innerHTML=all.filter(r=>r.competition_group===current.competition_group).map(r=>'<a href="'+esc(url(r))+'"'+(r.competition_key===current.competition_key?' aria-current="page"':'')+'>'+esc(r.nexus_view)+'</a>').join('');
-$('back').closest('.back-row').before(rail);
-const banner=document.createElement('section');banner.className='competition-banner';banner.setAttribute('aria-label',current.nexus_view);
-banner.innerHTML=IMCCompetitionRow.symbol(current.sm_action==='league')+'<div><p>Scudetto · '+esc(current.competition_group)+'</p><h1>'+esc(current.nexus_view)+'</h1></div>';
-$('back').closest('.back-row').after(banner);
-const summary=document.createElement('div');summary.innerHTML=IMCCompetitionRow.render(current,progress[current.competition_key],awards[current.competition_key],true);banner.after(summary);
-const context=document.createElement('div');context.className='competition-context';summary.after(context);context.append($('season-select').closest('.filters'));
-const status=document.createElement('span');status.id='competition-status';status.className='competition-status';status.textContent='Caricamento stato…';context.append(status);
-category=current.competition_group;const initial=['overview','results','schedule','standings','stats'].includes(params.get('tab'))?params.get('tab'):'overview';history.replaceState(null,'',url(current,initial));$('title').textContent=current.nexus_view;document.title=current.nexus_view+' · Scudetto';$('group').textContent=category;$('competition-tools').hidden=false;$('selected-name').textContent=current.nexus_view;
-const changer=document.createElement('button');changer.className='change-competition';changer.textContent='Cambia competizione';$('back').after(changer);const dialog=document.createElement('dialog');dialog.className='catalog-dialog';dialog.innerHTML='<div class="catalog-dialog-head"><h2>Cambia competizione</h2><button aria-label="Chiudi">×</button></div><div id="switch-catalog"></div>';document.body.append(dialog);dialog.querySelector('button').onclick=()=>dialog.close();changer.onclick=()=>{catalog($('switch-catalog'),true);dialog.showModal()};
-$('competition-nav').hidden=false;$('competition-nav').innerHTML='<button data-section="overview">Overview</button><button data-section="matches">Partite</button><button data-section="standings">Classifica</button><button data-section="stats">Statistiche</button>';
-const sub=document.createElement('nav');sub.className='catalog-match-tabs';sub.innerHTML='<button data-match-tab="results">Risultati</button><button data-match-tab="schedule">Calendario</button>';sub.setAttribute('aria-label','Risultati e calendario');$('view').before(sub);
-function mount(tab){cleanup();const section=['results','schedule'].includes(tab)?'matches':tab;sub.hidden=section!=='matches';document.querySelectorAll('[data-section]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.section===section)));sub.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.matchTab===tab)));history.replaceState(null,'',url(current,tab));cleanup=NexusCompetition.mount({season,key:current.competition_key,name:current.nexus_view,action:current.sm_action,tab})||(()=>{})}
-document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>mount(b.dataset.section==='matches'?'results':b.dataset.section));sub.querySelectorAll('button').forEach(b=>b.onclick=()=>mount(b.dataset.matchTab));mount(initial);
 }catch(e){$('view').innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
 })();
 

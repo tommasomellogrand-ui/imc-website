@@ -2,15 +2,15 @@
 const $=id=>document.getElementById(id),key=document.body.dataset.competition,params=new URLSearchParams(location.search),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const settings=window.leaguePage;
 const world=settings?.world||'GW001',base=settings?.base||'/roadtohistory/';
-const league=Boolean(settings)||!key.endsWith('|clubworldcup');
+const league=settings?settings.isLeague:!key.endsWith('|clubworldcup');
 let season='',tab=params.get('tab')||'overview',mode='results',metric='goals',statsMode='teams',data,epoch=0;
 const safe=v=>/^(https:\/\/|\/(?!\/))/.test(v||'')?v:'',date=v=>v?new Date(String(v).slice(0,10)+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'}):'Data da definire';
 const badge=(name,logo)=>'<span class="club">'+(safe(logo)?'<img src="'+esc(logo)+'" alt="" loading="lazy">':'')+'<span>'+esc(name)+'</span></span>';
 const empty=text=>'<p class="cup-empty">'+esc(text)+'</p>';
 async function api(file,extra={}){const r=await fetch(base+'competitions/'+file+'?'+new URLSearchParams({world,season,competition:key,...extra}),{cache:'no-store'});const j=await r.json();if(!r.ok||!j.ok)throw Error(file);return j}
 const identity=r=>[String(r.match_date).slice(0,10),r.home_sm_club_id||r.home_sm_team_id||r.home_name,r.away_sm_club_id||r.away_sm_team_id||r.away_name].join('|');
-const roundKey=r=>r.competition_round?'round:'+r.competition_round:'date:'+String(r.match_date).slice(0,10);
-const roundLabel=r=>(r.competition_stage?String(r.competition_stage)+' · ':'')+(r.competition_round?(league?'Giornata ':'Turno ')+r.competition_round:date(r.match_date));
+const roundKey=r=>!league?JSON.stringify([r.competition_stage||'',r.competition_round||r.match_date]):r.competition_round?'round:'+r.competition_round:'date:'+String(r.match_date).slice(0,10);
+const roundLabel=r=>(r.competition_stage?String(r.competition_stage)+' · ':'')+(r.competition_round?(/^\d+$/.test(r.competition_round)?(league?'Giornata ':'Turno '):'')+r.competition_round:date(r.match_date));
 function match(r,played){
  const team=side=>{
   const name=r[side+'_name']||'',logo=safe(r[side+'_logo_url']),manager=r[side+'_imc_manager_name'];

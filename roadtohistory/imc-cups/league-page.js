@@ -11,7 +11,7 @@ window.showLeaguePage=async function({world,base,competition,seasons,season}){
  for(let el=document.querySelector('.world-entry-static')?.nextElementSibling;el&&el!==oldMain;){const next=el.nextElementSibling;el.remove();el=next;}
  oldMain.replaceWith(main);document.title=competition.nexus_view;
  document.body.dataset.competition=competition.competition_key;
- window.leaguePage={world,base:root,context:{seasons:seasons.map(imc_season=>({imc_season})),current_season:season}};
+ window.leaguePage={isLeague:competition.sm_action==='league'||/\|IMC\|(risingstarsleague|nextgenleague)(\||$)/i.test(competition.competition_key),world,base:root,context:{seasons:seasons.map(imc_season=>({imc_season})),current_season:season}};
  for(const file of ['cup.css','road.css']){const link=document.createElement('link');link.rel='stylesheet';link.href='/roadtohistory/imc-cups/'+file;document.head.append(link);}
- for(const file of ['cup-model.js','cup.js'])await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/roadtohistory/imc-cups/'+file+'?v=league-page2';script.onload=resolve;script.onerror=reject;document.head.append(script);});
+ for(const file of ['cup-model.js','cup.js'])await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/roadtohistory/imc-cups/'+file+'?v=allcups3';script.onload=resolve;script.onerror=reject;document.head.append(script);});
 };
