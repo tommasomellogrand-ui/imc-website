@@ -98,20 +98,18 @@ function imc_site_codex_position(string $role, ?string $stored): ?string {
     return strpbrk($coZone ?? '', 'DS') !== false ? 'Centrocampista Offensivo' : 'Centrocampista';
   }
   if (preg_match('/(?:^|,)A(?:\(|,|$)/', $role)) return $stored;
-  // Central defence, either alone or paired only with defensive midfield.
-  if (preg_match('/^(?:D(?:\((?:C|D(?:X)?C|S(?:X)?C)\)|(?:D|S)?C)(?:,CD(?:\([A-Z]+\))?)?|D,CD\((?:C|D(?:X)?C|S(?:X)?C)\)|CD(?:\([A-Z]+\))?,D(?:\((?:C|D(?:X)?C|S(?:X)?C)\)|(?:D|S)?C))$/', $role)) return 'Difensore';
   $pending = [];
   $wide = [];
   $centralAndWideDefender = false;
   foreach (explode(',', $role) as $token) {
     if (!preg_match('/^([A-Z]+)(?:\(([A-Z]+)\))?$/', $token, $part)) return $stored;
-    if (in_array($part[1], ['DDC','DSC'], true)) {
+    if (in_array($part[1], ['DDC','DSC','DDCS','DDSC'], true)) {
       $centralAndWideDefender = true;
       continue;
     }
     $pending[] = $part[1];
     if (!isset($part[2])) continue;
-    if (in_array($part[2], ['DXC','SXC','DC','SC'], true) && in_array('D', $pending, true)) {
+    if (str_contains($part[2], 'C') && strpbrk($part[2], 'DS') !== false && in_array('D', $pending, true)) {
       $centralAndWideDefender = true;
     }
     if (preg_match('/^(?:DX|SX|D|S)+$/', $part[2])) {
@@ -119,6 +117,8 @@ function imc_site_codex_position(string $role, ?string $stored): ?string {
     }
     $pending = [];
   }
-  if ($centralAndWideDefender && isset($wide['CD'], $wide['CC'])) return 'Terzino';
+  if ($centralAndWideDefender && isset($wide['CD'])) return 'Terzino';
+  // Central defence, either alone or paired only with defensive midfield.
+  if (preg_match('/^(?:D(?:\((?:C|D(?:X)?C|S(?:X)?C)\)|(?:D|S)?C)(?:,CD(?:\([A-Z]+\))?)?|D,CD\((?:C|D(?:X)?C|S(?:X)?C)\)|CD(?:\([A-Z]+\))?,D(?:\((?:C|D(?:X)?C|S(?:X)?C)\)|(?:D|S)?C))$/', $role)) return 'Difensore';
   return isset($wide['D'], $wide['CD']) ? 'Terzino' : $stored;
 }
