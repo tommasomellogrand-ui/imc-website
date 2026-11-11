@@ -48,7 +48,7 @@ window.updateClubTransferSummary = async function(rows) {
   const clubs = await directory;
   const names = new Map(), ids = new Map();
   const totals = clubs.map(club => {
-   const entry = {club, purchases:0, sales:0, spent:0, received:0};
+   const entry = {club, purchases:0, sales:0, spent:0, received:0, issues:[]};
    ids.set(String(club.world_id), entry);
    names.set(club.name.trim().toLowerCase(), entry);
    return entry;
@@ -60,15 +60,20 @@ window.updateClubTransferSummary = async function(rows) {
     const entry = id && Number(id)>0 ? ids.get(String(id)) : names.get(String(row['club_'+side]||'').trim().toLowerCase());
     if (!entry) continue;
     entry[count]++;
+    if (fee === null) {
+     const raw = String(row.amount_text ?? '').trim();
+     const direction = side === 'to' ? 'Acquisto' : 'Cessione';
+     entry.issues.push(direction + ' #' + row.imc_transfer_number + ' · ' + row.player_name + ' · ' + row.club_from + ' → ' + row.club_to + ' · ' + (raw ? 'Importo registrato «' + raw + '»' : 'Campo importo vuoto'));
+    }
     if (entry[amount] !== null) entry[amount] = fee === null ? null : entry[amount]+fee;
    }
   }
   const cards = document.createDocumentFragment();
   const scudetto = panel.dataset.initialBudget !== undefined;
   const initial = scudetto ? Number(panel.dataset.initialBudget) : 0;
-  const money = value => value === null ? 'Da verificare' : formatMillions(value);
+  const money = value => value === null ? 'Totale incompleto' : formatMillions(value);
   totals.sort((a,b) => a.club.name.localeCompare(b.club.name,'it'));
-  for (const {club,purchases,sales,spent,received} of totals) {
+  for (const {club,purchases,sales,spent,received,issues} of totals) {
    const card = document.createElement('article');
    const title = document.createElement('h2');
    if (/^https?:\/\//i.test(club.image_url || '')) {
@@ -88,7 +93,18 @@ window.updateClubTransferSummary = async function(rows) {
     const term = document.createElement('dt'), value = document.createElement('dd');
     term.textContent = label; value.textContent = amount; list.append(term,value);
    }
-   card.append(list); cards.append(card);
+   card.append(list);
+   if (issues.length) {
+    const details = document.createElement('details'), summary = document.createElement('summary');
+    summary.textContent = 'Movimenti con importo da controllare (' + issues.length + ')';
+    details.append(summary);
+    for (const issue of issues) {
+     const line = document.createElement('p');
+     line.textContent = issue; details.append(line);
+    }
+    card.append(details);
+   }
+   cards.append(card);
   }
   panel.replaceChildren(cards);
  } catch {
