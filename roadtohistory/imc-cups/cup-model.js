@@ -11,7 +11,7 @@ function build(rawResults,rawSchedule,today){
  const teams=new Map(),tables=new Map();
  for(const r of [...scheduled,...results])for(const side of ['home','away']){const id=r[side+'_sm_club_id'];teams.set(id,{name:r[side+'_name'],logo:r[side+'_logo_url']||teams.get(id)?.logo})}
  for(const r of results){if(r.competition_stage&&!/group|grupp|giron|league|campionato/i.test(r.competition_stage))continue;const group=r.competition_group_name||'';if(!tables.has(group))tables.set(group,new Map());const table=tables.get(group);for(const side of ['home','away']){const id=r[side+'_sm_club_id'],other=side==='home'?'away':'home',gf=Number(r[side+'_score']),ga=Number(r[other+'_score']);if(!table.has(id))table.set(id,{team_id:id,team_name:teams.get(id).name,played:0,won:0,drawn:0,lost:0,gf:0,ga:0,gd:0,points:0});const t=table.get(id);t.played++;t.gf+=gf;t.ga+=ga;t.gd=t.gf-t.ga;if(gf>ga){t.won++;t.points+=3}else if(gf===ga){t.drawn++;t.points++}else t.lost++}}
- const groups=[...tables].map(([group_name,table])=>({group_name,rows:[...table.values()].sort((a,b)=>b.points-a.points||b.gd-a.gd||b.gf-a.gf||a.team_name.localeCompare(b.team_name)).map((t,i)=>({...t,position:i+1}))}));return {results,schedule,teams,groups};
+ const groups=[...tables].map(([group_name,table])=>({group_name,rows:[...table.values()].sort((a,b)=>b.points-a.points||b.gd-a.gd||b.gf-a.gf||a.team_name.localeCompare(b.team_name)).map((t,i)=>({...t,position:i+1}))}));return {results,schedule,calendar:scheduled.slice().sort((a,b)=>(String(a.match_date)+String(a.match_time)).localeCompare(String(b.match_date)+String(b.match_time))),teams,groups};
 }
 if(typeof module!=='undefined')module.exports={build};else root.CupModel={build};
 })(typeof window!=='undefined'?window:this);
