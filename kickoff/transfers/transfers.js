@@ -1,16 +1,26 @@
 (() => {
 'use strict';
 function transferFee(row) {
- const value = String(row.amount_text ?? '').trim().toLowerCase().replace(/[€£$\s]/g, '');
- if (/^(gratis|gratuito|free|parametrozero|svincolato)$/.test(value)) return 0;
- const match = /^(\d+(?:[.,]\d+)*)(milioni|milione|mln|m|mila|k)?$/.exec(value);
+ const raw = String(row.amount_text ?? '').normalize('NFKC').trim().toLowerCase();
+ const value = raw.replace(/^(?:euro|eur|[€£$])\s*|\s*(?:euro|eur|[€£$])$/g, '').trim();
+ if (/^(?:gratis|gratuito|free(?: transfer)?|(?:a )?parametro\s*zero|svincolato|scambio|player exchange)$/.test(value)) return 0;
+ const match = /^([\d][\d.,'’\s]*)(milioni|milione|mln\.?|millions?|mil|m|mila|mille|thousand|k)?$/.exec(value);
  if (!match) return null;
- const [, number, unit] = match;
- const multiplier = /^(k|mila)$/.test(unit) ? 1000 : unit ? 1000000 : 1;
- const normalized = !unit && /^\d{1,3}(?:[.,]\d{3})+$/.test(number)
-   ? number.replace(/[.,]/g, '') : number.replace(',', '.');
- const fee = Math.round(Number(normalized) * multiplier);
- return Number.isSafeInteger(fee) ? fee : null;
+ const unit = match[2];
+ const multiplier = !unit ? 1 : /^(?:k|mila|mille|thousand)$/.test(unit) ? 1000 : 1000000;
+ let number = match[1].trim().replace(/['’\s]/g, '');
+ if (number.includes('.') && number.includes(',')) {
+  if (/^\d{1,3}(?:\.\d{3})+,\d+$/.test(number)) number = number.replace(/\./g, '').replace(',', '.');
+  else if (/^\d{1,3}(?:,\d{3})+\.\d+$/.test(number)) number = number.replace(/,/g, '');
+  else return null;
+ } else if (!unit && /^\d{1,3}([.,])\d{3}(?:\1\d{3})*$/.test(number)) {
+  number = number.replace(/[.,]/g, '');
+ } else {
+  if (!/^\d+(?:[.,]\d+)?$/.test(number)) return null;
+  number = number.replace(',', '.');
+ }
+ const amount = Math.round(Number(number) * multiplier);
+ return Number.isSafeInteger(amount) ? amount : null;
 }
 
 const panel = document.getElementById('club-summary');
