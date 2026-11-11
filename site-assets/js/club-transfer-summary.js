@@ -63,23 +63,34 @@ window.updateClubTransferSummary = async function(rows) {
     if (entry[amount] !== null) entry[amount] = fee === null ? null : entry[amount]+fee;
    }
   }
-  const table = document.createElement('table');
-  const header = table.createTHead().insertRow();
-  for (const label of ['Club','N. acquisti','N. cessioni','Valore acquisti','Valore cessioni','Saldo mercato']) {
-   const th = document.createElement('th'); th.scope='col'; th.textContent=label; header.append(th);
-  }
-  const body = table.createTBody();
-  const money = amount => amount === null ? 'Da verificare' : formatMillions(amount);
-  totals.sort((a,b)=>a.club.name.localeCompare(b.club.name,'it'));
+  const cards = document.createDocumentFragment();
+  const scudetto = panel.dataset.initialBudget !== undefined;
+  const initial = scudetto ? Number(panel.dataset.initialBudget) : 0;
+  const money = value => value === null ? 'Da verificare' : formatMillions(value);
+  totals.sort((a,b) => a.club.name.localeCompare(b.club.name,'it'));
   for (const {club,purchases,sales,spent,received} of totals) {
-   const row = body.insertRow(), cell = row.insertCell();
+   const card = document.createElement('article');
+   const title = document.createElement('h2');
    if (/^https?:\/\//i.test(club.image_url || '')) {
-    const img = document.createElement('img'); img.alt=''; img.src=club.image_url.replace(/^http:/i,'https:'); img.onerror=()=>img.hidden=true; cell.append(img);
+    const img = document.createElement('img');
+    img.alt = ''; img.src = club.image_url.replace(/^http:/i,'https:');
+    img.onerror = () => img.hidden = true;
+    title.append(img);
    }
-   cell.append(club.name);
-   for (const value of [purchases,sales,money(spent),money(received),money(received === null || spent === null ? null : received-spent)]) row.insertCell().textContent=value;
+   title.append(club.name);
+   card.append(title);
+   const lines = [];
+   if (scudetto) lines.push(['Budget iniziale', money(initial)]);
+   lines.push(['Acquisti (' + purchases + ')', money(spent)], ['Cessioni (' + sales + ')', money(received)]);
+   lines.push([scudetto ? 'Saldo' : 'Saldo mercato', money(spent === null || received === null ? null : initial + received - spent)]);
+   const list = document.createElement('dl');
+   for (const [label, amount] of lines) {
+    const term = document.createElement('dt'), value = document.createElement('dd');
+    term.textContent = label; value.textContent = amount; list.append(term,value);
+   }
+   card.append(list); cards.append(card);
   }
-  panel.replaceChildren(table);
+  panel.replaceChildren(cards);
  } catch {
   directory = null;
   panel.textContent='Impossibile caricare il riepilogo dei club.';
