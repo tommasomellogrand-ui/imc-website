@@ -9,6 +9,7 @@ try{
  $c=imc_site_config();$gw=imc_site_world($_GET['world']??'');$raw=(string)($_GET['player']??'');if(!ctype_digit($raw)||(int)$raw<1)throw new InvalidArgumentException('invalid_player');$id=(int)$raw;
  $db=imc_site_db($c,imc_site_target($c,$gw));$core=imc_site_db($c,'core');
  $players=imc_site_rows($db,'SELECT * FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE player_id=?',[$id]);$player=$players[0]??null;
+ if($player) $player['posizione']=imc_site_codex_position((string)($player['position']??''),$player['posizione']??$player['Posizione']??null);
  if(!$player){
   $global=imc_site_rows($core,'SELECT * FROM `IMC Player Codex Global Data` WHERE player_id=?',[$id]);$identityFallback=imc_site_player_identity($core,[$id])[$id]??[];
   $player=array_merge($identityFallback,$global[0]??[],['player_id'=>$id]);

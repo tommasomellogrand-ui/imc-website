@@ -88,3 +88,21 @@ function imc_site_rth_competition_key(string $key): string {
 }
 
 if(isset($_GET['competition'])&&is_string($_GET['competition']))$_GET['competition']=imc_site_rth_competition_key($_GET['competition']);
+
+function imc_site_codex_position(string $role, ?string $stored): ?string {
+  $role = strtoupper(preg_replace('/\s+/', '', $role));
+  if ($role === 'PT') return 'Portiere';
+  if (preg_match('/(?:^|,)A(?:\(|,|$)/', $role)) return $stored;
+  $pending = [];
+  $wide = [];
+  foreach (explode(',', $role) as $token) {
+    if (!preg_match('/^([A-Z]+)(?:\(([A-Z]+)\))?$/', $token, $part)) return $stored;
+    $pending[] = $part[1];
+    if (!isset($part[2])) continue;
+    if (preg_match('/^(?:DX|SX|D|S)+$/', $part[2])) {
+      foreach ($pending as $code) $wide[$code] = true;
+    }
+    $pending = [];
+  }
+  return isset($wide['D'], $wide['CD']) ? 'Terzino' : $stored;
+}

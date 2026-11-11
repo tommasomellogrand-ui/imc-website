@@ -111,7 +111,7 @@ async function showRoster(background=false){
   if(type==='club')html+='<div class="transfer-tabs" role="tablist" aria-label="Stato rosa">'+[['active','Attivi'],['departed','Ceduti']].map(([v,label])=>'<button type="button" role="tab" data-roster-state="'+v+'" aria-pressed="'+(rosterFilter===v)+'" aria-selected="'+(rosterFilter===v)+'">'+label+' ('+j.rows.filter(x=>(x.roster_status||'unknown')===v).length+')</button>').join('')+'</div>';
   const visibleRows=type==='club'?j.rows.filter(x=>(x.roster_status||'unknown')===rosterFilter):j.rows;
   const positionGroups = new Map([
-   ['portiere', 'Portieri'], ['difensore', 'Difensori'], ['centrocampista', 'Centrocampisti'],
+   ['portiere', 'Portieri'], ['difensore', 'Difensori'], ['terzino', 'Terzini'], ['centrocampista', 'Centrocampisti'],
    ['centrocampista offensivo', 'Centrocampisti offensivi'], ['attaccante', 'Attaccanti']
   ]);
   const grouped = new Map([...positionGroups.values()].map(label => [label, []]));
