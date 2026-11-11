@@ -92,7 +92,11 @@ if(isset($_GET['competition'])&&is_string($_GET['competition']))$_GET['competiti
 function imc_site_codex_position(string $role, ?string $stored): ?string {
   $role = strtoupper(preg_replace('/\s+/', '', $role));
   if ($role === 'PT') return 'Portiere';
-  if (preg_match('/^(?:CC(?:\([A-Z]+\))?,CO(?:\([A-Z]+\))?|CO(?:\([A-Z]+\))?,CC(?:\([A-Z]+\))?)$/', $role)) return 'Centrocampista';
+  if (preg_match('/^(?:CC(?:\(([A-Z]+)\))?,CO(?:\(([A-Z]+)\))?|CO(?:\(([A-Z]+)\))?,CC(?:\(([A-Z]+)\))?)$/', $role, $parts, PREG_UNMATCHED_AS_NULL)) {
+    // A trailing zone applies to both roles when the first role has no zone.
+    $coZone = str_starts_with($role, 'CC') ? $parts[2] : ($parts[3] ?? $parts[4]);
+    return strpbrk($coZone ?? '', 'DS') !== false ? 'Centrocampista Offensivo' : 'Centrocampista';
+  }
   if (preg_match('/(?:^|,)A(?:\(|,|$)/', $role)) return $stored;
   // Central defence, either alone or paired only with defensive midfield.
   if (preg_match('/^(?:D(?:\((?:C|D(?:X)?C|S(?:X)?C)\)|(?:D|S)?C)(?:,CD(?:\([A-Z]+\))?)?|D,CD\((?:C|D(?:X)?C|S(?:X)?C)\)|CD(?:\([A-Z]+\))?,D(?:\((?:C|D(?:X)?C|S(?:X)?C)\)|(?:D|S)?C))$/', $role)) return 'Difensore';
