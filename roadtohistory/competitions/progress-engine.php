@@ -180,12 +180,17 @@ try {
  }
  unset($award);
  foreach($rows as &$row)if(!empty($byKey[$row['competition_key']]['nexus_view']))$row['nexus_view']=$byKey[$row['competition_key']]['nexus_view'];unset($row);
- if(in_array($gw,['GW001','GW010'],true)){
-  $definitions=imc_site_rows($core,"SELECT competition_key,custom_competition,expected_match,expected_matchdays FROM `IMC Competition Codex Global` WHERE game_world_id=? AND sm_action_group='IMC'",[$gw]);
+ if(in_array($gw,['GW001','GW009','GW010','GW011'],true)){
+  $definitions=imc_site_rows($core,"SELECT competition_key,custom_competition,expected_match,expected_matchdays FROM `IMC Competition Codex Global` WHERE game_world_id=? AND (sm_action_group='IMC' OR (game_world_id='GW009' AND custom_competition='Kick Off Cup'))",[$gw]);
   $indexes=array_flip(array_column($rows,'competition_key'));
   foreach($definitions as $definition){
    $key=$uiKey($definition['competition_key']);
    $name=$definition['custom_competition'];
+   if($gw==='GW009' && $key==='' && $name==='Kick Off Cup')$key='GW009|IMC|kickoffcup';
+   if($gw==='GW011'){
+    if(in_array($key,['GW011|IMC|risingstarsleague','GW011|IMC|nextgenleague'],true))continue;
+    $name=preg_replace('/ U(?:21|18) · (Premier|Challenger) Pool$/',' $1',$name);
+   }
    if($definition['expected_matchdays']>0 && $definition['expected_match']>0){
     $results=imc_site_result_identity($gw,$imcResults[$key]??[]);
     $table=imc_site_standings_tables($results)['rows'];
