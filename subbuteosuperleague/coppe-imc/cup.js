@@ -7,7 +7,8 @@ const empty=text=>'<p class="cup-empty">'+esc(text)+'</p>';
 async function api(file,extra={}){const r=await fetch('/subbuteosuperleague/competitions/'+file+'?'+new URLSearchParams({world:'GW011',season,competition:key,...extra}),{cache:'no-store'});const j=await r.json();if(!r.ok||!j.ok)throw Error(file);return j}
 const identity=r=>[String(r.match_date).slice(0,10),r.home_sm_club_id||r.home_sm_team_id||r.home_name,r.away_sm_club_id||r.away_sm_team_id||r.away_name].join('|');
 const roundKey=r=>r.competition_round?'round:'+r.competition_round:'date:'+String(r.match_date).slice(0,10);
-const roundLabel=r=>(r.competition_stage?String(r.competition_stage)+' · ':'')+(r.competition_round?'Giornata / turno '+r.competition_round:date(r.match_date));
+const league=!key.toLowerCase().includes('clubworldcup');
+const roundLabel=r=>(r.competition_stage?String(r.competition_stage)+' · ':'')+(r.competition_round?(league?'Giornata ':'Turno ')+r.competition_round:date(r.match_date));
 function match(r,played){const team=side=>'<span class="match-team">'+badge(r[side+'_name'],r[side+'_logo_url'])+'<small>'+esc(r[side+'_imc_manager_name']||'')+'</small></span>';const score=played?esc(r.home_score)+' – '+esc(r.away_score):esc(r.match_time?.slice(0,5)||'VS');const id=data.results.indexOf(r);return '<article class="cup-match">'+team('home')+'<span class="score">'+score+'<small>'+date(r.match_date)+'</small></span>'+team('away')+(played?'<button class="details" data-match="'+id+'">Dettaglio partita →</button>':'')+'</article>'}
 function resultRow(r){const team=side=>'<span class="match-team">'+badge(r[side+'_name'],r[side+'_logo_url'])+'<small>'+esc(r[side+'_imc_manager_name']||'')+'</small></span>';return '<article class="cup-result-row">'+team('home')+'<button class="result-score" data-match="'+data.results.indexOf(r)+'" aria-label="'+esc('Dettaglio '+r.home_name+' '+r.home_score+' a '+r.away_score+' '+r.away_name)+'">'+esc(r.home_score)+' – '+esc(r.away_score)+'</button>'+team('away')+'</article>'}
 function matches(rows,played){if(!rows.length)return empty(played?'Nessun risultato disponibile.':'Nessuna partita futura in calendario.');if(!played)return '<div class="match-grid">'+rows.map(r=>match(r,false)).join('')+'</div>';const dates=[...new Set(rows.map(r=>date(r.match_date)))];return '<div class="result-round"><header class="result-round-head"><h3>'+esc(roundLabel(rows[0]))+'</h3><span>'+esc(dates.join(' · '))+'</span></header><div class="results-list">'+rows.map(resultRow).join('')+'</div></div>'}
@@ -20,9 +21,22 @@ function render(){if(!data)return;document.querySelectorAll('[data-main-tab]').f
  if(!results.length&&!schedule.length)html+=empty(key.endsWith('|clubworldcup')?'Competizione non ancora iniziata.':'Nessuna partita disponibile per questa stagione.');
  else html+='<section><div class="cup-section-title"><h2>Ultimo turno</h2><button data-open="matches">Tutte le partite →</button></div>'+matches(latest?results.filter(r=>roundKey(r)===roundKey(latest)):[],true)+'</section><section><div class="cup-section-title"><h2>La classifica</h2><button data-open="table">Classifica completa →</button></div>'+table(true)+'</section><section><h2>Prossimo turno</h2>'+(next?'<p class="cup-note">'+esc(roundLabel(next))+'</p>':'')+matches(next?schedule.filter(r=>roundKey(r)===roundKey(next)):[],false)+'</section>';
  }else if(tab==='matches'){
- const rows=mode==='results'?results:schedule,groups=new Map();rows.forEach(r=>{if(!groups.has(roundKey(r)))groups.set(roundKey(r),{label:roundLabel(r),rows:[]});groups.get(roundKey(r)).rows.push(r)});
- html='<div class="cup-tools"><div class="cup-pills">'+['results','schedule'].map(m=>'<button data-mode="'+m+'" aria-pressed="'+(mode===m)+'">'+(m==='results'?'Risultati':'Calendario')+'</button>').join('')+'</div><label>Turno <select id="round"><option value="">Tutti</option>'+[...groups].map(([k,g])=>'<option value="'+esc(k)+'"'+(round===k?' selected':'')+'>'+esc(g.label)+'</option>').join('')+'</select></label></div>';
- html+=groups.size?[...groups].filter(([k])=>!round||round===k).map(([,g])=>'<section>'+ (mode==='results'?'':'<h2>'+esc(g.label)+'</h2>')+matches(g.rows,mode==='results')+'</section>').join(''):empty(mode==='results'?'Nessun risultato disponibile.':'Nessuna partita futura in calendario.');
+ const calendar=mode==='schedule';
+ html='<div class="cup-tools"><div class="cup-pills">'+['results','schedule'].map(m=>'<button data-mode="'+m+'" aria-pressed="'+(mode===m)+'">'+(m==='results'?'Risultati':'Calendario')+'</button>').join('')+'</div></div>';
+ function renderDays(rows,played){
+  const groups=new Map();
+  for(const r of rows){const k=roundKey(r);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r);}
+  return [...groups.values()].map(group=>'<section>'+matches(group,played)+'</section>').join('');
+ }
+ if(!calendar)html+=renderDays(results,true)||empty('Nessun risultato disponibile.');
+ else{
+  const all=data.calendar||schedule,upcoming=new Set(schedule.map(identity));
+  const future=all.filter(r=>upcoming.has(identity(r))),past=all.filter(r=>!upcoming.has(identity(r)));
+  if(league)future.sort((a,b)=>Number(a.competition_round)-Number(b.competition_round));
+  html+=renderDays(future,false);
+  if(past.length)html+='<h2>Calendario precedente</h2>'+renderDays(past.slice().reverse(),false);
+  if(!all.length)html+=empty('Nessuna partita in calendario.');
+ }
  }else if(tab==='table'){html='<h2>Classifica</h2>'+table();const knockout=[...results,...schedule].filter(r=>r.competition_stage&&!/group|grupp|giron|league|campionato/i.test(r.competition_stage));if(knockout.length)html+='<h2>Fase a eliminazione diretta</h2>'+knockout.map(r=>'<h3>'+esc(r.competition_stage)+'</h3>'+match(r,results.includes(r))).join('');
  }else{
  html='<div class="cup-pills">'+['teams','players'].map(v=>'<button data-stats="'+v+'" aria-pressed="'+(v===statsMode)+'">'+(v==='teams'?'Squadre':'Giocatori')+'</button>').join('')+'</div>';
@@ -37,7 +51,7 @@ function wire(){document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()
 async function load(){const request=++epoch;$('cup-view').innerHTML=empty('Caricamento della competizione…');$('cup-view').setAttribute('aria-busy','true');try{
  const [r,s,stats,reports]=await Promise.allSettled([api('results.php'),api('schedule.php'),api('match-report.php',{mode:'stats'}),api('match-report.php',{mode:'feed'})]);if(request!==epoch)return;if(r.status!=='fulfilled'||s.status!=='fulfilled')throw Error('matches');
  const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome'}).format(new Date());
- const model=CupModel.build(r.value.rows,s.value.rows,today),{results,schedule}=model;
+ const model=CupModel.build(r.value.rows,s.value.rows,today,league),{results,schedule}=model;
  data={...model,tableError:false,stats:stats.status==='fulfilled'?stats.value:{},statsError:stats.status==='rejected',reports:reports.status==='fulfilled'?reports.value.rows:[],reportError:reports.status==='rejected'};
  $('cup-phase').textContent=results.length?(results[0].competition_stage||'Competizione in corso')+(results[0].competition_round?' · Turno '+results[0].competition_round:''):schedule.length?'In programma':key.endsWith('|clubworldcup')?'Non ancora iniziata':'Nessuna partita disponibile';render();$('cup-updated').textContent='Aggiornato alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'});
  }catch(e){if(request===epoch)$('cup-view').innerHTML=empty('Dati temporaneamente non disponibili. Riprova con Aggiorna.')}finally{if(request===epoch)$('cup-view').setAttribute('aria-busy','false')}}
