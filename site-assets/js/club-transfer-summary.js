@@ -1,5 +1,9 @@
 (() => {
 'use strict';
+const millionFormat = new Intl.NumberFormat('it-IT', {maximumFractionDigits: 1});
+function formatMillions(amount) {
+ return millionFormat.format(amount / 1000000) + ' M €';
+}
 function transferFee(row) {
  const raw = String(row.amount_text ?? '').normalize('NFKC').trim().toLowerCase();
  const value = raw.replace(/^(?:euro|eur|[€£$])\s*|\s*(?:euro|eur|[€£$])$/g, '').trim();
@@ -33,7 +37,6 @@ function select(index) {
 }
 buttons.forEach((button, i) => button.addEventListener('click', () => select(i)));
 select(location.search.length > 1 ? 1 : 0);
-const euros = new Intl.NumberFormat('it-IT', {style:'currency', currency:'EUR', maximumFractionDigits:0});
 let directory;
 window.updateClubTransferSummary = async function(rows) {
  try {
@@ -66,7 +69,7 @@ window.updateClubTransferSummary = async function(rows) {
    const th = document.createElement('th'); th.scope='col'; th.textContent=label; header.append(th);
   }
   const body = table.createTBody();
-  const money = amount => amount === null ? 'Da verificare' : euros.format(amount);
+  const money = amount => amount === null ? 'Da verificare' : formatMillions(amount);
   totals.sort((a,b)=>a.club.name.localeCompare(b.club.name,'it'));
   for (const {club,purchases,sales,spent,received} of totals) {
    const row = body.insertRow(), cell = row.insertCell();

@@ -52,6 +52,10 @@ function loadMatches(){
 function loadTransfers(){
  if(!transfersRequest)transfersRequest=readClub('../transfers/data.php',false).then(j=>{C.transfers=j.rows||[];}).catch(e=>{transfersRequest=null;throw e});return transfersRequest;
 }
+const millionFormat = new Intl.NumberFormat('it-IT', {maximumFractionDigits: 1});
+function formatMillions(amount) {
+ return millionFormat.format(amount / 1000000) + ' M €';
+}
 function transferFee(row) {
  const raw = String(row.amount_text ?? '').normalize('NFKC').trim().toLowerCase();
  const value = raw.replace(/^(?:euro|eur|[€£$])\s*|\s*(?:euro|eur|[€£$])$/g, '').trim();
@@ -74,6 +78,10 @@ function transferFee(row) {
  const amount = Math.round(Number(number) * multiplier);
  return Number.isSafeInteger(amount) ? amount : null;
 }
+function renderTransferCard(row) {
+ const amount = transferFee(row);
+ return NexusCards.transfer(amount === null ? row : {...row, amount_text: formatMillions(amount)});
+}
 function transferTotal(rows) {
  let total = 0;
  for (const row of rows) {
@@ -88,14 +96,13 @@ function budgetSummary(incoming, outgoing) {
  const spent = transferTotal(incoming), earned = transferTotal(outgoing);
  const balance = spent === null || earned === null ? null : initial - spent + earned;
  const amounts = [['Budget iniziale', initial], ['Totale acquisti', spent], ['Totale cessioni', earned], ['Nuovo saldo', balance]];
- const euros = new Intl.NumberFormat('it-IT', {style:'currency', currency:'EUR', maximumFractionDigits:0});
  return '<section class="kpis" aria-label="Budget del club">' + amounts.map(([label, value]) =>
-  '<div class="kpi"><b>' + (value === null ? 'Da verificare' : euros.format(value)) + '</b><span>' + label + '</span></div>'
+  '<div class="kpi"><b>' + (value === null ? 'Da verificare' : formatMillions(value)) + '</b><span>' + label + '</span></div>'
  ).join('') + '</section>';
 }
 function showTransfers(){
  const club=String(D.team.world_id),all=C.transfers||[],incoming=all.filter(x=>String(x.to_sm_world_club_id)===club),outgoing=all.filter(x=>String(x.from_sm_world_club_id)===club),rows=transferDirection==='in'?incoming:outgoing;
- view.innerHTML=budgetSummary(incoming,outgoing)+'<p class="muted">Trasferimenti · Tutte le stagioni</p><div class="transfer-tabs" role="tablist" aria-label="Direzione trasferimenti">'+[['in','In',incoming.length],['out','Out',outgoing.length]].map(([direction,label,count])=>'<button type="button" role="tab" id="transfer-'+direction+'" aria-controls="transfer-list" aria-selected="'+(transferDirection===direction)+'" data-direction="'+direction+'">'+label+' ('+count+')</button>').join('')+'</div><div class="transfer-list" id="transfer-list" role="tabpanel" aria-labelledby="transfer-'+transferDirection+'">'+(rows.length?rows.map(NexusCards.transfer).join(''):'<div class="card empty">Nessun trasferimento in '+(transferDirection==='in'?'entrata':'uscita')+'.</div>')+'</div>';
+ view.innerHTML=budgetSummary(incoming,outgoing)+'<p class="muted">Trasferimenti · Tutte le stagioni</p><div class="transfer-tabs" role="tablist" aria-label="Direzione trasferimenti">'+[['in','In',incoming.length],['out','Out',outgoing.length]].map(([direction,label,count])=>'<button type="button" role="tab" id="transfer-'+direction+'" aria-controls="transfer-list" aria-selected="'+(transferDirection===direction)+'" data-direction="'+direction+'">'+label+' ('+count+')</button>').join('')+'</div><div class="transfer-list" id="transfer-list" role="tabpanel" aria-labelledby="transfer-'+transferDirection+'">'+(rows.length?rows.map(renderTransferCard).join(''):'<div class="card empty">Nessun trasferimento in '+(transferDirection==='in'?'entrata':'uscita')+'.</div>')+'</div>';
  NexusCards.wireImages(view);
  view.querySelectorAll('[data-direction]').forEach(button=>button.onclick=()=>{transferDirection=button.dataset.direction;showTransfers();view.querySelector('#transfer-'+transferDirection).focus();});
 }

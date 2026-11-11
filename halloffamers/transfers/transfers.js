@@ -1,5 +1,9 @@
 (() => {
 'use strict';
+const millionFormat = new Intl.NumberFormat('it-IT', {maximumFractionDigits: 1});
+function formatMillions(amount) {
+ return millionFormat.format(amount / 1000000) + ' M €';
+}
 function transferFee(row) {
  const raw = String(row.amount_text ?? '').normalize('NFKC').trim().toLowerCase();
  const value = raw.replace(/^(?:euro|eur|[€£$])\s*|\s*(?:euro|eur|[€£$])$/g, '').trim();
@@ -23,6 +27,11 @@ function transferFee(row) {
  return Number.isSafeInteger(amount) ? amount : null;
 }
 
+function renderTransferCard(row) {
+ const amount = transferFee(row);
+ return NexusCards.transfer(amount === null ? row : {...row, amount_text: formatMillions(amount)});
+}
+window.renderMarketTransferCard = renderTransferCard;
 const panel = document.getElementById('club-summary');
 const details = document.getElementById('transfer-details');
 const buttons = Array.from(document.querySelectorAll('[data-market-tab]'));
@@ -33,7 +42,6 @@ function select(index) {
 }
 buttons.forEach((button, i) => button.addEventListener('click', () => select(i)));
 select(location.search.length > 1 ? 1 : 0);
-const euros = new Intl.NumberFormat('it-IT', {style:'currency', currency:'EUR', maximumFractionDigits:0});
 let directory;
 window.updateClubTransferSummary = async function(rows) {
  try {
@@ -66,7 +74,7 @@ window.updateClubTransferSummary = async function(rows) {
    const th = document.createElement('th'); th.scope='col'; th.textContent=label; header.append(th);
   }
   const body = table.createTBody();
-  const money = amount => amount === null ? 'Da verificare' : euros.format(amount);
+  const money = amount => amount === null ? 'Da verificare' : formatMillions(amount);
   totals.sort((a,b)=>a.club.name.localeCompare(b.club.name,'it'));
   for (const {club,purchases,sales,spent,received} of totals) {
    const row = body.insertRow(), cell = row.insertCell();
@@ -93,7 +101,7 @@ function render(){
  const q=$('search').value.trim().toLocaleLowerCase('it'),club=$('club').value,season=$('season').value;
  const filtered=rows.filter(r=>(!q||[r.player_name,r.club_from,r.club_to,r.player_id].some(v=>String(v??'').toLocaleLowerCase('it').includes(q)))&&(!club||r.club_from===club||r.club_to===club)&&(!season||String(r.imc_season??r.normalized_season??r.season)===season));
  $('count').textContent=filtered.length+' trasferimenti';
- $('list').innerHTML=filtered.length?'<div class="transfer-grid">'+filtered.slice(0,shown).map(NexusCards.transfer).join('')+'</div>':'<p class="summary-line">Nessun trasferimento disponibile per questi filtri.</p>';
+ $('list').innerHTML=filtered.length?'<div class="transfer-grid">'+filtered.slice(0,shown).map(window.renderMarketTransferCard).join('')+'</div>':'<p class="summary-line">Nessun trasferimento disponibile per questi filtri.</p>';
  $('load-more').hidden=shown>=filtered.length;NexusCards.wireImages($('list'));
 }
 function options(id,values,label,prefix=''){const current=loaded?$(id).value:params.get(id)||'';$(id).innerHTML='<option value="">'+label+'</option>'+values.map(v=>'<option value="'+esc(v)+'">'+prefix+esc(v)+'</option>').join('');if(values.includes(current))$(id).value=current;}
