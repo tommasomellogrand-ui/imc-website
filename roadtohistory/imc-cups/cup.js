@@ -41,14 +41,7 @@ function render(){if(!data)return;document.querySelectorAll('[data-main-tab]').f
   return [...groups.values()].map(group=>'<section>'+matches(group,played)+'</section>').join('');
  }
  if(!calendar)html+=renderDays(results,true)||empty('Nessun risultato disponibile.');
- else{
-  const all=data.calendar||schedule,upcoming=new Set(schedule.map(identity));
-  const future=all.filter(r=>upcoming.has(identity(r))),past=all.filter(r=>!upcoming.has(identity(r)));
-  if(league)future.sort((a,b)=>Number(a.competition_round)-Number(b.competition_round));
-  html+=renderDays(future,false);
-  if(past.length)html+='<h2>Calendario precedente</h2>'+renderDays(past.slice().reverse(),false);
-  if(!all.length)html+=empty('Nessuna partita in calendario.');
- }
+ else html+=renderDays(schedule,false)||empty('Nessuna partita in calendario.');
  }else if(tab==='table'){html='<h2>Classifica</h2>'+table();const knockout=[...results,...schedule].filter(r=>r.competition_stage&&!/group|grupp|giron|league|campionato/i.test(r.competition_stage));if(knockout.length)html+='<h2>Fase a eliminazione diretta</h2>'+knockout.map(r=>'<h3>'+esc(r.competition_stage)+'</h3>'+match(r,results.includes(r))).join('');
  }else{
  html='<div class="cup-pills">'+['teams','players'].map(v=>'<button data-stats="'+v+'" aria-pressed="'+(v===statsMode)+'">'+(v==='teams'?'Squadre':'Giocatori')+'</button>').join('')+'</div>';
