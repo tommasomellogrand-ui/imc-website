@@ -26,7 +26,7 @@ function imc_site_result_identity(string $world,array $rows): array {
                 $name=$fold($row[$side.'_name']);
                 $matches=$ids[$key][$name]??[];
                 if (!$row[$field] && count($matches)===1) $row[$field]=(string)array_key_first($matches);
-                $fixture[]=$row[$field]?:$name;
+                $fixture[]=(string)($row[$field]?:$name);
                 if (!$row[$field] && $name!=='') $row[$side.'_name']=$names[$key][$name];
             }
             $fixture[]=$row['home_score'];$fixture[]=$row['away_score'];
