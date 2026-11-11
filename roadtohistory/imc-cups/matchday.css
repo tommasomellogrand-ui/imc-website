@@ -1,0 +1,41 @@
+/* One bordered round, with the same fixture layout for scores and kickoff times. */
+:is(#view, #cup-view) :is(.round-box .match, .result-round .fixture-line, .result-round .cup-result-row) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(64px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+  min-height: 108px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+:is(#view, #cup-view) :is(.match + .match, .fixture-line + .fixture-line, .cup-result-row + .cup-result-row) {
+  border-top: 1px solid #d9dfe5;
+}
+:is(#view, #cup-view) :is(.round-box .match-team, .result-round .match-team .club, .result-round .fixture-side) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  min-height: 0;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font: 650 13px/1.25 Inter, sans-serif;
+}
+:is(#view, #cup-view) :is(.round-box .team-logo, .result-round .club img, .result-round .fixture-crest img) {
+  width: 30px; height: 30px; object-fit: contain;
+}
+#cup-view .fixture-crest { flex: none; }
+:is(#view, #cup-view) :is(.match-team small, .fixture-names small) {
+  display: block; margin-top: 5px; font: 400 11px/1.35 Inter, sans-serif; color: #52647a;
+}
+:is(#view, #cup-view) :is(.round-box .match-team b, .fixture-names strong) { font-size: 13px; white-space: normal; overflow-wrap: anywhere; }
+:is(#view, #cup-view) :is(.round-box .match > .score, .result-round .result-score, .result-round .fixture-center) {
+  text-align: center; font: 800 23px/1.15 Inter, sans-serif; white-space: nowrap;
+  font-variant-numeric: tabular-nums; color: #142b45; background: transparent; border: 0; padding: 4px 0;
+}
