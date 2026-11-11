@@ -21,3 +21,17 @@ th,td,.cup-result-row+.cup-result-row,.details{border-color:var(--line)}thead{co
 .fixture-names strong,.fixture-names small{display:block}
 .fixture-names small{font-size:.82em;color:#52647a;margin-top:3px}
 .fixture-center{text-align:center;font:700 1em Inter,sans-serif;font-variant-numeric:tabular-nums;color:#142b45;padding:6px 0;border:1px solid var(--line);background:white;border-radius:4px}
+
+/* Equal matchday rows follow the tallest fixture as names wrap. */
+.result-round > div { display: grid; grid-auto-rows: 1fr; }
+.result-round .fixture-line { min-height: calc(24px + 2.5em + 3px + 1.025em + 1px); }
+.cup-card .cup-standings { width: 100%; table-layout: fixed; margin-inline: auto; }
+.cup-standings th, .cup-standings td { padding-inline: 2px; text-align: center; }
+.cup-standings th:first-child { width: 2.2em; }
+.cup-standings th:nth-child(2) { width: 36%; min-width: 0; }
+.cup-standings .club { white-space: normal; overflow-wrap: anywhere; text-align: left; }
+@media (max-width: 650px) {
+  .cup-card .cup-standings { font-size: 11px; }
+  .cup-standings .club { gap: 3px; font-size: 11px; }
+  .cup-standings .club img { width: 16px; height: 20px; }
+}
