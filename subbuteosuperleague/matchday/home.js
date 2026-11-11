@@ -41,7 +41,7 @@ function render(d){
    const played=mode==='results';let score=played?esc(r.home_score)+' – '+esc(r.away_score):esc(String(r.match_time||'').slice(0,5)||'—');
    if(played)for(const [p,label] of [['penalty','Rigori'],['aggregate','Totale']])if(r[p+'_home_score']!=null&&r[p+'_away_score']!=null)score+='<small>'+label+' '+esc(r[p+'_home_score'])+' – '+esc(r[p+'_away_score'])+'</small>';
    const report=played&&r.has_report?'<a class="md-report" aria-label="Match report: '+esc(r.home_name)+' – '+esc(r.away_name)+'" href="/subbuteosuperleague/competitions/match.html?fixture='+encodeURIComponent(r.sm_fixture_id)+'"></a>':'';
-   return '<article class="md-game">'+team(r,'home')+'<div class="md-score">'+score+'</div>'+team(r,'away')+report+'</article>';
+   return '<article class="md-game">'+team(r,'home')+'<div class="md-score">'+score+'</div>'+team(r,'away')+report+(r.youth_lines||[]).map(line=>'<small style="display:block;grid-column:1/-1;white-space:normal">'+esc(line)+'</small>').join('')+'</article>';
   }).join('')+'</div></section>';
  }).join('');
  panel.querySelectorAll('img').forEach(i=>i.onerror=()=>{i.hidden=true});

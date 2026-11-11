@@ -39,6 +39,10 @@ try{
   $r=array_intersect_key($r,array_flip($fields));$r['competition_name']=$label;$r['has_report']=isset($reports[$fixture]);$clean[]=$r;
  }
  $clean=imc_site_enrich_match_teams($core,$gw,$clean);
+ if($mode==='results'){
+   require_once dirname(__DIR__).'/competitions/youth-audit.php';
+   $clean=subbuteo_youth_results($db,$clean);
+ }
  imc_site_out(['ok'=>true,'game_world_id'=>$gw,'mode'=>$mode,'today'=>$today,'date'=>$day?:null,'dates'=>$dates,'rows'=>$clean,'generated_at'=>gmdate('c')]);
 }catch(InvalidArgumentException $e){imc_site_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){error_log('RTH home matchday: '.$e->getMessage());imc_site_out(['ok'=>false,'error'=>'matchday_unavailable'],500);}
 
