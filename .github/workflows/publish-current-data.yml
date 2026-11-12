@@ -10,6 +10,7 @@ on:
       - 'site-data/core/change-signal.php'
       - 'site-assets/js/site-changes.js'
       - 'tests/world-site-change-browser.py'
+      - 'subbuteosuperleague/coppe-imc/index.php'
       - 'site-assets/js/world-ui.js'
       - 'imc-universal-gateway/daily-player.php'
       - 'imc-universal-gateway/transfer-normalizer.php'
@@ -33,7 +34,7 @@ jobs:
           import io, os, ssl, subprocess
           from ftplib import FTP_TLS
           from pathlib import Path
-          files = [Path(s) for s in ('site-data/core/change-signal.php', 'site-assets/js/site-changes.js', 'site-assets/js/world-ui.js', 'site-assets/names/display.js', 'site-data/core/bootstrap.php', 'imc-universal-gateway/daily-player.php', 'imc-universal-gateway/transfer-normalizer.php', 'api/imc-data/v1/index.php', 'api/imc-data/v1/site-ready.php', 'site-assets/master/api.php', 'site-assets/names/list.php')]
+          files = [Path(s) for s in ('subbuteosuperleague/coppe-imc/index.php', 'site-data/core/change-signal.php', 'site-assets/js/site-changes.js', 'site-assets/js/world-ui.js', 'site-assets/names/display.js', 'site-data/core/bootstrap.php', 'imc-universal-gateway/daily-player.php', 'imc-universal-gateway/transfer-normalizer.php', 'api/imc-data/v1/index.php', 'api/imc-data/v1/site-ready.php', 'site-assets/master/api.php', 'site-assets/names/list.php')]
           for p in files:
               subprocess.run((['node', '--check'] if p.suffix=='.js' else ['php', '-l'])+[str(p)], check=True)
           ctx = ssl.create_default_context()
