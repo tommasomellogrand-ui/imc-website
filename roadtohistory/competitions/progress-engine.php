@@ -248,7 +248,11 @@ try {
   elseif($row['sm_action']==='playoff' && isset($divisionNames[$row['sm_division']]))$row['nexus_view']=$divisionNames[$row['sm_division']].' Playoff';
  }
  unset($row);
- usort($rows,fn($a,$b)=>[(int)$a['sm_division'],$a['nexus_view']]<=>[(int)$b['sm_division'],$b['nexus_view']]);
+ $catalogOrder=static fn(array $row):array=>[
+  $row['competition_group']==='DOMESTIC' && in_array($row['sm_action'],['leaguecup','nationalcup'],true) ? 0 : 1,
+  (int)$row['sm_division'],$row['nexus_view']
+ ];
+ usort($rows,static fn($a,$b)=>$catalogOrder($a)<=>$catalogOrder($b));
  header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');
  echo json_encode(['ok'=>true,'progress'=>$out,'rows'=>$rows,'awards'=>$byKey,'season'=>$season,'seasons'=>$seasons],JSON_INVALID_UTF8_SUBSTITUTE|JSON_UNESCAPED_UNICODE);
 }catch(Throwable $e){error_log('Competition progress: '.$e->getMessage());imc_site_out(['ok'=>false,'error'=>'progress_unavailable'],503);}
