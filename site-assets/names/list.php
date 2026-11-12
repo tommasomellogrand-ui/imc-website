@@ -11,6 +11,6 @@ try {
  $names=$world->query(implode(' UNION ',$select))->fetchAll(PDO::FETCH_COLUMN);
  $managers=$core->query('SELECT full_name FROM `IMC Manager Codex Global`')->fetchAll(PDO::FETCH_COLUMN);
  $clubs=$core->query('SELECT name FROM `IMC Club Codex Global` UNION SELECT nexus_view FROM `IMC Club Codex Global` UNION SELECT name FROM `IMC National Team Codex Global`')->fetchAll(PDO::FETCH_COLUMN);
- header('Cache-Control: public, max-age=900');
+ header('Cache-Control: no-store');
  echo json_encode(['names'=>array_values(array_unique(array_merge($names,$managers))),'clubs'=>array_values(array_filter($clubs))],JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);
 } catch(Throwable $error){http_response_code(503);echo '{"error":"names_unavailable"}';}

@@ -18,7 +18,7 @@ const IMC_DATA_API_MAX_LIMIT = 500;
 function api_response(array $data, int $status = 200): never {
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
-    header('Cache-Control: public, max-age=30, stale-while-revalidate=60');
+    header('Cache-Control: no-store');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: no-referrer');
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);

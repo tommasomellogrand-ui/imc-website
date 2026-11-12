@@ -79,6 +79,55 @@ function imc_site_table(string $world,string $repository):string {
  return SITE_WORLD_TABLES[imc_site_world($world)].'_'.$suffix[$repository];
 }
 
+/** Read the effective transfer date in the same MySQL snapshot as the transfer.
+ * Apply the Codex history only to a unique player/route/amount on both sides.
+ */
+function imc_site_transfers(PDO $db, string $world, ?int $player=null, ?int $club=null, ?int $season=null, ?int $limit=null, bool $withPlayer=false): array {
+    $table = imc_site_table($world, 'Transfers');
+    $codex = imc_site_table($world, 'Player_Codex');
+    $conditions = [];
+    $params = [];
+    if ($player !== null) {
+        $conditions[] = 't.player_id=?';
+        $params[] = $player;
+    }
+    if ($club !== null) {
+        $conditions[] = '(t.from_sm_world_club_id=? OR t.to_sm_world_club_id=?)';
+        array_push($params, $club, $club);
+    }
+    if ($season !== null) {
+        $conditions[] = 't.imc_season=?';
+        $params[] = $season;
+    }
+    $where = $conditions ? ' WHERE '.implode(' AND ', $conditions) : '';
+    $fields = $withPlayer ? ', pc.full_name AS world_name, pc.age AS world_age, pc.rating AS world_rating, pc.image_url AS world_photo' : '';
+    $sql = "SELECT t.* $fields,
+        COALESCE(CASE WHEN t.route_count=1 THEN (
+            SELECT CASE WHEN COUNT(*)=1 THEN MAX(history.played_on) END
+            FROM JSON_TABLE(pc.transfer_history, '$[*]' COLUMNS (
+                played_on DATE PATH '$.date' NULL ON ERROR,
+                club_from VARCHAR(255) PATH '$.club_from',
+                club_to VARCHAR(255) PATH '$.club_to',
+                amount_text VARCHAR(255) PATH '$.amount_text'
+            )) history
+            WHERE TRIM(history.club_from)=TRIM(t.club_from)
+              AND TRIM(history.club_to)=TRIM(t.club_to)
+              AND REPLACE(history.amount_text,' ','')=REPLACE(t.amount_text,' ','')
+        ) END, t.normalized_transfer_date, t.transfer_date) AS effective_date
+        FROM (SELECT raw.*, COUNT(*) OVER (
+            PARTITION BY player_id, TRIM(club_from), TRIM(club_to), REPLACE(amount_text,' ','')
+        ) AS route_count FROM `$table` raw) t
+        LEFT JOIN `$codex` pc ON pc.player_id=t.player_id $where
+        ORDER BY effective_date DESC, t.imc_transfer_number DESC";
+    if ($limit !== null) $sql .= ' LIMIT '.max(1,$limit);
+    $rows = imc_site_rows($db, $sql, $params);
+    foreach ($rows as &$row) {
+        $row['normalized_transfer_date'] = $row['effective_date'];
+        unset($row['effective_date'], $row['route_count']);
+    }
+    return $rows;
+}
+
 function imc_site_rth_competition_key(string $key): string {
     $slugs=['CHAMPIONS_LEAGUE'=>'championsleague','EUROPA_LEAGUE'=>'europaleague','CONFERENCE_LEAGUE'=>'conferenceleague','CLUB_WORLD_CUP'=>'clubworldcup'];
     foreach($slugs as $old=>$slug) {
