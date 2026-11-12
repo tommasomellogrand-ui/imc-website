@@ -19,7 +19,7 @@ function playerCheck(r){
  return heading+sides+notes.map(note=>'<small style="grid-column:1/-1;'+style+'">'+esc(note)+'</small>').join('');
 }
 function resultRow(r,played){const team=side=>'<span class="match-team">'+badge(r[side+'_name'],r[side+'_logo_url'])+'<small>'+esc(r[side+'_imc_manager_name']||'')+'</small></span>';return '<article class="cup-result-row">'+team('home')+(played?'<button class="result-score" data-match="'+data.results.indexOf(r)+'" aria-label="'+esc('Dettaglio '+r.home_name+' '+r.home_score+' a '+r.away_score+' '+r.away_name)+'">'+esc(r.home_score)+' – '+esc(r.away_score)+'</button>':'<span class="result-score">'+esc(r.match_time?.slice(0,5)||'VS')+'</span>')+team('away')+playerCheck(r)+'</article>'}
-function matches(rows,played){if(!rows.length)return empty(played?'Nessun risultato disponibile.':'Nessuna partita futura in calendario.');const dates=[...new Set(rows.map(r=>date(r.match_date)))];return '<div class="result-round"><header class="result-round-head"><h3>'+esc(roundLabel(rows[0]))+'</h3><span>'+esc(dates.join(' · '))+'</span></header><div class="results-list">'+rows.map(r=>resultRow(r,played)).join('')+'</div></div>'}
+function matches(rows,played){if(!rows.length)return empty(played?'Nessun risultato disponibile.':'Nessuna partita futura in calendario.');const dates=[...new Set(rows.map(r=>date(r.match_date)))];return '<div class="result-round"><header class="result-round-head" style="'+phaseBox+'"><h3 style="margin:0;text-align:center">'+esc(phaseTitle(rows[0]))+'</h3><span>'+esc(dates.join(' · '))+'</span></header><div class="results-list">'+rows.map(r=>resultRow(r,played)).join('')+'</div></div>'}
 
 const pureKO=/(?:^|[|_])(?:nationalcup|leaguecup|leagueshield|charityshield|supercup|smfasupercup|playoff|clubworldcup)(?:[|_]|$)/i.test(key);
 function groupOf(r){
@@ -30,14 +30,23 @@ function groupOf(r){
  }
  return String(r.competition_group_name||'').trim();
 }
-function groupedMatches(rows,played){
- const buckets=new Map();for(const r of rows){const g=groupOf(r);if(!buckets.has(g))buckets.set(g,[]);buckets.get(g).push(r)}
- return [...buckets].sort(([a],[b])=>!a?1:!b?-1:a.localeCompare(b,'it',{numeric:true})).map(([g,rs])=>{
- const days=new Map();for(const r of rs){const k=roundKey(r);if(!days.has(k))days.set(k,[]);days.get(k).push(r)}
- return (g?'<h2>'+esc(g)+'</h2>':buckets.size>1?'<h2>Partite fuori dai gironi</h2>':'')+[...days.values()].map(day=>'<section>'+matches(day,played)+'</section>').join('');
- }).join('');
+const phaseBox='display:grid;justify-items:center;text-align:center;gap:3px;padding:9px 12px;border:1px solid #d8d3c5;border-radius:4px;background:#f7f6f2;color:#201f1c';
+function phaseTitle(r){
+ const group=groupOf(r),stage=String(r.competition_stage||'').trim(),round=String(r.competition_round||'').trim();
+ const parts=[group,stage,round].filter(Boolean).filter(v=>!(group&&/^(?:group|girone|gruppo|pool)\s*(?:stage|phase|[a-z]|\d+)$/i.test(v)&&v!==group));
+ const label=[...new Set(parts)].map(v=>/^\d+$/.test(v)?(league||group?'Giornata ':'Turno ')+v:v).join(' · ');
+ return (label||'Partite').replace(/finalee\b/gi,'finale');
 }
-function table(compact=false){if(data.tableError)return empty('Classifica temporaneamente non disponibile.');if(!data.groups.length)return empty('Classifica non ancora disponibile.');return data.groups.filter(g=>league||g.group_name).slice().sort((a,b)=>String(a.group_name||'').localeCompare(String(b.group_name||''),'it',{numeric:true})).map(g=>'<section class="cup-card">'+(g.group_name?'<h3>'+esc(g.group_name)+'</h3>':'')+'<div class="table-scroll"><table><caption class="sr-only">Classifica '+esc(document.title)+'</caption><thead><tr><th>#</th><th>Club</th><th>PG</th><th>DR</th><th>Pt</th>'+(!compact?'<th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th>':'')+'</tr></thead><tbody>'+g.rows.map(t=>{const logo=data.teams.get(String(t.team_id))?.logo;return '<tr><td>'+t.position+'</td><th scope="row">'+badge(t.team_name,logo)+'</th><td>'+t.played+'</td><td>'+t.gd+'</td><td class="points">'+t.points+'</td>'+(!compact?[t.won,t.drawn,t.lost,t.gf,t.ga].map(v=>'<td>'+v+'</td>').join(''):'')+'</tr>'}).join('')+'</tbody></table></div></section>').join('')+'<p class="cup-note">Classifica calcolata dai risultati disponibili: 3 punti per vittoria, 1 per pareggio. Ordinamento: punti, differenza reti, gol fatti. Zone di qualificazione non ancora configurate.</p>'}
+function groupedMatches(rows,played){
+ const blocks=new Map();
+ for(const r of rows){
+  const day=String(r.match_date||'').slice(0,10),group=groupOf(r),id=JSON.stringify([played?day:'',group,roundKey(r)]);
+  if(!blocks.has(id))blocks.set(id,{day,group,rows:[]});blocks.get(id).rows.push(r);
+ }
+ const byGroup=(a,b)=>a&&b?a.localeCompare(b,'it',{numeric:true}):Number(!a)-Number(!b);
+ return [...blocks.values()].sort((a,b)=>played?(b.day.localeCompare(a.day)||byGroup(a.group,b.group)):(byGroup(a.group,b.group)||a.day.localeCompare(b.day))).map(block=>'<section>'+matches(block.rows,played)+'</section>').join('');
+}
+function table(compact=false){if(data.tableError)return empty('Classifica temporaneamente non disponibile.');if(!data.groups.length)return empty('Classifica non ancora disponibile.');return data.groups.filter(g=>league||g.group_name).slice().sort((a,b)=>String(a.group_name||'').localeCompare(String(b.group_name||''),'it',{numeric:true})).map(g=>'<section class="cup-card">'+(g.group_name?'<h3 style="'+phaseBox+'">'+esc(g.group_name)+'</h3>':'')+'<div class="table-scroll"><table><caption class="sr-only">Classifica '+esc(document.title)+'</caption><thead><tr><th>#</th><th>Club</th><th>PG</th><th>DR</th><th>Pt</th>'+(!compact?'<th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th>':'')+'</tr></thead><tbody>'+g.rows.map(t=>{const logo=data.teams.get(String(t.team_id))?.logo;return '<tr><td>'+t.position+'</td><th scope="row">'+badge(t.team_name,logo)+'</th><td>'+t.played+'</td><td>'+t.gd+'</td><td class="points">'+t.points+'</td>'+(!compact?[t.won,t.drawn,t.lost,t.gf,t.ga].map(v=>'<td>'+v+'</td>').join(''):'')+'</tr>'}).join('')+'</tbody></table></div></section>').join('')+'<p class="cup-note">Classifica calcolata dai risultati disponibili: 3 punti per vittoria, 1 per pareggio. Ordinamento: punti, differenza reti, gol fatti. Zone di qualificazione non ancora configurate.</p>'}
 function render(){if(!data)return;
  const hasTable=!pureKO&&(league||data.groups.some(g=>g.group_name)||[...data.results,...data.calendar].some(r=>groupOf(r)));
  const tableTab=document.querySelector('[data-main-tab="table"]');if(tableTab){tableTab.hidden=!hasTable;tableTab.style.display=hasTable?'':'none'}
