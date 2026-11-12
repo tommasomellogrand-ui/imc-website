@@ -20,7 +20,7 @@ jobs:
         run: |
           python3 - <<'PYTHON'
           import io, os, ssl
-          from ftplib import FTP_TLS
+          from ftplib import FTP_TLS, error_perm
           from pathlib import Path
           from urllib.request import urlopen
           paths = '''
@@ -50,7 +50,15 @@ jobs:
               ftp.prot_p()
               for path in paths:
                   data = Path(path).read_bytes()
-                  ftp.storbinary('STOR /www.italianmastersclub.it/' + path, io.BytesIO(data))
+                  print(path, flush=True)
+                  ftp.cwd('/www.italianmastersclub.it')
+                  for part in Path(path).parent.parts:
+                      try:
+                          ftp.cwd(part)
+                      except error_perm:
+                          ftp.mkd(part)
+                          ftp.cwd(part)
+                  ftp.storbinary('STOR ' + Path(path).name, io.BytesIO(data))
                   with urlopen('https://www.italianmastersclub.it/' + path + '?release=' + os.environ['GITHUB_SHA'], timeout=60) as response:
                       assert response.read() == data, path
           PYTHON
