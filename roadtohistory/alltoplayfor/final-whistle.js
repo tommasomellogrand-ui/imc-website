@@ -193,11 +193,11 @@
       state={coffee,matches,errors:matches.some(m=>m.error),checked:new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit'}).format(new Date())};
       const signature=JSON.stringify([coffee,matches]);
       if(signature!==lastSignature){lastSignature=signature;render();}
-      else {const p=root.querySelector('.fw-update p');if(p)p.textContent=`Dati verificati alle ${state.checked}. Aggiornamento automatico ogni 2 minuti mentre questa sezione è aperta.`;}
+      else {const p=root.querySelector('.fw-update p');if(p)p.textContent=`Dati verificati alle ${state.checked}.`;}
     } catch(error) {
       if(token!==generation) return;
-      if(state){const message=root.querySelector('.fw-update p');if(message)message.textContent='Aggiornamento non riuscito: restano visibili i dati dell’ultima verifica. Riproveremo automaticamente.';}
-      else root.replaceChildren(el('p','Impossibile verificare i dati Nexus. Riproveremo automaticamente; puoi anche ricaricare la pagina.','fw-warning'));
+      if(state){const message=root.querySelector('.fw-update p');if(message)message.textContent='Aggiornamento non riuscito: restano visibili i dati dell’ultima verifica.';}
+      else root.replaceChildren(el('p','Impossibile verificare i dati Nexus. Ricarica la pagina per riprovare.','fw-warning'));
     } finally {clearTimeout(timeout);if(token===generation)busy=false;}
   }
   document.addEventListener('programme-date-change',()=>{controller?.abort();++generation;busy=false;visibility();load(true);});

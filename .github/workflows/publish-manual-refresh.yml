@@ -2,7 +2,9 @@ name: Publish manual-refresh scripts
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/publish-manual-refresh.yml']
+    paths:
+      - '.github/workflows/publish-manual-refresh.yml'
+      - 'site-assets/master/homepage.js'
   workflow_dispatch:
 permissions:
   contents: read

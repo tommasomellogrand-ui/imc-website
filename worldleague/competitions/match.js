@@ -63,7 +63,7 @@ function headerScorers(){
 function overview(){
  const m=data.match;
  const venue='<div class="mx-venue"><span><small>STADIO</small><strong>'+val(m.stadium_name)+'</strong></span><span><small>SPETTATORI</small><strong>'+(m.attendance!=null?Number(m.attendance).toLocaleString('it-IT'):'—')+'</strong></span></div>';
- if(!data.report_available)return venue+card('Match Report',empty('Match Report non ancora disponibile. La pagina si aggiornerà automaticamente dopo il caricamento.'));
+ if(!data.report_available)return venue+card('Match Report',empty('Match Report non ancora disponibile.'));
  const mvp=data.players.filter(p=>Number(p.man_of_match)>0);
  const award='<section class="mx-mvp" aria-label="MVP">'+(mvp.length?mvp.map(p=>'<div class="mj-mvp-card">'+portrait(p,true)+'<div class="mj-mvp-copy"><span class="mj-award-label">★ MVP DEL MATCH</span><h2>'+player(p)+'</h2><p>'+esc(m[p.team_side+'_name'])+'</p>'+rating(p)+'<div class="mj-mvp-numbers"><span><b>'+val(p.goals)+'</b>Gol</span><span><b>'+val(p.assists)+'</b>Assist</span><span><b>'+val(p.minutes)+'</b>Minuti</span></div></div></div>').join(''):empty('MVP non indicato nel report.'))+'</section>';
  return '<div class="mj-overview">'+award+venue+card('La partita in numeri',statRows())+'</div>';
