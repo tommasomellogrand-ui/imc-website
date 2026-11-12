@@ -101,30 +101,39 @@ function imc_site_transfers(PDO $db, string $world, ?int $player=null, ?int $clu
     }
     $where = $conditions ? ' WHERE '.implode(' AND ', $conditions) : '';
     $fields = $withPlayer ? ', pc.full_name AS world_name, pc.age AS world_age, pc.rating AS world_rating, pc.image_url AS world_photo' : '';
-    $sql = "SELECT t.* $fields,
-        COALESCE(CASE WHEN t.route_count=1 THEN (
-            SELECT CASE WHEN COUNT(*)=1 THEN MAX(history.played_on) END
-            FROM JSON_TABLE(pc.transfer_history, '$[*]' COLUMNS (
-                played_on DATE PATH '$.date' NULL ON ERROR,
-                club_from VARCHAR(255) PATH '$.club_from',
-                club_to VARCHAR(255) PATH '$.club_to',
-                amount_text VARCHAR(255) PATH '$.amount_text'
-            )) history
-            WHERE TRIM(history.club_from)=TRIM(t.club_from)
-              AND TRIM(history.club_to)=TRIM(t.club_to)
-              AND REPLACE(history.amount_text,' ','')=REPLACE(t.amount_text,' ','')
-        ) END, t.normalized_transfer_date, t.transfer_date) AS effective_date
+    $sql = "SELECT t.* $fields, pc.transfer_history AS codex_history
         FROM (SELECT raw.*, COUNT(*) OVER (
             PARTITION BY player_id, TRIM(club_from), TRIM(club_to), REPLACE(amount_text,' ','')
         ) AS route_count FROM `$table` raw) t
-        LEFT JOIN `$codex` pc ON pc.player_id=t.player_id $where
-        ORDER BY effective_date DESC, t.imc_transfer_number DESC";
-    if ($limit !== null) $sql .= ' LIMIT '.max(1,$limit);
+        LEFT JOIN `$codex` pc ON pc.player_id=t.player_id $where";
     $rows = imc_site_rows($db, $sql, $params);
+    $key = static function(array $row): ?string {
+        $from = trim((string)($row['club_from'] ?? ''));
+        $to = trim((string)($row['club_to'] ?? ''));
+        $amount = str_replace(' ', '', (string)($row['amount_text'] ?? ''));
+        if ($from === '' || $to === '' || $amount === '') return null;
+        return mb_strtolower(implode('|', [$from, $to, $amount]), 'UTF-8');
+    };
     foreach ($rows as &$row) {
-        $row['normalized_transfer_date'] = $row['effective_date'];
-        unset($row['effective_date'], $row['route_count']);
+        $date = $row['normalized_transfer_date'] ?? $row['transfer_date'];
+        $route = $key($row);
+        if ((int)$row['route_count'] === 1 && $route !== null) {
+            $matches = [];
+            foreach (json_decode((string)$row['codex_history'], true) ?: [] as $move) {
+                if (is_array($move) && $key($move) === $route) $matches[] = $move['date'] ?? null;
+            }
+            if (count($matches) === 1 && is_string($matches[0]) &&
+                preg_match('/^(\d{4})-(\d{2})-(\d{2})$/D', $matches[0], $parts) &&
+                checkdate((int)$parts[2], (int)$parts[3], (int)$parts[1])) $date = $matches[0];
+        }
+        $row['normalized_transfer_date'] = $date;
+        unset($row['codex_history'], $row['route_count']);
     }
+    unset($row);
+    usort($rows, static fn($a,$b) =>
+        strcmp((string)$b['normalized_transfer_date'], (string)$a['normalized_transfer_date'])
+        ?: (int)$b['imc_transfer_number'] <=> (int)$a['imc_transfer_number']);
+    if ($limit !== null) return array_slice($rows, 0, $limit);
     return $rows;
 }
 

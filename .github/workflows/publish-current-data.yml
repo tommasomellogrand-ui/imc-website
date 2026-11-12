@@ -1,0 +1,72 @@
+name: Publish and verify current world data
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-current-data.yml'
+      - 'api/imc-data/v1/index.php'
+      - 'api/imc-data/v1/site-ready.php'
+      - 'site-data/core/bootstrap.php'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: current-world-data
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish data endpoints and verify deployed bytes
+        env:
+          FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io, os, ssl, subprocess
+          from ftplib import FTP_TLS
+          from pathlib import Path
+          files = [Path(s) for s in ('site-data/core/bootstrap.php', 'api/imc-data/v1/index.php', 'api/imc-data/v1/site-ready.php', 'site-assets/master/api.php', 'site-assets/names/list.php')]
+          for p in files:
+              subprocess.run(['php', '-l', str(p)], check=True)
+          ctx = ssl.create_default_context()
+          ctx.check_hostname = False  # Aruba FTP uses its hosting certificate.
+          with FTP_TLS(context=ctx, timeout=60) as ftp:
+              ftp.connect('ftp.italianmastersclub.it')
+              ftp.login(os.environ['FTP_USER'], os.environ['FTP_PASS'])
+              ftp.prot_p()
+              for p in files:
+                  ftp.cwd('/www.italianmastersclub.it/' + str(p.parent))
+                  data = p.read_bytes()
+                  ftp.storbinary('STOR ' + p.name, io.BytesIO(data))
+                  check = io.BytesIO()
+                  ftp.retrbinary('RETR ' + p.name, check.write)
+                  assert check.getvalue() == data, str(p)
+          PY
+      - name: Read live transfer, competition and matchday data for all worlds
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          from concurrent.futures import ThreadPoolExecutor
+          worlds = 'roadtohistory halloffamers kickoff sensiblesocceracademy subbuteosuperleague worldleague masterleagueworld scudetto'.split()
+          def verify(world):
+              def get(path):
+                  with urllib.request.urlopen('https://www.italianmastersclub.it/'+world+'/'+path, timeout=120) as response:
+                      assert 'no-store' in response.headers.get('Cache-Control',''), (world,path)
+                      data = json.load(response)
+                      assert data.get('ok'), (world,path,data.get('error'))
+                      return data
+              rows = get('transfers/data.php?limit=1')['rows']
+              if rows:
+                  player = str(rows[0]['player_id'])
+                  path = 'players/' if world == 'roadtohistory' else 'playercodex/'
+                  profile = get(path+'profile.php?player='+player)
+                  assert 'transfers' not in profile['errors'], world
+                  assert any(str(t['imc_transfer_number']) == str(rows[0]['imc_transfer_number']) and t['normalized_transfer_date'] == rows[0]['normalized_transfer_date'] for t in profile['transfers']), world
+              get('matchday/data.php')
+              get('competitions/catalog.php')
+              print(world, 'verified', flush=True)
+          with ThreadPoolExecutor(2) as pool:
+              list(pool.map(verify, worlds))
+          PY
