@@ -2,7 +2,7 @@
 declare(strict_types=1);
 // IMC Ranking v9: Results-only match scores and manager IDs; trophy rules unchanged.
 function imc_rank_weight(string $gw): int {
- if(in_array($gw,['GW001','IMC001','IMC-001'],true))return 2;
+ if(in_array($gw,['GW001','IMC001','IMC-001','GW005','IMC002','IMC-002'],true))return 2;
  return $gw==='GW008'?3:(in_array($gw,['GW002','GW003'],true)?2:1);
 }
 function imc_rank_bonus(array $t): ?int {

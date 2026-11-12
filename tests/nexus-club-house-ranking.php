@@ -3,7 +3,7 @@ declare(strict_types=1);
 require dirname(__DIR__).'/nexus/club-house/ranking.php';
 require dirname(__DIR__).'/nexus/club-house/engine.php';
 function check($got,$want):void {if($got!==$want && !(is_numeric($got)&&is_numeric($want)&&(float)$got===(float)$want))throw new RuntimeException(json_encode([$got,$want]));}
-foreach(['GW001'=>2,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>1,'GW006'=>1,'GW007'=>1,'GW008'=>3,'GW009'=>1,'GW010'=>1] as $gw=>$weight){
+foreach(['GW001'=>2,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>2,'IMC002'=>2,'IMC-002'=>2,'GW006'=>1,'GW007'=>1,'GW008'=>3,'GW009'=>1,'GW010'=>1] as $gw=>$weight){
  check(imc_rank_weight($gw),$weight);
  foreach([[1,1,0,1],[1,0,0,0.5],[1,0,1,0],[6,3,1,4],[4,0,4,0]] as [$played,$won,$lost,$points]){
   $drawn=$played-$won-$lost;$r=imc_rank_start(compact('played','won','drawn','lost'),$gw);check($r['total'],$points*$weight);check($r['match_points'],$points*$weight);
