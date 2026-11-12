@@ -144,6 +144,23 @@ on:
       - 'site-assets/master/**'
       - 'docs/official-website/**'
       - '.github/workflows/deploy-imc-master.yml'
+      # These files are published and checked by their data and gateway workflows.
+      - '.github/workflows/publish-current-data.yml'
+      - 'tests/world-site-change-browser.py'
+      - 'database/migrations/20261112_public_site_revisions.sql'
+      - 'site-data/core/bootstrap.php'
+      - 'site-data/core/change-signal.php'
+      - 'site-data/transfers/index.php'
+      - 'site-data/teams/roster.php'
+      - 'site-data/players/profile.php'
+      - 'site-assets/js/site-changes.js'
+      - 'site-assets/js/world-ui.js'
+      - 'site-assets/names/display.js'
+      - 'site-assets/names/list.php'
+      - 'api/imc-data/v1/index.php'
+      - 'api/imc-data/v1/site-ready.php'
+      - '__imc-sm-master/admin/database-manager/index.php'
+      - 'subbuteosuperleague/coppe-imc/index.php'
   workflow_dispatch:
 
 permissions:

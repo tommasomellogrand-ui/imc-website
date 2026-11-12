@@ -12,6 +12,9 @@ on:
       - 'tests/world-site-change-browser.py'
       - 'subbuteosuperleague/coppe-imc/index.php'
       - 'site-assets/js/world-ui.js'
+      - 'site-assets/master/api.php'
+      - 'site-assets/names/display.js'
+      - 'site-assets/names/list.php'
       - 'imc-universal-gateway/daily-player.php'
       - 'imc-universal-gateway/transfer-normalizer.php'
   workflow_dispatch:
