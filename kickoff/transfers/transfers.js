@@ -51,9 +51,27 @@ function parseCash(raw) {
  return Number.isSafeInteger(amount) ? amount : null;
 }
 
+function exchangeNames(value) {
+ if (typeof value === 'string') {
+  const text = value.trim();
+  if (!hasExchangePlayer(text)) return [];
+  if (/^[\[{]/.test(text)) return exchangeNames(JSON.parse(text));
+  return [text];
+ }
+ if (Array.isArray(value)) return value.flatMap(exchangeNames);
+ const name = value?.player_name || value?.name;
+ return typeof name === 'string' && name.trim() ? [name.trim()] : [];
+}
 function renderTransferCard(row) {
  const amount = transferFee(row);
- return NexusCards.transfer(amount === null ? row : {...row, amount_text: formatMillions(amount)});
+ let names = exchangeNames(row.normalized_exchange_players);
+ if (!names.length) names = exchangeNames(row.exchange_players);
+ if (!names.length && amount !== null) {
+  const parts = String(row.amount_text || '').split(/\s*\+\s*/);
+  if (parts.length > 1) names = parts.filter(p => p && parseCash(p.toLowerCase()) === null);
+ }
+ return NexusCards.transfer({...row, amount_text:amount === null ? row.amount_text : formatMillions(amount),
+  exchange_names:[...new Set(names)]});
 }
 window.renderMarketTransferCard = renderTransferCard;
 const panel = document.getElementById('club-summary');
@@ -136,22 +154,31 @@ window.updateClubTransferSummary = async function(rows) {
    cards.append(card);
   }
   panel.replaceChildren(cards);
+  return clubs;
  } catch {
   directory = null;
   panel.textContent='Impossibile caricare il riepilogo dei club.';
+  return null;
  }
 };
 })();
 (()=>{'use strict';
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let clubIds=new Map();
 let rows=[],shown=60,loading=false,loaded=false;
 $('search').value=params.get('q')||'';
 function remember(){const p=new URLSearchParams();for(const [id,key] of [['search','q'],['club','club'],['season','season']])if($(id).value)p.set(key,$(id).value);history.replaceState(null,'',location.pathname+(p.size?'?'+p:''));}
 function render(){
  const q=$('search').value.trim().toLocaleLowerCase('it'),club=$('club').value,season=$('season').value;
- const filtered=rows.filter(r=>(!q||[r.player_name,r.club_from,r.club_to,r.player_id].some(v=>String(v??'').toLocaleLowerCase('it').includes(q)))&&(!club||r.club_from===club||r.club_to===club)&&(!season||String(r.imc_season??r.normalized_season??r.season)===season));
- $('count').textContent=filtered.length+' trasferimenti';
+ const clubId=clubIds.get(club);
+ function matchesClub(row,side) {
+  const id=row[side+'_sm_world_club_id'];
+  return Number(id)>0 && clubId ? String(id)===clubId : row['club_'+side]===club;
+ }
+ const filtered=rows.filter(r=>(!q||[r.player_name,r.club_from,r.club_to,r.player_id].some(v=>String(v??'').toLocaleLowerCase('it').includes(q)))&&(!club||matchesClub(r,'from')||matchesClub(r,'to'))&&(!season||String(r.imc_season??r.normalized_season??r.season)===season));
+ const normalized=filtered.filter(r=>String(r.normalization_status || r.status || '').toUpperCase()==='CERTIFIED').length;
+ $('count').replaceChildren(document.createTextNode(filtered.length+' trasferimenti'),document.createElement('br'),document.createTextNode(normalized+' normalizzati'));
  $('list').innerHTML=filtered.length?'<div class="transfer-grid">'+filtered.slice(0,shown).map(window.renderMarketTransferCard).join('')+'</div>':'<p class="summary-line">Nessun trasferimento disponibile per questi filtri.</p>';
  $('load-more').hidden=shown>=filtered.length;NexusCards.wireImages($('list'));
 }
@@ -159,8 +186,11 @@ function options(id,values,label,prefix=''){const current=loaded?$(id).value:par
 async function refresh(){
  if(loading)return;loading=true;$('retry').hidden=true;
  try{const r=await fetch('data.php',{cache:'no-store'}),d=await r.json();if(!r.ok||d.ok!==true||d.game_world_id!=='GW009'||!Array.isArray(d.rows))throw Error('data');
- rows=d.rows;window.updateClubTransferSummary(rows);
- options('club',[...new Set(rows.flatMap(r=>[r.club_from,r.club_to]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it')),'Tutti i club');
+ rows=d.rows;
+ const clubs=await window.updateClubTransferSummary(rows);
+ clubIds=new Map((clubs || []).map(c=>[c.name,Number(c.world_id)>0 ? String(c.world_id) : null]));
+ options('club',[...clubIds.keys()].sort((a,b)=>a.localeCompare(b,'it')),'Tutti i club');
+ $('club').disabled=!clubs;
  options('season',[...new Set(rows.map(r=>String(r.imc_season??r.normalized_season??r.season??'')).filter(Boolean))].sort((a,b)=>Number(b)-Number(a)),'Tutte le stagioni','Stagione ');
  loaded=true;render();$('updated').textContent='Ultimo aggiornamento: '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'});
  }catch(e){$('retry').hidden=false;if(!loaded){document.getElementById('club-summary').textContent='Trasferimenti non disponibili.';$('count').textContent='Dati non disponibili';$('list').innerHTML='<p class="summary-line">Impossibile caricare i trasferimenti. Riprova tra poco.</p>';}else $('updated').textContent='Aggiornamento non riuscito: restano visibili i dati precedenti.';}

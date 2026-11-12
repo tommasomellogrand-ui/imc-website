@@ -18,10 +18,11 @@
   const amount = x.amount_text ? '<span class="nc-amount">'+esc(x.amount_text)+'</span>' : '';
   const heading = '<div class="transfer-heading"><strong class="nc-name">'+esc(x.player_name||'Giocatore')+'</strong>'+amount+'</div>';
   const route = '<div class="transfer-clubs">'+club(x.club_from,x.from_logo_url)+'<span>→</span>'+club(x.club_to,x.to_logo_url)+'</div>';
+  const exchange = x.exchange_names?.length ? '<div class="nc-meta">In scambio: '+x.exchange_names.map(esc).join(', ')+'</div>' : '';
   const season = x.imc_season||x.normalized_season||x.season||'—';
   const meta = [x.codex_age ? esc(x.codex_age)+' anni' : 'Età —', 'Rating '+esc(x.codex_rating??'—'), esc(date), 'S'+esc(season)];
   const open = href ? '<a class="nc-card nc-transfer" href="'+esc(href)+'" style="color:inherit;text-decoration:none">' : '<article class="nc-card nc-transfer">';
-  return open+photo(x.player_images||[x.player_image],x.player_name)+'<div class="nc-data">'+heading+route+'<div class="nc-meta">'+meta.join(' · ')+'</div></div>'+(href?'</a>':'</article>');
+  return open+photo(x.player_images||[x.player_image],x.player_name)+'<div class="nc-data">'+heading+route+exchange+'<div class="nc-meta">'+meta.join(' · ')+'</div></div>'+(href?'</a>':'</article>');
  }
  window.NexusCards={photo,wireImages,transfer,playerUrl};
 })();
