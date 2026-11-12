@@ -236,6 +236,11 @@ try {
   $summary['logos']=$displayLogos;
   unset($summary);
  }
+ $leagueNames=array_column(imc_site_rows($core,"SELECT sm_division,IMC_View FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND sm_action='league' AND competition_group='DOMESTIC'",[$gw]),'IMC_View','sm_division');
+ foreach($rows as &$row){
+  if($row['competition_group']==='DOMESTIC' && $row['sm_action']==='league' && isset($leagueNames[$row['sm_division']]))$row['nexus_view']=$leagueNames[$row['sm_division']];
+ }
+ unset($row);
  usort($rows,fn($a,$b)=>[(int)$a['sm_division'],$a['nexus_view']]<=>[(int)$b['sm_division'],$b['nexus_view']]);
  header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');
  echo json_encode(['ok'=>true,'progress'=>$out,'rows'=>$rows,'awards'=>$byKey,'season'=>$season,'seasons'=>$seasons],JSON_INVALID_UTF8_SUBSTITUTE|JSON_UNESCAPED_UNICODE);
