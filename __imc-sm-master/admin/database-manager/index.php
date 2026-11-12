@@ -95,6 +95,11 @@ function dbm_log_dir(): string {
 }
 
 function dbm_audit(array $record): void {
+    if (($record['status'] ?? '') === 'success' &&
+        ((int)($record['affected_rows'] ?? 0) > 0 || ($record['action'] ?? '') === 'execute_migration')) {
+        require_once dirname(__DIR__, 3).'/site-data/core/change-signal.php';
+        imc_changed_table((string)($record['table'] ?? ''));
+    }
     $record = array_merge(['timestamp' => gmdate('c'), 'remote_ip' => (string)($_SERVER['REMOTE_ADDR'] ?? '')], $record);
     $line = json_encode($record, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE) . "\n";
     if (file_put_contents(dbm_log_dir() . '/audit.jsonl', $line, FILE_APPEND | LOCK_EX) === false) throw new RuntimeException('Cannot write audit log.');

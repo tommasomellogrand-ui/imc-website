@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 require_once __DIR__.'/club-display.php';
 require_once __DIR__.'/person-display.php';
+if (is_file(__DIR__.'/change-signal.php')) {
+    require_once __DIR__.'/change-signal.php';
+    imc_retry_site_changes();
+}
 
 function imc_site_out(array $body,int $status=200): never {
   if($status===200&&($body['ok']??false)===true){

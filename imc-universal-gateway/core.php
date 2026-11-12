@@ -2,7 +2,16 @@
 declare(strict_types=1);
 const IMC_VERSION='2.4.0'; const IMC_MAX_ROWS=100000;
 $GLOBALS['imc_started']=microtime(true);
-function imc_out(array $x,int $s=200):never{http_response_code($s);$x['duration_ms']??=(int)round((microtime(true)-$GLOBALS['imc_started'])*1000);echo json_encode($x,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);exit;}
+function imc_publish_committed_rows(array $out): void {
+    if (!($out['ok'] ?? false)) return;
+    $count = max((int)($out['inserted_rows'] ?? 0), (int)($out['written_rows'] ?? 0),
+        (int)($out['updated_rows'] ?? 0), (int)($out['deleted_rows'] ?? 0), (int)($out['copied_rows'] ?? 0));
+    if ($count > 0) {
+        require_once dirname(__DIR__).'/site-data/core/change-signal.php';
+        imc_changed_table((string)($out['destination_table'] ?? $out['physical_table'] ?? $out['table'] ?? ''));
+    }
+}
+function imc_out(array $x,int $s=200):never{imc_publish_committed_rows($x);http_response_code($s);$x['duration_ms']??=(int)round((microtime(true)-$GLOBALS['imc_started'])*1000);echo json_encode($x,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);exit;}
 
 // Table names migrated in Sql1956795_3. Row IDs and normalization remain legacy for now.
 function imc_destination_pairs(): array {

@@ -7,6 +7,7 @@ require_once __DIR__.'/core.php';
  */
 
 function imc_ingress_out(array $data, int $status = 200): never {
+    imc_publish_committed_rows($data);
     http_response_code($status);
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
@@ -101,6 +102,7 @@ function imc_ingress_insert_many(PDO $pdo, string $table, string $gw, array $row
         if ($atomic) $pdo->commit();
     } catch (Throwable $e) {
         if ($atomic && $pdo->inTransaction()) $pdo->rollBack();
+        if (!$atomic && $written > 0) imc_publish_committed_rows(['ok'=>true,'written_rows'=>$written,'table'=>$table]);
         throw $e;
     }
     return ['received' => count($rows), 'inserted' => $written, 'written_rows' => $written, 'skipped_rows' => 0, 'failed' => 0, 'rolled_back' => false, 'errors' => []];

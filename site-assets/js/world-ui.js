@@ -1,3 +1,12 @@
+(() => {
+ const section = location.pathname.split('/')[1];
+ if (!['','index.html','clubhouse','imc_campus','nexus','roadtohistory','halloffamers','kickoff','sensiblesocceracademy','subbuteosuperleague','worldleague','masterleagueworld','scudetto'].includes(section)) return;
+ if (document.getElementById('imc-site-changes')) return;
+ const script = document.createElement('script');
+ script.id = 'imc-site-changes';
+ script.src = '/site-assets/js/site-changes.js';
+ document.head.append(script);
+})();
 /* Dedicated worlds: Nexus navigation, with routes scoped to the current world. */
 (()=>{'use strict';
 const worlds={roadtohistory:['Road To History','players'],halloffamers:['Hall Of Famers','playercodex'],kickoff:['Kick Off','playercodex'],sensiblesocceracademy:['Sensible Soccer Academy','playercodex'],subbuteosuperleague:['Subbuteo Super League','playercodex'],worldleague:['World League','playercodex'],masterleagueworld:['Master League World','playercodex'],scudetto:['Scudetto','playercodex']};

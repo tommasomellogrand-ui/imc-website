@@ -21,10 +21,10 @@ function imc_changed_table(string $table): void {
     $queued[$scope] = true;
     $dir = dirname(__DIR__, 2).'/__imc_private_gateway';
     $file = $dir.'/site-change-'.$scope.'.pending';
-    // Atomic rename gives a racing writer its own generation.
-    $tmp = tempnam($dir, 'site-signal-');
-    if ($tmp !== false && file_put_contents($tmp, bin2hex(random_bytes(12))) !== false) {
-        if (!rename($tmp, $file)) @unlink($tmp);
+    // The marker carries no payload; repeated writes can share it until claimed.
+    if (!@touch($file)) {
+        error_log('IMC site signal could not be queued');
+        return;
     }
     imc_retry_site_changes();
 }
