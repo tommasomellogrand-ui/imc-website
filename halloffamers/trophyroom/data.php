@@ -7,7 +7,11 @@ try{
  $db=imc_site_db($config,imc_site_target($config,$gw));$core=imc_site_db($config,'core');
  // Display existing awards only. Synchronisation remains with the existing award automation.
  $rows=imc_site_rows($db,'SELECT * FROM `'.imc_site_table($gw,'Trophy_Room').'` WHERE game_world_id=? ORDER BY imc_season DESC,won_date DESC,id',[$gw]);
- $labels=[];foreach(imc_site_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $r)$labels[$r['competition_key']]=$r['nexus_view'];
+ $labels=[];foreach(imc_site_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $r){
+  $key=$r['competition_key'];
+  $labels[$key]=$r['nexus_view'];
+  if(str_starts_with($key,'IMC002|DOMESTIC|league|'))$labels['GW005'.substr($key,6)]=$r['nexus_view'];
+ }
  $competitions=[];
  foreach($labels as $key=>$label){
   if(!$label)continue;
