@@ -9,6 +9,7 @@ on:
       - 'site-data/core/bootstrap.php'
       - 'site-data/core/change-signal.php'
       - 'site-assets/js/site-changes.js'
+      - 'tests/world-site-change-browser.py'
       - 'site-assets/js/world-ui.js'
       - 'imc-universal-gateway/daily-player.php'
       - 'imc-universal-gateway/transfer-normalizer.php'
@@ -75,3 +76,9 @@ jobs:
           with ThreadPoolExecutor(2) as pool:
               list(pool.map(verify, worlds))
           PY
+
+      - name: Verify live world change subscriptions in Chrome
+        run: |
+          python3 -m venv "$RUNNER_TEMP/site-change-browser"
+          "$RUNNER_TEMP/site-change-browser/bin/pip" install --quiet selenium
+          "$RUNNER_TEMP/site-change-browser/bin/python" tests/world-site-change-browser.py
