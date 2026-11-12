@@ -249,7 +249,7 @@ try {
  }
  unset($row);
  $catalogOrder=static fn(array $row):array=>[
-  $row['competition_group']==='DOMESTIC' && in_array($row['sm_action'],['leaguecup','nationalcup'],true) ? 0 : 1,
+  $row['competition_group']==='DOMESTIC' ? (['charityshield'=>0,'leaguecup'=>1,'nationalcup'=>1,'leagueshield'=>2][$row['sm_action']] ?? 3) : 3,
   (int)$row['sm_division'],$row['nexus_view']
  ];
  usort($rows,static fn($a,$b)=>$catalogOrder($a)<=>$catalogOrder($b));
