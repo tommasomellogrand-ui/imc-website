@@ -580,7 +580,8 @@ function dbm_health_data(): array {
             $databases[$target] = ['ok'=>false,'database'=>$definition['database'],'error'=>$e->getMessage()];
         }
     }
-    return ['ok'=>!in_array(false,array_column($databases,'ok'),true),'version'=>IMC_DBM_VERSION,'mode'=>'ready','databases'=>$databases];
+    require_once dirname(__DIR__,3).'/site-data/core/change-signal.php';
+    return ['ok'=>!in_array(false,array_column($databases,'ok'),true),'version'=>IMC_DBM_VERSION,'mode'=>'ready','databases'=>$databases,'site_changes'=>imc_change_delivery_health()];
 }
 
 function dbm_execute_plan(array $payload): array {

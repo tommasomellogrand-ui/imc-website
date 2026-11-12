@@ -60,10 +60,11 @@ function imc_retry_site_changes(): void {
                     $request = curl_init('https://toanuzojdkfjgucztpze.supabase.co/rest/v1/rpc/imc_publish_site_change');
                     curl_setopt_array($request, [CURLOPT_POST=>true, CURLOPT_POSTFIELDS=>$body,
                         CURLOPT_HTTPHEADER=>['Content-Type: application/json','apikey: sb_publishable_DYmVU7yEavK_ddsdNMUjcg_a7HesB-l'],
-                        CURLOPT_RETURNTRANSFER=>true, CURLOPT_TIMEOUT_MS=>2500, CURLOPT_CONNECTTIMEOUT_MS=>1000]);
+                        CURLOPT_RETURNTRANSFER=>true, CURLOPT_TIMEOUT_MS=>5500, CURLOPT_CONNECTTIMEOUT_MS=>2500]);
                     curl_exec($request);
                     $status = curl_getinfo($request,CURLINFO_RESPONSE_CODE);
                     $sent = $status>=200 && $status<300;
+                    if (!$sent) @file_put_contents($active, json_encode(['http'=>$status,'transport'=>curl_errno($request)]));
                     curl_close($request);
                 } finally {
                     if ($sent || is_file($file)) @unlink($active);
@@ -71,9 +72,22 @@ function imc_retry_site_changes(): void {
                 }
             }
         } catch (Throwable $e) {
-            error_log('IMC site change delivery pending');
+            error_log('IMC site change delivery pending: '.get_class($e));
         } finally {
             flock($lock, LOCK_UN); fclose($lock);
         }
     });
+}
+
+function imc_change_delivery_health(): array {
+    $root = dirname(__DIR__,2);
+    $dir = $root.'/__imc_private_gateway';
+    $pending = [];
+    foreach (glob($dir.'/site-change-*.pending*') ?: [] as $file) {
+        $detail = json_decode((string)@file_get_contents($file),true);
+        $pending[basename($file)] = ['http'=>(int)($detail['http'] ?? 0), 'transport'=>(int)($detail['transport'] ?? 0)];
+    }
+    return ['queue_writable'=>is_writable($dir),'curl'=>function_exists('curl_init'),
+        'signer_available'=>is_readable($root.'/__imc-sm-master/admin/database-manager/connector-key.php'),
+        'pending'=>$pending];
 }
