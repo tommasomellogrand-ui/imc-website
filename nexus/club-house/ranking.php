@@ -2,11 +2,17 @@
 declare(strict_types=1);
 // IMC Ranking v9: Results-only match scores and manager IDs; trophy rules unchanged.
 function imc_rank_weight(string $gw): int {
- return in_array($gw,['GW001','GW008'],true)?3:(in_array($gw,['GW002','GW003'],true)?2:1);
+ if(in_array($gw,['GW001','IMC001','IMC-001'],true))return 2;
+ return $gw==='GW008'?3:(in_array($gw,['GW002','GW003'],true)?2:1);
 }
 function imc_rank_bonus(array $t): ?int {
  $type=strtolower(trim((string)($t['trophy_type']??'')));
  $compact=preg_replace('/[^a-z0-9]+/','',$type);
+ $key=strtoupper((string)($t['competition_key']??''));
+ $key=preg_replace(['/^(GW001|IMC-001)[_|](?:IMC[_|])/','/^(GW011|IMC-005)[_|](?:IMC[_|])/'],['IMC001|IMC|','IMC005|IMC|'],$key);
+ $key=str_replace('_','',$key);
+ $cups=['IMC001|IMC|CHAMPIONSLEAGUE'=>100,'IMC001|IMC|EUROPALEAGUE'=>75,'IMC001|IMC|CONFERENCELEAGUE'=>75,'IMC001|IMC|CLUBWORLDCUP'=>125,'IMC005|IMC|CLUBWORLDCUP'=>75,'IMC005|IMC|RISINGSTARSLEAGUE|PREMIER'=>75,'IMC005|IMC|RISINGSTARSLEAGUE|CHALLENGER'=>50,'IMC005|IMC|NEXTGENLEAGUE|PREMIER'=>75,'IMC005|IMC|NEXTGENLEAGUE|CHALLENGER'=>50];
+ if(isset($cups[$key]))return $cups[$key];
  if($compact==='worldcup')return 125;
  if(strtoupper((string)($t['competition_group']??''))==='NATIONS'||$type==='interqualifier')return null;
  if(in_array($t['competition_key']??'', ['GW010_COPA_LIBERTADORES','GW010_COPPA_DEI_CAMPIONI','IMC004_COPA_LIBERTADORES','IMC004_COPPA_DEI_CAMPIONI'], true))return 100;

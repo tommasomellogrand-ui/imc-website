@@ -3,7 +3,7 @@ declare(strict_types=1);
 require dirname(__DIR__).'/nexus/club-house/ranking.php';
 require dirname(__DIR__).'/nexus/club-house/engine.php';
 function check($got,$want):void {if($got!==$want && !(is_numeric($got)&&is_numeric($want)&&(float)$got===(float)$want))throw new RuntimeException(json_encode([$got,$want]));}
-foreach(['GW001'=>3,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>1,'GW006'=>1,'GW007'=>1,'GW008'=>3,'GW009'=>1,'GW010'=>1] as $gw=>$weight){
+foreach(['GW001'=>2,'GW002'=>2,'GW003'=>2,'GW004'=>1,'GW005'=>1,'GW006'=>1,'GW007'=>1,'GW008'=>3,'GW009'=>1,'GW010'=>1] as $gw=>$weight){
  check(imc_rank_weight($gw),$weight);
  foreach([[1,1,0,1],[1,0,0,0.5],[1,0,1,0],[6,3,1,4],[4,0,4,0]] as [$played,$won,$lost,$points]){
   $drawn=$played-$won-$lost;$r=imc_rank_start(compact('played','won','drawn','lost'),$gw);check($r['total'],$points*$weight);check($r['match_points'],$points*$weight);
@@ -61,3 +61,13 @@ foreach(['club'=>false,'national_team'=>true,'global'=>null] as $scope=>$nationa
  }
 }
 echo "PASS: Career and Ranking statistics identical for clubs, nations and global including penalties\n";
+
+check(imc_rank_bonus(['competition_key'=>'IMC001|IMC|championsleague']),100);
+check(imc_rank_bonus(['competition_key'=>'IMC001|IMC|europaleague']),75);
+check(imc_rank_bonus(['competition_key'=>'IMC001|IMC|conferenceleague']),75);
+check(imc_rank_bonus(['competition_key'=>'IMC001|IMC|clubworldcup']),125);
+check(imc_rank_bonus(['competition_key'=>'IMC005|IMC|clubworldcup']),75);
+check(imc_rank_bonus(['competition_key'=>'IMC005|IMC|risingstarsleague|premier']),75);
+check(imc_rank_bonus(['competition_key'=>'IMC005|IMC|risingstarsleague|challenger']),50);
+check(imc_rank_bonus(['competition_key'=>'IMC005|IMC|nextgenleague|premier']),75);
+check(imc_rank_bonus(['competition_key'=>'IMC005|IMC|nextgenleague|challenger']),50);

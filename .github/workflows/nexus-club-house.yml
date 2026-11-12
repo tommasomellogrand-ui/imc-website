@@ -96,7 +96,7 @@ jobs:
                   assert m['opponent_id'] is None or (m['opponent_id'] in ids and m['opponent_identity_source']=='id')
               for v in d['managers'].values():
                   s=v['stats']; assert s['played']==s['won']+s['drawn']+s['lost']; assert s['played']==s['matched_by_id']; assert s['matched_by_name']==0
-                  r=v['ranking']; weight=3 if gw in ['GW001','GW008'] else 2 if gw in ['GW002','GW003'] else 1
+                  r=v['ranking']; weight=3 if gw == 'GW008' else 2 if gw in ['GW001','GW002','GW003'] else 1
                   n=v['national_stats']; national_total+=n['played']
                   assert n['played']==n['won']+n['drawn']+n['lost']==n['matched_by_id']
                   assert not d['national_ranking_error'] and d['national_ranking_coverage']['source']=='Results'
