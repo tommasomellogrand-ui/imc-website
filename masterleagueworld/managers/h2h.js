@@ -32,8 +32,8 @@
   const render=()=>{body.querySelectorAll('[data-detail-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.detailTab===selected)));body.querySelector('.hh-detail-view').innerHTML=detailContent(d,selected)};
   body.querySelectorAll('[data-detail-tab]').forEach(b=>b.onclick=()=>{selected=b.dataset.detailTab;const el=body.closest('details');if(el)el.dataset.tab=selected;render()});render();
  }
- 
- function stop(root){const old=instances.get(root);if(old){old.stopped=true;clearInterval(old.timer);document.removeEventListener('visibilitychange',old.onVisible);instances.delete(root);}}
+
+ function stop(root){const old=instances.get(root);if(old){old.stopped=true;instances.delete(root);}}
  function mount(root,options){
   stop(root);const state={...options,scope:options.scope||'club',competition:'',venue:'',search:'',version:0,stopped:false,loading:false,rows:[]};instances.set(root,state);
   root.innerHTML='<section class="hh"><p class="hh-note">'+esc(options.world)+' · Tutto lo storico · Bilancio dalla prospettiva di '+esc(options.name||'questa pagina')+'</p>'+(options.kind==='manager'&&!options.lockScope?'<div class="hh-scope" role="tablist" aria-label="Tipo di incarico"><button role="tab" aria-selected="true" data-scope="club">Club</button><button role="tab" aria-selected="false" data-scope="national_team">Nazionali</button></div>':'')+'<div class="hh-summary" aria-live="polite"></div><div class="hh-tools"><label>Avversario<input class="hh-search" type="search" placeholder="Cerca avversario…"></label><label>Competizione<select class="hh-competition"><option value="">Tutte le competizioni</option></select></label><label>Campo<select class="hh-venue"><option value="">Casa e trasferta</option><option value="home">Casa</option><option value="away">Trasferta</option></select></label></div><div class="hh-list"></div></section>';
@@ -64,8 +64,8 @@
   root.querySelector('.hh-search').oninput=e=>{state.search=e.target.value;renderList()};
   competition.onchange=e=>{state.competition=e.target.value;load()};root.querySelector('.hh-venue').onchange=e=>{state.venue=e.target.value;load()};
   root.querySelectorAll('[data-scope]').forEach(b=>b.onclick=()=>{state.scope=b.dataset.scope;state.competition='';root.querySelectorAll('[data-scope]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));load()});
-  state.onVisible=()=>{if(!document.hidden&&!state.loading&&!state.stopped)load(true)};document.addEventListener('visibilitychange',state.onVisible);
-  state.timer=setInterval(()=>{if(!document.hidden&&!state.loading&&!state.stopped&&document.activeElement!==root.querySelector('.hh-search'))load(true)},60000);load();
+
+  load();
  }
  window.NexusH2H={mount,stop,renderDetail};
 })();

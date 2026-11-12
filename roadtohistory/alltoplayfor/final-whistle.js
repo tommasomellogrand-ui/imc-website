@@ -203,8 +203,8 @@
   document.addEventListener('programme-date-change',()=>{controller?.abort();++generation;busy=false;visibility();load(true);});
   document.addEventListener('postmatch-ready',visibility);
   new MutationObserver(()=>{if(!panel.hidden)load(true);}).observe(panel,{attributes:true,attributeFilter:['hidden']});
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)load(false);});
-  setInterval(()=>{if(!document.hidden)load(false);},120000);
+
+  
   const url=new URL(location.href);
   if(/^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get('date')||''))dateInput.value=url.searchParams.get('date');
   if(followsToday()) {dateInput.value=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());load(true);}

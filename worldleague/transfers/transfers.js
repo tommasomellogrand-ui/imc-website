@@ -168,5 +168,5 @@ async function refresh(){
 }
 for(const id of ['search','club','season'])$(id).addEventListener(id==='search'?'input':'change',()=>{shown=60;remember();render();});
 $('load-more').onclick=()=>{shown+=60;render();};$('retry').onclick=refresh;
-refresh();setInterval(()=>{if(!document.hidden)refresh();},60000);
+refresh();
 })();

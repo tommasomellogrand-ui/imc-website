@@ -52,10 +52,9 @@ export function mountFixtures({gw,resource,render,esc}) {
     finally{clearTimeout(timeout);if(current===generation){loading=false;controls.forEach(c=>c.disabled=false);}}
   }
   window.addEventListener('pagehide',()=>controller?.abort());
-  window.addEventListener('pageshow',e=>{if(e.persisted)load();});
-  // Refresh after returning to the page and across the Rome date boundary.
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!loading)load();});
-  const interval=setInterval(()=>{if(!document.hidden&&!loading)load();},60000);
-  window.addEventListener('pagehide',()=>clearInterval(interval),{once:true});
+
+
+  
+
   load();
 }

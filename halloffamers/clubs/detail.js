@@ -133,8 +133,8 @@ async function showRoster(background=false){
  }catch(e){if(activeTab==='ROSTER'&&version===rosterVersion)document.getElementById('roster-values').innerHTML='<div class="card empty">'+esc(e.message)+'</div>'}
  finally{if(version===rosterVersion)rosterLoading=false}
 }
-setInterval(()=>{if(activeTab==='ROSTER'&&!document.hidden&&!rosterLoading)showRoster(true)},60000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeTab==='ROSTER'&&!rosterLoading)showRoster(true)});
+
+
 async function openTab(n){
  NexusH2H.stop(view);NexusHistory.stop(view);NexusDataRoom.stop(view);activeTab=n;trophyRequestVersion++;
  tabs.querySelectorAll('.tab').forEach(b=>{const active=b.dataset.n===n;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});clubStatsVersion++;rosterVersion++;rosterLoading=false;

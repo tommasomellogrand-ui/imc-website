@@ -76,7 +76,7 @@ function activate(tab){
 }
 tabs.forEach((tab,i)=>{tab.onclick=()=>activate(tab);tab.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=tabs[e.key==='Home'?0:e.key==='End'?1:1-i];activate(next);next.focus()}}});
 prev.onclick=()=>load(dates[dates.indexOf(current)-1]);next.onclick=()=>load(dates[dates.indexOf(current)+1]);
-setInterval(()=>{if(!document.hidden&&!loading)load(current===defaultDate?'':current,true)},60000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!loading)load(current===defaultDate?'':current,true)});
+
+
 load();
 })();

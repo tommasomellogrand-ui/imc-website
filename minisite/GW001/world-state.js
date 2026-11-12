@@ -28,10 +28,5 @@ export function startWorldState(){
   started=true;
   Object.defineProperty(window,'IMC_GW001',{value:worldState,writable:false,configurable:false});
   worldState.refreshSeasons();
-  const refresh=()=>{if(!document.hidden)worldState.refreshSeasons();};
-  // Refresh on return and while visible: new database rows need no snapshot rebuild.
-  document.addEventListener('visibilitychange',refresh);
-  window.addEventListener('pageshow',event=>{if(event.persisted)refresh();});
-  setInterval(refresh,60000);
   return worldState;
 }
