@@ -2,19 +2,22 @@
 declare(strict_types=1);
 
 function imc_site_standings_group(array $row): string {
-    $group=trim((string)($row['competition_group_name']??''));
-    if($group!=='')return $group;
-    $stage=trim((string)($row['competition_stage']??''));
-    if(preg_match('/^(?:group\s+(?:stage|phase)|fase\s+a\s+gironi)$/i',$stage))return '';
-    return preg_match('/^(?:group|gruppo|girone)\s+[A-Z0-9]+$/i',$stage)?$stage:'';
+    foreach(['competition_group_name','competition_stage','competition_round'] as $field){
+        $v=trim((string)($row[$field]??''));
+        if(preg_match('/^(?:girone|gruppo|group|pool)\s*([a-z]|\d+)$/i',$v,$m)||($field==='competition_group_name'&&preg_match('/^([a-z]|\d+)$/i',$v,$m)))return 'Girone '.strtoupper($m[1]);
+        if($field==='competition_group_name'&&$v!=='')return $v;
+    }
+    return '';
 }
-
-function imc_site_standings_tables(array $rows, array $seeds=[]): array {
+function imc_site_standings_tables(array $rows, array $seeds=[], string $key=''): array {
+    if(preg_match('/(?:^|[|_])(?:nationalcup|leaguecup|leagueshield|charityshield|supercup|smfasupercup|playoff|clubworldcup)(?:[|_]|$)/i',$key))return ['grouped'=>false,'groups'=>[],'rows'=>[],'excluded_unassigned'=>0];
+    $needsGroup=$key!==''&&!preg_match('/\|(?:league|championsleague|europaleague|conferenceleague|risingstarsleague|nextgenleague)(?:\||$)/i',$key);
     $eligible=[];$seen=[];$hasGroups=false;
     foreach($rows as $r){
         if($r['home_score']===null||$r['away_score']===null)continue;
         $stage=trim((string)($r['competition_stage']??''));
         // Knockout matches never contribute to a group table, even if a group label remains on the row.
+        if(preg_match('/final|quarti|ottavi|round of|knockout|eliminaz|play.?off/i',$stage.' '.($r['competition_round']??'')))continue;
         if($stage!==''&&!preg_match('/group|grupp|giron|league|campionato/i',$stage))continue;
         $fixture=(string)($r['sm_fixture_id']??'');
         if($fixture!==''&&isset($seen[$fixture]))continue;
@@ -23,7 +26,7 @@ function imc_site_standings_tables(array $rows, array $seeds=[]): array {
     }
     $tables=[];$excluded=0;
     foreach($seeds as $seed){
-        $name=$seed['group_name'];$tables[$name]=[];$hasGroups=true;
+        $name=imc_site_standings_group(['competition_group_name'=>$seed['group_name']]);$tables[$name]=[];$hasGroups=true;
         foreach($seed['teams'] as $team){
             $id=(string)$team['team_id'];
             $tables[$name][$id]=['team_id'=>$id,'team_name'=>$team['team_name'],'played'=>0,'won'=>0,'drawn'=>0,'lost'=>0,'gf'=>0,'ga'=>0,'gd'=>0,'points'=>0];
@@ -31,7 +34,7 @@ function imc_site_standings_tables(array $rows, array $seeds=[]): array {
     }
     foreach($eligible as $r){
         $group=$r['_group'];
-        if($hasGroups&&$group===''){$excluded++;continue;}
+        if(($hasGroups||$needsGroup)&&$group===''){$excluded++;continue;}
         $h=(string)($r['home_sm_club_id']?:$r['home_name']);$a=(string)($r['away_sm_club_id']?:$r['away_name']);
         if($h===''||$a==='')continue;
         if(!isset($tables[$group]))$tables[$group]=[];

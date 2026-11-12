@@ -24,25 +24,39 @@ function matches(rows,played){
  const dates=[...new Set(rows.map(r=>date(r.match_date)))];
  return '<div class="result-round"><header class="result-round-head"><h3>'+esc(roundLabel(rows[0]))+'</h3><span>'+esc(dates.join(' · '))+'</span></header><div>'+rows.map(r=>match(r,played)).join('')+'</div></div>';
 }
-function table(compact=false){if(data.tableError)return empty('Classifica temporaneamente non disponibile.');if(!data.groups.length)return empty('Classifica non ancora disponibile.');return data.groups.map(g=>'<section class="cup-card">'+(g.group_name?'<h3>'+esc(g.group_name)+'</h3>':'')+'<div class="table-scroll"><table class="cup-standings"><caption class="sr-only">Classifica '+esc(document.title)+'</caption><thead><tr><th>#</th><th>Club</th><th>PG</th>'+(!compact?'<th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th>':'')+'<th>DR</th><th>Pt</th></tr></thead><tbody>'+g.rows.map(t=>{const logo=data.teams.get(String(t.team_id))?.logo;return '<tr><td>'+t.position+'</td><th scope="row">'+badge(t.team_name,logo)+'</th><td>'+t.played+'</td>'+(!compact?[t.won,t.drawn,t.lost,t.gf,t.ga].map(v=>'<td>'+v+'</td>').join(''):'')+'<td>'+t.gd+'</td><td class="points">'+t.points+'</td></tr>'}).join('')+'</tbody></table></div></section>').join('')+'<p class="cup-note">Classifica calcolata dai risultati disponibili: 3 punti per vittoria, 1 per pareggio. Ordinamento: punti, differenza reti, gol fatti. Zone di qualificazione non ancora configurate.</p>'}
-function render(){if(!data)return;document.querySelectorAll('[data-main-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mainTab===tab)));const p=new URLSearchParams(settings?location.search:'');p.set('season',season);p.set('tab',tab);history.replaceState(null,'','?'+p);const results=data.results,schedule=data.schedule;let html='';
+const pureKO=/(?:^|[|_])(?:nationalcup|leaguecup|leagueshield|charityshield|supercup|smfasupercup|playoff|clubworldcup)(?:[|_]|$)/i.test(key);
+function groupOf(r){
+ if(pureKO||/final|quarti|ottavi|round of|knockout|eliminaz|play.?off/i.test([r.competition_stage,r.competition_round].join(' ')))return '';
+ for(const [i,v] of [r.competition_group_name,r.competition_stage,r.competition_round].entries()){
+  const m=String(v||'').trim().match(/^(?:(?:girone|gruppo|group|pool)\s*)?([a-z]|\d+)$/i);
+  if(m&&(i===0||/^(?:girone|gruppo|group|pool)/i.test(String(v))))return 'Girone '+m[1].toUpperCase();
+ }
+ return String(r.competition_group_name||'').trim();
+}
+function groupedMatches(rows,played){
+ const buckets=new Map();for(const r of rows){const g=groupOf(r);if(!buckets.has(g))buckets.set(g,[]);buckets.get(g).push(r)}
+ return [...buckets].sort(([a],[b])=>!a?1:!b?-1:a.localeCompare(b,'it',{numeric:true})).map(([g,rs])=>{
+ const days=new Map();for(const r of rs){const k=roundKey(r);if(!days.has(k))days.set(k,[]);days.get(k).push(r)}
+ return (g?'<h2>'+esc(g)+'</h2>':buckets.size>1?'<h2>Partite fuori dai gironi</h2>':'')+[...days.values()].map(day=>'<section>'+matches(day,played)+'</section>').join('');
+ }).join('');
+}
+function table(compact=false){if(data.tableError)return empty('Classifica temporaneamente non disponibile.');if(!data.groups.length)return empty('Classifica non ancora disponibile.');return data.groups.filter(g=>league||g.group_name).slice().sort((a,b)=>String(a.group_name||'').localeCompare(String(b.group_name||''),'it',{numeric:true})).map(g=>'<section class="cup-card">'+(g.group_name?'<h3>'+esc(g.group_name)+'</h3>':'')+'<div class="table-scroll"><table class="cup-standings"><caption class="sr-only">Classifica '+esc(document.title)+'</caption><thead><tr><th>#</th><th>Club</th><th>PG</th>'+(!compact?'<th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th>':'')+'<th>DR</th><th>Pt</th></tr></thead><tbody>'+g.rows.map(t=>{const logo=data.teams.get(String(t.team_id))?.logo;return '<tr><td>'+t.position+'</td><th scope="row">'+badge(t.team_name,logo)+'</th><td>'+t.played+'</td>'+(!compact?[t.won,t.drawn,t.lost,t.gf,t.ga].map(v=>'<td>'+v+'</td>').join(''):'')+'<td>'+t.gd+'</td><td class="points">'+t.points+'</td></tr>'}).join('')+'</tbody></table></div></section>').join('')+'<p class="cup-note">Classifica calcolata dai risultati disponibili: 3 punti per vittoria, 1 per pareggio. Ordinamento: punti, differenza reti, gol fatti. Zone di qualificazione non ancora configurate.</p>'}
+function render(){if(!data)return;
+ const hasTable=!pureKO&&(league||data.groups.some(g=>g.group_name)||[...data.results,...data.calendar].some(r=>groupOf(r)));
+ const tableTab=document.querySelector('[data-main-tab="table"]');if(tableTab){tableTab.hidden=!hasTable;tableTab.style.display=hasTable?'':'none'}
+ if(!hasTable&&tab==='table')tab='matches';document.querySelectorAll('[data-main-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mainTab===tab)));const p=new URLSearchParams(settings?location.search:'');p.set('season',season);p.set('tab',tab);history.replaceState(null,'','?'+p);const results=data.results,schedule=data.schedule;let html='';
  if(tab==='overview'){
  const latest=results[0],next=schedule[0];
  const planned=new Set(schedule.map(roundKey)),played=new Set(results.map(roundKey).filter(k=>!planned.has(k)));
  html='<div class="cup-summary"><div><strong>'+played.size+'</strong><span>'+(league?'Giornate giocate':'Turni giocati')+'</span></div><div><strong>'+planned.size+'</strong><span>'+(league?'Giornate in calendario':'Turni in calendario')+'</span></div></div>';
  if(!results.length&&!schedule.length)html+=empty(key.endsWith('|clubworldcup')?'Competizione non ancora iniziata.':'Nessuna partita disponibile per questa stagione.');
- else html+='<section><div class="cup-section-title"><h2>'+(league?'Ultima giornata':'Ultimo turno')+'</h2><button data-open="matches">Tutte le partite →</button></div>'+matches(latest?results.filter(r=>roundKey(r)===roundKey(latest)):[],true)+'</section><section><div class="cup-section-title"><h2>La classifica</h2><button data-open="table">Classifica completa →</button></div>'+table(true)+'</section><section><h2>'+(league?'Prossima giornata':'Prossimo turno')+'</h2>'+matches(next?schedule.filter(r=>roundKey(r)===roundKey(next)):[],false)+'</section>';
+ else html+='<section><div class="cup-section-title"><h2>'+(league?'Ultima giornata':'Ultimo turno')+'</h2><button data-open="matches">Tutte le partite →</button></div>'+groupedMatches(latest?results.filter(r=>roundKey(r)===roundKey(latest)):[],true)+'</section>'+(hasTable?'<section><div class="cup-section-title"><h2>La classifica</h2><button data-open="table">Classifica completa →</button></div>'+table(true)+'</section>':'')+'<section><h2>'+(league?'Prossima giornata':'Prossimo turno')+'</h2>'+groupedMatches(next?schedule.filter(r=>roundKey(r)===roundKey(next)):[],false)+'</section>';
  }else if(tab==='matches'){
  const calendar=mode==='schedule';
  html='<div class="cup-tools"><div class="cup-pills">'+['results','schedule'].map(m=>'<button data-mode="'+m+'" aria-pressed="'+(mode===m)+'">'+(m==='results'?'Risultati':'Calendario')+'</button>').join('')+'</div></div>';
- function renderDays(rows,played){
-  const groups=new Map();
-  for(const r of rows){const k=roundKey(r);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r);}
-  return [...groups.values()].map(group=>'<section>'+matches(group,played)+'</section>').join('');
- }
- if(!calendar)html+=renderDays(results,true)||empty('Nessun risultato disponibile.');
- else html+=renderDays(schedule,false)||empty('Nessuna partita in calendario.');
- }else if(tab==='table'){html='<h2>Classifica</h2>'+table();const knockout=[...results,...schedule].filter(r=>r.competition_stage&&!/group|grupp|giron|league|campionato/i.test(r.competition_stage));if(knockout.length)html+='<h2>Fase a eliminazione diretta</h2>'+knockout.map(r=>'<h3>'+esc(r.competition_stage)+'</h3>'+match(r,results.includes(r))).join('');
+ if(!calendar)html+=groupedMatches(results,true)||empty('Nessun risultato disponibile.');
+ else html+=groupedMatches(schedule,false)||empty('Nessuna partita in calendario.');
+ }else if(tab==='table'){html='<h2>Classifica</h2>'+table();
  }else{
  html='<div class="cup-pills">'+['teams','players'].map(v=>'<button data-stats="'+v+'" aria-pressed="'+(v===statsMode)+'">'+(v==='teams'?'Squadre':'Giocatori')+'</button>').join('')+'</div>';
  if(statsMode==='teams'){const teams=new Map();results.forEach(r=>['home','away'].forEach(side=>{const name=r[side+'_name'],id=String(r[side+'_sm_club_id']||name),opp=side==='home'?'away':'home';if(!teams.has(id))teams.set(id,{name,logo:r[side+'_logo_url'],pg:0,gf:0,ga:0,w:0});const t=teams.get(id);t.pg++;t.gf+=Number(r[side+'_score']);t.ga+=Number(r[opp+'_score']);if(Number(r[side+'_score'])>Number(r[opp+'_score']))t.w++}));html+='<h2>Rendimento delle squadre</h2>'+([...teams.values()].length?'<div class="team-stats">'+[...teams.values()].sort((a,b)=>b.gf-a.gf||a.name.localeCompare(b.name)).map(t=>'<article class="cup-card">'+badge(t.name,t.logo)+'<div class="mini-stats"><span><b>'+t.pg+'</b>PG</span><span><b>'+t.w+'</b>Vittorie</span><span><b>'+t.gf+'</b>Gol fatti</span><span><b>'+t.ga+'</b>Gol subiti</span></div></article>').join('')+'</div>':empty('Statistiche disponibili dopo le prime partite.'));}
