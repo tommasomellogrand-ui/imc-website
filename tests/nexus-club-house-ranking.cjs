@@ -1,7 +1,7 @@
 const {chromium}=require(process.env.NEXUS_PLAYWRIGHT_PATH||'playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const people=[{manager_id:'MNG001',full_name:'Manager Uno'},{manager_id:'MNG002',full_name:'Manager Due'},{manager_id:'MNG003',full_name:'Manager Tre'}];
-function bundle(world){const weight=['GW001','GW008'].includes(world)?3:['GW002','GW003'].includes(world)?2:1;return {ok:true,world,trophy_error:false,managers:Object.fromEntries(people.map((m,i)=>{const base=i===2?0:1.5;return [m.manager_id,{stats:{played:i===2?1:2,won:i===2?0:1,drawn:i===2?0:1,lost:i===2?1:0},ranking_club_stats:{played:i===2?1:2,won:i===2?0:1,drawn:i===2?0:1,lost:i===2?1:0},national_stats:{played:1,won:i===2?0:1,drawn:i===2?1:0,lost:0},ranking:{version:9,club_base:base,national_base:i===2?0.5:1,club_points:base*weight,national_points:(i===2?0.5:1)*weight,weight,match_base:base+(i===2?0.5:1),trophy_base:i===2?0:75,match_points:(base+(i===2?0.5:1))*weight,trophy_points:(i===2?0:75)*weight,total:(base+(i===2?0.5:1))*weight+(i===2?0:75)*weight,unscored_trophies:0,awards:i===2?[]:[{competition:'Charity Shield',season:1,date:'2026-09-01',team:'Club Uno',base:75,points:75*weight}]}}];}))};}
+function bundle(world){const weight=world==='GW008'?3:['GW001','GW002','GW003'].includes(world)?2:1;return {ok:true,world,trophy_error:false,managers:Object.fromEntries(people.map((m,i)=>{const base=i===2?0:1.5;return [m.manager_id,{stats:{played:i===2?1:2,won:i===2?0:1,drawn:i===2?0:1,lost:i===2?1:0},ranking_club_stats:{played:i===2?1:2,won:i===2?0:1,drawn:i===2?0:1,lost:i===2?1:0},national_stats:{played:1,won:i===2?0:1,drawn:i===2?1:0,lost:0},ranking:{version:9,club_base:base,national_base:i===2?0.5:1,club_points:base*weight,national_points:(i===2?0.5:1)*weight,weight,match_base:base+(i===2?0.5:1),trophy_base:i===2?0:75,match_points:(base+(i===2?0.5:1))*weight,trophy_points:(i===2?0:75)*weight,total:(base+(i===2?0.5:1))*weight+(i===2?0:75)*weight,unscored_trophies:0,awards:i===2?[]:[{competition:'Charity Shield',season:1,date:'2026-09-01',team:'Club Uno',base:75,points:75*weight}]}}];}))};}
 (async()=>{const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||undefined,headless:true,args:['--no-sandbox']});try{
  const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];let fail=false;
  page.on('pageerror',e=>errors.push(e.message));
@@ -9,12 +9,12 @@ function bundle(world){const weight=['GW001','GW008'].includes(world)?3:['GW002'
  await page.goto('https://rank.test/?view=ranking');await page.waitForFunction(()=>document.querySelector('#loading').textContent.startsWith('11/11'));
  await page.locator('.rank-rules>summary').click();
  assert.equal(await page.locator('.ranking-score-guide').count(),1);
- assert.equal(await page.locator('.rank-bonus-list>div').count(),6);
+ assert.equal(await page.locator('.rank-bonus-list>div').count(),11);
  assert.equal(await page.locator('.rank-rule-notes').getAttribute('open'),null);
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Rules mobile overflow');
  await page.locator('.rank-rules>summary').click();
  assert.equal(await page.locator('#title').textContent(),'Club House');assert.equal(await page.locator('.ranking-row').count(),3);
- assert.deepEqual(await page.locator('.rank-position').allTextContents(),['1','1','3']);assert.equal((await page.locator('.rank-total').first().textContent()).replace(/\./g,''),'1317,5PUNTI');
+ assert.deepEqual(await page.locator('.rank-position').allTextContents(),['1','1','3']);assert.equal((await page.locator('.rank-total').first().textContent()).replace(/\./g,''),'1240PUNTI');
  await page.locator('.ranking-row>summary').first().click();assert.equal(await page.locator('.ranking-row').first().locator('.rank-world').count(),11);
  assert.match(await page.locator('.rank-detail').first().textContent(),/75/);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile overflow');
  assert.match(await page.locator('.rank-split').first().textContent(),/Nazionali/);assert.match(await page.locator('.rank-world').first().textContent(),/Results/);
