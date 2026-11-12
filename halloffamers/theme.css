@@ -1,3 +1,4 @@
+@import url("/roadtohistory/assets/world-menu-contrast.css");
 /* IMC-002 · Hall Of Famers: shared navigation, individual colour identity. */
 :root,body{--gold:#6e4625!important;--accent:#6e4625!important;--world-accent:#6e4625;--world-tint:#f4ece1;font-family:Inter,sans-serif!important}
 body .hero{background:linear-gradient(120deg,#f4ece1,#fff)!important;border-top:5px solid #6e4625}body .hero h1{color:#6e4625!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}

@@ -1,3 +1,4 @@
+@import url("/roadtohistory/assets/world-menu-contrast.css");
 /* IMC-004 · Sensible Soccer Academy: shared navigation, individual colour identity. */
 :root,body{--gold:#286e25!important;--accent:#286e25!important;--world-accent:#286e25;--world-tint:#eef7e8;font-family:Inter,sans-serif!important}
 body .hero{background:linear-gradient(120deg,#eef7e8,#fff)!important;border-top:5px solid #286e25}body .hero h1{color:#286e25!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}

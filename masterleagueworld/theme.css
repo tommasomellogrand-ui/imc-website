@@ -1,3 +1,4 @@
+@import url("/roadtohistory/assets/world-menu-contrast.css");
 /* IMC-007 · Master League World: shared navigation, individual colour identity. */
 :root,body{--gold:#173e99!important;--accent:#173e99!important;--world-accent:#173e99;--world-tint:#f2f8df;font-family:Inter,sans-serif!important}
 body .hero{background:linear-gradient(120deg,#f2f8df,#fff)!important;border-top:5px solid #173e99}body .hero h1{color:#173e99!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}

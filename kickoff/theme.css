@@ -1,3 +1,4 @@
+@import url("/roadtohistory/assets/world-menu-contrast.css");
 /* IMC-003 · Kick Off: shared navigation, individual colour identity. */
 :root,body{--gold:#92352b!important;--accent:#92352b!important;--world-accent:#92352b;--world-tint:#f3e8ce;font-family:Inter,sans-serif!important}
 body .hero{background:linear-gradient(120deg,#f3e8ce,#fff)!important;border-top:5px solid #92352b}body .hero h1{color:#92352b!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}

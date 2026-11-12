@@ -1,3 +1,4 @@
+@import url("/roadtohistory/assets/world-menu-contrast.css");
 /* IMC-006 · World League: shared navigation, individual colour identity. */
 :root,body{--gold:#16577d!important;--accent:#16577d!important;--world-accent:#16577d;--world-tint:#e6f5ff;font-family:Inter,sans-serif!important}
 body .hero{background:linear-gradient(120deg,#e6f5ff,#fff)!important;border-top:5px solid #16577d}body .hero h1{color:#16577d!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}

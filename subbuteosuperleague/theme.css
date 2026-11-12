@@ -1,3 +1,4 @@
+@import url("/roadtohistory/assets/world-menu-contrast.css");
 /* IMC-005 · Subbuteo Super League: shared navigation, individual colour identity. */
 :root,body{--gold:#9c2528!important;--accent:#9c2528!important;--world-accent:#9c2528;--world-tint:#f0e7d4;font-family:Inter,sans-serif!important}
 body .hero{background:linear-gradient(120deg,#f0e7d4,#fff)!important;border-top:5px solid #9c2528}body .hero h1{color:#9c2528!important;font-size:clamp(42px,7vw,92px);max-width:1000px;overflow-wrap:normal;line-height:1.06}

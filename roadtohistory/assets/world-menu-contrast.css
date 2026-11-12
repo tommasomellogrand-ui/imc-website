@@ -1,0 +1,22 @@
+/* Keep dropdown surfaces and their text together across world header themes. */
+@layer world-menu-contrast {
+  .top .menu nav {
+    background: #fff !important;
+    color: #142b45 !important;
+  }
+  .top .menu nav :is(a, button) {
+    color: #142b45 !important;
+    background-color: transparent !important;
+  }
+  .top .menu nav :is(a, button) :is(span, small, strong) {
+    color: inherit !important;
+  }
+  .top .menu nav :is(a, button):is(:hover, :focus-visible, :active, [aria-current="page"], [aria-selected="true"]) {
+    color: #142b45 !important;
+    background: #e9eff5 !important;
+  }
+  .top .menu nav :focus-visible {
+    outline: 2px solid #284e73 !important;
+    outline-offset: -2px;
+  }
+}
