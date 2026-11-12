@@ -40,7 +40,16 @@ function imc_retry_site_changes(): void {
         $lock = @fopen($dir.'/site-change.lock', 'c');
         if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) return;
         try {
-            $secret = require dirname(__DIR__, 2).'/__imc-sm-master/admin/database-manager/connector-key.php';
+            $admin = dirname(__DIR__, 2).'/__imc-sm-master/admin';
+            $connector = $admin.'/database-manager/connector-key.php';
+            if (is_readable($connector)) {
+                $secret = require $connector;
+            } else {
+                // Same credential selection used by the authenticated Database Manager.
+                if (!function_exists('smm_config')) require_once $admin.'/core.php';
+                $secret = smm_config()['admin_token'] ?? '';
+            }
+            if (!is_string($secret) || $secret === '') throw new RuntimeException('Signing unavailable');
             foreach (glob($dir.'/site-change-*.pending.sending') ?: [] as $orphan) {
                 $pending = substr($orphan, 0, -strlen('.sending'));
                 if (is_file($pending)) @unlink($orphan);
@@ -88,6 +97,7 @@ function imc_change_delivery_health(): array {
         $pending[basename($file)] = ['http'=>(int)($detail['http'] ?? 0), 'transport'=>(int)($detail['transport'] ?? 0)];
     }
     return ['queue_writable'=>is_writable($dir),'curl'=>function_exists('curl_init'),
-        'signer_available'=>is_readable($root.'/__imc-sm-master/admin/database-manager/connector-key.php'),
+        'signer_available'=>is_readable($root.'/__imc-sm-master/admin/database-manager/connector-key.php') ||
+            (function_exists('smm_config') && !empty(smm_config()['admin_token'])),
         'pending'=>$pending];
 }
