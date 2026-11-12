@@ -236,9 +236,16 @@ try {
   $summary['logos']=$displayLogos;
   unset($summary);
  }
- $leagueNames=array_column(imc_site_rows($core,"SELECT sm_division,IMC_View FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND sm_action='league' AND competition_group='DOMESTIC'",[$gw]),'IMC_View','sm_division');
+ $domesticNames=[];$divisionNames=[];
+ foreach(imc_site_rows($core,"SELECT competition_key,sm_action,sm_division,IMC_View FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND competition_group='DOMESTIC'",[$gw]) as $entry){
+  $domesticNames[$uiKey($entry['competition_key'])]=$entry['IMC_View'];
+  if($entry['sm_action']==='league')$divisionNames[$entry['sm_division']]=$entry['IMC_View'];
+ }
  foreach($rows as &$row){
-  if($row['competition_group']==='DOMESTIC' && $row['sm_action']==='league' && isset($leagueNames[$row['sm_division']]))$row['nexus_view']=$leagueNames[$row['sm_division']];
+  if($row['competition_group']!=='DOMESTIC')continue;
+  $key=$row['competition_key'];
+  if(isset($domesticNames[$key]))$row['nexus_view']=$domesticNames[$key];
+  elseif($row['sm_action']==='playoff' && isset($divisionNames[$row['sm_division']]))$row['nexus_view']=$divisionNames[$row['sm_division']].' Playoff';
  }
  unset($row);
  usort($rows,fn($a,$b)=>[(int)$a['sm_division'],$a['nexus_view']]<=>[(int)$b['sm_division'],$b['nexus_view']]);
