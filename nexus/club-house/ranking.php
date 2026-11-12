@@ -9,6 +9,7 @@ function imc_rank_bonus(array $t): ?int {
  $compact=preg_replace('/[^a-z0-9]+/','',$type);
  if($compact==='worldcup')return 125;
  if(strtoupper((string)($t['competition_group']??''))==='NATIONS'||$type==='interqualifier')return null;
+ if(in_array($t['competition_key']??'', ['GW010_COPA_LIBERTADORES','GW010_COPPA_DEI_CAMPIONI'], true))return 100;
  $fixed=['smfacup'=>100,'smfashield'=>75,'leaguecup'=>50,'nationalcup'=>50,'leagueshield'=>50,'supercup'=>75,'charityshield'=>75,'playoff'=>10];
  if(isset($fixed[$type]))return $fixed[$type];
  if($type==='league'){
