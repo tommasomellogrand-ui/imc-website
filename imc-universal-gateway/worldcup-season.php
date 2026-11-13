@@ -15,7 +15,7 @@ function imc_worldcup_reconcile(PDO $db, string $table): array {
         $exists->execute([$name]);
         if (!(int)$exists->fetchColumn()) continue;
         $available[]=$name;
-        foreach ($db->query('SELECT id,game_world_id,imc_season,match_date,competition_stage,competition_round FROM '.imc_ident($name)." WHERE LOWER(TRIM(sm_action))='worldcup' AND match_date IS NOT NULL")->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        foreach ($db->query('SELECT sm_fixture_id,fingerprint,game_world_id,imc_season,match_date,competition_stage,competition_round FROM '.imc_ident($name)." WHERE LOWER(TRIM(sm_action))='worldcup' AND match_date IS NOT NULL")->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $row['table']=$name;$rows[]=$row;
         }
     }
@@ -43,8 +43,8 @@ function imc_worldcup_reconcile(PDO $db, string $table): array {
         if ($season===null) continue;
         foreach ($editionRows as $row) {
             if ((int)$row['imc_season']===$season) continue;
-            $update=$db->prepare('UPDATE '.imc_ident($row['table'])." SET imc_season=? WHERE id=? AND LOWER(TRIM(sm_action))='worldcup'");
-            $update->execute([$season,$row['id']]);$changed+=$update->rowCount();
+            $update=$db->prepare('UPDATE '.imc_ident($row['table'])." SET imc_season=? WHERE sm_fixture_id <=> ? AND fingerprint <=> ? AND LOWER(TRIM(sm_action))='worldcup'");
+            $update->execute([$season,$row['sm_fixture_id'],$row['fingerprint']]);$changed+=$update->rowCount();
         }
     }
     return ['worldcup_season_updated'=>$changed];
