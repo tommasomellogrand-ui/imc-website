@@ -169,5 +169,9 @@
   "masterleagueworld/matchday/index.html",
   "worldleague/matchday/index.html",
   "roadtohistory/matchday/index.html",
-  "scudetto/matchday/index.html"
+  "scudetto/matchday/index.html",
+  "roadtohistory/rth-champions-league/index.html",
+  "roadtohistory/rth-conference-league/index.html",
+  "roadtohistory/rth-club-world-cup/index.html",
+  "roadtohistory/rth-europa-league/index.html"
 ]
