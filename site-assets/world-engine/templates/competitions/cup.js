@@ -102,7 +102,17 @@ async function render(){if(!data)return;
  }
  $('cup-view').innerHTML=html;wire();
 }
-function wire(){document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{tab=b.dataset.open;render()});document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;render()});document.querySelectorAll('[data-stats]').forEach(b=>b.onclick=()=>{statsMode=b.dataset.stats;render()});if($('metric'))$('metric').onchange=e=>{metric=e.target.value;render()};document.querySelectorAll('[data-match]').forEach(b=>b.onclick=async()=>{const current=data;await extra('reports');if(data!==current)return;const r=data.results[Number(b.dataset.match)];if(!r)return;const report=r.sm_fixture_id!=null&&data.reports.find(x=>x.sm_fixture_id!=null&&String(x.sm_fixture_id)===String(r.sm_fixture_id));$('match-body').innerHTML='<h2>'+esc(r.home_name)+' – '+esc(r.away_name)+'</h2><p>'+esc(roundLabel(r))+'</p><p class="detail-score">'+r.home_score+' – '+r.away_score+'</p><p>'+date(r.match_date)+'</p>'+(report?'<a class="report-link" href="'+base+'competitions/match.html?world='+encodeURIComponent(world)+'&fixture='+encodeURIComponent(r.sm_fixture_id)+'">Apri Match Report →</a>':empty(data.reportError?'Verifica Match Report temporaneamente non disponibile.':'Match Report non disponibile.'));$('match-dialog').showModal()});document.querySelectorAll('#cup-view img').forEach(img=>img.onerror=()=>img.hidden=true)}
+function wire(){document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{tab=b.dataset.open;render()});document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;render()});document.querySelectorAll('[data-stats]').forEach(b=>b.onclick=()=>{statsMode=b.dataset.stats;render()});if($('metric'))$('metric').onchange=e=>{metric=e.target.value;render()};document.querySelectorAll('[data-match]').forEach(b=>b.onclick=async()=>{
+ const current=data,r=current?.results[Number(b.dataset.match)];if(!r)return;
+ b.disabled=true;b.setAttribute('aria-busy','true');
+ try{
+  await extra('reports');if(data!==current)return;
+  const report=r.sm_fixture_id!=null&&current.reports.find(x=>x.sm_fixture_id!=null&&String(x.sm_fixture_id)===String(r.sm_fixture_id));
+  if(report){location.href=base+'competitions/match.html?'+new URLSearchParams({world,fixture:r.sm_fixture_id});return;}
+  let note=b.querySelector('.fixture-report-status');if(!note){note=document.createElement('small');note.className='fixture-report-status';note.setAttribute('role','status');note.style.cssText='display:block;font-size:11px;font-weight:400;white-space:normal';b.append(note);}
+  note.textContent=current.reportError?'Verifica Match Report temporaneamente non disponibile.':'Match Report non disponibile.';
+ }finally{b.disabled=false;b.removeAttribute('aria-busy');}
+});document.querySelectorAll('#cup-view img').forEach(img=>img.onerror=()=>img.hidden=true)}
 async function load(){const request=++epoch;data=null;$('cup-view').innerHTML=empty('Caricamento della competizione…');$('cup-view').setAttribute('aria-busy','true');try{
  const [r,s]=await Promise.allSettled([api('results.php'),api('schedule.php')]);if(request!==epoch)return;if(r.status!=='fulfilled'||s.status!=='fulfilled')throw Error('matches');
  const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome'}).format(new Date());
