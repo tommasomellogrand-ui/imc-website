@@ -24,7 +24,7 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
         if (count($seasons)!==1 || (int)$seasons[0]['imc_season']<1) return ['state'=>'current_season_unavailable','version'=>TROPHY_SYNC_VERSION];
         $currentSeason=(int)$seasons[0]['imc_season'];
         $core=nexus_db($config,'core');
-        $definitions=nexus_rows($core,'SELECT game_world_id,competition_key,sm_action,sm_country,sm_division,teams_count,expected_match FROM `IMC Competition Codex Global` WHERE game_world_id=? AND sm_action=?',[$gw,'league']);
+        $definitions=nexus_rows($core,'SELECT game_world_id,competition_key,sm_action,sm_country,sm_division,teams_count,expected_match,sm_action_group,custom_competition FROM `IMC Competition Codex Global` WHERE game_world_id=? AND (sm_action=? OR sm_action_group=?)',[$gw,'league','IMC']);
         $labels=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $label)$labels[$label['competition_key']]=$label['nexus_view'];
         $mapping=nexus_rows($core,'SELECT `Club Name`,`SM World Club ID` FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]);
         $db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
@@ -40,7 +40,7 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
             unset($result);
         }
         $derived=trophy_derive($gw,$results,$reports,$schedule,$definitions,$today,$mapping);
-        foreach($derived['awards'] as &$award)$award['nexus_view']=trophy_nexus_view($award,$labels);unset($award);
+        foreach($derived['awards'] as &$award)$award['nexus_view']=$award['nexus_view']??trophy_nexus_view($award,$labels);unset($award);
         $table='`'.nexus_table($gw,'Trophy_Room').'`';
         $before=nexus_rows($db,'SELECT * FROM '.$table.' ORDER BY id');
         if ($preview) {$db->rollBack();return ['state'=>'preview','version'=>TROPHY_SYNC_VERSION,'existing_count'=>count($before)]+$derived;}

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 // Pure derivation: no writes, network access or dependency on the current club roster.
-const TROPHY_ENGINE_VERSION = '20261006.1';
+const TROPHY_ENGINE_VERSION = '20261113.1';
 function trophy_nexus_view(array $row,array $labels): string {
     $key=(string)$row['competition_key'];
     if (isset($labels[$key])) return (string)$labels[$key];
@@ -104,6 +104,15 @@ function trophy_record(string $gw,array $r,string $side,string $method): array {
         'source_repository'=>'IMC Results'];
 }
 function trophy_derive(string $gw,array $results,array $reports,array $schedules,array $definitions,string $today,array $mapping=[]): array {
+    $imcNames=[];
+    $competitionId=static fn(string $key): string => preg_replace('/^(?:GW\\d{3}|IMC-?\\d{3})/', '', $key);
+    foreach ($definitions as $definition) {
+        if (strtoupper(trim((string)($definition['sm_action_group']??'')))==='IMC') {
+            $imcNames[$competitionId((string)$definition['competition_key'])]=$definition['custom_competition'];
+        }
+    }
+    $isImc=static fn(array $row): bool => isset($imcNames[$competitionId((string)($row['competition_key']??''))]);
+    $results=array_values(array_filter($results,static fn(array $row): bool => !$isImc($row) || trophy_final($row)));
     [$results,$reports,$schedules]=trophy_resolve_ids($results,[],$schedules,$mapping);
     [$fixtures,$conflicts]=trophy_fixture_map($results);
     [$reportMap,$reportConflicts]=trophy_fixture_map($reports);
@@ -128,7 +137,7 @@ function trophy_derive(string $gw,array $results,array $reports,array $schedules
             if ($winner) $awards[$key]=$winner; else $issues[$key]=$reason;
             continue;
         }
-        if (!in_array($action,['leaguecup','leagueshield','charityshield','smfacup','smfashield','supercup','playoff','worldcup'],true)) continue;
+        if (!$isImc($sample) && !in_array($action,['leaguecup','leagueshield','charityshield','smfacup','smfashield','supercup','playoff','worldcup'],true)) continue;
         $finals=array_values(array_filter($rows,'trophy_final'));
         if (!$finals) {$issues[$key]='final_not_available';continue;}
         usort($finals,fn($a,$b)=>strcmp((string)$a['match_date'],(string)$b['match_date']));
@@ -166,6 +175,7 @@ function trophy_derive(string $gw,array $results,array $reports,array $schedules
         $side=$decision>0?'home':'away';
         if (empty($m[$side.'_name'])) {$issues[$key]='winner_name_missing';continue;}
         $awards[$key]=trophy_record($gw,$m,$side,'final');
+        if ($isImc($m)) $awards[$key]['nexus_view']=$imcNames[$competitionId((string)$m['competition_key'])];
     }
     ksort($awards); ksort($issues);
     return ['awards'=>array_values($awards),'pending'=>$issues,'unassigned_source_rows'=>$invalid];
