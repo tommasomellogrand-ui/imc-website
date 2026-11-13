@@ -19,6 +19,7 @@ function competitionHeader(){
  main.querySelectorAll(':scope > .cup-back,:scope > .cup-world-nav,:scope > h1,.cup-tabs').forEach(el=>el.remove());
  $('cup-phase')?.remove();
  const style=document.createElement('style');style.textContent=`
+body[data-competition] .imc-section-plate{display:none!important}
 .competition-banner{position:relative;isolation:isolate;width:100%;aspect-ratio:24/5;overflow:hidden;background:#142b45;border-radius:4px}
 .competition-banner .cup-banner{position:absolute;inset:0;width:100%;height:100%;margin:0;border:0;border-radius:0;object-fit:cover;object-position:center bottom}
 .competition-banner-world:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,15,26,.88),rgba(5,15,26,.35));z-index:1}
