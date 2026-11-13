@@ -159,3 +159,90 @@ if(!document.getElementById('nx-universal-nav')){
 })().catch(() => {});
 
 ;(()=>{if(document.querySelector('script[src*="/site-assets/names/display.js"]'))return;const s=document.createElement('script');s.src='/site-assets/names/display.js?v=1';document.head.append(s)})();
+
+// Feed delle home dei mondi. Gli endpoint sono gli stessi delle rispettive sezioni.
+(async function worldHomeFeed() {
+ const root = document.getElementById('home-content');
+ if (!root) return;
+ const base = '/' + location.pathname.split('/')[1] + '/';
+ const feed = document.createElement('div');
+ feed.className = 'wrap';
+ root.prepend(feed);
+ const today = new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Rome'}).format(new Date());
+ const clock = new Intl.DateTimeFormat('it-IT', {timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
+ const formatDate = day => day.split('-').reverse().join('/');
+ async function read(path) {
+   const response = await fetch(base + path, {cache:'no-store'});
+   if (!response.ok) throw Error('HTTP ' + response.status);
+   const data = await response.json();
+   if (!data.ok) throw Error('Dati non disponibili');
+   return data;
+ }
+ async function fixtures() {
+   const path = 'matchday/data.php?mode=schedule';
+   let data = await read(path);
+   const dates = data.dates;
+   for (const day of dates) {
+     if (day < today) continue;
+     if (day !== data.date) data = await read(path + '&date=' + encodeURIComponent(day));
+     const rows = data.rows.filter(r => day > today || !r.match_time || r.match_time.slice(0,5) >= clock);
+     if (rows.length) return rows.sort((a,b)=>String(a.match_time || '').localeCompare(String(b.match_time || ''))).map(r=>({
+       day, title:r.home_name + ' – ' + r.away_name,
+       detail:[r.match_time && r.match_time.slice(0,5),r.competition_name].filter(Boolean).join(' · ')
+     }));
+   }
+   return [];
+ }
+ async function awards() {
+   const data = await read('trophyroom/data.php');
+   return data.rows.filter(r=>r.winner_name && r.won_date && r.won_date <= today).map(r=>({
+     day:r.won_date,title:r.winner_name,detail:[r.nexus_view || r.trophy_type,r.winner_manager_name].filter(Boolean).join(' · ')
+   }));
+ }
+ async function changes() {
+   const data = await read('managers/roster.php');
+   const events = [];
+   for (const a of data.assignments) {
+     for (const [day,verb] of [[a.start_date,'assume la guida di'],[a.end_date,'lascia']]) {
+       if (day && day !== '0000-00-00' && day <= today && a.assignment_name)
+         events.push({day,title:a.full_name + ' ' + verb + ' ' + a.assignment_name,detail:''});
+     }
+   }
+   return events;
+ }
+ async function section(label,source,empty,limit) {
+   const box = document.createElement('section');
+   const heading = document.createElement('h2');
+   heading.textContent = label;
+   box.append(heading);
+   feed.append(box);
+   const status = document.createElement('p');
+   status.textContent = 'Caricamento…';
+   box.append(status);
+   try {
+     let events = await source();
+     if (limit) events = events.sort((a,b)=>b.day.localeCompare(a.day)).slice(0,limit);
+     if (!events.length) { status.textContent = empty; return; }
+     const list = document.createElement('ul');
+     list.style.cssText = 'list-style:none;padding:0;margin:0 0 1.5rem';
+     for (const event of events) {
+       const row = document.createElement('li');
+       row.style.cssText = 'padding:.7rem 0;border-bottom:1px solid #ddd';
+       const title = document.createElement('strong');
+       title.textContent = event.title;
+       const detail = document.createElement('div');
+       detail.textContent = [formatDate(event.day),event.detail].filter(Boolean).join(' · ');
+       row.append(title,detail);
+       list.append(row);
+     }
+     status.replaceWith(list);
+   } catch {
+     status.textContent = 'Dati temporaneamente non disponibili.';
+   }
+ }
+ await Promise.all([
+   section('Prossime partite',fixtures,'Nessuna partita in programma.'),
+   section('Vincitori trofei',awards,'Nessun trofeo assegnato.',5),
+   section('Cambi allenatori',changes,'Nessun cambio registrato.',5)
+ ]);
+})();
