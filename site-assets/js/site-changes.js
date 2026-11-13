@@ -10,6 +10,53 @@
     if (!world && !['','index.html','clubhouse','imc_campus','nexus'].includes(section)) return;
     if (/(?:^|\/)(?:admin|one|draft|pick|lottery)(?:\/|$)/i.test(location.pathname)) return;
     window.imcSiteChanges = true;
+
+    if (world) {
+        const route = location.pathname.split('/')[2] || 'home';
+        const dependencies = {
+            home:['Results','Schedule','Trophy_Room'],
+            competitions:['Results','Schedule','Match_Reports','Player_Codex','Trophy_Room'],
+            matchday:['Results','Schedule','Match_Reports','Player_Codex'],
+            transfers:['Transfers','Player_Codex'],
+            players:['Player_Codex','Transfers','Match_Reports','Results'],
+            playercodex:['Player_Codex','Transfers','Match_Reports','Results'],
+            trophyroom:['Trophy_Room']
+        };
+        const repositories=dependencies[route];
+        const relevant = key => key.startsWith('core:') || !repositories || repositories.includes(key.slice(6));
+        let baseline, timer, inFlight=false, stopped=false;
+        async function check() {
+            if(stopped || inFlight)return;
+            inFlight=true;
+            try{
+                const response=await fetch('/site-assets/world-engine/revisions.php?world='+encodeURIComponent(section),{cache:'no-store'});
+                if(!response.ok)throw Error('revisions');
+                const data=await response.json();
+                if(!data.ok || data.world!==section)throw Error('world');
+                const current=Object.fromEntries(Object.entries(data.revisions).filter(([key])=>relevant(key)));
+                if(baseline){
+                    const keys=new Set([...Object.keys(baseline),...Object.keys(current)]);
+                    if([...keys].some(key=>(baseline[key]||'0')!==(current[key]||'0'))){
+                        stopped=true;
+                        location.reload();
+                        return;
+                    }
+                }
+                baseline=current;
+            }catch{
+                // A failed revision check keeps the current page usable and retries.
+            }finally{
+                inFlight=false;
+                clearTimeout(timer);
+                if(!stopped)timer=setTimeout(check,document.hidden?60000:10000);
+            }
+        }
+        document.addEventListener('visibilitychange',()=>{if(!document.hidden){clearTimeout(timer);check();}});
+        addEventListener('pagehide',()=>{stopped=true;clearTimeout(timer)});
+        addEventListener('pageshow',event=>{if(event.persisted){stopped=false;check();}});
+        check();
+        return;
+    }
     const host = 'toanuzojdkfjgucztpze.supabase.co';
     const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvYW51em9qZGtmamd1Y3p0cHplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2MzQyMDYsImV4cCI6MjEwMTIxMDIwNn0.N0FNhtH1nAqnr5_DSPuBc_PkSFfnaWziMomhouYrTyU';
     const topic = 'realtime:imc-site';

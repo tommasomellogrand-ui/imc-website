@@ -19,7 +19,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate shared engine
         run: |
-          php -l site-assets/world-engine/asset.php
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          for p in json.loads(Path('ops/world-engine-files.json').read_text()):
+              if p.endswith('.php'):subprocess.run(['php','-l',p],check=True)
+          PY
           python3 - <<'PY'
           import json,subprocess
           from pathlib import Path
@@ -77,3 +82,8 @@ jobs:
           with concurrent.futures.ThreadPoolExecutor(4) as pool:list(pool.map(page,pages))
           print('Verified',len(jobs),'modules and',len(pages),'pages')
           PY
+      - name: Verify normal competition navigation in Chrome
+        run: |
+          python3 -m venv "$RUNNER_TEMP/world-engine-browser"
+          "$RUNNER_TEMP/world-engine-browser/bin/pip" install --quiet selenium
+          "$RUNNER_TEMP/world-engine-browser/bin/python" tests/world-engine-browser.py
