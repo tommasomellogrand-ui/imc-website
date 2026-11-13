@@ -4,7 +4,7 @@
  if (document.getElementById('imc-site-changes')) return;
  const script = document.createElement('script');
  script.id = 'imc-site-changes';
- script.src = '/site-assets/js/site-changes.js?v=repository-revisions1';
+ script.src = '/site-assets/js/site-changes.js?v=push-only1';
  document.head.append(script);
 })();
 /* Dedicated worlds: Nexus navigation, with routes scoped to the current world. */
