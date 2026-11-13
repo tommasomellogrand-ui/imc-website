@@ -112,7 +112,7 @@ async function render(){if(!data)return;
  if(!hasTable&&tab==='table')tab='matches';document.querySelectorAll('[data-main-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mainTab===tab)));const p=new URLSearchParams(settings?location.search:'');p.set('season',season);p.set('tab',tab);history.replaceState(null,'','?'+p);const results=data.results,schedule=data.schedule;let html='';
  if(tab==='overview'){
  const latest=results[0];
- html='<h2>Last Round</h2>'+(groupedMatches(latest?results.filter(r=>roundKey(r)===roundKey(latest)):[],true)||empty('Nessun risultato disponibile.'));
+ html=(groupedMatches(latest?results.filter(r=>roundKey(r)===roundKey(latest)):[],true)||empty('Nessun risultato disponibile.'));
  }else if(tab==='matches'){
  html='<h2>Schedule</h2>'+(groupedMatches(schedule,false)||empty('Nessuna partita in calendario.'));
  }else if(tab==='table'){html='<h2>Classifica</h2>'+table();
