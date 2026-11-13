@@ -8,6 +8,28 @@ const safe=v=>/^(https:\/\/|\/(?!\/))/.test(v||'')?v:'',date=v=>v?new Date(Strin
 const badge=(name,logo)=>'<span class="club">'+(safe(logo)?'<img src="'+esc(logo)+'" alt="" loading="lazy">':'')+'<span>'+esc(name)+'</span></span>';
 const empty=text=>'<p class="cup-empty">'+esc(text)+'</p>';
 
+
+function competitionHeader(){
+ const main=document.querySelector('main.cup-wrap');if(!main)return;
+ const image=main.querySelector('img.cup-banner'),heading=main.querySelector(':scope > h1');
+ const name=settings?.name||heading?.textContent?.trim()||image?.alt||document.title;
+ const banner=document.createElement('section');banner.className='competition-banner'+(settings?' competition-banner-world':' competition-banner-art');banner.setAttribute('aria-label',name);
+ if(image){image.replaceWith(banner);banner.append(image);}else main.prepend(banner);
+ if(settings||!image){const title=document.createElement('h1');title.textContent=name;banner.append(title);}
+ main.querySelectorAll(':scope > .cup-back,:scope > .cup-world-nav,:scope > h1,.cup-tabs').forEach(el=>el.remove());
+ $('cup-phase')?.remove();
+ const style=document.createElement('style');style.textContent=`
+.competition-banner{position:relative;isolation:isolate;width:100%;aspect-ratio:24/5;overflow:hidden;background:#142b45;border-radius:4px}
+.competition-banner .cup-banner{position:absolute;inset:0;width:100%;height:100%;margin:0;border:0;border-radius:0;object-fit:cover;object-position:center bottom}
+.competition-banner-world:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,15,26,.88),rgba(5,15,26,.35));z-index:1}
+.competition-banner h1{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;text-align:center;margin:0;padding:12px;color:#fff;font:800 clamp(20px,4.8vw,52px)/1.15 Inter,sans-serif;overflow-wrap:anywhere}
+.competition-banner-art{aspect-ratio:6/1}
+.competition-banner-art .cup-banner{object-fit:contain;object-position:center}
+.competition-banner+.cup-context{padding:12px 0 0}
+`;document.head.append(style);
+}
+competitionHeader();
+
 function seasonBar(){
  const picker=$('cup-season'),context=picker.closest('.cup-context'),label=picker.closest('label');
  picker.setAttribute('aria-label','Scegli stagione');
@@ -118,7 +140,7 @@ async function load(){const request=++epoch;data=null;$('cup-view').innerHTML=em
  const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome'}).format(new Date());
  const model=CupModel.build(r.value.rows,s.value.rows,today,league),{results,schedule}=model;
  data={...model,groups:[],tableError:false,stats:{},statsError:false,reports:[],reportError:false,extra:{}};
- $('cup-phase').textContent=results.length?(results[0].competition_stage||'Competizione in corso')+(results[0].competition_round?(league?' · Giornata ':' · Turno ')+results[0].competition_round:''):schedule.length?'In programma':key.endsWith('|clubworldcup')?'Non ancora iniziata':'Nessuna partita disponibile';render();$('cup-updated').textContent='Aggiornato alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'});
+ render();$('cup-updated').textContent='Aggiornato alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'});
  }catch(e){if(request===epoch)$('cup-view').innerHTML=empty('Dati temporaneamente non disponibili. Riprova con Aggiorna.')}finally{if(request===epoch)$('cup-view').setAttribute('aria-busy','false')}}
  document.querySelectorAll('[data-main-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.mainTab;render()});$('refresh-cup').onclick=load;$('close-match').onclick=()=>$('match-dialog').close();
  (async()=>{try{let c=settings?.context;
