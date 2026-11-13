@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__.'/engine.php';
 
-const TROPHY_SYNC_VERSION = TROPHY_ENGINE_VERSION.'.h3';
+const TROPHY_SYNC_VERSION = TROPHY_ENGINE_VERSION.'.h4';
 
 function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $completedImport=false): array {
     $gw=nexus_world($gw);
@@ -30,12 +30,18 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
         $db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
         $db->beginTransaction();
         $state=nexus_rows($db,'SELECT * FROM IMC_Trophy_Sync_State WHERE game_world_id=?',[$gw])[0];
-        $results=nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Results` WHERE game_world_id=? AND imc_season>=?',[$gw,$currentSeason]);
+        $results=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id IN (?,?) AND imc_season>=?',[$gw,$gw==='IMC-008'?'IMC008':$gw,$currentSeason]);
         $reports=[]; // Results-only trophy derivation.
-        $schedule=nexus_rows($db,'SELECT * FROM `'.$gw.'_IMC_Schedule` WHERE game_world_id=? AND imc_season>=?',[$gw,$currentSeason]);
+        $schedule=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Schedule').'` WHERE game_world_id=? AND imc_season>=?',[$gw,$currentSeason]);
+        if ($gw==='IMC-008') {
+            foreach ($results as &$result) {
+                $result['competition_key']=preg_replace('/^IMC008\\|/', 'IMC-008|', (string)$result['competition_key']);
+            }
+            unset($result);
+        }
         $derived=trophy_derive($gw,$results,$reports,$schedule,$definitions,$today,$mapping);
         foreach($derived['awards'] as &$award)$award['nexus_view']=trophy_nexus_view($award,$labels);unset($award);
-        $table='`'.$gw.'_IMC_Trophy_Room`';
+        $table='`'.nexus_table($gw,'Trophy_Room').'`';
         $before=nexus_rows($db,'SELECT * FROM '.$table.' ORDER BY id');
         if ($preview) {$db->rollBack();return ['state'=>'preview','version'=>TROPHY_SYNC_VERSION,'existing_count'=>count($before)]+$derived;}
         $wanted=[];foreach($derived['awards'] as $row)if((int)$row['imc_season']>=$currentSeason)$wanted[trophy_group_key($row)]=$row;

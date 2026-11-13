@@ -175,7 +175,8 @@ function imc_after_results_import(PDO $db,string $table,?string $world,array $ro
     try {
         require_once dirname(__DIR__).'/nexus/trophies/sync.php';
         foreach ($rows as $row) {
-            if (!isset($row['home_score'], $row['away_score']) || !trophy_final($row)) continue;
+            if (!isset($row['home_score'], $row['away_score'])) continue;
+            if (strtolower(trim((string)($row['sm_action'] ?? ''))) !== 'league' && !trophy_final($row)) continue;
             require_once dirname(__DIR__).'/nexus/core/bootstrap.php';
             $sync = trophy_sync(nexus_config(), $db, $world, false, true);
             return ['trophy_sync' => $sync['state']];
