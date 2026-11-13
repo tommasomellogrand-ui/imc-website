@@ -27,6 +27,9 @@ body[data-competition] .imc-section-plate{display:none!important}
 .competition-banner-art{aspect-ratio:6/1}
 .competition-banner-art .cup-banner{object-fit:contain;object-position:center}
 .competition-banner+.cup-context{padding:12px 0 0}
+.cup-wrap .cup-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;width:100%;margin:12px 0 24px;border:0;overflow:visible}
+.cup-wrap .cup-tabs button{min-width:0;min-height:42px;padding:12px 3px;background:#fff;color:#142b45;border:1px solid #d9dfe5;border-radius:4px;font:700 clamp(11px,2.6vw,15px)/1.25 Inter,sans-serif;white-space:normal}
+.cup-wrap .cup-tabs button[aria-pressed=true]{background:#e8d5aa;color:#142b45;border:1px solid var(--world-accent,#a68b50);box-shadow:none}
 `;document.head.append(style);
 }
 competitionHeader();
