@@ -40,6 +40,7 @@ function domesticRows(rows){
  return (leagues.length?'<h3 class="cups-title">Leagues</h3><div class="league-overview">'+gauge+turns+'</div>'+links+'':'')+(cups.length?'<h3 class="cups-title">Cups</h3>'+cups.map(card).join(''):'');
 }
 function seasonBar(){
+ const spacing=document.createElement('style');spacing.textContent='#view .catalog-categories{gap:6px!important}';document.head.append(spacing);
  const source=$('season-select'),bar=document.createElement('div');bar.className='season-bar';
  const picker=source.cloneNode(true);picker.id='catalog-season';picker.hidden=false;picker.value=season;picker.setAttribute('aria-label','Scegli stagione');
  const move=(step,label,arrow)=>{const btn=document.createElement('button');btn.textContent=arrow;btn.setAttribute('aria-label',label);btn.disabled=!picker.options[picker.selectedIndex+step];btn.onclick=()=>{picker.selectedIndex+=step;picker.onchange()};return btn};
