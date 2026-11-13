@@ -55,16 +55,10 @@ function render(){if(!data)return;
  const tableTab=document.querySelector('[data-main-tab="table"]');if(tableTab){tableTab.hidden=!hasTable;tableTab.style.display=hasTable?'':'none'}
  if(!hasTable&&tab==='table')tab='matches';document.querySelectorAll('[data-main-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mainTab===tab)));const p=new URLSearchParams(settings?location.search:'');p.set('season',season);p.set('tab',tab);history.replaceState(null,'','?'+p);const results=data.results,schedule=data.schedule;let html='';
  if(tab==='overview'){
- const latest=results[0],next=schedule[0];
- const planned=new Set(schedule.map(roundKey)),played=new Set(results.map(roundKey).filter(k=>!planned.has(k)));
- html='<div class="cup-summary"><div><strong>'+played.size+'</strong><span>'+(league?'Giornate giocate':'Turni giocati')+'</span></div><div><strong>'+planned.size+'</strong><span>'+(league?'Giornate in calendario':'Turni in calendario')+'</span></div></div>';
- if(!results.length&&!schedule.length)html+=empty(key.endsWith('|clubworldcup')?'Competizione non ancora iniziata.':'Nessuna partita disponibile per questa stagione.');
- else html+='<section><div class="cup-section-title"><h2>'+(league?'Ultima giornata':'Ultimo turno')+'</h2><button data-open="matches">Tutte le partite →</button></div>'+groupedMatches(latest?results.filter(r=>roundKey(r)===roundKey(latest)):[],true)+'</section>'+(hasTable?'<section><div class="cup-section-title"><h2>La classifica</h2><button data-open="table">Classifica completa →</button></div>'+table(true)+'</section>':'')+'<section><h2>'+(league?'Prossima giornata':'Prossimo turno')+'</h2>'+groupedMatches(next?schedule.filter(r=>roundKey(r)===roundKey(next)):[],false)+'</section>';
+ const latest=results[0];
+ html='<h2>Last Round</h2>'+(groupedMatches(latest?results.filter(r=>roundKey(r)===roundKey(latest)):[],true)||empty('Nessun risultato disponibile.'));
  }else if(tab==='matches'){
- const calendar=mode==='schedule';
- html='<div class="cup-tools"><div class="cup-pills">'+['results','schedule'].map(m=>'<button data-mode="'+m+'" aria-pressed="'+(mode===m)+'">'+(m==='results'?'Risultati':'Calendario')+'</button>').join('')+'</div></div>';
- if(!calendar)html+=groupedMatches(results,true)||empty('Nessun risultato disponibile.');
- else html+=groupedMatches(schedule,false)||empty('Nessuna partita in calendario.');
+ html='<h2>Schedule</h2>'+(groupedMatches(schedule,false)||empty('Nessuna partita in calendario.'));
  }else if(tab==='table'){html='<h2>Classifica</h2>'+table();
  }else{
  html='<div class="cup-pills">'+['teams','players'].map(v=>'<button data-stats="'+v+'" aria-pressed="'+(v===statsMode)+'">'+(v==='teams'?'Squadre':'Giocatori')+'</button>').join('')+'</div>';

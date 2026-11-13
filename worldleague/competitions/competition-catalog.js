@@ -53,7 +53,7 @@ if(!current){seasonBar();$('title').textContent='Competizioni';$('competition-na
  const dedicated={championsleague:'rth-champions-league',europaleague:'rth-europa-league',conferenceleague:'rth-conference-league',clubworldcup:'rth-club-world-cup'};
  const target=gw==='GW001'&&current.competition_group==='IMC'&&dedicated[current.competition_key.split('|').pop()];
  if(target){const query=new URLSearchParams({season,tab:params.get('tab')||'overview'});location.replace('/roadtohistory/'+target+'/?'+query);return;}
- await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/roadtohistory/imc-cups/league-page.js?v=allcups3';script.onload=resolve;script.onerror=reject;document.head.append(script);});
+ await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/roadtohistory/imc-cups/league-page.js?v=actualtabs1';script.onload=resolve;script.onerror=reject;document.head.append(script);});
  await showLeaguePage({world:gw,base,competition:current,seasons:d.seasons,season});return;
 }catch(e){$('view').innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
 })();
