@@ -5,6 +5,7 @@ on:
     paths:
       - 'site-assets/world-engine/**'
       - 'ops/world-engine-files.json'
+      - 'tests/world-engine-browser.py'
       - '.github/workflows/world-engine.yml'
       - 'site-data/matchday/**'
       - 'site-data/trophies/**'

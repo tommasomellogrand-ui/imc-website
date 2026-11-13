@@ -16,7 +16,8 @@ with webdriver.Chrome(options=options) as driver:
         driver.get('https://www.italianmastersclub.it/'+world+'/competitions/?engine=browser')
         wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'[data-key]'))
         first=driver.find_elements(By.CSS_SELECTOR,'[data-key]')[0]
-        driver.execute_script("arguments[0].scrollIntoView({block:'center'})",first)
+        driver.execute_script("arguments[0].scrollIntoView({block:'center',behavior:'instant'})",first)
+        wait.until(lambda d:d.execute_script("const r=arguments[0].getBoundingClientRect();const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return hit && arguments[0].contains(hit)",first))
         first.click()
         wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.cup-tabs [data-main-tab]'))
         labels=[e.text for e in driver.find_elements(By.CSS_SELECTOR,'.cup-tabs [data-main-tab]')]
