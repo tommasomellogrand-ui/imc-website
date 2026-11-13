@@ -146,16 +146,14 @@ function imc_competition_catalog(array $cfg, array $body): array {
     if (!preg_match('/^IMC-(?:00[1-9]|010)$/D',$alias)) throw new InvalidArgumentException('invalid_game_world');
     $compact=str_replace('-','',$alias);
     $pdo=imc_db($cfg,$cfg['db']['core']);
-    $sql = "SELECT c.competition_key,c.custom_competition FROM `IMC Competition Codex Global` c WHERE c.game_world_id IN (?,?,?) AND UPPER(TRIM(c.sm_action_group))='IMC'";
-    if ($compact === 'IMC005') {
-        // Each Subbuteo pool has its own import key. Exclude the umbrella competitions.
-        $sql .= " AND NOT EXISTS (SELECT 1 FROM `IMC Competition Pools` p WHERE p.competition_id=c.id)";
-    }
-    $stmt=$pdo->prepare($sql);
+    // CORE mapping is the canonical source for competition keys, including pool-specific keys.
+    // Do not reference the retired IMC Competition Pools table.
+    $stmt=$pdo->prepare("SELECT competition_key,nexus_view,competition_group FROM `IMC Competition Nexus Mapping` WHERE game_world_id IN (?,?,?) AND UPPER(TRIM(competition_group))='IMC'");
     $stmt->execute([$legacy,$alias,$compact]);
     $rows=[];$seen=[];
-    foreach($stmt->fetchAll() as $row) {
-        $key=trim((string)$row['competition_key']);$name=trim((string)$row['custom_competition']);
+    foreach($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $key=trim((string)($row['competition_key']??''));
+        $name=trim((string)($row['nexus_view']??''));
         if($key===''||$name==='') throw new InvalidArgumentException('invalid_payload:incomplete_competition');
         $valid=false;
         foreach(array_unique([$legacy,$alias,$compact]) as $prefix) {
@@ -163,8 +161,10 @@ function imc_competition_catalog(array $cfg, array $body): array {
                 $key=$compact.substr($key,strlen($prefix));$valid=true;break;
             }
         }
-        if(!$valid||isset($seen[$key])) throw new InvalidArgumentException('invalid_payload:competition_key');
-        $seen[$key]=true;$rows[]=['key'=>$key,'name'=>$name,'group'=>'IMC'];
+        if(!$valid) throw new InvalidArgumentException('invalid_payload:competition_key');
+        if(isset($seen[$key])) continue;
+        $seen[$key]=true;
+        $rows[]=['key'=>$key,'name'=>$name,'group'=>'IMC'];
     }
     usort($rows,fn($a,$b)=>strcmp($a['name'],$b['name']));
     return ['ok'=>true,'action'=>'list_imc_competitions','source'=>'core','game_world_id'=>$compact,'competitions'=>$rows];
