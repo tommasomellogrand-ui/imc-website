@@ -140,5 +140,5 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/world-engine-browser"
           "$RUNNER_TEMP/world-engine-browser/bin/pip" install --quiet selenium
-          "$RUNNER_TEMP/world-engine-browser/bin/python" tests/world-engine-browser.py
           "$RUNNER_TEMP/world-engine-browser/bin/python" tests/world-site-change-browser.py
+          "$RUNNER_TEMP/world-engine-browser/bin/python" tests/world-engine-browser.py
