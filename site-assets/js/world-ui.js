@@ -166,7 +166,11 @@ if(!document.getElementById('nx-universal-nav')){
  if (!root) return;
  const base = '/' + location.pathname.split('/')[1] + '/';
  const feed = document.createElement('div');
- feed.className = 'wrap';
+ feed.className = 'wrap imc-home-feed';
+ const style=document.createElement('style');style.textContent='.imc-feed-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:20px 0}.imc-feed-tabs button{font:600 14px Inter,sans-serif;padding:14px 3px;background:white;color:#253347;border:1px solid #ccc;border-radius:3px}.imc-feed-tabs button[aria-selected="true"]{background:#253347;color:white;border-bottom:3px solid #b49248}.imc-home-feed section[hidden]{display:none!important}.imc-home-feed section{background:white;padding:12px 16px;border:1px solid #ddd;border-radius:4px;margin-bottom:24px}.imc-home-feed li{display:flex;align-items:center;gap:12px;min-height:80px}.imc-feed-images{display:flex;align-items:center;gap:6px;flex-shrink:0}.imc-feed-images img{width:36px;height:42px;object-fit:contain}.imc-feed-images img.portrait{width:48px;height:58px;object-fit:cover;object-position:top}.imc-feed-copy{min-width:0;overflow-wrap:anywhere}.imc-feed-copy div{font-size:13px;color:#566174;margin-top:6px}.imc-feed-more{font:600 14px Inter,sans-serif;padding:10px 18px;margin-top:12px;background:white;border:1px solid #bbb}';document.head.append(style);
+ const tabs=document.createElement('div');tabs.className='imc-feed-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Aggiornamenti del mondo');feed.append(tabs);
+ let portraitPromise;
+ async function portraits(){if(!portraitPromise)portraitPromise=fetch('/clubhouse/data.php',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(d=>new Map((d.managers||[]).map(m=>[m.manager_id,m.face_image_url||m.bust_image_url]))).catch(()=>new Map());return portraitPromise;}
  root.prepend(feed);
  const today = new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Rome'}).format(new Date());
  const clock = new Intl.DateTimeFormat('it-IT', {timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
@@ -187,7 +191,7 @@ if(!document.getElementById('nx-universal-nav')){
      if (day !== data.date) data = await read(path + '&date=' + encodeURIComponent(day));
      const rows = data.rows.filter(r => day > today || !r.match_time || r.match_time.slice(0,5) >= clock);
      if (rows.length) return rows.sort((a,b)=>String(a.match_time || '').localeCompare(String(b.match_time || ''))).map(r=>({
-       day, title:r.home_name + ' – ' + r.away_name,
+       images:[r.home_logo_url,r.away_logo_url],day, title:r.home_name + ' – ' + r.away_name,
        detail:[r.match_time && r.match_time.slice(0,5),r.competition_name].filter(Boolean).join(' · ')
      }));
    }
@@ -196,16 +200,17 @@ if(!document.getElementById('nx-universal-nav')){
  async function awards() {
    const data = await read('trophyroom/data.php');
    return data.rows.filter(r=>r.winner_name && r.won_date && r.won_date <= today).map(r=>({
-     day:r.won_date,title:r.winner_name,detail:[r.nexus_view || r.trophy_type,r.winner_manager_name].filter(Boolean).join(' · ')
+     images:[r.winner_logo_url],portrait:r.winner_manager_photo_url,day:r.won_date,title:r.winner_name,detail:[r.nexus_view || r.trophy_type,r.winner_manager_name].filter(Boolean).join(' · ')
    }));
  }
  async function changes() {
    const data = await read('managers/roster.php');
    const events = [];
+   const photos=await portraits();
    for (const a of data.assignments) {
      for (const [day,verb] of [[a.start_date,'assume la guida di'],[a.end_date,'lascia']]) {
        if (day && day !== '0000-00-00' && day <= today && a.assignment_name)
-         events.push({day,title:a.full_name + ' ' + verb + ' ' + a.assignment_name,detail:''});
+         events.push({images:[a.image_url],portrait:photos.get(a.manager_id),day,title:a.full_name + ' ' + verb + ' ' + a.assignment_name,detail:''});
      }
    }
    return events;
@@ -214,35 +219,45 @@ if(!document.getElementById('nx-universal-nav')){
    const box = document.createElement('section');
    const heading = document.createElement('h2');
    heading.textContent = label;
-   box.append(heading);
-   feed.append(box);
+   const index=tabs.children.length;
+   const tab=document.createElement('button');tab.type='button';tab.id='imc-feed-tab-'+index;tab.setAttribute('role','tab');tab.setAttribute('aria-selected',String(index===0));tab.tabIndex=index===0?0:-1;tab.textContent=label;
+   box.id='imc-feed-panel-'+index;box.setAttribute('role','tabpanel');box.setAttribute('aria-labelledby',tab.id);tab.setAttribute('aria-controls',box.id);box.hidden=index!==0;
+   tab.onclick=()=>{for(const button of tabs.children){const active=button===tab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;document.getElementById(button.getAttribute('aria-controls')).hidden=!active;}};
+   tab.onkeydown=e=>{const buttons=Array.from(tabs.children);let next;if(e.key==='ArrowRight')next=(index+1)%buttons.length;if(e.key==='ArrowLeft')next=(index+buttons.length-1)%buttons.length;if(e.key==='Home')next=0;if(e.key==='End')next=buttons.length-1;if(next!==undefined){e.preventDefault();buttons[next].click();buttons[next].focus();}};
+   tabs.append(tab);feed.append(box);
    const status = document.createElement('p');
    status.textContent = 'Caricamento…';
    box.append(status);
    try {
      let events = await source();
-     if (limit) events = events.sort((a,b)=>b.day.localeCompare(a.day)).slice(0,limit);
+     if (limit) events = events.sort((a,b)=>b.day.localeCompare(a.day));
      if (!events.length) { status.textContent = empty; return; }
      const list = document.createElement('ul');
      list.style.cssText = 'list-style:none;padding:0;margin:0 0 1.5rem';
      for (const event of events) {
        const row = document.createElement('li');
        row.style.cssText = 'padding:.7rem 0;border-bottom:1px solid #ddd';
+       const images=document.createElement('span');images.className='imc-feed-images';
+       for(const [src,portrait] of [[event.portrait,true],...(event.images||[]).map(src=>[src,false])]){if(!src)continue;let url;try{url=new URL(src,location.origin)}catch{continue}if(url.protocol!=='https:')continue;const img=document.createElement('img');img.src=url.href;img.alt='';img.loading='lazy';if(portrait)img.className='portrait';img.onerror=()=>img.remove();images.append(img);}
+       const copy=document.createElement('div');copy.className='imc-feed-copy';row.append(images,copy);
        const title = document.createElement('strong');
        title.textContent = event.title;
        const detail = document.createElement('div');
        detail.textContent = [formatDate(event.day),event.detail].filter(Boolean).join(' · ');
-       row.append(title,detail);
+       copy.append(title,detail);
        list.append(row);
      }
-     status.replaceWith(list);
+     let visible=5;
+     const more=document.createElement('button');more.type='button';more.className='imc-feed-more';more.textContent='Carica altri';
+     const paginate=()=>{Array.from(list.children).forEach((row,index)=>{row.hidden=index>=visible;row.style.display=index>=visible?'none':'';});more.hidden=visible>=events.length;};
+     more.onclick=()=>{visible+=5;paginate();};paginate();status.replaceWith(list);box.append(more);
    } catch {
      status.textContent = 'Dati temporaneamente non disponibili.';
    }
  }
  await Promise.all([
    section('Prossime partite',fixtures,'Nessuna partita in programma.'),
-   section('Vincitori trofei',awards,'Nessun trofeo assegnato.',5),
-   section('Cambi allenatori',changes,'Nessun cambio registrato.',5)
+   section('Trofei',awards,'Nessun trofeo assegnato.',5),
+   section('Allenatori',changes,'Nessun cambio registrato.',5)
  ]);
 })();
