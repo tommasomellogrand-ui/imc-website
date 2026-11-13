@@ -191,7 +191,7 @@ if(!document.getElementById('nx-universal-nav')){
      if (day !== data.date) data = await read(path + '&date=' + encodeURIComponent(day));
      const rows = data.rows.filter(r => day > today || !r.match_time || r.match_time.slice(0,5) >= clock);
      if (rows.length) return rows.sort((a,b)=>String(a.match_time || '').localeCompare(String(b.match_time || ''))).map(r=>({
-       images:[r.home_logo_url,r.away_logo_url],day, title:r.home_name + ' – ' + r.away_name,
+       competition:r.competition_key,competitionName:r.competition_name,images:[r.home_logo_url,r.away_logo_url],day, title:r.home_name + ' – ' + r.away_name,
        detail:[r.match_time && r.match_time.slice(0,5),r.competition_name].filter(Boolean).join(' · ')
      }));
    }
@@ -243,14 +243,18 @@ if(!document.getElementById('nx-universal-nav')){
        const title = document.createElement('strong');
        title.textContent = event.title;
        const detail = document.createElement('div');
-       detail.textContent = [formatDate(event.day),event.detail].filter(Boolean).join(' · ');
+       detail.textContent = (source===fixtures ? event.detail.split(' · ')[0] : [formatDate(event.day),event.detail].filter(Boolean).join(' · '));
        copy.append(title,detail);
-       list.append(row);
+       if(source===fixtures){
+         let group=Array.from(list.children).find(item=>item.dataset.competition===event.competition);
+         if(!group){group=document.createElement('li');group.dataset.competition=event.competition;group.style.cssText='display:block;min-height:0';const title=document.createElement('h3');title.textContent=event.competitionName;title.style.cssText='margin:20px 0 8px;font-size:16px';const games=document.createElement('ul');games.style.cssText='list-style:none;padding:0;margin:0';group.append(title,games);list.append(group);}
+         group.querySelector('ul').append(row);
+       }else list.append(row);
      }
-     let visible=5;
+     let visible=source===fixtures?events.length:5;
      const more=document.createElement('button');more.type='button';more.className='imc-feed-more';more.textContent='Carica altri';
      const paginate=()=>{Array.from(list.children).forEach((row,index)=>{row.hidden=index>=visible;row.style.display=index>=visible?'none':'';});more.hidden=visible>=events.length;};
-     more.onclick=()=>{visible+=5;paginate();};paginate();status.replaceWith(list);box.append(more);
+     more.onclick=()=>{visible+=5;paginate();};paginate();status.replaceWith(list);box.append(more);if(source===fixtures){const date=document.createElement('h2');date.textContent=formatDate(events[0].day);box.prepend(date);}
    } catch {
      status.textContent = 'Dati temporaneamente non disponibili.';
    }
