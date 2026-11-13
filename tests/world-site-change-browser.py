@@ -8,6 +8,12 @@ options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 options.page_load_strategy = "eager"
 instrument = """
+window.testRevisionsRequests = 0;
+const nativeFetch = window.fetch;
+window.fetch = function(input,...rest) {
+    if (String(typeof input==='string'?input:input.url).includes('/world-engine/revisions.php')) window.testRevisionsRequests++;
+    return nativeFetch.call(this,input,...rest);
+};
 const Native = window.WebSocket;
 window.WebSocket = class extends Native {
     constructor(...args) {
@@ -30,10 +36,11 @@ window.testSocket.dispatchEvent(new MessageEvent('message',{data:JSON.stringify(
 with webdriver.Chrome(options=options) as browser:
     browser.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {"source": instrument})
     wait = WebDriverWait(browser, 40)
-    for path, scope in [("roadtohistory", "IMC001"), ("scudetto", "IMC008")]:
+    for path, scope in [("roadtohistory","IMC001"),("halloffamers","IMC002"),("kickoff","IMC003"),("sensiblesocceracademy","IMC004"),("subbuteosuperleague","IMC005"),("worldleague","IMC006"),("masterleagueworld","IMC007"),("scudetto","IMC008")]:
         browser.get("https://www.italianmastersclub.it/" + path + "/transfers/?q=IMC-check")
         wait.until(lambda d: d.execute_script("return window.testJoined === true"))
-        print(path, "joined live change stream", flush=True)
+        assert browser.execute_script("return window.testRevisionsRequests") == 0, path
+        print(path, "joined live change stream without polling tables", flush=True)
         start = browser.execute_script("return performance.timeOrigin")
         revision = 8000000000
         browser.execute_script(inject, "IMC010", revision)
