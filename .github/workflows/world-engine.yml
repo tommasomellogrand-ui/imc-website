@@ -80,9 +80,15 @@ jobs:
               headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'}
               def gh(path):
                   with urllib.request.urlopen(urllib.request.Request(api+path,headers=headers),timeout=30) as response:return json.load(response)
-              runs=gh('/actions/workflows/world-engine.yml/runs?status=success&branch=main&per_page=1')['workflow_runs']
-              if runs:
-                  diff=gh('/compare/'+runs[0]['head_sha']+'...'+os.environ['GITHUB_SHA'])
+              runs=gh('/actions/workflows/world-engine.yml/runs?status=completed&branch=main&per_page=5')['workflow_runs']
+              baseline=None
+              for run in runs:
+                  jobs=gh('/actions/runs/'+str(run['id'])+'/jobs')['jobs']
+                  if any(all(any(step['name']==name and step['conclusion']=='success' for step in job.get('steps',[])) for name in ['Publish engine before world pages','Verify live modules and page references']) for job in jobs):
+                      baseline=run['head_sha']
+                      break
+              if baseline:
+                  diff=gh('/compare/'+baseline+'...'+os.environ['GITHUB_SHA'])
                   if diff.get('status') in ['ahead','identical'] and len(diff.get('files',[]))<300:
                       changed={f['filename'] for f in diff.get('files',[])}
                       names=[name for name in names if name in changed]
