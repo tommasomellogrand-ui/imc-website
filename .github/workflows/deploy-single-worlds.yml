@@ -64,6 +64,8 @@ jobs:
                       files=[Path(f['filename']) for f in diff.get('files',[]) if f['filename'].startswith(world+'/') and Path(f['filename']).is_file()]
               print('Files to publish:',len(files),flush=True)
           except Exception:print('Full publication',flush=True)
+          managed=set(json.loads(Path('ops/world-engine-files.json').read_text()))
+          files=[p for p in files if p.as_posix() not in managed]
           previous=None
           for p in files:
               if not p.is_file():continue

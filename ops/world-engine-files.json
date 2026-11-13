@@ -160,5 +160,14 @@
   "scudetto/matchday/data.php",
   "scudetto/trophyroom/data.php",
   "site-assets/world-engine/worlds.php",
-  "site-assets/world-engine/events.php"
+  "site-assets/world-engine/events.php",
+  "site-assets/world-engine/templates/matchday/index.js",
+  "halloffamers/matchday/index.html",
+  "subbuteosuperleague/matchday/index.html",
+  "sensiblesocceracademy/matchday/index.html",
+  "kickoff/matchday/index.html",
+  "masterleagueworld/matchday/index.html",
+  "worldleague/matchday/index.html",
+  "roadtohistory/matchday/index.html",
+  "scudetto/matchday/index.html"
 ]

@@ -6,9 +6,38 @@ on:
       - 'site-assets/world-engine/**'
       - 'ops/world-engine-files.json'
       - '.github/workflows/world-engine.yml'
+      - 'site-data/matchday/**'
+      - 'site-data/trophies/**'
+      - 'site-assets/js/world-ui.js'
+      - 'site-assets/js/site-changes.js'
+      - 'roadtohistory/**/*.html'
+      - 'roadtohistory/matchday/data.php'
+      - 'roadtohistory/trophyroom/data.php'
+      - 'halloffamers/**/*.html'
+      - 'halloffamers/matchday/data.php'
+      - 'halloffamers/trophyroom/data.php'
+      - 'kickoff/**/*.html'
+      - 'kickoff/matchday/data.php'
+      - 'kickoff/trophyroom/data.php'
+      - 'sensiblesocceracademy/**/*.html'
+      - 'sensiblesocceracademy/matchday/data.php'
+      - 'sensiblesocceracademy/trophyroom/data.php'
+      - 'subbuteosuperleague/**/*.html'
+      - 'subbuteosuperleague/matchday/data.php'
+      - 'subbuteosuperleague/trophyroom/data.php'
+      - 'worldleague/**/*.html'
+      - 'worldleague/matchday/data.php'
+      - 'worldleague/trophyroom/data.php'
+      - 'masterleagueworld/**/*.html'
+      - 'masterleagueworld/matchday/data.php'
+      - 'masterleagueworld/trophyroom/data.php'
+      - 'scudetto/**/*.html'
+      - 'scudetto/matchday/data.php'
+      - 'scudetto/trophyroom/data.php'
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: world-engine-production
   cancel-in-progress: false
@@ -36,6 +65,7 @@ jobs:
           PY
       - name: Publish engine before world pages
         env:
+          GH_TOKEN: ${{ github.token }}
           FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
           FTP_PASS: ${{ secrets.ARUBA_FTP_PASSWORD }}
         run: |
@@ -44,6 +74,20 @@ jobs:
           from pathlib import Path
           from ftplib import FTP_TLS,error_perm
           names=json.loads(Path('ops/world-engine-files.json').read_text())
+          try:
+              api='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+              headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'}
+              def gh(path):
+                  with urllib.request.urlopen(urllib.request.Request(api+path,headers=headers),timeout=30) as response:return json.load(response)
+              runs=gh('/actions/workflows/world-engine.yml/runs?status=success&branch=main&per_page=1')['workflow_runs']
+              if runs:
+                  diff=gh('/compare/'+runs[0]['head_sha']+'...'+os.environ['GITHUB_SHA'])
+                  if diff.get('status') in ['ahead','identical'] and len(diff.get('files',[]))<300:
+                      changed={f['filename'] for f in diff.get('files',[])}
+                      names=[name for name in names if name in changed]
+          except Exception:
+              print('Publishing full engine manifest',flush=True)
+          print('Engine files to publish:',len(names),flush=True)
           names.sort(key=lambda p:(0 if p.startswith(('site-assets/world-engine/','site-data/','site-assets/js/')) else 1,p))
           ctx=ssl.create_default_context();ctx.check_hostname=False
           with FTP_TLS(context=ctx,timeout=60) as ftp:
