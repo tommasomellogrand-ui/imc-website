@@ -89,6 +89,18 @@ function imc_schedule_reconcile(PDO $pdo, string $gw): array {
 
 /** Runs after persistence and before commit, on both import routes. */
 function imc_schedule_import(PDO $pdo,string $table,bool $atomic,callable $write): array {
+    require_once __DIR__.'/worldcup-season.php';
+    $normalization=[];
+    $result=imc_schedule_import_inner($pdo,$table,$atomic,function() use ($pdo,$table,$write,&$normalization) {
+        $written=$write();
+        $normalization=imc_worldcup_reconcile($pdo,$table);
+        return $written;
+    });
+    if ($normalization) $result['worldcup']=$normalization;
+    return $result;
+}
+
+function imc_schedule_import_inner(PDO $pdo,string $table,bool $atomic,callable $write): array {
     if (!preg_match('/^GW(?:00[1-9]|010)_IMC_Schedule$/D',$table)) return imc_playoff_import($pdo,$table,$atomic,$write);
     $gw=substr($table,0,5);$lock='imc_schedule_'.$gw;
     $q=$pdo->prepare('SELECT GET_LOCK(?,15)');$q->execute([$lock]);
