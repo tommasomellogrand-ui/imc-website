@@ -1,6 +1,9 @@
 window.NexusCompetition={mount(selected){
 const {gw,esc,url}=NexusUI,view=document.getElementById('view');
-const {season,key,name}=selected;let disposed=false;
+const {season,key,name}=selected;
+const navigation=document.getElementById('competition-nav');
+if(navigation)navigation.innerHTML=[['overview','Last Round'],['schedule','Schedule'],['standings','Standings'],['stats','Stats']].map(([id,label])=>'<button class="tab" data-tab="'+id+'" aria-pressed="false">'+label+'</button>').join('');
+let disposed=false;
 const imcCustom=false;
 const dailyLeague=/\|IMC\|(championsleague|europaleague|conferenceleague)$/.test(key);
 const byDay=selected.action==='league' || dailyLeague;
@@ -192,7 +195,7 @@ async function show(tab,background=false){if(disposed)return;const epoch=++showE
 const completed=j.results.filter(r=>!scheduled.has(r.id)).length;
 const phase=document.getElementById('competition-status');if(phase)phase.textContent=j.results.length?'Competizione in corso':scheduled.size?'In programma':'Nessun dato disponibile';
 const next=j.schedule[0],last=j.results[0];
-view.innerHTML='<div class="competition-summary"><div><strong>'+completed+'</strong><span>'+(byDay?'Giornate giocate':'Turni giocati')+'</span></div><div><strong>'+scheduled.size+'</strong><span>'+(byDay?'Giornate in calendario':'Turni in calendario')+'</span></div></div><section class="section"><div class="competition-section-title"><h2>'+lastUnit+'</h2><button data-overview-open="results">'+(byDay?'Tutte le giornate':'Tutti i turni')+' →</button></div>'+roundsHtml(last?[last]:[],true)+'</section><section class="section"><div class="competition-section-title"><h2>'+nextUnit+'</h2><button data-overview-open="schedule">Calendario →</button></div>'+roundsHtml(next?[next]:[],false)+'</section>';
+view.innerHTML='<section class="section"><h2>Last Round</h2>'+roundsHtml(last?[last]:[],true)+'</section>';
 view.querySelectorAll('[data-overview-open]').forEach(b=>b.onclick=()=>document.querySelector('[data-match-tab="'+b.dataset.overviewOpen+'"]').click())}else view.innerHTML='<section class="section"><h2>'+ (tab==='results'?'Risultati':'Calendario')+'</h2>'+roundsHtml(j[tab],tab==='results')+'</section>';return}
 if(tab==='standings'&&['leaguecup','charityshield','playoff'].includes(selected.action)){
  const raw=await loadMatches();if(disposed||activeTab!==tab||epoch!==showEpoch)return;
@@ -203,7 +206,7 @@ const groups=j.groups||[{group_name:null,rows:j.rows||[]}];
 view.innerHTML='<section class="section ranking-section"><h2>Classifica</h2>'+(j.excluded_unassigned?'<p class="ranking-note">'+esc(j.excluded_unassigned)+' partite senza girone identificato non incluse.</p>':'')+(groups.length?groups.map(g=>'<section class="ranking-card standings-card">'+rankingHead(g.group_name||name,'Stagione '+season)+'<div class="ranking-scroll" tabindex="0" role="region" aria-label="Classifica '+esc(g.group_name||name)+'"><table class="stand team-ranking"><caption class="sr-only">Classifica '+esc(g.group_name||name)+'</caption><thead><tr><th scope="col">#</th><th scope="col">Squadra</th><th scope="col"><abbr title="Punti">PT</abbr></th><th scope="col"><abbr title="Partite giocate">PG</abbr></th><th scope="col"><abbr title="Vittorie">V</abbr></th><th scope="col"><abbr title="Pareggi">N</abbr></th><th scope="col"><abbr title="Sconfitte">P</abbr></th><th scope="col"><abbr title="Gol fatti">GF</abbr></th><th scope="col"><abbr title="Gol subiti">GS</abbr></th><th scope="col"><abbr title="Differenza reti">DR</abbr></th></tr></thead><tbody>'+g.rows.map(r=>'<tr><td class="ranking-position">'+esc(r.position)+'</td><th scope="row">'+teamBadge(r.team_name,r.team_id)+(imcCustom&&r.manager_name?'<small class="team-manager">'+esc(r.manager_name)+'</small>':'')+'</th><td><span class="ranking-value">'+esc(r.points)+'</span></td><td>'+esc(r.played)+'</td><td>'+esc(r.won)+'</td><td>'+esc(r.drawn)+'</td><td>'+esc(r.lost)+'</td><td>'+esc(r.gf)+'</td><td>'+esc(r.ga)+'</td><td>'+esc(r.gd)+'</td></tr>').join('')+'</tbody></table></div></section>').join(''):'<div class="empty">Nessuna classifica disponibile per questa competizione.</div>')+'<p class="ranking-note">'+(j.grouped?'Classifiche calcolate dai risultati di ciascun girone.':'Classifica calcolata dai risultati della competizione.')+'</p></section>';
 }
 if(tab==='stats')await refreshStats(statsEpoch)}catch(e){if(disposed||activeTab!==tab||epoch!==showEpoch)return;view.innerHTML='<div class="loading">'+esc(e.message)+'</div>'}finally{if(!disposed&&opened&&epoch===showEpoch)view.querySelectorAll('details').forEach(d=>d.open=opened.has(d.dataset.round))}}
-function selectTab(tab){document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===tab;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});const next=new URLSearchParams(location.search);next.set('tab',tab);history.replaceState(null,'',location.pathname+'?'+next);show(tab)}
+function selectTab(tab){if(tab==='results')tab='overview';document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===tab;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});const next=new URLSearchParams(location.search);next.set('tab',tab);history.replaceState(null,'',location.pathname+'?'+next);show(tab)}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
 selectTab(imcCustom&&selected.tab==='stats'?'overview':selected.tab||'overview');
 
