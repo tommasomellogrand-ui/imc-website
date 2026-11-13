@@ -44,7 +44,7 @@ jobs:
           from pathlib import Path
           from ftplib import FTP_TLS,error_perm
           names=json.loads(Path('ops/world-engine-files.json').read_text())
-          names.sort(key=lambda p:(not p.startswith('site-assets/world-engine/'),p))
+          names.sort(key=lambda p:(0 if p.startswith(('site-assets/world-engine/','site-data/','site-assets/js/')) else 1,p))
           ctx=ssl.create_default_context();ctx.check_hostname=False
           with FTP_TLS(context=ctx,timeout=60) as ftp:
               ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()
@@ -59,6 +59,9 @@ jobs:
                       previous=parent
                   data=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(data))
                   check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+                  if check.getvalue()!=data:
+                      ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+                      check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
                   assert check.getvalue()==data,name
           PY
       - name: Verify live modules and page references
