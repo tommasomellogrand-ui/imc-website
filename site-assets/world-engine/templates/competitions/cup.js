@@ -10,6 +10,7 @@ const empty=text=>'<p class="cup-empty">'+esc(text)+'</p>';
 
 function seasonBar(){
  const picker=$('cup-season'),context=picker.closest('.cup-context'),label=picker.closest('label');
+ picker.setAttribute('aria-label','Scegli stagione');
  const bar=document.createElement('div');bar.className='season-bar cup-season-bar';
  const style=document.createElement('style');style.textContent=`
 .cup-context:has(.cup-season-bar){display:flex;flex-direction:column;align-items:stretch;gap:8px}
