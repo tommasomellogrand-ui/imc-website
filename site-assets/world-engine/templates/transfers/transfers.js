@@ -1,0 +1,202 @@
+(() => {
+'use strict';
+const millionFormat = new Intl.NumberFormat('it-IT', {maximumFractionDigits: 1});
+function formatMillions(amount) {
+ return millionFormat.format(amount / 1000000) + ' M €';
+}
+function hasExchangePlayer(players) {
+ if (Array.isArray(players)) return players.some(hasExchangePlayer);
+ if (players && typeof players === 'object') return Object.values(players).some(hasExchangePlayer);
+ if (typeof players === 'number') return players > 0;
+ const text = typeof players === 'string' ? players.trim() : '';
+ if (!text || /^(?:null|false|0|none|nessuno|n\/a|[-–—])$/i.test(text)) return false;
+ if (/^[\[{]/.test(text)) {
+  try { return hasExchangePlayer(JSON.parse(text)); } catch { return false; }
+ }
+ return true;
+}
+function transferFee(row) {
+ const raw = String(row.amount_text ?? '').normalize('NFKC').trim().toLowerCase();
+ const direct = parseCash(raw);
+ if (direct !== null) return direct;
+ const exchange = hasExchangePlayer(row.exchange_players);
+ const parts = raw.split(/\s*\+\s*/);
+ if (parts.length > 1) {
+  const amounts = parts.map(parseCash).filter(amount => amount !== null);
+  if (amounts.length === 1) return amounts[0];
+  if (amounts.length > 1) return null;
+ }
+ if (exchange && !/[\d€£$]/.test(raw)) return 0;
+ return null;
+}
+function parseCash(raw) {
+ const value = raw.replace(/^(?:euro|eur|[€£$])\s*|\s*(?:euro|eur|[€£$])$/g, '').trim();
+ if (/^(?:gratis|gratuito|free(?: transfer)?|(?:a )?parametro\s*zero|svincolato|scambio|player exchange)$/.test(value)) return 0;
+ const match = /^([\d][\d.,'’\s]*)(milioni|milione|mln\.?|millions?|mil|m|mila|mille|thousand|k)?$/.exec(value);
+ if (!match) return null;
+ const unit = match[2];
+ const multiplier = !unit ? 1 : /^(?:k|mila|mille|thousand)$/.test(unit) ? 1000 : 1000000;
+ let number = match[1].trim().replace(/['’\s]/g, '');
+ if (number.includes('.') && number.includes(',')) {
+  if (/^\d{1,3}(?:\.\d{3})+,\d+$/.test(number)) number = number.replace(/\./g, '').replace(',', '.');
+  else if (/^\d{1,3}(?:,\d{3})+\.\d+$/.test(number)) number = number.replace(/,/g, '');
+  else return null;
+ } else if (!unit && /^\d{1,3}([.,])\d{3}(?:\1\d{3})*$/.test(number)) {
+  number = number.replace(/[.,]/g, '');
+ } else {
+  if (!/^\d+(?:[.,]\d+)?$/.test(number)) return null;
+  number = number.replace(',', '.');
+ }
+ const amount = Math.round(Number(number) * multiplier);
+ return Number.isSafeInteger(amount) ? amount : null;
+}
+
+function exchangeNames(value) {
+ if (typeof value === 'string') {
+  const text = value.trim();
+  if (!hasExchangePlayer(text)) return [];
+  if (/^[\[{]/.test(text)) return exchangeNames(JSON.parse(text));
+  return [text];
+ }
+ if (Array.isArray(value)) return value.flatMap(exchangeNames);
+ const name = value?.player_name || value?.name;
+ return typeof name === 'string' && name.trim() ? [name.trim()] : [];
+}
+function renderTransferCard(row) {
+ const amount = transferFee(row);
+ let names = exchangeNames(row.normalized_exchange_players);
+ if (!names.length) names = exchangeNames(row.exchange_players);
+ if (!names.length && amount !== null) {
+  const parts = String(row.amount_text || '').split(/\s*\+\s*/);
+  if (parts.length > 1) names = parts.filter(p => p && parseCash(p.toLowerCase()) === null);
+ }
+ return NexusCards.transfer({...row, amount_text:amount === null ? row.amount_text : formatMillions(amount),
+  exchange_names:[...new Set(names)]});
+}
+window.renderMarketTransferCard = renderTransferCard;
+const panel = document.getElementById('club-summary');
+const details = document.getElementById('transfer-details');
+const buttons = Array.from(document.querySelectorAll('[data-market-tab]'));
+function select(index) {
+ buttons.forEach((button, i) => button.setAttribute('aria-pressed', String(i === index)));
+ panel.hidden = index !== 0;
+ details.hidden = index !== 1;
+}
+buttons.forEach((button, i) => button.addEventListener('click', () => select(i)));
+select(location.search.length > 1 ? 1 : 0);
+let directory;
+window.updateClubTransferSummary = async function(rows) {
+ try {
+  directory ??= fetch('../clubs/directory.php', {cache:'no-store'}).then(async response => {
+   const data = await response.json();
+   if (!response.ok || !data.ok || !Array.isArray(data.rows)) throw Error();
+   return data.rows;
+  });
+  const clubs = await directory;
+  const names = new Map(), ids = new Map();
+  const totals = clubs.map(club => {
+   const entry = {club, purchases:0, sales:0, spent:0, received:0, issues:[]};
+   ids.set(String(club.world_id), entry);
+   names.set(club.name.trim().toLowerCase(), entry);
+   return entry;
+  });
+  for (const row of rows) {
+   const fee = transferFee(row);
+   for (const [side,count,amount] of [['to','purchases','spent'], ['from','sales','received']]) {
+    const id = row[side+'_sm_world_club_id'];
+    const entry = id && Number(id)>0 ? ids.get(String(id)) : names.get(String(row['club_'+side]||'').trim().toLowerCase());
+    if (!entry) continue;
+    entry[count]++;
+    if (fee === null) {
+     const raw = String(row.amount_text ?? '').trim();
+     const direction = side === 'to' ? 'Acquisto' : 'Cessione';
+     entry.issues.push(direction + ' #' + row.imc_transfer_number + ' · ' + row.player_name + ' · ' + row.club_from + ' → ' + row.club_to + ' · ' + (raw ? 'Importo registrato «' + raw + '»' : 'Campo importo vuoto'));
+    }
+    if (entry[amount] !== null) entry[amount] = fee === null ? null : entry[amount]+fee;
+   }
+  }
+  const cards = document.createDocumentFragment();
+  const scudetto = panel.dataset.initialBudget !== undefined;
+  const initial = scudetto ? Number(panel.dataset.initialBudget) : 0;
+  const money = value => value === null ? 'Totale incompleto' : formatMillions(value);
+  totals.sort((a,b) => a.club.name.localeCompare(b.club.name,'it'));
+  for (const {club,purchases,sales,spent,received,issues} of totals) {
+   const card = document.createElement('article');
+   const title = document.createElement('h2');
+   if (/^https?:\/\//i.test(club.image_url || '')) {
+    const img = document.createElement('img');
+    img.alt = ''; img.src = club.image_url.replace(/^http:/i,'https:');
+    img.onerror = () => img.hidden = true;
+    title.append(img);
+   }
+   title.append(club.name);
+   card.append(title);
+   const lines = [];
+   if (scudetto) lines.push(['Budget iniziale', money(initial)]);
+   lines.push(['Acquisti (' + purchases + ')', money(spent)], ['Cessioni (' + sales + ')', money(received)]);
+   lines.push([scudetto ? 'Saldo' : 'Saldo mercato', money(spent === null || received === null ? null : initial + received - spent)]);
+   const list = document.createElement('dl');
+   for (const [label, amount] of lines) {
+    const term = document.createElement('dt'), value = document.createElement('dd');
+    term.textContent = label; value.textContent = amount; list.append(term,value);
+   }
+   card.append(list);
+   if (issues.length) {
+    const details = document.createElement('details'), summary = document.createElement('summary');
+    summary.textContent = 'Movimenti con importo da controllare (' + issues.length + ')';
+    details.append(summary);
+    for (const issue of issues) {
+     const line = document.createElement('p');
+     line.textContent = issue; details.append(line);
+    }
+    card.append(details);
+   }
+   cards.append(card);
+  }
+  panel.replaceChildren(cards);
+  return clubs;
+ } catch {
+  directory = null;
+  panel.textContent='Impossibile caricare il riepilogo dei club.';
+  return null;
+ }
+};
+})();
+(()=>{'use strict';
+const $=id=>document.getElementById(id),params=new URLSearchParams(location.search);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let clubIds=new Map();
+let rows=[],shown=60,loading=false,loaded=false;
+$('search').value=params.get('q')||'';
+function remember(){const p=new URLSearchParams();for(const [id,key] of [['search','q'],['club','club'],['season','season']])if($(id).value)p.set(key,$(id).value);history.replaceState(null,'',location.pathname+(p.size?'?'+p:''));}
+function render(){
+ const q=$('search').value.trim().toLocaleLowerCase('it'),club=$('club').value,season=$('season').value;
+ const clubId=clubIds.get(club);
+ function matchesClub(row,side) {
+  const id=row[side+'_sm_world_club_id'];
+  return Number(id)>0 && clubId ? String(id)===clubId : row['club_'+side]===club;
+ }
+ const filtered=rows.filter(r=>(!q||[r.player_name,r.club_from,r.club_to,r.player_id].some(v=>String(v??'').toLocaleLowerCase('it').includes(q)))&&(!club||matchesClub(r,'from')||matchesClub(r,'to'))&&(!season||String(r.imc_season??r.normalized_season??r.season)===season));
+ const normalized=filtered.filter(r=>String(r.normalization_status || r.status || '').toUpperCase()==='CERTIFIED').length;
+ $('count').replaceChildren(document.createTextNode(filtered.length+' trasferimenti'),document.createElement('br'),document.createTextNode(normalized+' normalizzati'));
+ $('list').innerHTML=filtered.length?'<div class="transfer-grid">'+filtered.slice(0,shown).map(window.renderMarketTransferCard).join('')+'</div>':'<p class="summary-line">Nessun trasferimento disponibile per questi filtri.</p>';
+ $('load-more').hidden=shown>=filtered.length;NexusCards.wireImages($('list'));
+}
+function options(id,values,label,prefix=''){const current=loaded?$(id).value:params.get(id)||'';$(id).innerHTML='<option value="">'+label+'</option>'+values.map(v=>'<option value="'+esc(v)+'">'+prefix+esc(v)+'</option>').join('');if(values.includes(current))$(id).value=current;}
+async function refresh(){
+ if(loading)return;loading=true;$('retry').hidden=true;
+ try{const r=await fetch('data.php',{cache:'no-store'}),d=await r.json();if(!r.ok||d.ok!==true||d.game_world_id!=='__WORLD_ID__'||!Array.isArray(d.rows))throw Error('data');
+ rows=d.rows;
+ const clubs=await window.updateClubTransferSummary(rows);
+ clubIds=new Map((clubs || []).map(c=>[c.name,Number(c.world_id)>0 ? String(c.world_id) : null]));
+ options('club',[...clubIds.keys()].sort((a,b)=>a.localeCompare(b,'it')),'Tutti i club');
+ $('club').disabled=!clubs;
+ options('season',[...new Set(rows.map(r=>String(r.imc_season??r.normalized_season??r.season??'')).filter(Boolean))].sort((a,b)=>Number(b)-Number(a)),'Tutte le stagioni','Stagione ');
+ loaded=true;render();$('updated').textContent='Ultimo aggiornamento: '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'});
+ }catch(e){$('retry').hidden=false;if(!loaded){document.getElementById('club-summary').textContent='Trasferimenti non disponibili.';$('count').textContent='Dati non disponibili';$('list').innerHTML='<p class="summary-line">Impossibile caricare i trasferimenti. Riprova tra poco.</p>';}else $('updated').textContent='Aggiornamento non riuscito: restano visibili i dati precedenti.';}
+ finally{loading=false;}
+}
+for(const id of ['search','club','season'])$(id).addEventListener(id==='search'?'input':'change',()=>{shown=60;remember();render();});
+$('load-more').onclick=()=>{shown+=60;render();};$('retry').onclick=refresh;
+refresh();
+})();

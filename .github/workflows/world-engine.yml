@@ -1,0 +1,79 @@
+name: Publish shared world engine
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site-assets/world-engine/**'
+      - 'ops/world-engine-files.json'
+      - '.github/workflows/world-engine.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: world-engine-production
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shared engine
+        run: |
+          php -l site-assets/world-engine/asset.php
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          for name in json.loads(Path('ops/world-engine-files.json').read_text()):
+              assert Path(name).is_file(),name
+          for p in Path('site-assets/world-engine/templates').rglob('*.js'):
+              result=subprocess.run(['node','--check','-'],input=p.read_text(),text=True,capture_output=True)
+              assert result.returncode==0,(str(p),result.stderr)
+          PY
+      - name: Publish engine before world pages
+        env:
+          FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,json,os,ssl,urllib.request
+          from pathlib import Path
+          from ftplib import FTP_TLS,error_perm
+          names=json.loads(Path('ops/world-engine-files.json').read_text())
+          names.sort(key=lambda p:(not p.startswith('site-assets/world-engine/'),p))
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          with FTP_TLS(context=ctx,timeout=60) as ftp:
+              ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()
+              previous=None
+              for name in names:
+                  p=Path(name);parent='/www.italianmastersclub.it/'+str(p.parent)
+                  if previous!=parent:
+                      ftp.cwd('/')
+                      for part in parent.strip('/').split('/'):
+                          try:ftp.cwd(part)
+                          except error_perm:ftp.mkd(part);ftp.cwd(part)
+                      previous=parent
+                  data=p.read_bytes();ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+                  check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+                  assert check.getvalue()==data,name
+          PY
+      - name: Verify live modules and page references
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request,urllib.parse,concurrent.futures
+          from pathlib import Path
+          root=Path('site-assets/world-engine')
+          worlds={'roadtohistory':('GW001','Road To History','players'),'halloffamers':('GW005','Hall Of Famers','playercodex'),'kickoff':('GW009','Kick Off','playercodex'),'sensiblesocceracademy':('GW010','Sensible Soccer Academy','playercodex'),'subbuteosuperleague':('GW011','Subbuteo Super League','playercodex'),'worldleague':('GW004','World League','playercodex'),'masterleagueworld':('GW006','Master League World','playercodex'),'scudetto':('IMC-008','Scudetto','playercodex')}
+          def get(path):
+              with urllib.request.urlopen('https://www.italianmastersclub.it/'+path,timeout=90) as r:return r.read().decode()
+          jobs=[(world,p) for world in worlds for p in (root/'templates').rglob('*.js')]
+          def verify(job):
+              world,p=job;wid,name,players=worlds[world]
+              expected=p.read_text().replace('__WORLD_SLUG__',world).replace('__WORLD_ID__',wid).replace('__WORLD_NAME__',name).replace('__PLAYER_PATH__',players)
+              actual=get('site-assets/world-engine/asset.php?'+urllib.parse.urlencode({'world':world,'module':str(p.relative_to(root/'templates')),'v':'engine2'}))
+              assert actual==expected,(world,str(p))
+          with concurrent.futures.ThreadPoolExecutor(4) as pool:list(pool.map(verify,jobs))
+          pages=[p for p in json.loads(Path('ops/world-engine-files.json').read_text()) if p.endswith('.html')]
+          def page(p):assert get(p+'?engine=verify')==Path(p).read_text(),p
+          with concurrent.futures.ThreadPoolExecutor(4) as pool:list(pool.map(page,pages))
+          print('Verified',len(jobs),'modules and',len(pages),'pages')
+          PY
