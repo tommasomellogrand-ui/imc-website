@@ -230,7 +230,7 @@ if(!document.getElementById('nx-universal-nav')){
    box.append(status);
    try {
      let events = await source();
-     if (limit) events = events.sort((a,b)=>b.day.localeCompare(a.day));
+     if (limit) events = events.sort((a,b)=>b.day.localeCompare(a.day)).slice(0,limit);
      if (!events.length) { status.textContent = empty; return; }
      const list = document.createElement('ul');
      list.style.cssText = 'list-style:none;padding:0;margin:0 0 1.5rem';
@@ -243,7 +243,7 @@ if(!document.getElementById('nx-universal-nav')){
        const title = document.createElement('strong');
        title.textContent = event.title;
        const detail = document.createElement('div');
-       detail.textContent = (source===fixtures ? event.detail.split(' · ')[0] : [formatDate(event.day),event.detail].filter(Boolean).join(' · '));
+       detail.textContent = (source===fixtures ? event.detail.split(' · ')[0] : event.detail);
        copy.append(title,detail);
        if(source===fixtures){
          const match=event.match;
@@ -260,9 +260,13 @@ if(!document.getElementById('nx-universal-nav')){
          let group=Array.from(list.children).find(item=>item.dataset.competition===event.competition);
          if(!group){group=document.createElement('li');group.dataset.competition=event.competition;group.className='imc-upcoming-competition';const title=document.createElement('h3');title.textContent=event.competitionName;title.className='imc-upcoming-heading';const games=document.createElement('ul');games.style.cssText='list-style:none;padding:0;margin:0';group.append(title,games);list.append(group);}
          group.querySelector('ul').append(row);
-       }else list.append(row);
+       }else{
+         let group=Array.from(list.children).find(item=>item.dataset.day===event.day);
+         if(!group){group=document.createElement('li');group.dataset.day=event.day;group.style.cssText='display:block;min-height:0;padding:0;border:0';const date=document.createElement('div');date.className='imc-upcoming-date';date.textContent=formatDate(event.day);const entries=document.createElement('ul');entries.style.cssText='list-style:none;padding:0;margin:0 0 16px';group.append(date,entries);list.append(group);}
+         group.querySelector('ul').append(row);
+       }
      }
-     let visible=source===fixtures?events.length:5;
+     let visible=events.length;
      const more=document.createElement('button');more.type='button';more.className='imc-feed-more';more.textContent='Carica altri';
      const paginate=()=>{Array.from(list.children).forEach((row,index)=>{row.hidden=index>=visible;row.style.display=index>=visible?'none':'';});more.hidden=visible>=events.length;};
      more.onclick=()=>{visible+=5;paginate();};paginate();status.replaceWith(list);box.append(more);if(source===fixtures){const date=document.createElement('div');date.className='imc-upcoming-date';date.textContent=formatDate(events[0].day);box.prepend(date);}
@@ -272,7 +276,7 @@ if(!document.getElementById('nx-universal-nav')){
  }
  await Promise.all([
    section('Prossime partite',fixtures,'Nessuna partita in programma.'),
-   section('Trofei',awards,'Nessun trofeo assegnato.',5),
-   section('Allenatori',changes,'Nessun cambio registrato.',5)
+   section('Trofei',awards,'Nessun trofeo assegnato.',10),
+   section('Allenatori',changes,'Nessun cambio registrato.',10)
  ]);
 })();
