@@ -167,7 +167,7 @@ if(!document.getElementById('nx-universal-nav')){
  const base = '/' + location.pathname.split('/')[1] + '/';
  const feed = document.createElement('div');
  feed.className = 'wrap imc-home-feed';
- const style=document.createElement('style');style.textContent='.imc-feed-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:20px 0}.imc-feed-tabs button{font:600 14px Inter,sans-serif;padding:14px 3px;background:white;color:#253347;border:1px solid #ccc;border-radius:3px}.imc-feed-tabs button[aria-selected="true"]{background:#253347;color:white;border-bottom:3px solid #b49248}.imc-home-feed section[hidden]{display:none!important}.imc-home-feed section{background:white;padding:12px 16px;border:1px solid #ddd;border-radius:4px;margin-bottom:24px}.imc-home-feed li{display:flex;align-items:center;gap:12px;min-height:80px}.imc-feed-images{display:flex;align-items:center;gap:6px;flex-shrink:0}.imc-feed-images img{width:36px;height:42px;object-fit:contain}.imc-feed-images img.portrait{width:48px;height:58px;object-fit:cover;object-position:top}.imc-feed-copy{min-width:0;overflow-wrap:anywhere}.imc-feed-copy div{font-size:13px;color:#566174;margin-top:6px}.imc-feed-more{font:600 14px Inter,sans-serif;padding:10px 18px;margin-top:12px;background:white;border:1px solid #bbb}';document.head.append(style);
+ const style=document.createElement('style');style.textContent='.imc-feed-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:20px 0}.imc-feed-tabs button{font:600 14px Inter,sans-serif;padding:14px 3px;background:white;color:#253347;border:1px solid #ccc;border-radius:3px}.imc-feed-tabs button[aria-selected="true"]{background:#253347;color:white;border-bottom:3px solid #b49248}.imc-home-feed section[hidden]{display:none!important}.imc-home-feed section{background:white;padding:12px 16px;border:1px solid #ddd;border-radius:4px;margin-bottom:24px}.imc-home-feed li{display:flex;align-items:center;gap:12px;min-height:80px}.imc-feed-images{display:flex;align-items:center;gap:6px;flex-shrink:0}.imc-feed-images img{width:36px;height:42px;object-fit:contain}.imc-feed-images img.portrait{width:48px;height:58px;object-fit:cover;object-position:top}.imc-feed-copy{min-width:0;overflow-wrap:anywhere}.imc-feed-copy div{font-size:13px;color:#566174;margin-top:6px}.imc-feed-more{font:600 14px Inter,sans-serif;padding:10px 18px;margin-top:12px;background:white;border:1px solid #bbb}';style.textContent+='.imc-home-feed{font-family:Inter,sans-serif!important;font-size:14px!important}.imc-home-feed .imc-upcoming-date{font:600 15px/1.4 Inter,sans-serif!important;padding:12px 14px;background:#f5f5f2;border:1px solid #ddd;margin:0 0 14px}.imc-home-feed .imc-upcoming-competition{display:block!important;min-height:0;border:1px solid #d8d8d4;border-radius:3px;overflow:hidden;margin:0 0 14px;padding:0}.imc-home-feed .imc-upcoming-heading{font:700 15px/1.4 Inter,sans-serif!important;letter-spacing:0!important;text-transform:none!important;margin:0!important;padding:12px 14px;background:#f1f2ef;color:#253347!important;border-bottom:1px solid #ddd}.imc-home-feed .imc-upcoming-match{display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);align-items:center;gap:8px;padding:14px 10px;min-height:110px;border-bottom:1px solid #eee}.imc-home-feed .imc-upcoming-match:last-child{border-bottom:0}.imc-upcoming-team{display:grid;justify-items:center;text-align:center;gap:5px;min-width:0}.imc-home-feed .imc-upcoming-team img{width:32px;height:32px;object-fit:contain}.imc-home-feed .imc-upcoming-team strong{font:600 14px/1.35 Inter,sans-serif!important;overflow-wrap:anywhere}.imc-home-feed .imc-upcoming-team small{font:400 12px/1.4 Inter,sans-serif!important;color:#596477}.imc-home-feed .imc-upcoming-time{font:600 12px/1.4 Inter,sans-serif!important;text-align:center}';document.head.append(style);
  const tabs=document.createElement('div');tabs.className='imc-feed-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Aggiornamenti del mondo');feed.append(tabs);
  let portraitPromise;
  async function portraits(){if(!portraitPromise)portraitPromise=fetch('/clubhouse/data.php',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(d=>new Map((d.managers||[]).map(m=>[m.manager_id,m.face_image_url||m.bust_image_url]))).catch(()=>new Map());return portraitPromise;}
@@ -191,7 +191,7 @@ if(!document.getElementById('nx-universal-nav')){
      if (day !== data.date) data = await read(path + '&date=' + encodeURIComponent(day));
      const rows = data.rows.filter(r => day > today || !r.match_time || r.match_time.slice(0,5) >= clock);
      if (rows.length) return rows.sort((a,b)=>String(a.match_time || '').localeCompare(String(b.match_time || ''))).map(r=>({
-       competition:r.competition_key,competitionName:r.competition_name,images:[r.home_logo_url,r.away_logo_url],day, title:r.home_name + ' – ' + r.away_name,
+       match:r,competition:r.competition_key,competitionName:r.competition_name,images:[r.home_logo_url,r.away_logo_url],day, title:r.home_name + ' – ' + r.away_name,
        detail:[r.match_time && r.match_time.slice(0,5),r.competition_name].filter(Boolean).join(' · ')
      }));
    }
@@ -246,15 +246,26 @@ if(!document.getElementById('nx-universal-nav')){
        detail.textContent = (source===fixtures ? event.detail.split(' · ')[0] : [formatDate(event.day),event.detail].filter(Boolean).join(' · '));
        copy.append(title,detail);
        if(source===fixtures){
+         const match=event.match;
+         row.replaceChildren();row.className='imc-upcoming-match';row.removeAttribute('style');
+         for(const side of ['home','away']){
+           const team=document.createElement('div');team.className='imc-upcoming-team';
+           const logo=document.createElement('img');logo.alt='';logo.loading='lazy';
+           if(match[side+'_logo_url']){logo.src=match[side+'_logo_url'];logo.onerror=()=>logo.remove();team.append(logo);}
+           const name=document.createElement('strong');name.textContent=match[side+'_name'];
+           const manager=document.createElement('small');manager.textContent=match[side+'_imc_manager_name']||'—';
+           team.append(name,manager);row.append(team);
+           if(side==='home'){const time=document.createElement('span');time.className='imc-upcoming-time';time.textContent=match.match_time?match.match_time.slice(0,5):'–';row.append(time);}
+         }
          let group=Array.from(list.children).find(item=>item.dataset.competition===event.competition);
-         if(!group){group=document.createElement('li');group.dataset.competition=event.competition;group.style.cssText='display:block;min-height:0';const title=document.createElement('h3');title.textContent=event.competitionName;title.style.cssText='margin:20px 0 8px;font-size:16px';const games=document.createElement('ul');games.style.cssText='list-style:none;padding:0;margin:0';group.append(title,games);list.append(group);}
+         if(!group){group=document.createElement('li');group.dataset.competition=event.competition;group.className='imc-upcoming-competition';const title=document.createElement('h3');title.textContent=event.competitionName;title.className='imc-upcoming-heading';const games=document.createElement('ul');games.style.cssText='list-style:none;padding:0;margin:0';group.append(title,games);list.append(group);}
          group.querySelector('ul').append(row);
        }else list.append(row);
      }
      let visible=source===fixtures?events.length:5;
      const more=document.createElement('button');more.type='button';more.className='imc-feed-more';more.textContent='Carica altri';
      const paginate=()=>{Array.from(list.children).forEach((row,index)=>{row.hidden=index>=visible;row.style.display=index>=visible?'none':'';});more.hidden=visible>=events.length;};
-     more.onclick=()=>{visible+=5;paginate();};paginate();status.replaceWith(list);box.append(more);if(source===fixtures){const date=document.createElement('h2');date.textContent=formatDate(events[0].day);box.prepend(date);}
+     more.onclick=()=>{visible+=5;paginate();};paginate();status.replaceWith(list);box.append(more);if(source===fixtures){const date=document.createElement('div');date.className='imc-upcoming-date';date.textContent=formatDate(events[0].day);box.prepend(date);}
    } catch {
      status.textContent = 'Dati temporaneamente non disponibili.';
    }
