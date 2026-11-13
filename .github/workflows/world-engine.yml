@@ -127,7 +127,10 @@ jobs:
           jobs=[(world,p) for world in worlds for p in (root/'templates').rglob('*.js')]
           def verify(job):
               world,p=job;wid,name,players=worlds[world]
-              expected=p.read_text().replace('__WORLD_SLUG__',world).replace('__WORLD_ID__',wid).replace('__WORLD_NAME__',name).replace('__PLAYER_PATH__',players)
+              source=p.read_text()
+              if str(p.relative_to(root/'templates'))=='competitions/page.js':
+                  source=(root/'templates/competitions/cup-model.js').read_text()+"\n;window.IMCStartCompetition=function(){\n"+(root/'templates/competitions/cup.js').read_text()+"\n};\n"+source
+              expected=source.replace('__WORLD_SLUG__',world).replace('__WORLD_ID__',wid).replace('__WORLD_NAME__',name).replace('__PLAYER_PATH__',players)
               actual=get('site-assets/world-engine/asset.php?'+urllib.parse.urlencode({'world':world,'module':str(p.relative_to(root/'templates')),'v':'engine2'}))
               assert actual==expected,(world,str(p))
           with concurrent.futures.ThreadPoolExecutor(4) as pool:list(pool.map(verify,jobs))

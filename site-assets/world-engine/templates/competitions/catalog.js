@@ -1,5 +1,11 @@
 (async()=>{'use strict';
 const {gw,esc,get,ready}=NexusUI,$=id=>document.getElementById(id),base='/__WORLD_SLUG__/competitions/',params=new URLSearchParams(location.search);
+const detailScript='/site-assets/world-engine/asset.php?'+new URLSearchParams({world:location.pathname.split('/')[1],module:'competitions/page.js',v:'engine2'});
+if(params.has('competition')||params.has('division')){
+ for(const [href,as] of [[detailScript,'script'],['/site-assets/world-engine/cup.css?v=engine2','style'],['/site-assets/world-engine/road.css?v=engine2','style']]){
+  const preload=document.createElement('link');preload.rel='preload';preload.as=as;preload.href=href;document.head.append(preload);
+ }
+}
 let all=[],season='',cleanup=()=>{},category=params.get('group')||'DOMESTIC',country=params.get('country')||'',current=null,imcOnly=false;
 const slug=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 function route(r){return slug(r.competition_key.replace(gw+'|',''))}
@@ -53,7 +59,7 @@ if(!current){seasonBar();$('title').textContent='Competizioni';$('competition-na
  const dedicated={championsleague:'rth-champions-league',europaleague:'rth-europa-league',conferenceleague:'rth-conference-league',clubworldcup:'rth-club-world-cup'};
  const target=gw==='GW001'&&current.competition_group==='IMC'&&dedicated[current.competition_key.split('|').pop()];
  if(target){const query=new URLSearchParams({season,tab:params.get('tab')||'overview'});location.replace('/roadtohistory/'+target+'/?'+query);return;}
- await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/site-assets/world-engine/asset.php?'+new URLSearchParams({world:location.pathname.split('/')[1],module:'competitions/page.js',v:'engine2'});script.onload=resolve;script.onerror=reject;document.head.append(script);});
+ await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=detailScript;script.onload=resolve;script.onerror=reject;document.head.append(script);});
  await showLeaguePage({world:gw,base,competition:current,seasons:d.seasons,season});return;
 }catch(e){$('view').innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
 })();

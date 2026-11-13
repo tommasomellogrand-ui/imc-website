@@ -11,6 +11,12 @@ if(!isset($worlds[$world])||!in_array($module,$modules,true)){
 }
 $source=file_get_contents(__DIR__.'/templates/'.$module);
 if($source===false){http_response_code(503);exit;}
+if($module==='competitions/page.js'){
+ $model=file_get_contents(__DIR__.'/templates/competitions/cup-model.js');
+ $controller=file_get_contents(__DIR__.'/templates/competitions/cup.js');
+ if($model===false||$controller===false){http_response_code(503);exit;}
+ $source=$model."\n;window.IMCStartCompetition=function(){\n".$controller."\n};\n".$source;
+}
 [$id,$name,$players]=$worlds[$world];
 $source=strtr($source,['__WORLD_SLUG__'=>$world,'__WORLD_ID__'=>$id,'__WORLD_NAME__'=>$name,'__PLAYER_PATH__'=>$players]);
 $etag='"'.hash('sha256',$source).'"';
