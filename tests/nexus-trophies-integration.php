@@ -9,7 +9,7 @@ $root=new PDO('mysql:host=127.0.0.1;port=3306','root',getenv('MYSQL_TEST_PASSWOR
 foreach(['core','gold','custom'] as $target)$root->exec('CREATE DATABASE `'.$config['db'][$target].'`');
 $core=nexus_db($config,'core');
 $core->exec('CREATE TABLE `IMC Game World Club Mapping` (`Game World` VARCHAR(16),`Club Name` VARCHAR(255),`SM World Club ID` BIGINT)');
-$core->exec('CREATE TABLE `IMC Competition Codex Global` (game_world_id VARCHAR(16),competition_key VARCHAR(255),sm_action VARCHAR(64),sm_country VARCHAR(128),sm_division VARCHAR(128),teams_count INT,expected_match INT)');
+$core->exec('CREATE TABLE `IMC Competition Codex Global` (game_world_id VARCHAR(16),competition_key VARCHAR(255),sm_action VARCHAR(64),sm_country VARCHAR(128),sm_division VARCHAR(128),teams_count INT,expected_match INT,sm_action_group VARCHAR(64),custom_competition VARCHAR(255))');
 foreach(['gold','custom'] as $target)nexus_db($config,$target)->exec('CREATE TABLE IMC_Game_World_Season (game_world_id VARCHAR(16),imc_season INT,imc_season_start_date DATE,imc_season_end_date DATE)');
 $core->exec('CREATE TABLE `IMC Competition Nexus Mapping` (game_world_id VARCHAR(16),competition_key VARCHAR(255),nexus_view VARCHAR(255))');
 $source='(game_world_id VARCHAR(16),imc_season INT,competition_key VARCHAR(255),sm_action VARCHAR(64),sm_country VARCHAR(128),sm_division VARCHAR(128),competition_group VARCHAR(64),competition_group_name VARCHAR(128),competition_stage VARCHAR(128),competition_round VARCHAR(128),sm_fixture_id BIGINT,home_sm_club_id BIGINT,away_sm_club_id BIGINT,home_name VARCHAR(255),away_name VARCHAR(255),home_score INT,away_score INT,penalty_home_score INT,penalty_away_score INT,aggregate_home_score INT,aggregate_away_score INT,match_date DATE,result_status VARCHAR(64)) ENGINE=InnoDB';
@@ -20,7 +20,7 @@ for($i=1;$i<=10;$i++) {
     foreach(['Results','Match_Report','Schedule'] as $repo)$db->exec('CREATE TABLE '.$gw.'_IMC_'.$repo.' '.$source);
     $db->exec('CREATE TABLE '.$gw.'_IMC_Trophy_Room '.$trophy);
     $core->prepare('INSERT INTO `IMC Competition Nexus Mapping` VALUES (?,?,?)')->execute([$gw,$gw.'|DOMESTIC|league|1','Mapped Division 1']);
-    $core->prepare('INSERT INTO `IMC Competition Codex Global` VALUES (?,NULL,?,NULL,?,?,?)')->execute([$gw,'league','1',4,12]);
+    $core->prepare('INSERT INTO `IMC Competition Codex Global` (game_world_id,competition_key,sm_action,sm_country,sm_division,teams_count,expected_match) VALUES (?,NULL,?,NULL,?,?,?)')->execute([$gw,'league','1',4,12]);
 }
 foreach(json_decode(file_get_contents(dirname(__DIR__).'/docs/trophy-automation-migrations.json'),true) as $plan) {
     $db=nexus_db($config,$plan['target']);foreach($plan['statements'] as $sql)$db->exec($sql);
