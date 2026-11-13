@@ -22,11 +22,16 @@ with webdriver.Chrome(options=options) as driver:
         first.click()
         wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.competition-banner'))
         assert driver.find_element(By.CSS_SELECTOR,'.competition-banner').get_attribute('aria-label'),world
-        assert not driver.find_elements(By.CSS_SELECTOR,'main.cup-wrap > .cup-back, main.cup-wrap > h1, .cup-tabs, #cup-phase'),world
+        assert not driver.find_elements(By.CSS_SELECTOR,'main.cup-wrap > .cup-back, main.cup-wrap > h1, #cup-phase'),world
         wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.cup-season-bar select'))
+        wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.cup-tabs [data-main-tab]'))
+        labels=[e.text for e in driver.find_elements(By.CSS_SELECTOR,'.cup-tabs [data-main-tab]')]
+        assert labels==['Last Round','Schedule','Standings','Stats'],(world,labels)
         wait.until(lambda d:d.find_element(By.ID,'cup-view').get_attribute('aria-busy')=='false')
         assert not driver.find_elements(By.CSS_SELECTOR,'.cup-summary'),world
         assert 'temporaneamente non disponibili' not in driver.find_element(By.ID,'cup-view').text,world
+        driver.find_element(By.CSS_SELECTOR,'[data-main-tab="matches"]').click()
+        wait.until(lambda d:d.find_element(By.CSS_SELECTOR,'[data-main-tab="matches"]').get_attribute('aria-pressed')=='true')
         assert not driver.find_elements(By.CSS_SELECTOR,'[data-mode]'),world
         assert driver.current_url.startswith('https://www.italianmastersclub.it/'+world+'/'),world
         print(world,'normal competition entry verified',flush=True)

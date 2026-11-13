@@ -16,7 +16,7 @@ function competitionHeader(){
  const banner=document.createElement('section');banner.className='competition-banner'+(settings?' competition-banner-world':' competition-banner-art');banner.setAttribute('aria-label',name);
  if(image){image.replaceWith(banner);banner.append(image);}else main.prepend(banner);
  if(settings||!image){const title=document.createElement('h1');title.textContent=name;banner.append(title);}
- main.querySelectorAll(':scope > .cup-back,:scope > .cup-world-nav,:scope > h1,.cup-tabs').forEach(el=>el.remove());
+ main.querySelectorAll(':scope > .cup-back,:scope > .cup-world-nav,:scope > h1').forEach(el=>el.remove());
  $('cup-phase')?.remove();
  const style=document.createElement('style');style.textContent=`
 body[data-competition] .imc-section-plate{display:none!important}
