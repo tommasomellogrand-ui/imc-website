@@ -1,0 +1,38 @@
+<?php
+declare(strict_types=1);
+require dirname(__DIR__).'/nexus/almanac/service.php';
+function expect(mixed $actual,mixed $expected,string $message): void {if($actual!==$expected&&!(is_numeric($actual)&&is_numeric($expected)&&(float)$actual===(float)$expected))throw new RuntimeException($message.': '.json_encode([$actual,$expected]));}
+$worlds=[['id'=>'IMC-001','code'=>'IMC001','legacy'=>'GW001','name'=>'Road To History','site_url'=>'/roadtohistory/','weight'=>2],['id'=>'IMC-009','code'=>'IMC009','legacy'=>'GW012','name'=>'Future World','site_url'=>'/futureworld/','weight'=>1]];
+$managers=[['manager_id'=>'MNG001','sm_manager_id'=>10,'full_name'=>'Test Manager One','face_image_url'=>'','imc_join_date'=>'2026-01-01'],['manager_id'=>'MNG002','sm_manager_id'=>20,'full_name'=>'Test Manager Two','face_image_url'=>'','imc_join_date'=>'2026-01-01']];
+$job=['game_world_id'=>'GW001','assignment_type'=>'club','team_id'=>100,'national_team_id'=>null,'team_name'=>'Club One','assignment_name'=>'Club One','manager_id'=>'MNG001','start_date'=>'2026-01-01','end_date'=>'2026-06-30'];$new=$job;$new['manager_id']='MNG002';$new['start_date']='2026-07-01';$new['end_date']=null;
+$r=['game_world_id'=>'IMC001','sm_fixture_id'=>101,'imc_season'=>1,'match_date'=>'2026-06-10','competition_key'=>'IMC001|DOMESTIC|league|1','competition_group'=>'DOMESTIC','sm_action'=>'league','sm_division'=>1,'home_sm_club_id'=>100,'away_sm_club_id'=>200,'home_name'=>'Club One','away_name'=>'Club Two','home_sm_manager_id'=>10,'away_sm_manager_id'=>20,'home_score'=>2,'away_score'=>1,'result_status'=>'COMPLETED'];
+$t=['game_world_id'=>'GW001','imc_season'=>1,'competition_key'=>'GW001|DOMESTIC|league|1','competition_group'=>'DOMESTIC','trophy_type'=>'league','sm_division'=>1,'winner_sm_world_club_id'=>100,'winner_name'=>'Club One','won_date'=>'2026-06-10'];
+$future=$r;$future['game_world_id']='IMC009';$future['competition_key']='IMC009|DOMESTIC|league|1';
+$src=['IMC-001'=>['results'=>[$r,$r],'trophies'=>[$t]],'IMC-009'=>['results'=>[$future],'trophies'=>[]]];
+$d=na_bundle($worlds,$managers,[$job,$new],$src,'2026-11-14');
+expect(count($d['matches']),2,'Same fixture across worlds stays distinct; exact duplicate counted once');
+expect($d['coverage']['duplicates'],1,'Duplicate row reported');
+expect($d['managers']['MNG001']['stats']['played'],2,'One manager appearance in each world');
+expect($d['managers']['MNG002']['stats']['played'],2,'Opponent also has one appearance');
+expect($d['managers']['MNG001']['trophies'],1,'Trophy belongs to manager on winning date');
+expect($d['managers']['MNG002']['trophies'],0,'Current manager never inherits prior trophy');
+expect($d['managers']['MNG001']['ranking']['match_points'],3,'Existing world weights applied');
+expect($d['managers']['MNG001']['ranking']['trophy_points'],200,'League bonus and world weight unchanged');
+expect($d['managers']['MNG001']['ranking']['total'],203,'Combined ranking');
+expect(count(na_filter($d['matches'],['manager'=>'MNG001','opponent'=>'MNG002'])),2,'Cross-world H2H');
+expect(count(na_filter($d['matches'],['manager'=>'MNG001','outcome'=>'won','world'=>'IMC-009'])),1,'Drilldown matches metrics');
+expect(count(na_filter($d['matches'],['manager'=>'MNG001','outcome'=>'lost'])),0,'Outcome perspective');
+expect(na_current($job,'2026-11-14'),false,'Closed assignment not active');expect(na_current($new,'2026-11-14'),true,'Current assignment active');
+$bad=$r;$bad['home_score']=9;$c=$src;$c['IMC-001']['results'][]=$bad;
+expect(na_bundle($worlds,$managers,[$job,$new],$c,'2026-11-14')['coverage']['conflicts'],1,'Conflicting fixture excluded');
+$missing=$r;$missing['home_sm_manager_id']=null;$c=$src;$c['IMC-001']['results']=[$missing];
+expect(na_bundle($worlds,$managers,[$job,$new],$c,'2026-11-14')['managers']['MNG001']['stats']['played'],1,'No current-assignment guess when result identity missing');
+$manual=$r;$manual['sm_fixture_id']=null;expect(na_fixture_key($manual)!==null,true,'Manual match has stable coordinates');$manual2=$manual;$manual2['home_score']=4;expect(na_fixture_key($manual),na_fixture_key($manual2),'Score conflict cannot make new manual fixture');
+expect(na_finished($r+[],'2026-01-01'),false,'Future matches not played');$award=$r;$award['result_status']='AWARDED';expect(na_finished($award,'2026-11-14'),true,'Official walkover included');$award['home_score']=null;expect(na_finished($award,'2026-11-14'),false,'No invented null score');
+$draw=$r;$draw['away_score']=2;$draw['penalty_home_score']=5;$draw['penalty_away_score']=4;$c=$src;$c['IMC-001']['results']=[$draw];$drawn=na_bundle($worlds,$managers,[$job,$new],$c,'2026-11-14');expect($drawn['managers']['MNG001']['stats']['drawn'],1,'Shootout is a draw');expect($drawn['managers']['MNG001']['stats']['penalty_won'],1,'Shootout retained separately');
+$wrong=$t;$wrong['winner_sm_world_club_id']=200;$c=$src;$c['IMC-001']['trophies']=[$t,$wrong];expect(na_bundle($worlds,$managers,[$job,$new],$c,'2026-11-14')['coverage']['conflicting_titles'],1,'Conflicting awards never pick arbitrary winner');
+$unknown=$t;$unknown['trophy_type']='unknown';$unknown['competition_key']='GW001|IMC|unknown';$c=$src;$c['IMC-001']['trophies']=[$unknown];$u=na_bundle($worlds,$managers,[$job,$new],$c,'2026-11-14');expect($u['managers']['MNG001']['trophies'],1,'Unknown bonus still a title');expect($u['managers']['MNG001']['ranking']['unscored_trophies'],1,'Unknown bonus flagged');
+expect(na_page(range(1,65),2,30)['rows'],range(31,60),'Archive pagination');expect(na_page(range(1,65),2,30)['pages'],3,'Page count');
+$joined=0;foreach($d['managers'] as $m){expect($m['stats']['played'],$m['stats']['won']+$m['stats']['drawn']+$m['stats']['lost'],'Career sum invariant');$joined+=$m['stats']['played'];}expect($joined,4,'Global fixtures are not manager appearances');
+foreach($argv as $arg)if(str_starts_with($arg,'--fixture='))file_put_contents(substr($arg,10),json_encode($d,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+echo "PASS: global fixture identity, future worlds, historical title attribution, Results-only identities, official ranking, walkovers, shootouts, conflicts, filters and pagination\n";

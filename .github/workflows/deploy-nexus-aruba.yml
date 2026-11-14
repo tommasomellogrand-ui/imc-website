@@ -18,6 +18,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Verify global almanac before publication
+        run: |
+          for file in nexus/almanac/*.php; do php -l "$file"; done
+          php tests/nexus-almanac.php
+          node --check nexus/assets/almanac.js
+          node --check nexus/assets/nexus-header.js
       - name: Publish changed Nexus files with FTPS verification
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
