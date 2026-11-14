@@ -13,6 +13,7 @@ on:
       - 'scudetto/**'
       - 'scripts/verify-single-worlds.py'
       - 'scripts/single-worlds.json'
+      - 'ops/world-engine-files.json'
       - '.github/workflows/deploy-single-worlds.yml'
   workflow_dispatch:
 permissions:
@@ -44,7 +45,7 @@ jobs:
               selected=worlds
           else:
               changed=subprocess.check_output(['git','diff','--name-only',before,'HEAD'],text=True).splitlines()
-              common={'scripts/verify-single-worlds.py','scripts/single-worlds.json','.github/workflows/deploy-single-worlds.yml'}
+              common={'scripts/verify-single-worlds.py','scripts/single-worlds.json','ops/world-engine-files.json','.github/workflows/deploy-single-worlds.yml'}
               selected=worlds if any(p in common for p in changed) else [w for w in worlds if any(p.startswith(w+'/') for p in changed)]
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:out.write('worlds='+json.dumps(selected,separators=(',',':'))+'\n')
           print('Worlds selected:',selected)
@@ -90,7 +91,9 @@ jobs:
               runs=gh('/actions/workflows/deploy-single-worlds.yml/runs?status=success&branch=main&per_page=1')['workflow_runs']
               if runs:
                   diff=gh('/compare/'+runs[0]['head_sha']+'...'+os.environ['GITHUB_SHA'])
-                  if diff.get('status') in ['ahead','identical'] and len(diff.get('files',[]))<300:
+                  changed={f['filename'] for f in diff.get('files',[])}
+                  force_full=bool(changed & {'ops/world-engine-files.json','scripts/single-worlds.json','.github/workflows/deploy-single-worlds.yml'})
+                  if not force_full and diff.get('status') in ['ahead','identical'] and len(diff.get('files',[]))<300:
                       files=[Path(f['filename']) for f in diff.get('files',[]) if f['filename'].startswith(world+'/') and Path(f['filename']).is_file()]
               print('Files to publish:',len(files),flush=True)
           except Exception:print('Full publication',flush=True)
