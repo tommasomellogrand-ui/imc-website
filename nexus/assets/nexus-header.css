@@ -1,0 +1,14 @@
+/* IMC Nexus shared site header: IMC mark remains the original PNG */
+#imc-nexus-header{position:relative;z-index:50;background:linear-gradient(150deg,#071426,#102b4c 48%,#071427);border-bottom:2px solid #b18c49;box-shadow:0 6px 22px #0005;color:#fff;font-family:Inter,Arial,sans-serif}
+#imc-nexus-header *{box-sizing:border-box}
+#imc-nexus-header .nh-wrap{max-width:1140px;min-height:96px;margin:auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:22px}
+#imc-nexus-header .nh-brand{display:flex;align-items:center;gap:15px;min-width:0;flex:1;text-decoration:none;color:#fff}
+#imc-nexus-header .nh-crest{width:67px;height:67px;object-fit:contain;flex:none;filter:drop-shadow(0 2px 7px #0009)}
+#imc-nexus-header .nh-sep{height:53px;width:2px;background:linear-gradient(#f3d48b,#a97527,#f3d48b);box-shadow:0 0 9px #e7b85d88;flex:none}
+#imc-nexus-header .nh-word{position:relative;font-family:Inter,Arial,sans-serif;font-size:clamp(29px,4.6vw,57px);line-height:1;font-weight:900;font-style:italic;letter-spacing:-.105em;white-space:nowrap;transform:skew(-8deg);background:linear-gradient(175deg,#f8fbff 6%,#b5cce4 24%,#194f88 41%,#e4effc 55%,#bb862f 72%,#f3ce79 83%,#1c5e9a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:.6px #9dbad5;text-shadow:2px 4px 9px #0005;filter:drop-shadow(0 2px 0 #092744)}
+#imc-nexus-header .nh-word::after{content:'';position:absolute;left:4%;right:0;bottom:-8px;height:2px;background:linear-gradient(90deg,transparent,#0e9dfd 30%,#f0c36b 70%,transparent);box-shadow:0 0 7px #2588ff}
+#imc-nexus-header .nh-links{display:flex;gap:17px;align-items:center;font-size:11px;letter-spacing:.04em;font-weight:800;text-transform:uppercase}
+#imc-nexus-header .nh-links a{color:#eaf2fa;text-decoration:none}#imc-nexus-header .nh-links a:hover{color:#f1c779}
+#imc-nexus-header .nh-menu{display:none;border:1px solid #a18b60;border-radius:8px;padding:8px 11px;background:#102b4c;color:#fff;font-size:18px}
+@media(max-width:800px){#imc-nexus-header .nh-wrap{min-height:76px;gap:10px}#imc-nexus-header .nh-crest{width:48px;height:48px}#imc-nexus-header .nh-sep{height:42px}#imc-nexus-header .nh-word{font-size:clamp(25px,6vw,39px)}#imc-nexus-header .nh-links{display:none;position:absolute;top:100%;left:0;right:0;padding:15px 20px;background:#0b2039;box-shadow:0 9px 18px #0005;flex-direction:column;align-items:flex-start}#imc-nexus-header .nh-links.open{display:flex}#imc-nexus-header .nh-menu{display:block}}
+@media(max-width:380px){#imc-nexus-header .nh-crest{width:41px;height:41px}#imc-nexus-header .nh-brand{gap:8px}#imc-nexus-header .nh-word{font-size:25px}}
