@@ -1,13 +1,7 @@
 name: Deploy minisite GW005 master
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'minisite/GW005/**'
-      - '.github/workflows/deploy-minisite-gw005.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
