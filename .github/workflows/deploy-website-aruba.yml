@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/deploy-website-aruba.yml'
-      - 'nexus/**'
       - 'site-assets/**'
       - 'sensible-soccer-academy-creation/**'
       - 'sensible-soccer-academy/world-cup-draw/**'
@@ -109,7 +108,6 @@ jobs:
                   except error_perm:ftp.mkd(part);ftp.cwd(part)
           excluded={'site-assets/css/game-world.css','site-assets/css/gameworld-engine.css','site-assets/js/gameworld-engine.js','site-assets/js/imc-data-service.js','site-assets/js/team-hub-detail.js'}
           files=[Path('index.html')]
-          files += [p for p in sorted(Path('nexus').rglob('*')) if p.is_file() and not p.as_posix().startswith('nexus/alltoplayfor/') and p.as_posix() not in {'nexus/competitions/imc-cups.json','nexus/competitions/imc-cups.php'}]
           files += [p for p in sorted(Path('site-assets').rglob('*')) if p.is_file() and p.as_posix() not in excluded]
           files += [Path('sensible-soccer-academy/world-cup-draw/index.html'),Path('sensible-soccer-academy/world-cup-draw/api.php'),Path('sensible-soccer-academy/world-cup-draw/live/index.html')]
           files += [Path('sensible-soccer-academy-creation/gw-setting/draft-matrix.html'),Path('sensible-soccer-academy-creation/gw-setting/.htaccess'),Path('sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg'),Path('sensible-soccer-academy-creation/gw-setting/draw-live.php')]
