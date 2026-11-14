@@ -9,6 +9,7 @@ const badge=(name,logo)=>'<span class="club">'+(safe(logo)?'<img src="'+esc(logo
 const empty=text=>'<p class="cup-empty">'+esc(text)+'</p>';
 
 
+document.querySelector('[data-main-tab="overview"]')?.replaceChildren(document.createTextNode('Results'));
 function competitionHeader(){
  const main=document.querySelector('main.cup-wrap');if(!main)return;
  const image=main.querySelector('img.cup-banner'),heading=main.querySelector(':scope > h1');
@@ -115,8 +116,7 @@ async function render(){if(!data)return;
  const tableTab=document.querySelector('[data-main-tab="table"]');if(tableTab){tableTab.hidden=!hasTable;tableTab.style.display=hasTable?'':'none'}
  if(!hasTable&&tab==='table')tab='matches';document.querySelectorAll('[data-main-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mainTab===tab)));const p=new URLSearchParams(settings?location.search:'');p.set('season',season);p.set('tab',tab);history.replaceState(null,'','?'+p);const results=data.results,schedule=data.schedule;let html='';
  if(tab==='overview'){
- const latest=results[0];
- html=(groupedMatches(latest?results.filter(r=>roundKey(r)===roundKey(latest)):[],true)||empty('Nessun risultato disponibile.'));
+ html=(groupedMatches(results,true)||empty('Nessun risultato disponibile.'));
  }else if(tab==='matches'){
  html='<h2>Schedule</h2>'+(groupedMatches(schedule,false)||empty('Nessuna partita in calendario.'));
  }else if(tab==='table'){html='<h2>Classifica</h2>'+table();

@@ -26,7 +26,7 @@ with webdriver.Chrome(options=options) as driver:
         wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.cup-season-bar select'))
         wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.cup-tabs [data-main-tab]'))
         labels=[e.text for e in driver.find_elements(By.CSS_SELECTOR,'.cup-tabs [data-main-tab]')]
-        assert labels==['Last Round','Schedule','Standings','Stats'],(world,labels)
+        assert labels==['Results','Schedule','Standings','Stats'],(world,labels)
         wait.until(lambda d:d.find_element(By.ID,'cup-view').get_attribute('aria-busy')=='false')
         assert not driver.find_elements(By.CSS_SELECTOR,'.cup-summary'),world
         assert 'temporaneamente non disponibili' not in driver.find_element(By.ID,'cup-view').text,world
