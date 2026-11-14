@@ -1,13 +1,7 @@
 name: Deploy minisite GW003 manager 2035
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'minisite/GW003/**'
-      - '.github/workflows/deploy-minisite-gw003.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
