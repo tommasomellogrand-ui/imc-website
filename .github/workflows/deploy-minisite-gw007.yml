@@ -1,13 +1,5 @@
 name: Deploy GW007 Football Territories
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'minisite/GW007/**'
-      # These entry points have their own dependency-ordered deployment.
-      - '!minisite/GW007/results.html'
-      - '!minisite/GW007/schedule.html'
-      - '!minisite/GW007/live-fixtures.js'
   workflow_dispatch:
 permissions:
   contents: read
