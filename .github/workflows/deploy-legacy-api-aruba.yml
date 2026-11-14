@@ -1,0 +1,73 @@
+name: Deploy IMC legacy API endpoints to Aruba
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'api/imc-gateway/**'
+      - 'api/imc-data/**'
+      - '__imc-gateway/**'
+      - '__imc-sm-master/admin/database-manager/normalizer.php'
+      - '.github/workflows/deploy-legacy-api-aruba.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-legacy-api-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate endpoints
+        run: |
+              test -s api/imc-gateway/index.php
+              test -s api/imc-gateway/config.php
+              test -s api/imc-gateway/database.php
+              php -l api/imc-gateway/index.php
+              php -l api/imc-gateway/database.php
+              test -s api/imc-data/v1/site-ready.php
+              test -s api/imc-data/v1/.htaccess
+              php -l api/imc-data/v1/site-ready.php
+              test -s __imc-gateway/__imc-gateway/index.php
+              test -s __imc-sm-master/admin/database-manager/normalizer.php
+      - name: Publish changed endpoint files with FTPS byte verification
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+          BEFORE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl,subprocess,time
+          from pathlib import Path
+          from ftplib import FTP_TLS,error_perm
+          allowed=["api/imc-gateway/index.php","api/imc-gateway/config.php","api/imc-gateway/database.php","api/imc-data/v1/site-ready.php","api/imc-data/v1/.htaccess","__imc-gateway/__imc-gateway/index.php","__imc-sm-master/admin/database-manager/normalizer.php"]
+          before=os.environ.get('BEFORE_SHA','')
+          full=os.environ.get('EVENT_NAME')!='push' or not before or set(before)=={'0'}
+          if not full:
+              try: changed=set(subprocess.check_output(['git','diff','--name-only',before,'HEAD'],text=True).splitlines())
+              except subprocess.CalledProcessError: full=True
+          selected=allowed if full else [p for p in allowed if p in changed]
+          if not selected:
+              print('No legacy API endpoints changed');exit()
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx,timeout=60)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p()
+          for p in selected:
+              local=Path(p);parent='/www.italianmastersclub.it/'+str(local.parent)
+              ftp.cwd('/')
+              for segment in parent.strip('/').split('/'):
+                  try:ftp.cwd(segment)
+                  except error_perm:ftp.mkd(segment);ftp.cwd(segment)
+              data=local.read_bytes()
+              ftp.storbinary('STOR '+local.name,io.BytesIO(data))
+              out=io.BytesIO();ftp.retrbinary('RETR '+local.name,out.write)
+              if out.getvalue()!=data:raise RuntimeError('FTPS byte mismatch '+p)
+              print('Verified',p)
+          ftp.quit()
+          PY
