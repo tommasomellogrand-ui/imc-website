@@ -41,7 +41,7 @@ jobs:
               except subprocess.CalledProcessError:full=True
           # Archive entry points are a coherent release: include all when one changes.
           archive={'nexus/index.html','nexus/worlds/index.html','nexus/managers/index.html','nexus/assets/archive.css'}
-          if full or any(p.as_posix() in archive for p in files):
+          if full or any(p.as_posix() in archive for p in files) or ' .github/workflows/deploy-nexus-aruba.yml'.strip() in (changed if not full else set()):
               files=sorted(set(files)|{Path(p) for p in archive if p!='nexus/index.html'})
           if not files:
               print('No Nexus files to publish');exit()
