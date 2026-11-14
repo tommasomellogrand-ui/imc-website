@@ -1,10 +1,5 @@
 name: Deploy GW001 CORE and Match Report
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'minisite/GW001/**'
-      - '.github/workflows/deploy-minisite-gw001.yml'
   workflow_dispatch:
 permissions:
   contents: read
