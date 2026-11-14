@@ -8,7 +8,7 @@ try {
  $world=imc_site_db($cfg,'custom');
  $select=[];
  for($i=1;$i<=8;$i++) $select[]=sprintf("SELECT full_name FROM IMC%03d_Player_Codex WHERE full_name IS NOT NULL",$i);
- $names=$world->query(implode(' UNION ',$select))->fetchAll(PDO::FETCH_COLUMN);
+ $names=$world->query(implode(' UNION ALL ',$select))->fetchAll(PDO::FETCH_COLUMN);
  $managers=$core->query('SELECT full_name FROM `IMC Manager Codex Global`')->fetchAll(PDO::FETCH_COLUMN);
  $clubs=$core->query('SELECT name FROM `IMC Club Codex Global` UNION SELECT nexus_view FROM `IMC Club Codex Global` UNION SELECT name FROM `IMC National Team Codex Global`')->fetchAll(PDO::FETCH_COLUMN);
  header('Cache-Control: no-store');
