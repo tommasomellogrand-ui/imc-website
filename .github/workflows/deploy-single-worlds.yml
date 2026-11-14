@@ -21,13 +21,42 @@ concurrency:
   group: single-worlds-production
   cancel-in-progress: false
 jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      worlds: ${{ steps.select.outputs.worlds }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: select
+        env:
+          BEFORE: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          worlds=[w['slug'] for w in json.loads(Path('scripts/single-worlds.json').read_text())]
+          before=os.environ.get('BEFORE','')
+          if os.environ.get('EVENT_NAME')=='workflow_dispatch' or not before or set(before)=={'0'}:
+              selected=worlds
+          else:
+              changed=subprocess.check_output(['git','diff','--name-only',before,'HEAD'],text=True).splitlines()
+              common={'scripts/verify-single-worlds.py','scripts/single-worlds.json','.github/workflows/deploy-single-worlds.yml'}
+              selected=worlds if any(p in common for p in changed) else [w for w in worlds if any(p.startswith(w+'/') for p in changed)]
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:out.write('worlds='+json.dumps(selected,separators=(',',':'))+'\\n')
+          print('Worlds selected:',selected)
+          PY
   deploy:
+    needs: detect
+    if: ${{ needs.detect.outputs.worlds != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
-        world: [halloffamers, kickoff, sensiblesocceracademy, subbuteosuperleague, worldleague, masterleagueworld, scudetto]
+        world: ${{ fromJSON(needs.detect.outputs.worlds) }}
     steps:
       - uses: actions/checkout@v4
       - name: Validate PHP and JavaScript
