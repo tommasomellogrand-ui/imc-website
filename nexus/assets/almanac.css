@@ -12,3 +12,6 @@
 @media(min-width:700px){.home-columns .section-card{padding:17px 16px}.home-columns .section-card strong{font-size:18px}.home-columns .world-card{padding:16px}.home-columns .section-head h2{font-size:20px}.home-columns .section-head:after{max-width:60px}}
 
 .notice{background:#0b2235;border-color:#36536b;color:#afc5d9}.notice strong{color:#d2e3f1}
+
+.subnav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;gap:6px}.subnav a{text-align:center;min-height:44px;padding:11px 6px}.profile-hero h1{font-size:26px;margin:4px 0;line-height:1.15}.na-profile .na-page-head{padding-top:20px;padding-bottom:0}.na-profile .na-page-head h1,.na-profile .na-page-head p{display:none}
+@media(min-width:700px){.subnav{display:flex}.subnav a{padding:11px 17px}.profile-hero h1{font-size:34px}}
