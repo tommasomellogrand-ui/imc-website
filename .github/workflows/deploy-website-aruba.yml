@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Validate package
         shell: bash
         run: |
@@ -60,6 +62,29 @@ jobs:
           php -l api/imc-data/v1/site-ready.php
           test -s __imc-gateway/__imc-gateway/index.php
           test -s __imc-sm-master/admin/database-manager/normalizer.php
+      - name: Detect changed files
+        id: changes
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os,subprocess
+          from pathlib import Path
+          before=os.environ.get('BEFORE_SHA','')
+          full=os.environ.get('EVENT_NAME')!='push' or not before or set(before)=={'0'}
+          if not full:
+              try:
+                  changed=subprocess.check_output(['git','diff','--name-only',before,'HEAD'],text=True).splitlines()
+              except subprocess.CalledProcessError:
+                  full=True
+          if full:
+              changed=[]
+          Path('/tmp/imc-deploy-changed.txt').write_text('\n'.join(changed)+'\n')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write(f'full={str(full).lower()}\n')
+          print('Full deployment:',full,'changed files:',len(changed))
+          PY
       - name: Validate Aruba secrets
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -70,6 +95,7 @@ jobs:
           for name in ARUBA_FTP_USERNAME ARUBA_FTP_PASSWORD; do test -n "${!name:-}"; done
       - name: Upload shared website assets (worlds deployed independently)
         env:
+          DEPLOY_FULL: ${{ steps.changes.outputs.full }}
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
           ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
         shell: bash
@@ -104,22 +130,29 @@ jobs:
           files += [Path('sensible-soccer-academy-creation/draw-replay/index.html'),Path('sensible-soccer-academy-creation/draw-replay/replay.php')]
           files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('api/imc-gateway/database.php'),Path('api/imc-data/v1/site-ready.php'),Path('api/imc-data/v1/.htaccess'),Path('__imc-gateway/__imc-gateway/index.php'),Path('__imc-sm-master/admin/database-manager/normalizer.php')]
           files=[p for p in files if str(p) not in {'nexus/index.html','nexus/assets/home.js'}] # Home has its own publisher
+          changed=set(Path('/tmp/imc-deploy-changed.txt').read_text().splitlines())
+          full=os.environ.get('DEPLOY_FULL')=='true'
+          if not full:
+              files=[p for p in files if p.as_posix() in changed]
+          print('Files selected for deployment:',len(files),'full:',full)
           for local in files:
               parent=local.parent.as_posix(); dest=remote_root if parent=='.' else f'{remote_root}/{parent}'
               ensure_dir(dest); data=local.read_bytes()
               with local.open('rb') as fh:ftp.storbinary(f'STOR {local.name}',fh)
               check=io.BytesIO();ftp.retrbinary(f'RETR {local.name}',check.write)
               if check.getvalue()!=data:raise SystemExit(f'Verifica upload fallita: {local}')
-          state_dest=f'{remote_root}/sensible-soccer-academy/world-cup-draw'; ensure_dir(state_dest)
-          try:ftp.size('state.json')
-          except Exception:ftp.storbinary('STOR state.json',io.BytesIO(b'{"event":"waiting","phase":"idle","current_manager":null,"current_slot":null,"assignments":[]}\n'))
-          try:ftp.sendcmd('SITE CHMOD 666 state.json')
-          except Exception:pass
+          if full or any(p.startswith('sensible-soccer-academy/world-cup-draw/') for p in changed):
+              state_dest=f'{remote_root}/sensible-soccer-academy/world-cup-draw'; ensure_dir(state_dest)
+              try:ftp.size('state.json')
+              except Exception:ftp.storbinary('STOR state.json',io.BytesIO(b'{"event":"waiting","phase":"idle","current_manager":null,"current_slot":null,"assignments":[]}\\n'))
+              try:ftp.sendcmd('SITE CHMOD 666 state.json')
+              except Exception:pass
           enhancement_local=Path('sensible-soccer-academy-creation/gw-setting/draft-enhancements.js'); chat_local=Path('sensible-soccer-academy-creation/gw-setting/draft-chat.js'); live_local=Path('sensible-soccer-academy-creation/gw-setting/draft-live.js'); recorder_local=Path('sensible-soccer-academy-creation/gw-setting/replay-recorder.js')
           runtime_dest=f'{remote_root}/sensible-soccer-academy-creation/gw-setting'; ensure_dir(runtime_dest)
           runtime_data=enhancement_local.read_bytes()+b'\n'+chat_local.read_bytes()+b'\n'+live_local.read_bytes()+b'\n'+recorder_local.read_bytes()
-          ftp.storbinary('STOR crest-overrides.js',io.BytesIO(runtime_data)); check=io.BytesIO();ftp.retrbinary('RETR crest-overrides.js',check.write)
-          if check.getvalue()!=runtime_data:raise SystemExit('Verifica upload fallita: Draft Matrix runtime bundle')
+          if full or any(p in changed for p in ['sensible-soccer-academy-creation/gw-setting/draft-enhancements.js','sensible-soccer-academy-creation/gw-setting/draft-chat.js','sensible-soccer-academy-creation/gw-setting/draft-live.js','sensible-soccer-academy-creation/gw-setting/replay-recorder.js']):
+              ftp.storbinary('STOR crest-overrides.js',io.BytesIO(runtime_data)); check=io.BytesIO();ftp.retrbinary('RETR crest-overrides.js',check.write)
+              if check.getvalue()!=runtime_data:raise SystemExit('Verifica upload fallita: Draft Matrix runtime bundle')
           ftp.quit(); print(f'Pubblicati e verificati {len(files)+1} file; World Cup Draw incluso')
           PY
       - name: Verify GW010 World Cup Draw live
