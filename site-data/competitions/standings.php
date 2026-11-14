@@ -10,5 +10,22 @@ try{
   $db=imc_site_db($c,imc_site_target($c,$gw));$table=imc_site_table($gw,'Results');
   $rows=imc_site_rows($db,'SELECT competition_key,match_date,sm_fixture_id,competition_stage,competition_round,competition_group_name,home_sm_club_id,home_name,away_sm_club_id,away_name,home_score,away_score,result_status FROM `'.$table.'` WHERE game_world_id=? AND imc_season=? AND competition_key=? AND home_score IS NOT NULL AND away_score IS NOT NULL ORDER BY match_date,sm_fixture_id',[$gw,$season,$key]);
   $rows=imc_site_result_identity($gw,$rows);
+  if ($gw === 'GW011' && preg_match('/\|risingstarsleague\|(premier|challenger)$/i', $key)) {
+      $calendar = imc_site_table($gw, 'Schedule');
+      $fixtures = [];
+      foreach (array_chunk(array_unique(array_column($rows, 'sm_fixture_id')), 200) as $ids) {
+          $marks = implode(',', array_fill(0, count($ids), '?'));
+          foreach (imc_site_rows($db, "SELECT sm_fixture_id,home_sm_team_id,away_sm_team_id FROM `$calendar` WHERE sm_fixture_id IN ($marks) AND imc_season=?", [...$ids, $season]) as $fixture) {
+              $fixtures[$fixture['sm_fixture_id']] = $fixture;
+          }
+      }
+      foreach ($rows as &$row) {
+          foreach (['home','away'] as $side) {
+              $id = $fixtures[$row['sm_fixture_id']][$side.'_sm_team_id'] ?? $row[$side.'_sm_club_id'];
+              $row[$side.'_sm_club_id'] = $id ?: strtolower(trim($row[$side.'_name']));
+          }
+      }
+      unset($row);
+  }
   imc_site_out(array_merge(['ok'=>true,'game_world_id'=>$gw,'season'=>$season,'competition_key'=>$key],imc_site_standings_tables($rows,imc_site_custom_cup($gw,$season,$key)['groups']??[], $key)));
 }catch(InvalidArgumentException $e){imc_site_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){imc_site_out(['ok'=>false,'error'=>'competition_standings_error'],500);}
