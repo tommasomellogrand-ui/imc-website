@@ -61,7 +61,7 @@ try {
             $p=$agg['players'][$id]??['player_id'=>$id,'label'=>$name?:('Giocatore '.$id),'played'=>0,'starts'=>0,'subs'=>0,'minutes'=>0,'known_minutes'=>0,'goals'=>0,'assists'=>0,'mom'=>0,'yellow'=>0,'red'=>0,'rating_sum'=>0,'rated'=>0,'worlds'=>[],'world_stats'=>[],'matches'=>[]];
             if($name!=='')$p['label']=imc_person_display_name($name);$p['image_url']=$identity['image_url']??null;
             usort($p['matches'],fn($a,$b)=>strcmp($b['date'],$a['date']));$p['matches_total']=count($p['matches']);$p['matches']=array_slice($p['matches'],0,50);
-            $out['player']=$p;$out['rosters']=nr_player_rosters($data,(int)$id);$out['record_summary']=$agg['coverage'];$out['warnings']=array_merge($out['warnings'],$agg['warnings']);
+            $out['player']=$p;$out['rosters']=array_values(array_filter(nr_player_rosters($data,(int)$id),fn($r)=>$q['world']===''||$r['world']===$q['world']));$out['record_summary']=$agg['coverage'];$out['warnings']=array_merge($out['warnings'],$agg['warnings']);
         }
     }
     echo json_encode(imc_person_display_fields($out),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);
