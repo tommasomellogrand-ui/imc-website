@@ -1,0 +1,61 @@
+name: Deploy Nexus remaining files to Aruba
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nexus/**'
+      - '.github/workflows/deploy-nexus-aruba.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: imc-nexus-general-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Publish changed Nexus files with FTPS verification
+        env:
+          ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
+          ARUBA_FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+          BEFORE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl,subprocess
+          from pathlib import Path
+          from ftplib import FTP_TLS,error_perm
+          root=Path('nexus')
+          excluded={'nexus/index.html','nexus/assets/home.js','nexus/competitions/imc-cups.json','nexus/competitions/imc-cups.php'}
+          files=[p for p in sorted(root.rglob('*')) if p.is_file() and not p.as_posix().startswith('nexus/alltoplayfor/') and p.as_posix() not in excluded]
+          before=os.environ.get('BEFORE_SHA','')
+          full=os.environ.get('EVENT_NAME')!='push' or not before or set(before)=={'0'}
+          if not full:
+              try:
+                  changed=set(subprocess.check_output(['git','diff','--name-only',before,'HEAD'],text=True).splitlines())
+                  files=[p for p in files if p.as_posix() in changed]
+              except subprocess.CalledProcessError:full=True
+          if not files:
+              print('No Nexus files to publish');exit()
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          ftp=FTP_TLS(context=ctx,timeout=60)
+          ftp.connect('ftp.italianmastersclub.it',21,timeout=60)
+          ftp.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD'])
+          ftp.prot_p()
+          for p in files:
+              ftp.cwd('/')
+              for part in ('www.italianmastersclub.it/'+p.parent.as_posix()).split('/'):
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+              data=p.read_bytes()
+              ftp.storbinary('STOR '+p.name,io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+              if check.getvalue()!=data:raise RuntimeError('Nexus upload mismatch: '+str(p))
+              print('Verified',p)
+          ftp.quit()
+          print('Published',len(files),'Nexus files')
+          PY
