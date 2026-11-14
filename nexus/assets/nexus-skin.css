@@ -1,58 +1,68 @@
-/* Nexus Diagonal. Presentation layer only; existing data and interactions are retained. */
+/* NEXUS Orbit: shared night palette and mobile-first public pages. Data behavior is unchanged. */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-html:has(body.nexus-diagonal){color-scheme:light;background:#fff!important}
-html body.nexus-diagonal{--navy:#0b203d;--gold:#0986b2;--muted:#536d84;--line:#c6d7e3;--edge:#a9c2d4;--surface:#f4faff;--b:#0b203d;--g:#0986b2;--l:#c6d7e3;--s:#f4faff;--m:#536d84;--ink:#0b203d;--paper:#fff;--imc-ink:#0b203d;--imc-gold:#0986b2;--nx-nav-navy:#0b203d;--nx-nav-gold:#1eb6e9;--nx-nav-muted:#536d84;--nx-nav-line:#c6d7e3;--wg-gold:linear-gradient(120deg,#fff,#dcf2ff);--wg-enamel:linear-gradient(120deg,#fff,#eff9ff);--wg-blue:linear-gradient(140deg,#244e74,#103252);background:#fff!important;color:#0b203d!important;font-family:Inter,Arial,sans-serif;min-height:100vh}
-html body.nexus-diagonal *{box-sizing:border-box}html body.nexus-diagonal a{text-decoration:none}html body.nexus-diagonal img{max-width:100%}
-html body.nexus-diagonal :focus-visible{outline-color:#008dbd!important;outline-width:2px;outline-offset:3px}html body.nexus-diagonal ::selection{background:#c5efff;color:#0b203d}
-html body.nexus-diagonal :is(main.wrap,.shell,.profile-wrap){max-width:1200px;margin-left:auto;margin-right:auto}
-html body.nexus-diagonal :is(.hero:not(.nx-home-hero),.profile-banner,.md-banner,.club-hero){color:#0b203d!important;background:linear-gradient(90deg,#fffffff5 10%,#ffffffc9 50%,#f4faff24),url('/nexus/assets/diagonal/earth.webp') center/cover!important;border:0!important;border-bottom:1px solid #b9cfdf!important;border-radius:0!important;box-shadow:none!important;position:relative;overflow:hidden}
-html body.nexus-diagonal main>.hero{margin:24px 0 28px;padding:30px 28px 33px;clip-path:polygon(0 0,100% 0,100% 88%,96% 100%,0 100%);border-left:2px solid #32b9e5!important}
-html body.nexus-diagonal :is(.hero,.profile-banner,.md-banner,.club-hero) :is(h1,h2,.season,#subtitle,p){color:#0b203d!important;text-shadow:none!important}
-html body.nexus-diagonal :is(.hero,.profile-banner,.md-banner,.club-hero) h1{font-size:clamp(27px,4vw,46px);font-weight:850;letter-spacing:-.04em;font-style:italic}
-html body.nexus-diagonal :is(.hero,.profile-banner,.md-banner,.club-hero) p{line-height:1.65;max-width:760px}
-html body.nexus-diagonal :is(.eyebrow,.kicker,.feed-kicker,.wg-kicker,.profile-hero small){color:#087da7!important;letter-spacing:.1em}
+html:has(body.nexus-diagonal){color-scheme:dark;background:#041322!important}
+html body.nexus-diagonal{--navy:#edf5ff;--gold:#dbbf7b;--muted:#a4bed3;--line:#36536d;--edge:#52728e;--surface:#092138;--b:#edf5ff;--g:#dbbf7b;--l:#36536d;--s:#0a263f;--m:#a4bed3;--ink:#edf5ff;--paper:#041322;--imc-paper:#041322;--imc-ink:#edf5ff;--imc-muted:#a4bed3;--imc-gold:#dbbf7b;--imc-line:#36536d;--nx-nav-navy:#edf5ff;--nx-nav-gold:#dbbf7b;--nx-nav-muted:#a4bed3;--nx-nav-line:#36536d;--wg-gold:linear-gradient(120deg,#123550,#071c30);--wg-enamel:linear-gradient(120deg,#0b2944,#06192c);--wg-blue:linear-gradient(140deg,#204d73,#0a2944);background:#041322!important;color:#edf5ff!important;font-family:Inter,Arial,sans-serif;min-height:100vh;color-scheme:dark}
+html body.nexus-diagonal *{box-sizing:border-box}
+html body.nexus-diagonal a{color:inherit;text-decoration:none}
+html body.nexus-diagonal img{max-width:100%}
+html body.nexus-diagonal :where(h1,h2,h3,h4,h5,h6,strong,b){color:inherit!important}
+html body.nexus-diagonal :focus-visible{outline:2px solid #69d3ff!important;outline-offset:3px}
+html body.nexus-diagonal ::selection{background:#365a78;color:#fff}
+html body.nexus-diagonal :is(main.wrap,.shell,.profile-wrap){max-width:1200px;margin-left:auto;margin-right:auto;background:transparent!important}
+html body.nexus-diagonal :is(.hero:not(.nx-home-hero),.profile-banner,.md-banner,.club-hero){color:#edf5ff!important;background:linear-gradient(90deg,#041322f2 10%,#041322cd 52%,#04132233),url('/nexus/assets/diagonal/earth-night.webp') 67% center/cover!important;border:0!important;border-bottom:1px solid #35526b!important;border-radius:0!important;box-shadow:none!important;position:relative;overflow:hidden}
+html body.nexus-diagonal main>.hero{margin:14px 0 18px;padding:18px 16px 22px;clip-path:polygon(0 0,100% 0,100% 88%,96% 100%,0 100%);border-left:2px solid #8fcbe9!important}
+html body.nexus-diagonal :is(.hero,.profile-banner,.md-banner,.club-hero) :is(h1,h2,.season,#subtitle,p){color:#e9f3fc!important;text-shadow:none!important}
+html body.nexus-diagonal :is(.hero,.profile-banner,.md-banner,.club-hero) h1{font-size:26px;font-weight:850;letter-spacing:-.04em;font-style:italic}
+html body.nexus-diagonal :is(.hero,.profile-banner,.md-banner,.club-hero) p{font-size:12px;line-height:1.5;max-width:760px}
+html body.nexus-diagonal :is(.eyebrow,.kicker,.feed-kicker,.wg-kicker,.profile-hero small){color:#d9c38b!important;letter-spacing:.1em}
 html body.nexus-diagonal :is(.nx-masthead,.nx-masthead .nx-hero){background-color:transparent!important;border-radius:0!important;box-shadow:none!important}
 html body.nexus-diagonal .nx-masthead .nx-hero{background:transparent!important}
 html body.nexus-diagonal .nx-masthead .nx-hero::before{display:none!important}
-/* Shared identity replaces old repeated wordmarks, while selectors remain usable. */
-html body.nexus-diagonal :is(.profile-top,.nx-topbar,.md-top,.club-top,.hero>.wrap>.top){margin-bottom:12px;min-height:38px;justify-content:flex-end;background:transparent!important}
+html body.nexus-diagonal :is(.profile-top,.nx-topbar,.md-top,.club-top,.hero>.wrap>.top){margin-bottom:8px;min-height:32px;justify-content:flex-end;background:transparent!important}
 html body.nexus-diagonal :is(.profile-top,.nx-topbar,.md-top,.club-top,.hero>.wrap>.top) :is(.brand,.nexus-brand,.nx-brand-caption){display:none!important}
-html body.nexus-diagonal #nx-universal-header{background:#f4faff!important;border-bottom:1px solid #dce9f2!important;color:#0b203d!important;box-shadow:none!important}
-html body.nexus-diagonal #nx-universal-header .nx-universal-top{min-height:45px;max-width:1200px;margin:auto;padding:8px 24px;justify-content:flex-end;background:transparent!important}
+html body.nexus-diagonal #nx-universal-header{background:#061a2c!important;border-bottom:1px solid #27415a!important;color:#dcebf7!important;box-shadow:none!important}
+html body.nexus-diagonal #nx-universal-header .nx-universal-top{min-height:44px;max-width:1200px;margin:auto;padding:5px 14px;justify-content:flex-end;background:transparent!important}
 html body.nexus-diagonal .nx-universal-brand{display:none!important}
-html body.nexus-diagonal #nx-universal-context{max-width:1200px;margin:auto;min-height:0;padding:0 24px 9px;color:#536d84!important;background:transparent!important;font-size:11px}
-html body.nexus-diagonal :is(select,input,textarea){background-color:#fff!important;border-color:#bcd0df!important;color:#0b203d!important;border-radius:0!important;accent-color:#0986b2}
-html body.nexus-diagonal :is(#nx-world-select,#profile-world,.world-select,.world-label select){background:#ebf8ff!important;color:#0b203d!important;border:1px solid #bcd0df!important;box-shadow:none!important;font-size:12px;max-width:100%}
-html body.nexus-diagonal :is(.card,.nc-card,.assignment,.competition-card,.world-card,.manager-card,.cup-card,.shortcut,.history-block,.career-card,.timeline-card,.timeline-event,.panel,.wg-tile,.trophy-tile){background:linear-gradient(120deg,#fff 15%,#f3faff 80%,#e5f3fd)!important;color:#0b203d!important;border:1px solid #b8ccdc!important;border-radius:0!important;box-shadow:none!important;position:relative}
-html body.nexus-diagonal :is(.grid>.card,.cards>.card,.competition-card,.manager-card,.shortcut){clip-path:polygon(0 0,calc(100% - 15px) 0,100% 15px,100% 100%,15px 100%,0 calc(100% - 15px))}
-html body.nexus-diagonal :is(a.card,a.manager-card,button.competition-card,.shortcut):hover{border-color:#16ade0!important;background:linear-gradient(120deg,#fff,#def3ff)!important;box-shadow:none!important}
-html body.nexus-diagonal .card small{color:#087da7;font-weight:750}
-html body.nexus-diagonal .card strong{color:#0b203d;font-weight:800}
-html body.nexus-diagonal .card a[style*='806020']{color:#087da7!important}
-html body.nexus-diagonal :is(.nc-photo,.player-photo){background:#eaf5fc!important}
-html body.nexus-diagonal :is(.summary,.kpis,.history-scopes,.career-summary,.round-box,.result-round,.nx-report,.nx-competition-card){border-color:#c6d7e3!important;border-radius:0!important;box-shadow:none!important;background:#fff!important}
-html body.nexus-diagonal :is(.kpi,.k,.nc-stat,.player-metrics div,.ps){background:#f1f9ff!important;border-radius:0!important}
-html body.nexus-diagonal :is(.catalog-cup,.count,.pill,.history-badge,.career-badge,.trophy-season){background:#e8f6ff!important;color:#087da7!important}
-html body.nexus-diagonal :is(.trophy-icon,.catalog-cup,.nx-competition-symbol,.hero-cup){color:#6b8aa2!important}
-html body.nexus-diagonal :is(.trophy-tile .trophy-face,.trophy-book,.trophy-room,.trophy-tiles){border-color:#b8ccdc!important}
-html body.nexus-diagonal :is(.trophy-tile,.career-card,.timeline-card){background:linear-gradient(120deg,#fff,#eaf6ff)!important}
-html body.nexus-diagonal :is(.trophy-competition,.trophy-winner,.trophy-team,.career-world-heading,.career-world-heading h2){color:#0b203d!important}
-html body.nexus-diagonal :is(.page-links a[aria-current=page],.profile-nav [aria-current=page],#nx-universal-nav [aria-current=page]){color:#087da7!important;border-color:#1bb7ed!important}
-html body.nexus-diagonal #nx-universal-nav [aria-current=page] .nx-nav-icon{color:#087da7!important}
-html body.nexus-diagonal .nexus-filter-chips button[aria-pressed=true]{background:#e7f7ff!important;color:#0b203d!important;border-color:#94c9df!important}
-html body.nexus-diagonal .competition-rail a[aria-current=page],html body.nexus-diagonal main button[aria-pressed=true]{background:#e7f7ff!important;color:#0b203d!important;border-color:#94c9df!important}
-html body.nexus-diagonal .competition-banner .icon{color:#6b8aa2!important}
+html body.nexus-diagonal #nx-universal-context{max-width:1200px;margin:auto;min-height:0;padding:0 14px 7px;color:#a4bed3!important;background:transparent!important;font-size:11px}
+html body.nexus-diagonal :is(select,input,textarea){background-color:#0b263e!important;border-color:#47637a!important;color:#edf5ff!important;border-radius:0!important;accent-color:#6bbde8;font-size:16px}
+html body.nexus-diagonal :is(input,textarea)::placeholder{color:#a2b8cb;opacity:1}
+html body.nexus-diagonal :is(#nx-world-select,#profile-world,.world-select,.world-label select){background:#0b263e!important;color:#edf5ff!important;border:1px solid #47637a!important;box-shadow:none!important;font-size:16px;max-width:100%;min-height:40px}
+html body.nexus-diagonal :is(.card,.nc-card,.assignment,.competition-card,.world-card,.manager-card,.cup-card,.shortcut,.history-block,.career-card,.timeline-card,.timeline-event,.panel,.wg-tile,.trophy-tile){background:linear-gradient(120deg,#0d2b47,#071b2f)!important;color:#edf5ff!important;border:1px solid #46627a!important;border-radius:0!important;box-shadow:none!important;position:relative}
+html body.nexus-diagonal :is(.grid>.card,.cards>.card,.competition-card,.manager-card,.shortcut){clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+html body.nexus-diagonal :is(a.card,a.manager-card,button.competition-card,.shortcut):hover{border-color:#d9bf7b!important;background:linear-gradient(120deg,#123754,#0b263f)!important;box-shadow:none!important}
+html body.nexus-diagonal :is(.card small,.card a,.nc-amount,.nc-arrow,.back,.back-link,.profile-back a){color:#ddc386!important}
+html body.nexus-diagonal :is(.card span,.muted,.id,.nc-meta,.nc-club,.player-club,.player-country,.player-role,.directory-note,.updated,.profile-back,.history-intro,.nx-competition-meta,.competition-card span,.competition-card small){color:#b6ccdf!important}
+html body.nexus-diagonal :is(.nc-photo,.nc-photo img,.player-photo){background:#0b2944!important}
+html body.nexus-diagonal :is(.summary,.kpis,.history-scopes,.career-summary,.round-box,.result-round,.nx-report,.nx-competition-card,.competition-banner,.table-box,.match-box,.match-card,.md-match,.feed-card,.dr,.hh){border-color:#36536d!important;border-radius:0!important;box-shadow:none!important;background:#081f34!important;color:#edf5ff!important}
+html body.nexus-diagonal :is(.kpi,.k,.nc-stat,.player-metrics div,.ps,.history-scopes div){background:#0c2943!important;color:#edf5ff!important;border-radius:0!important}
+html body.nexus-diagonal :is(.kpi span,.k span,.nc-stat span,.player-metrics span,.ps span,.competition-status,.round-head small){color:#b6ccdf!important}
+html body.nexus-diagonal :is(.catalog-cup,.count,.pill,.history-badge,.career-badge,.trophy-season){background:#153751!important;color:#e2c98d!important}
+html body.nexus-diagonal :is(.trophy-icon,.catalog-cup,.nx-competition-symbol,.hero-cup,.competition-banner .icon){color:#adc7da!important}
+html body.nexus-diagonal :is(.trophy-tile .trophy-face,.trophy-book,.trophy-room,.trophy-tiles){border-color:#526d83!important}
+html body.nexus-diagonal :is(.trophy-tile,.career-card,.timeline-card){background:linear-gradient(120deg,#0d2b47,#071b2f)!important}
+html body.nexus-diagonal :is(.trophy-competition,.trophy-winner,.trophy-team,.career-world-heading,.career-world-heading h2,.nc-name,.name,.team b,.selected-name){color:#edf5ff!important}
+html body.nexus-diagonal :is(.page-links a[aria-current=page],.profile-nav [aria-current=page],#nx-universal-nav [aria-current=page]){color:#dfc98e!important;border-color:#d9bc76!important}
+html body.nexus-diagonal #nx-universal-nav [aria-current=page] .nx-nav-icon{color:#dfc98e!important}
+html body.nexus-diagonal :is(.nexus-filter-chips button[aria-pressed=true],.competition-rail a[aria-current=page],main button[aria-pressed=true],.tab.active,.tab[aria-pressed=true],.catalog-country-flags [aria-pressed=true],.catalog-imc-toggle[aria-pressed=true],.hub-sections a[aria-current=page],.hub-sections a.active){background:#1a3c56!important;color:#fff0c5!important;border-color:#bba56b!important;box-shadow:inset 0 -2px #bba56b!important}
+html body.nexus-diagonal :is(button,.nexus-filter-chips button,.competition-rail a,.catalog-country-flags button,.catalog-imc-toggle){color:#caddEC;background-color:#0a253e;border-color:#36536d}
+html body.nexus-diagonal :is(.nx-scope-band,.nx-rail-frame,.tabs,.hub-sections,.catalog-categories,.catalog-match-tabs,.group-tabs-wrap){background:#061a2d!important;border-color:#36536d!important;border-radius:0!important;box-shadow:none!important}
+html body.nexus-diagonal [data-nx-nav]{--nx-nav-muted:#b8ccdd;--nx-nav-navy:#eff6ff;--nx-nav-gold:#d9bc76;background-color:#061a2d!important}
+html body.nexus-diagonal :is(#nx-universal-nav,.profile-nav,.bottom-nav){background:#061a2df5!important;border-top:1px solid #47637a!important;color:#b8ccdd!important;box-shadow:none!important}
+html body.nexus-diagonal #nx-universal-nav .nx-clubhouse-center .nx-nav-icon{background:#123a58!important;border:1px solid #6688a3!important;color:#edf5ff!important;box-shadow:none!important}
+html body.nexus-diagonal #nx-universal-nav [aria-current=page]::after,html body.nexus-diagonal .profile-nav [aria-current=page]::after{background:#d9bc76!important}
+html body.nexus-diagonal :is(footer,.footer){background:#061a2d!important;color:#adc5d9!important;border-color:#36536d!important;box-shadow:none!important}
+html body.nexus-diagonal :is(.world-card,.world-links a,.career-world-card){border-left-color:#7ca8c5!important}
+html body.nexus-diagonal :is(.row,.match-row,tr,td,th){border-color:#2c4962;color:inherit}
+html body.nexus-diagonal :is(th,.round-head,.match-heading,.match-card-header,.dr header,.hh header){background:#0c2943!important;color:#d6e8f7!important}
+html body.nexus-diagonal :is(dialog,.catalog-dialog,#nx-universal-dialog,#profile-more){background:#081f34!important;color:#edf5ff!important;border-color:#526f87!important}
+html body.nexus-diagonal dialog::backdrop{background:#010912b8}
+html body.nexus-diagonal :is(.competition-rail a,.catalog-categories button,.catalog-match-tabs button,.change-competition,#more-links a,#profile-more-links a,#nx-universal-dialog a){background:#0a253e!important;color:#d6e8f7!important;border-color:#36536d!important}
+html body.nexus-diagonal :is(.catalog-dialog-head button,.nx-rail-next,.close){background:#123550!important;color:#eff6ff!important}
+html body.nexus-diagonal .search{min-height:44px;font-size:16px}
+.nexus-diagonal .cards-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.nexus-diagonal .nc-card{grid-template-columns:1fr!important}
+.nexus-diagonal .nc-photo{min-height:112px!important;border-right:0;border-bottom:1px solid #36536d}
+.nexus-diagonal .nc-name{font-size:13px!important}
 html body.nexus-diagonal>header:is(.hero,.profile-banner,.md-banner,.club-hero){clip-path:polygon(0 0,100% 0,100% 89%,96% 100%,0 100%)}
-html body.nexus-diagonal :is(.tab.active,.tab[aria-pressed=true],.catalog-country-flags [aria-pressed=true],.catalog-imc-toggle[aria-pressed=true]){background:#e7f7ff!important;color:#0b203d!important;border-color:#94c9df!important;box-shadow:inset 0 -2px #1bb7ed!important}
-html body.nexus-diagonal :is(.nx-scope-band,.nx-rail-frame,.tabs,.hub-sections){background:#fff!important;border-color:#c6d7e3!important;border-radius:0!important;box-shadow:none!important}
-html body.nexus-diagonal :is(#nx-universal-nav,.profile-nav,.bottom-nav){background:#fffffff5!important;border-top:1px solid #b8ccdc!important;color:#536d84!important;box-shadow:none!important}
-html body.nexus-diagonal #nx-universal-nav .nx-clubhouse-center .nx-nav-icon{background:#e7f7ff!important;border:1px solid #a8cadd!important;color:#0b203d!important;box-shadow:none!important}
-html body.nexus-diagonal #nx-universal-nav [aria-current=page]::after,html body.nexus-diagonal .profile-nav [aria-current=page]::after{background:#1bb7ed!important}
-html body.nexus-diagonal :is(footer,.footer){background:#f6fbff!important;color:#536d84!important;border-color:#bdcfdd!important;box-shadow:none!important}
-html body.nexus-diagonal :is(.dr,.hh,.history-block,.table-box){color:#0b203d}
-html body.nexus-diagonal :is(.back,.back-link,.profile-back a){color:#087da7!important}
-html body.nexus-diagonal :is(.hub-sections a[aria-current=page],.hub-sections a.active){color:#087da7!important;border-color:#1bb7ed!important;background:#eaf8ff!important}
-html body.nexus-diagonal :is(.world-card,.world-links a,.career-world-card){border-left-color:#2eb3e3!important}
-html body.nexus-diagonal :is(.row,.match-row,tr,td,th){border-color:#d6e3ed}
-@media(max-width:760px){html body.nexus-diagonal main>.hero{margin:18px 0 22px;padding:24px 18px 28px;background-position:65% center!important}html body.nexus-diagonal :is(.hero,.profile-banner,.md-banner,.club-hero) h1{font-size:30px}html body.nexus-diagonal :is(.grid>.card,.competition-card,.shortcut){clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}html body.nexus-diagonal #nx-universal-header .nx-universal-top{padding:7px 16px}html body.nexus-diagonal #nx-universal-context{padding:0 16px 8px}.nexus-diagonal .cards-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.nexus-diagonal .nc-card{grid-template-columns:1fr!important}.nexus-diagonal .nc-photo{min-height:130px!important;border-right:0;border-bottom:1px solid #c6d7e3}.nexus-diagonal .nc-name{font-size:13px!important}}
+@media(min-width:761px){html body.nexus-diagonal main>.hero{margin:24px 0 26px;padding:30px 28px 34px}html body.nexus-diagonal :is(.hero,.profile-banner,.md-banner,.club-hero) h1{font-size:clamp(32px,4vw,46px)}html body.nexus-diagonal :is(.hero,.profile-banner,.md-banner,.club-hero) p{font-size:14px;line-height:1.65}html body.nexus-diagonal #nx-universal-header .nx-universal-top{padding:8px 24px}html body.nexus-diagonal #nx-universal-context{padding:0 24px 9px}html body.nexus-diagonal :is(.grid>.card,.cards>.card,.competition-card,.manager-card,.shortcut){clip-path:polygon(0 0,calc(100% - 15px) 0,100% 15px,100% 100%,15px 100%,0 calc(100% - 15px))}.nexus-diagonal .cards-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.nexus-diagonal .nc-card{grid-template-columns:minmax(0,1fr) minmax(0,2fr)!important}.nexus-diagonal .nc-photo{min-height:150px!important;border-bottom:0;border-right:1px solid #36536d}.nexus-diagonal .nc-name{font-size:16px!important}}
 @media(prefers-reduced-motion:reduce){html body.nexus-diagonal *{scroll-behavior:auto!important}}
