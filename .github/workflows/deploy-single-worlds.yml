@@ -1,4 +1,4 @@
-name: Deploy IMC Single League Worlds
+name: IMC Worlds
 on:
   push:
     branches: [main]
