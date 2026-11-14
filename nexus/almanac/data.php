@@ -8,7 +8,12 @@ try {
     if(!in_array($action,['home','managers','manager','ranking','trophies','compare','records','matches','player','player-search'],true))throw new InvalidArgumentException('Sezione non valida.');
     $q=[];foreach(['world','manager','opponent','season','competition_key','scope','outcome','team','search','category','player'] as $key){$v=$_GET[$key]??'';if(!is_string($v)||strlen($v)>255)throw new InvalidArgumentException('Filtro non valido.');$q[$key]=trim($v);}
     if($q['scope']==='global')$q['scope']='';if(!in_array($q['scope'],['','club','national_team'],true))throw new InvalidArgumentException('Ambito non valido.');
-    $page=max(1,min(100000,(int)($_GET['page']??1)));$data=na_read();
+    $page=max(1,min(100000,(int)($_GET['page']??1)));
+    if($action==='player-search'){
+        require_once __DIR__.'/player-directory.php';$core=nexus_db(nexus_config(),'core');$catalog=na_player_directory($core,$q['search'],$page);
+        echo json_encode(imc_person_display_fields(['ok'=>true,'worlds'=>na_catalog($core),'people'=>[],'warnings'=>[],'coverage'=>[],'player_search'=>$catalog['rows'],'player_page'=>array_diff_key($catalog,['rows'=>true]),'generated_at'=>gmdate('c')]),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);exit;
+    }
+    $data=na_read();
     if($q['world']!==''){
         $found=false;foreach($data['worlds'] as $w)if(in_array($q['world'],na_aliases($w),true)){$q['world']=$w['id'];$found=true;break;}if(!$found)throw new InvalidArgumentException('Mondo non trovato.');
     }
@@ -51,9 +56,6 @@ try {
             elseif($category==='market'){$source=nr_market_source($data,$q);$record=nr_market_records($data,$q,$source['sources']);$out['warnings']=array_merge($out['warnings'],$source['warnings']);}
             else{$agg=nr_report_source($data,$q);$record=nr_report_records($data,$q,$agg,$category);$out['warnings']=array_merge($out['warnings'],$agg['warnings']);}
             $out+=['category'=>$category,'record_boards'=>$record['boards'],'record_summary'=>$record['summary'],'analysis'=>$record['analysis'],'record_notes'=>$record['notes']??[]];
-        }elseif($action==='player-search'){
-            $term=trim($q['search']);$out['player_search']=[];
-            if(mb_strlen($term,'UTF-8')>=2){$core=nexus_db(nexus_config(),'core');$like='%'.$term.'%';$rows=nexus_rows($core,"SELECT p.id player_id,COALESCE(NULLIF(d.full_name,''),CONCAT_WS(' ',p.forename,p.surname)) player_name FROM `IMC Player Codex Global` p LEFT JOIN `IMC Player Codex Global Data` d ON d.player_id=p.id WHERE d.full_name LIKE ? OR CONCAT_WS(' ',p.forename,p.surname) LIKE ? OR p.id=? ORDER BY player_name LIMIT 30",[$like,$like,ctype_digit($term)?(int)$term:0]);$out['player_search']=$rows;}
         }else{
             if(!ctype_digit($q['player'])||(int)$q['player']<1)throw new InvalidArgumentException('ID giocatore non valido.');
             $agg=nr_report_source($data,$q);$id=$q['player'];$core=nexus_db(nexus_config(),'core');$identity=nexus_player_identity($core,[(int)$id])[(int)$id]??[];
