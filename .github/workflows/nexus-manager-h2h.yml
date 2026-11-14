@@ -90,7 +90,8 @@ jobs:
           opponent=matches[0]['opponent_id']
           expected=[m for m in matches if m['opponent_id']==opponent]
           d=get('club-house/h2h-detail.php',manager='MNG001',opponent=opponent,worlds='GW001,GW002')
-          assert d['source']=='Match Report' and d['summary']['played']==len(expected),(d['summary'],len(expected))
+          # Club House aggregates Results; scoped Data Room above is report-based.
+          assert d['source']=='Results' and d['summary']['played']==len(expected),(d['summary'],len(expected))
           assert {(m['world'],str(m['sm_fixture_id'])) for m in d['matches']}=={(m['world'],str(m['fixture_id'])) for m in expected}
           assert all(k in d for k in ['home','away','players','metrics'])
           print('Manager logos, scope isolation, report-only H2H and cross-world detail verified live. No database writes.')
