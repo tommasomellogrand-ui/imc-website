@@ -47,6 +47,11 @@ html body.nexus-diagonal :is(.nexus-filter-chips button[aria-pressed=true],.comp
 html body.nexus-diagonal :is(button,.nexus-filter-chips button,.competition-rail a,.catalog-country-flags button,.catalog-imc-toggle){color:#caddEC;background-color:#0a253e;border-color:#36536d}
 html body.nexus-diagonal :is(.nx-scope-band,.nx-rail-frame,.tabs,.hub-sections,.catalog-categories,.catalog-match-tabs,.group-tabs-wrap){background:#061a2d!important;border-color:#36536d!important;border-radius:0!important;box-shadow:none!important}
 html body.nexus-diagonal [data-nx-nav]{--nx-nav-muted:#b8ccdd;--nx-nav-navy:#eff6ff;--nx-nav-gold:#d9bc76;background-color:#061a2d!important}
+html body.nexus-diagonal.nx-linea-oro :is(#nexus-nav-priority,[data-nx-nav])[data-nx-nav]{background:#061a2d!important;border-color:#36536d!important}
+html body.nexus-diagonal.nx-linea-oro :is(#nexus-nav-priority,[data-nx-nav])[data-nx-nav]>:is(button,a){background:transparent!important;color:#b8ccdd!important;border-color:#36536d!important}
+html body.nexus-diagonal.nx-linea-oro :is(#nexus-nav-priority,[data-nx-nav])[data-nx-nav]>:is(.active,.on,[aria-pressed=true],[aria-selected=true],[aria-current=page]){background:#163b55!important;color:#fff0c5!important;border-color:#bba56b!important}
+html body.nexus-diagonal :is(.nx-report>summary,.nx-report>summary small,.nx-scope-title){color:#c9ddec!important}
+html body.nexus-diagonal :is(.trophy-face,.trophy-book,.trophy-room){background:#0a263e!important;color:#edf5ff!important}
 html body.nexus-diagonal :is(#nx-universal-nav,.profile-nav,.bottom-nav){background:#061a2df5!important;border-top:1px solid #47637a!important;color:#b8ccdd!important;box-shadow:none!important}
 html body.nexus-diagonal #nx-universal-nav .nx-clubhouse-center .nx-nav-icon{background:#123a58!important;border:1px solid #6688a3!important;color:#edf5ff!important;box-shadow:none!important}
 html body.nexus-diagonal #nx-universal-nav [aria-current=page]::after,html body.nexus-diagonal .profile-nav [aria-current=page]::after{background:#d9bc76!important}
