@@ -1,10 +1,5 @@
 name: Deploy Road To History
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'roadtohistory/**'
-      - '.github/workflows/deploy-roadtohistory.yml'
   workflow_dispatch:
 permissions:
   contents: read
