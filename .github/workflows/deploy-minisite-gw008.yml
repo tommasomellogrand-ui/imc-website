@@ -1,10 +1,5 @@
 name: Deploy GW008 Elite Football Board
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'minisite/GW008/**'
-      - '.github/workflows/deploy-minisite-gw008.yml'
   workflow_dispatch:
 permissions:
   contents: read
