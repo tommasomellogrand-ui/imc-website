@@ -1,13 +1,7 @@
 name: Deploy minisite GW002 Visual Exploration
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'minisite/GW002/**'
-      - '.github/workflows/deploy-minisite-gw002.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
