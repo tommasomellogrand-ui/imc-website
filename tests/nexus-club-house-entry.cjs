@@ -5,7 +5,7 @@ const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors
 await page.addInitScript(()=>localStorage.setItem('imc_nexus_world','GW008'));
 await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='entry.test')return route.abort();
 if(u.pathname==='/nexus/'||u.pathname==='/nexus/index.html')return route.fulfill({contentType:'text/html',body:fs.readFileSync('nexus/index.html')});
-if(/^\/nexus\/gw\\d{3}\/$/.test(u.pathname))return route.fulfill({contentType:'text/html',body:fs.readFileSync('nexus/world-legacy.html','utf8').replace('<head>','<head><base href="/nexus/">')});
+if(/^\/nexus\/gw\d{3}\/$/.test(u.pathname))return route.fulfill({contentType:'text/html',body:fs.readFileSync('nexus/world-legacy.html','utf8').replace('<head>','<head><base href="/nexus/">')});
 if(u.pathname.endsWith('.php'))return route.fulfill({contentType:'application/json',body:JSON.stringify({ok:true,world:{game_world_name:'Test GW'},current_season:null,rows:[]})});
 if(u.pathname.startsWith('/nexus/assets/')){const file=u.pathname.slice(1);if(!fs.existsSync(file))return route.abort();const ext=path.extname(file);return route.fulfill({contentType:ext==='.js'?'text/javascript':ext==='.css'?'text/css':ext==='.webp'?'image/webp':'application/octet-stream',body:fs.readFileSync(file)});}
 if(u.pathname.endsWith('.js'))return route.fulfill({contentType:'text/javascript',body:'window.NexusCards={wireImages:()=>{}};'});

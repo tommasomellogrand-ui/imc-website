@@ -38,6 +38,9 @@ html body.nexus-diagonal :is(.trophy-tile .trophy-face,.trophy-book,.trophy-room
 html body.nexus-diagonal :is(.trophy-tile,.career-card,.timeline-card){background:linear-gradient(120deg,#fff,#eaf6ff)!important}
 html body.nexus-diagonal :is(.trophy-competition,.trophy-winner,.trophy-team,.career-world-heading,.career-world-heading h2){color:#0b203d!important}
 html body.nexus-diagonal :is(.page-links a[aria-current=page],.profile-nav [aria-current=page],#nx-universal-nav [aria-current=page]){color:#087da7!important;border-color:#1bb7ed!important}
+html body.nexus-diagonal #nx-universal-nav [aria-current=page] .nx-nav-icon{color:#087da7!important}
+html body.nexus-diagonal .nexus-filter-chips button[aria-pressed=true]{background:#e7f7ff!important;color:#0b203d!important;border-color:#94c9df!important}
+html body.nexus-diagonal>header:is(.hero,.profile-banner,.md-banner,.club-hero){clip-path:polygon(0 0,100% 0,100% 89%,96% 100%,0 100%)}
 html body.nexus-diagonal :is(.tab.active,.tab[aria-pressed=true],.catalog-country-flags [aria-pressed=true],.catalog-imc-toggle[aria-pressed=true]){background:#e7f7ff!important;color:#0b203d!important;border-color:#94c9df!important;box-shadow:inset 0 -2px #1bb7ed!important}
 html body.nexus-diagonal :is(.nx-scope-band,.nx-rail-frame,.tabs,.hub-sections){background:#fff!important;border-color:#c6d7e3!important;border-radius:0!important;box-shadow:none!important}
 html body.nexus-diagonal :is(#nx-universal-nav,.profile-nav,.bottom-nav){background:#fffffff5!important;border-top:1px solid #b8ccdc!important;color:#536d84!important;box-shadow:none!important}
