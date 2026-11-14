@@ -6,3 +6,7 @@
 @media(min-width:761px) and (max-width:1050px){#imc-nexus-header .nh-menu{display:flex}#imc-nexus-header .nh-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;background:#071a2e;padding:12px 24px;border-bottom:1px solid var(--line)}#imc-nexus-header .nh-links.open{display:flex}}
 
 .trophy-symbol svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.4}
+/* Nested home panels retain two readable columns at tablet sizes. */
+.home-columns .section-grid,.home-columns .world-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.home-columns .section-card{min-width:0}
+@media(min-width:700px){.home-columns .section-card{padding:17px 16px}.home-columns .section-card strong{font-size:18px}.home-columns .world-card{padding:16px}.home-columns .section-head h2{font-size:20px}.home-columns .section-head:after{max-width:60px}}
