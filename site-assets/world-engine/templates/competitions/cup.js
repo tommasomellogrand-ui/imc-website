@@ -58,13 +58,21 @@ async function api(file,extra={}){const r=await fetch(base+'competitions/'+file+
 const identity=r=>[String(r.match_date).slice(0,10),r.home_sm_club_id||r.home_sm_team_id||r.home_name,r.away_sm_club_id||r.away_sm_team_id||r.away_name].join('|');
 const roundKey=r=>!league?JSON.stringify([r.competition_stage||'',r.competition_round||r.match_date]):r.competition_round?'round:'+r.competition_round:'date:'+String(r.match_date).slice(0,10);
 const roundLabel=r=>(r.competition_stage?String(r.competition_stage)+' · ':'')+(r.competition_round?(/^\d+$/.test(r.competition_round)?(league?'Giornata ':'Turno '):'')+r.competition_round:date(r.match_date));
+function playerCheck(r){
+ if (!Array.isArray(r.youth_lines) || !r.youth_lines.length) return '';
+ const title='<strong style="grid-column:1/-1;text-align:center;border-top:1px solid #d8dfe6;padding-top:.4rem">Player Check</strong>';
+ const side=(key,column)=>'<small style="grid-column:'+column+';text-align:center;font-family:inherit">'+esc(r.player_check[key])+'</small>';
+ const checks=r.player_check?side('home',1)+side('away',3):'';
+ const notes=r.player_check?r.youth_lines.slice(1):r.youth_lines;
+ return title+checks+notes.map(note=>'<small style="grid-column:1/-1;text-align:center">'+esc(note)+'</small>').join('');
+}
 function match(r,played){
  const team=side=>{
   const name=r[side+'_name']||'',logo=safe(r[side+'_logo_url']),manager=r[side+'_imc_manager_name'];
   return '<div class="fixture-side '+side+'"><span class="fixture-crest">'+(logo?'<img alt="" loading="lazy" src="'+esc(logo)+'">':'')+'</span><span class="fixture-names"><strong>'+esc(name)+'</strong>'+(manager?'<small>'+esc(manager)+'</small>':'')+'</span></div>';
  };
  const middle=played?'<button class="fixture-center" data-match="'+data.results.indexOf(r)+'" aria-label="'+esc(r.home_name+' '+r.home_score+' – '+r.away_score+' '+r.away_name)+'">'+esc(r.home_score)+' – '+esc(r.away_score)+'</button>':'<span class="fixture-center">'+esc(r.match_time?.slice(0,5)||'VS')+'</span>';
- return '<article class="fixture-line">'+team('home')+middle+team('away')+'</article>';
+ return '<article class="fixture-line">'+team('home')+middle+team('away')+(played?playerCheck(r):'')+'</article>';
 }
 function matches(rows,played){
  if(!rows.length)return empty(played?'Nessun risultato disponibile.':'Nessuna partita in calendario.');
