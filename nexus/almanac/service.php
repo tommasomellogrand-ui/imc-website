@@ -12,14 +12,19 @@ function na_read(): array {
     $assignments=nexus_rows($core,'SELECT a.*,COALESCE(a.team_name,n.`National Team Name`) assignment_name FROM `IMC Manager Assignment Global` a LEFT JOIN `IMC Game World National Team Mapping` n ON n.`Game World`=a.game_world_id AND n.`SM World National Club ID`=a.national_team_id ORDER BY a.start_date DESC,a.id DESC');
     $labels=[];$aliases=[];foreach($worlds as $w)foreach(na_aliases($w) as $a)$aliases[$a]=$w['id'];
     foreach(nexus_rows($core,'SELECT game_world_id,competition_key,nexus_view FROM `IMC Competition Nexus Mapping`') as $r)if(isset($aliases[$r['game_world_id']]))$labels[$aliases[$r['game_world_id']].'|'.na_key($r['competition_key'])]=$r['nexus_view'];
-    $clubs=nexus_rows($core,'SELECT id,name,nexus_view FROM `IMC Club Codex Global`');
+    $clubs=nexus_rows($core,'SELECT id,name,nexus_view,image_url FROM `IMC Club Codex Global`');
     $mapping=nexus_rows($core,'SELECT `Game World` game_world_id,`Club ID` entity_id,`SM World Club ID` world_id,`Club Name` name FROM `IMC Game World Club Mapping`');
     $display=nexus_club_label_index($clubs,$mapping);
     foreach($assignments as &$a)if($a['assignment_type']==='club')$a['assignment_name']=nexus_club_label((string)$a['team_name'],$display,$a['game_world_id'],$a['team_id']);unset($a);
+    // Batch media enrichment for every historical and current assignment.
+    $clubImages=array_column($clubs,'image_url','id');$media=[];
+    foreach($mapping as $m){$world=$aliases[$m['game_world_id']]??null;$url=$clubImages[$m['entity_id']]??null;if($world&&$url)$media[$world.'|club|'.$m['world_id']][$url]=true;}
+    foreach(nexus_rows($core,'SELECT m.`Game World` world,m.`SM World National Club ID` world_id,c.image_url FROM `IMC Game World National Team Mapping` m JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID`') as $m){$world=$aliases[$m['world']]??null;if($world&&!empty($m['image_url']))$media[$world.'|national_team|'.$m['world_id']][$m['image_url']]=true;}
+    foreach($assignments as &$a){$world=$aliases[$a['game_world_id']]??'';$key=$world.'|'.$a['assignment_type'].'|'.($a['assignment_type']==='club'?$a['team_id']:$a['national_team_id']);$images=$media[$key]??[];$a['image_url']=count($images)===1?array_key_first($images):null;}unset($a);
     $dbs=[];$tables=[];
     foreach(['custom','gold'] as $target){
         if(empty($c['db'][$target]))continue;
-        try{$dbs[$target]=nexus_db($c,$target);foreach(nexus_rows($dbs[$target],'SHOW TABLES') as $r){$table=(string)array_values($r)[0];if(preg_match('/^IMC\d{3}_(Results|Trophy_Room)$/D',$table)&&!isset($tables[$table]))$tables[$table]=$target;}}
+        try{$dbs[$target]=nexus_db($c,$target);foreach(nexus_rows($dbs[$target],'SHOW TABLES') as $r){$table=(string)array_values($r)[0];if(preg_match('/^IMC\d{3}_(Results|Trophy_Room|Transfers|Match_Reports|Player_Codex)$/D',$table)&&!isset($tables[$table]))$tables[$table]=$target;}}
         catch(Throwable $e){error_log('Nexus Almanac discovery '.$target.': '.$e->getMessage());}
     }
     $sources=[];
@@ -30,7 +35,7 @@ function na_read(): array {
             catch(Throwable $e){$src['warnings'][]=$w['id'].': lettura '.($key==='results'?'risultati':'titoli').' temporaneamente non disponibile.';error_log('Nexus Almanac '.$table.': '.$e->getMessage());}
         }$sources[$w['id']]=$src;
     }
-    return na_bundle($worlds,$managers,$assignments,$sources,(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d'),$labels);
+    $data=na_bundle($worlds,$managers,$assignments,$sources,(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d'),$labels);$data['_source_targets']=$tables;return $data;
 }
 function na_page(array $rows,int $page,int $size=30): array {return ['rows'=>array_slice($rows,($page-1)*$size,$size),'total'=>count($rows),'page'=>$page,'pages'=>max(1,(int)ceil(count($rows)/$size))];}
 function na_manager_public(array $m): array {unset($m['sm_manager_id']);return $m;}

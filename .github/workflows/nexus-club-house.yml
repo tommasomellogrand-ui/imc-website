@@ -2,7 +2,7 @@ name: Nexus Club House
 on:
   push:
     branches: [main, nexus-admin-assignments, nexus-white-gloss-preview]
-    paths: ['nexus/club-house/**', 'nexus/almanac/**', 'nexus/assets/almanac.*', 'tests/nexus-almanac*', 'tests/nexus-club-house*', '.github/workflows/nexus-club-house.yml']
+    paths: ['nexus/club-house/**', 'nexus/almanac/**', 'nexus/assets/almanac.*', 'tests/nexus-almanac*', 'tests/nexus-records*', 'tests/nexus-club-house*', '.github/workflows/nexus-club-house.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,6 +33,7 @@ jobs:
           php tests/nexus-club-house-national.php
           php tests/nexus-club-house-ranking.php
           php tests/nexus-almanac.php --fixture=/tmp/nexus-almanac-fixture.json
+          php tests/nexus-records.php
           node --check nexus/club-house/club-house.js
           node --check nexus/assets/home.js
       - name: Verify tabs and responsive layout

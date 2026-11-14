@@ -5,8 +5,8 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, max-age=0');
 try {
     $action=(string)($_GET['action']??'home');
-    if(!in_array($action,['home','managers','manager','ranking','trophies','compare','records','matches'],true))throw new InvalidArgumentException('Sezione non valida.');
-    $q=[];foreach(['world','manager','opponent','season','competition_key','scope','outcome','team','search'] as $key){$v=$_GET[$key]??'';if(!is_string($v)||strlen($v)>255)throw new InvalidArgumentException('Filtro non valido.');$q[$key]=trim($v);}
+    if(!in_array($action,['home','managers','manager','ranking','trophies','compare','records','matches','player','player-search'],true))throw new InvalidArgumentException('Sezione non valida.');
+    $q=[];foreach(['world','manager','opponent','season','competition_key','scope','outcome','team','search','category','player'] as $key){$v=$_GET[$key]??'';if(!is_string($v)||strlen($v)>255)throw new InvalidArgumentException('Filtro non valido.');$q[$key]=trim($v);}
     if($q['scope']==='global')$q['scope']='';if(!in_array($q['scope'],['','club','national_team'],true))throw new InvalidArgumentException('Ambito non valido.');
     $page=max(1,min(100000,(int)($_GET['page']??1)));$data=na_read();
     if($q['world']!==''){
@@ -42,9 +42,27 @@ try {
         $out['left']=current(array_filter($rank,fn($m)=>$m['manager_id']===$q['manager']));$out['right']=current(array_filter($rank,fn($m)=>$m['manager_id']===$q['opponent']));
         $all=na_filter($data['matches'],$q);$s=ch_zero();foreach($all as $r){$side=$r['home_manager']===$q['manager']?'home':'away';$other=$side==='home'?'away':'home';ch_add($s,$r[$side.'_score'],$r[$other.'_score'],$r['penalty_'.$side],$r['penalty_'.$other]);}$out['h2h']=$s;$out['matches']=na_page($all,$page);
     }
-    if($action==='records'){
-        $boards=[];foreach(['played','won','trophies','streak'] as $metric){$rows=[];foreach($rank as $m){$value=$metric==='trophies'?$m['trophies']:($m['stats'][$metric]??0);if($metric==='streak'){$current=0;$value=0;$events=na_filter($data['matches'],['manager'=>$m['manager_id'],'world'=>$q['world']]);$days=[];foreach($events as $r)$days[$r['date']][]=$r;ksort($days);foreach($days as $events){$unbeaten=true;foreach($events as $r){$side=$r['home_manager']===$m['manager_id']?'home':'away';$other=$side==='home'?'away':'home';if($r[$side.'_score']<$r[$other.'_score'])$unbeaten=false;}if($unbeaten)$current++;else $current=0;$value=max($value,$current);}}
-            if($value>0)$rows[]=['manager_id'=>$m['manager_id'],'full_name'=>$m['full_name'],'value'=>$value];}usort($rows,fn($a,$b)=>($b['value']<=>$a['value'])?:strcasecmp($a['full_name'],$b['full_name']));$boards[$metric]=$rows;}$out['records']=$boards;
+    if(in_array($action,['records','player','player-search'],true)){
+        require_once __DIR__.'/record-source.php';
+        $out['seasons']=array_values(array_unique(array_column($data['matches'],'season')));sort($out['seasons']);
+        if($action==='records'){
+            $category=$q['category']?:'results';if(!in_array($category,['results','career','reports','players','market'],true))throw new InvalidArgumentException('Categoria record non valida.');
+            if(in_array($category,['results','career'],true))$record=nr_result_records($data,$q,$category);
+            elseif($category==='market'){$source=nr_market_source($data,$q);$record=nr_market_records($data,$q,$source['sources']);$out['warnings']=array_merge($out['warnings'],$source['warnings']);}
+            else{$agg=nr_report_source($data,$q);$record=nr_report_records($data,$q,$agg,$category);$out['warnings']=array_merge($out['warnings'],$agg['warnings']);}
+            $out+=['category'=>$category,'record_boards'=>$record['boards'],'record_summary'=>$record['summary'],'analysis'=>$record['analysis'],'record_notes'=>$record['notes']??[]];
+        }elseif($action==='player-search'){
+            $term=trim($q['search']);$out['player_search']=[];
+            if(mb_strlen($term,'UTF-8')>=2){$core=nexus_db(nexus_config(),'core');$like='%'.$term.'%';$rows=nexus_rows($core,"SELECT p.id player_id,COALESCE(NULLIF(d.full_name,''),CONCAT_WS(' ',p.forename,p.surname)) player_name FROM `IMC Player Codex Global` p LEFT JOIN `IMC Player Codex Global Data` d ON d.player_id=p.id WHERE d.full_name LIKE ? OR CONCAT_WS(' ',p.forename,p.surname) LIKE ? OR p.id=? ORDER BY player_name LIMIT 30",[$like,$like,ctype_digit($term)?(int)$term:0]);$out['player_search']=$rows;}
+        }else{
+            if(!ctype_digit($q['player'])||(int)$q['player']<1)throw new InvalidArgumentException('ID giocatore non valido.');
+            $agg=nr_report_source($data,$q);$id=$q['player'];$core=nexus_db(nexus_config(),'core');$identity=nexus_player_identity($core,[(int)$id])[(int)$id]??[];
+            $name=trim((string)($identity['full_name']??''))?:trim(($identity['forename']??'').' '.($identity['surname']??''));
+            $p=$agg['players'][$id]??['player_id'=>$id,'label'=>$name?:('Giocatore '.$id),'played'=>0,'starts'=>0,'subs'=>0,'minutes'=>0,'known_minutes'=>0,'goals'=>0,'assists'=>0,'mom'=>0,'yellow'=>0,'red'=>0,'rating_sum'=>0,'rated'=>0,'worlds'=>[],'world_stats'=>[],'matches'=>[]];
+            if($name!=='')$p['label']=imc_person_display_name($name);$p['image_url']=$identity['image_url']??null;
+            usort($p['matches'],fn($a,$b)=>strcmp($b['date'],$a['date']));$p['matches_total']=count($p['matches']);$p['matches']=array_slice($p['matches'],0,50);
+            $out['player']=$p;$out['rosters']=nr_player_rosters($data,(int)$id);$out['record_summary']=$agg['coverage'];$out['warnings']=array_merge($out['warnings'],$agg['warnings']);
+        }
     }
     echo json_encode(imc_person_display_fields($out),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);
 }catch(InvalidArgumentException $e){http_response_code(422);echo json_encode(['ok'=>false,'error'=>$e->getMessage()]);}
