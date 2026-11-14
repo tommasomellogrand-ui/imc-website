@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'roadtohistory/**'
       - 'halloffamers/**'
       - 'kickoff/**'
       - 'sensiblesocceracademy/**'
@@ -45,7 +46,7 @@ jobs:
               changed=subprocess.check_output(['git','diff','--name-only',before,'HEAD'],text=True).splitlines()
               common={'scripts/verify-single-worlds.py','scripts/single-worlds.json','.github/workflows/deploy-single-worlds.yml'}
               selected=worlds if any(p in common for p in changed) else [w for w in worlds if any(p.startswith(w+'/') for p in changed)]
-          with open(os.environ['GITHUB_OUTPUT'],'a') as out:out.write('worlds='+json.dumps(selected,separators=(',',':'))+'\\n')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:out.write('worlds='+json.dumps(selected,separators=(',',':'))+'\n')
           print('Worlds selected:',selected)
           PY
   deploy:
@@ -111,4 +112,20 @@ jobs:
           ftp.quit();print('Published and byte verified',world)
           PY
       - name: Verify live pages, profiles and world data
+        if: ${{ matrix.world != 'roadtohistory' }}
         run: python3 scripts/verify-single-worlds.py '${{ matrix.world }}'
+      - name: Verify IMC001 live data and pages
+        if: ${{ matrix.world == 'roadtohistory' }}
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          base='https://www.italianmastersclub.it/roadtohistory/'
+          for path in ('','matchday/','clubs/','competitions/','transfers/','players/'):
+              with urllib.request.urlopen(base+path,timeout=90) as r:
+                  assert r.status==200 and r.read(),path
+          for path in ('clubs/directory.php','competitions/catalog.php','matchday/data.php','transfers/data.php?limit=1'):
+              with urllib.request.urlopen(base+path,timeout=90) as r:
+                  data=json.load(r)
+                  assert data.get('ok'),(path,data.get('error'))
+          print('IMC001 verified')
+          PY
