@@ -30,8 +30,8 @@ jobs:
           from pathlib import Path
           from ftplib import FTP_TLS,error_perm
           root=Path('nexus')
-          excluded={'nexus/index.html','nexus/assets/home.js','nexus/competitions/imc-cups.json','nexus/competitions/imc-cups.php'}
-          files=[p for p in sorted(root.rglob('*')) if p.is_file() and not p.as_posix().startswith('nexus/alltoplayfor/') and p.as_posix() not in excluded]
+          excluded={'nexus/assets/home.js','nexus/competitions/imc-cups.json','nexus/competitions/imc-cups.php'}
+          files=[p for p in sorted(root.rglob('*')) if p.is_file() and (not p.as_posix().startswith('nexus/alltoplayfor/') or p.as_posix()=='nexus/alltoplayfor/index.html') and p.as_posix() not in excluded]
           before=os.environ.get('BEFORE_SHA','')
           full=os.environ.get('EVENT_NAME')!='push' or not before or set(before)=={'0'}
           if not full:
@@ -42,7 +42,7 @@ jobs:
           # Archive entry points are a coherent release: include all when one changes.
           archive={'nexus/index.html','nexus/worlds/index.html','nexus/managers/index.html','nexus/managers/view.html','nexus/managers/index.php','nexus/assets/archive.css','nexus/assets/nexus-header.css','nexus/assets/nexus-header.js'}
           if full or any(p.as_posix() in archive for p in files) or ' .github/workflows/deploy-nexus-aruba.yml'.strip() in (changed if not full else set()):
-              files=sorted(set(files)|{Path(p) for p in archive if p!='nexus/index.html'})
+              files=sorted(set(files)|{Path(p) for p in archive if Path(p).is_file()})
           if full or any(p.as_posix().startswith('nexus/worlds/') or p.as_posix().startswith('nexus/managers/') or p.as_posix() in {'nexus/assets/nexus-header.css','nexus/assets/nexus-header.js'} for p in files) or ' .github/workflows/deploy-nexus-aruba.yml'.strip() in (changed if not full else set()):
               files=sorted(set(files)|set(Path('nexus/worlds').rglob('*.html')))
           if not files:

@@ -1,8 +1,8 @@
-name: Publish canonical GW home
+name: Publish legacy GW home runtime
 on:
   push:
     branches: [main]
-    paths: ['nexus/index.html', 'nexus/assets/home.js', '.github/workflows/nexus-home.yml']
+    paths: ['nexus/assets/home.js', '.github/workflows/nexus-home.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -27,7 +27,7 @@ jobs:
           ctx=ssl.create_default_context();ctx.check_hostname=False
           f=FTP_TLS(context=ctx);f.connect('ftp.italianmastersclub.it',21,timeout=60)
           f.login(os.environ['ARUBA_FTP_USERNAME'],os.environ['ARUBA_FTP_PASSWORD']);f.prot_p()
-          for name in ['nexus/assets/home.js','nexus/index.html']:
+          for name in ['nexus/assets/home.js']:
               data=Path(name).read_bytes()
               f.storbinary('STOR /www.italianmastersclub.it/'+name,io.BytesIO(data))
               check=io.BytesIO();f.retrbinary('RETR /www.italianmastersclub.it/'+name,check.write)
