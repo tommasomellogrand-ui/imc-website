@@ -15,3 +15,20 @@
 
 .subnav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;gap:6px}.subnav a{text-align:center;min-height:44px;padding:11px 6px}.profile-hero h1{font-size:26px;margin:4px 0;line-height:1.15}.na-profile .na-page-head{padding-top:20px;padding-bottom:0}.na-profile .na-page-head h1,.na-profile .na-page-head p{display:none}
 @media(min-width:700px){.subnav{display:flex}.subnav a{padding:11px 17px}.profile-hero h1{font-size:34px}}
+/* Home: immediate section entrances, then manager search and world archive. */
+body[data-page=home] .na-hero h1{margin:0;line-height:1}
+.na-portal .section-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.na-portal .section-card{min-width:0;min-height:110px;padding:13px 16px 14px 18px;background:linear-gradient(125deg,#123b59,#061727 85%)}
+.na-portal .portal-icon{position:absolute;right:15px;top:15px;width:25px;height:25px;fill:none;stroke:#c7e2f4;stroke-width:1.4;opacity:.8}
+.na-portal .section-card strong{font-size:17px;margin-top:19px;line-height:1.15}
+.na-portal .section-card small{font-size:10px;margin-top:6px;padding-right:12px}
+.na-portal .section-card .arrow{top:auto;bottom:12px;right:14px;color:#e8c578}
+.na-portal .section-card:nth-child(1){background:linear-gradient(100deg,#09213bf0,#071c31b8),url('/nexus/assets/diagonal/earth-night.webp') 60% 60%/cover;clip-path:polygon(15px 0,100% 0,calc(100% - 9px) 100%,0 100%,0 15px)}
+.na-portal .section-card:nth-child(2){clip-path:polygon(0 0,calc(100% - 15px) 0,100% 15px,100% 100%,9px 100%)}
+.na-portal .section-card:nth-child(3){clip-path:polygon(0 0,100% 0,calc(100% - 11px) 100%,11px 100%)}
+.na-portal .section-card:nth-child(4){clip-path:polygon(11px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%)}
+.na-portal .section-card:nth-child(5){clip-path:polygon(0 13px,13px 0,100% 0,100% 100%,0 100%)}
+.na-portal .section-card:nth-child(6){clip-path:polygon(0 0,calc(100% - 13px) 0,100% 13px,100% calc(100% - 13px),calc(100% - 13px) 100%,0 100%)}
+.na-portal .section-card:hover{border-color:#e8c578;filter:brightness(1.15)}
+@media(min-width:700px){.na-portal .section-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.na-portal .section-card{min-height:145px;padding:21px 24px}.na-portal .section-card strong{font-size:25px;margin-top:24px}.na-portal .section-card small{font-size:12px}.na-portal .portal-icon{right:24px;top:22px;width:32px;height:32px}.na-portal .section-card .arrow{right:23px;bottom:20px}body[data-page=home] .search-panel{max-width:720px;margin:28px auto}}
+@media(min-width:1050px){.na-portal .section-grid{grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:155px 155px;gap:10px}.na-portal .section-card:nth-child(1){grid-column:1/span 4;grid-row:1/span 2;padding-top:30px;background:linear-gradient(180deg,#071a2dcf,#071a2d42 70%,#071a2d9c),url('/nexus/assets/diagonal/earth-night.webp') 65% 70%/cover}.na-portal .section-card:nth-child(1) strong{font-size:36px;margin-top:27px}.na-portal .section-card:nth-child(1) .portal-icon{width:45px;height:45px;top:30px}.na-portal .section-card:nth-child(2){grid-column:5/span 4;grid-row:1}.na-portal .section-card:nth-child(3){grid-column:9/span 4;grid-row:1}.na-portal .section-card:nth-child(4){grid-column:5/span 3;grid-row:2}.na-portal .section-card:nth-child(5){grid-column:8/span 2;grid-row:2;padding-left:18px;padding-right:18px}.na-portal .section-card:nth-child(6){grid-column:10/span 3;grid-row:2}.na-portal .section-card:nth-child(5) .portal-icon{right:15px;width:25px;height:25px}.na-portal .section-card:nth-child(5) strong{font-size:23px}}
