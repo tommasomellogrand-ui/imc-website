@@ -16,13 +16,29 @@
     const topic = 'realtime:imc-site';
     const revisions = new Map();
     let socket, heartbeat, reconnect, refresh, joinTimeout, heartbeatRef;
-    let ref = 0, failures = 0, paused = false;
+    let ref = 0, failures = 0, paused = false, pendingRefresh = false;
     const interested = scope => !world || scope === 'core' || scope === world;
     const storageKey = scope => 'imc-applied-revision:'+scope;
     function applied(scope) {
         try { return Number(sessionStorage.getItem(storageKey(scope)) || 0); }
         catch { return 0; }
     }
+    function scheduleRefresh() {
+        pendingRefresh = true;
+        if (document.hidden || refresh) return;
+        refresh = setTimeout(() => {
+            refresh = null;
+            if (!pendingRefresh || document.hidden) return;
+            pendingRefresh = false;
+            for (const [scope, value] of revisions) {
+                try { sessionStorage.setItem(storageKey(scope), String(value)); } catch {}
+            }
+            location.reload();
+        }, 2000);
+    }
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && pendingRefresh) scheduleRefresh();
+    });
     function receive(row, changedDuringLoad) {
         if (!row || !interested(row.scope)) return;
         const revision = Number(row.revision);
@@ -30,12 +46,7 @@
         if (!Number.isSafeInteger(revision) || revision <= (previous || 0)) return;
         revisions.set(row.scope, revision);
         if ((previous === undefined && !changedDuringLoad) || revision <= applied(row.scope)) return;
-        if (!refresh) refresh = setTimeout(() => {
-            for (const [scope, value] of revisions) {
-                try { sessionStorage.setItem(storageKey(scope), String(value)); } catch {}
-            }
-            location.reload();
-        }, 500);
+        scheduleRefresh();
     }
     async function catchUp(ws) {
         const filter = world ? '&scope=in.(core,'+world+')' : '';
@@ -50,6 +61,7 @@
     }
     function connect() {
         if (paused) return;
+        clearTimeout(reconnect);
         const ws = new WebSocket('wss://'+host+'/realtime/v1/websocket?vsn=1.0.0&apikey='+apiKey);
         socket = ws;
         const send = (channel,event,payload) => {
@@ -86,7 +98,7 @@
         };
     }
     addEventListener('pagehide', () => {
-        paused=true; clearTimeout(reconnect); clearTimeout(joinTimeout); clearInterval(heartbeat);
+        paused=true; clearTimeout(reconnect); clearTimeout(joinTimeout); clearInterval(heartbeat); clearTimeout(refresh); refresh=null;
         if (socket) socket.close();
     });
     addEventListener('pageshow', event => { if (event.persisted) { paused=false; connect(); } });
