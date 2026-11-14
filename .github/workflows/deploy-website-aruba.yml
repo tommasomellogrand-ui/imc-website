@@ -7,10 +7,6 @@ on:
       - '.github/workflows/deploy-website-aruba.yml'
       - 'nexus/**'
       - 'site-assets/**'
-      - 'api/imc-gateway/**'
-      - 'api/imc-data/**'
-      - '__imc-gateway/**'
-      - '__imc-sm-master/admin/database-manager/normalizer.php'
       - 'sensible-soccer-academy-creation/**'
       - 'sensible-soccer-academy/world-cup-draw/**'
   workflow_dispatch:
@@ -52,16 +48,6 @@ jobs:
           test -s sensible-soccer-academy-creation/draw-replay/index.html
           test -s sensible-soccer-academy-creation/draw-replay/replay.php
           php -l sensible-soccer-academy-creation/draw-replay/replay.php
-          test -s api/imc-gateway/index.php
-          test -s api/imc-gateway/config.php
-          test -s api/imc-gateway/database.php
-          php -l api/imc-gateway/index.php
-          php -l api/imc-gateway/database.php
-          test -s api/imc-data/v1/site-ready.php
-          test -s api/imc-data/v1/.htaccess
-          php -l api/imc-data/v1/site-ready.php
-          test -s __imc-gateway/__imc-gateway/index.php
-          test -s __imc-sm-master/admin/database-manager/normalizer.php
       - name: Detect changed files
         id: changes
         env:
@@ -128,7 +114,6 @@ jobs:
           files += [Path('sensible-soccer-academy/world-cup-draw/index.html'),Path('sensible-soccer-academy/world-cup-draw/api.php'),Path('sensible-soccer-academy/world-cup-draw/live/index.html')]
           files += [Path('sensible-soccer-academy-creation/gw-setting/draft-matrix.html'),Path('sensible-soccer-academy-creation/gw-setting/.htaccess'),Path('sensible-soccer-academy-creation/gw-setting/sensible-soccer-academy-logo.svg'),Path('sensible-soccer-academy-creation/gw-setting/draw-live.php')]
           files += [Path('sensible-soccer-academy-creation/draw-replay/index.html'),Path('sensible-soccer-academy-creation/draw-replay/replay.php')]
-          files += [Path('api/imc-gateway/index.php'),Path('api/imc-gateway/config.php'),Path('api/imc-gateway/database.php'),Path('api/imc-data/v1/site-ready.php'),Path('api/imc-data/v1/.htaccess'),Path('__imc-gateway/__imc-gateway/index.php'),Path('__imc-sm-master/admin/database-manager/normalizer.php')]
           files=[p for p in files if str(p) not in {'nexus/index.html','nexus/assets/home.js'}] # Home has its own publisher
           changed=set(Path('/tmp/imc-deploy-changed.txt').read_text().splitlines())
           full=os.environ.get('DEPLOY_FULL')=='true'
