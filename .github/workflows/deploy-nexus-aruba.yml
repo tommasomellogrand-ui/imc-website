@@ -43,6 +43,8 @@ jobs:
           archive={'nexus/index.html','nexus/worlds/index.html','nexus/managers/index.html','nexus/assets/archive.css'}
           if full or any(p.as_posix() in archive for p in files) or ' .github/workflows/deploy-nexus-aruba.yml'.strip() in (changed if not full else set()):
               files=sorted(set(files)|{Path(p) for p in archive if p!='nexus/index.html'})
+          if full or any(p.as_posix().startswith('nexus/worlds/') for p in files) or ' .github/workflows/deploy-nexus-aruba.yml'.strip() in (changed if not full else set()):
+              files=sorted(set(files)|set(Path('nexus/worlds').rglob('*.html')))
           if not files:
               print('No Nexus files to publish');exit()
           ctx=ssl.create_default_context();ctx.check_hostname=False
