@@ -19,7 +19,7 @@ def triggers(world):
     lookup = lambda col: f"(SELECT {col} FROM IMC_World_Cup_Fixtures f WHERE {where})"
     assignments = [
         "NEW.sm_fixture_id=COALESCE(NULLIF(NEW.sm_fixture_id,0),(SELECT CASE WHEN COUNT(*)=1 THEN MAX(f.sm_fixture_id) END FROM IMC_World_Cup_Fixtures f "
-        f"WHERE f.world_id='{world}' AND f.match_date=NEW.match_date AND f.home_id=NEW.home_sm_club_id AND f.away_id=NEW.away_sm_club_id))",
+        f"WHERE f.world_id='{world}' AND (NEW.match_date IS NULL OR f.match_date=NEW.match_date) AND f.home_id=NEW.home_sm_club_id AND f.away_id=NEW.away_sm_club_id))",
         f"NEW.sm_action=IF({lookup('f.sm_fixture_id')} IS NOT NULL,'worldcup',NEW.sm_action)",
         f"NEW.competition_key=IF({lookup('f.sm_fixture_id')} IS NOT NULL,'{world}|NATIONS|worldcup',NEW.competition_key)",
         f"NEW.competition_group=IF({lookup('f.sm_fixture_id')} IS NOT NULL,'NATIONS',NEW.competition_group)",

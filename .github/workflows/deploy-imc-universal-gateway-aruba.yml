@@ -115,5 +115,12 @@ jobs:
           IMC_WC_APPLY: 'true'
         run: php scripts/worldcup-live-check.php
 
+      - name: Verify explicit partial World Cup schedules
+        env:
+          IMC_WC_WORLD: IMC-007
+          IMC_WC_APPLY: 'true'
+          IMC_WC_REQUIRE_REPORT: 'false'
+        run: php scripts/worldcup-live-check.php
+
 
 

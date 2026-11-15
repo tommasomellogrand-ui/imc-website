@@ -81,7 +81,7 @@ function imc_wc_season(string $date,array $seasons,?int $fallback=null): ?int {
 
 function imc_wc_reconcile(PDO $db,string $table,?array $seasons=null,bool $dryRun=false): array {
     $target=imc_wc_target($table);if($target===null)return [];
-    $world=$target['world'];$report=['version'=>'1.0','world'=>$world,'editions'=>0,'registered_fixtures'=>0,'schedule_updated'=>0,'reports_updated'=>0,'results_updated'=>0,'pending'=>[]];
+    $world=$target['world'];$report=['version'=>'1.1','world'=>$world,'editions'=>0,'registered_fixtures'=>0,'schedule_updated'=>0,'reports_updated'=>0,'results_updated'=>0,'pending'=>[]];
     $exists=$db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name IN ('IMC_World_Cup_Editions','IMC_World_Cup_Fixtures')");
     if((int)$exists->fetchColumn()!==2)return $report+['status'=>'schema_pending'];
     if($seasons===null){
@@ -102,6 +102,26 @@ function imc_wc_reconcile(PDO $db,string $table,?array $seasons=null,bool $dryRu
         foreach($edition['groups'] as $group)foreach($group['fixtures'] as $fixture){
             $fixtureWrite->execute([$world,$fixture['sm_fixture_id'],$edition['start'],$season,$fixture['match_date'],$group['name'],$group['name'],$fixture['competition_round'],$fixture['home_sm_team_id'],$fixture['away_sm_team_id'],$fixture['home_name'],$fixture['away_name']]);
         }
+    }
+    // Explicit World Cup schedules are usable individually. The 48-match check is
+    // required only when overriding a Qualifier label. A partial reference keeps
+    // the supplied origin season; its earliest supplied date is provisional.
+    $q=$db->prepare('SELECT * FROM IMC_World_Cup_Fixtures WHERE world_id=?');$q->execute([$world]);$known=[];
+    foreach($q->fetchAll(PDO::FETCH_ASSOC) as $f)$known[(string)$f['sm_fixture_id']]=$f;
+    $explicit=[];$first=[];$members=[];
+    foreach($rows as $row){
+        $id=(string)($row['sm_fixture_id']??'');$season=(int)($row['imc_season']??0);$group=imc_wc_group($row);
+        if(strtolower(trim((string)($row['sm_action']??'')))!=='worldcup'||imc_wc_knockout($row)||!$group||$season<1||!ctype_digit($id)||(int)$id<=0||empty($row['match_date'])||empty($row['home_sm_team_id'])||empty($row['away_sm_team_id'])||in_array($id,array_map('strval',$detected['conflicting_fixtures']),true))continue;
+        $explicit[$id]=$row;$first[$season]=min($first[$season]??$row['match_date'],$row['match_date']);
+        $members[$season][$group][(string)$row['home_sm_team_id']]=true;$members[$season][$group][(string)$row['away_sm_team_id']]=true;
+    }
+    $report['explicit_fixtures']=0;
+    foreach($explicit as $id=>$row){
+        $group=imc_wc_group($row);$sourceSeason=(int)$row['imc_season'];if(count($members[$sourceSeason][$group])>4)continue;
+        $season=isset($known[$id])?(int)$known[$id]['imc_season']:$sourceSeason;$start=$known[$id]['edition_start']??$first[$sourceSeason];
+        $q=$db->prepare('SELECT edition_start,imc_season FROM IMC_World_Cup_Editions WHERE world_id=? AND imc_season=? ORDER BY edition_start LIMIT 1');$q->execute([$world,$season]);$edition=$q->fetch(PDO::FETCH_ASSOC);
+        if($edition)$start=$edition['edition_start'];
+        $fixtureWrite->execute([$world,$id,$start,$season,$row['match_date'],$group,$group,$row['competition_round'],$row['home_sm_team_id'],$row['away_sm_team_id'],$row['home_name'],$row['away_name']]);$report['explicit_fixtures']++;
     }
     $q=$db->prepare('SELECT * FROM IMC_World_Cup_Editions WHERE world_id=? ORDER BY edition_start');$q->execute([$world]);$editions=$q->fetchAll(PDO::FETCH_ASSOC);
     $q=$db->prepare('SELECT * FROM IMC_World_Cup_Fixtures WHERE world_id=?');$q->execute([$world]);$registry=$q->fetchAll(PDO::FETCH_ASSOC);$participants=[];
@@ -126,7 +146,7 @@ function imc_wc_reconcile(PDO $db,string $table,?array $seasons=null,bool $dryRu
         }
     }
     // Read the registry first, then update only the report table: its triggers lock the registry row.
-    $q=$db->prepare('SELECT DISTINCT m.fingerprint,m.sm_fixture_id,m.match_date,m.home_sm_club_id,m.away_sm_club_id FROM '.imc_ident($target['reports']).' m JOIN IMC_World_Cup_Fixtures f ON f.world_id=? AND (f.sm_fixture_id=m.sm_fixture_id OR ((m.sm_fixture_id IS NULL OR m.sm_fixture_id=0) AND m.match_date=f.match_date AND m.home_sm_club_id=f.home_id AND m.away_sm_club_id=f.away_id)) WHERE f.group_name IS NOT NULL AND m.home_score IS NOT NULL AND m.away_score IS NOT NULL AND (m.match_date IS NULL OR m.match_date=f.match_date) AND (m.home_sm_club_id IS NULL OR m.home_sm_club_id=0 OR m.home_sm_club_id=f.home_id) AND (m.away_sm_club_id IS NULL OR m.away_sm_club_id=0 OR m.away_sm_club_id=f.away_id) AND NOT EXISTS (SELECT 1 FROM '.imc_ident($target['results']).' r WHERE r.sm_fixture_id=f.sm_fixture_id)');
+    $q=$db->prepare('SELECT m.fingerprint,m.sm_fixture_id,m.match_date,m.home_sm_club_id,m.away_sm_club_id FROM '.imc_ident($target['reports']).' m JOIN IMC_World_Cup_Fixtures f ON f.world_id=? AND (f.sm_fixture_id=m.sm_fixture_id OR ((m.sm_fixture_id IS NULL OR m.sm_fixture_id=0) AND (m.match_date IS NULL OR m.match_date=f.match_date) AND m.home_sm_club_id=f.home_id AND m.away_sm_club_id=f.away_id)) WHERE f.group_name IS NOT NULL AND m.home_score IS NOT NULL AND m.away_score IS NOT NULL AND (m.match_date IS NULL OR m.match_date=f.match_date) AND (m.home_sm_club_id IS NULL OR m.home_sm_club_id=0 OR m.home_sm_club_id=f.home_id) AND (m.away_sm_club_id IS NULL OR m.away_sm_club_id=0 OR m.away_sm_club_id=f.away_id) AND NOT EXISTS (SELECT 1 FROM '.imc_ident($target['results']).' r WHERE r.sm_fixture_id=f.sm_fixture_id) GROUP BY m.fingerprint,m.sm_fixture_id,m.match_date,m.home_sm_club_id,m.away_sm_club_id HAVING COUNT(DISTINCT f.sm_fixture_id)=1');
     $q->execute([$world]);$pending=$q->fetchAll(PDO::FETCH_ASSOC);$report['reports_replayed']=0;
     foreach($pending as $row){$u=$db->prepare('UPDATE '.imc_ident($target['reports']).' SET sm_action=sm_action WHERE fingerprint <=> ? AND sm_fixture_id <=> ? AND match_date <=> ? AND home_sm_club_id <=> ? AND away_sm_club_id <=> ?');$u->execute(array_values($row));$report['reports_replayed']++;}
     $report['status']=$registry?'ready':'pending_schedules';return $report;
