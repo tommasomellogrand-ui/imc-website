@@ -31,7 +31,7 @@ try {
         if($q['manager']==='')throw new InvalidArgumentException('Scegli un manager.');
         $out['manager']=na_manager_public($data['managers'][$q['manager']]);
         if($q['world']!==''){$mw=$out['manager']['worlds'][$q['world']]??null;$out['manager']['stats']=$mw['stats']??ch_zero();$out['manager']['trophies']=$mw['trophies']??0;}
-        $out['matches']=na_page(na_filter($data['matches'],$q),$page,15);$out['trophies']=na_filter($data['trophies'],$q);
+        $out['seasons']=array_values(array_unique(array_column($data['matches'],'season')));sort($out['seasons']);$out['matches']=na_page(na_filter($data['matches'],$q),$page,15);$out['trophies']=na_filter($data['trophies'],$q);
     }
     if($action==='trophies')$out['trophies']=na_page(na_filter($data['trophies'],$q),$page);
     if($action==='matches'){
