@@ -57,6 +57,7 @@ echo "PASS RTH cup keys: old/new writes, legacy view reads, guest awards, Schedu
 require_once __DIR__.'/../imc-universal-gateway/core.php';
 require_once __DIR__.'/../imc-universal-gateway/write.php';
 $p->exec('CREATE TABLE IMC006_Transfers (game_world_id VARCHAR(16),imc_transfer_number INT UNSIGNED,player_id INT UNSIGNED,player_name VARCHAR(255),club_from VARCHAR(255),from_sm_world_club_id BIGINT UNSIGNED,club_to VARCHAR(255),to_sm_world_club_id BIGINT UNSIGNED,transfer_date DATE,amount_text VARCHAR(255),exchange_players JSON,imported_at DATETIME,imc_season INT,player_rating INT UNSIGNED)');
+$p->exec('CREATE VIEW GW004_IMC_Transfers AS SELECT * FROM IMC006_Transfers');
 $transfer=['game_world_id'=>'GW004','imc_transfer_number'=>1,'player_id'=>156902,'player_name'=>'Test Player','club_from'=>'Club A','from_sm_world_club_id'=>10,'club_to'=>'Club B','to_sm_world_club_id'=>20,'transfer_date'=>'2026-11-15','amount_text'=>'720k','exchange_players'=>'[]','imported_at'=>'2026-11-15 08:00:00','imc_season'=>3,'player_rating'=>70];
 checkStorage(imc_insert($p,'GW004_IMC_Transfers',$transfer)===1);
 $saved=$p->query('SELECT * FROM IMC006_Transfers WHERE imc_transfer_number=1')->fetch(PDO::FETCH_ASSOC);
