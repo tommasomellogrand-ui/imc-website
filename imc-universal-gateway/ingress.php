@@ -84,6 +84,15 @@ function imc_ingress_where(array $where, array &$values): string {
 }
 
 function imc_ingress_insert_many(PDO $pdo, string $table, string $gw, array $rows, bool $atomic): array {
+    require_once __DIR__.'/worldcup-automation.php';
+    if (imc_wc_target($table)!==null) {
+        $outcome=imc_wc_import($pdo,$table,true,fn()=>imc_ingress_insert_rows($pdo,$table,$gw,$rows,false));
+        return $outcome['written']+['normalization'=>$outcome['normalization']];
+    }
+    return imc_ingress_insert_rows($pdo,$table,$gw,$rows,$atomic);
+}
+
+function imc_ingress_insert_rows(PDO $pdo, string $table, string $gw, array $rows, bool $atomic): array {
     if (!$rows || count($rows) > 500) throw new InvalidArgumentException('invalid_batch');
     $tableSql = imc_ingress_table_ident($table, $gw);
     $written = 0;
@@ -154,4 +163,5 @@ function imc_ingress_run(array $body): never {
         imc_ingress_out(['ok' => false, 'mode' => 'INGRESS_ONLY', 'error' => $e->getMessage()], $status);
     }
 }
+
 

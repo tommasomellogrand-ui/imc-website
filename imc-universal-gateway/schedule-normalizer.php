@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/playoff-normalizer.php';
+require_once __DIR__ . '/worldcup-automation.php';
 
 // Derived IDs never replace source IDs or the original import fingerprint.
 function imc_schedule_name(mixed $value): string {
@@ -89,6 +90,8 @@ function imc_schedule_reconcile(PDO $pdo, string $gw): array {
 
 /** Runs after persistence and before commit, on both import routes. */
 function imc_schedule_import(PDO $pdo,string $table,bool $atomic,callable $write): array {
+    require_once __DIR__.'/worldcup-automation.php';
+    if (imc_wc_target($table)!==null) return imc_wc_import($pdo,$table,$atomic,$write);
     require_once __DIR__.'/worldcup-season.php';
     $normalization=[];
     $result=imc_schedule_import_inner($pdo,$table,$atomic,function() use ($pdo,$table,$write,&$normalization) {
@@ -114,3 +117,4 @@ function imc_schedule_import_inner(PDO $pdo,string $table,bool $atomic,callable 
     } catch (Throwable $e) {if($pdo->inTransaction())$pdo->rollBack();throw $e;}
     finally {$q=$pdo->prepare('SELECT RELEASE_LOCK(?)');$q->execute([$lock]);}
 }
+

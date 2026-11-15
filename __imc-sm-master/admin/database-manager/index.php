@@ -519,7 +519,21 @@ function dbm_data_operation(array $p): array {
         if (in_array($action,['delete','delete_one','clear_repository'],true) && $after !== 0) throw new RuntimeException('Delete verification failed.');
         $db->commit(); $committed = true; $begun = false;
         dbm_audit($record + ['status'=>'success','before_count'=>$before,'after_count'=>$after,'affected_rows'=>$affected]);
-        return $base + ['before_count'=>$before,'after_count'=>$after,'affected_rows'=>$affected,'insert_id'=>$insertId,'committed'=>true];
+        $worldcup=[];
+        if (in_array($action,['insert','update'],true) && preg_match('/^(?:IMC-?\d{3}|GW\d{3})_(?:IMC_)?Schedule$/D',$table)) {
+            try {
+                $root=dirname(__DIR__,3);
+                require_once $root.'/imc-universal-gateway/core.php';
+                require_once $root.'/imc-universal-gateway/worldcup-automation.php';
+                $cfg=imc_cfg();$physical=imc_physical_table($table);
+                foreach(imc_world_catalog($cfg) as $entry)if($table===$entry['legacy_id'].'_IMC_Schedule')$physical=str_replace('-','',(string)$entry['imc_id']).'_Schedule';
+                if(imc_wc_target($physical)!==null)$worldcup=imc_wc_import(imc_db($cfg,$database),$physical,true,fn()=>0)['normalization'];
+            } catch(Throwable $e) {
+                error_log('World Cup reconciliation after schedule write: '.$e->getMessage());
+                $worldcup=['worldcup'=>['status'=>'pending_retry']];
+            }
+        }
+        return $base + ['before_count'=>$before,'after_count'=>$after,'affected_rows'=>$affected,'insert_id'=>$insertId,'committed'=>true,'normalization'=>$worldcup];
     } catch (Throwable $e) {
         if ($begun) $db->rollback();
         dbm_audit($record + ['status'=>$committed ? 'committed_with_error' : 'failed','affected_rows'=>$affected,'error'=>$e->getMessage()]);
@@ -1039,3 +1053,4 @@ try {
     if (!is_int($status) || $status < 400 || $status > 599) $status = $e instanceof InvalidArgumentException ? 422 : 500;
     dbm_reply(['ok' => false, 'version' => IMC_DBM_VERSION, 'error' => $e->getMessage()], $status);
 }
+

@@ -9,6 +9,10 @@ on:
       - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
       - 'tests/gateway-world-*'
       - 'tests/gateway-results-storage.php'
+      - 'tests/gateway-worldcup.php'
+      - 'tests/fixtures/worldcup-*'
+      - 'scripts/build-worldcup-migration.py'
+      - 'database-migrations/20261115_worldcup_automation.json'
       - 'tests/fixtures/rth-cup-key-schema.json'
   workflow_dispatch:
 
@@ -54,6 +58,11 @@ jobs:
       - name: Test canonical Results storage
         run: php tests/gateway-results-storage.php
 
+      - name: Test World Cup imports and repository triggers
+        env:
+          IMC_WC_TEST_MYSQL: '1'
+        run: php tests/gateway-worldcup.php
+
       - name: Deploy complete IMC Universal Gateway
         env:
           ARUBA_FTP_USERNAME: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -69,7 +78,7 @@ jobs:
           remote_root='/www.italianmastersclub.it'
           uploads=[
               (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
-              for n in ['index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php']
+              for n in ['index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php','schedule-normalizer.php','playoff-normalizer.php','worldcup-season.php','worldcup-automation.php']
           ]
           uploads += [
               (Path('__imc_private_gateway/config.php'), f'{remote_root}/__imc_private_gateway'),
@@ -99,5 +108,12 @@ jobs:
               if check.getvalue()!=data: raise SystemExit('Verifica upload fallita: '+local.as_posix())
           ftp.quit(); print('IMC Universal Gateway completo, ingress-only incluso, configurazione privata inclusa, pubblicato e verificato')
           PY
+
+      - name: Reconcile and verify pilot World Cup
+        env:
+          IMC_WC_WORLD: IMC-002
+          IMC_WC_APPLY: 'true'
+        run: php scripts/worldcup-live-check.php
+
 
 
