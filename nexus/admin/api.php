@@ -73,6 +73,15 @@ try {
     $keys=array_column($catalog,'gw','code');
     if (!isset($keys[$code])) nexus_out(['ok'=>false,'world_names'=>$names,'error'=>$code.' non ancora assegnato.'],422);
     $gw=$keys[$code];
+    if ($method==='GET' && in_array($action,['transfers-check','transfers-overview'],true)) {
+        require __DIR__.'/transfers-check-service.php';
+        $checkDb=nexus_db($c,'custom');
+        $checkDb->exec('SET TRANSACTION READ ONLY');$checkDb->beginTransaction();
+        $result=$action==='transfers-overview'?['worlds'=>tc_overview($checkDb,$catalog)]:tc_read($checkDb,$code);
+        $checkDb->commit();
+        nexus_out(['ok'=>true,'world'=>$code,'world_names'=>$names,'checked_at'=>(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format(DATE_ATOM)]+$result);
+    }
+
     if (($method==='GET' && $action==='seasons') || ($method==='POST' && $action==='season-save')) {
         require __DIR__.'/seasons-service.php';
         $c=nexus_config();$seasonDb=nexus_db($c,'core');
@@ -106,4 +115,5 @@ try {
     throw new InvalidArgumentException('Operazione non valida.');
 } catch (InvalidArgumentException|JsonException $e) {nexus_out(['ok'=>false,'error'=>$e->getMessage()],422);}
 catch (Throwable $e) {error_log('Nexus admin: '.$e->getMessage());$code=in_array($e->getCode(),[409,503],true)?$e->getCode():500;nexus_out(['ok'=>false,'error'=>$code===500?'Impossibile completare l’operazione. Nessuna modifica confermata.':$e->getMessage()],$code);}
+
 

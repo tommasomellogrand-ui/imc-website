@@ -23,6 +23,11 @@ jobs:
           for file in nexus/almanac/*.php; do php -l "$file"; done
           php tests/nexus-almanac.php
           php tests/nexus-records.php
+          php -l nexus/admin/api.php
+          php -l nexus/admin/transfers-check-service.php
+          php tests/nexus-admin-transfers-check.php
+          node --check nexus/admin/transfers-check.js
+          node --check nexus/admin/admin-nav.js
           node --check nexus/assets/almanac.js
           node --check nexus/assets/nexus-header.js
       - name: Publish changed Nexus files with FTPS verification
