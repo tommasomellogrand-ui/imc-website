@@ -148,13 +148,15 @@ function imc_competition_catalog(array $cfg, array $body): array {
     $pdo=imc_db($cfg,$cfg['db']['core']);
     // CORE mapping is the canonical source for competition keys, including pool-specific keys.
     // Do not reference the retired IMC Competition Pools table.
-    $stmt=$pdo->prepare("SELECT competition_key,nexus_view,competition_group,sm_action FROM `IMC Competition Nexus Mapping` WHERE game_world_id IN (?,?,?) AND UPPER(TRIM(competition_group))='IMC'");
+    $all=($body['scope']??'')==='all';
+    $stmt=$pdo->prepare("SELECT competition_key,nexus_view,competition_group,sm_action,sm_country,sm_division FROM `IMC Competition Nexus Mapping` WHERE game_world_id IN (?,?,?)".($all?"":" AND UPPER(TRIM(competition_group))='IMC'"));
     $stmt->execute([$legacy,$alias,$compact]);
     $rows=[];$seen=[];
     foreach($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $key=trim((string)($row['competition_key']??''));
         $name=trim((string)($row['nexus_view']??''));
         if($key===''||$name==='') throw new InvalidArgumentException('invalid_payload:incomplete_competition');
+        $canonicalKey=$key;
         $valid=false;
         foreach(array_unique([$legacy,$alias,$compact]) as $prefix) {
             if(str_starts_with($key,$prefix.'_')||str_starts_with($key,$prefix.'|')) {
@@ -164,7 +166,7 @@ function imc_competition_catalog(array $cfg, array $body): array {
         if(!$valid) throw new InvalidArgumentException('invalid_payload:competition_key');
         if(isset($seen[$key])) continue;
         $seen[$key]=true;
-        $rows[]=['key'=>$key,'name'=>$name,'group'=>'IMC','sm_action'=>trim((string)($row['sm_action']??''))];
+        $rows[]=['key'=>$all?$canonicalKey:$key,'name'=>$name,'group'=>$all?strtoupper(trim((string)$row['competition_group'])):'IMC','sm_action'=>trim((string)($row['sm_action']??''))]+($all?['sm_country'=>$row['sm_country'],'sm_division'=>$row['sm_division']]:[]);
     }
     usort($rows,fn($a,$b)=>strcmp($a['name'],$b['name']));
     return ['ok'=>true,'action'=>'list_imc_competitions','source'=>'core','game_world_id'=>$compact,'competitions'=>$rows];
