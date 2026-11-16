@@ -49,11 +49,17 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
     }
     $fixtures=array_values($unique);
     usort($fixtures,static fn($a,$b)=>strcmp((string)$a['match_date'],(string)$b['match_date']) ?: strcmp((string)($a['sm_fixture_id']??''),(string)($b['sm_fixture_id']??'')));
-    $played=0;$latest=null;$next=null;$rounds=[];
+    $played=0;$latest=null;$next=null;$rounds=[];$turns=[];
     foreach ($fixtures as $fixture) {
         if (!empty($fixture['played'])) { $played++;$latest=$fixture; }
         elseif ($next===null) $next=$fixture;
-        $round=trim((string)($fixture['competition_round']??''))?:substr((string)$fixture['match_date'],0,10);
+        $day=substr((string)$fixture['match_date'],0,10);
+        if (preg_match('/^[1-9]\d{3}-\d{2}-\d{2}$/D',$day)) {
+            $turns[$day]['sample']=$fixture;
+            $turns[$day]['played']=($turns[$day]['played']??0)+(!empty($fixture['played'])?1:0);
+            $turns[$day]['pending']=($turns[$day]['pending']??0)+(empty($fixture['played'])?1:0);
+        }
+        $round=trim((string)($fixture['competition_round']??''))?:$day;
         if (!empty($fixture['played'])) $rounds[$round]=($rounds[$round]??0)+1;
     }
     $expected=(int)($definition['expected_match']??0)?:null;
@@ -84,10 +90,20 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
     }
     $existing['next_date']=$existing['next_turn']['date']??null;
     $existing['total_days']=$totalDays;
-    $existing['played_days']=null;
-    if ($league && $teams!==null && $teams>1 && $known) {
-        $perDay=(int)floor($teams/2);
-        $existing['played_days']=count(array_filter($rounds,static fn($count)=>$count===$perDay));
+    $playedDays=0;
+    foreach ($turns as $turn) {
+        if ($turn['pending']>0 || $turn['played']===0) continue;
+        $required=null;
+        [$phase]=cupPhase($turn['sample']);
+        if ($league && $teams!==null && $teams>1) $required=(int)floor($teams/2);
+        elseif (($row['sm_action']??'')==='interqualifier' && $expected && $totalDays) $required=(int)($expected/$totalDays);
+        elseif (in_array($phase,['Ottavi','Quarti','Semifinale','Finale'],true)) $required=['Ottavi'=>8,'Quarti'=>4,'Semifinale'=>2,'Finale'=>1][$phase];
+        elseif (in_array($row['sm_action']??'',['smfacup','smfashield','worldcup'],true) && $teams) $required=(int)($teams/2);
+        if ($required===null || $turn['played']>=$required) $playedDays++;
     }
+    $existing['played_days']=$totalDays!==null?min($totalDays,$playedDays):null;
+    $existing['remaining_days']=$totalDays!==null?$totalDays-$existing['played_days']:null;
+    $existing['round_percent']=$totalDays!==null?(int)round(100*$existing['played_days']/$totalDays):null;
+    if (!$known && $totalDays!==null) $existing['status']='In programma';
     return $existing;
 }

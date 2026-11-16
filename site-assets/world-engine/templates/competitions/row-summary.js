@@ -25,9 +25,9 @@
    const league=p.league_summary||r.sm_action==='league';
    const bits=[];
    if(p.status)bits.push('<span class="cs-status" data-status="'+esc(p.status)+'">'+esc(p.status)+'</span>');
-   if(Number.isFinite(p.played)&&Number.isFinite(p.expected)&&p.expected>0){
-    const percent=Math.min(100,Math.round(100*p.played/p.expected));
-    bits.push('<span class="cs-progress"><span><strong>'+esc(p.played)+' / '+esc(p.expected)+'</strong> partite <b>'+percent+'%</b></span><progress max="'+esc(p.expected)+'" value="'+esc(p.played)+'" aria-label="Partite disputate"></progress></span>');
+   if(Number.isFinite(p.played_days)&&Number.isFinite(p.total_days)&&p.total_days>0){
+    const percent=Math.min(100,Math.round(100*p.played_days/p.total_days));
+    bits.push('<span class="cs-progress"><span><strong>'+esc(p.played_days)+' di '+esc(p.total_days)+'</strong> turni giocati <b>'+percent+'%</b></span><progress max="'+esc(p.total_days)+'" value="'+esc(p.played_days)+'" aria-label="Turni giocati"></progress><small>'+esc(p.remaining_days??Math.max(0,p.total_days-p.played_days))+' turni da giocare</small></span>');
    }
    function turn(t,title){
     if(!t?.date)return;
@@ -35,7 +35,10 @@
     bits.push('<span class="cs-turn"><small>'+title+'</small><strong>'+esc(value)+'</strong></span>');
    }
    turn(p.last_turn,league?'Ultima giornata giocata':'Ultima fase giocata');
-   if(!p.complete)turn(p.next_turn,league?'Prossima giornata':'Prossima fase');
+   if(!p.complete){
+    if(p.next_turn?.date)turn(p.next_turn,league?'Prossima giornata':'Prossimo turno');
+    else bits.push('<span class="cs-turn"><small>'+(league?'Prossima giornata':'Prossimo turno')+'</small><strong>Data da definire</strong></span>');
+   }
    if(award.winner_name){
     const photo=String(award.winner_manager_photo_url||'');
     const portrait=/^(https?:\/\/|\/(?!\/))/.test(photo)?'<img src="'+esc(photo)+'" alt="" width="30" height="30">':'';

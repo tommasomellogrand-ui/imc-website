@@ -34,7 +34,7 @@ function domesticRows(rows){
  function turnLine(slot,title){
   const dates=stats.map(p=>p[slot]).filter(t=>t?.date).sort((a,b)=>a.date.localeCompare(b.date));
   const t=slot==='last_turn'?dates[dates.length-1]:dates[0];
-  const value=t?[(t.number?'Giornata '+t.number:''),t.date.split('-').reverse().join('/')].filter(Boolean).join(' · '):'';
+  const value=t?[(t.number?'Giornata '+t.number:''),t.date.split('-').reverse().join('/')].filter(Boolean).join(' · '):(slot==='next_turn'?'Data da definire':'');
   return '<div><small>'+title+'</small><strong>'+esc(value)+'</strong></div>';
  }
  const turns='<div class="league-turns">'+turnLine('last_turn','Ultima giornata giocata')+turnLine('next_turn','Prossima giornata')+'</div>';

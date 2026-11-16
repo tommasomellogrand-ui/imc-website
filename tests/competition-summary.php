@@ -8,7 +8,7 @@ function fixture(string $id,bool $played,string $phase='Semifinali',string $date
 $cup=['sm_action'=>'smfacup','competition_group'=>'INTERNATIONAL','competition_key'=>'GW001|INTERNATIONAL|smfacup'];
 $definition=['teams_count'=>16,'expected_match'=>37,'expected_matchdays'=>8];
 $empty=imc_competition_summary($cup,$definition,[],[],[]);
-check($empty['played']===null&&$empty['percent']===null&&$empty['status']===null,'No fixtures must stay blank');
+check($empty['played']===null&&$empty['percent']===null&&$empty['status']==='In programma','No fixtures: turn count starts at zero');
 $p=imc_competition_summary($cup,$definition,[fixture('1',false),fixture('1',true),fixture('2',false,'Semifinali','2026-11-19','Ritorno')],[],[]);
 check($p['played']===1&&$p['percent']===3,'Result/Schedule identity must count once');
 check($p['last_turn']['label']==='Semifinali · Andata'&&$p['next_turn']['label']==='Semifinali · Ritorno','Legs and dates remain explicit');
@@ -33,3 +33,17 @@ check(!imc_competition_is_league(['sm_action'=>'league','competition_key'=>'GW00
 $p=imc_competition_summary($cup,[],[fixture('1',true)],[],[]);
 check($p['expected']===null&&$p['percent']===null,'Unknown expected totals cannot be guessed');
 echo "Competition summary: all checks passed\n";
+
+check($empty['played_days']===0&&$empty['remaining_days']===8,'Unstarted cup is 0 of configured total');
+foreach ([[16,37,8,3,false],[32,125,13,6,true]] as [$teams,$matches,$days,$groupDays,$hasLast16]) {
+ $calendar=[];$day=0;$id=0;
+ $phases=array_fill(0,$groupDays,['Gironi',$teams/2]);
+ if($hasLast16){$phases[]=['Ottavi',8];$phases[]=['Ottavi',8];}
+ foreach([['Quarti',4],['Quarti',4],['Semifinali',2],['Semifinali',2],['Finale',1]] as $phase)$phases[]=$phase;
+ foreach($phases as [$phase,$size]){ $day++;for($i=0;$i<$size;$i++)$calendar[]=fixture((string)++$id,true,$phase,'2026-11-'.str_pad((string)$day,2,'0',STR_PAD_LEFT),''); }
+ $p=imc_competition_summary($cup,['teams_count'=>$teams,'expected_match'=>$matches,'expected_matchdays'=>$days],$calendar,['final_played'=>true],[]);
+ check($p['played_days']===$days&&$p['remaining_days']===0,'Group and knockout legs count as calendar turns');
+ array_pop($calendar);
+ $p=imc_competition_summary($cup,['teams_count'=>$teams,'expected_match'=>$matches,'expected_matchdays'=>$days],$calendar,[],[]);
+ check($p['played_days']===$days-1&&$p['remaining_days']===1,'Unplayed final remains one turn');
+}
