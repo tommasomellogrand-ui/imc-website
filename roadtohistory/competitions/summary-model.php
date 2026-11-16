@@ -152,3 +152,7 @@ function imc_competition_calendar(array $row,array $definition,array $fixtures):
     return $out;
 }
 
+
+function imc_competition_available(string $world,int $season,string $action): bool {
+    return $season!==1 || in_array(strtoupper($world),['GW004','IMC006','IMC-006'],true) || !in_array(strtolower($action),['charityshield','supercup'],true);
+}

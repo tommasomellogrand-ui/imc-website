@@ -172,24 +172,64 @@ if(!document.getElementById('nx-universal-nav')){
  const tabs=document.createElement('div');tabs.className='imc-feed-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Aggiornamenti del mondo');feed.append(tabs);
  root.prepend(feed);
  const overview=document.createElement('section');overview.className='imc-home-turns';overview.setAttribute('aria-label','Turni delle competizioni');root.insertBefore(overview,feed);
- const turnsStyle=document.createElement('style');turnsStyle.textContent='.imc-home-turns{font-family:Inter,sans-serif;margin:20px auto;padding:16px;max-width:1120px}.imc-home-turns article{border-bottom:1px solid #e0e3e8;padding:12px 0}.imc-home-turns h2{font-size:20px}.imc-home-turns h3{font-size:15px;margin:0 0 6px}.imc-home-turns p{font-size:13px;line-height:1.5;margin:4px 0;color:#536277}.imc-home-turns a{color:inherit;text-decoration:none}';document.head.append(turnsStyle);
+ const turnsStyle=document.createElement('style');turnsStyle.textContent=`
+ .imc-home-turns{font-family:Inter,sans-serif;margin:20px auto;padding:0 16px;max-width:1120px;color:#192b43}
+ .imc-home-turns h2{font-size:20px;margin:0 0 16px}
+ .imc-home-turns .imc-competition-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:0 0 18px}
+ .imc-home-turns .imc-competition-tabs button{font:650 12px/1.2 Inter,sans-serif;min-height:44px;padding:9px 2px;border:1px solid #dce0e6;border-radius:8px;background:white;color:#192b43;cursor:pointer}
+ .imc-home-turns .imc-competition-tabs button[aria-selected=true]{background:var(--world-accent,#b69b5d);color:var(--world-accent-ink,#192b43);border-color:var(--world-accent,#b69b5d)}
+ .imc-home-turns [hidden]{display:none!important}
+ .imc-home-turns .imc-turn-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+ .imc-home-turns article{padding:18px;background:#fff;border:1px solid #dce0e6;border-top:3px solid var(--world-accent,#b69b5d);border-radius:12px;box-shadow:0 3px 12px #192b4308;min-width:0}
+ .imc-home-turns h3{font-size:17px;line-height:1.3;margin:0 0 7px}.imc-home-turns a{color:inherit;text-decoration:none}
+ .imc-home-turns .imc-turn-state{font-size:12px;color:#5b697c;margin:0 0 14px}
+ .imc-home-turns .imc-turn-count{display:block;font-size:21px;font-weight:750;line-height:1.3}.imc-home-turns .imc-turn-count small{font-size:12px;font-weight:500;color:#5b697c}
+ .imc-home-turns progress{display:block;width:100%;height:7px;margin:10px 0 7px;accent-color:var(--world-accent,#b69b5d);border:0;border-radius:9px;overflow:hidden;background:#e7eaf0}
+ .imc-home-turns progress::-webkit-progress-bar{background:#e7eaf0}.imc-home-turns progress::-webkit-progress-value{background:var(--world-accent,#b69b5d)}
+ .imc-home-turns .imc-turn-remaining{font-size:12px;color:#5b697c;margin:0}
+ .imc-home-turns .imc-turn-date{border-top:1px solid #edf0f3;padding-top:11px;margin-top:12px;display:grid;gap:4px;font-size:13px;line-height:1.4}
+ .imc-home-turns .imc-turn-date small{color:#5b697c;font-size:11px}.imc-home-turns .imc-turn-divisions{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;padding-top:12px;border-top:1px solid #edf0f3}
+ .imc-home-turns .imc-turn-divisions a{font-size:12px;padding:7px 10px;border:1px solid #e1e5eb;border-radius:7px;background:#f7f8fa}
+ `;document.head.append(turnsStyle);
  read('competitions/progress.php').then(data=>{
   const heading=document.createElement('h2');heading.textContent='Competizioni · Stagione '+data.season;overview.append(heading);
+  const categories=[['DOMESTIC','Domestic'],['INTERNATIONAL','International'],['IMC','IMC'],['NATIONS','Nations']];
+  const categoryTabs=document.createElement('div');categoryTabs.className='imc-competition-tabs';categoryTabs.setAttribute('role','tablist');categoryTabs.setAttribute('aria-label','Categorie competizioni');overview.append(categoryTabs);
+  const panels=new Map();
+  for(const [group,name] of categories){
+   const button=document.createElement('button');button.type='button';button.textContent=name;button.dataset.group=group;button.id='home-category-'+group;button.setAttribute('role','tab');button.setAttribute('aria-controls','home-competitions-'+group);
+   const panel=document.createElement('div');panel.id='home-competitions-'+group;panel.className='imc-turn-grid';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',button.id);panels.set(group,panel);categoryTabs.append(button);overview.append(panel);
+   button.onclick=()=>{for(const b of categoryTabs.children){const active=b===button;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;panels.get(b.dataset.group).hidden=!active;}};
+   button.onkeydown=e=>{const bs=[...categoryTabs.children],i=bs.indexOf(button);let n;if(e.key==='ArrowRight')n=(i+1)%4;if(e.key==='ArrowLeft')n=(i+3)%4;if(e.key==='Home')n=0;if(e.key==='End')n=3;if(n!==undefined){e.preventDefault();bs[n].click();bs[n].focus();}};
+  }
+  const competitionLink=row=>base+'competitions/view.html?'+new URLSearchParams({season:data.season,competition:row.competition_key,group:row.competition_group});
   let domesticShown=false;
   for(const row of data.rows){
-   const p=data.progress[row.competition_key];if(!p)continue;
+   const p=data.progress[row.competition_key],panel=panels.get(row.competition_group);if(!p||!panel)continue;
    const domestic=row.sm_action==='league'&&row.competition_group==='DOMESTIC';
    if(domestic&&domesticShown)continue;if(domestic)domesticShown=true;
-   const card=document.createElement('article'),title=document.createElement('h3'),link=document.createElement('a');
-   link.href=base+'competitions/';link.textContent=domestic?'Leagues':row.nexus_view;title.append(link);card.append(title);
-   const add=text=>{const line=document.createElement('p');line.textContent=text;card.append(line);};
-   if(p.total_days) add(p.played_days+' di '+p.total_days+' turni giocati · '+p.remaining_days+' da giocare');
-   for(const [slot,label] of [['last_turn','Ultimo turno'],['next_turn','Prossimo turno']]){
-    const t=p[slot];if(t?.date) add(label+': '+[t.number_label,t.label,t.date.split('-').reverse().join('/')].filter((v,i,a)=>v&&a.indexOf(v)===i&&!(v===t.label&&t.number_label?.startsWith(v+' di '))).join(' · '));
-    else if(slot==='next_turn'&&!p.complete)add('Prossimo turno: Data da definire');
+   const card=document.createElement('article');card.dataset.competition=row.competition_key;
+   const title=document.createElement('h3'),link=document.createElement('a');link.href=domestic?base+'competitions/?group=DOMESTIC':competitionLink(row);link.textContent=domestic?'Leagues':row.nexus_view;title.append(link);card.append(title);
+   if(p.status){const state=document.createElement('p');state.className='imc-turn-state';state.textContent=p.status;card.append(state);}
+   if(p.total_days){
+    const count=document.createElement('strong');count.className='imc-turn-count';count.append(p.played_days+' di '+p.total_days+' ');const label=document.createElement('small');label.textContent='turni giocati';count.append(label);
+    const bar=document.createElement('progress');bar.max=p.total_days;bar.value=p.played_days;bar.setAttribute('aria-label','Turni giocati');
+    const remaining=document.createElement('p');remaining.className='imc-turn-remaining';remaining.textContent=p.remaining_days+' turni da giocare';card.append(count,bar,remaining);
    }
-   overview.append(card);
+   for(const [slot,label] of [['last_turn','Ultimo turno'],['next_turn','Prossimo turno']]){
+    const t=p[slot];if(!t?.date&&(slot!=='next_turn'||p.complete))continue;
+    const line=document.createElement('div');line.className='imc-turn-date';const caption=document.createElement('small');caption.textContent=label;
+    const value=document.createElement('strong');value.textContent=t?.date?[t.number_label,t.label,t.date.split('-').reverse().join('/')].filter((v,i,a)=>v&&a.indexOf(v)===i&&!(v===t.label&&t.number_label?.startsWith(v+' di '))).join(' · '):'Data da definire';line.append(caption,value);card.append(line);
+   }
+   if(domestic){
+    const divisions=document.createElement('div');divisions.className='imc-turn-divisions';divisions.setAttribute('aria-label','Divisioni');
+    for(const division of data.rows.filter(r=>r.sm_action==='league'&&r.competition_group==='DOMESTIC')){const a=document.createElement('a');a.href=competitionLink(division);a.textContent=division.nexus_view;divisions.append(a);}
+    card.append(divisions);
+   }
+   panel.append(card);
   }
+  for(const panel of panels.values())if(!panel.children.length){const empty=document.createElement('p');empty.textContent='Nessuna competizione disponibile per questa stagione.';panel.append(empty);}
+  categoryTabs.firstElementChild.click();
  }).catch(()=>{overview.textContent='Turni temporaneamente non disponibili.';});
  const today = new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Rome'}).format(new Date());
  const clock = new Intl.DateTimeFormat('it-IT', {timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());

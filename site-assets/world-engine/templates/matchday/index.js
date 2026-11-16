@@ -2,6 +2,29 @@
 'use strict';
 const root=document.getElementById('matchday'),panel=document.getElementById('match-content'),status=document.getElementById('match-status'),tabs=[...root.querySelectorAll('[role=tab]')];
 let mode='results',version=0,controller,loading=false;
+let category='DOMESTIC',categoryChosen=false,lastData=null;
+const categories=[['DOMESTIC','Domestic'],['INTERNATIONAL','International'],['IMC','IMC'],['NATIONS','Nations']];
+const categoryTabs=document.createElement('div');categoryTabs.className='md-category-tabs';categoryTabs.setAttribute('role','tablist');categoryTabs.setAttribute('aria-label','Categorie competizioni');panel.before(categoryTabs);
+for(const [group,label] of categories){
+ const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.group=group;b.setAttribute('role','tab');b.setAttribute('aria-controls',panel.id);
+ b.onclick=()=>{category=group;categoryChosen=true;if(lastData)render(lastData);};
+ b.onkeydown=e=>{const i=categories.findIndex(([g])=>g===group);let n;if(e.key==='ArrowRight')n=(i+1)%4;if(e.key==='ArrowLeft')n=(i+3)%4;if(e.key==='Home')n=0;if(e.key==='End')n=3;if(n!==undefined){e.preventDefault();categoryTabs.children[n].click();categoryTabs.children[n].focus();}};
+ categoryTabs.append(b);
+}
+const boxStyle=document.createElement('style');boxStyle.textContent=`
+ #matchday .md-category-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:16px 0 20px}
+ #matchday .md-category-tabs button{min-height:44px;font:650 12px/1.2 Inter,sans-serif;padding:9px 2px;border:1px solid #dce0e6;border-radius:8px;background:#fff;color:#192b43;cursor:pointer}
+ #matchday .md-category-tabs button[aria-selected=true]{background:var(--world-accent,#b69b5d);color:var(--world-accent-ink,#192b43);border-color:var(--world-accent,#b69b5d)}
+ #matchday .md-group{border:1px solid #dce0e6;border-top:3px solid var(--world-accent,#b69b5d);border-radius:12px;background:#fff;margin:0 0 18px;overflow:hidden;box-shadow:0 3px 12px #192b4308;color:#192b43}
+ #matchday .md-group-heading{display:grid;gap:10px;padding:16px;border:0;border-bottom:1px solid #edf0f3;background:#fff;color:#192b43}
+ #matchday .md-group-heading h3{font:750 17px/1.3 Inter,sans-serif;margin:0}
+ #matchday .md-group-heading>span{text-align:left;font:600 13px/1.4 Inter,sans-serif}
+ #matchday .md-group-heading small{display:block;color:#5b697c;font:400 12px/1.4 Inter,sans-serif;margin-top:7px}
+ #matchday .md-group-heading progress{display:block;width:100%;height:7px;margin-top:9px;accent-color:var(--world-accent,#b69b5d);border:0;border-radius:9px;overflow:hidden;background:#e7eaf0}
+ #matchday .md-group-heading progress::-webkit-progress-bar{background:#e7eaf0}#matchday .md-group-heading progress::-webkit-progress-value{background:var(--world-accent,#b69b5d)}
+ #matchday .md-games{padding:0 12px}#matchday .md-game{padding:14px 0}#matchday .md-game:last-child{border-bottom:0}
+`;document.head.append(boxStyle);
+
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dayLabel=v=>new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(v+'T12:00:00'));
 const image=v=>/^(https:\/\/|\/(?!\/))/i.test(String(v||''))?'<img src="'+esc(v)+'" alt="" loading="lazy" width="30" height="30">':'';
@@ -26,6 +49,11 @@ function roundLabel(r){
  return n?'Giornata '+n:'';
 }
 function render(d){
+ lastData=d;
+ const categoryOf=r=>r.competition_group||String(r.competition_key).split('|')[1];
+ if(!categoryChosen&&!d.rows.some(r=>categoryOf(r)===category))category=categories.find(([g])=>d.rows.some(r=>categoryOf(r)===g))?.[0]||'DOMESTIC';
+ for(const b of categoryTabs.children){const selected=b.dataset.group===category;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;}
+ const visibleRows=d.rows.filter(r=>categoryOf(r)===category);
  dates=[...d.dates].sort();current=d.date||'';defaultDate=d.dates[0]||'';
  const index=dates.indexOf(current);
  const tools=root.querySelector('.md-tools');
@@ -33,12 +61,12 @@ function render(d){
  const day=tools.querySelector('time');day.textContent=current?dayLabel(current):'';day.dateTime=current;
  prev.hidden=next.hidden=dates.length<2;prev.disabled=index<1;next.disabled=index>=dates.length-1;
  status.hidden=true;
- if(!d.rows.length){panel.innerHTML='<p class="md-empty">'+(mode==='results'?'Nessun risultato disponibile.':'Nessuna partita in programma.')+'</p>';return}
+ if(!visibleRows.length){panel.innerHTML='<p class="md-empty">'+(mode==='results'?'Nessun risultato disponibile.':'Nessuna partita in programma.')+'</p>';return}
  const groups=new Map;
- for(const r of d.rows){const k=r.competition_key+'|'+r.imc_season+'|'+roundLabel(r);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
+ for(const r of visibleRows){const k=r.competition_key+'|'+r.imc_season+'|'+roundLabel(r);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
  panel.innerHTML=[...groups.values()].map(rows=>{
   const first=rows[0];
-  return '<section class="md-group"><div class="md-group-heading"><h3><a href="'+esc(competitionUrl(first))+'">'+esc(first.competition_name)+'</a></h3><span>'+esc(roundLabel(first))+(first.turn_progress?.total_days?' <small>'+esc(first.turn_progress.played_days)+' di '+esc(first.turn_progress.total_days)+' turni giocati · '+esc(first.turn_progress.remaining_days)+' da giocare</small>':'')+'</span></div><div class="md-games">'+rows.map(r=>{
+  return '<section class="md-group" data-group="'+esc(category)+'"><div class="md-group-heading"><h3><a href="'+esc(competitionUrl(first))+'">'+esc(first.competition_name)+'</a></h3><span>'+esc(roundLabel(first))+(first.turn_progress?.total_days?' <small>'+esc(first.turn_progress.played_days)+' di '+esc(first.turn_progress.total_days)+' turni giocati · '+esc(first.turn_progress.remaining_days)+' da giocare</small><progress aria-label="Turni giocati" max="'+esc(first.turn_progress.total_days)+'" value="'+esc(first.turn_progress.played_days)+'"></progress>':'')+'</span></div><div class="md-games">'+rows.map(r=>{
    const played=mode==='results';let score=played?esc(r.home_score)+' – '+esc(r.away_score):esc(String(r.match_time||'').slice(0,5)||'—');
    if(played)for(const [p,label] of [['penalty','Rigori'],['aggregate','Totale']])if(r[p+'_home_score']!=null&&r[p+'_away_score']!=null)score+='<small>'+label+' '+esc(r[p+'_home_score'])+' – '+esc(r[p+'_away_score'])+'</small>';
    const report=played&&r.has_report?'<a class="md-report" aria-label="Match report: '+esc(r.home_name)+' – '+esc(r.away_name)+'" href="/__WORLD_SLUG__/competitions/match.html?fixture='+encodeURIComponent(r.sm_fixture_id)+'"></a>':'';

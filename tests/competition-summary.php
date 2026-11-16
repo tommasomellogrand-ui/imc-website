@@ -55,3 +55,12 @@ $calendar=imc_competition_calendar($domestic,['expected_matchdays'=>18],[fixture
 check($calendar['2026-11-16']['number_label']==='Giornata 15 di 18','Explicit domestic matchday survives partial imports');
 $calendar=imc_competition_calendar($domestic,['expected_matchdays'=>18],[fixture('1',false,'','2026-11-16','')]);
 check($calendar['2026-11-16']['number']===null,'A partial calendar cannot invent a day number');
+
+foreach(['IMC001','IMC002','IMC003','IMC004','IMC005','IMC007','IMC008'] as $world){
+ foreach(['charityshield','supercup'] as $action){
+  check(!imc_competition_available($world,1,$action),'Super cups are absent in season 1 outside 006');
+  check(imc_competition_available($world,2,$action),'Super cups start in season 2');
+ }
+ check(imc_competition_available($world,1,'leaguecup'),'National cup is unaffected');
+}
+check(imc_competition_available('IMC006',1,'supercup')&&imc_competition_available('GW004',1,'charityshield'),'006 season 1 exception supports both world identifiers');

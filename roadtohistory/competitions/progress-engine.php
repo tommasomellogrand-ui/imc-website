@@ -234,6 +234,10 @@ try {
   elseif($row['sm_action']==='playoff' && isset($divisionNames[$row['sm_division']]))$row['nexus_view']=$divisionNames[$row['sm_division']].' Playoff';
  }
  unset($row);
+ $rows=array_values(array_filter($rows,static function($row)use($gw,$season,&$out,&$byKey){
+  if(imc_competition_available($gw,$season,(string)$row['sm_action']))return true;
+  unset($out[$row['competition_key']],$byKey[$row['competition_key']]);return false;
+ }));
  $catalogOrder=static fn(array $row):array=>[
   $row['competition_group']==='DOMESTIC' ? (['charityshield'=>0,'leaguecup'=>1,'nationalcup'=>1,'leagueshield'=>2][$row['sm_action']] ?? 3) : 3,
   (int)$row['sm_division'],$row['nexus_view']
