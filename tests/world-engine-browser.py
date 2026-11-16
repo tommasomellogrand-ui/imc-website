@@ -35,3 +35,13 @@ with webdriver.Chrome(options=options) as driver:
         assert not driver.find_elements(By.CSS_SELECTOR,'[data-mode]'),world
         assert driver.current_url.startswith('https://www.italianmastersclub.it/'+world+'/'),world
         print(world,'normal competition entry verified',flush=True)
+
+        driver.get('https://www.italianmastersclub.it/'+world+'/home/?turns=verify')
+        wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.imc-home-turns article'))
+        summary=driver.find_element(By.CSS_SELECTOR,'.imc-home-turns').text
+        assert 'turni giocati' in summary,(world,summary)
+        assert len(driver.find_elements(By.XPATH,"//*[contains(@class,'imc-home-turns')]//h3[a[text()='Leagues']]"))==1,world
+        driver.get('https://www.italianmastersclub.it/'+world+'/matchday/?turns=verify')
+        wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.md-group-heading'))
+        assert 'turni giocati' in driver.find_element(By.ID,'match-content').text,world
+        print(world,'Home and Matchday turn summaries verified',flush=True)
