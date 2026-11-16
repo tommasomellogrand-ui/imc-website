@@ -106,3 +106,38 @@ check($c['2026-11-19']['number_label']==='Giornata 16 di 18','Preserve explicit 
 $c=imc_competition_calendar($domestic,['expected_matchdays'=>18],[fixture('old',false,'','2026-11-01',''),fixture('last',true,'','2026-11-15','15'),fixture('next',false,'','2026-11-19','')]);
 check($c['2026-11-19']['number']===16,'Old schedules without Results cannot shift the next turn');
 echo "Home calendar numbering: Results sequence passed\n";
+
+// Daily previews belong to Home only; no fixture or Matchday date is created.
+$imc=['sm_action'=>'imc','competition_group'=>'IMC','competition_key'=>'IMC001|IMC|championsleague'];
+$last=['date'=>'2026-11-15','number'=>19];
+$turns=imc_competition_home_turns($imc,22,19,$last,[],'2026-11-16',false);
+check(array_column($turns,'date')===['2026-11-16','2026-11-17','2026-11-18'],'Home fills daily turns without any Schedule');
+check(array_column($turns,'number')===[20,21,22]&&$turns[2]['number_label']==='Giornata 22 di 22','Daily Home previews stop at expected turns');
+$scheduled=['2026-11-16'=>['date'=>'2026-11-16','number'=>20,'label'=>'Giornata 20']];
+$turns=imc_competition_home_turns($imc,22,19,$last,$scheduled,'2026-11-16',false);
+check(count($turns)===3&&empty($turns[0]['projected'])&&!empty($turns[1]['projected']),'Imported dates replace projections without duplicating turns');
+$calendar=imc_competition_calendar($imc,['expected_matchdays'=>22],[fixture('last',true,'','2026-11-15','19')]);
+check(array_keys($calendar)===['2026-11-15'],'Shared Matchday calendar contains imported fixtures only');
+check(imc_competition_home_turns($imc,22,22,['date'=>'2026-11-18','number'=>22],[],'2026-11-19',false)===[],'No turns beyond the configured expected');
+check(imc_competition_home_turns($imc,22,19,$last,$scheduled,'2026-11-16',true)===[],'A completed competition has no previews');
+check(imc_competition_home_turns($imc,22,0,null,[],'2026-11-16',false)===[],'Do not invent a start for an unstarted competition');
+check(imc_competition_home_turns($domestic,18,15,$last,[],'2026-11-16',false)===[],'Daily projection applies only to IMC competitions');
+check(imc_competition_home_turns($imc,null,19,$last,$scheduled,'2026-11-16',false)===array_values($scheduled),'No projection without configured expected turns');
+$turns=imc_competition_home_turns($imc,22,19,$last,[],'2026-12-01',false);
+check($turns[0]['date']==='2026-12-01'&&$turns[0]['number']===20,'Elapsed days do not count as played without Results');
+$turns=imc_competition_home_turns($cwc,4,1,['date'=>'2026-11-15','number'=>1],[],'2026-11-16',false);
+check(count($turns)===3&&$turns[0]['number_label']==='Turno 2 di 4'&&$turns[0]['label']===null,'IMC cups project numbered turns without invented phases or teams');
+$turns=imc_competition_home_turns($imc,3,0,null,['2026-11-20'=>['date'=>'2026-11-20']],'2026-11-16',false);
+check(array_column($turns,'date')===['2026-11-20','2026-11-21','2026-11-22'],'Unstarted competition uses its first actual Schedule as the start');
+$today=new DateTimeImmutable('today',new DateTimeZone('Europe/Rome'));
+$yesterday=$today->modify('-1 day')->format('Y-m-d');
+$tomorrow=$today->modify('+1 day')->format('Y-m-d');
+$p=imc_competition_summary($imc,['expected_matchdays'=>22],[fixture('latest',true,'',$yesterday,'19')],[],[]);
+check(count($p['calendar_turns'])===3&&$p['calendar_turns'][0]['number']===20&&$p['next_turn']===null,'Summary projects missing Home dates without inventing a next fixture');
+$fixtures=[fixture('latest',true,'',$yesterday,'19'),fixture('new-schedule',false,'',$today->format('Y-m-d'),'20')];
+$p=imc_competition_summary($imc,['expected_matchdays'=>22],$fixtures,[],[]);
+check(count($p['calendar_turns'])===3&&empty($p['calendar_turns'][0]['projected']),'Schedule import replaces the same Home turn');
+$fixtures[]=fixture('new-schedule',true,'',$today->format('Y-m-d'),'20');
+$p=imc_competition_summary($imc,['expected_matchdays'=>22],$fixtures,[],[]);
+check(count($p['calendar_turns'])===2&&$p['calendar_turns'][0]['date']===$tomorrow&&$p['calendar_turns'][0]['number']===21,'Result import advances Home and removes the played turn');
+echo "Home daily IMC projections: all checks passed\n";

@@ -115,8 +115,38 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
         $date=substr((string)($fixture['match_date']??''),0,10);
         if($date>=$today && isset($calendar[$date]))$pending[$date]=$calendar[$date];
     }
-    ksort($pending);$existing['calendar_turns']=array_values($pending);
+    ksort($pending);
+    $existing['calendar_turns']=imc_competition_home_turns($row,$totalDays,$playedDays,$existing['last_turn'],$pending,$today,$complete);
     return $existing;
+}
+
+// Home can show daily IMC turns before Schedule imports. These are turn
+// summaries only: the fixture calendar used by Matchday stays unchanged.
+function imc_competition_home_turns(array $row,?int $total,int $played,?array $last,array $pending,string $today,bool $complete): array {
+    if (($row['competition_group']??'')!=='IMC' || !$total) return array_values($pending);
+    if ($complete) return [];
+    $played=max($played,(int)($last['number']??0));
+    $remaining=max(0,$total-$played);
+    if (!$remaining) return [];
+    // An unstarted competition needs its first imported date as an anchor.
+    if (!$last && !$pending) return [];
+    $zone=new DateTimeZone('Europe/Rome');
+    $start=$last ? (new DateTimeImmutable($last['date'],$zone))->modify('+1 day')->format('Y-m-d') : array_key_first($pending);
+    $date=new DateTimeImmutable(max($today,$start),$zone);
+    $turns=array_slice($pending,0,$remaining,true);
+    while (count($turns)<$remaining) {
+        $day=$date->format('Y-m-d');
+        if (!isset($turns[$day])) $turns[$day]=['date'=>$day,'label'=>null,'projected'=>true];
+        $date=$date->modify('+1 day');
+    }
+    ksort($turns);$league=imc_competition_is_league($row);$number=$played;
+    foreach ($turns as &$turn) {
+        $turn['number']=++$number;$turn['total']=$total;
+        $turn['number_label']=($league?'Giornata ':'Turno ').$number.' di '.$total;
+        if ($league) $turn['label']='Giornata '.$number;
+    }
+    unset($turn);
+    return array_values($turns);
 }
 
 // Resolve turns from explicit labels or the played Results sequence.
