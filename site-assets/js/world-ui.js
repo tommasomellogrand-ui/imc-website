@@ -185,7 +185,7 @@ if(!document.getElementById('nx-universal-nav')){
    const add=text=>{const line=document.createElement('p');line.textContent=text;card.append(line);};
    if(p.total_days) add(p.played_days+' di '+p.total_days+' turni giocati · '+p.remaining_days+' da giocare');
    for(const [slot,label] of [['last_turn','Ultimo turno'],['next_turn','Prossimo turno']]){
-    const t=p[slot];if(t?.date) add(label+': '+[t.number_label,t.label,t.date.split('-').reverse().join('/')].filter((v,i,a)=>v&&a.indexOf(v)===i).join(' · '));
+    const t=p[slot];if(t?.date) add(label+': '+[t.number_label,t.label,t.date.split('-').reverse().join('/')].filter((v,i,a)=>v&&a.indexOf(v)===i&&!(v===t.label&&t.number_label?.startsWith(v+' di '))).join(' · '));
     else if(slot==='next_turn'&&!p.complete)add('Prossimo turno: Data da definire');
    }
    overview.append(card);

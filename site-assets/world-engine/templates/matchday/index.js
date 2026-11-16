@@ -20,7 +20,7 @@ function competitionUrl(r){
 let dates=[],current='',defaultDate='',initial=true;
 const prev=document.getElementById('md-prev'),next=document.getElementById('md-next');
 function roundLabel(r){
- if(r.turn){const t=r.turn;return [...new Set([t.number_label,t.label].filter(Boolean))].join(' · ');}
+ if(r.turn){const t=r.turn;return [...new Set([t.number_label,t.label].filter(v=>v&&!(v===t.label&&t.number_label?.startsWith(v+' di '))))].join(' · ');}
  if(r.round)return String(r.round);
  const n=r.sm_matchday||r.matchday;
  return n?'Giornata '+n:'';
