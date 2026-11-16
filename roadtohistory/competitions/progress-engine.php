@@ -43,6 +43,7 @@ try {
    else $history[$r['competition_key']][$id]=$r;
   }
  }
+ $groups=imc_home_worldcup_scope($groups,$history);
  $clubLogos=[];
  foreach(imc_site_rows($db,"SELECT sm_world_club_id,sm_club_id FROM IMC_Game_World_Club_Mapping WHERE game_world_id IN (?,?)",[$gw,$prefix]) as $club){
   if((int)$club['sm_club_id']>0)$clubLogos[$club['sm_world_club_id']]='https://cdn.soccerwiki.org/images/logos/clubs/'.(int)$club['sm_club_id'].'.png';
@@ -115,7 +116,7 @@ try {
   $pair=static fn($match)=>$match?[$match['home_name'],$match['away_name']]:null;
   $row=$fixtures[0];$action=$row['sm_action'];$division=$row['sm_division'];
   $names=['league'=>'Div '.$division,'playoff'=>'Playoff','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers','worldcup'=>'World Cup','charityshield'=>'Charity Shield','leaguecup'=>'National Cup','nationalcup'=>'National Cup','leagueshield'=>'League Cup'];
-  $rows[]=['competition_key'=>$key,'sm_action'=>$action,'sm_division'=>$division,'competition_group'=>$row['competition_group'],'sm_country'=>$row['sm_country'],'nexus_view'=>$names[$action]??$action,'result_count'=>$played,'schedule_count'=>$total-$played];
+  $rows[]=['imc_season'=>(int)$row['imc_season'],'competition_key'=>$key,'sm_action'=>$action,'sm_division'=>$division,'competition_group'=>$row['competition_group'],'sm_country'=>$row['sm_country'],'nexus_view'=>$names[$action]??$action,'result_count'=>$played,'schedule_count'=>$total-$played];
   $ranking=[];
   foreach(array_slice($table,0,2,true) as $name=>$stats)$ranking[]=['name'=>$name,'points'=>$stats[0]];
   $upcoming=[];

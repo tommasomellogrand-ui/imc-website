@@ -191,7 +191,7 @@ if(!document.getElementById('nx-universal-nav')){
   const heading=document.createElement('h2');heading.textContent='Calendario · Stagione '+data.season;overview.append(heading);
   const names={DOMESTIC:'Domestic',INTERNATIONAL:'International',IMC:'IMC',NATIONS:'Nations'},days=new Map();
   const calendarToday=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome'}).format(new Date());
-  const competitionLink=row=>base+'competitions/view.html?'+new URLSearchParams({season:data.season,competition:row.competition_key,group:row.competition_group});
+  const competitionLink=row=>base+'competitions/view.html?'+new URLSearchParams({season:row.imc_season||data.season,competition:row.competition_key,group:row.competition_group});
   let domesticShown=false;
   for(const row of data.rows){
    const p=data.progress[row.competition_key];if(!p||p.complete||!names[row.competition_group])continue;

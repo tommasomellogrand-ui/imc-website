@@ -153,3 +153,15 @@ check(imc_competition_home_turns($wc,7,7,['date'=>'2026-11-22','number'=>7],[],'
 $qualifiers=['sm_action'=>'interqualifier','competition_group'=>'NATIONS'];
 check(imc_competition_home_turns($qualifiers,10,1,['date'=>'2026-11-15'],[],'2026-11-16',false)===[],'Qualifiers do not use daily World Cup projections');
 echo "World Cup daily Home calendar: all checks passed\n";
+
+$oldWorldCup=['competition_key'=>'GW006|NATIONS|worldcup','sm_action'=>'worldcup','imc_season'=>1,'played'=>false,'competition_stage'=>'Quarti di Finale','competition_round'=>'Quarti di Finale','match_date'=>'2026-11-16','sm_fixture_id'=>'wc-quarter','home_name'=>'A','away_name'=>'B'];
+$scope=imc_home_worldcup_scope(['league'=>['current']],['worldcup'=>[$oldWorldCup],'old-league'=>[['sm_action'=>'league']],'qualifiers'=>[['sm_action'=>'interqualifier']]]);
+check(isset($scope['worldcup'])&&$scope['worldcup'][0]['imc_season']===1,'Home must retain the previous World Cup edition season');
+check(!isset($scope['old-league'],$scope['qualifiers'])&&$scope['league']===['current'],'Previous leagues and qualifiers must not carry into Home');
+$nextCup=$oldWorldCup;$nextCup['imc_season']=2;
+$scope=imc_home_worldcup_scope(['worldcup'=>[$nextCup]],['worldcup'=>[$oldWorldCup]]);
+check($scope['worldcup'][0]['imc_season']===2,'A new edition replaces the old edition');
+$final=$oldWorldCup;$final['played']=true;$final['competition_stage']='Finale';$final['competition_round']='Finale';$final['home_score']=1;$final['away_score']=0;
+$summary=imc_competition_summary(['sm_action'=>'worldcup','competition_group'=>'NATIONS'],[],[$final],[],[]);
+check($summary['complete'],'A played World Cup final ends Home visibility');
+echo "World Cup season rollover: all checks passed\n";
