@@ -98,7 +98,7 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
         if ($league && $teams!==null && $teams>1) $required=(int)floor($teams/2);
         elseif (($row['sm_action']??'')==='interqualifier' && $expected && $totalDays) $required=(int)($expected/$totalDays);
         elseif (in_array($phase,['Ottavi','Quarti','Semifinale','Finale'],true)) $required=['Ottavi'=>8,'Quarti'=>4,'Semifinale'=>2,'Finale'=>1][$phase];
-        elseif (in_array($row['sm_action']??'',['smfacup','smfashield','worldcup'],true) && $teams) $required=(int)($teams/2);
+        elseif (in_array($row['sm_action']??'',['smfacup','smfashield','worldcup'],true) && $teams && ($phase==='' || $phase==='Gironi')) $required=(int)($teams/2);
         if ($required===null || $turn['played']>=$required) $playedDays++;
     }
     $existing['played_days']=$totalDays!==null?min($totalDays,$playedDays):null;

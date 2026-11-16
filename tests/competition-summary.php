@@ -38,7 +38,7 @@ check($empty['played_days']===0&&$empty['remaining_days']===8,'Unstarted cup is 
 foreach ([[16,37,8,3,false],[32,125,13,6,true]] as [$teams,$matches,$days,$groupDays,$hasLast16]) {
  $calendar=[];$day=0;$id=0;
  $phases=array_fill(0,$groupDays,['Gironi',$teams/2]);
- if($hasLast16){$phases[]=['Ottavi',8];$phases[]=['Ottavi',8];}
+ if($hasLast16){$phases[]=['Turno 1',8];$phases[]=['Turno 1',8];}
  foreach([['Quarti',4],['Quarti',4],['Semifinali',2],['Semifinali',2],['Finale',1]] as $phase)$phases[]=$phase;
  foreach($phases as [$phase,$size]){ $day++;for($i=0;$i<$size;$i++)$calendar[]=fixture((string)++$id,true,$phase,'2026-11-'.str_pad((string)$day,2,'0',STR_PAD_LEFT),''); }
  $p=imc_competition_summary($cup,['teams_count'=>$teams,'expected_match'=>$matches,'expected_matchdays'=>$days],$calendar,['final_played'=>true],[]);
