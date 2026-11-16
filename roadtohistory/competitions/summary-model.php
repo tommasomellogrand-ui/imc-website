@@ -70,6 +70,10 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
     $complete=$league || ($row['sm_action']??'')==='interqualifier'
         ? ($known && $expected!==null && $played===$expected)
         : !empty($existing['final_played']);
+    if (($row['sm_action']??'')==='worldcup') foreach($fixtures as $fixture) {
+        [$phase,$leg]=cupPhase($fixture);
+        if (!empty($fixture['played']) && $phase==='Finale' && $leg!=='Andata') $complete=true;
+    }
     if (!empty($award['winner_name'])) $complete=true;
     $existing['league_summary']=$league && ($row['competition_group']??'')==='IMC';
     $existing['expected']=$expected;
