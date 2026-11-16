@@ -4,8 +4,12 @@ on:
     branches: [main]
     paths:
       - 'site-assets/world-engine/**'
+      - 'roadtohistory/competitions/progress-engine.php'
+      - 'roadtohistory/competitions/summary-model.php'
       - 'ops/world-engine-files.json'
       - 'tests/world-engine-browser.py'
+      - 'tests/competition-summary.php'
+      - 'tests/competition-summary.cjs'
       - '.github/workflows/world-engine.yml'
       - 'site-data/matchday/**'
       - 'site-data/trophies/**'
@@ -40,6 +44,10 @@ jobs:
               result=subprocess.run(['node','--check','-'],input=p.read_text(),text=True,capture_output=True)
               assert result.returncode==0,(str(p),result.stderr)
           PY
+      - name: Validate competition summaries
+        run: |
+          php tests/competition-summary.php
+          node tests/competition-summary.cjs
       - name: Publish engine before world pages
         env:
           GH_TOKEN: ${{ github.token }}
@@ -50,7 +58,7 @@ jobs:
           import io,json,os,ssl,urllib.request
           from pathlib import Path
           from ftplib import FTP_TLS,error_perm
-          names=json.loads(Path('ops/world-engine-files.json').read_text())
+          names=json.loads(Path('ops/world-engine-files.json').read_text())+['roadtohistory/competitions/summary-model.php','roadtohistory/competitions/progress-engine.php']
           try:
               api='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
               headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'}
@@ -71,7 +79,7 @@ jobs:
           except Exception:
               print('Publishing full engine manifest',flush=True)
           print('Engine files to publish:',len(names),flush=True)
-          names.sort(key=lambda p:(0 if p.startswith(('site-assets/world-engine/','site-data/','site-assets/js/')) else 1,p))
+          names.sort(key=lambda p:(0 if p.endswith('/summary-model.php') else 1 if p.endswith('/progress-engine.php') else 2 if p.startswith(('site-assets/world-engine/','site-data/','site-assets/js/')) else 3,p))
           ctx=ssl.create_default_context();ctx.check_hostname=False
           with FTP_TLS(context=ctx,timeout=60) as ftp:
               ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()
@@ -121,3 +129,4 @@ jobs:
           "$RUNNER_TEMP/world-engine-browser/bin/pip" install --quiet selenium
           "$RUNNER_TEMP/world-engine-browser/bin/python" tests/world-site-change-browser.py
           "$RUNNER_TEMP/world-engine-browser/bin/python" tests/world-engine-browser.py
+

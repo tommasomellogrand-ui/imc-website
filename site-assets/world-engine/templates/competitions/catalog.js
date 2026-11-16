@@ -15,25 +15,26 @@ let progress={},awards={};
 function card(r){return IMCCompetitionRow.render(r,progress[r.competition_key],awards[r.competition_key])}
 function domesticRows(rows){
  const leagues=rows.filter(r=>r.sm_action==='league'),cups=rows.filter(r=>r.sm_action!=='league');
- const stats=leagues.map(r=>progress[r.competition_key]||{}),known=stats.length&&stats.every(p=>p.total_days>0);
+ const stats=leagues.map(r=>progress[r.competition_key]||{}),known=stats.length&&stats.every(p=>p.total_days>0&&Number.isFinite(p.played_days));
  let pct=known?Math.round(100*stats.reduce((v,p)=>v+p.played_days,0)/stats.reduce((v,p)=>v+p.total_days,0)):null;
  const commonRound=known && stats.every(p=>p.played_days===stats[0].played_days && p.total_days===stats[0].total_days);
- const caption=commonRound?stats[0].played_days+' giornate su '+stats[0].total_days:'Avanzamento campionati';
+ const caption=commonRound?stats[0].played_days+' giornate su '+stats[0].total_days:'';
  const links=leagues.map(r=>{
   const p=progress[r.competition_key]||{}, award=awards[r.competition_key]||{};
-  const finished=Boolean(award.winner_name||p.complete);
+  const finished=Boolean(award.winner_name);
   const name=award.winner_name||p.leader;
   const logo=award.winner_logo_url||p.logos?.[name];
   const label=/^Div (\d+)$/.test(r.nexus_view)?'Divisione '+r.sm_division:r.nexus_view;
   const points=!finished && p.points!=null?'<small class="league-points">'+esc(p.points)+' pt</small>':'';
-  const info=name?'<small>'+(finished?'Vincitore':'Prima in classifica')+'</small><span class="league-side">'+(logo?'<img width="24" height="24" src="'+esc(logo)+'" alt="">':'')+'<strong>'+esc(name)+'</strong>'+points+'</span>':'<small>In attesa dei risultati</small>';
+  const manager=award.winner_manager_name?'<span class="cs-manager">'+(award.winner_manager_photo_url?'<img width="30" height="30" src="'+esc(award.winner_manager_photo_url)+'" alt="">':'')+esc(award.winner_manager_name)+'</span>':'';
+  const info=name?'<small>'+(finished?'Vincitore':'Prima in classifica')+'</small><span class="league-side">'+(logo?'<img width="24" height="24" src="'+esc(logo)+'" alt="">':'')+'<strong>'+esc(name)+'</strong>'+points+'</span>'+manager:'';
   return '<button class="gw-cup league-card" data-key="'+esc(r.competition_key)+'"><span class="gw-name">'+IMCCompetitionRow.symbol(true)+'<b>'+esc(label)+'</b></span><span class="gw-state">'+info+'</span></button>';
  }).join('');
  const gauge='<div class="gw-gauge"><svg viewBox="0 0 120 68" aria-hidden="true"><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="#dedee5" stroke-width="9"/><path d="M6 62a54 54 0 0 1 108 0" fill="none" stroke="var(--world-accent,#7656a0)" stroke-width="9" pathLength="100" stroke-dasharray="'+(pct??0)+' 100"/></svg><b>'+(pct===null?'':pct+'%')+'</b><small>'+esc(caption)+'</small></div>';
  function turnLine(slot,title){
   const dates=stats.map(p=>p[slot]).filter(t=>t?.date).sort((a,b)=>a.date.localeCompare(b.date));
   const t=slot==='last_turn'?dates[dates.length-1]:dates[0];
-  const value=t?[(t.number?'Giornata '+t.number:''),t.date.split('-').reverse().join('/')].filter(Boolean).join(' · '):'—';
+  const value=t?[(t.number?'Giornata '+t.number:''),t.date.split('-').reverse().join('/')].filter(Boolean).join(' · '):'';
   return '<div><small>'+title+'</small><strong>'+esc(value)+'</strong></div>';
  }
  const turns='<div class="league-turns">'+turnLine('last_turn','Ultima giornata giocata')+turnLine('next_turn','Prossima giornata')+'</div>';
@@ -64,4 +65,5 @@ if(!current){seasonBar();$('title').textContent='Competizioni';$('competition-na
  await showLeaguePage({world:gw,base,competition:current,seasons:d.seasons,season});return;
 }catch(e){$('view').innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
 })();
+
 

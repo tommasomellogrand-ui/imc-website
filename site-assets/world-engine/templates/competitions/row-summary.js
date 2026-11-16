@@ -1,4 +1,5 @@
 (()=> {
+ "use strict";
  const {esc}=NexusUI;
  function symbol(league){
   const shape=league?'<path d="M4 21h16M5 17v-5h4v5m1 0V4h4v13m1 0V8h4v9"/>':'<path d="M7 3h10v5a5 5 0 0 1-10 0zM7 5H3v2a4 4 0 0 0 5 4m9-6h4v2a4 4 0 0 1-5 4m-4 2v5m-4 3h8"/>';
@@ -20,7 +21,32 @@
    const initials=name.trim().split(/\s+/).slice(0,2).map(v=>v[0]).join('');
    return '<span class="cr-team"><i>'+esc(initials)+(src?'<img alt="" src="'+esc(src)+'" onerror="this.remove()">':'')+'</i><span>'+esc(name)+'</span></span>';
   }
-  const league=r.sm_action==='league',items=[];
+  if(!detail){
+   const league=p.league_summary||r.sm_action==='league';
+   const bits=[];
+   if(p.status)bits.push('<span class="cs-status" data-status="'+esc(p.status)+'">'+esc(p.status)+'</span>');
+   if(Number.isFinite(p.played)&&Number.isFinite(p.expected)&&p.expected>0){
+    const percent=Math.min(100,Math.round(100*p.played/p.expected));
+    bits.push('<span class="cs-progress"><span><strong>'+esc(p.played)+' / '+esc(p.expected)+'</strong> partite <b>'+percent+'%</b></span><progress max="'+esc(p.expected)+'" value="'+esc(p.played)+'" aria-label="Partite disputate"></progress></span>');
+   }
+   function turn(t,title){
+    if(!t?.date)return;
+    const value=[t.label,t.date.split('-').reverse().join('/')].filter(Boolean).join(' · ');
+    bits.push('<span class="cs-turn"><small>'+title+'</small><strong>'+esc(value)+'</strong></span>');
+   }
+   turn(p.last_turn,league?'Ultima giornata giocata':'Ultima fase giocata');
+   if(!p.complete)turn(p.next_turn,league?'Prossima giornata':'Prossima fase');
+   if(award.winner_name){
+    const photo=String(award.winner_manager_photo_url||'');
+    const portrait=/^(https?:\/\/|\/(?!\/))/.test(photo)?'<img src="'+esc(photo)+'" alt="" width="30" height="30">':'';
+    bits.push('<span class="cs-winner"><small>Vincitore</small><strong>'+team(award.winner_name)+'</strong>'+(award.winner_manager_name?'<span class="cs-manager">'+portrait+esc(award.winner_manager_name)+'</span>':'')+'</span>');
+   }else if(league&&p.ranking?.[0]){
+    const first=p.ranking[0];
+    bits.push('<span class="cs-leader"><small>Prima in classifica</small><strong>'+team(first.name)+' <span>'+esc(first.points)+' pt</span></strong></span>');
+   }
+   return '<button class="gw-cup gw-summary" data-key="'+esc(r.competition_key)+'"><span class="gw-name">'+symbol(league)+'<b>'+esc(r.nexus_view)+'</b></span><span class="cs-data">'+bits.join('')+'</span></button>';
+  }
+  const league=p.league_summary||r.sm_action==='league',items=[];
   function field(label,values){if(values.length)items.push('<span class="cr-field"><small>'+esc(label)+'</small>'+values.map(v=>'<b>'+v+'</b>').join('')+'</span>')}
   if(p.finalists)field('Finalisti',p.finalists.map(team));
   if(award.winner_name){
@@ -56,5 +82,16 @@
   const content='<span class="cr-identity">'+symbol(league)+'<strong>'+esc(r.nexus_view)+'</strong><small>'+esc(kind)+'</small></span><span class="cr-data">'+items.join('')+'</span>';
   return detail?'<section class="cr-row" aria-label="Situazione competizione">'+content+'</section>':'<button class="competition-card cr-row" data-key="'+esc(r.competition_key)+'">'+content+'</button>';
  }
+ const style=document.createElement('style');style.id='imc-competition-summary-style';style.textContent=`
+ #view .gw-summary{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-height:0;height:auto;padding:16px 12px;text-align:left;background:#fff;border:1px solid #e0e3e8;border-radius:10px;margin:8px 0;color:inherit}
+ #view .gw-summary .gw-name{display:flex;align-items:center;gap:9px;min-width:0}
+ #view .gw-summary .gw-name b{font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+ #view .gw-summary .gw-name svg{flex:none;color:var(--world-accent,#a68b50)}
+ .gw-summary .cs-data{display:grid;gap:10px;min-width:0}.gw-summary .cs-data:empty{display:none}
+ .cs-status{font-size:11px;font-weight:700;color:#536277}.cs-status[data-status="Conclusa"]{color:var(--world-accent,#8b6829)}
+ .cs-progress{display:grid;gap:5px}.cs-progress>span{font-size:12px;color:#536277}.cs-progress b{float:right;color:inherit}.cs-progress progress{display:block;width:100%;height:7px;border:0;border-radius:6px;overflow:hidden;accent-color:var(--world-accent,#a68b50);background:#e6e8ed}.cs-progress progress::-webkit-progress-bar{background:#e6e8ed;border-radius:6px}.cs-progress progress::-webkit-progress-value{background:var(--world-accent,#a68b50);border-radius:6px}.cs-progress progress::-moz-progress-bar{background:var(--world-accent,#a68b50);border-radius:6px}
+ .cs-turn,.cs-winner,.cs-leader{display:grid;gap:4px;min-width:0}.cs-turn small,.cs-winner small,.cs-leader small{font-size:11px;color:#536277}.cs-turn strong{font-size:13px;line-height:1.4;font-weight:600}.cs-winner>strong,.cs-leader>strong{font-size:14px;line-height:1.35}.cs-winner{border-top:1px solid #e6e8ed;padding-top:9px}.cs-manager{display:flex;gap:7px;align-items:center;font-size:12px}.cs-manager img{object-fit:cover;border-radius:50%}.cs-leader>strong{display:flex;align-items:center;justify-content:space-between;gap:8px}.gw-summary .cr-team{white-space:normal}.gw-summary .cr-team>span{overflow:visible;text-overflow:clip;overflow-wrap:anywhere}.gw-summary .cr-team i{width:24px;height:26px}
+ #view .league-card .gw-state:empty{border:0;padding:0}
+ `;document.getElementById(style.id)?.remove();document.head.append(style);
  window.IMCCompetitionRow={render,symbol};
 })();

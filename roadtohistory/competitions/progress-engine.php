@@ -3,15 +3,7 @@ declare(strict_types=1);
 require dirname(__DIR__,2).'/site-data/core/bootstrap.php';
 require_once dirname(__DIR__,2).'/site-data/competitions/result-identity.php';
 require_once dirname(__DIR__,2).'/site-data/competitions/standings-engine.php';
-function cupPhase(array $r): array {
- $stage=trim((string)$r['competition_stage']);$round=trim((string)$r['competition_round']);
- $text=trim($stage.' '.$round);$leg='';
- if(preg_match('/\b(andata|ritorno|first leg|second leg)\b/i',$text,$m))$leg=in_array(strtolower($m[1]),['andata','first leg'])?'Andata':'Ritorno';
- if(preg_match('/gironi|group stage|fase a gruppi/i',$text)||(!empty($r['competition_group_name'])&&!$text))return ['Gironi',$leg];
- foreach(['Ottavi'=>'/ottav|round of 16/i','Quarti'=>'/quart/i','Semifinale'=>'/semi/i','Finale'=>'/\bfinale*\b/i'] as $label=>$pattern)if(preg_match($pattern,$text))return [$label,$leg];
- $label=preg_replace('/\b(andata|ritorno|first leg|second leg)\b/i','',$round)?:$stage;
- $label=trim($label," -·");return [ctype_digit($label)?'Turno '.$label:$label,$leg];
-}
+require_once __DIR__.'/summary-model.php';
 function phaseSequence(array $fixtures):array {
  $order=[];$dates=[];$legs=[];
  foreach($fixtures as $r){[$phase,$leg]=cupPhase($r);if($phase==='')continue;
@@ -98,10 +90,6 @@ try {
    $priorFinal=false;
    foreach($prior as $past){[$ph,$leg]=cupPhase($past);if($past['played']&&$ph==='Finale'&&$leg!=='Andata')$priorFinal=true;}
    $path=$priorFinal?phaseSequence($prior):[];
-   if($priorFinal && $gw==='GW001' && in_array($fixtures[0]['sm_action'],['smfacup','smfashield'],true)){
-    $seen=array_column($path,null,'phase');$path=[];
-    foreach(['Gironi','Ottavi','Quarti','Semifinale','Finale'] as $ph)$path[]=['phase'=>$ph,'days'=>$ph==='Gironi'?3:($seen[$ph]['days']??0),'legs'=>$seen[$ph]['legs']??[]];
-   }
    $r=$next??$latest;[$phase,$leg]=cupPhase($r);
    if($phase==='Gironi' && $path && $path[0]['phase']==='Gironi'){
     $detail=$path[0]['days'].' giornate';
@@ -180,41 +168,40 @@ try {
  }
  unset($award);
  foreach($rows as &$row)if(!empty($byKey[$row['competition_key']]['nexus_view']))$row['nexus_view']=$byKey[$row['competition_key']]['nexus_view'];unset($row);
- if(in_array($gw,['GW001','GW009','GW010','GW011'],true)){
-  $definitions=imc_site_rows($core,"SELECT competition_key,custom_competition,expected_match,expected_matchdays FROM `IMC Competition Codex Global` WHERE game_world_id=? AND (sm_action_group='IMC' OR (game_world_id='GW009' AND custom_competition='Kick Off Cup'))",[$gw]);
-  $indexes=array_flip(array_column($rows,'competition_key'));
-  foreach($definitions as $definition){
-   $key=$uiKey($definition['competition_key']);
-   $name=$definition['custom_competition'];
-   if($gw==='GW009' && $key==='' && $name==='Kick Off Cup')$key='GW009|IMC|kickoffcup';
-   if($gw==='GW011'){
-    if(in_array($key,['GW011|IMC|risingstarsleague','GW011|IMC|nextgenleague'],true))continue;
-    $name=preg_replace('/ U(?:21|18) · (Premier|Challenger) Pool$/',' $1',$name);
-   }
-   if($definition['expected_matchdays']>0 && $definition['expected_match']>0){
-    $results=imc_site_result_identity($gw,$imcResults[$key]??[]);
-    $table=imc_site_standings_tables($results)['rows'];
-    $played=(int)(array_sum(array_column($table,'played'))/2);
-    $expected=(int)$definition['expected_match'];
-    $out[$key]['league_summary']=true;
-    $out[$key]['expected']=$expected;
-    $out[$key]['played']=$played;
-    $expectedDays=(int)$definition['expected_matchdays'];
-    $perDay=(int)($expected/$expectedDays);
-    $byDay=array_count_values(array_column($results,'match_date'));
-    $playedDays=count(array_filter($byDay,static fn($count)=>$count>=$perDay));
-    $out[$key]['played_days']=$playedDays;
-    $out[$key]['total_days']=$expectedDays;
-    $out[$key]['percent']=(int)round(100*$playedDays/$expectedDays);
-    $out[$key]['complete']=$played===$expected;
-    $out[$key]['ranking']=array_map(static fn($t)=>['name'=>$t['team_name'],'points'=>$t['points']],array_slice($table,0,2));
-   }
-   if(isset($indexes[$key])){
-    $rows[$indexes[$key]]['nexus_view']=$name;
-    $rows[$indexes[$key]]['competition_group']='IMC';
-   }else{
-    $rows[]=['competition_key'=>$key,'sm_action'=>'imc_custom','sm_division'=>null,'competition_group'=>'IMC','sm_country'=>null,'nexus_view'=>$name,'result_count'=>0,'schedule_count'=>0];
-   }
+ // Read configured totals for every competition, including those without fixtures yet.
+ $definitions=imc_site_rows($core,"SELECT competition_key,custom_competition,sm_action,sm_action_group,sm_country,sm_division,teams_count,expected_match,expected_matchdays FROM `IMC Competition Codex Global` WHERE game_world_id=?",[$gw]);
+ $indexes=array_flip(array_column($rows,'competition_key'));$configured=[];
+ foreach($definitions as $definition){
+  $group=strtoupper(trim((string)$definition['sm_action_group']));
+  $group=['DOMESTIC COMPETITION'=>'DOMESTIC','INTERNATIONAL COMPETITION'=>'INTERNATIONAL','NATIONAL TEAM COMPETITION'=>'NATIONS'][$group]??$group;
+  $key=$uiKey($definition['competition_key']);
+  $action=(string)$definition['sm_action'];
+  $name=trim((string)$definition['custom_competition']);
+  if($group==='IMC' && $gw==='GW011' && in_array($key,['GW011|IMC|risingstarsleague','GW011|IMC|nextgenleague'],true))continue;
+  if($key==='' && $action!=='')$key=implode('|',array_filter([$gw,$definition['sm_country'],$group,$action,$definition['sm_division']],static fn($v)=>$v!==null && $v!==''));
+  if($key==='')continue;
+  if(str_contains($key,'|playoff|'))$action='playoff';
+  $configured[$key]=$definition;
+  if($group==='IMC' && $gw==='GW011')$name=preg_replace('/ U(?:21|18) · (Premier|Challenger) Pool$/',' $1',$name);
+  if(isset($indexes[$key])){
+   if($group==='IMC' && $name!=='')$rows[$indexes[$key]]['nexus_view']=$name;
+  }else{
+   $defaultNames=['league'=>'Div '.$definition['sm_division'],'playoff'=>'Playoff','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers','worldcup'=>'World Cup','charityshield'=>'Charity Shield','leaguecup'=>'National Cup','leagueshield'=>'League Cup','friendly'=>'Amichevoli'];
+   $rows[]=['competition_key'=>$key,'sm_action'=>$action,'sm_division'=>$definition['sm_division'],'competition_group'=>$group,'sm_country'=>$definition['sm_country'],'nexus_view'=>$name?:($defaultNames[$action]??$action),'result_count'=>0,'schedule_count'=>0];
+   $indexes[$key]=count($rows)-1;
+  }
+ }
+ foreach($rows as $competition){
+  $key=$competition['competition_key'];
+  $fixtures=array_values($groups[$key]??[]);
+  $out[$key]=imc_competition_summary($competition,$configured[$key]??[],$fixtures,$out[$key]??[],$byKey[$key]??[]);
+  if($out[$key]['league_summary']){
+   $results=array_values(array_filter($fixtures,static fn($r)=>!empty($r['played'])));
+   foreach($results as &$r){$r['home_sm_club_id']=$r['h'];$r['away_sm_club_id']=$r['a'];}unset($r);
+   $table=imc_site_standings_tables(imc_site_result_identity($gw,$results))['rows'];
+   $out[$key]['ranking']=array_map(static fn($t)=>['name'=>$t['team_name'],'points'=>$t['points']],array_slice($table,0,2));
+   $out[$key]['leader']=$table[0]['team_name']??null;
+   $out[$key]['points']=$table[0]['points']??null;
   }
  }
  $clubs=imc_site_rows($core,'SELECT id,name,nexus_view FROM `IMC Club Codex Global`');
@@ -256,3 +243,4 @@ try {
  header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');
  echo json_encode(['ok'=>true,'progress'=>$out,'rows'=>$rows,'awards'=>$byKey,'season'=>$season,'seasons'=>$seasons],JSON_INVALID_UTF8_SUBSTITUTE|JSON_UNESCAPED_UNICODE);
 }catch(Throwable $e){error_log('Competition progress: '.$e->getMessage());imc_site_out(['ok'=>false,'error'=>'progress_unavailable'],503);}
+
