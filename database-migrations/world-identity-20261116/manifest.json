@@ -1,0 +1,436 @@
+[
+  {
+    "file": "custom-imc001_match_reports.json",
+    "target": "custom",
+    "table": "IMC001_Match_Reports",
+    "triggers_preserved": 16,
+    "statements": 35
+  },
+  {
+    "file": "custom-imc001_results.json",
+    "target": "custom",
+    "table": "IMC001_Results",
+    "triggers_preserved": 16,
+    "statements": 35
+  },
+  {
+    "file": "custom-imc001_schedule.json",
+    "target": "custom",
+    "table": "IMC001_Schedule",
+    "triggers_preserved": 13,
+    "statements": 29
+  },
+  {
+    "file": "custom-imc001_transfers.json",
+    "target": "custom",
+    "table": "IMC001_Transfers",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc001_trophy_room.json",
+    "target": "custom",
+    "table": "IMC001_Trophy_Room",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc002_match_reports.json",
+    "target": "custom",
+    "table": "IMC002_Match_Reports",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc002_results.json",
+    "target": "custom",
+    "table": "IMC002_Results",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc002_schedule.json",
+    "target": "custom",
+    "table": "IMC002_Schedule",
+    "triggers_preserved": 11,
+    "statements": 25
+  },
+  {
+    "file": "custom-imc002_transfers.json",
+    "target": "custom",
+    "table": "IMC002_Transfers",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc002_trophy_room.json",
+    "target": "custom",
+    "table": "IMC002_Trophy_Room",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc003_match_reports.json",
+    "target": "custom",
+    "table": "IMC003_Match_Reports",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc003_results.json",
+    "target": "custom",
+    "table": "IMC003_Results",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc003_schedule.json",
+    "target": "custom",
+    "table": "IMC003_Schedule",
+    "triggers_preserved": 11,
+    "statements": 25
+  },
+  {
+    "file": "custom-imc003_transfers.json",
+    "target": "custom",
+    "table": "IMC003_Transfers",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc003_trophy_room.json",
+    "target": "custom",
+    "table": "IMC003_Trophy_Room",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc004_match_reports.json",
+    "target": "custom",
+    "table": "IMC004_Match_Reports",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc004_results.json",
+    "target": "custom",
+    "table": "IMC004_Results",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc004_schedule.json",
+    "target": "custom",
+    "table": "IMC004_Schedule",
+    "triggers_preserved": 13,
+    "statements": 29
+  },
+  {
+    "file": "custom-imc004_transfers.json",
+    "target": "custom",
+    "table": "IMC004_Transfers",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc004_trophy_room.json",
+    "target": "custom",
+    "table": "IMC004_Trophy_Room",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc005_match_reports.json",
+    "target": "custom",
+    "table": "IMC005_Match_Reports",
+    "triggers_preserved": 18,
+    "statements": 39
+  },
+  {
+    "file": "custom-imc005_results.json",
+    "target": "custom",
+    "table": "IMC005_Results",
+    "triggers_preserved": 20,
+    "statements": 43
+  },
+  {
+    "file": "custom-imc005_schedule.json",
+    "target": "custom",
+    "table": "IMC005_Schedule",
+    "triggers_preserved": 15,
+    "statements": 33
+  },
+  {
+    "file": "custom-imc005_transfers.json",
+    "target": "custom",
+    "table": "IMC005_Transfers",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc005_trophy_room.json",
+    "target": "custom",
+    "table": "IMC005_Trophy_Room",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc006_match_reports.json",
+    "target": "custom",
+    "table": "IMC006_Match_Reports",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc006_results.json",
+    "target": "custom",
+    "table": "IMC006_Results",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc006_schedule.json",
+    "target": "custom",
+    "table": "IMC006_Schedule",
+    "triggers_preserved": 11,
+    "statements": 25
+  },
+  {
+    "file": "custom-imc006_transfers.json",
+    "target": "custom",
+    "table": "IMC006_Transfers",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc006_trophy_room.json",
+    "target": "custom",
+    "table": "IMC006_Trophy_Room",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc007_match_reports.json",
+    "target": "custom",
+    "table": "IMC007_Match_Reports",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc007_results.json",
+    "target": "custom",
+    "table": "IMC007_Results",
+    "triggers_preserved": 14,
+    "statements": 31
+  },
+  {
+    "file": "custom-imc007_schedule.json",
+    "target": "custom",
+    "table": "IMC007_Schedule",
+    "triggers_preserved": 13,
+    "statements": 29
+  },
+  {
+    "file": "custom-imc007_transfers.json",
+    "target": "custom",
+    "table": "IMC007_Transfers",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc007_trophy_room.json",
+    "target": "custom",
+    "table": "IMC007_Trophy_Room",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc008_match_reports.json",
+    "target": "custom",
+    "table": "IMC008_Match_Reports",
+    "triggers_preserved": 11,
+    "statements": 25
+  },
+  {
+    "file": "custom-imc008_results.json",
+    "target": "custom",
+    "table": "IMC008_Results",
+    "triggers_preserved": 8,
+    "statements": 19
+  },
+  {
+    "file": "custom-imc008_schedule.json",
+    "target": "custom",
+    "table": "IMC008_Schedule",
+    "triggers_preserved": 7,
+    "statements": 17
+  },
+  {
+    "file": "custom-imc008_transfers.json",
+    "target": "custom",
+    "table": "IMC008_Transfers",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc008_trophy_room.json",
+    "target": "custom",
+    "table": "IMC008_Trophy_Room",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "custom-imc_game_world_club_mapping.json",
+    "target": "custom",
+    "table": "IMC_Game_World_Club_Mapping",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_game_world_season.json",
+    "target": "custom",
+    "table": "IMC_Game_World_Season",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_repository_report.json",
+    "target": "custom",
+    "table": "IMC_Repository_Report",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_results_report.json",
+    "target": "custom",
+    "table": "IMC_Results_Report",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_schedule_report.json",
+    "target": "custom",
+    "table": "IMC_Schedule_Report",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_site_match_report.json",
+    "target": "custom",
+    "table": "IMC_Site_Match_Report",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_site_player_codex.json",
+    "target": "custom",
+    "table": "IMC_Site_Player_Codex",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_site_results.json",
+    "target": "custom",
+    "table": "IMC_Site_Results",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_site_revisions.json",
+    "target": "custom",
+    "table": "IMC_Site_Revisions",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_site_sm_player_stats.json",
+    "target": "custom",
+    "table": "IMC_Site_SM_Player_Stats",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_site_schedule.json",
+    "target": "custom",
+    "table": "IMC_Site_Schedule",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_site_transfers.json",
+    "target": "custom",
+    "table": "IMC_Site_Transfers",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_trophy_sync_log.json",
+    "target": "custom",
+    "table": "IMC_Trophy_Sync_Log",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_trophy_sync_state.json",
+    "target": "custom",
+    "table": "IMC_Trophy_Sync_State",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_world_cup_editions.json",
+    "target": "custom",
+    "table": "IMC_World_Cup_Editions",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "custom-imc_world_cup_fixtures.json",
+    "target": "custom",
+    "table": "IMC_World_Cup_Fixtures",
+    "triggers_preserved": 0,
+    "statements": 3
+  },
+  {
+    "file": "core-imc_competition_codex_global.json",
+    "target": "core",
+    "table": "IMC Competition Codex Global",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "core-imc_game_world_codex_global.json",
+    "target": "core",
+    "table": "IMC Game World Codex Global",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "core-imc_game_world_season.json",
+    "target": "core",
+    "table": "IMC Game World Season",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "core-imc_manager_assignment_global.json",
+    "target": "core",
+    "table": "IMC Manager Assignment Global",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "core-imc_trophy_room.json",
+    "target": "core",
+    "table": "IMC Trophy Room",
+    "triggers_preserved": 3,
+    "statements": 9
+  },
+  {
+    "file": "core-imc_site_revisions.json",
+    "target": "core",
+    "table": "IMC_Site_Revisions",
+    "triggers_preserved": 0,
+    "statements": 3
+  }
+]

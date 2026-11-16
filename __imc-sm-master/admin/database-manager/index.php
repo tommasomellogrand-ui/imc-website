@@ -10,6 +10,7 @@ declare(strict_types=1);
 require dirname(__DIR__) . '/core.php';
 require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
+require_once dirname(__DIR__,3).'/site-data/core/world-identity.php';
 
 const IMC_DBM_VERSION = '1.6.15';
 const IMC_DBM_MAX_BODY = 524288;
@@ -403,24 +404,30 @@ function dbm_data_ident(string $name): string {
 }
 
 function dbm_data_route(array $p): array {
-    $gw = strtoupper(trim((string)($p['game_world_id'] ?? '')));
+    $gw = imc_world_id(strtoupper(trim((string)($p['game_world_id'] ?? ''))));
     $table = trim((string)($p['table'] ?? ''));
-    if (preg_match('/^(GW[0-9]{3})_/', $table, $m)) {
-        if ($gw !== '' && $gw !== $m[1]) throw new InvalidArgumentException('game_world_id/table mismatch.');
-        $gw = $m[1];
+    if (preg_match('/^((?:GW|IMC-?)\d{3})_(.+)$/', $table, $m)) {
+        $tableWorld=imc_world_id($m[1]);
+        if ($gw !== '' && $gw !== $tableWorld) throw new InvalidArgumentException('game_world_id/table mismatch.');
+        $gw=$tableWorld;
+        if(preg_match('/^IMC00[1-8]$/',$gw)){
+            $suffix=preg_replace('/^IMC[ _]/','',$m[2]);$suffix=str_replace(' ','_',$suffix);
+            $table=$gw.'_'.($suffix==='Match_Report'?'Match_Reports':$suffix);
+        }
     }
     $target = trim((string)($p['target'] ?? ''));
     if ($gw !== '') {
-        $routes = ['GW001'=>'custom','GW002'=>'gold','GW003'=>'gold','GW004'=>'custom','GW005'=>'custom','GW006'=>'custom','GW007'=>'gold','GW008'=>'gold','GW009'=>'custom','GW010'=>'custom'];
+        $routes = ['GW002'=>'gold','GW003'=>'gold','GW007'=>'gold','GW008'=>'gold'];
+        foreach(range(1,8) as $n)$routes[sprintf('IMC%03d',$n)]='custom';
         if (!isset($routes[$gw])) throw new InvalidArgumentException('Unknown game_world_id.');
         if ($target !== '' && $target !== $routes[$gw]) throw new InvalidArgumentException('game_world_id/target mismatch.');
         $target = $routes[$gw];
     }
     if ($table === '') {
         $repo = trim((string)($p['repository'] ?? ''));
-        if ($repo === 'IMC Transfer') $repo = 'IMC Transfers';
         if ($repo === '') throw new InvalidArgumentException('table or repository required.');
-        $table = $gw !== '' ? $gw . '_' . $repo : $repo;
+        $suffix=['IMC Results'=>'Results','IMC Schedule'=>'Schedule','IMC Match Report'=>'Match_Reports','IMC Transfer'=>'Transfers','IMC Transfers'=>'Transfers','IMC Player Codex'=>'Player_Codex','IMC Trophy Room'=>'Trophy_Room'];
+        $table=$gw!==''&&preg_match('/^IMC00[1-8]$/',$gw)?$gw.'_'.($suffix[$repo]??str_replace(' ','_',$repo)):($gw!==''?$gw.'_'.$repo:$repo);
     }
     dbm_data_ident($table);
     if (!in_array($target, ['core','gold','custom','imc'], true)) throw new InvalidArgumentException('target or known game_world_id required.');
@@ -500,6 +507,7 @@ function dbm_data_operation(array $p): array {
             $names = []; $writeValues = [];
             foreach ($data as $column => $value) {
                 if (!isset($columns[$column])) throw new InvalidArgumentException('Unknown column: ' . $column);
+                if ($column === 'game_world_id' && is_string($value)) $value=imc_world_id($value);
                 if ($column === 'game_world_id' && $gw !== '' && $value !== $gw) throw new InvalidArgumentException('game_world_id mismatch.');
                 $names[] = dbm_data_ident((string)$column); $writeValues[] = $value;
             }

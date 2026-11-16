@@ -1,0 +1,76 @@
+name: Publish canonical IMC world identity
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'database-migrations/world-identity-20261116/**'
+      - '.github/workflows/world-identity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: canonical-world-identity
+  cancel-in-progress: false
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: identity-ci-only
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pidentity-ci-only"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test canonical reads, joins and writes against MySQL
+        env:
+          MYSQL_TEST_PASSWORD: identity-ci-only
+        run: php tests/world-identity.php
+      - name: Publish identity consumers with atomic file replacement
+        env:
+          FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl,subprocess
+          from pathlib import Path
+          from ftplib import FTP_TLS,error_perm
+          names=['site-data/core/world-identity.php','site-data/core/bootstrap.php','nexus/core/bootstrap.php','imc-universal-gateway/core.php','imc-universal-gateway/ingress.php','imc-universal-gateway/write.php','__imc-sm-master/admin/database-manager/index.php','api/imc-data/v1/site-ready.php','site-assets/master/api.php','site-assets/world-engine/worlds.php','site-assets/world-engine/templates/competitions/catalog.js','site-assets/world-engine/templates/competitions/cup.js','roadtohistory/competitions/progress-engine.php','imc_campus/world_center/index.php']
+          for name in names:
+              subprocess.run((['php','-l'] if name.endswith('.php') else ['node','--check'])+[name],check=True)
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          with FTP_TLS(context=ctx,timeout=60) as ftp:
+              ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()
+              for name in names:
+                  p=Path(name);ftp.cwd('/')
+                  for part in ('www.italianmastersclub.it/'+p.parent.as_posix()).split('/'):
+                      try:ftp.cwd(part)
+                      except error_perm:ftp.mkd(part);ftp.cwd(part)
+                  data=p.read_bytes();temporary='.'+p.name+'.identity-upload'
+                  ftp.storbinary('STOR '+temporary,io.BytesIO(data));ftp.rename(temporary,p.name)
+                  check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write)
+                  assert check.getvalue()==data,name
+          PY
+      - name: Verify all eight worlds and canonical importer catalogue live
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          worlds='roadtohistory halloffamers kickoff sensiblesocceracademy subbuteosuperleague worldleague masterleagueworld scudetto'.split()
+          for n,slug in enumerate(worlds,1):
+              wid=f'IMC{n:03d}'
+              with urllib.request.urlopen(f'https://www.italianmastersclub.it/{slug}/competitions/progress.php',timeout=90) as r:j=json.load(r)
+              assert j.get('ok'),slug
+              assert all(x['competition_key'].startswith(wid) for x in j['rows']),slug
+              body=json.dumps({'action':'list_imc_competitions','channel':'IMPORT','game_world_id':wid,'scope':'all'}).encode()
+              request=urllib.request.Request('https://www.italianmastersclub.it/imc-universal-gateway/',data=body,headers={'Content-Type':'application/json'})
+              with urllib.request.urlopen(request,timeout=60) as r:c=json.load(r)
+              assert c.get('ok') and c['competitions'],wid
+              assert all(x['key'].startswith(wid) for x in c['competitions']),wid
+              print(wid,'verified')
+          with urllib.request.urlopen('https://www.italianmastersclub.it/site-assets/master/homepage.php?format=json',timeout=60) as r:j=json.load(r)
+          assert j.get('ok') and len(j['worlds'])==8 and j['managers']
+          assert all(w['game_world_id']==f'IMC{n:03d}' for n,w in enumerate(j['worlds'],1))
+          PY
