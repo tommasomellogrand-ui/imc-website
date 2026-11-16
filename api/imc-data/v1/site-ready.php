@@ -156,7 +156,7 @@ function world_payload(string $world): never {
 }
 
 function competition_codex(string $world): never {
-    $rows = all(db(IMC_CORE_DB), "SELECT id,game_world_id,sm_action,custom_competition,sm_action_group,sm_country,sm_division,teams_count,expected_match,is_sm_action FROM `IMC Competition Codex Global` WHERE game_world_id=? ORDER BY sm_action_group,sm_action,sm_division", [$world]);
+    $rows = all(db(IMC_CORE_DB), "SELECT id,game_world_id,world_type,competition_key,competition_key_aliases,sm_action,custom_competition,sm_action_group,competition_group,sm_country,sm_division,teams_count,expected_match,expected_matchdays,is_sm_action FROM `IMC Competition Codex Global` WHERE game_world_id=? ORDER BY sm_action_group,sm_action,sm_division", [$world]);
     out(['ok'=>true,'data'=>$rows,'pagination'=>['total'=>count($rows),'limit'=>count($rows),'offset'=>0,'returned'=>count($rows)],'source'=>'MYSQL_CORE.IMC Competition Codex Global','generated_at'=>gmdate('c')]);
 }
 

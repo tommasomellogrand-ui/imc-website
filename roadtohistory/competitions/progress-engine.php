@@ -223,7 +223,7 @@ try {
   unset($summary);
  }
  $domesticNames=[];$divisionNames=[];
- foreach(imc_site_rows($core,"SELECT competition_key,sm_action,sm_division,IMC_View FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND competition_group='DOMESTIC'",[$gw]) as $entry){
+ foreach(imc_site_rows($core,"SELECT competition_key,sm_action,sm_division,IMC_View FROM `IMC Competition Codex Global` WHERE game_world_id=? AND competition_group='DOMESTIC'",[$gw]) as $entry){
   $domesticNames[$uiKey($entry['competition_key'])]=$entry['IMC_View'];
   if($entry['sm_action']==='league')$divisionNames[$entry['sm_division']]=$entry['IMC_View'];
  }

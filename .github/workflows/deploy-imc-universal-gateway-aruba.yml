@@ -55,6 +55,11 @@ jobs:
         run: php tests/gateway-world-routing.php
 
 
+      - name: Test unified Competition Codex and historical key aliases
+        env:
+          MYSQL_TEST_PASSWORD: imc-normalizer-ci-only
+        run: php tests/competition-codex-unification.php
+
       - name: Test canonical Results storage
         run: php tests/gateway-results-storage.php
 

@@ -145,7 +145,7 @@ try {
   case 'stories':
     $payload=matches_enrich($db,rows($db,"SELECT r.game_world_id,r.sm_fixture_id,r.home_name,r.away_name,r.home_score,r.away_score,r.match_date,r.sm_action,r.home_sm_club_id,r.away_sm_club_id,r.home_sm_manager_id,r.away_sm_manager_id,r.stadium_name FROM $reports r ORDER BY r.match_date DESC,r.sm_fixture_id DESC LIMIT 12"));break;
   case 'archive':$payload=rows($db,'SELECT * FROM imc_game_world_seasons ORDER BY imc_season_start_date,game_world_id');break;
-  case 'competitions':$payload=rows($db,'SELECT game_world_id,sm_action,custom_competition,sm_country,sm_division,teams_count,expected_match FROM `IMC Competition Codex Global` ORDER BY game_world_id,sm_action,sm_country,sm_division');break;
+  case 'competitions':$payload=rows($db,'SELECT id,game_world_id,world_type,competition_key,competition_key_aliases,custom_competition,competition_group,sm_action,sm_country,sm_division,teams_count,expected_match,expected_matchdays FROM `IMC Competition Codex Global` ORDER BY game_world_id,sm_action,sm_country,sm_division');break;
   default:respond(['ok'=>false,'error'=>'Sezione non disponibile.'],404);
   }
   respond(['ok'=>true,'data'=>$payload,'context'=>$context,'source'=>'MySQL Aruba · IMC','generated_at'=>gmdate('c')]);
