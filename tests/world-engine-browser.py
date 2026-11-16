@@ -44,6 +44,14 @@ with webdriver.Chrome(options=options) as driver:
         assert [d for d in dates if d]==sorted(d for d in dates if d),world
         assert driver.execute_script("return getComputedStyle(document.querySelector('.imc-turn-grid')).gridTemplateColumns.split(' ').length") == 3,world
         assert all(c.get_attribute('data-group') in ['DOMESTIC','INTERNATIONAL','IMC','NATIONS'] for c in driver.find_elements(By.CSS_SELECTOR,'.imc-home-turns article')),world
+        if world=='roadtohistory':
+            import re
+            for key in ['championsleague','europaleague']:
+                cards=driver.find_elements(By.CSS_SELECTOR,'.imc-home-turns article[data-competition="IMC001|IMC|'+key+'"] .imc-calendar-card-body')
+                for card in cards:
+                    if card.find_elements(By.XPATH,"ancestor::section[@data-date!='']"):
+                        assert re.search(r'Giornata \d+ di \d+',card.text),(key,card.text)
+
         driver.get('https://www.italianmastersclub.it/'+world+'/matchday/?turns=verify')
         wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.md-group-heading'))
         assert 'turni giocati' in driver.find_element(By.ID,'match-content').text,world

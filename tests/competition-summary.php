@@ -89,3 +89,20 @@ foreach(['league','leaguecup','leagueshield','charityshield','playoff','smfacup'
  check($p['played_days']===1,$action.': multiple matches of the same turn count once');
 }
 echo "Results-only turn authority: all competition families passed\n";
+
+foreach([['championsleague',19,22],['europaleague',24,26],['conferenceleague',21,26],['risingstarsleague|premier',7,18]] as [$key,$played,$total]){
+ $row=['sm_action'=>'imc','competition_group'=>'IMC','competition_key'=>'IMC001|IMC|'.$key];
+ $fixtures=[];$start=new DateTimeImmutable('2026-01-01');
+ for($i=1;$i<=$played;$i++)$fixtures[]=fixture('r'.$i,true,'',$start->modify('+'.($i-1).' days')->format('Y-m-d'),'');
+ $next=$start->modify('+'.$played.' days')->format('Y-m-d');
+ $later=$start->modify('+'.($played+1).' days')->format('Y-m-d');
+ $fixtures[]=fixture('next',false,'',$next,'');$fixtures[]=fixture('later',false,'',$later,'');
+ $c=imc_competition_calendar($row,['expected_matchdays'=>$total],$fixtures);
+ check($c[$next]['number_label']==='Giornata '.($played+1).' di '.$total,$key.': Home continues from Results even with no round labels');
+ if($played+2<=$total)check($c[$later]['number']===$played+2,$key.': successive future dates advance once per turn');
+}
+$c=imc_competition_calendar($domestic,['expected_matchdays'=>18],[fixture('last',true,'','2026-11-15','15'),fixture('next',false,'','2026-11-19','')]);
+check($c['2026-11-19']['number_label']==='Giornata 16 di 18','Preserve explicit last Result when only part of the history is loaded');
+$c=imc_competition_calendar($domestic,['expected_matchdays'=>18],[fixture('old',false,'','2026-11-01',''),fixture('last',true,'','2026-11-15','15'),fixture('next',false,'','2026-11-19','')]);
+check($c['2026-11-19']['number']===16,'Old schedules without Results cannot shift the next turn');
+echo "Home calendar numbering: Results sequence passed\n";

@@ -101,7 +101,7 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
         $date=$existing[$slot]['date']??null;
         if ($date && isset($calendar[$date])) {
             $resolved=$calendar[$date];
-            if (!$resolved['number'] && !empty($existing[$slot]['number'])) {
+            if ((!$resolved['number'] || !empty($resolved['number_from_results'])) && !empty($existing[$slot]['number'])) {
                 $resolved['number']=$existing[$slot]['number'];
                 $resolved['label']=$existing[$slot]['label'];
                 $resolved['number_label']=($league?'Giornata ':'Turno ').$resolved['number'].($totalDays?' di '.$totalDays:'');
@@ -119,21 +119,37 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
     return $existing;
 }
 
-// Resolve a fixture's place only from an explicit matchday, a complete calendar,
-// or a named knockout phase anchored to the configured final turn.
+// Resolve turns from explicit labels or the played Results sequence.
+// A league's future calendar continues from its latest played turn.
 function imc_competition_calendar(array $row,array $definition,array $fixtures): array {
     $league=imc_competition_is_league($row);
     $total=(int)($definition['expected_matchdays']??0);
-    $days=[];
+    $days=[];$resultDates=[];
     foreach($fixtures as $r) {
         $turn=imc_competition_turn($r,$league);
-        if($turn) $days[$turn['date']]=$r;
+        if(!$turn)continue;
+        $date=$turn['date'];
+        if(!empty($r['played']))$resultDates[$date]=true;
+        // Results win over stale Schedule labels for the same turn.
+        if(!isset($days[$date]) || !empty($r['played']) || empty($days[$date]['played']))$days[$date]=$r;
     }
-    ksort($days);$out=[];$index=0;
+    ksort($days);$out=[];$index=0;$leagueNumbers=[];
+    if($league && $resultDates){
+        $position=0;$lastPlayed=max(array_keys($resultDates));
+        foreach($days as $date=>$r)if(isset($resultDates[$date])){
+            $position=imc_competition_turn($r,true)['number']??($position+1);
+            $leagueNumbers[$date]=$position;
+        }
+        foreach($days as $date=>$r)if($date>$lastPlayed && !isset($resultDates[$date])){
+            $position=imc_competition_turn($r,true)['number']??($position+1);
+            $leagueNumbers[$date]=$position;
+        }
+    }
     foreach($days as $date=>$r) {
-        $index++;$turn=imc_competition_turn($r,$league);$n=$turn['number'];
+        $index++;$turn=imc_competition_turn($r,$league);$n=$turn['number'];$fromResults=false;
         if(!$league && !in_array(cupPhase($r)[0],['Gironi'],true) && ($row['sm_action']??'')!=='interqualifier') $n=null; // Knockout round numbers restart.
-        if($total>0 && count($days)===$total) $n=$index;
+        if($n===null && $league && isset($leagueNumbers[$date])){$n=$leagueNumbers[$date];$fromResults=true;}
+        if($total>0 && count($days)===$total){$n=$index;$fromResults=false;}
         if(!$league && $total>0) {
             [$phase,$leg]=cupPhase($r);
             $twoLeg=in_array($row['sm_action']??'',['smfacup','smfashield'],true);
@@ -143,6 +159,7 @@ function imc_competition_calendar(array $row,array $definition,array $fixtures):
         }
         if($n!==null && ($n<1 || ($total>0 && $n>$total))) $n=null;
         $turn['number']=$n;$turn['total']=$total?:null;
+        if($fromResults)$turn['number_from_results']=true;
         if($league && $n) $turn['label']='Giornata '.$n;
         $turn['number_label']=$n?($league?'Giornata ':'Turno ').$n.($total?' di '.$total:''):null;
         $out[$date]=$turn;
