@@ -1,9 +1,9 @@
 <?php
 $cups = [
-    'u21-premier' => ['IMC005|IMC|risingstarsleague|premier', 'Rising Stars League Premier'],
-    'u21-challenger' => ['IMC005|IMC|risingstarsleague|challenger', 'Rising Stars League Challenger'],
-    'u18-premier' => ['IMC005|IMC|nextgenleague|premier', 'Next Gen League Premier'],
-    'u18-challenger' => ['IMC005|IMC|nextgenleague|challenger', 'Next Gen League Challenger'],
+    'u21-premier' => ['IMC005|IMC|risingstarsleague|premier', 'Rising Stars League U21 · Premier Pool'],
+    'u21-challenger' => ['IMC005|IMC|risingstarsleague|challenger', 'Rising Stars League U21 · Challenger Pool'],
+    'u18-premier' => ['IMC005|IMC|nextgenleague|premier', 'Next Gen League U18 · Premier Pool'],
+    'u18-challenger' => ['IMC005|IMC|nextgenleague|challenger', 'Next Gen League U18 · Challenger Pool'],
     'club-world-cup' => ['IMC005|IMC|clubworldcup', 'Club World Cup'],
 ];
 $pool = ($_GET['pool'] ?? 'premier') === 'challenger' ? 'challenger' : 'premier';

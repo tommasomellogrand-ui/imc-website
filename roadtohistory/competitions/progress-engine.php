@@ -182,7 +182,6 @@ try {
   if($key==='')continue;
   if(str_contains($key,'|playoff|'))$action='playoff';
   $configured[$key]=$definition;
-  if($group==='IMC' && $gw==='GW011')$name=preg_replace('/ U(?:21|18) · (Premier|Challenger) Pool$/',' $1',$name);
   if(isset($indexes[$key])){
    if($group==='IMC' && $name!=='')$rows[$indexes[$key]]['nexus_view']=$name;
   }else{
