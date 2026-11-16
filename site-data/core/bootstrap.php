@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__.'/world-identity.php';
 require_once __DIR__.'/club-display.php';
 require_once __DIR__.'/person-display.php';
 if (is_file(__DIR__.'/change-signal.php')) {
@@ -18,7 +19,7 @@ function imc_site_out(array $body,int $status=200): never {
   header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   header('Pragma: no-cache');
   header('Expires: 0');
-  echo json_encode(imc_person_display_fields($body),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);
+  echo json_encode(imc_world_payload(imc_person_display_fields($body)),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);
   exit;
 }
 function imc_site_config(): array {
@@ -30,6 +31,7 @@ function imc_site_config(): array {
 }
 const SITE_WORLD_TABLES = ['GW001'=>'IMC001','GW005'=>'IMC002','GW009'=>'IMC003','GW010'=>'IMC004','GW011'=>'IMC005','GW004'=>'IMC006','GW006'=>'IMC007','IMC-008'=>'IMC008'];
 function imc_site_world(?string $value):string {
+ $value=imc_world_route(strtoupper(trim((string)$value)));
  if(!isset(SITE_WORLD_TABLES[$value??'']))throw new InvalidArgumentException('invalid_world');
  return $value;
 }
@@ -37,7 +39,7 @@ function imc_site_target(array $config,string $world):string { imc_site_world($w
 function imc_site_db(array $c,string $target): PDO {
   $name=$c['db'][$target]??null;
   if(!$name) throw new RuntimeException('database_not_configured');
-  return new PDO(sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',$c['db']['host'],$c['db']['port'],$name),$c['db']['user'],$c['db']['pass'],[
+  return new IMCWorldPDO(sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',$c['db']['host'],$c['db']['port'],$name),$c['db']['user'],$c['db']['pass'],[
     PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES=>false
@@ -60,7 +62,7 @@ function imc_site_rows(PDO $db,string $sql,array $params=[]): array {
     $sql=preg_replace('/\b[a-z]+\.game_world_id\s*=\s*[a-z]+\.game_world_id\b/i','1=1',$sql);
   }
   $s=$db->prepare($sql);$s->execute($params);
-  $rows=$s->fetchAll();
+  $rows=imc_world_compat_rows($s->fetchAll());
   if(isset($route)&&$route!==false){
     foreach($rows as &$row){
       $key=$row['competition_key']??'';

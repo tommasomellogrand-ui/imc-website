@@ -53,6 +53,11 @@ jobs:
           test -s "__imc_private_gateway/.htaccess"
           for f in imc-universal-gateway/*.php __imc_private_gateway/config.php; do php -l "$f"; done
 
+      - name: Test canonical world identity and alias compatibility
+        env:
+          MYSQL_TEST_PASSWORD: imc-normalizer-ci-only
+        run: php tests/world-identity.php
+
       - name: Test world routing
         run: php tests/gateway-world-routing.php
 
@@ -87,6 +92,7 @@ jobs:
               (Path('imc-universal-gateway')/n, f'{remote_root}/imc-universal-gateway')
               for n in ['index.php','ingress.php','core.php','read.php','write.php','ddl.php','minisite.php','minisite-site.php','schedule-normalizer.php','playoff-normalizer.php','worldcup-season.php','worldcup-automation.php']
           ]
+          uploads.insert(0,(Path('site-data/core/world-identity.php'), f'{remote_root}/site-data/core'))
           uploads += [
               (Path('__imc_private_gateway/config.php'), f'{remote_root}/__imc_private_gateway'),
               (Path('__imc_private_gateway/.htaccess'), f'{remote_root}/__imc_private_gateway'),

@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__,3).'/site-data/core/world-identity.php';
 
 require_once dirname(__DIR__, 3).'/__imc-sm-master/admin/core.php';
 
@@ -15,7 +16,7 @@ function out(array $payload, int $status = 200): never {
     header('Cache-Control: no-store');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: no-referrer');
-    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+    echo json_encode(imc_world_payload($payload), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
     exit;
 }
 
@@ -35,8 +36,8 @@ function db(string $name): mysqli {
 }
 
 function all(mysqli $cx, string $sql, array $params = []): array {
-    $st = $cx->prepare($sql);
-    $st->execute($params);
+    $st = $cx->prepare(imc_world_sql($sql));
+    $st->execute(array_map('imc_world_value',$params));
     $rows = $st->get_result()->fetch_all(MYSQLI_ASSOC);
     $st->close();
     return $rows;
@@ -54,7 +55,7 @@ function positive_int(mixed $value, int $fallback, int $max): int {
 }
 
 function allowed_world(): string {
-    $world = strtoupper(trim((string)($_GET['game_world_id'] ?? IMC_BETA_WORLD)));
+    $world = imc_world_route(strtoupper(trim((string)($_GET['game_world_id'] ?? IMC_BETA_WORLD))));
     if ($world !== IMC_BETA_WORLD) fail('This beta endpoint is available only for GW004.', 404, 'WORLD_NOT_AVAILABLE');
     return $world;
 }

@@ -1,13 +1,14 @@
 <?php
 declare(strict_types=1);
 require_once dirname(__DIR__,2).'/site-data/core/person-display.php';
+require_once dirname(__DIR__,2).'/site-data/core/world-identity.php';
 /* IMC master website. Public editorial reads only. No gateway or schema mutation. */
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store');
 function respond(array $data, int $status=200): never {
   http_response_code($status);
-  echo json_encode(imc_person_display_fields($data), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE); exit;
+  echo json_encode(imc_world_payload(imc_person_display_fields($data)), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE); exit;
 }
 if (($_SERVER['REQUEST_METHOD']??'GET')!=='GET') respond(['ok'=>false,'error'=>'Metodo non disponibile.'],405);
 function rows(PDO $db,string $sql,array $args=[]): array { $s=$db->prepare($sql); $s->execute($args); return $s->fetchAll(); }
@@ -42,7 +43,7 @@ try {
   $root=dirname(__DIR__,2);
   $cfg=require $root.'/__imc_private_gateway/config.php';
   $stage='connection';
-  $db=new PDO(sprintf('mysql:host=%s;port=%d;dbname=Sql1956795_1;charset=utf8mb4',$cfg['db']['host'],$cfg['db']['port']),$cfg['db']['user'],$cfg['db']['pass'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]);
+  $db=new IMCWorldPDO(sprintf('mysql:host=%s;port=%d;dbname=Sql1956795_1;charset=utf8mb4',$cfg['db']['host'],$cfg['db']['port']),$cfg['db']['user'],$cfg['db']['pass'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]);
   $stage='query';
   $results=union_table('IMC Site Results','site_result_id','game_world_id',true);
   $schedule=union_table('IMC Site Schedule','site_schedule_id','game_world_id',true);
@@ -50,7 +51,7 @@ try {
   $transfers=union_table('IMC Site Transfers','site_transfer_id');
   $stats=union_table('IMC Site SM Player Stats','site_player_stats_id');
   $valid="r.result_status='COMPLETED' AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND r.home_score>=0 AND r.away_score>=0";
-  $dataset=string_arg('dataset')?:'pulse'; $world=string_arg('world');
+  $dataset=string_arg('dataset')?:'pulse'; $world=imc_world_route(string_arg('world'));
   if($world!==''&&!preg_match('/^GW0(0[1-9]|10)$/',$world))respond(['ok'=>false,'error'=>'Mondo non valido.'],422);
   $offset=number('offset');$limit=max(1,number('limit',30,100));$search=string_arg('q');
   $payload=[];$context=[];

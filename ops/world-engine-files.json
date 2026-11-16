@@ -1,4 +1,5 @@
 [
+  "site-data/core/world-identity.php",
   "site-assets/world-engine/templates/clubs/detail.js",
   "site-assets/world-engine/templates/clubs/directory.js",
   "site-assets/world-engine/templates/competitions/match.js",

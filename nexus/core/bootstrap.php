@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+require_once dirname(__DIR__,2).'/site-data/core/world-identity.php';
 require_once __DIR__.'/club-display.php';
 require_once __DIR__.'/person-display.php';
 
@@ -14,7 +15,7 @@ function nexus_out(array $body,int $status=200): never {
   header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   header('Pragma: no-cache');
   header('Expires: 0');
-  echo json_encode(imc_person_display_fields($body),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);
+  echo json_encode(imc_world_payload(imc_person_display_fields($body)),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE);
   exit;
 }
 function nexus_config(): array {
@@ -25,7 +26,7 @@ function nexus_config(): array {
   return $c;
 }
 function nexus_world(?string $value): string {
-  $gw=strtoupper(trim((string)$value));
+  $gw=imc_world_route(strtoupper(trim((string)$value)));
   if($gw==='IMC-008') return $gw;
   if(!preg_match('/^GW00[1-9]$|^GW01[01]$/',$gw)) throw new InvalidArgumentException('invalid_game_world');
   return $gw;
@@ -39,14 +40,14 @@ function nexus_target(array $c,string $gw): string {
 function nexus_db(array $c,string $target): PDO {
   $name=$c['db'][$target]??null;
   if(!$name) throw new RuntimeException('database_not_configured');
-  return new PDO(sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',$c['db']['host'],$c['db']['port'],$name),$c['db']['user'],$c['db']['pass'],[
+  return new IMCWorldPDO(sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',$c['db']['host'],$c['db']['port'],$name),$c['db']['user'],$c['db']['pass'],[
     PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES=>false
   ]);
 }
 function nexus_rows(PDO $db,string $sql,array $params=[]): array {
-  $s=$db->prepare($sql);$s->execute($params);return $s->fetchAll();
+  $s=$db->prepare($sql);$s->execute($params);return imc_world_compat_rows($s->fetchAll());
 }
 function nexus_season(mixed $value): ?int {
   if($value===null||$value==='') return null;

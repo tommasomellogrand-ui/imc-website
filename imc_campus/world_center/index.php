@@ -2,14 +2,14 @@
 declare(strict_types=1);
 require dirname(__DIR__,2).'/nexus/core/bootstrap.php';
 header('Cache-Control: no-store');
-$worlds = ['IMC-001' => ['Road To History', '/roadtohistory/'],
-'IMC-002' => ['Hall Of Famers', '/halloffamers/'],
-'IMC-003' => ['Kick Off', '/kickoff/'],
-'IMC-004' => ['Sensible Soccer Academy', '/sensiblesocceracademy/'],
-'IMC-005' => ['Subbuteo Super League', '/subbuteosuperleague/'],
-'IMC-006' => ['World League', '/worldleague/'],
-'IMC-007' => ['Master League World', '/masterleagueworld/'],
-'IMC-008' => ['Scudetto', '/scudetto/']];
+$worlds = ['IMC001' => ['Road To History', '/roadtohistory/'],
+'IMC002' => ['Hall Of Famers', '/halloffamers/'],
+'IMC003' => ['Kick Off', '/kickoff/'],
+'IMC004' => ['Sensible Soccer Academy', '/sensiblesocceracademy/'],
+'IMC005' => ['Subbuteo Super League', '/subbuteosuperleague/'],
+'IMC006' => ['World League', '/worldleague/'],
+'IMC007' => ['Master League World', '/masterleagueworld/'],
+'IMC008' => ['Scudetto', '/scudetto/']];
 $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
 $data=[];
 try {
@@ -17,7 +17,7 @@ try {
  $rows=nexus_rows($db,"SELECT w.`IMC_WORLD_ID` code,w.`Active Club` teams,
  (SELECT COUNT(DISTINCT a.manager_id) FROM `IMC Manager Assignment Global` a WHERE a.game_world_id=w.`IMC GW` AND a.assignment_type='club' AND a.team_id IS NOT NULL AND (a.start_date IS NULL OR a.start_date<='$today') AND (a.end_date IS NULL OR a.end_date>='$today')) managers,
  (SELECT s.imc_season FROM `IMC Game World Season` s WHERE s.game_world_id=w.`IMC GW` AND s.imc_season_start_date<='$today' AND (s.imc_season_end_date IS NULL OR s.imc_season_end_date>='$today') ORDER BY s.imc_season_start_date DESC LIMIT 1) season
- FROM `IMC Game World Codex Global` w WHERE w.IMC_WORLD_ID BETWEEN 'IMC-001' AND 'IMC-008'");
+ FROM `IMC Game World Codex Global` w WHERE w.IMC_WORLD_ID BETWEEN 'IMC001' AND 'IMC008'");
  $data=array_column($rows,null,'code');
 } catch(Throwable $e){error_log('World Center: '.$e->getMessage());}
 function metric($value){return $value===null?'—':(int)$value;}

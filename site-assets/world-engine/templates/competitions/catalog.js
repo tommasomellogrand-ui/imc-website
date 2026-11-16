@@ -59,7 +59,7 @@ $('back').href='/__WORLD_SLUG__/';$('back').textContent='← '+(c.world?.game_wo
 $('season-select').onchange=()=>{const next=new URLSearchParams(location.search);next.set('season',$('season-select').value);location.href=location.pathname+'?'+next};
 if(!current){seasonBar();$('title').textContent='Competizioni';$('competition-nav').hidden=true;$('competition-tools').hidden=true;$('group-filter').hidden=true;if(requested)$('meta').textContent='Competizione non disponibile nella stagione selezionata · Scegli dal catalogo';catalog($('view'));history.replaceState(null,'',base+'?'+new URLSearchParams({season,group:category}));return}
  const dedicated={championsleague:'rth-champions-league',europaleague:'rth-europa-league',conferenceleague:'rth-conference-league',clubworldcup:'rth-club-world-cup'};
- const target=gw==='GW001'&&current.competition_group==='IMC'&&dedicated[current.competition_key.split('|').pop()];
+ const target=gw==='IMC001'&&current.competition_group==='IMC'&&dedicated[current.competition_key.split('|').pop()];
  if(target){const query=new URLSearchParams({season,tab:params.get('tab')||'overview'});location.replace('/roadtohistory/'+target+'/?'+query);return;}
  await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=detailScript;script.onload=resolve;script.onerror=reject;document.head.append(script);});
  await showLeaguePage({world:gw,base,competition:current,seasons:d.seasons,season});return;

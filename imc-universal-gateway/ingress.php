@@ -7,6 +7,7 @@ require_once __DIR__.'/core.php';
  */
 
 function imc_ingress_out(array $data, int $status = 200): never {
+    if(($GLOBALS['imc_legacy_read']??false)&&isset($data['rows']))$data['rows']=imc_world_compat_rows($data['rows']);else $data=imc_world_payload($data);
     imc_publish_committed_rows($data);
     http_response_code($status);
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
@@ -56,7 +57,7 @@ function imc_ingress_route(array $body, array $cfg): array {
 }
 
 function imc_ingress_db(array $cfg, string $database): PDO {
-    return new PDO(
+    return new IMCWorldPDO(
         sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $cfg['db']['host'], $cfg['db']['port'], $database),
         $cfg['db']['user'],
         $cfg['db']['pass'],

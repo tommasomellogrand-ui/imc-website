@@ -51,6 +51,7 @@ jobs:
               try: changed=set(subprocess.check_output(['git','diff','--name-only',before,'HEAD'],text=True).splitlines())
               except subprocess.CalledProcessError: full=True
           selected=allowed if full else [p for p in allowed if p in changed]
+          selected=['site-data/core/world-identity.php']+[p for p in selected if p!='site-data/core/world-identity.php']
           if not selected:
               print('No legacy API endpoints changed');exit()
           ctx=ssl.create_default_context();ctx.check_hostname=False

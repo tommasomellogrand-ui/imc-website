@@ -17,7 +17,7 @@ function imc_validate_match_report_row(PDO $p,string $t,array $r):array{
     $keys=array_keys($r); sort($keys); $sortedExpected=$expected; sort($sortedExpected);
     if($keys!==$sortedExpected)throw new InvalidArgumentException('invalid_payload:match_report_structure_mismatch');
     $gw=substr($t,0,5);
-    if(strtoupper(trim((string)$r['game_world_id']))!==$gw)throw new InvalidArgumentException('game_world_mismatch');
+    if(imc_world_id(strtoupper(trim((string)$r['game_world_id'])))!==imc_world_id($gw))throw new InvalidArgumentException('game_world_mismatch');
     $cols=imc_cols($p,$t);
     foreach($expected as$k){if(!isset($cols[$k]))throw new InvalidArgumentException('column_not_found:'.$k);imc_validate_import_value($k,$r[$k],$cols[$k]);}
     return imc_row($p,$t,$r);

@@ -143,7 +143,7 @@ function dbm_assert_no_cross_database(string $sql, string $database): void {
     // Owner-authorized CORE lookups for dated club and national-team manager assignments.
     $lookupTables = ['IMC Manager Assignment Global', 'IMC Manager Codex Global', 'IMC Game World National Team Mapping'];
     $isRead = preg_match('/^\s*SELECT\b/i', $sql) === 1;
-    $isAssignmentTrigger = preg_match('/^\s*CREATE\s+TRIGGER\s+`?imc_results_(?:nations|clubs)_gw[0-9]{3}_bi`?\s+BEFORE\s+INSERT\s+ON\s+`?GW[0-9]{3}_IMC_Results`?\s+FOR\s+EACH\s+ROW\s+SET\s+NEW\./i', $sql) === 1;
+    $isAssignmentTrigger = preg_match('/^\s*CREATE\s+TRIGGER\s+`?imc_results_(?:nations|clubs)_gw[0-9]{3}_bi`?\s+BEFORE\s+INSERT\s+ON\s+`?(?:GW[0-9]{3}_IMC_Results|IMC00[1-8]_Results)`?\s+FOR\s+EACH\s+ROW\s+SET\s+NEW\./i', $sql) === 1;
     $canLookup = in_array(strtolower($database), ['sql1956795_2', 'sql1956795_3'], true) && ($isRead || $isAssignmentTrigger);
     if (preg_match_all('/`?(Sql\d+_\d+)`?\s*\./i', $sql, $matches, PREG_OFFSET_CAPTURE)) {
         foreach ($matches[1] as $i => $match) {

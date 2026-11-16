@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id),key=document.body.dataset.competition,params=new URLSearchParams(location.search),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const settings=window.leaguePage;
-const world=settings?.world||'GW001',base=settings?.base||'/roadtohistory/';
+const world=settings?.world||'IMC001',base=settings?.base||'/roadtohistory/';
 const league=settings?settings.isLeague:!key.endsWith('|clubworldcup');
 let season='',tab=params.get('tab')||'overview',mode='results',metric='goals',statsMode='teams',data,epoch=0;
 const safe=v=>/^(https:\/\/|\/(?!\/))/.test(v||'')?v:'',date=v=>v?new Date(String(v).slice(0,10)+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'}):'Data da definire';
@@ -157,5 +157,5 @@ async function load(){const request=++epoch;data=null;$('cup-view').innerHTML=em
  }catch(e){if(request===epoch)$('cup-view').innerHTML=empty('Dati temporaneamente non disponibili. Riprova con Aggiorna.')}finally{if(request===epoch)$('cup-view').setAttribute('aria-busy','false')}}
  document.querySelectorAll('[data-main-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.mainTab;render()});$('refresh-cup').onclick=load;$('close-match').onclick=()=>$('match-dialog').close();
  (async()=>{try{let c=settings?.context;
- if(!c){const r=await fetch('/roadtohistory/imc-cups/context.php?world=GW001',{cache:'no-store'});c=await r.json();if(!r.ok||!c.ok)throw Error();}const seasons=c.seasons||[];season=seasons.some(s=>String(s.imc_season)===params.get('season'))?params.get('season'):String(c.current_season||'');$('cup-season').innerHTML=seasons.map(s=>'<option value="'+s.imc_season+'">Stagione '+s.imc_season+'</option>').join('');$('cup-season').value=season;$('cup-season').onchange=e=>{season=e.target.value;load()};seasonBar();if(tab==='standings')tab='table';if(tab==='results')tab='overview';if(tab==='schedule')tab='matches';if(!['overview','matches','table','stats'].includes(tab))tab='overview';await load()}catch(e){$('cup-view').innerHTML=empty('Impossibile caricare la stagione. Ricarica la pagina.')}})();
+ if(!c){const r=await fetch('/roadtohistory/imc-cups/context.php?world=IMC001',{cache:'no-store'});c=await r.json();if(!r.ok||!c.ok)throw Error();}const seasons=c.seasons||[];season=seasons.some(s=>String(s.imc_season)===params.get('season'))?params.get('season'):String(c.current_season||'');$('cup-season').innerHTML=seasons.map(s=>'<option value="'+s.imc_season+'">Stagione '+s.imc_season+'</option>').join('');$('cup-season').value=season;$('cup-season').onchange=e=>{season=e.target.value;load()};seasonBar();if(tab==='standings')tab='table';if(tab==='results')tab='overview';if(tab==='schedule')tab='matches';if(!['overview','matches','table','stats'].includes(tab))tab='overview';await load()}catch(e){$('cup-view').innerHTML=empty('Impossibile caricare la stagione. Ricarica la pagina.')}})();
 })();
