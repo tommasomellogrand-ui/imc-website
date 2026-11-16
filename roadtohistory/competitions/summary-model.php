@@ -105,5 +105,50 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
     $existing['remaining_days']=$totalDays!==null?$totalDays-$existing['played_days']:null;
     $existing['round_percent']=$totalDays!==null?(int)round(100*$existing['played_days']/$totalDays):null;
     if (!$known && $totalDays!==null) $existing['status']='In programma';
+    $calendar=imc_competition_calendar($row,$definition,$fixtures);
+    foreach (['last_turn','next_turn'] as $slot) {
+        $date=$existing[$slot]['date']??null;
+        if ($date && isset($calendar[$date])) {
+            $resolved=$calendar[$date];
+            if (!$resolved['number'] && !empty($existing[$slot]['number'])) {
+                $resolved['number']=$existing[$slot]['number'];
+                $resolved['label']=$existing[$slot]['label'];
+                $resolved['number_label']=($league?'Giornata ':'Turno ').$resolved['number'].($totalDays?' di '.$totalDays:'');
+            }
+            $existing[$slot]=array_replace($existing[$slot],$resolved);
+        }
+    }
     return $existing;
 }
+
+// Resolve a fixture's place only from an explicit matchday, a complete calendar,
+// or a named knockout phase anchored to the configured final turn.
+function imc_competition_calendar(array $row,array $definition,array $fixtures): array {
+    $league=imc_competition_is_league($row);
+    $total=(int)($definition['expected_matchdays']??0);
+    $days=[];
+    foreach($fixtures as $r) {
+        $turn=imc_competition_turn($r,$league);
+        if($turn) $days[$turn['date']]=$r;
+    }
+    ksort($days);$out=[];$index=0;
+    foreach($days as $date=>$r) {
+        $index++;$turn=imc_competition_turn($r,$league);$n=$turn['number'];
+        if(!$league && !in_array(cupPhase($r)[0],['Gironi'],true) && ($row['sm_action']??'')!=='interqualifier') $n=null; // Knockout round numbers restart.
+        if($total>0 && count($days)===$total) $n=$index;
+        if(!$league && $total>0) {
+            [$phase,$leg]=cupPhase($r);
+            $twoLeg=in_array($row['sm_action']??'',['smfacup','smfashield'],true);
+            $offset=['Finale'=>0,'Semifinale'=>$twoLeg?2:1,'Quarti'=>$twoLeg?4:2,'Ottavi'=>$twoLeg?6:3][$phase]??null;
+            if($offset!==null) $n=$total-$offset+($twoLeg && $leg==='Ritorno'?1:0);
+            if($twoLeg && $phase!=='Finale' && $leg==='') $n=count($days)===$total?$index:null;
+        }
+        if($n!==null && ($n<1 || ($total>0 && $n>$total))) $n=null;
+        $turn['number']=$n;$turn['total']=$total?:null;
+        if($league && $n) $turn['label']='Giornata '.$n;
+        $turn['number_label']=$n?($league?'Giornata ':'Turno ').$n.($total?' di '.$total:''):null;
+        $out[$date]=$turn;
+    }
+    return $out;
+}
+

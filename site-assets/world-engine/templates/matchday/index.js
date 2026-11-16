@@ -20,6 +20,7 @@ function competitionUrl(r){
 let dates=[],current='',defaultDate='',initial=true;
 const prev=document.getElementById('md-prev'),next=document.getElementById('md-next');
 function roundLabel(r){
+ if(r.turn){const t=r.turn;return [...new Set([t.number_label,t.label].filter(Boolean))].join(' · ');}
  if(r.round)return String(r.round);
  const n=r.sm_matchday||r.matchday;
  return n?'Giornata '+n:'';
@@ -37,7 +38,7 @@ function render(d){
  for(const r of d.rows){const k=r.competition_key+'|'+r.imc_season+'|'+roundLabel(r);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
  panel.innerHTML=[...groups.values()].map(rows=>{
   const first=rows[0];
-  return '<section class="md-group"><div class="md-group-heading"><h3><a href="'+esc(competitionUrl(first))+'">'+esc(first.competition_name)+'</a></h3><span>'+esc(roundLabel(first))+'</span></div><div class="md-games">'+rows.map(r=>{
+  return '<section class="md-group"><div class="md-group-heading"><h3><a href="'+esc(competitionUrl(first))+'">'+esc(first.competition_name)+'</a></h3><span>'+esc(roundLabel(first))+(first.turn_progress?.total_days?' <small>'+esc(first.turn_progress.played_days)+' di '+esc(first.turn_progress.total_days)+' turni giocati · '+esc(first.turn_progress.remaining_days)+' da giocare</small>':'')+'</span></div><div class="md-games">'+rows.map(r=>{
    const played=mode==='results';let score=played?esc(r.home_score)+' – '+esc(r.away_score):esc(String(r.match_time||'').slice(0,5)||'—');
    if(played)for(const [p,label] of [['penalty','Rigori'],['aggregate','Totale']])if(r[p+'_home_score']!=null&&r[p+'_away_score']!=null)score+='<small>'+label+' '+esc(r[p+'_home_score'])+' – '+esc(r[p+'_away_score'])+'</small>';
    const report=played&&r.has_report?'<a class="md-report" aria-label="Match report: '+esc(r.home_name)+' – '+esc(r.away_name)+'" href="/__WORLD_SLUG__/competitions/match.html?fixture='+encodeURIComponent(r.sm_fixture_id)+'"></a>':'';

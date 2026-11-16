@@ -47,3 +47,11 @@ foreach ([[16,37,8,3,false],[32,125,13,6,true]] as [$teams,$matches,$days,$group
  $p=imc_competition_summary($cup,['teams_count'=>$teams,'expected_match'=>$matches,'expected_matchdays'=>$days],$calendar,[],[]);
  check($p['played_days']===$days-1&&$p['remaining_days']===1,'Unplayed final remains one turn');
 }
+
+$calendar=imc_competition_calendar($cup,$definition,[fixture('1',false,'Semifinali','2026-11-16','Andata'),fixture('2',false,'Semifinali','2026-11-20','Ritorno'),fixture('3',false,'Finale','2026-11-24','')]);
+check($calendar['2026-11-16']['number_label']==='Turno 6 di 8','Named semifinal first leg anchors to total, not first imported date');
+check($calendar['2026-11-20']['number']===7&&$calendar['2026-11-24']['number']===8,'Second leg and final retain separate turns');
+$calendar=imc_competition_calendar($domestic,['expected_matchdays'=>18],[fixture('1',false,'','2026-11-16','15')]);
+check($calendar['2026-11-16']['number_label']==='Giornata 15 di 18','Explicit domestic matchday survives partial imports');
+$calendar=imc_competition_calendar($domestic,['expected_matchdays'=>18],[fixture('1',false,'','2026-11-16','')]);
+check($calendar['2026-11-16']['number']===null,'A partial calendar cannot invent a day number');

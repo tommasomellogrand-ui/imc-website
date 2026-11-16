@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require dirname(__DIR__,2).'/site-data/core/bootstrap.php';
 require dirname(__DIR__,2).'/site-data/competitions/match-teams.php';
+require_once dirname(__DIR__,2).'/roadtohistory/competitions/summary-model.php';
 try{
  $gw=imc_site_world((string)($_GET['world']??''));
  $mode=(string)($_GET['mode']??'results');
@@ -22,6 +23,25 @@ try{
  if($day!==''&&!in_array($day,$dates,true))throw new InvalidArgumentException('invalid_date');
  $rows=$day===''?[]:imc_site_rows($db,'SELECT t.* FROM `'.$table.'` t WHERE '.$where.' AND DATE(t.match_date)=? ORDER BY t.competition_key,t.sm_fixture_id',array_merge($params,[$day]));
  $labels=[];foreach(imc_site_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $r)$labels[$r['competition_key']]=$r['nexus_view'];
+ // One season-scoped calendar per competition, shared by Home and Matchday.
+ $definitions=[];
+ foreach(imc_site_rows($core,'SELECT competition_key,sm_action,competition_group,teams_count,expected_match,expected_matchdays FROM `IMC Competition Codex Global` WHERE game_world_id=?',[$gw]) as $definition)$definitions[$definition['competition_key']]=$definition;
+ $calendars=[];$summaries=[];
+ $seasons=array_values(array_unique(array_column($rows,'imc_season')));
+ foreach($seasons as $season){
+  $groups=[];
+  foreach(['Schedule'=>$st,'Results'=>$rt] as $repository=>$source){
+   $scores=$repository==='Results'?' AND home_score IS NOT NULL AND away_score IS NOT NULL':'';
+   foreach(imc_site_rows($db,'SELECT sm_fixture_id,competition_key,sm_action,competition_group,competition_stage,competition_round,match_date,home_name,away_name FROM `'.$source.'` WHERE imc_season=?'.$scores.' ORDER BY match_date,sm_fixture_id',[$season]) as $fixture){
+    $fixture['played']=$repository==='Results';$groups[$fixture['competition_key']][]=$fixture;
+   }
+  }
+  foreach($groups as $key=>$fixtures){
+   $definition=$definitions[$key]??[];$row=$fixtures[0];
+   $calendars[$season][$key]=imc_competition_calendar($row,$definition,$fixtures);
+   $summaries[$season][$key]=imc_competition_summary($row,$definition,$fixtures,[],[]);
+  }
+ }
  $reports=[];if($mode==='results'&&$rows){
   $ids=array_values(array_filter(array_unique(array_column($rows,'sm_fixture_id'))));
   foreach(array_chunk($ids,500) as $chunk)foreach(imc_site_rows($db,'SELECT DISTINCT sm_fixture_id FROM `'.$mt.'` WHERE sm_fixture_id IN ('.implode(',',array_fill(0,count($chunk),'?')).')',$chunk) as $r)$reports[(string)$r['sm_fixture_id']]=true;
@@ -35,8 +55,8 @@ try{
   $action=strtolower((string)$r['sm_action']);$div=(int)($r['sm_division']??0);
   $label=$labels[$key]??null;
   if(!$label)$label=in_array($action,['league','playoff'],true)?($divisions[$div]??'Divisione '.$div).($action==='playoff'?' · Playoff':''):($names[$action]??ucwords(str_replace('_',' ',preg_replace('/^'.preg_quote($gw,'/').'_IMC_/','',$key))));
-  $fields=['sm_fixture_id','competition_key','competition_group','sm_action','sm_division','imc_season','match_date','match_time','home_name','away_name','home_score','away_score','home_sm_club_id','away_sm_club_id','home_sm_team_id','away_sm_team_id','home_sm_manager_id','away_sm_manager_id','aggregate_home_score','aggregate_away_score','penalty_home_score','penalty_away_score','sm_matchday','matchday','round'];
-  $r=array_intersect_key($r,array_flip($fields));$r['competition_name']=$label;$r['has_report']=isset($reports[$fixture]);$clean[]=$r;
+  $fields=['sm_fixture_id','competition_key','competition_group','sm_action','sm_division','imc_season','match_date','match_time','home_name','away_name','home_score','away_score','home_sm_club_id','away_sm_club_id','home_sm_team_id','away_sm_team_id','home_sm_manager_id','away_sm_manager_id','aggregate_home_score','aggregate_away_score','penalty_home_score','penalty_away_score','sm_matchday','matchday','round','competition_stage','competition_round'];
+  $r=array_intersect_key($r,array_flip($fields));$r['competition_name']=$label;$r['turn']=$calendars[$r['imc_season']][$key][substr((string)$r['match_date'],0,10)]??null;$summary=$summaries[$r['imc_season']][$key]??[];$r['turn_progress']=array_intersect_key($summary,array_flip(['played_days','remaining_days','total_days']));$r['has_report']=isset($reports[$fixture]);$clean[]=$r;
  }
  $clean=imc_site_enrich_match_teams($core,$gw,$clean);
  imc_site_out(['ok'=>true,'game_world_id'=>$gw,'mode'=>$mode,'today'=>$today,'date'=>$day?:null,'dates'=>$dates,'rows'=>$clean,'generated_at'=>gmdate('c')]);
