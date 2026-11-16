@@ -173,64 +173,54 @@ if(!document.getElementById('nx-universal-nav')){
  root.prepend(feed);
  const overview=document.createElement('section');overview.className='imc-home-turns';overview.setAttribute('aria-label','Turni delle competizioni');root.insertBefore(overview,feed);
  const turnsStyle=document.createElement('style');turnsStyle.textContent=`
- .imc-home-turns{font-family:Inter,sans-serif;margin:20px auto;padding:0 16px;max-width:1120px;color:#192b43}
- .imc-home-turns h2{font-size:20px;margin:0 0 16px}
- .imc-home-turns .imc-competition-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:0 0 18px}
- .imc-home-turns .imc-competition-tabs button{font:650 12px/1.2 Inter,sans-serif;min-height:44px;padding:9px 2px;border:1px solid #dce0e6;border-radius:8px;background:white;color:#192b43;cursor:pointer}
- .imc-home-turns .imc-competition-tabs button[aria-selected=true]{background:var(--world-accent,#b69b5d);color:var(--world-accent-ink,#192b43);border-color:var(--world-accent,#b69b5d)}
- .imc-home-turns [hidden]{display:none!important}
- .imc-home-turns .imc-turn-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
- .imc-home-turns article{padding:18px;background:#fff;border:1px solid #dce0e6;border-top:3px solid var(--world-accent,#b69b5d);border-radius:12px;box-shadow:0 3px 12px #192b4308;min-width:0}
- .imc-home-turns h3{font-size:17px;line-height:1.3;margin:0 0 7px}.imc-home-turns a{color:inherit;text-decoration:none}
- .imc-home-turns .imc-turn-state{font-size:12px;color:#5b697c;margin:0 0 14px}
- .imc-home-turns .imc-turn-count{display:block;font-size:21px;font-weight:750;line-height:1.3}.imc-home-turns .imc-turn-count small{font-size:12px;font-weight:500;color:#5b697c}
- .imc-home-turns progress{display:block;width:100%;height:7px;margin:10px 0 7px;accent-color:var(--world-accent,#b69b5d);border:0;border-radius:9px;overflow:hidden;background:#e7eaf0}
- .imc-home-turns progress::-webkit-progress-bar{background:#e7eaf0}.imc-home-turns progress::-webkit-progress-value{background:var(--world-accent,#b69b5d)}
- .imc-home-turns .imc-turn-remaining{font-size:12px;color:#5b697c;margin:0}
- .imc-home-turns .imc-turn-date{border-top:1px solid #edf0f3;padding-top:11px;margin-top:12px;display:grid;gap:4px;font-size:13px;line-height:1.4}
- .imc-home-turns .imc-turn-date small{color:#5b697c;font-size:11px}.imc-home-turns .imc-turn-divisions{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;padding-top:12px;border-top:1px solid #edf0f3}
- .imc-home-turns .imc-turn-divisions a{font-size:12px;padding:7px 10px;border:1px solid #e1e5eb;border-radius:7px;background:#f7f8fa}
+ .imc-home-turns{font-family:Inter,sans-serif;margin:20px auto;padding:0 12px;max-width:1120px;color:#192b43}
+ .imc-home-turns>h2{font:750 19px/1.3 Inter,sans-serif;margin:0 0 18px}
+ .imc-home-turns .imc-calendar-day{margin:0 0 22px}.imc-home-turns .imc-calendar-date{font:750 15px/1.3 Inter,sans-serif;margin:0 0 10px;padding:0 0 8px;border-bottom:1px solid #dce0e6;color:#192b43;text-transform:none;letter-spacing:0}
+ .imc-home-turns .imc-turn-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:stretch}
+ .imc-home-turns article{--category:#2d587c;--category-bg:#edf4fa;min-width:0;padding:0;background:#fff;border:1px solid #dce0e6;border-radius:9px;overflow:hidden;box-shadow:0 2px 6px #192b4306}
+ .imc-home-turns article[data-group=INTERNATIONAL]{--category:#65478d;--category-bg:#f2edfa}.imc-home-turns article[data-group=IMC]{--category:#956b19;--category-bg:#fbf4e3}.imc-home-turns article[data-group=NATIONS]{--category:#24644d;--category-bg:#eaf5ee}
+ .imc-home-turns .imc-calendar-card-head{display:block;background:var(--category-bg);border-top:3px solid var(--category);padding:9px 7px;color:var(--category)}
+ .imc-home-turns .imc-calendar-card-head small{display:block;font:650 9px/1.2 Inter,sans-serif;margin:0 0 4px}
+ .imc-home-turns h3{font:750 12px/1.3 Inter,sans-serif;margin:0;overflow-wrap:anywhere;text-transform:none;letter-spacing:0}.imc-home-turns a{color:inherit;text-decoration:none}
+ .imc-home-turns .imc-calendar-card-body{display:grid;gap:6px;padding:9px 7px;font:600 11px/1.35 Inter,sans-serif;overflow-wrap:anywhere}
+ .imc-home-turns .imc-calendar-card-body small{font:400 10px/1.3 Inter,sans-serif;color:#5b697c}
+ .imc-home-turns .imc-turn-divisions{display:block;border-top:1px solid #edf0f3;padding-top:6px;font:400 9px/1.4 Inter,sans-serif;color:#5b697c}
+ @media(min-width:700px){.imc-home-turns .imc-turn-grid{gap:12px}.imc-home-turns h3{font-size:15px}.imc-home-turns .imc-calendar-card-head{padding:12px}.imc-home-turns .imc-calendar-card-body{font-size:13px;padding:12px}}
  `;document.head.append(turnsStyle);
  read('competitions/progress.php').then(data=>{
-  const heading=document.createElement('h2');heading.textContent='Competizioni · Stagione '+data.season;overview.append(heading);
-  const categories=[['DOMESTIC','Domestic'],['INTERNATIONAL','International'],['IMC','IMC'],['NATIONS','Nations']];
-  const categoryTabs=document.createElement('div');categoryTabs.className='imc-competition-tabs';categoryTabs.setAttribute('role','tablist');categoryTabs.setAttribute('aria-label','Categorie competizioni');overview.append(categoryTabs);
-  const panels=new Map();
-  for(const [group,name] of categories){
-   const button=document.createElement('button');button.type='button';button.textContent=name;button.dataset.group=group;button.id='home-category-'+group;button.setAttribute('role','tab');button.setAttribute('aria-controls','home-competitions-'+group);
-   const panel=document.createElement('div');panel.id='home-competitions-'+group;panel.className='imc-turn-grid';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',button.id);panels.set(group,panel);categoryTabs.append(button);overview.append(panel);
-   button.onclick=()=>{for(const b of categoryTabs.children){const active=b===button;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;panels.get(b.dataset.group).hidden=!active;}};
-   button.onkeydown=e=>{const bs=[...categoryTabs.children],i=bs.indexOf(button);let n;if(e.key==='ArrowRight')n=(i+1)%4;if(e.key==='ArrowLeft')n=(i+3)%4;if(e.key==='Home')n=0;if(e.key==='End')n=3;if(n!==undefined){e.preventDefault();bs[n].click();bs[n].focus();}};
-  }
+  const heading=document.createElement('h2');heading.textContent='Calendario · Stagione '+data.season;overview.append(heading);
+  const names={DOMESTIC:'Domestic',INTERNATIONAL:'International',IMC:'IMC',NATIONS:'Nations'},days=new Map();
+  const calendarToday=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome'}).format(new Date());
   const competitionLink=row=>base+'competitions/view.html?'+new URLSearchParams({season:data.season,competition:row.competition_key,group:row.competition_group});
   let domesticShown=false;
   for(const row of data.rows){
-   const p=data.progress[row.competition_key],panel=panels.get(row.competition_group);if(!p||!panel)continue;
+   const p=data.progress[row.competition_key];if(!p||p.complete||!names[row.competition_group])continue;
    const domestic=row.sm_action==='league'&&row.competition_group==='DOMESTIC';
    if(domestic&&domesticShown)continue;if(domestic)domesticShown=true;
-   const card=document.createElement('article');card.dataset.competition=row.competition_key;
-   const title=document.createElement('h3'),link=document.createElement('a');link.href=domestic?base+'competitions/?group=DOMESTIC':competitionLink(row);link.textContent=domestic?'Leagues':row.nexus_view;title.append(link);card.append(title);
-   if(p.status){const state=document.createElement('p');state.className='imc-turn-state';state.textContent=p.status;card.append(state);}
-   if(p.total_days){
-    const count=document.createElement('strong');count.className='imc-turn-count';count.append(p.played_days+' di '+p.total_days+' ');const label=document.createElement('small');label.textContent='turni giocati';count.append(label);
-    const bar=document.createElement('progress');bar.max=p.total_days;bar.value=p.played_days;bar.setAttribute('aria-label','Turni giocati');
-    const remaining=document.createElement('p');remaining.className='imc-turn-remaining';remaining.textContent=p.remaining_days+' turni da giocare';card.append(count,bar,remaining);
+   const turns=(p.calendar_turns||[p.next_turn]).filter(t=>t?.date&&t.date>=calendarToday);
+   for(const t of turns.length?turns:[null]){
+    const date=t?.date||'';if(!days.has(date))days.set(date,[]);days.get(date).push({row,p,t,domestic});
    }
-   for(const [slot,label] of [['last_turn','Ultimo turno'],['next_turn','Prossimo turno']]){
-    const t=p[slot];if(!t?.date&&(slot!=='next_turn'||p.complete))continue;
-    const line=document.createElement('div');line.className='imc-turn-date';const caption=document.createElement('small');caption.textContent=label;
-    const value=document.createElement('strong');value.textContent=t?.date?[t.number_label,t.label,t.date.split('-').reverse().join('/')].filter((v,i,a)=>v&&a.indexOf(v)===i&&!(v===t.label&&t.number_label?.startsWith(v+' di '))).join(' · '):'Data da definire';line.append(caption,value);card.append(line);
-   }
-   if(domestic){
-    const divisions=document.createElement('div');divisions.className='imc-turn-divisions';divisions.setAttribute('aria-label','Divisioni');
-    for(const division of data.rows.filter(r=>r.sm_action==='league'&&r.competition_group==='DOMESTIC')){const a=document.createElement('a');a.href=competitionLink(division);a.textContent=division.nexus_view;divisions.append(a);}
-    card.append(divisions);
-   }
-   panel.append(card);
   }
-  for(const panel of panels.values())if(!panel.children.length){const empty=document.createElement('p');empty.textContent='Nessuna competizione disponibile per questa stagione.';panel.append(empty);}
-  categoryTabs.firstElementChild.click();
- }).catch(()=>{overview.textContent='Turni temporaneamente non disponibili.';});
+  for(const date of [...days.keys()].sort((a,b)=>a===''?1:b===''?-1:a.localeCompare(b))){
+   const section=document.createElement('section');section.className='imc-calendar-day';section.dataset.date=date;
+   const dateTitle=document.createElement('h2');dateTitle.className='imc-calendar-date';
+   if(date){const time=document.createElement('time');time.dateTime=date;time.textContent=new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long'}).format(new Date(date+'T12:00:00'));dateTitle.append(time);}else dateTitle.textContent='Data da definire';
+   const grid=document.createElement('div');grid.className='imc-turn-grid';section.append(dateTitle,grid);
+   for(const {row,p,t,domestic} of days.get(date)){
+    const card=document.createElement('article');card.dataset.competition=row.competition_key;card.dataset.group=row.competition_group;
+    const head=document.createElement('header');head.className='imc-calendar-card-head';const category=document.createElement('small');category.textContent=names[row.competition_group];
+    const title=document.createElement('h3'),link=document.createElement('a');link.href=domestic?base+'competitions/?group=DOMESTIC':competitionLink(row);link.textContent=domestic?'Leagues':row.nexus_view;title.append(link);head.append(category,title);
+    const body=document.createElement('div');body.className='imc-calendar-card-body';const turn=document.createElement('strong');
+    turn.textContent=t?[t.number_label,t.label].filter((v,i,a)=>v&&a.indexOf(v)===i&&!(v===t.label&&t.number_label?.startsWith(v+' di '))).join(' · ')||'Turno in programma':'In programma';body.append(turn);
+    if(!t&&p.total_days){const count=document.createElement('small');count.textContent=p.played_days+' di '+p.total_days+' turni giocati';body.append(count);}
+    if(domestic){const divisions=document.createElement('small');divisions.className='imc-turn-divisions';divisions.setAttribute('aria-label','Divisioni');divisions.textContent=data.rows.filter(r=>r.sm_action==='league'&&r.competition_group==='DOMESTIC').map(r=>r.nexus_view).join(' · ');body.append(divisions);}
+    card.append(head,body);grid.append(card);
+   }
+   overview.append(section);
+  }
+  if(!days.size){const empty=document.createElement('p');empty.textContent='Nessun turno in programma.';overview.append(empty);}
+ }).catch(()=>{overview.textContent='Calendario temporaneamente non disponibile.';});
  const today = new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Rome'}).format(new Date());
  const clock = new Intl.DateTimeFormat('it-IT', {timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
  const formatDate = day => day.split('-').reverse().join('/');

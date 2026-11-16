@@ -38,25 +38,15 @@ with webdriver.Chrome(options=options) as driver:
 
         driver.get('https://www.italianmastersclub.it/'+world+'/home/?turns=verify')
         wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.imc-home-turns article'))
-        summary=driver.find_element(By.CSS_SELECTOR,'.imc-home-turns').text
-        assert 'turni giocati' in summary,(world,summary)
-        assert len(driver.find_elements(By.XPATH,"//*[contains(@class,'imc-home-turns')]//h3[a[text()='Leagues']]"))==1,world
-        home_tabs=driver.find_elements(By.CSS_SELECTOR,'.imc-competition-tabs [role=tab]')
-        assert [t.text for t in home_tabs]==['Domestic','International','IMC','Nations'],world
-        assert driver.find_elements(By.CSS_SELECTOR,'.imc-turn-divisions a'),world
-        for tab in home_tabs:
-            driver.execute_script('arguments[0].click()',tab)
-            selected=tab.get_attribute('data-group')
-            visible=[p for p in driver.find_elements(By.CSS_SELECTOR,'.imc-home-turns [role=tabpanel]') if p.is_displayed()]
-            assert len(visible)==1 and visible[0].get_attribute('id')=='home-competitions-'+selected,world
-        home_tabs[0].click()
+        assert driver.find_elements(By.CSS_SELECTOR,'.imc-calendar-date'),world
+        assert not driver.find_elements(By.CSS_SELECTOR,'.imc-competition-tabs'),world
+        dates=[s.get_attribute('data-date') for s in driver.find_elements(By.CSS_SELECTOR,'.imc-calendar-day')]
+        assert [d for d in dates if d]==sorted(d for d in dates if d),world
+        assert driver.execute_script("return getComputedStyle(document.querySelector('.imc-turn-grid')).gridTemplateColumns.split(' ').length") == 3,world
+        assert all(c.get_attribute('data-group') in ['DOMESTIC','INTERNATIONAL','IMC','NATIONS'] for c in driver.find_elements(By.CSS_SELECTOR,'.imc-home-turns article')),world
         driver.get('https://www.italianmastersclub.it/'+world+'/matchday/?turns=verify')
         wait.until(lambda d:d.find_elements(By.CSS_SELECTOR,'.md-group-heading'))
         assert 'turni giocati' in driver.find_element(By.ID,'match-content').text,world
-        match_tabs=driver.find_elements(By.CSS_SELECTOR,'.md-category-tabs [role=tab]')
-        assert [t.text for t in match_tabs]==['Domestic','International','IMC','Nations'],world
-        for tab in match_tabs:
-            driver.execute_script('arguments[0].click()',tab)
-            assert tab.get_attribute('aria-selected')=='true',world
-            assert all(g.get_attribute('data-group')==tab.get_attribute('data-group') for g in driver.find_elements(By.CSS_SELECTOR,'.md-group')),world
-        print(world,'Home and Matchday boxes and category tabs verified',flush=True)
+        assert not driver.find_elements(By.CSS_SELECTOR,'.md-category-tabs'),world
+        assert driver.find_elements(By.CSS_SELECTOR,'.md-category-label'),world
+        print(world,'Calendar dates, three-column boxes and category headers verified',flush=True)

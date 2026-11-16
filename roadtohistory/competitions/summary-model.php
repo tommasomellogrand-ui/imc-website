@@ -118,6 +118,13 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
             $existing[$slot]=array_replace($existing[$slot],$resolved);
         }
     }
+    $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
+    $pending=[];
+    foreach($fixtures as $fixture)if(empty($fixture['played'])){
+        $date=substr((string)($fixture['match_date']??''),0,10);
+        if($date>=$today && isset($calendar[$date]))$pending[$date]=$calendar[$date];
+    }
+    ksort($pending);$existing['calendar_turns']=array_values($pending);
     return $existing;
 }
 

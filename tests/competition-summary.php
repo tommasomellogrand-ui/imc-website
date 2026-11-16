@@ -64,3 +64,7 @@ foreach(['IMC001','IMC002','IMC003','IMC004','IMC005','IMC007','IMC008'] as $wor
  check(imc_competition_available($world,1,'leaguecup'),'National cup is unaffected');
 }
 check(imc_competition_available('IMC006',1,'supercup')&&imc_competition_available('GW004',1,'charityshield'),'006 season 1 exception supports both world identifiers');
+
+$future=(new DateTimeImmutable('tomorrow',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
+$p=imc_competition_summary($cup,$definition,[fixture('future',false,'Semifinali',$future,'Andata'),fixture('past',false,'Quarti','2020-01-01','Andata'),fixture('played',true,'Semifinali',$future,'Andata')],[],[]);
+check(count($p['calendar_turns'])===1&&$p['calendar_turns'][0]['date']===$future,'Calendar exposes upcoming scheduled dates, never past dates');

@@ -33,5 +33,21 @@
   "site-data/matchday/index.php",
   "site-assets/world-engine/worlds.php",
   "site-assets/world-engine/events.php",
-  "site-assets/world-engine/templates/matchday/index.js"
+  "site-assets/world-engine/templates/matchday/index.js",
+  "roadtohistory/home/index.html",
+  "roadtohistory/matchday/index.html",
+  "halloffamers/home/index.html",
+  "halloffamers/matchday/index.html",
+  "kickoff/home/index.html",
+  "kickoff/matchday/index.html",
+  "sensiblesocceracademy/home/index.html",
+  "sensiblesocceracademy/matchday/index.html",
+  "subbuteosuperleague/home/index.html",
+  "subbuteosuperleague/matchday/index.html",
+  "worldleague/home/index.html",
+  "worldleague/matchday/index.html",
+  "masterleagueworld/home/index.html",
+  "masterleagueworld/matchday/index.html",
+  "scudetto/home/index.html",
+  "scudetto/matchday/index.html"
 ]
