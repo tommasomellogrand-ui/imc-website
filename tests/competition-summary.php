@@ -162,6 +162,6 @@ $nextCup=$oldWorldCup;$nextCup['imc_season']=2;
 $scope=imc_home_worldcup_scope(['worldcup'=>[$nextCup]],['worldcup'=>[$oldWorldCup]]);
 check($scope['worldcup'][0]['imc_season']===2,'A new edition replaces the old edition');
 $final=$oldWorldCup;$final['played']=true;$final['competition_stage']='Finale';$final['competition_round']='Finale';$final['home_score']=1;$final['away_score']=0;
-$summary=imc_competition_summary(['sm_action'=>'worldcup','competition_group'=>'NATIONS'],[],[$final],[],[]);
+$summary=imc_competition_summary(['sm_action'=>'worldcup','competition_group'=>'NATIONS'],[],[$final],['final_played'=>true],[]);
 check($summary['complete'],'A played World Cup final ends Home visibility');
 echo "World Cup season rollover: all checks passed\n";
