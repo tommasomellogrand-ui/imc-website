@@ -13,6 +13,9 @@ $p=imc_competition_summary($cup,$definition,[fixture('1',false),fixture('1',true
 check($p['played']===1&&$p['percent']===3,'Result/Schedule identity must count once');
 check($p['last_turn']['label']==='Semifinali · Andata'&&$p['next_turn']['label']==='Semifinali · Ritorno','Legs and dates remain explicit');
 check(!$p['complete'],'Partial cup cannot finish from count alone');
+$domestic=['sm_action'=>'league','competition_group'=>'DOMESTIC','competition_key'=>'GW001|DOMESTIC|league|1'];
+$p=imc_competition_summary($domestic,['teams_count'=>10,'expected_match'=>90,'expected_matchdays'=>18],[fixture('1',true,'','2026-11-16','')],['last_turn'=>['date'=>'2026-11-16','number'=>15]],[]);
+check($p['last_turn']['number']===15&&$p['last_turn']['label']==='Giornata 15','Keep matchday resolved by the season calendar');
 $p=imc_competition_summary($cup,$definition,[fixture('1',true,'Finale')],['final_played'=>true],[]);
 check($p['complete']&&$p['status']==='Conclusa'&&$p['percent']===3,'Final can finish a cup without concealing missing imports');
 $worldCup=['sm_action'=>'worldcup','competition_group'=>'NATIONS','competition_key'=>'GW001|NATIONS|worldcup'];

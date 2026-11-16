@@ -72,8 +72,16 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
     $existing['position']=null;
     $existing['format']=[];
     $existing['status']=$complete?'Conclusa':($played>0?'In corso':($known?'In programma':null));
-    $existing['last_turn']=imc_competition_turn($latest,$league);
-    $existing['next_turn']=imc_competition_turn($next,$league);
+    foreach (['last_turn'=>$latest,'next_turn'=>$next] as $slot=>$fixture) {
+        $turn=imc_competition_turn($fixture,$league);
+        // Preserve a matchday already resolved from a complete season calendar.
+        $previous=$existing[$slot]??null;
+        if ($league && $turn && !$turn['number'] && ($previous['date']??null)===$turn['date'] && !empty($previous['number'])) {
+            $turn['number']=(int)$previous['number'];
+            $turn['label']='Giornata '.$turn['number'];
+        }
+        $existing[$slot]=$turn;
+    }
     $existing['next_date']=$existing['next_turn']['date']??null;
     $existing['total_days']=$totalDays;
     $existing['played_days']=null;
