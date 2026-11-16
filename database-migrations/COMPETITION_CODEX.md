@@ -4,7 +4,7 @@
 IDs, sporting totals and independent IMC005 competition keys are preserved.
 
 Each row contains the official name (`custom_competition`), canonical key,
-historical key aliases, world type, category, SM action, country/division,
+historical key aliases, category, SM action, country/division,
 team count, expected matches and expected matchdays. `IMC_View`, `nexus_view`
 and `competition_group` are generated compatibility columns, not independent
 values to update.
@@ -24,3 +24,7 @@ Never rerun a completed schema plan blindly.
 Regression coverage: `tests/competition-codex-unification.php` runs the migration
 in a disposable MySQL database and checks historical alias resolution, automatic
 name propagation, read-only compatibility, counts and the single physical table.
+
+The follow-up `20261116_competition_drop_world_type.json` removes `world_type`
+from the Codex. Existing compatibility reads derive it from `sm_country`, as
+the existing site catalogue does; no world type is stored in the Codex.

@@ -1,0 +1,10 @@
+{
+  "action": "plan_migration",
+  "target": "core",
+  "migration_id": "20261116-competition-drop-world-type",
+  "allow_destructive": true,
+  "statements": [
+    "CREATE OR REPLACE SQL SECURITY INVOKER VIEW `IMC Competition Nexus Mapping` AS\n SELECT c.id AS mapping_id,c.game_world_id,CASE WHEN NULLIF(TRIM(c.sm_country),'') IS NULL THEN 'SINGLE' ELSE 'MULTI' END AS world_type,c.sm_country,c.competition_group,c.sm_action,CAST(c.sm_division AS CHAR(16)) AS sm_division,k.competition_key,c.IMC_View,c.updated_at,c.nexus_view\n FROM `IMC Competition Codex Global` c\n JOIN JSON_TABLE(JSON_MERGE_PRESERVE(JSON_ARRAY(c.competition_key),COALESCE(c.competition_key_aliases,JSON_ARRAY())), '$[*]' COLUMNS (competition_key VARCHAR(255) PATH '$')) AS k ON TRUE",
+    "ALTER TABLE `IMC Competition Codex Global` DROP COLUMN world_type"
+  ]
+}

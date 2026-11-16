@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'imc-universal-gateway/**'
+      - 'tests/competition-codex-unification.php'
+      - 'database-migrations/20261116_competition_*.json'
       - '__imc_private_gateway/**'
       - '.github/workflows/deploy-imc-universal-gateway-aruba.yml'
       - 'tests/gateway-world-*'

@@ -14,7 +14,10 @@ foreach($migration['codex_rows'] as $row){
     $pdo->prepare('INSERT INTO `IMC Competition Codex Global` (`'.implode('`,`',$columns).'`) VALUES ('.implode(',',array_fill(0,count($columns),'?')).')')->execute(array_values($row));
 }
 foreach($migration['plans'][1]['statements'] as $sql)$pdo->exec($sql);
+$removeWorldType=json_decode(file_get_contents(__DIR__.'/../database-migrations/20261116_competition_drop_world_type.json'),true,512,JSON_THROW_ON_ERROR);
+foreach($removeWorldType['statements'] as $sql)$pdo->exec($sql);
 function verify(bool $ok,string $why):void{if(!$ok)throw new RuntimeException($why);}
+verify($pdo->query("SHOW COLUMNS FROM `IMC Competition Codex Global` LIKE 'world_type'")->fetch()===false,'world_type is absent from the authoritative Codex');
 verify((int)$pdo->query('SELECT COUNT(*) FROM `IMC Competition Codex Global`')->fetchColumn()===120,'Exactly one canonical row per configured competition');
 verify((int)$pdo->query('SELECT COUNT(*) FROM `IMC Competition Nexus Mapping`')->fetchColumn()===126,'Canonical keys and six historical aliases resolve');
 verify((int)$pdo->query("SELECT COUNT(*) FROM `IMC Competition Codex Global` WHERE competition_key IS NULL OR custom_competition IS NULL OR sm_action IS NULL")->fetchColumn()===0,'All rows have name, key and action');
