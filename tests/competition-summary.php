@@ -141,3 +141,15 @@ $fixtures[]=fixture('new-schedule',true,'',$today->format('Y-m-d'),'20');
 $p=imc_competition_summary($imc,['expected_matchdays'=>22],$fixtures,[],[]);
 check(count($p['calendar_turns'])===2&&$p['calendar_turns'][0]['date']===$tomorrow&&$p['calendar_turns'][0]['number']===21,'Result import advances Home and removes the played turn');
 echo "Home daily IMC projections: all checks passed\n";
+
+$wc=['sm_action'=>'worldcup','competition_group'=>'NATIONS','competition_key'=>'IMC004|NATIONS|worldcup'];
+$turns=imc_competition_home_turns($wc,7,0,null,['2026-11-16'=>['date'=>'2026-11-16']],'2026-11-16',false);
+check(array_column($turns,'label')===['Gironi · Giornata 1','Gironi · Giornata 2','Gironi · Giornata 3','Ottavi di Finale','Quarti di Finale','Semifinali','Finale'],'World Cup has three group days then four knockout days');
+check(array_column($turns,'date')===['2026-11-16','2026-11-17','2026-11-18','2026-11-19','2026-11-20','2026-11-21','2026-11-22'],'World Cup plays every day from its first group date');
+$turns=imc_competition_home_turns($wc,7,3,['date'=>'2026-11-18','number'=>3],[],'2026-11-19',false);
+check(count($turns)===4&&$turns[0]['label']==='Ottavi di Finale'&&$turns[3]['label']==='Finale','World Cup continues after groups without knockout Schedule');
+check(imc_competition_home_turns($wc,7,0,null,[],'2026-11-16',false)===[],'World Cup must have a known start date');
+check(imc_competition_home_turns($wc,7,7,['date'=>'2026-11-22','number'=>7],[],'2026-11-23',true)===[],'No World Cup turns after the final');
+$qualifiers=['sm_action'=>'interqualifier','competition_group'=>'NATIONS'];
+check(imc_competition_home_turns($qualifiers,10,1,['date'=>'2026-11-15'],[],'2026-11-16',false)===[],'Qualifiers do not use daily World Cup projections');
+echo "World Cup daily Home calendar: all checks passed\n";

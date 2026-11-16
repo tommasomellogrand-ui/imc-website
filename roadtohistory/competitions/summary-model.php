@@ -120,10 +120,11 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
     return $existing;
 }
 
-// Home can show daily IMC turns before Schedule imports. These are turn
+// Home can show daily IMC and World Cup turns before Schedule imports. These are turn
 // summaries only: the fixture calendar used by Matchday stays unchanged.
 function imc_competition_home_turns(array $row,?int $total,int $played,?array $last,array $pending,string $today,bool $complete): array {
-    if (($row['competition_group']??'')!=='IMC' || !$total) return array_values($pending);
+    $worldCup=($row['sm_action']??'')==='worldcup' && ($row['competition_group']??'')==='NATIONS';
+    if ((($row['competition_group']??'')!=='IMC' && !$worldCup) || !$total) return array_values($pending);
     if ($complete) return [];
     $played=max($played,(int)($last['number']??0));
     $remaining=max(0,$total-$played);
@@ -144,6 +145,10 @@ function imc_competition_home_turns(array $row,?int $total,int $played,?array $l
         $turn['number']=++$number;$turn['total']=$total;
         $turn['number_label']=($league?'Giornata ':'Turno ').$number.' di '.$total;
         if ($league) $turn['label']='Giornata '.$number;
+        if ($worldCup && $total>4) {
+            $knockout=$number-($total-4);
+            $turn['label']=$knockout>0 ? [1=>'Ottavi di Finale',2=>'Quarti di Finale',3=>'Semifinali',4=>'Finale'][$knockout] : 'Gironi · Giornata '.$number;
+        }
     }
     unset($turn);
     return array_values($turns);
