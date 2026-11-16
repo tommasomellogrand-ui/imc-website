@@ -26,7 +26,7 @@ $p=imc_competition_summary($worldCup,['expected_match'=>63],[$r],[],[]);
 check($p['last_turn']['label']==='Gironi','A group letter must not become a knockout stage');
 $league=['sm_action'=>'imc_custom','competition_group'=>'IMC','competition_key'=>'GW001|IMC|championsleague'];
 $p=imc_competition_summary($league,['teams_count'=>12,'expected_match'=>132,'expected_matchdays'=>22],[fixture('1',true,'','2026-11-16','19')],[],[]);
-check($p['league_summary']&&$p['played_days']===0&&$p['last_turn']['label']==='Giornata 19','Incomplete matchday is not a completed day');
+check($p['league_summary']&&$p['played_days']===1&&$p['last_turn']['label']==='Giornata 19','A Result marks the turn played without a full matchday import');
 $cwc=['sm_action'=>'imc_custom','competition_group'=>'IMC','competition_key'=>'GW001|IMC|clubworldcup'];
 check(!imc_competition_is_league($cwc),'Club World Cup is not a league');
 check(!imc_competition_is_league(['sm_action'=>'league','competition_key'=>'GW001|DOMESTIC|playoff|2']),'Playoff is not a league');
@@ -66,5 +66,26 @@ foreach(['IMC001','IMC002','IMC003','IMC004','IMC005','IMC007','IMC008'] as $wor
 check(imc_competition_available('IMC006',1,'supercup')&&imc_competition_available('GW004',1,'charityshield'),'006 season 1 exception supports both world identifiers');
 
 $future=(new DateTimeImmutable('tomorrow',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
-$p=imc_competition_summary($cup,$definition,[fixture('future',false,'Semifinali',$future,'Andata'),fixture('past',false,'Quarti','2020-01-01','Andata'),fixture('played',true,'Semifinali',$future,'Andata')],[],[]);
+$p=imc_competition_summary($cup,$definition,[fixture('future',false,'Semifinali',$future,'Andata'),fixture('past',false,'Quarti','2020-01-01','Andata'),fixture('played',true,'Quarti','2020-01-01','Andata')],[],[]);
 check(count($p['calendar_turns'])===1&&$p['calendar_turns'][0]['date']===$future,'Calendar exposes upcoming scheduled dates, never past dates');
+
+// The same Results-only rule applies to every competition family, including
+// partial imports, missing schedules and mismatched historical fixture IDs.
+foreach(['league','leaguecup','leagueshield','charityshield','playoff','smfacup','smfashield','supercup','interqualifier','worldcup','imc','friendly'] as $action){
+ $row=['sm_action'=>$action,'competition_key'=>'IMC001|TEST|'.$action,'competition_group'=>'TEST'];
+ $definition=['teams_count'=>32,'expected_match'=>100,'expected_matchdays'=>10];
+ $day=(new DateTimeImmutable('tomorrow',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
+ $next=(new DateTimeImmutable('+2 days',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
+ $fixtures=[fixture('result',true,'Gironi',$day,'1'),fixture('stale-schedule',false,'Gironi',$day,'1'),fixture('future',false,'Gironi',$next,'2')];
+ $p=imc_competition_summary($row,$definition,$fixtures,[],[]);
+ check($p['played_days']===1&&$p['remaining_days']===9,$action.': Schedule cannot veto a played turn');
+ check($p['played']===1&&$p['next_turn']['date']===$next,$action.': past turn is excluded from next turns');
+ check(count($p['calendar_turns'])===1&&$p['calendar_turns'][0]['date']===$next,$action.': calendar omits a turn represented in Results');
+ $p=imc_competition_summary($row,$definition,[$fixtures[0]],[],[]);
+ check($p['played_days']===1,$action.': a Result alone is sufficient');
+ $p=imc_competition_summary($row,$definition,[$fixtures[1]],[],[]);
+ check($p['played_days']===0,$action.': Schedule alone does not mean played');
+ $p=imc_competition_summary($row,$definition,[$fixtures[0],fixture('another-result',true,'Gironi',$day,'1')],[],[]);
+ check($p['played_days']===1,$action.': multiple matches of the same turn count once');
+}
+echo "Results-only turn authority: all competition families passed\n";

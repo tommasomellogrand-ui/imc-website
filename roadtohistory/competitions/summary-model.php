@@ -47,24 +47,25 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
         // Results take precedence over the matching Schedule row.
         if (!isset($unique[$token]) || !empty($fixture['played'])) $unique[$token]=$fixture;
     }
-    $fixtures=array_values($unique);
+    // A Result is authoritative for its turn. Schedule IDs and the number of
+    // imported matches never veto a turn already represented in Results.
+    $resultDates=[];
+    foreach($unique as $fixture)if(!empty($fixture['played'])){
+        $date=substr((string)($fixture['match_date']??''),0,10);
+        if(preg_match('/^[1-9]\d{3}-\d{2}-\d{2}$/D',$date))$resultDates[$date]=true;
+    }
+    $fixtures=array_values(array_filter($unique,static fn($fixture)=>
+        !empty($fixture['played']) || !isset($resultDates[substr((string)($fixture['match_date']??''),0,10)])
+    ));
     usort($fixtures,static fn($a,$b)=>strcmp((string)$a['match_date'],(string)$b['match_date']) ?: strcmp((string)($a['sm_fixture_id']??''),(string)($b['sm_fixture_id']??'')));
-    $played=0;$latest=null;$next=null;$rounds=[];$turns=[];
+    $played=0;$latest=null;$next=null;
     foreach ($fixtures as $fixture) {
         if (!empty($fixture['played'])) { $played++;$latest=$fixture; }
         elseif ($next===null) $next=$fixture;
-        $day=substr((string)$fixture['match_date'],0,10);
-        if (preg_match('/^[1-9]\d{3}-\d{2}-\d{2}$/D',$day)) {
-            $turns[$day]['sample']=$fixture;
-            $turns[$day]['played']=($turns[$day]['played']??0)+(!empty($fixture['played'])?1:0);
-            $turns[$day]['pending']=($turns[$day]['pending']??0)+(empty($fixture['played'])?1:0);
-        }
-        $round=trim((string)($fixture['competition_round']??''))?:$day;
-        if (!empty($fixture['played'])) $rounds[$round]=($rounds[$round]??0)+1;
+
     }
     $expected=(int)($definition['expected_match']??0)?:null;
     $totalDays=(int)($definition['expected_matchdays']??0)?:null;
-    $teams=(int)($definition['teams_count']??0)?:null;
     $known=count($fixtures)>0;
     $complete=$league || ($row['sm_action']??'')==='interqualifier'
         ? ($known && $expected!==null && $played===$expected)
@@ -90,17 +91,7 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
     }
     $existing['next_date']=$existing['next_turn']['date']??null;
     $existing['total_days']=$totalDays;
-    $playedDays=0;
-    foreach ($turns as $turn) {
-        if ($turn['pending']>0 || $turn['played']===0) continue;
-        $required=null;
-        [$phase]=cupPhase($turn['sample']);
-        if ($league && $teams!==null && $teams>1) $required=(int)floor($teams/2);
-        elseif (($row['sm_action']??'')==='interqualifier' && $expected && $totalDays) $required=(int)($expected/$totalDays);
-        elseif (in_array($phase,['Ottavi','Quarti','Semifinale','Finale'],true)) $required=['Ottavi'=>8,'Quarti'=>4,'Semifinale'=>2,'Finale'=>1][$phase];
-        elseif (in_array($row['sm_action']??'',['smfacup','smfashield','worldcup'],true) && $teams && ($phase==='' || $phase==='Gironi')) $required=(int)($teams/2);
-        if ($required===null || $turn['played']>=$required) $playedDays++;
-    }
+    $playedDays=count($resultDates);
     $existing['played_days']=$totalDays!==null?min($totalDays,$playedDays):null;
     $existing['remaining_days']=$totalDays!==null?$totalDays-$existing['played_days']:null;
     $existing['round_percent']=$totalDays!==null?(int)round(100*$existing['played_days']/$totalDays):null;

@@ -15,7 +15,8 @@ try{
  if(!imc_competition_available($gw,1,'supercup'))$where.=" AND NOT (t.imc_season=1 AND t.sm_action IN ('charityshield','supercup'))";
  if($mode==='results'){$where.=' AND t.home_score IS NOT NULL AND t.away_score IS NOT NULL AND DATE(t.match_date)<=?';$params[]=$today;}
  else{
-  $where.=' AND DATE(t.match_date)>=? AND NOT EXISTS (SELECT 1 FROM `'.$rt.'` r WHERE r.imc_season=t.imc_season AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND ((r.sm_fixture_id IS NOT NULL AND CAST(r.sm_fixture_id AS CHAR)<>\'\' AND CAST(r.sm_fixture_id AS CHAR)<>\'0\' AND r.sm_fixture_id=t.sm_fixture_id) OR (r.competition_key=t.competition_key AND DATE(r.match_date)=DATE(t.match_date) AND r.home_sm_club_id=t.home_sm_team_id AND r.away_sm_club_id=t.away_sm_team_id)))';
+  // Results alone mark a competition turn played, even if Schedule IDs differ.
+  $where.=' AND DATE(t.match_date)>=? AND NOT EXISTS (SELECT 1 FROM `'.$rt.'` r WHERE r.imc_season=t.imc_season AND r.competition_key=t.competition_key AND DATE(r.match_date)=DATE(t.match_date) AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL)';
   $params[]=$today;
  }
  $order=$mode==='results'?'DESC':'ASC';
