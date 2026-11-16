@@ -240,6 +240,6 @@ try {
  ];
  usort($rows,static fn($a,$b)=>$catalogOrder($a)<=>$catalogOrder($b));
  header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');
- echo json_encode(['ok'=>true,'progress'=>$out,'rows'=>$rows,'awards'=>$byKey,'season'=>$season,'seasons'=>$seasons],JSON_INVALID_UTF8_SUBSTITUTE|JSON_UNESCAPED_UNICODE);
+ echo json_encode(imc_world_payload(['ok'=>true,'progress'=>$out,'rows'=>$rows,'awards'=>$byKey,'season'=>$season,'seasons'=>$seasons]),JSON_INVALID_UTF8_SUBSTITUTE|JSON_UNESCAPED_UNICODE);
 }catch(Throwable $e){error_log('Competition progress: '.$e->getMessage());imc_site_out(['ok'=>false,'error'=>'progress_unavailable'],503);}
 

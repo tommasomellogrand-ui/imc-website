@@ -43,9 +43,10 @@ function imc_world_sql_value(string $column,bool $key=false): string {
 function imc_world_sql(string $sql): string {
     if(!preg_match('/^\s*SELECT\b/i',$sql))return $sql;
     $sql=preg_replace_callback("/'(?:''|[^'])*'/",static function($m){$s=substr($m[0],1,-1);return "'".imc_world_value($s)."'";},$sql);
-    $column='(?:[a-zA-Z_][a-zA-Z0-9_]*\.)?(?:`?(?:game_world_id|source_game_world_id|competition_key)`?|`(?:IMC GW|IMC_WORLD_ID|Game World)`)';
-    $sql=preg_replace_callback('/(?<![a-zA-Z0-9_`])('.$column.')\s*(=|IN\s*\(|LIKE\b|BETWEEN\b)/i',static function($m){
-        return imc_world_sql_value($m[1],stripos($m[1],'competition_key')!==false).' '.$m[2];
+    $column='(?:[a-zA-Z_][a-zA-Z0-9_]*\.)?(?:`?(?:game_world_id|source_game_world_id|competition_key|IMC_WORLD_ID)`?|`(?:IMC GW|IMC_WORLD_ID|Game World)`)';
+    $sql=preg_replace_callback('/(?<![a-zA-Z0-9_`])('.$column.')\s*(=|IN\s*\(|LIKE\b|BETWEEN\b)\s*('.$column.')?/i',static function($m){
+        $right=isset($m[3])&&$m[3]!==''?imc_world_sql_value($m[3],stripos($m[3],'competition_key')!==false):'';
+        return imc_world_sql_value($m[1],stripos($m[1],'competition_key')!==false).' '.$m[2].' '.$right;
     },$sql);
     return $sql;
 }

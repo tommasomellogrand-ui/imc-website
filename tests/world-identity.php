@@ -21,6 +21,7 @@ $db->exec('CREATE TABLE worlds(game_world_id VARCHAR(16),competition_key VARCHAR
 // Seed old stored data without the statement adapter to test transition reads.
 $db->exec("INSERT INTO worlds VALUES ('GW011','GW011|DOMESTIC|league|1',9)");
 foreach(['GW011','IMC-005','IMC005'] as $input){$q=$db->prepare('SELECT value FROM worlds WHERE game_world_id=? AND competition_key=?');$q->execute([$input,$input.'|DOMESTIC|league|1']);identity_check((int)$q->fetchColumn()===9,'Read old stored rows through every alias');}
+identity_check((int)$db->query('SELECT COUNT(*) FROM worlds a JOIN worlds b ON a.game_world_id=b.game_world_id')->fetchColumn()===1,'Joins normalize both sides before migration');
 $db->exec("UPDATE worlds SET game_world_id='IMC005',competition_key='IMC005|DOMESTIC|league|1'");
 foreach(['GW011','IMC-005','IMC005'] as $input){$q=$db->prepare('SELECT value FROM worlds WHERE game_world_id=? AND competition_key=?');$q->execute([$input,$input.'|DOMESTIC|league|1']);identity_check((int)$q->fetchColumn()===9,'Read canonical stored rows through every alias');}
 $q=$db->prepare('INSERT INTO worlds VALUES (?,?,?)');$q->execute(['GW001','GW001|DOMESTIC|league|1',4]);
