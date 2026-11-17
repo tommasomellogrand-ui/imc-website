@@ -1,18 +1,18 @@
-/* IMC | SCHEDULE IMPORT V3.2
+/* IMC | SCHEDULE IMPORT V3.3
  * CORE → mondo → tipo → competizione singola → stagione precaricata.
  * Da eseguire nella pagina Soccer Manager della competizione da importare.
  * Importa solo la selezione, dalla pagina aperta in avanti. Nessun campo sm_country.
  */
 (function () {
     'use strict';
-    var VERSION = 'IMC-SCHEDULE-V3.2';
+    var VERSION = 'IMC-SCHEDULE-V3.3';
     var GATEWAY = 'https://www.italianmastersclub.it/imc-universal-gateway/';
     var old = document.getElementById('__imc_schedule_v3');
     if (old) return;
     var S = {world:null, catalog:[], seasons:[], destination:null, competition:null,
         season:null, running:false, stopped:false, pages:0, read:0, saved:0, skipped:0,
         existing:new Map(), selectedKey:null, loggedManager:null, errors:0, localSkip:0, sent:0, phase:null, finalMessage:null,
-        lastBatch:{sent:0,written:0,skipped:0}};
+        lastBatch:{sent:0,written:0,skipped:0}, leaguePlan:[], leagueIndex:0};
     var MONTHS = {gennaio:1,febbraio:2,marzo:3,aprile:4,maggio:5,giugno:6,luglio:7,agosto:8,settembre:9,ottobre:10,novembre:11,dicembre:12};
     var GROUPS = ['DOMESTIC','INTERNATIONAL','IMC','NATIONS'];
     function clean(v) { return String(v == null ? '' : v).replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim(); }
@@ -109,6 +109,60 @@
         }
         return Number((candidates[candidates.length-1] || S.seasons[0] || {}).imc_season) || null;
     }
+    function divisionNumber(value) {
+        var m=clean(value).match(/^(?:division(?:e)?\s*)?0*(\d+)$/i);return m ? positive(m[1]) : null;
+    }
+    function divisionSelect() {
+        var preferred=q('#div-selector select',screen());if(preferred)return preferred;
+        return qa('select',screen()).find(function(el){return shown(el) && Array.from(el.options).some(function(o){return /^division(?:e)?\s*\d+$/i.test(text(o));});}) || null;
+    }
+    function currentDivision() {
+        var sel=divisionSelect(),opt=sel && sel.options[sel.selectedIndex];
+        var selected=divisionNumber(text(opt));if(selected)return selected;
+        var link=qa('#goalsTab[data-division], #avgRatingTab[data-division], #FixturesnextWeek_click a[data-division], #FixturesprevWeek_click a[data-division]',screen()).find(function(el){return positive(attr(el,'data-division'));});
+        return positive(attr(link,'data-division')) || positive(sel && sel.value);
+    }
+    function leagueOption(select,competition) {
+        return select && Array.from(select.options).find(function(o){return !o.disabled && (divisionNumber(text(o)) || divisionNumber(o.value))===positive(competition.sm_division);});
+    }
+    function validateLeaguePlan() {
+        if(!S.leaguePlan.length)return;
+        var seen=new Set(),sel=divisionSelect();
+        S.leaguePlan.forEach(function(c){
+            var division=positive(c.sm_division);
+            if(!division || seen.has(division))throw new Error('Divisioni League mancanti o duplicate nel CORE');seen.add(division);
+            if((sel && !leagueOption(sel,c)) || (!sel && (S.leaguePlan.length>1 || currentDivision()!==division)))throw new Error('Divisione '+division+' del CORE non disponibile nel menu League di SM. Apri il calendario League.');
+        });
+    }
+    async function changeLeagueDivision(competition) {
+        checkStop();var target=positive(competition.sm_division);
+        if(currentDivision()!==target) {
+            var select=divisionSelect(),option=leagueOption(select,competition);
+            if(!option)throw new Error('Divisione '+target+' non disponibile nel menu League di SM');
+            setPhase('Cambio Divisione '+target);log('SWAP · Divisione '+target+' · '+competition.name);
+            var before=pageKey(),oldContent=content(),oldSelect=select;
+            select.selectedIndex=option.index;select.value=option.value;
+            if(typeof select.onchange==='function')select.onchange.call(select,new Event('change',{bubbles:true}));
+            else select.dispatchEvent(new Event('change',{bubbles:true}));
+            // A changed select alone is insufficient: wait for the new fixture DOM.
+            await wait(function(){return currentDivision()===target && content() && (pageKey()!==before || content()!==oldContent || divisionSelect()!==oldSelect);},22000);
+            await openFixtures();await sleep(650);
+        }
+        S.competition=competition;S.selectedKey=competitionKey(competition,S.season);guardSource();update();
+        log('LEAGUE · Divisione '+target+' · '+competition.name+' · '+S.selectedKey);
+    }
+    async function chooseCompetition(competition,allLeague) {
+        S.leaguePlan=[];S.leagueIndex=0;
+        if(allLeague) {
+            var plan=S.catalog.filter(function(c){return c.group==='DOMESTIC' && action(c.sm_action)==='league';}).sort(function(a,b){return Number(a.sm_division)-Number(b.sm_division);});
+            var index=plan.findIndex(function(c){return positive(c.sm_division)===currentDivision();});
+            S.leaguePlan=index>=0 ? plan.slice(index).concat(plan.slice(0,index)) : plan;
+            validateLeaguePlan();competition=S.leaguePlan[0];
+        }
+        S.competition=competition;S.season=selectedSeason();
+        if(allLeague)await changeLeagueDivision(competition);
+        await preview();
+    }
     function guardSource() {
         var found=sourceAction(),wanted=action(S.competition.sm_action);
         // Single-match cups can expose no action at all. The CORE selection
@@ -118,15 +172,7 @@
             throw new Error('Pagina SM: '+found+'. Hai scelto '+S.competition.name+'. Apri il calendario corretto e rilancia.');
         }
         if(wanted==='league' && /play[\s-]*off/i.test(round() || ''))throw new Error('Raggiunti i playoff: seleziona la competizione Playoff dal CORE.');
-        if(wanted==='league' || wanted==='playoff') {
-            var sel=q('#div-selector select',screen());
-            var opt=sel && sel.options[sel.selectedIndex];
-            var m=text(opt).match(/(?:divisione?|division)\s*0*(\d+)/i);
-            var link=qa('[data-division]',screen()).find(function(e){return shown(e) && positive(attr(e,'data-division'));});
-            var actual=m ? positive(m[1]) : positive(attr(link,'data-division'));
-            if(!actual)actual=positive(sel && sel.value);
-            if(!actual || actual!==positive(S.competition.sm_division))throw new Error('Apri su SM la divisione della competizione selezionata: '+S.competition.name);
-        }
+        if((wanted==='league' || wanted==='playoff') && currentDivision()!==positive(S.competition.sm_division))throw new Error('Apri su SM la divisione della competizione selezionata: '+S.competition.name);
         return found;
     }
     async function fingerprint(row) {
@@ -255,7 +301,10 @@
         setText('__imc_v3_phase',S.phase || 'Preparazione');
         setText('__imc_v3_fixtures',S.read);setText('__imc_v3_saved',S.saved);setText('__imc_v3_skip',S.skipped);setText('__imc_v3_errors',S.errors);
         setText('__imc_v3_local_skip',S.localSkip);setText('__imc_v3_pages_meta',S.pages+' pagine');
-        setText('__imc_v3_scan','1 competizione');
+        setText('__imc_v3_scan',S.leaguePlan.length ? 'Divisione '+(S.leagueIndex+1)+' / '+S.leaguePlan.length : '1 competizione');
+        setText('__imc_v3_context_name',S.competition ? S.competition.name : '-');
+        setText('__imc_v3_context_meta',S.competition ? S.competition.group+' · IMC Season '+S.season+(S.leaguePlan.length ? ' · Divisione '+S.competition.sm_division : '') : '-');
+        setText('__imc_v3_context_key',S.selectedKey);
         setText('__imc_v3_batch_state',batch.sent ? batch.written+' verificate / '+batch.sent+' inviate · '+batch.skipped+' skip' : batch.skipped ? batch.skipped+' già presenti' : 'Nessun invio ancora');
         setText('__imc_v3_dest_main',S.destination ? S.destination.table : '-');
         setText('__imc_v3_dest_written',batch.written);
@@ -286,7 +335,7 @@
                 '</div>'+
             '</div>'+
             '<div style="background:#fff;border:1px solid #e3e5ec;border-radius:17px;padding:11px 12px;min-width:0">'+
-                '<div style="font-size:8px;letter-spacing:1.2px;font-weight:900;color:#969bad">CONTESTO</div><div style="font-size:16px;font-weight:900;margin-top:5px;overflow-wrap:anywhere">'+esc(S.competition.name)+'</div><div style="font-size:10px;font-weight:700;color:#777d8f;margin-top:5px">'+esc(S.competition.group)+' · IMC Season '+esc(S.season)+'</div><div style="font-size:10px;color:#777d8f;margin-top:5px;overflow-wrap:anywhere">'+esc(S.selectedKey)+'</div>'+
+                '<div style="font-size:8px;letter-spacing:1.2px;font-weight:900;color:#969bad">CONTESTO</div><div id="__imc_v3_context_name" style="font-size:16px;font-weight:900;margin-top:5px;overflow-wrap:anywhere">'+esc(S.competition.name)+'</div><div id="__imc_v3_context_meta" style="font-size:10px;font-weight:700;color:#777d8f;margin-top:5px">'+esc(S.competition.group)+' · IMC Season '+esc(S.season)+'</div><div id="__imc_v3_context_key" style="font-size:10px;color:#777d8f;margin-top:5px;overflow-wrap:anywhere">'+esc(S.selectedKey)+'</div>'+
             '</div>'+
             '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px">'+statBox('FIXTURE','__imc_v3_fixtures')+statBox('SALVATE','__imc_v3_saved')+statBox('SKIP','__imc_v3_skip')+statBox('ERRORI','__imc_v3_errors')+'</div>'+
             '<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px">'+
@@ -325,33 +374,51 @@
     }
     function showCompetitions(group) {
         badge('COMPETIZIONE');body('<h3>'+esc(group)+'</h3><p>Scegli la competizione da importare.</p><div id="__imc_v3_competitions"></div>'+button('Indietro','__imc_v3_back')+'<p id="__imc_v3_error"></p>');
-        S.catalog.filter(function(c){return c.group===group;}).forEach(function(c,i){q('#__imc_v3_competitions').insertAdjacentHTML('beforeend',button(c.name,'__imc_v3_comp_'+i));on('__imc_v3_comp_'+i,async function(){S.competition=c;S.season=selectedSeason();await preview();});});
+        var leagueAdded=false,choices=[];
+        S.catalog.filter(function(c){return c.group===group;}).forEach(function(c){
+            var league=group==='DOMESTIC' && action(c.sm_action)==='league';
+            if(league && leagueAdded)return;if(league)leagueAdded=true;
+            choices.push({competition:c,league:league,label:league?'League':c.name});
+        });
+        choices.forEach(function(choice,i){q('#__imc_v3_competitions').insertAdjacentHTML('beforeend',button(choice.label,'__imc_v3_comp_'+i));on('__imc_v3_comp_'+i,function(){return chooseCompetition(choice.competition,choice.league);});});
         on('__imc_v3_back',showTypes);
     }
     async function preview() {
         S.selectedKey=competitionKey(S.competition,S.season);await openFixtures();
         var rows=await readRows();badge('ANTEPRIMA');
         var options=S.seasons.map(function(s){return '<option value="'+Number(s.imc_season)+'"'+(Number(s.imc_season)===S.season?' selected':'')+'>S'+String(s.imc_season).padStart(2,'0')+' · dal '+esc(s.imc_season_start_date)+'</option>';}).join('');
-        var example=rows[0];
-        body('<h3>'+esc(S.world.id+' · '+S.world.name)+'</h3><p><strong>'+esc(S.competition.name)+'</strong> · '+esc(S.competition.group)+'</p><label>IMC Season dell’edizione<select id="__imc_v3_season">'+options+'</select></label><p style="overflow-wrap:anywhere" id="__imc_v3_key">'+esc(S.selectedKey)+'</p><p>'+rows.length+' partite nella pagina aperta</p>'+(example?'<p>'+esc(example.home_name+' – '+example.away_name)+'<br>'+esc(example.match_date+' · '+(example.match_time || ''))+'<br>'+esc(example.competition_group_name || '')+'</p>':'')+'<p>Importa questa competizione dalla pagina aperta in avanti.</p>'+button('AVVIA IMPORTAZIONE','__imc_v3_start')+button('Indietro','__imc_v3_back')+'<p id="__imc_v3_error"></p>');
+        var example=rows[0],label=S.leaguePlan.length ? 'League' : S.competition.name;
+        var scope=S.leaguePlan.length ? '<p>Scorrimento automatico di '+S.leaguePlan.length+' divisioni:</p>'+S.leaguePlan.map(function(c){return '<div style="font-size:12px;margin:5px 0">Divisione '+esc(c.sm_division)+' · '+esc(c.name)+'</div>';}).join('')+'<p>Ogni divisione userà la propria competition key.</p>' : '<p>Importa questa competizione dalla pagina aperta in avanti.</p>';
+        body('<h3>'+esc(S.world.id+' · '+S.world.name)+'</h3><p><strong>'+esc(label)+'</strong> · '+esc(S.competition.group)+'</p><label>IMC Season dell’edizione<select id="__imc_v3_season">'+options+'</select></label><p style="overflow-wrap:anywhere" id="__imc_v3_key">'+esc(S.selectedKey)+'</p><p>'+rows.length+' partite nella pagina aperta</p>'+(example?'<p>'+esc(example.home_name+' – '+example.away_name)+'<br>'+esc(example.match_date+' · '+(example.match_time || ''))+'<br>'+esc(example.competition_group_name || '')+'</p>':'')+scope+button('AVVIA IMPORTAZIONE','__imc_v3_start')+button('Indietro','__imc_v3_back')+'<p id="__imc_v3_error"></p>');
         q('#__imc_v3_season').onchange=function(){S.season=Number(this.value);S.selectedKey=competitionKey(S.competition,S.season);q('#__imc_v3_key').textContent=S.selectedKey;};
         on('__imc_v3_start',run);on('__imc_v3_back',function(){showCompetitions(S.competition.group);});
     }
-    async function run() {
-        if(S.running)return;S.running=true;S.stopped=false;S.pages=0;S.read=0;S.saved=0;S.skipped=0;S.errors=0;S.localSkip=0;S.sent=0;S.finalMessage=null;S.lastBatch={sent:0,written:0,skipped:0};S.existing=new Map();
-        S.selectedKey=competitionKey(S.competition,S.season);badge('IN CORSO');
-        renderProgressUI();setPhase('Preparo Schedule');log('START · '+S.world.id+' · '+S.competition.name+' · IMC Season '+S.season);
-        q('#__imc_v3_close').style.display='none';on('__imc_v3_close',function(){q('#__imc_schedule_v3').remove();});
-        q('#__imc_v3_stop').onclick=requestStop;update();
-        await openFixtures();var locked=guardSource(),visited=new Set();await loadExisting();
+    async function scanCurrentCompetition() {
+        var locked=guardSource(),visited=new Set();
         for(var page=0;page<500;page++) {
-            checkStop();var key=pageKey();if(visited.has(key))throw new Error('Pagina Schedule ripetuta: scansione fermata');visited.add(key);
-            if(sourceAction()!==locked)break;guardSource();
+            checkStop();
+            if(sourceAction()!==locked)return;
+            if(S.leaguePlan.length && /play[\s-]*off/i.test(round() || '')){log('LEAGUE · raggiunti i playoff, passo alla divisione successiva');return;}
+            var key=pageKey();if(visited.has(key))throw new Error('Pagina Schedule ripetuta: scansione fermata');visited.add(key);guardSource();
             var rows=await readRows();if(!rows.length && !noFixtures())throw new Error('Pagina senza fixture riconoscibili');
             S.pages++;S.read+=rows.length;update();log('READ · '+heading()+' · '+rows.length+' fixture');await store(rows);update();
-            if(!await nextPage(locked)){S.running=false;badge('COMPLETATO');setPhase('Importazione completata');log('FINE · '+S.saved+' salvate · '+S.skipped+' già presenti · '+S.errors+' errori');q('#__imc_v3_stop').style.display='none';q('#__imc_v3_close').style.display='block';return;}
+            if(!await nextPage(locked))return;
         }
-        if(S.running)throw new Error('Limite pagine raggiunto: verifica il punto di arresto');
+        throw new Error('Limite pagine raggiunto: verifica il punto di arresto');
+    }
+    async function run() {
+        if(S.running)return;S.running=true;S.stopped=false;S.pages=0;S.read=0;S.saved=0;S.skipped=0;S.errors=0;S.localSkip=0;S.sent=0;S.finalMessage=null;S.lastBatch={sent:0,written:0,skipped:0};S.existing=new Map();S.leagueIndex=0;
+        S.selectedKey=competitionKey(S.competition,S.season);badge('IN CORSO');
+        renderProgressUI();setPhase('Preparo Schedule');log('START · '+S.world.id+' · '+(S.leaguePlan.length?'League':S.competition.name)+' · IMC Season '+S.season);
+        q('#__imc_v3_close').style.display='none';on('__imc_v3_close',function(){q('#__imc_schedule_v3').remove();});
+        q('#__imc_v3_stop').onclick=requestStop;update();
+        await openFixtures();validateLeaguePlan();await loadExisting();
+        if(S.leaguePlan.length) {
+            for(var i=0;i<S.leaguePlan.length;i++) {
+                checkStop();S.leagueIndex=i;await changeLeagueDivision(S.leaguePlan[i]);await scanCurrentCompetition();
+            }
+        } else await scanCurrentCompetition();
+        checkStop();S.running=false;badge('COMPLETATO');setPhase('Importazione completata');log('FINE · '+S.saved+' salvate · '+S.skipped+' già presenti · '+S.errors+' errori');q('#__imc_v3_stop').style.display='none';q('#__imc_v3_close').style.display='block';
     }
     async function boot() {
         badge('CARICAMENTO MONDI');body('<p>Leggo i mondi dal CORE…</p><p id="__imc_v3_error"></p>');
@@ -362,7 +429,7 @@
     }
     var overlay=document.createElement('div');overlay.id='__imc_schedule_v3';
     overlay.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(18,22,34,.30);backdrop-filter:blur(2px);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171b2a;padding:6px;box-sizing:border-box';
-    overlay.innerHTML='<style>#__imc_schedule_v3 *{box-sizing:border-box}#__imc_schedule_v3 .imc-v3-button{display:block;width:100%;min-height:48px;padding:12px;margin:7px 0;border:1px solid #dedced;border-radius:13px;background:#fff;color:#473c83;font:700 13px Inter,-apple-system,sans-serif;cursor:pointer}#__imc_schedule_v3 .imc-v3-button:disabled{opacity:.4;cursor:default}#__imc_schedule_v3 .imc-v3-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#__imc_schedule_v3 select{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #dedced;border-radius:12px;background:white}#__imc_v3_error{color:#b7463e;overflow-wrap:anywhere}</style><div style="width:min(100%,420px);height:100%;margin:auto;background:#f8f8fd;border:1px solid #e3e4ec;border-radius:22px;box-shadow:0 14px 44px rgba(20,24,40,.32);overflow:hidden;display:flex;flex-direction:column"><div style="background:white;padding:15px;border-bottom:1px solid #e5e6ee"><div style="font-size:10px;letter-spacing:2px;font-weight:900;color:#7153d8">IMC · SCHEDULE IMPORT</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><strong style="font-size:20px">SCHEDULE V3.2</strong><span id="__imc_v3_badge" style="font-size:9px;background:#eee8ff;color:#6548c8;padding:8px;border-radius:99px">PRONTO</span><button id="__imc_v3_dismiss" aria-label="Chiudi" style="border:0;background:none;font-size:20px">×</button></div></div><div id="__imc_v3_body" style="padding:14px;overflow:auto;flex:1"></div></div>';
+    overlay.innerHTML='<style>#__imc_schedule_v3 *{box-sizing:border-box}#__imc_schedule_v3 .imc-v3-button{display:block;width:100%;min-height:48px;padding:12px;margin:7px 0;border:1px solid #dedced;border-radius:13px;background:#fff;color:#473c83;font:700 13px Inter,-apple-system,sans-serif;cursor:pointer}#__imc_schedule_v3 .imc-v3-button:disabled{opacity:.4;cursor:default}#__imc_schedule_v3 .imc-v3-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#__imc_schedule_v3 select{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #dedced;border-radius:12px;background:white}#__imc_v3_error{color:#b7463e;overflow-wrap:anywhere}</style><div style="width:min(100%,420px);height:100%;margin:auto;background:#f8f8fd;border:1px solid #e3e4ec;border-radius:22px;box-shadow:0 14px 44px rgba(20,24,40,.32);overflow:hidden;display:flex;flex-direction:column"><div style="background:white;padding:15px;border-bottom:1px solid #e5e6ee"><div style="font-size:10px;letter-spacing:2px;font-weight:900;color:#7153d8">IMC · SCHEDULE IMPORT</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><strong style="font-size:20px">SCHEDULE V3.3</strong><span id="__imc_v3_badge" style="font-size:9px;background:#eee8ff;color:#6548c8;padding:8px;border-radius:99px">PRONTO</span><button id="__imc_v3_dismiss" aria-label="Chiudi" style="border:0;background:none;font-size:20px">×</button></div></div><div id="__imc_v3_body" style="padding:14px;overflow:auto;flex:1"></div></div>';
     document.body.appendChild(overlay);
     q('#__imc_v3_dismiss').onclick=function(){if(S.running)requestStop();else overlay.remove();};
     S.loggedManager=positive(q('#scid') && (q('#scid').value || text(q('#scid')))) || positive(window.CUSTOMERID);
