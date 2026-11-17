@@ -1,5 +1,5 @@
 /* ================================================================
-   IMC | RESULTS IMPORT V3.3 · BACKFILL · CORE + SCHEDULE
+   IMC | RESULTS IMPORT V3.4 · BACKFILL · CORE + SCHEDULE
    Manager ID esclusi: assegnazione demandata ai trigger del database.
    REPOSITORY: IMC Results
    Girone per fixture; custom D1–D5; playoff e nazionali; solo MySQL3.
@@ -84,7 +84,7 @@ function buildUI(){
   <div style="position:sticky;top:0;z-index:3;padding:13px;background:rgba(255,255,255,.96);border-bottom:1px solid #eef1f5;backdrop-filter:blur(12px)">
    <div style="font-size:8px;letter-spacing:1.7px;font-weight:950;color:#7357df">ITALIAN MASTERS CLUB</div>
    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-    <strong style="font-size:20px;letter-spacing:-.4px">Results Import V3.3 · Backfill</strong>
+    <strong style="font-size:20px;letter-spacing:-.4px">Results Import V3.4 · Backfill</strong>
     <span id="badge" style="font-size:9px;font-weight:950;padding:7px 10px;border-radius:999px;background:#f1edff;color:#6847dc">PRONTO</span>
    </div>
   </div>
@@ -227,7 +227,15 @@ async function insertRows(rows){
  const written=Number(json.written_rows);if(written!==rows.length||Number(json.skipped_rows||0)!==0||Number(json.failed||0)!==0||json.rolled_back===true||(json.errors&&json.errors.length))throw Error("Salvataggio Results non confermato integralmente");
  for(const r of rows){
   const reply=await gateway({action:'read',game_world_id:S.gw,repository:RESULTS,target_database:dest.database,target_table:dest.table,route_mode:'explicit',where:{sm_fixture_id:r.sm_fixture_id},limit:100,offset:0});
-  if(reply.has_more||!(reply.rows||[]).some(old=>old.competition_key===r.competition_key&&Number(old.imc_season)===r.imc_season&&old.sm_action===r.sm_action&&old.competition_group===r.competition_group))throw Error('Fixture '+r.sm_fixture_id+': identità salvata diversa da quella inviata. Verifica il database prima di riprovare.');
+  // The World Cup registry stores its base key and the edition in imc_season.
+  const worldCupKey=r.sm_action==='worldcup'&&r.competition_group==='NATIONS'
+   ? S.gw+'|NATIONS|worldcup' : null;
+  const matches=(reply.rows||[]).some(old=>{
+   const sameKey=old.competition_key===r.competition_key||(worldCupKey!==null&&old.competition_key===worldCupKey);
+   return sameKey&&Number(old.imc_season)===r.imc_season
+    &&old.sm_action===r.sm_action&&old.competition_group===r.competition_group;
+  });
+  if(reply.has_more||!matches)throw Error('Fixture '+r.sm_fixture_id+': identità salvata diversa da quella inviata. Verifica il database prima di riprovare.');
  }
  rows.forEach(r=>{const id=Number(r.sm_fixture_id);if(Number.isFinite(id)){S.existingIds.add(id);S.existingRows.set(id,[r]);}if(clean(r.fingerprint))S.existingFingerprints.add(clean(r.fingerprint));});
  S.saved+=written;return written;

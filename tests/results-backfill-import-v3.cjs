@@ -5,7 +5,7 @@ const original=fs.readFileSync('tests/fixtures/results-import-v20.js','utf8');
 const section=(s,a,b)=>s.slice(s.indexOf(a),s.indexOf(b,s.indexOf(a)));
 assert.equal(section(code,'/* NAVIGATION */','/* PROCESS */'),section(original,'/* NAVIGATION */','/* PROCESS */'),'SM navigation is byte-identical');
 assert.equal(section(code,'function progressUI(){','function infoCard('),section(original,'function progressUI(){','function infoCard('),'Progress popup is byte-identical');
-assert.equal(section(code,'function buildUI(){','function worldUI(){').replace('Results Import V3.3 · Backfill','Results Import V2.0'),section(original,'function buildUI(){','function worldUI(){'),'Popup layout preserved');
+assert.equal(section(code,'function buildUI(){','function worldUI(){').replace('Results Import V3.4 · Backfill','Results Import V2.0'),section(original,'function buildUI(){','function worldUI(){'),'Popup layout preserved');
 assert.equal(section(code,'async function processSection(){','async function run(){'),section(original,'async function processSection(){','async function run(){'),'Original backfill loop retained');
 assert.equal(section(code,'async function run(){','/* SHORTCUT */'),section(original,'async function run(){','/* SHORTCUT */'),'Original division loop retained');
 const until=async f=>{for(let n=0;n<2000;n++){if(f())return;await new Promise(r=>setTimeout(r,2));}throw Error('UI timeout');};
