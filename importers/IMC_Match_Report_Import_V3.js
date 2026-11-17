@@ -23,7 +23,7 @@
 (function () {
     "use strict";
 
-    var VERSION = "IMC-MATCH-REPORT-V3.2-CORE-SCHEDULE";
+    var VERSION = "IMC-MATCH-REPORT-V3.3-CORE-SCHEDULE";
     var SCANNER = "IMC_MATCH_REPORT_IMPORT_V1";
 
     var GATEWAY_URL =
@@ -206,8 +206,9 @@ function fixtureGroupName(button){
         if(reply.database!==dest.database||(reply.physical_table||reply.table)!==dest.table||Number(reply.matched_rows)!==1||Number(reply.updated_rows)!==1)throw new Error('Completamento Match Report non confermato');
         await verifyStoredReport(expected);
         STATE.existingMeta.set(String(Number(row.sm_fixture_id)),{key:expected.competition_key,season:expected.imc_season,complete:true});
-        STATE.lastBatch={sent:1,written:1,skipped:0,database:dest.database,table:dest.table,trace_id:reply.trace_id||null};
-        log('Fixture '+row.sm_fixture_id+' · report completato senza duplicarlo','ok');updateUI();return 1;
+        STATE.reportsUpdated++;STATE.rowsUpdated++;
+        STATE.lastBatch={sent:1,written:1,updated:1,skipped:0,database:dest.database,table:dest.table,trace_id:reply.trace_id||null};
+        log('Fixture '+row.sm_fixture_id+' · UPDATED · report completato senza duplicarlo','ok');updateUI();return 1;
     }
     async function verifyStoredReport(row){
         var dest=explicitMatchReportDestination();
@@ -354,6 +355,8 @@ async function chooseCatalog(){
         reportsOpened: 0,
         reportsSkipped: 0,
         reportsSaved: 0,
+        reportsUpdated: 0,
+        rowsUpdated: 0,
         rowsSaved: 0,
         errors: 0,
 
@@ -641,7 +644,7 @@ async function chooseCatalog(){
                 '<div style="background:#fff;padding:13px 15px 12px;border-bottom:1px solid #e5e6ee;flex:0 0 auto;">' +
                     '<div style="font-size:9px;letter-spacing:2.3px;font-weight:950;color:#7153d8;margin-bottom:4px;">IMC · MATCH REPORT IMPORT</div>' +
                     '<div style="display:flex;align-items:center;justify-content:space-between;gap:7px;">' +
-                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.2 · SENZA BACKFILL</div>' +
+                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.3 · SENZA BACKFILL</div>' +
                         '<div id="__imc_badge" style="background:#eee8ff;color:#6548c8;padding:8px 11px;border-radius:999px;font-weight:950;font-size:9px;white-space:nowrap;">PRONTO</div>' +
                     '</div>' +
                 '</div>' +
@@ -713,9 +716,10 @@ async function chooseCatalog(){
                     '<div id="__imc_context_meta" style="font-size:8.5px;font-weight:700;color:#777d8f;margin-top:5px;overflow-wrap:anywhere;">-</div>' +
                 '</div>' +
 
-                '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;">' +
+                '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;">' +
                     '<div style="background:#fff;border:1px solid #e3e5ec;border-radius:14px;padding:8px 3px;text-align:center;min-width:0;"><div style="font-size:6px;font-weight:900;color:#969bad;">VISTE</div><div id="__imc_seen" style="font-size:18px;font-weight:900;margin-top:5px;">0</div></div>' +
                     '<div style="background:#fff;border:1px solid #e3e5ec;border-radius:14px;padding:8px 3px;text-align:center;min-width:0;"><div style="font-size:8px;font-weight:900;color:#358c50;">SALVATI</div><div id="__imc_saved" style="font-size:22px;font-weight:900;margin-top:5px;">0</div></div>' +
+                    '<div style="background:#fff;border:1px solid #e3e5ec;border-radius:14px;padding:8px 3px;text-align:center;min-width:0;"><div style="font-size:8px;font-weight:900;color:#7153d8;">UPDATED</div><div id="__imc_updated" style="font-size:22px;font-weight:900;margin-top:5px;">0</div></div>' +
                     '<div style="background:#fff;border:1px solid #e3e5ec;border-radius:14px;padding:8px 3px;text-align:center;min-width:0;"><div style="font-size:8px;font-weight:900;color:#a96700;">SALTATI</div><div id="__imc_skip" style="font-size:22px;font-weight:900;margin-top:5px;">0</div></div>' +
                     '<div style="background:#fff;border:1px solid #e3e5ec;border-radius:14px;padding:8px 3px;text-align:center;min-width:0;"><div style="font-size:6px;font-weight:900;color:#969bad;">ERRORI</div><div id="__imc_errors" style="font-size:18px;font-weight:900;margin-top:5px;">0</div></div>' +
                 '</div>' +
@@ -823,6 +827,7 @@ async function chooseCatalog(){
             STATE.fixturesSeen
         );
 
+        setText("#__imc_updated",STATE.reportsUpdated);
         setText(
             "#__imc_saved",
             STATE.reportsSaved
@@ -851,8 +856,7 @@ async function chooseCatalog(){
 
         setText(
             "#__imc_rows_meta",
-            STATE.rowsSaved +
-            " righe"
+            STATE.rowsSaved + " nuove · " + STATE.rowsUpdated + " updated"
         );
 
         setText(
@@ -897,7 +901,7 @@ async function chooseCatalog(){
             batch.sent
                 ? (
                     batch.written +
-                    " written · " +
+                    (batch.updated ? " updated · " : " written · ") +
                     batch.skipped +
                     " skip"
                   )
@@ -923,7 +927,7 @@ async function chooseCatalog(){
                     batch.database +
                     " · sent " +
                     batch.sent +
-                    " · written " +
+                    (batch.updated ? " · updated " : " · written ") +
                     batch.written +
                     " · skip " +
                     batch.skipped +
@@ -972,7 +976,7 @@ async function chooseCatalog(){
 
         setPhase(
             STATE.reportsSaved +
-            " salvati · " +
+            " salvati · " + STATE.reportsUpdated + " updated · " +
             STATE.reportsSkipped +
             " saltati · " +
             STATE.errors +
@@ -1181,8 +1185,10 @@ async function chooseCatalog(){
             );
         }
 
+        STATE.reportsSaved++;STATE.rowsSaved+=written;
         STATE.lastBatch = {
             sent: 1,
+            updated: 0,
             written: written,
             skipped: skipped,
             database: explicit.database,
@@ -3283,9 +3289,6 @@ async function chooseCatalog(){
                     );
 
                 if (storedRows > 0) {
-                    STATE.reportsSaved++;
-                    STATE.rowsSaved +=
-                        storedRows;
 
                     STATE.existingReports.add(
                         String(
@@ -3297,7 +3300,7 @@ async function chooseCatalog(){
 
                     log(
                         label +
-                        " · SALVATO · 1 riga",
+                        (STATE.lastBatch.updated ? " · UPDATED · 1 riga esistente" : " · SALVATO · 1 nuova riga"),
                         "ok"
                     );
                 } else {
@@ -3463,7 +3466,7 @@ async function chooseCatalog(){
 
         if (!resultsPageState()) {
             throw new Error(
-                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.2"
+                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.3"
             );
         }
 
@@ -3496,7 +3499,7 @@ async function chooseCatalog(){
 
         finish(
             STATE.errors ? "error" : "ok",
-            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.2 completato"
+            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.3 completato"
         );
     }
 
