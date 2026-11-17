@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - 'importers/IMC_Match_Report_Import_V3.js'
+      - 'importers/IMC_Match_Report_Backfill_Import_V3.js'
+      - 'tests/match-report-backfill-v3.cjs'
+      - 'tests/fixtures/match-report-backfill-*.js'
       - 'tests/match-report-import-v3.cjs'
       - 'tests/fixtures/match-report-import-v20.js'
       - 'tests/fixtures/imc-connection-report.html'
@@ -25,8 +28,11 @@ jobs:
       - name: Verify Match Report identity and unchanged popup/navigation
         run: |
           node --check importers/IMC_Match_Report_Import_V3.js
+          node --check importers/IMC_Match_Report_Backfill_Import_V3.js
           npm install --prefix /tmp/imc-results-test jsdom@27.2.0 --no-audit --no-fund
           IMC_TEST_NODE_MODULES=/tmp/imc-results-test/node_modules node tests/match-report-import-v3.cjs
+          IMC_TEST_NODE_MODULES=/tmp/imc-results-test/node_modules IMC_MR_SOURCE=importers/IMC_Match_Report_Backfill_Import_V3.js node tests/match-report-import-v3.cjs
+          IMC_TEST_NODE_MODULES=/tmp/imc-results-test/node_modules node tests/match-report-backfill-v3.cjs
           
       - name: Publish importer and verify live bytes
         env:
@@ -37,7 +43,7 @@ jobs:
           import io,os,ssl,urllib.request,json
           from pathlib import Path
           from ftplib import FTP_TLS
-          files=['importers/IMC_Match_Report_Import_V3.js']
+          files=['importers/IMC_Match_Report_Import_V3.js','importers/IMC_Match_Report_Backfill_Import_V3.js']
           ctx=ssl.create_default_context();ctx.check_hostname=False
           with FTP_TLS(context=ctx,timeout=60) as ftp:
               ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()

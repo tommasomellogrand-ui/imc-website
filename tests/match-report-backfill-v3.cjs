@@ -1,0 +1,24 @@
+const fs=require('fs'),assert=require('node:assert/strict'),{JSDOM}=require(process.env.IMC_TEST_NODE_MODULES+'/jsdom');
+const source=fs.readFileSync('importers/IMC_Match_Report_Backfill_Import_V3.js','utf8');
+for(const path of ['tests/fixtures/match-report-backfill-navigation.js','tests/fixtures/match-report-backfill-loop.js'])assert.ok(source.includes(fs.readFileSync(path,'utf8')),'Original backfill logic preserved: '+path);
+assert.match(source,/if\(S\.leagueMode\)await runNavigation\(\);else await runBackfill\(\)/);
+const dom=new JSDOM('<ul class="pager"><li id="ResultsprevWeek_click"><a onclick="loadPrevious(42)">Precedenti</a></li></ul>',{url:'https://it.soccermanager.com',runScripts:'dangerously'}),w=dom.window,d=w.document;
+w.HTMLElement.prototype.getBoundingClientRect=()=>({width:100,height:10});w.getComputedStyle=()=>({display:'block',visibility:'visible',opacity:'1'});
+const exposedFunctions='STATE,S,goPrevious,runBackfill,runNavigation,backfillSeason';
+const hooks=`hooks(h){if(h.wait)waitResultsReady=h.wait;if(h.click)realClick=h.click;if(h.state)resultsPageState=h.state;if(h.process)processCurrentResultsPage=h.process;if(h.previous)goPrevious=h.previous;if(h.plan)selectPlan=h.plan;if(h.change)changeCompetition=h.change;log=()=>{};updateUI=()=>{};}`;
+w.eval(source.replace(/    buildUI\(\);\n    boot\(\);[\s\S]*$/,'window.api={'+exposedFunctions+','+hooks+'};})();'));
+const a=w.api;
+(async()=>{
+ let clicks=[];a.hooks({state:()=> 'old',click:async e=>clicks.push(e.getAttribute('onclick')),wait:async(_,timeout)=>timeout===1200?null:clicks.length===3?'new':null});
+ assert.equal(await a.goPrevious(),true);assert.deepEqual(clicks,['loadPrevious(42)','loadPrevious(42)','loadPrevious(42)']);
+ clicks=[];a.hooks({wait:async()=>null});await assert.rejects(()=>a.goPrevious(),/tre caricamenti falliti/);assert.equal(clicks.length,3,'Exactly three retries');
+ d.body.innerHTML='<li id="ResultsprevWeek_noclick" class="disabled">Precedenti</li>';assert.equal(await a.goPrevious(),false,'Confirmed end of history');
+ let cursor=0;const pages=[];a.STATE.errors=0;
+ a.hooks({plan:()=>[{value:'1',text:'Divisione 1'},{value:'2',text:'Divisione 2'}],change:async()=>{cursor=0;},wait:async()=> 'page'+cursor,process:async()=>pages.push(a.STATE.currentDivision+':'+cursor),previous:async()=>++cursor<3});
+ await a.runNavigation();assert.deepEqual(pages,['Divisione 1:0','Divisione 1:1','Divisione 1:2','Divisione 2:0','Divisione 2:1','Divisione 2:2']);assert.equal(a.STATE.errors,0,'Every past page read before changing division');
+ let processed=0;a.hooks({wait:async()=> 'same-page',process:async()=>processed++,previous:async()=>true});await a.runBackfill();assert.equal(processed,1,'Repeated historical pages cannot loop forever');assert.equal(a.STATE.errors,1);
+ a.S.seasons=[{imc_season:1,start:'2026-01-01',end:'2026-10-31'},{imc_season:2,start:'2026-11-01',end:null}];a.S.season=2;
+ assert.equal(a.backfillSeason('2026-09-15'),1);assert.equal(a.backfillSeason('2026-11-17'),2);assert.throws(()=>a.backfillSeason('2025-01-01'),/assente o ambigua/);
+ a.STATE.stopped=true;await assert.rejects(()=>a.runBackfill(),/interrotta/);
+ dom.window.close();console.log('PASS original backfill navigation: same-target retry3, history end, all pages per division, loop guard, STOP and historical CORE seasons');
+})().catch(e=>{console.error(e);dom.window.close();process.exit(1);});
