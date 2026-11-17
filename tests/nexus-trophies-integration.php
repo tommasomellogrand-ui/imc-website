@@ -23,24 +23,30 @@ for($i=1;$i<=10;$i++) {
     $core->prepare('INSERT INTO `IMC Competition Codex Global` (game_world_id,competition_key,sm_action,sm_country,sm_division,teams_count,expected_match) VALUES (?,NULL,?,NULL,?,?,?)')->execute([$gw,'league','1',4,12]);
 }
 foreach(json_decode(file_get_contents(dirname(__DIR__).'/docs/trophy-automation-migrations.json'),true) as $plan) {
-    $db=nexus_db($config,$plan['target']);foreach($plan['statements'] as $sql)$db->exec($sql);
+    $db=nexus_db($config,$plan['target']);
+    foreach ($plan['statements'] as $sql) {
+        // Mirror the deployed migration of world IDs in state rows and trigger bodies.
+        $sql=preg_replace_callback("/'(GW[0-9]{3})'/",fn($match)=>"'".imc_world_id($match[1])."'",$sql);
+        $db->exec($sql);
+    }
 }
 for($i=1;$i<=10;$i++) {
     $gw=sprintf('GW%03d',$i);$db=nexus_db($config,nexus_target($config,$gw));
-    $db->exec("UPDATE IMC_Trophy_Sync_State SET enabled=1 WHERE game_world_id='$gw'");
+    $storageWorld=imc_world_id($gw);
+    $db->exec("UPDATE IMC_Trophy_Sync_State SET enabled=1 WHERE game_world_id='$storageWorld'");
     foreach($league as $r) {
         $r['game_world_id']=$gw;$r['competition_key']=$gw.'|DOMESTIC|league|1';
         $db->prepare('INSERT INTO '.$gw.'_IMC_Results (`'.implode('`,`',array_keys($r)).'`) VALUES ('.implode(',',array_fill(0,count($r),'?')).')')->execute(array_values($r));
     }
     check((int)$db->query("SELECT revision FROM IMC_Trophy_Sync_State WHERE game_world_id='$gw'")->fetchColumn()===13,$gw.' insert triggers revision');
-    $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$gw'");
+    $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$storageWorld'");
     $preview=trophy_sync($config,$db,$gw,true);check(count($preview['awards'])===1,$gw.' dry run winner');
     check((int)$db->query('SELECT COUNT(*) FROM '.$gw.'_IMC_Trophy_Room')->fetchColumn()===0,$gw.' preview never writes');
     $sync=trophy_sync($config,$db,$gw);check($sync['changes']['inserted']===1,$gw.' sync inserts champion');
     check($db->query('SELECT nexus_view FROM '.$gw.'_IMC_Trophy_Room')->fetchColumn()==='Mapped Division 1',$gw.' new trophy uses exact competition mapping');
     $again=trophy_sync($config,$db,$gw);check($again['state']==='current',$gw.' idempotent clean refresh');
     $db->exec('DELETE FROM '.$gw.'_IMC_Results WHERE sm_fixture_id=1');
-    $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$gw'");
+    $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$storageWorld'");
     $sync=trophy_sync($config,$db,$gw);check($sync['changes']['removed']===1,$gw.' deletion revokes incomplete title');
     check((int)$db->query("SELECT COUNT(*) FROM IMC_Trophy_Sync_Log WHERE game_world_id='$gw'")->fetchColumn()===2,$gw.' changes archived');
     $rev=(int)$db->query("SELECT revision FROM IMC_Trophy_Sync_State WHERE game_world_id='$gw'")->fetchColumn();
@@ -57,18 +63,18 @@ for($i=1;$i<=10;$i++) {
         $r['game_world_id']=$gw;$r['imc_season']=2;$r['competition_key']=$gw.'|DOMESTIC|league|1';
         $db->prepare('INSERT INTO '.$gw.'_IMC_Results (`'.implode('`,`',array_keys($r)).'`) VALUES ('.implode(',',array_fill(0,count($r),'?')).')')->execute(array_values($r));
     }
-    $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$gw'");
+    $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$storageWorld'");
     $sync=trophy_sync($config,$db,$gw);
     check($sync['changes']===['inserted'=>1,'updated'=>0,'removed'=>0],$gw.' current season still derives awards');
     check(nexus_rows($db,'SELECT * FROM '.$gw.'_IMC_Trophy_Room WHERE imc_season=1 ORDER BY id')===$history,$gw.' all historical fields preserved regardless of source');
     // Current-season Honours survive both conflicting and missing Results.
     $db->exec("UPDATE ".$gw."_IMC_Trophy_Room SET source_repository='SM Honours',winner_name='Official winner' WHERE imc_season=2");
     $official=nexus_rows($db,'SELECT * FROM '.$gw.'_IMC_Trophy_Room WHERE imc_season=2');
-    $db->exec("UPDATE IMC_Trophy_Sync_State SET revision=revision+1,touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$gw'");
+    $db->exec("UPDATE IMC_Trophy_Sync_State SET revision=revision+1,touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$storageWorld'");
     trophy_sync($config,$db,$gw);
     check(nexus_rows($db,'SELECT * FROM '.$gw.'_IMC_Trophy_Room WHERE imc_season=2')===$official,$gw.' current Honours not overwritten');
     $db->exec('DELETE FROM '.$gw.'_IMC_Results WHERE imc_season=2');
-    $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$gw'");
+    $db->exec("UPDATE IMC_Trophy_Sync_State SET touched_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE) WHERE game_world_id='$storageWorld'");
     trophy_sync($config,$db,$gw);
     check(nexus_rows($db,'SELECT * FROM '.$gw.'_IMC_Trophy_Room WHERE imc_season=2')===$official,$gw.' current Honours not deleted');
     // Reproduce a just-committed, decisive Super Cup result without a Match Report.
