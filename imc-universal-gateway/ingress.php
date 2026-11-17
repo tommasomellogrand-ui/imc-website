@@ -84,7 +84,22 @@ function imc_ingress_where(array $where, array &$values): string {
     return ' WHERE ' . implode(' AND ', $parts);
 }
 
+// Canonical ordinary reports carry their complete identity. The separate legacy
+// World Cup importer keeps its existing normalization path.
+function imc_ingress_canonical_report_batch(string $table, array $rows): bool {
+    $physical=imc_physical_table($table);
+    if (!preg_match('/^(IMC00[1-8])_Match_Reports$/D',$physical,$m)||!$rows) return false;
+    foreach ($rows as $row) {
+        $season=(int)($row['imc_season']??0);
+        if (($row['game_world_id']??'')!==$m[1]||$season<1||empty($row['sm_action'])||$row['sm_action']==='worldcup'
+            ||!str_starts_with((string)($row['competition_key']??''),$m[1].'|S'.str_pad((string)$season,2,'0',STR_PAD_LEFT).'|')
+            ||str_contains((string)$row['competition_key'],'|NATIONS|worldcup')) return false;
+    }
+    return true;
+}
+
 function imc_ingress_insert_many(PDO $pdo, string $table, string $gw, array $rows, bool $atomic): array {
+    if (imc_ingress_canonical_report_batch($table,$rows)) return imc_ingress_insert_rows($pdo,$table,$gw,$rows,$atomic);
     require_once __DIR__.'/worldcup-automation.php';
     if (imc_wc_target($table)!==null) {
         $outcome=imc_wc_import($pdo,$table,true,fn()=>imc_ingress_insert_rows($pdo,$table,$gw,$rows,false));
