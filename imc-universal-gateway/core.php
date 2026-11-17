@@ -173,6 +173,11 @@ function imc_competition_catalog(array $cfg, array $body): array {
     }
     usort($rows,fn($a,$b)=>strcmp($a['name'],$b['name']));
     $out=['ok'=>true,'action'=>'list_imc_competitions','source'=>'core','game_world_id'=>$compact,'competitions'=>$rows];
+    // Optional club identity aliases for IMC connection reports only.
+    if (($body['include_clubs']??false)===true) {
+        $stmt=$pdo->prepare('SELECT m.`SM World Club ID` world_id,m.`Club Name` mapping_name,c.name canonical_name FROM `IMC Game World Club Mapping` m LEFT JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World` IN (?,?,?) AND m.`SM World Club ID`>0');
+        $stmt->execute([$legacy,$alias,$compact]);$out['clubs']=$stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     // Optional Schedule V3 context, read only from the authoritative CORE.
     if (($body['include_seasons']??false)===true) {
         $stmt=$pdo->prepare('SELECT imc_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id IN (?,?,?) ORDER BY imc_season_start_date');

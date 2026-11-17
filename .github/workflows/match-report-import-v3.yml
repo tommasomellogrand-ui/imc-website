@@ -6,6 +6,7 @@ on:
       - 'importers/IMC_Match_Report_Import_V3.js'
       - 'tests/match-report-import-v3.cjs'
       - 'tests/fixtures/match-report-import-v20.js'
+      - 'tests/fixtures/imc-connection-report.html'
       - '.github/workflows/match-report-import-v3.yml'
   workflow_dispatch:
 permissions:

@@ -23,7 +23,7 @@
 (function () {
     "use strict";
 
-    var VERSION = "IMC-MATCH-REPORT-V3.1-CORE-SCHEDULE";
+    var VERSION = "IMC-MATCH-REPORT-V3.2-CORE-SCHEDULE";
     var SCANNER = "IMC_MATCH_REPORT_IMPORT_V1";
 
     var GATEWAY_URL =
@@ -82,12 +82,13 @@ var MATCH_REPORT_REPOSITORY =
     async function prepareReportImport(){
         S.gw=STATE.gameWorld;S.legacyGw=STATE.legacyWorld;
         setPhase('Leggo competizioni dal CORE');
-        var catalog=await gateway({action:'list_imc_competitions',game_world_id:S.gw,scope:'all',include_seasons:true});
+        var catalog=await gateway({action:'list_imc_competitions',game_world_id:S.gw,scope:'all',include_seasons:true,include_clubs:true});
         // Le World Cup singole rimangono all’importer dedicato.
         S.catalog=(catalog.competitions||[]).filter(c=>normalizedAction(c.sm_action)!=='worldcup').map(c=>({...c,group:clean(c.group).toUpperCase(),sm_action:normalizedAction(c.sm_action),sm_division:normalizedDivision(c.sm_division)}));
         S.seasons=(catalog.seasons||[]).map(s=>({imc_season:Number(s.imc_season),start:clean(s.imc_season_start_date),end:clean(s.imc_season_end_date)||null})).filter(s=>Number.isSafeInteger(s.imc_season)&&s.imc_season>0&&s.start).sort((a,b)=>a.start.localeCompare(b.start));
         if(!S.catalog.length||!S.seasons.length)throw new Error('Competizioni o stagioni CORE mancanti');
         var seen=new Set();S.catalog.forEach(c=>{var k=baseKey(c.key);if(seen.has(k)||!c.name||!c.sm_action||!['DOMESTIC','INTERNATIONAL','IMC','NATIONS'].includes(c.group))throw new Error('Catalogo CORE incoerente');seen.add(k);});
+        S.clubs=Array.isArray(catalog.clubs)?catalog.clubs:[];
         await chooseCatalog();renderProgressUI();
         S.results.clear();S.schedule.clear();
         function index(map,row){var id=Number(row.sm_fixture_id);if(!Number.isSafeInteger(id)||id<1)return;var list=map.get(id)||[];list.push(row);map.set(id,list);}
@@ -640,7 +641,7 @@ async function chooseCatalog(){
                 '<div style="background:#fff;padding:13px 15px 12px;border-bottom:1px solid #e5e6ee;flex:0 0 auto;">' +
                     '<div style="font-size:9px;letter-spacing:2.3px;font-weight:950;color:#7153d8;margin-bottom:4px;">IMC · MATCH REPORT IMPORT</div>' +
                     '<div style="display:flex;align-items:center;justify-content:space-between;gap:7px;">' +
-                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.1 · SENZA BACKFILL</div>' +
+                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.2 · SENZA BACKFILL</div>' +
                         '<div id="__imc_badge" style="background:#eee8ff;color:#6548c8;padding:8px 11px;border-radius:999px;font-weight:950;font-size:9px;white-space:nowrap;">PRONTO</div>' +
                     '</div>' +
                 '</div>' +
@@ -1735,7 +1736,24 @@ async function chooseCatalog(){
             : null;
     }
 
+    function imcConnectionTeamMeta(side){
+        var root=document.getElementById('currentScreenA')||document;
+        var heading=root.querySelector('[id="'+(side==='home'?'MatchReportTeam1':'MatchReportTeam2')+'"]');
+        var anchor=heading&&heading.querySelector('a');
+        var name=clean(anchor?.textContent||heading?.textContent);
+        if(!name)throw new Error('IMC: nome squadra '+side+' assente nel report');
+        var ids=new Set((S.clubs||[]).filter(c=>[c.mapping_name,c.canonical_name].some(n=>norm(n)===norm(name))).map(c=>Number(c.world_id)).filter(id=>Number.isSafeInteger(id)&&id>0));
+        if(ids.size>1)throw new Error('IMC: squadra '+name+' ambigua nel CORE');
+        var known=Number(STATE.currentIdentity?.[side+'_sm_club_id']);
+        var id=ids.size===1?Array.from(ids)[0]:known>0?known:null;
+        if(!id)throw new Error('IMC: ID squadra non trovato nel CORE per '+name);
+        if(known>0&&id!==known)throw new Error('IMC: squadra '+name+' diversa dalla fixture');
+        // MENU_connectGWDraw identifies the connection: never store its argument
+        // as a world club ID. Use the world-specific CORE mapping instead.
+        return {id:id,name:name};
+    }
     function reportTeamMeta(side) {
+        if(STATE.currentIdentity?.competition_group==='IMC')return imcConnectionTeamMeta(side);
         var scoreId =
             side === "home"
                 ? "MatchReportHometeamscore"
@@ -3442,7 +3460,7 @@ async function chooseCatalog(){
 
         if (!resultsPageState()) {
             throw new Error(
-                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.1"
+                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.2"
             );
         }
 
@@ -3475,7 +3493,7 @@ async function chooseCatalog(){
 
         finish(
             STATE.errors ? "error" : "ok",
-            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.1 completato"
+            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.2 completato"
         );
     }
 
