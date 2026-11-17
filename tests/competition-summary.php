@@ -54,7 +54,7 @@ check($calendar['2026-11-20']['number']===7&&$calendar['2026-11-24']['number']==
 $calendar=imc_competition_calendar($domestic,['expected_matchdays'=>18],[fixture('1',false,'','2026-11-16','15')]);
 check($calendar['2026-11-16']['number_label']==='Giornata 15 di 18','Explicit domestic matchday survives partial imports');
 $calendar=imc_competition_calendar($domestic,['expected_matchdays'=>18],[fixture('1',false,'','2026-11-16','')]);
-check($calendar['2026-11-16']['number']===null,'A partial calendar cannot invent a day number');
+check($calendar['2026-11-16']['number']===1,'Opening Schedule starts the new league season at matchday 1');
 
 foreach(['IMC001','IMC002','IMC003','IMC004','IMC005','IMC007','IMC008'] as $world){
  foreach(['charityshield','supercup'] as $action){
@@ -165,3 +165,12 @@ $final=$oldWorldCup;$final['played']=true;$final['competition_stage']='Finale';$
 $summary=imc_competition_summary(['sm_action'=>'worldcup','competition_group'=>'NATIONS'],[],[$final],['final_played'=>true],[]);
 check($summary['complete'],'A played World Cup final ends Home visibility');
 echo "World Cup season rollover: all checks passed\n";
+
+foreach(['league','smfacup','smfashield'] as $action){
+ $row=['sm_action'=>$action,'competition_group'=>$action==='league'?'DOMESTIC':'INTERNATIONAL'];
+ $f=[fixture('a',false,'','2026-11-22',''),fixture('b',false,'','2026-11-22',''),fixture('c',false,'','2026-11-25','')];
+ $p=imc_competition_summary($row,['expected_matchdays'=>14],$f,[],[]);
+ check($p['next_turn']['number']===1 && $p['next_turn']['number_label']===($action==='league'?'Giornata':'Turno').' 1 di 14','Opening unlabeled Schedule exposes turn on Home');
+ $c=imc_competition_calendar($row,['expected_matchdays'=>14],$f);
+ check($c['2026-11-25']['number']===2,'Count dates rather than fixtures');
+}

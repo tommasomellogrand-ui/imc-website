@@ -188,6 +188,9 @@ function imc_competition_calendar(array $row,array $definition,array $fixtures):
         $index++;$turn=imc_competition_turn($r,$league);$n=$turn['number'];$fromResults=false;
         if(!$league && !in_array(cupPhase($r)[0],['Gironi'],true) && ($row['sm_action']??'')!=='interqualifier') $n=null; // Knockout round numbers restart.
         if($n===null && $league && isset($leagueNumbers[$date])){$n=$leagueNumbers[$date];$fromResults=true;}
+        // Initial Schedule imports can omit round labels. Before any Results,
+        // number the imported league/SMFA dates from the season opening turn.
+        if($n===null && !$resultDates && ($league || in_array($row['sm_action']??'',['smfacup','smfashield'],true))) $n=$index;
         if($total>0 && count($days)===$total){$n=$index;$fromResults=false;}
         if(!$league && $total>0) {
             [$phase,$leg]=cupPhase($r);
