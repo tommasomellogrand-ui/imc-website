@@ -30,7 +30,7 @@ try{
     foreach($participants as $m){$kind=($m['competition_group']==='NATIONS'||strpos((string)$m['competition_key'],'|NATIONS|')!==false)?'national_team':'club';if(isset($assigned[$kind][(int)$m['home_id']])||isset($assigned[$kind][(int)$m['away_id']]))$imcKeys[$m['competition_key']]=true;}
   }
   foreach($rows as &$r)$r['has_imc_manager']=isset($imcKeys[$r['competition_key']]);unset($r);
-  $labels=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$labels[(string)$m['competition_key']]=$m['nexus_view'];
+  $labels=[];foreach(nexus_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$labels[(string)$m['competition_key']]=$m['nexus_view'];
   $names=['charityshield'=>'Charity Shield','leaguecup'=>'National Cup','nationalcup'=>'National Cup','leagueshield'=>'League Cup','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers','worldcup'=>'World Cup'];
   $order=['league'=>0,'playoff'=>1,'charityshield'=>2,'leaguecup'=>3,'nationalcup'=>3,'leagueshield'=>4,'smfacup'=>5,'smfashield'=>6,'supercup'=>7,'interqualifier'=>8,'worldcup'=>9];
   foreach($rows as &$r){

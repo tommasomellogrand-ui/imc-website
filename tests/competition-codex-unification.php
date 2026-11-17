@@ -24,18 +24,24 @@ foreach($removeTypeCountry['statements'] as $sql)$pdo->exec($sql);
 $fields=$pdo->query('SHOW COLUMNS FROM `IMC Competition Nexus Mapping`')->fetchAll(PDO::FETCH_COLUMN);
 verify(count($fields)===9&&!in_array('world_type',$fields,true)&&!in_array('sm_country',$fields,true),'Mapping exposes nine fields without world_type or sm_country');
 verify($pdo->query('SELECT '.$projection.' FROM `IMC Competition Nexus Mapping` ORDER BY mapping_id,competition_key')->fetchAll(PDO::FETCH_ASSOC)===$before,'All retained mapping fields and historical aliases are unchanged');
-// Execute the actual consumer queries against the reduced view.
+$projectionWithoutNexus='mapping_id,game_world_id,competition_group,sm_action,sm_division,competition_key,IMC_View,updated_at';
+$beforeWithoutNexus=$pdo->query('SELECT '.$projectionWithoutNexus.' FROM `IMC Competition Nexus Mapping` ORDER BY mapping_id,competition_key')->fetchAll(PDO::FETCH_ASSOC);
+$removeNexus=json_decode(file_get_contents(__DIR__.'/../database-migrations/20261117_competition_mapping_drop_nexus_view.json'),true,512,JSON_THROW_ON_ERROR);
+foreach($removeNexus['statements'] as $sql)$pdo->exec($sql);
+$fields=$pdo->query('SHOW COLUMNS FROM `IMC Competition Nexus Mapping`')->fetchAll(PDO::FETCH_COLUMN);
+verify(count($fields)===8&&!in_array('nexus_view',$fields,true),'Mapping exposes eight fields with only IMC_View as its label');
+verify($pdo->query('SELECT '.$projectionWithoutNexus.' FROM `IMC Competition Nexus Mapping` ORDER BY mapping_id,competition_key')->fetchAll(PDO::FETCH_ASSOC)===$beforeWithoutNexus,'Removing nexus_view preserves every retained field and alias');
+// Execute every actual consumer query against the reduced view.
 $sample=$before[0];
-foreach(['nexus/competitions/overview.php','site-data/competitions/overview.php','site-data/competitions/custom-cups.php'] as $file){
+foreach(json_decode(file_get_contents(__DIR__.'/../scripts/competition-mapping-consumers.json'),true,512,JSON_THROW_ON_ERROR) as $file){
  $checked=0;
  foreach(token_get_all(file_get_contents(__DIR__.'/../'.$file)) as $token){
   if(!is_array($token)||$token[0]!==T_CONSTANT_ENCAPSED_STRING)continue;
   $sql=stripcslashes(substr($token[1],1,-1));
   if(!str_starts_with($sql,'SELECT ')||!str_contains($sql,'IMC Competition Nexus Mapping'))continue;
-  $params=[$sample['game_world_id'],$sample['competition_key']];
-  if(substr_count($sql,'?')===3)$params[]=$sample['competition_key'];
+  $params=match(substr_count($sql,'?')){0=>[],1=>[$sample['game_world_id']],2=>[$sample['game_world_id'],$sample['competition_key']],3=>[$sample['game_world_id'],$sample['competition_key'],$sample['competition_key']]};
   $stmt=$pdo->prepare($sql);$stmt->execute($params);$rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
-  verify(count($rows)>0&&array_key_exists('sm_country',$rows[0])&&isset($rows[0]['world_type']),'Consumer reads country/type independently of the reduced mapping: '.$file);
+  verify(count($rows)>0&&isset($rows[0]['nexus_view']),'Consumer reads the competition label from IMC_View: '.$file);
   $checked++;
  }
  verify($checked===1,'Exactly one mapping query tested: '.$file);
@@ -49,7 +55,7 @@ verify((int)$pdo->query("SELECT COUNT(*) FROM `IMC Competition Codex Global` WHE
 verify((int)$pdo->query("SELECT COUNT(*) FROM `IMC Competition Codex Global` WHERE sm_action='friendly'")->fetchColumn()===8,'Friendlies in every world');
 verify((int)$pdo->query("SELECT COUNT(*) FROM `IMC Competition Codex Global` WHERE game_world_id='GW009' AND (sm_action='leagueshield' OR custom_competition='Kick Off Cup')")->fetchColumn()===0,'Removed excess competitions stay absent');
 $pdo->exec("UPDATE `IMC Competition Codex Global` SET custom_competition='Renamed once' WHERE id=1");
-$names=$pdo->query("SELECT nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id='GW001' AND sm_action='leaguecup'")->fetchAll(PDO::FETCH_COLUMN);
+$names=$pdo->query("SELECT IMC_View FROM `IMC Competition Nexus Mapping` WHERE game_world_id='GW001' AND sm_action='leaguecup'")->fetchAll(PDO::FETCH_COLUMN);
 verify(count($names)===2 && count(array_unique($names))===1 && $names[0]==='Renamed once','One Codex update changes canonical name and historical alias immediately');
 try{$pdo->exec("UPDATE `IMC Competition Nexus Mapping` SET IMC_View='Separate state' WHERE mapping_id=1");throw new RuntimeException('Compatibility view accepted an independent write');}catch(PDOException $expected){}
 $pdo->exec($migration['plans'][2]['statements'][0]);

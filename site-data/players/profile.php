@@ -28,7 +28,7 @@ try{
  $player['club_logo_url']=$logo($player['current_sm_club_id']??0,$player['current_club']??'');
  $rating=json_decode((string)($player['rating_history']??'[]'),true)??[];
  if(!$rating)$rating=imc_site_rows($core,'SELECT change_date,old_rating,new_rating FROM `IMC Player Codex Global Rating History` WHERE player_id=? ORDER BY change_date DESC,id DESC',[$id]);
- $competitionNames=[];foreach(imc_site_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $comp)$competitionNames[$comp['competition_key']]=$comp['nexus_view'];
+ $competitionNames=[];foreach(imc_site_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $comp)$competitionNames[$comp['competition_key']]=$comp['nexus_view'];
  $errors=[];$matches=[];$invalid=0;
  try{
   $reports=imc_site_rows($db,'SELECT r.*,mr.players_json,mr.commentary_json FROM `'.imc_site_table($gw,'Match_Report').'` mr JOIN `'.imc_site_table($gw,'Results').'` r ON r.sm_fixture_id=mr.sm_fixture_id WHERE mr.players_json REGEXP ? ORDER BY r.match_date DESC,r.sm_fixture_id DESC',['"sm_player_id"[[:space:]]*:[[:space:]]*"?'.$id.'"?[[:space:]]*[,}]']);

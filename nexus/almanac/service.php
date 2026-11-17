@@ -11,7 +11,7 @@ function na_read(): array {
     $managers=nexus_rows($core,'SELECT manager_id,full_name,sm_manager_id,imc_join_date,face_image_url,bust_image_url FROM `IMC Manager Codex Global` ORDER BY full_name');
     $assignments=nexus_rows($core,'SELECT a.*,COALESCE(a.team_name,n.`National Team Name`) assignment_name FROM `IMC Manager Assignment Global` a LEFT JOIN `IMC Game World National Team Mapping` n ON n.`Game World`=a.game_world_id AND n.`SM World National Club ID`=a.national_team_id ORDER BY a.start_date DESC,a.id DESC');
     $labels=[];$aliases=[];foreach($worlds as $w)foreach(na_aliases($w) as $a)$aliases[$a]=$w['id'];
-    foreach(nexus_rows($core,'SELECT game_world_id,competition_key,nexus_view FROM `IMC Competition Nexus Mapping`') as $r)if(isset($aliases[$r['game_world_id']]))$labels[$aliases[$r['game_world_id']].'|'.na_key($r['competition_key'])]=$r['nexus_view'];
+    foreach(nexus_rows($core,'SELECT game_world_id,competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping`') as $r)if(isset($aliases[$r['game_world_id']]))$labels[$aliases[$r['game_world_id']].'|'.na_key($r['competition_key'])]=$r['nexus_view'];
     $clubs=nexus_rows($core,'SELECT id,name,nexus_view,image_url FROM `IMC Club Codex Global`');
     $mapping=nexus_rows($core,'SELECT `Game World` game_world_id,`Club ID` entity_id,`SM World Club ID` world_id,`Club Name` name FROM `IMC Game World Club Mapping`');
     $display=nexus_club_label_index($clubs,$mapping);

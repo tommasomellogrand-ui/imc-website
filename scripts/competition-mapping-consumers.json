@@ -1,0 +1,22 @@
+[
+  "clubhouse/h2h-detail.php",
+  "nexus/almanac/service.php",
+  "nexus/club-house/h2h-detail.php",
+  "nexus/competitions/catalog.php",
+  "nexus/competitions/match.php",
+  "nexus/competitions/overview.php",
+  "nexus/h2h/index.php",
+  "nexus/home/data.php",
+  "nexus/players/profile.php",
+  "nexus/trophies/sync.php",
+  "site-data/competitions/catalog.php",
+  "site-data/competitions/custom-cups.php",
+  "site-data/competitions/match.php",
+  "site-data/competitions/overview.php",
+  "site-data/h2h/index.php",
+  "site-data/matchday/index.php",
+  "site-data/players/profile.php",
+  "site-data/teams/trophies.php",
+  "site-data/trophies/index.php",
+  "theroadalmanac/data.php"
+]

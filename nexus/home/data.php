@@ -39,7 +39,7 @@ try {
     $db=nexus_db($c,nexus_target($c,$gw));$core=nexus_db($c,'core');
     $rt=nexus_table($gw,'Results');$st=nexus_table($gw,'Schedule');
     $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
-    $labels=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$labels[$m['competition_key']]=$m['nexus_view'];
+    $labels=[];foreach(nexus_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$labels[$m['competition_key']]=$m['nexus_view'];
     $matchday=($_GET['mode']??'')==='matchday';
     // World Cup editions can finish after the game world rolls into its next season.
     // Only Matchday includes the previous season, and only for World Cup fixtures.

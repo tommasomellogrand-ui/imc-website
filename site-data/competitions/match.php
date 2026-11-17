@@ -26,7 +26,7 @@ try {
  try{$identities=imc_site_player_identity($core,array_column($players,'sm_player_id'));}catch(Throwable $e){}
  foreach($players as &$p){$id=(int)($p['sm_player_id']??0);$identity=$identities[$id]??[];$p['image_urls']=imc_site_player_images($id,$identity);$fullName=trim((string)($identity['forename']??'').' '.(string)($identity['surname']??''));$p['display_name']=$fullName!==''?$fullName:(trim((string)($identity['full_name']??''))?:($p['player_name']??''));}unset($p);
  $match=imc_site_enrich_match_teams($core,$gw,[$match])[0];
- $names=imc_site_rows($core,'SELECT nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND competition_key=? LIMIT 1',[$gw,$match['competition_key']]);
+ $names=imc_site_rows($core,'SELECT IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND competition_key=? LIMIT 1',[$gw,$match['competition_key']]);
  $match['competition_name']=$names[0]['nexus_view']??$match['competition_key'];
  imc_site_out(['ok'=>true,'world'=>$gw,'match'=>$match,'report_available'=>$report!==null,'players'=>$players,'team_stats'=>$teamStats,'generated_at'=>gmdate('c')]);
 }catch(InvalidArgumentException $e){imc_site_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){imc_site_out(['ok'=>false,'error'=>'match_detail_error'],500);}

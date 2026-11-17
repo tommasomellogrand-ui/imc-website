@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/competition-mapping-columns.yml'
       - 'database-migrations/20261117_competition_mapping_remove_type_country.json'
+      - 'database-migrations/20261117_competition_mapping_drop_nexus_view.json'
+      - 'scripts/competition-mapping-consumers.json'
   workflow_dispatch:
 permissions:
   contents: read
@@ -30,22 +32,25 @@ jobs:
           MYSQL_TEST_PASSWORD: mapping-ci-only
         run: |
           php tests/competition-codex-unification.php
-          php -l nexus/competitions/overview.php
-          php -l site-data/competitions/overview.php
-          php -l site-data/competitions/custom-cups.php
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          for name in json.loads(Path('scripts/competition-mapping-consumers.json').read_text()):
+              subprocess.run(['php','-l',name],check=True)
+          PY
       - name: Publish updated consumers with byte verification
         env:
           FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
           FTP_PASS: ${{ secrets.ARUBA_FTP_PASSWORD }}
         run: |
           python3 - <<'PY'
-          import io,os,ssl
+          import io,os,ssl,json
           from pathlib import Path
           from ftplib import FTP_TLS
           ctx=ssl.create_default_context();ctx.check_hostname=False
           with FTP_TLS(context=ctx,timeout=60) as ftp:
               ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()
-              for name in ['nexus/competitions/overview.php','site-data/competitions/overview.php','site-data/competitions/custom-cups.php']:
+              for name in json.loads(Path('scripts/competition-mapping-consumers.json').read_text()):
                   p=Path(name);data=p.read_bytes();ftp.cwd('/www.italianmastersclub.it/'+p.parent.as_posix())
                   temporary='.'+p.name+'.mapping-upload'
                   ftp.storbinary('STOR '+temporary,io.BytesIO(data));ftp.rename(temporary,p.name)

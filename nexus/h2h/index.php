@@ -23,7 +23,7 @@ try{
   $team=(int)($type==='club'?$a['team_id']:$a['national_team_id']);if($type==='national_team')$team=$nationAliases[$team]??$team;
   if($team>0){$ctx['assignments'][$type][$team][]=$a;if($a['manager_id']===$id&&($overview||$type===$scope))$assigned[]=$team;}
  }
- foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$ctx['competitions'][$m['competition_key']]=$m['nexus_view'];
+ foreach(nexus_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$ctx['competitions'][$m['competition_key']]=$m['nexus_view'];
  if($kind==='manager'){$subject=$ctx['managers'][$id]??null;if(!$subject)throw new InvalidArgumentException('manager_not_found');}
  else{$teamKind=$kind==='nation'?'national_team':'club';$entity=$ctx['teams'][$teamKind]['world'][(int)$id]??null;$club=$ctx['teams'][$teamKind]['id'][$entity]??null;if(!$club)throw new InvalidArgumentException('club_not_found');$subject=['key'=>'team:'.$id,'name'=>$club['name'],'image_url'=>nexus_player_image_url($club['image_url']??null)];}
  $rt=nexus_table($gw,'Results');$mt=nexus_table($gw,'Match_Report');$params=[$gw];$conditions=[];

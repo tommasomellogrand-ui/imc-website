@@ -26,7 +26,7 @@ try{
  $logo=static function($world,$name)use($lookup){$entity=$lookup['world'][(int)$world]??$lookup['name'][nexus_team_name_key((string)$name)]??null;return $entity!==null?nexus_player_image_url($lookup['id'][$entity]['image_url']??null):null;};
  $player['club_logo_url']=$logo($player['current_sm_club_id']??0,$player['current_club']??'');
  $rating=nexus_rows($core,'SELECT change_date,old_rating,new_rating FROM `IMC Player Codex Global Rating History` WHERE player_id=? ORDER BY change_date DESC,id DESC',[$id]);if(!$rating)$rating=json_decode((string)($player['rating_history']??'[]'),true)??[];
- $competitionNames=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $comp)$competitionNames[$comp['competition_key']]=$comp['nexus_view'];
+ $competitionNames=[];foreach(nexus_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $comp)$competitionNames[$comp['competition_key']]=$comp['nexus_view'];
  $errors=[];$matches=[];$invalid=0;
  try{
   $reports=nexus_rows($db,'SELECT r.*,mr.players_json,mr.commentary_json FROM `'.nexus_table($gw,'Match_Report').'` mr JOIN `'.nexus_table($gw,'Results').'` r ON r.game_world_id=mr.game_world_id AND r.sm_fixture_id=mr.sm_fixture_id WHERE mr.game_world_id=? AND mr.players_json REGEXP ? ORDER BY r.match_date DESC,r.sm_fixture_id DESC',[$gw,'"sm_player_id"[[:space:]]*:[[:space:]]*"?'.$id.'"?[[:space:]]*[,}]']);

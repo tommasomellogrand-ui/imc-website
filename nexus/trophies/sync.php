@@ -25,7 +25,7 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
         $currentSeason=(int)$seasons[0]['imc_season'];
         $core=nexus_db($config,'core');
         $definitions=nexus_rows($core,'SELECT game_world_id,competition_key,sm_action,sm_country,sm_division,teams_count,expected_match,sm_action_group,custom_competition FROM `IMC Competition Codex Global` WHERE game_world_id=? AND (sm_action=? OR sm_action_group=?)',[$gw,'league','IMC']);
-        $labels=[];foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $label)$labels[$label['competition_key']]=$label['nexus_view'];
+        $labels=[];foreach(nexus_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $label)$labels[$label['competition_key']]=$label['nexus_view'];
         $mapping=nexus_rows($core,'SELECT `Club Name`,`SM World Club ID` FROM `IMC Game World Club Mapping` WHERE `Game World`=?',[$gw]);
         $db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
         $db->beginTransaction();

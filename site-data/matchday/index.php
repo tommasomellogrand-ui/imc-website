@@ -24,7 +24,7 @@ try{
  $day=(string)($_GET['date']??($dates[0]??''));
  if($day!==''&&!in_array($day,$dates,true))throw new InvalidArgumentException('invalid_date');
  $rows=$day===''?[]:imc_site_rows($db,'SELECT t.* FROM `'.$table.'` t WHERE '.$where.' AND DATE(t.match_date)=? ORDER BY t.competition_key,t.sm_fixture_id',array_merge($params,[$day]));
- $labels=[];foreach(imc_site_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $r)$labels[$r['competition_key']]=$r['nexus_view'];
+ $labels=[];foreach(imc_site_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $r)$labels[$r['competition_key']]=$r['nexus_view'];
  // One season-scoped calendar per competition, shared by Home and Matchday.
  $definitions=[];
  foreach(imc_site_rows($core,'SELECT competition_key,sm_action,competition_group,teams_count,expected_match,expected_matchdays FROM `IMC Competition Codex Global` WHERE game_world_id=?',[$gw]) as $definition)$definitions[$definition['competition_key']]=$definition;

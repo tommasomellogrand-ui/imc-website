@@ -11,7 +11,7 @@ try{
  // Display existing awards only. Synchronisation remains with the existing award automation.
  $table=SITE_WORLD_TABLES[$gw].'_Trophy_Room';
  $rows=imc_site_rows($db,"SELECT * FROM `$table` WHERE winner_sm_world_club_id=? AND COALESCE(competition_group,'') <> 'NATIONS' AND trophy_type NOT IN ('worldcup','interqualifier') ORDER BY imc_season DESC,won_date DESC,id",[$club]);
- $labels=[];foreach(imc_site_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $r)$labels[$r['competition_key']]=$r['nexus_view'];
+ $labels=[];foreach(imc_site_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $r)$labels[$r['competition_key']]=$r['nexus_view'];
  $logos=['club'=>[],'national_team'=>[]];
  foreach(imc_site_rows($core,'SELECT m.`SM World Club ID` world_id,c.image_url FROM `IMC Game World Club Mapping` m JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=?',[$gw]) as $r)$logos['club'][(string)$r['world_id']]=$r['image_url'];
  foreach(imc_site_rows($core,'SELECT m.`SM World National Club ID` world_id,c.image_url FROM `IMC Game World National Team Mapping` m JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`=?',[$gw]) as $r)$logos['national_team'][(string)$r['world_id']]=$r['image_url'];

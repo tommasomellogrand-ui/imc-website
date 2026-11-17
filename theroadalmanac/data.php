@@ -14,7 +14,7 @@ try {
     foreach(nexus_rows($core,'SELECT manager_id,full_name,sm_manager_id FROM `IMC Manager Codex Global`') as $m)$managers[$m['manager_id']]=$m;
     $assignments=nexus_rows($core,'SELECT game_world_id,manager_id,assignment_type,team_id,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?',[$gw]);
     $labels=[];
-    foreach(nexus_rows($core,'SELECT competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $l)$labels[$l['competition_key']]=$l['nexus_view'];
+    foreach(nexus_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $l)$labels[$l['competition_key']]=$l['nexus_view'];
     $results=nexus_rows($db,'SELECT * FROM `GW001_IMC_Results` WHERE game_world_id=? AND imc_season IS NOT NULL ORDER BY match_date,sm_fixture_id',[$gw]);
     [$results]=trophy_resolve_ids($results,[],[],$mapping);
     $catalog=[]; $matches=[]; $seen=[]; $unknown=0;
