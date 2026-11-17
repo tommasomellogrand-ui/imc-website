@@ -16,6 +16,10 @@ on:
       - 'scripts/build-worldcup-migration.py'
       - 'database-migrations/20261115_worldcup_automation.json'
       - 'tests/fixtures/rth-cup-key-schema.json'
+      - 'tests/match-report-v3-mysql.php'
+      - 'tests/fixtures/match-report-before-v3.json'
+      - 'database-migrations/match-report-v3-20261117/**'
+      - 'scripts/build-match-report-v3.py'
   workflow_dispatch:
 
 permissions:
