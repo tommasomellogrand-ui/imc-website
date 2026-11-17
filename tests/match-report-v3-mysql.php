@@ -15,10 +15,13 @@ $p->exec('CREATE TABLE IMC005_Player_Codex (player_id BIGINT,full_name VARCHAR(2
 // Install the unchanged identity/ghost rules against the audited schemas.
 foreach($snapshot['triggers'] as $t)if(str_starts_with($t['TRIGGER_NAME'],'imc_identity_')||str_starts_with($t['TRIGGER_NAME'],'imc005_unmanaged_ghost'))$p->exec('CREATE TRIGGER `'.$t['TRIGGER_NAME'].'` '.$t['ACTION_TIMING'].' '.$t['EVENT_MANIPULATION'].' ON `'.$t['EVENT_OBJECT_TABLE'].'` FOR EACH ROW '.$t['ACTION_STATEMENT']);
 $sides=preg_replace('/CREATE ALGORITHM=UNDEFINED DEFINER=`[^`]+`@`[^`]+`/','CREATE ALGORITHM=UNDEFINED',$snapshot['youth_sides']);
-// The changed view is created by the IMC005 plan before its dependent view.
+$oldView=preg_replace('/CREATE ALGORITHM=UNDEFINED DEFINER=`[^`]+`@`[^`]+`/','CREATE ALGORITHM=UNDEFINED',$snapshot['youth_view']);
+$p->exec($oldView);$p->exec($sides);
+foreach($snapshot['triggers'] as $t)if(str_starts_with($t['TRIGGER_NAME'],'imc005_youth_report_'))$p->exec('CREATE TRIGGER `'.$t['TRIGGER_NAME'].'` '.$t['ACTION_TIMING'].' '.$t['EVENT_MANIPULATION'].' ON `'.$t['EVENT_OBJECT_TABLE'].'` FOR EACH ROW '.$t['ACTION_STATEMENT']);
+// Apply the exact production plans to a database with the old views/triggers.
 foreach(glob(__DIR__.'/../database-migrations/match-report-v3-20261117/IMC*.json') as $file){
  $plan=json_decode(file_get_contents($file),true,512,JSON_THROW_ON_ERROR);
- foreach($plan['statements'] as $sql){$p->exec($sql);if(str_starts_with($sql,'CREATE OR REPLACE ALGORITHM'))$p->exec($sides);}
+ foreach($plan['statements'] as $sql){$p->exec($sql);}
 }
 for($n=1;$n<=8;$n++){
  $w=sprintf('IMC%03d',$n);$key=$w.'|S02|DOMESTIC|league|1';
