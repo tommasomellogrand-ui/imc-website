@@ -165,6 +165,9 @@ function imc_ingress_merge_missing(mixed $current,mixed $incoming): mixed {
     return $current;
 }
 function imc_ingress_repair_report(PDO $pdo,string $table,string $gw,array $row): array {
+    // The explicit route uses a legacy world alias; persisted report identity is canonical.
+    if(isset($row['game_world_id']))$row['game_world_id']=imc_world_id((string)$row['game_world_id']);
+    if(isset($row['competition_key']))$row['competition_key']=imc_world_value($row['competition_key']);
     if (!imc_ingress_canonical_report_batch($table,[$row])||!is_numeric($row['sm_fixture_id']??null)||(int)$row['sm_fixture_id']<1) throw new InvalidArgumentException('invalid_report_repair');
     $allowed=['game_world_id','sm_fixture_id','competition_key','imc_season','sm_action','sm_division','competition_group','competition_group_name','competition_stage','competition_round','match_date','home_sm_club_id','home_name','away_sm_club_id','away_name','home_score','away_score','penalty_home_score','penalty_away_score','aggregate_home_score','aggregate_away_score','home_sm_manager_id','home_manager_name','away_sm_manager_id','away_manager_name','stadium_name','attendance','team_stats_json','players_json','events_json','tactics_json','commentary_json','fingerprint','imported_at'];
     if (array_diff(array_keys($row),$allowed)) throw new InvalidArgumentException('invalid_report_field');

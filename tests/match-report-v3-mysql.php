@@ -66,7 +66,11 @@ mrinsert($p,'IMC001_Match_Reports',$repairOld);
 $prior=$p->query('SELECT * FROM IMC001_Match_Reports WHERE sm_fixture_id=601')->fetch(PDO::FETCH_ASSOC);
 $incoming=array_replace($repairOld,['home_score'=>5,'home_sm_club_id'=>11,'away_sm_club_id'=>22,'players_json'=>[['sm_player_id'=>10,'rating'=>9]],'fingerprint'=>'new-hash']);
 $total=(int)$p->query('SELECT COUNT(*) FROM IMC001_Match_Reports')->fetchColumn();
-$out=imc_ingress_repair_report($p,'GW001_IMC_Match_Report','GW001',$incoming);
+// Exercise the same request normalization as the live HTTP ingress, not just
+// the persistence function with an already canonical row.
+$body=imc_normalize_world_request(['action'=>'repair_report','repository'=>'IMC Match Report','game_world_id'=>'IMC001','target_table'=>'IMC001_Match_Reports','row'=>$incoming],['custom_worlds'=>['GW001'],'gold_worlds'=>[]],'IMPORT',[['imc_id'=>'IMC-001','legacy_id'=>'GW001']]);
+mrcheck($body['row']['game_world_id']==='GW001','Ingress compatibility edge must be covered by repair test');
+$out=imc_ingress_repair_report($p,$body['target_table'],$body['game_world_id'],$body['row']);
 $after=$p->query('SELECT * FROM IMC001_Match_Reports WHERE sm_fixture_id=601')->fetch(PDO::FETCH_ASSOC);
 mrcheck($out['updated_rows']===1&&$out['inserted_rows']===0&&(int)$p->query('SELECT COUNT(*) FROM IMC001_Match_Reports')->fetchColumn()===$total,'Repair never inserts duplicate rows');
 mrcheck((int)$after['home_sm_club_id']===11&&(int)$after['away_sm_club_id']===22,'Repair fills missing team IDs');
