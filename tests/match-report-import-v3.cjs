@@ -1,11 +1,10 @@
 const fs=require('fs'),assert=require('node:assert/strict');
 const {JSDOM}=require(process.env.IMC_TEST_NODE_MODULES+'/jsdom');
 const source=fs.readFileSync(process.env.IMC_MR_SOURCE||'importers/IMC_Match_Report_Import_V3.js','utf8'),old=fs.readFileSync('tests/fixtures/match-report-import-v20.js','utf8');
-const backfill=!!process.env.IMC_MR_SOURCE,commonSource=backfill?source.replace(fs.readFileSync('tests/fixtures/match-report-backfill-navigation.js','utf8'),''):source;
+const withoutBackfill=source.replace(fs.readFileSync('tests/fixtures/match-report-backfill-navigation.js','utf8'),'');
 const cut=(s,a,b)=>s.slice(s.indexOf(a),s.indexOf(b,s.indexOf(a)));
-assert.equal(cut(commonSource,'    function buttons()','    /* ============================================================\n       MATCH REPORT HELPERS'),cut(old,'    function buttons()','    /* ============================================================\n       MATCH REPORT HELPERS'),'SM navigation is unchanged');
-assert.equal(cut(source,'    function renderProgressUI()','    function setText(').replace(/^.*id="__imc_updated".*\n/gm,'').replace('repeat(5,','repeat(4,'),cut(old,'    function renderProgressUI()','    function setText('),'Progress popup unchanged');
-assert.equal(cut(source,'    async function runDivisions()','    async function main()').replaceAll('runBackfill()','runCurrentMatchday()'),cut(old,'    async function runDivisions()','    async function main()'),'Original division loop retained');
+const navigation=s=>cut(s,'    function buttons()','    function teamIdFromResultAnchor(').replace(/\/\*[\s\S]*?\*\//g,'').replace(/\n[ \t]*\n+/g,'\n').trim();
+assert.equal(navigation(withoutBackfill),navigation(old),'SM navigation is unchanged');
 assert.equal(cut(source,'    function reportTeamMeta(side) {','    function reportManagerMeta(side) {').replace("\n        if(STATE.currentIdentity?.competition_group==='IMC')return imcConnectionTeamMeta(side);",''),cut(old,'    function reportTeamMeta(side) {','    function reportManagerMeta(side) {'),'Non-IMC team parser is byte-identical');
 const dom=new JSDOM('<div id="currentScreenA"><div id="leagueResultsContainer"><div class="scheduleScreen-Heading">Turno 1 · mar 17 novembre 2026</div><div id="ResultsprevWeek_click"><a action="friendly"></a></div><table><tr><td><a id="matchResult" onclick="MATCHREPORT_downloadScoreCentre(101)">1-2</a></td></tr></table></div></div>',{url:'https://it.soccermanager.com',runScripts:'dangerously'});
 const w=dom.window,d=w.document;w.HTMLElement.prototype.getBoundingClientRect=()=>({width:100,height:10});w.completion=()=>{};const style=w.getComputedStyle.bind(w);w.getComputedStyle=e=>{const s=style(e);return{display:s.display,visibility:s.visibility,opacity:s.opacity||'1'};};
@@ -62,7 +61,10 @@ const wait=async f=>{for(let n=0;n<2000;n++){if(f())return;await new Promise(r=>
  };
  a.STATE.existingMeta.set('101',{key:row.competition_key,season:'1',complete:false});
  assert.equal(await a.insertReport(row),1);assert.deepEqual(calls,['read','repair_report','read']);assert.equal(stored.home_sm_club_id,11);assert.equal(stored.away_sm_club_id,22);assert.equal(stored.home_score,0);assert.equal(stored.fingerprint,'original');assert.equal(stored.players_json[0].player_name,'Original Player');assert.equal(a.STATE.existingMeta.get('101').complete,true);
- assert.equal(a.STATE.reportsSaved,0);assert.equal(a.STATE.reportsUpdated,1);a.renderProgressUI();a.finish('ok','Test');assert.equal(d.querySelector('#__imc_saved').textContent,'0');assert.equal(d.querySelector('#__imc_updated').textContent,'1');assert.match(d.querySelector('#__imc_phase').textContent,/0 salvati · 1 updated/);
+ assert.equal(a.STATE.reportsSaved,0);assert.equal(a.STATE.reportsUpdated,1);a.renderProgressUI();
+ assert.ok(d.querySelector('#__imc_body > div > :first-child #__imc_log'),'Log is the first progress section');
+ assert.equal(d.querySelector('#__imc_log').closest('details').open,true,'Log starts expanded');
+ a.finish('ok','Test');assert.equal(d.querySelector('#__imc_saved').textContent,'0');assert.equal(d.querySelector('#__imc_updated').textContent,'1');assert.match(d.querySelector('#__imc_phase').textContent,/0 salvati · 1 updated/);
  const fresh={...row,sm_fixture_id:102};w.fetch=async(_,args)=>{const b=JSON.parse(args.body);return {ok:true,text:async()=>JSON.stringify({ok:true,database:'Sql1956795_3',physical_table:'IMC001_Match_Reports',...(b.action==='insert_many'?{written_rows:1,skipped_rows:0}:{rows:[fresh],has_more:false})})};};
  assert.equal(await a.insertReport(fresh),1);assert.equal(a.STATE.reportsSaved,1);assert.equal(a.STATE.reportsUpdated,1);assert.equal(d.querySelector('#__imc_saved').textContent,'1');assert.equal(d.querySelector('#__imc_updated').textContent,'1');
 

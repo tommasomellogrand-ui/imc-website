@@ -1,7 +1,7 @@
 const fs=require('fs'),assert=require('node:assert/strict'),{JSDOM}=require(process.env.IMC_TEST_NODE_MODULES+'/jsdom');
 const source=fs.readFileSync('importers/IMC_Match_Report_Backfill_Import_V3.js','utf8');
 for(const path of ['tests/fixtures/match-report-backfill-navigation.js','tests/fixtures/match-report-backfill-loop.js'])assert.ok(source.includes(fs.readFileSync(path,'utf8')),'Original backfill logic preserved: '+path);
-assert.match(source,/if\(S\.leagueMode\)await runNavigation\(\);else await runBackfill\(\)/);
+assert.match(source,/const BACKFILL = true;/);
 const dom=new JSDOM('<ul class="pager"><li id="ResultsprevWeek_click"><a onclick="loadPrevious(42)">Precedenti</a></li></ul>',{url:'https://it.soccermanager.com',runScripts:'dangerously'}),w=dom.window,d=w.document;
 w.HTMLElement.prototype.getBoundingClientRect=()=>({width:100,height:10});w.getComputedStyle=()=>({display:'block',visibility:'visible',opacity:'1'});
 const exposedFunctions='STATE,S,goPrevious,runBackfill,runNavigation,backfillSeason';

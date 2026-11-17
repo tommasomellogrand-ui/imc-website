@@ -4,7 +4,7 @@ on:
     branches: [main]
     paths:
       - 'importers/IMC_Match_Report_Import_V3.js'
-      - 'importers/IMC_Match_Report_Backfill_Import_V3.js'
+      - 'scripts/build-match-report-variants.cjs'
       - 'tests/match-report-backfill-v3.cjs'
       - 'tests/fixtures/match-report-backfill-*.js'
       - 'tests/match-report-import-v3.cjs'
@@ -25,8 +25,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify Match Report identity and unchanged popup/navigation
+      - name: Verify Match Report identity and popup and navigation
         run: |
+          node scripts/build-match-report-variants.cjs
           node --check importers/IMC_Match_Report_Import_V3.js
           node --check importers/IMC_Match_Report_Backfill_Import_V3.js
           npm install --prefix /tmp/imc-results-test jsdom@27.2.0 --no-audit --no-fund
