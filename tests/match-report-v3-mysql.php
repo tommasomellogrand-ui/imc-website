@@ -84,12 +84,12 @@ $knockout=['game_world_id'=>'IMC001','sm_fixture_id'=>701,'competition_key'=>'IM
  'match_date'=>'2026-11-17','home_sm_club_id'=>11,'away_sm_club_id'=>22,'home_score'=>1,'away_score'=>0];
 mrinsert($p,'IMC001_Results',$knockout);
 mrinsert($p,'IMC001_Match_Reports',array_replace($knockout,['competition_key'=>'IMC001|S02|NATIONS|worldcup']));
-$updated=imc_ingress_repair_report($p,'IMC001_Match_Reports','GW001',$knockout+['stadium_name'=>'Verified semifinal']);
+$updated=imc_ingress_repair_report($p,'GW001_IMC_Match_Report','GW001',$knockout+['stadium_name'=>'Verified semifinal']);
 mrcheck($updated['updated_rows']===1,'Knockout repair accepts both representations of the same edition');
 $group=array_replace($knockout,['sm_fixture_id'=>702,'competition_stage'=>'Girone A','competition_group_name'=>'Girone A','competition_round'=>'Giornata 1']);
 mrinsert($p,'IMC001_Results',$group);
 try {
-    imc_ingress_repair_report($p,'IMC001_Match_Reports','GW001',array_replace($group,['competition_group_name'=>null]));
+    imc_ingress_repair_report($p,'GW001_IMC_Match_Report','GW001',array_replace($group,['competition_group_name'=>null]));
     throw new RuntimeException('Group fixture accepted');
 } catch (InvalidArgumentException $e) {
     mrcheck($e->getMessage()==='worldcup_knockout_result_required','Group-stage repair remains with single-match importer');
