@@ -6,6 +6,7 @@ on:
       - 'importers/IMC_Schedule_Import_V3.js'
       - 'tests/schedule-import-v3.cjs'
       - 'tests/schedule-import-v3-league.cjs'
+      - 'tests/schedule-import-v3-phase.cjs'
       - 'tests/fixtures/schedule-dom/**'
       - 'tests/schedule-import-v3-worldcup.php'
       - '.github/workflows/schedule-import-v3.yml'
@@ -38,6 +39,7 @@ jobs:
           npm install --prefix /tmp/imc-schedule-test jsdom@27.2.0 --no-audit --no-fund
           IMC_TEST_NODE_MODULES=/tmp/imc-schedule-test/node_modules node tests/schedule-import-v3.cjs
           IMC_TEST_NODE_MODULES=/tmp/imc-schedule-test/node_modules node tests/schedule-import-v3-league.cjs
+          IMC_TEST_NODE_MODULES=/tmp/imc-schedule-test/node_modules node tests/schedule-import-v3-phase.cjs
           php -l imc-universal-gateway/core.php
           php -l imc-universal-gateway/worldcup-automation.php
       - name: Verify legacy World Cup and importer-selected season keys in MySQL
