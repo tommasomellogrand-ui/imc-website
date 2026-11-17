@@ -64,7 +64,7 @@ echo "PASS: Career and Ranking statistics identical for clubs, nations and globa
 
 check(imc_rank_bonus(['competition_key'=>'IMC001|IMC|championsleague']),100);
 check(imc_rank_bonus(['competition_key'=>'IMC001|IMC|europaleague']),75);
-check(imc_rank_bonus(['competition_key'=>'IMC001|IMC|conferenceleague']),75);
+check(imc_rank_bonus(['competition_key'=>'IMC001|IMC|conferenceleague']),50);
 check(imc_rank_bonus(['competition_key'=>'IMC001|IMC|clubworldcup']),125);
 check(imc_rank_bonus(['competition_key'=>'IMC005|IMC|clubworldcup']),75);
 check(imc_rank_bonus(['competition_key'=>'IMC005|IMC|risingstarsleague|premier']),75);
