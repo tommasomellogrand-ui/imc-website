@@ -1,0 +1,88 @@
+name: Test and publish Schedule Import V3
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'importers/IMC_Schedule_Import_V3.js'
+      - 'tests/schedule-import-v3.cjs'
+      - 'tests/fixtures/schedule-dom/**'
+      - 'tests/schedule-import-v3-worldcup.php'
+      - '.github/workflows/schedule-import-v3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: schedule-import-v3
+  cancel-in-progress: false
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: imc-normalizer-ci-only
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pimc-normalizer-ci-only"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate source and parser against supplied Schedule DOM fixtures
+        run: |
+          node --check importers/IMC_Schedule_Import_V3.js
+          npm install --prefix /tmp/imc-schedule-test jsdom@27.2.0 --no-audit --no-fund
+          IMC_TEST_NODE_MODULES=/tmp/imc-schedule-test/node_modules node tests/schedule-import-v3.cjs
+          php -l imc-universal-gateway/core.php
+          php -l imc-universal-gateway/worldcup-automation.php
+      - name: Verify legacy World Cup and importer-selected season keys in MySQL
+        env:
+          IMC_WC_TEST_MYSQL: '1'
+        run: php tests/schedule-import-v3-worldcup.php
+      - name: Publish gateway and importer with byte verification
+        env:
+          FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          with FTP_TLS(context=ctx,timeout=60) as ftp:
+              ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()
+              for name in ['imc-universal-gateway/core.php','imc-universal-gateway/worldcup-automation.php','importers/IMC_Schedule_Import_V3.js']:
+                  p=Path(name);data=p.read_bytes();ftp.cwd('/www.italianmastersclub.it')
+                  for part in p.parent.parts:
+                      try:ftp.mkd(part)
+                      except Exception:pass
+                      ftp.cwd(part)
+                  tmp='.'+p.name+'.schedule-v3-upload';ftp.storbinary('STOR '+tmp,io.BytesIO(data));ftp.rename(tmp,p.name)
+                  check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write);assert check.getvalue()==data,name
+          PY
+      - name: Verify live CORE context and published importer
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          from pathlib import Path
+          base='https://www.italianmastersclub.it/'
+          def call(data):
+              req=urllib.request.Request(base+'imc-universal-gateway/',data=json.dumps(dict(data,channel='IMPORT')).encode(),headers={'Content-Type':'application/json','X-IMC-Channel':'IMPORT','Origin':'https://it.soccermanager.com'})
+              with urllib.request.urlopen(req,timeout=90) as r:
+                  assert r.headers['Access-Control-Allow-Origin']=='https://it.soccermanager.com'
+                  return json.load(r)
+          worlds=call({'action':'list_imc_worlds','format':'canonical'})['worlds']
+          assert worlds
+          for w in worlds:
+              r=call({'action':'list_imc_competitions','game_world_id':w['id'],'scope':'all','include_seasons':True})
+              assert r['ok'] and r['competitions'] and r['seasons'],w
+              assert r['destination']['table']==w['id']+'_Schedule',w
+              assert all(c['group'] in ['DOMESTIC','INTERNATIONAL','IMC','NATIONS'] for c in r['competitions']),w
+              rows=call({'action':'read','game_world_id':w['id'],'repository':'IMC Schedule','target_database':r['destination']['database'],'target_table':r['destination']['table'],'route_mode':'explicit','limit':1})
+              assert rows['ok']
+          with urllib.request.urlopen(base+'importers/IMC_Schedule_Import_V3.js',timeout=90) as r:assert r.read()==Path('importers/IMC_Schedule_Import_V3.js').read_bytes()
+          print('Live: CORE worlds, competition catalogs, seasons, routes, CORS and importer verified; no fixture written.')
+          PY

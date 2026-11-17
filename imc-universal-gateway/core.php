@@ -152,7 +152,7 @@ function imc_competition_catalog(array $cfg, array $body): array {
     // One authoritative Codex row per world/competition, including its official name.
     // Historical key aliases are only for resolving previously imported records.
     $all=($body['scope']??'')==='all';
-    $stmt=$pdo->prepare("SELECT competition_key,nexus_view,competition_group,sm_action,sm_country,sm_division FROM `IMC Competition Codex Global` WHERE game_world_id IN (?,?,?)".($all?"":" AND UPPER(TRIM(competition_group))='IMC'"));
+    $stmt=$pdo->prepare("SELECT competition_key,IMC_View AS nexus_view,competition_group,sm_action,sm_country,sm_division FROM `IMC Competition Codex Global` WHERE game_world_id IN (?,?,?)".($all?"":" AND UPPER(TRIM(competition_group))='IMC'"));
     $stmt->execute([$legacy,$alias,$compact]);
     $rows=[];$seen=[];
     foreach($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -172,7 +172,22 @@ function imc_competition_catalog(array $cfg, array $body): array {
         $rows[]=['key'=>$all?$canonicalKey:$key,'name'=>$name,'group'=>$all?strtoupper(trim((string)$row['competition_group'])):'IMC','sm_action'=>trim((string)($row['sm_action']??''))]+($all?['sm_country'=>$row['sm_country'],'sm_division'=>$row['sm_division']]:[]);
     }
     usort($rows,fn($a,$b)=>strcmp($a['name'],$b['name']));
-    return ['ok'=>true,'action'=>'list_imc_competitions','source'=>'core','game_world_id'=>$compact,'competitions'=>$rows];
+    $out=['ok'=>true,'action'=>'list_imc_competitions','source'=>'core','game_world_id'=>$compact,'competitions'=>$rows];
+    // Optional Schedule V3 context, read only from the authoritative CORE.
+    if (($body['include_seasons']??false)===true) {
+        $stmt=$pdo->prepare('SELECT imc_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id IN (?,?,?) ORDER BY imc_season_start_date');
+        $stmt->execute([$legacy,$alias,$compact]);$out['seasons']=$stmt->fetchAll(PDO::FETCH_ASSOC);
+        $route=imc_route(['game_world_id'=>$legacy],$cfg);
+        $out['destination']=['database'=>$route['database'],'table'=>$compact.'_Schedule'];
+        $db=imc_db($cfg,$route['database']);
+        $exists=$db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='IMC_World_Cup_Editions'");
+        $out['worldcup_editions']=[];
+        if ((int)$exists->fetchColumn()) {
+            $stmt=$db->prepare('SELECT imc_season,edition_start,final_date FROM IMC_World_Cup_Editions WHERE world_id=? ORDER BY edition_start');
+            $stmt->execute([$compact]);$out['worldcup_editions']=$stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+    }
+    return $out;
 }
 
 function imc_after_results_import(PDO $db,string $table,?string $world,array $rows): array {

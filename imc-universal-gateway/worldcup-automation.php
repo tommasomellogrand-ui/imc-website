@@ -7,6 +7,11 @@ function imc_wc_target(string $table): ?array {
     return null;
 }
 
+/** An importer-selected edition must not be inferred again from match dates. */
+function imc_wc_selected_edition(array $row): bool {
+    return (int)($row['imc_season']??0)>0 && (bool)preg_match('/^IMC[0-9]{3}\|S0*'.(int)($row['imc_season']??0).'\|NATIONS\|worldcup$/D',(string)($row['competition_key']??''));
+}
+
 function imc_wc_knockout(array $row): bool {
     return (bool)preg_match('/final|quarti|ottavi|round of|knockout|eliminaz/i',($row['competition_stage']??'').' '.($row['competition_round']??''));
 }
@@ -22,7 +27,7 @@ function imc_wc_group(array $row): ?string {
 function imc_wc_detect(array $rows): array {
     $fixtures=[];$bad=[];
     foreach ($rows as $row) {
-        if (imc_wc_knockout($row) || !in_array(strtolower(trim((string)($row['sm_action']??''))),['interqualifier','worldcup','worldcupqualifying'],true)) continue;
+        if (imc_wc_selected_edition($row) || imc_wc_knockout($row) || !in_array(strtolower(trim((string)($row['sm_action']??''))),['interqualifier','worldcup','worldcupqualifying'],true)) continue;
         $id=(string)($row['sm_fixture_id']??'');
         if (!ctype_digit($id) || (int)$id<=0 || empty($row['match_date']) || empty($row['home_sm_team_id']) || empty($row['away_sm_team_id'])) continue;
         if (isset($fixtures[$id])) {
@@ -118,7 +123,7 @@ function imc_wc_reconcile(PDO $db,string $table,?array $seasons=null,bool $dryRu
     $report['explicit_fixtures']=0;
     foreach($explicit as $id=>$row){
         $group=imc_wc_group($row);$sourceSeason=(int)$row['imc_season'];if(count($members[$sourceSeason][$group])>4)continue;
-        $season=isset($known[$id])?(int)$known[$id]['imc_season']:$sourceSeason;$start=$known[$id]['edition_start']??$first[$sourceSeason];
+        $season=imc_wc_selected_edition($row)?$sourceSeason:(isset($known[$id])?(int)$known[$id]['imc_season']:$sourceSeason);$start=$known[$id]['edition_start']??$first[$sourceSeason];
         $q=$db->prepare('SELECT edition_start,imc_season FROM IMC_World_Cup_Editions WHERE world_id=? AND imc_season=? ORDER BY edition_start LIMIT 1');$q->execute([$world,$season]);$edition=$q->fetch(PDO::FETCH_ASSOC);
         if($edition)$start=$edition['edition_start'];
         $fixtureWrite->execute([$world,$id,$start,$season,$row['match_date'],$group,$group,$row['competition_round'],$row['home_sm_team_id'],$row['away_sm_team_id'],$row['home_name'],$row['away_name']]);$report['explicit_fixtures']++;
@@ -141,7 +146,7 @@ function imc_wc_reconcile(PDO $db,string $table,?array $seasons=null,bool $dryRu
             $fields=$meta;$new=$values;$home=$repository==='schedule'?'home_sm_team_id':'home_sm_club_id';$away=$repository==='schedule'?'away_sm_team_id':'away_sm_club_id';
             if($repository==='results'){$fields[]='competition_group_name';$new[]=$f['group_name'];}
             $set=implode(',',array_map(fn($field)=>imc_ident($field).'=?',$fields));$same=implode(' AND ',array_map(fn($field)=>imc_ident($field).' <=> ?',$fields));
-            $q=$db->prepare('UPDATE '.imc_ident($target[$repository]).' SET '.$set.' WHERE sm_fixture_id=? AND (match_date IS NULL OR match_date=?) AND ('.$home.' IS NULL OR '.$home.'=0 OR '.$home.'=?) AND ('.$away.' IS NULL OR '.$away.'=0 OR '.$away.'=?) AND NOT('.$same.')');
+            $q=$db->prepare('UPDATE '.imc_ident($target[$repository]).' SET '.$set.' WHERE sm_fixture_id=? AND (match_date IS NULL OR match_date=?) AND ('.$home.' IS NULL OR '.$home.'=0 OR '.$home.'=?) AND ('.$away.' IS NULL OR '.$away.'=0 OR '.$away.'=?) AND NOT('.$same.')'." AND COALESCE(competition_key,'') NOT REGEXP '^IMC[0-9]{3}[|]S[0-9]+[|]'");
             $q->execute(array_merge($new,[$f['sm_fixture_id'],$f['match_date'],$f['home_id'],$f['away_id']],$new));$report[$repository==='schedule'?'schedule_updated':($repository==='results'?'results_updated':'reports_updated')]+=$q->rowCount();
         }
     }

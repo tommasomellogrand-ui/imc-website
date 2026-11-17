@@ -1,0 +1,14 @@
+{
+  "target": "custom",
+  "migration_id": "20261117-schedule-v3-group-name",
+  "statements": [
+    "ALTER TABLE `IMC001_Schedule` ADD COLUMN `competition_group_name` VARCHAR(128) NULL AFTER `competition_group`",
+    "ALTER TABLE `IMC002_Schedule` ADD COLUMN `competition_group_name` VARCHAR(128) NULL AFTER `competition_group`",
+    "ALTER TABLE `IMC003_Schedule` ADD COLUMN `competition_group_name` VARCHAR(128) NULL AFTER `competition_group`",
+    "ALTER TABLE `IMC004_Schedule` ADD COLUMN `competition_group_name` VARCHAR(128) NULL AFTER `competition_group`",
+    "ALTER TABLE `IMC005_Schedule` ADD COLUMN `competition_group_name` VARCHAR(128) NULL AFTER `competition_group`",
+    "ALTER TABLE `IMC006_Schedule` ADD COLUMN `competition_group_name` VARCHAR(128) NULL AFTER `competition_group`",
+    "ALTER TABLE `IMC007_Schedule` ADD COLUMN `competition_group_name` VARCHAR(128) NULL AFTER `competition_group`",
+    "ALTER TABLE `IMC008_Schedule` ADD COLUMN `competition_group_name` VARCHAR(128) NULL AFTER `competition_group`"
+  ]
+}
