@@ -1,0 +1,94 @@
+name: Remove retired ONE access
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/retire-one.yml'
+      - 'database-migrations/20261117_retire_old_one_access.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: retire-one-access
+  cancel-in-progress: false
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify administrator access and rejection of retired invitations
+        run: |
+          php -l nexus/admin/api.php
+          php -l clubhouse/campus-links.php
+          php -l site-data/core/change-signal.php
+          python3 tests/nexus-admin-http.py
+      - name: Publish cleaned menus and remove retired files from Aruba
+        env:
+          FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,secrets,ssl,urllib.request
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          root='/www.italianmastersclub.it'
+          files=['nexus/admin/api.php','nexus/admin/index.html','nexus/admin/results-check.html','nexus/admin/seasons.html','nexus/admin/transfers-check.html','nexus/admin/visits.html','clubhouse/campus-links.php','imc_campus/index.html','site-data/core/change-signal.php']
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          with FTP_TLS(context=ctx,timeout=60) as ftp:
+              ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()
+              for name in files:
+                  p=Path(name);data=p.read_bytes();ftp.cwd(root+'/'+p.parent.as_posix())
+                  temporary='.'+p.name+'.retire-upload'
+                  ftp.storbinary('STOR '+temporary,io.BytesIO(data));ftp.rename(temporary,p.name)
+                  check=io.BytesIO();ftp.retrbinary('RETR '+p.name,check.write);assert check.getvalue()==data,name
+              def remove_old_tree(relative):
+                  assert relative=='imc_campus/one' or relative.startswith('imc_campus/one/')
+                  entries=list(ftp.mlsd(root+'/'+relative))
+                  for name,facts in entries:
+                      if facts.get('type') in ('cdir','pdir'):continue
+                      assert name not in ('.','..') and '/' not in name
+                      child=relative+'/'+name
+                      if facts.get('type')=='dir':remove_old_tree(child)
+                      else:ftp.delete(root+'/'+child)
+                  ftp.rmd(root+'/'+relative)
+              campus={name for name,facts in ftp.mlsd(root+'/imc_campus')}
+              if 'one' in campus:remove_old_tree('imc_campus/one')
+              assert 'one' not in {name for name,facts in ftp.mlsd(root+'/imc_campus')}
+              admin={name for name,facts in ftp.mlsd(root+'/nexus/admin')}
+              for name in ('one.html','one-access.js'):
+                  if name in admin:ftp.delete(root+'/nexus/admin/'+name)
+              remaining={name for name,facts in ftp.mlsd(root+'/nexus/admin')}
+              assert not remaining.intersection(('one.html','one-access.js'))
+              # Purge the retired endpoints and updated entry points from Aruba cache.
+              helper='release-'+secrets.token_hex(24)+'.php'
+              code=b"""<?php
+              header('Cache-Control: private, no-store');
+              foreach (['/imc_campus','/imc_campus/','/imc_campus/?mobile=full','/imc_campus/isola.html','/imc_campus/one/','/imc_campus/one/index.php','/imc_campus/one/manager-access.php','/nexus/admin/one.html','/nexus/admin/one-access.js','/nexus/admin/index.html','/nexus/admin/results-check.html','/nexus/admin/seasons.html','/nexus/admin/transfers-check.html','/nexus/admin/visits.html','/clubhouse/'] as $path) {
+                  $request=curl_init('http://127.0.0.1:8889/purge'.$path);
+                  curl_setopt_array($request,[CURLOPT_HTTPHEADER=>['Host: www.italianmastersclub.it'],CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>5]);
+                  curl_exec($request);curl_close($request);
+              }
+              echo 'done';"""
+              ftp.cwd(root+'/imc_campus')
+              try:
+                  ftp.storbinary('STOR '+helper,io.BytesIO(code))
+                  with urllib.request.urlopen('https://www.italianmastersclub.it/imc_campus/'+helper,timeout=90) as r:assert r.read()==b'done'
+              finally:ftp.delete(helper)
+          print('Updated menus verified; retired reception and administrator files removed.')
+          PY
+      - name: Verify removed endpoints and working Campus and Passport live
+        run: |
+          python3 - <<'PY'
+          import time,urllib.request,urllib.error
+          base='https://www.italianmastersclub.it/'
+          for path in ['imc_campus/one/','imc_campus/one/index.php','imc_campus/one/manager-access.php','nexus/admin/one.html','nexus/admin/one-access.js']:
+              try:
+                  with urllib.request.urlopen(base+path+'?retired='+str(time.time_ns()),timeout=60) as r:raise AssertionError('Retired endpoint is still available: '+path)
+              except urllib.error.HTTPError as e:assert e.code in (404,410),(path,e.code)
+          for path in ['imc_campus/','nexus/admin/index.html','nexus/admin/results-check.html','nexus/admin/seasons.html','nexus/admin/transfers-check.html','nexus/admin/visits.html','clubhouse/']:
+              with urllib.request.urlopen(base+path+'?retired='+str(time.time_ns()),timeout=60) as r:html=r.read().decode()
+              assert '/imc_campus/one/' not in html and 'href="one.html"' not in html,path
+              if path=='clubhouse/':assert 'href="/clubhouse/imc-passport/"' in html
+          with urllib.request.urlopen(base+'clubhouse/imc-passport/tommaso-mello/',timeout=60) as r:assert b'passport-data' in r.read()
+          print('Removed endpoints return 404/410; Campus, menus and Passport verified.')
+          PY

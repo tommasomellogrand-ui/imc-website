@@ -26,6 +26,7 @@ try:
     assert all(flag.lower() in cookies[-1].lower() for flag in ['secure','httponly','samesite=Strict'])
     token=result['csrf']
     assert call(cookie=cookie)[0]==200
+    assert call({'action':'one-invite'},cookie,token)[0]==422
     assert call({'action':'close','world':'GW004','id':1},cookie)[0]==403
     assert call({'action':'logout'},cookie,token)[0]==200
     assert call(cookie=cookie)[0]==401

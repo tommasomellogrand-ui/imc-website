@@ -1,0 +1,11 @@
+{
+  "action": "plan_migration",
+  "target": "core",
+  "migration_id": "20261117-retire-old-one-access",
+  "allow_destructive": true,
+  "statements": [
+    "DROP TABLE `IMC ONE Access Tokens`",
+    "DROP TABLE `IMC ONE Guest Activity`",
+    "DROP TABLE `IMC ONE Accounts`"
+  ]
+}

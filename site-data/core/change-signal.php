@@ -14,7 +14,7 @@ function imc_changed_scope(string $table): string {
 // Schedule delivery after the write has committed. Failure to reach the bridge
 // cannot roll back or change the result of a successful MySQL import.
 function imc_changed_table(string $table): void {
-    if (PHP_SAPI === 'cli' || stripos($table, 'IMC ONE ') === 0) return;
+    if (PHP_SAPI === 'cli') return;
     static $queued = [];
     $scope = imc_changed_scope($table);
     if (isset($queued[$scope])) return;
