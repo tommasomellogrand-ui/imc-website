@@ -48,8 +48,9 @@ const wait=async f=>{for(let n=0;n<2000;n++){if(f())return;await new Promise(r=>
  const cw=connection.window;cw.HTMLElement.prototype.getBoundingClientRect=()=>({width:100,height:10});const cs=cw.getComputedStyle.bind(cw);cw.getComputedStyle=e=>{const s=cs(e);return{display:s.display,visibility:s.visibility,opacity:s.opacity||'1'};};
  cw.eval(source.replace(/    buildUI\(\);\n    boot\(\);[\s\S]*$/,'window.api={'+exported.join(',')+'};})();'));
  const ca=cw.api;ca.S.gw='IMC001';ca.STATE.gameWorld='IMC001';ca.S.clubs=[{world_id:'94079037',mapping_name:'Boca Juniors',canonical_name:'Boca Juniors'},{world_id:'94078847',mapping_name:'Tottenham',canonical_name:'Tottenham Hotspur'}];
- ca.STATE.currentIdentity={...fixture,competition_key:'IMC001|S02|IMC|europaleague',imc_season:2,home_sm_club_id:null,away_sm_club_id:null};
+ ca.STATE.currentIdentity={...fixture,competition_key:'IMC001|S02|IMC|europaleague',imc_season:2,home_sm_club_id:null,away_sm_club_id:null,home_name:'Boca Juniors',away_name:'Tottenham'};
  const actual=await ca.buildReportRow(701);assert.equal(actual.home_sm_club_id,94079037);assert.equal(actual.away_sm_club_id,94078847);assert.equal(actual.home_name,'Boca Juniors');assert.equal(actual.away_name,'Tottenham Hotspur');assert.equal(actual.home_score,2);assert.equal(actual.away_score,0);assert.equal(actual.players_json.length,36);assert.equal(actual.players_json.filter(p=>p.starter).length,22);assert.ok(ca.completeReport(actual));assert.notEqual(actual.home_sm_club_id,52322,'Connection ID must never be stored as world club ID');
+ ca.STATE.currentIdentity.home_name='Wrong Team';assert.throws(()=>ca.reportTeamMeta('home'),/diverso dalla fixture/);ca.STATE.currentIdentity.home_name='Boca Juniors';
  ca.S.clubs.push({world_id:123,mapping_name:'Boca Juniors'});assert.throws(()=>ca.reportTeamMeta('home'),/ambigua/);connection.window.close();
  dom.window.close();console.log('PASS MR identity conflicts, CORE connection choice, fallback, actual scores, own goals, stoppage minutes, readback integrity; original popup/navigation preserved');
 })().catch(e=>{console.error(e);dom.window.close();process.exit(1)});

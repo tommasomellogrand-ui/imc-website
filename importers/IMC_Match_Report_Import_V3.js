@@ -1748,6 +1748,9 @@ async function chooseCatalog(){
         var id=ids.size===1?Array.from(ids)[0]:known>0?known:null;
         if(!id)throw new Error('IMC: ID squadra non trovato nel CORE per '+name);
         if(known>0&&id!==known)throw new Error('IMC: squadra '+name+' diversa dalla fixture');
+        var expectedName=clean(STATE.currentIdentity?.[side+'_name']);
+        var expectedIds=new Set((S.clubs||[]).filter(c=>[c.mapping_name,c.canonical_name].some(n=>norm(n)===norm(expectedName))).map(c=>Number(c.world_id)).filter(n=>n>0));
+        if(expectedName&&norm(expectedName)!==norm(name)&&!(expectedIds.size===1&&expectedIds.has(id)))throw new Error('IMC: nome squadra '+name+' diverso dalla fixture '+expectedName);
         // MENU_connectGWDraw identifies the connection: never store its argument
         // as a world club ID. Use the world-specific CORE mapping instead.
         return {id:id,name:name};
