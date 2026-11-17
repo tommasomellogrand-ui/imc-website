@@ -211,7 +211,7 @@
     async function openFixtures() {
         var tab=q('#fixturesTableTab',screen());
         if(tab && (!content() || !shown(q('#fixturesContainer',screen()))))await click(tab);
-        await wait(function(){return content() && shown(q('#fixturesContainer',screen()));});
+        await wait(function(){return content() && shown(q('#fixturesContainer',screen())) && (buttons().length || noFixtures());});
     }
     function nextControl() {
         var p=q('#FixturesnextWeek_click',screen());

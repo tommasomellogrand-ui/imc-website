@@ -9,6 +9,8 @@ $new['competition_key']='IMC007|S01|NATIONS|worldcup';$new['sm_action']='worldcu
 $new['competition_group']='NATIONS';$new['competition_group_name']='Girone Z';$new['competition_stage']='Group Stage';
 $new['match_date']='2026-11-30';
 wc_check(imc_wc_selected_edition($new),'Selected edition key recognized');
+$selectedQualifiers=$wrong;foreach($selectedQualifiers as &$r){$r['competition_key']='IMC002|S02|NATIONS|interqualifier';$r['imc_season']=2;}unset($r);
+wc_check(imc_wc_detect($selectedQualifiers)['editions']===[],'Explicit Qualifier selection must also bypass automatic relabelling');
 wc_check(imc_wc_detect([$new])['editions']===[],'Selected edition must bypass date-based inference');
 imc_wc_import($p,'IMC007_Schedule',true,function()use($p,$new){wc_insert($p,'IMC007_Schedule',$new);return 1;},$seasons);
 $saved=$p->query('SELECT * FROM IMC007_Schedule WHERE sm_fixture_id=991234567')->fetch();

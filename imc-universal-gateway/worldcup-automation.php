@@ -9,7 +9,7 @@ function imc_wc_target(string $table): ?array {
 
 /** An importer-selected edition must not be inferred again from match dates. */
 function imc_wc_selected_edition(array $row): bool {
-    return (int)($row['imc_season']??0)>0 && (bool)preg_match('/^IMC[0-9]{3}\|S0*'.(int)($row['imc_season']??0).'\|NATIONS\|worldcup$/D',(string)($row['competition_key']??''));
+    return (int)($row['imc_season']??0)>0 && (bool)preg_match('/^IMC[0-9]{3}\|S0*'.(int)($row['imc_season']??0).'\|NATIONS\|(?:worldcup|interqualifier)$/D',(string)($row['competition_key']??''));
 }
 
 function imc_wc_knockout(array $row): bool {
