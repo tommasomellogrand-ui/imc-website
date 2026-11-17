@@ -38,6 +38,9 @@ foreach(['GW001|DOMESTIC|league|1','IMC001|DOMESTIC|league|1','IMC001|S02|DOMEST
  $q=$db->prepare('SELECT value FROM worlds WHERE competition_key=? AND imc_season=?');$q->execute([$key,2]);
  identity_check($q->fetchAll(PDO::FETCH_COLUMN)===[102],'Results edition remains readable through existing season-filtered links');
 }
+$q=$db->prepare('SELECT value FROM worlds WHERE competition_key=?');$q->execute(['IMC001|S02|DOMESTIC|league|1']);
+identity_check($q->fetchAll(PDO::FETCH_COLUMN)===[102],'Full edition key alone cannot select another season');
+identity_check((int)$db->query("SELECT value FROM worlds WHERE competition_key='IMC001|S01|DOMESTIC|league|1'")->fetchColumn()===101,'Full literal edition key is exact');
 identity_check((int)$db->query("SELECT value FROM worlds WHERE competition_key='GW001|DOMESTIC|league|1' AND imc_season=1")->fetchColumn()===101,'Literal CORE key resolves stored edition');
 $db->exec("CREATE TABLE definitions (competition_key VARCHAR(255))");
 $db->exec("INSERT INTO definitions VALUES ('IMC001|DOMESTIC|league|1')");

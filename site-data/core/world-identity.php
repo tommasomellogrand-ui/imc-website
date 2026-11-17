@@ -39,8 +39,8 @@ function imc_world_compat_rows(array $rows): array {
     }
     unset($row,$value);return $rows;
 }
-function imc_world_sql_value(string $column,bool $key=false): string {
-    if($key){
+function imc_world_sql_value(string $column,bool $key=false,bool $definition=true): string {
+    if($key&&$definition){
         $column="REGEXP_REPLACE($column,'[|]S[0-9]+[|]','|')";
         foreach(['COPA_LIBERTADORES','COPPA_DEI_CAMPIONI'] as $slug)$column="REPLACE($column,'|IMC|$slug','_$slug')";
     }
@@ -55,7 +55,13 @@ function imc_world_sql_value(string $column,bool $key=false): string {
 /** Dual-read aliases during migration; only canonical values are bound/written. */
 function imc_world_sql(string $sql): string {
     if(!preg_match('/^\s*SELECT\b/i',$sql))return $sql;
-    $sql=preg_replace_callback("/'(?:''|[^'])*'/",static function($m){$s=substr($m[0],1,-1);return "'".imc_world_value(imc_competition_definition_key($s))."'";},$sql);
+    $sql=preg_replace_callback("/'(?:''|[^'])*'/",static function($m){$s=substr($m[0],1,-1);return "'".imc_world_value($s)."'";},$sql);
+    // A full edition key is exact; an older definition key may resolve any
+    // edition selected by the caller's separate imc_season predicate.
+    $keyColumn='(?:[a-zA-Z_][a-zA-Z0-9_]*\.)?`?competition_key`?';
+    $sql=preg_replace_callback("/(?<![a-zA-Z0-9_`])($keyColumn)\\s*=\\s*(\\?|'(?:''|[^'])*')/i",static function($m){
+        return 'JSON_CONTAINS(JSON_ARRAY('.imc_world_sql_value($m[1],true,false).','.imc_world_sql_value($m[1],true).'),JSON_QUOTE('.$m[2].'))';
+    },$sql);
     $column='(?:[a-zA-Z_][a-zA-Z0-9_]*\.)?(?:`?(?:game_world_id|source_game_world_id|competition_key)`?|`(?:IMC GW|Game World)`)';
     $sql=preg_replace_callback('/(?<![a-zA-Z0-9_`])('.$column.')\s*(=|IN\s*\(|LIKE\b|BETWEEN\b)\s*('.$column.')?/i',static function($m){
         $right=isset($m[3])&&$m[3]!==''?imc_world_sql_value($m[3],stripos($m[3],'competition_key')!==false):'';
@@ -66,8 +72,7 @@ function imc_world_sql(string $sql): string {
 class IMCWorldStatement extends PDOStatement {
     protected function __construct() {}
     public function execute(?array $params=null): bool {
-        $read=preg_match('/^\s*SELECT\b/i',$this->queryString)===1;
-        return parent::execute($params===null?null:array_map(static fn($value)=>imc_world_value($read&&is_string($value)?imc_competition_definition_key($value):$value),$params));
+        return parent::execute($params===null?null:array_map('imc_world_value',$params));
     }
 }
 class IMCWorldPDO extends PDO {

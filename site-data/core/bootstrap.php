@@ -51,12 +51,7 @@ function imc_site_rows(PDO $db,string $sql,array $params=[]): array {
   if(preg_match('/\b(IMC00[1-8])_(?:Results|Schedule|Match_Reports)\b/i',$sql,$partition)){
     $world=$partition[1];
     $route=array_search($world,SITE_WORLD_TABLES,true);
-    // Public competition links may carry either prefix. Compare both forms
-    // using the physical world ID while retaining one bound parameter.
-    if($route!==false){
-      $sql=preg_replace_callback('/\b((?:[a-z]+\.)?competition_key)\s*=\s*\?/i',
-        static fn($m)=>imc_world_sql_value($m[1],true).'=?',$sql);
-    }
+    // IMCWorldPDO resolves both definition links and full edition keys.
     $sql=preg_replace('/\b((?:[a-z]+\.)?game_world_id)\s*=\s*\?/i', "$1 IN (?, '$world')", $sql);
     // Both sides already refer to the same physical world partition.
     $sql=preg_replace('/\b[a-z]+\.game_world_id\s*=\s*[a-z]+\.game_world_id\b/i','1=1',$sql);
