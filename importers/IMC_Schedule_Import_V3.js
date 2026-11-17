@@ -1,11 +1,11 @@
-/* IMC | SCHEDULE IMPORT V3.4
+/* IMC | SCHEDULE IMPORT V3.5
  * CORE → mondo → tipo → competizione singola → stagione precaricata.
  * Da eseguire nella pagina Soccer Manager della competizione da importare.
  * Importa solo la selezione, dalla pagina aperta in avanti. Nessun campo sm_country.
  */
 (function () {
     'use strict';
-    var VERSION = 'IMC-SCHEDULE-V3.4';
+    var VERSION = 'IMC-SCHEDULE-V3.5';
     var GATEWAY = 'https://www.italianmastersclub.it/imc-universal-gateway/';
     var old = document.getElementById('__imc_schedule_v3');
     if (old) return;
@@ -21,8 +21,11 @@
     function attr(el,key) { return el ? el.getAttribute(key) : null; }
     function q(sel,root) { return (root || document).querySelector(sel); }
     function qa(sel,root) { return Array.from((root || document).querySelectorAll(sel)); }
-    function screen() { return q('#currentScreenA') || document; }
-    function content() { return q('#fixturesContainer #competitionFixturesContent',screen()); }
+    function screen() {
+        return qa('[id^="currentScreen"]').find(function(el){return /^currentScreen[A-Z]$/.test(el.id) && el.classList.contains('current-screen-shown') && !el.closest('#workingCopy');}) || q('#currentScreenA') || document;
+    }
+    function fixturesRoot() {return qa('[id="fixturesContainer"]',screen()).find(function(el){return !el.closest('#workingCopy');}) || null;}
+    function content() {var root=fixturesRoot();return root ? q('#competitionFixturesContent',root) : null;}
     function sleep(ms) { return new Promise(function(resolve){setTimeout(resolve,ms);}); }
     function checkStop() { if(S.stopped) throw new Error('Importazione fermata'); }
     function shown(el) {
@@ -143,8 +146,7 @@
             var before=pageKey(),oldSelect=select,oldScreen=screen(),oldTables=q('#leagueTableContainer',screen());
             var oldTablesHTML=oldTables ? oldTables.innerHTML : null,oldFixtureIds=buttons().map(fixtureId).join(',');
             select.selectedIndex=option.index;select.value=option.value;
-            if(typeof select.onchange==='function')select.onchange.call(select,new Event('change',{bubbles:true}));
-            else select.dispatchEvent(new Event('change',{bubbles:true}));
+            pageCommand(select,'change');
             // SM returns to Tables after a division change. Wait for that screen,
             // then open Partite BEFORE waiting for its Schedule content.
             await wait(function(){
@@ -271,18 +273,59 @@
             log('WRITE · '+S.lastBatch.written+' fixture salvate e verificate · '+S.lastBatch.skipped+' skip');update();
         }
     }
-    async function click(el) {
-        if(!el)throw new Error('Controllo Schedule assente');
-        el.click();await sleep(250);
+    // Same page-context execution used by the original iPhone Schedule importer.
+    // Safari Shortcuts may not expose SM functions/inline handlers to the caller.
+    function pageCommand(el,kind) {
+        if(!el || el.closest('#workingCopy'))throw new Error('Controllo SM assente o non attivo');
+        var token='imc_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+        var resultAttr='data-imc-v3-result-'+token,root=document.documentElement;
+        el.setAttribute('data-imc-v3-nav',token);
+        var script=document.createElement('script');
+        var command=function(token,kind,resultAttr){
+            var root=document.documentElement;
+            try {
+                var e=document.querySelector('[data-imc-v3-nav="'+token+'"]');
+                if(!e || e.closest('#workingCopy'))throw new Error('Elemento SM non più disponibile');
+                if(kind==='fixtures' && typeof window.showLeagueTabContents==='function') {
+                    window.showLeagueTabContents('fixturesContainer','fixturesTableTab');
+                } else {
+                    var eventName=kind==='change'?'change':'click',property='on'+eventName;
+                    var event=new Event(eventName,{bubbles:true,cancelable:true});
+                    var raw=e.getAttribute(property) || '';
+                    if(typeof e[property]==='function')e[property].call(e,event);
+                    else if(raw)(new Function('event',raw)).call(e,event);
+                    else if(kind==='change')e.dispatchEvent(event);
+                    else e.click();
+                }
+                root.setAttribute(resultAttr,JSON.stringify({ok:true}));
+            } catch(error) {root.setAttribute(resultAttr,JSON.stringify({ok:false,error:String(error && error.message || error)}));}
+        };
+        script.textContent='('+command.toString()+')('+JSON.stringify(token)+','+JSON.stringify(kind)+','+JSON.stringify(resultAttr)+');';
+        root.appendChild(script);
+        var reply=root.getAttribute(resultAttr);
+        script.remove();root.removeAttribute(resultAttr);el.removeAttribute('data-imc-v3-nav');
+        if(reply) {
+            var result=JSON.parse(reply);if(!result.ok)throw new Error('Comando SM: '+result.error);
+            return;
+        }
+        // Native fallback for environments that disallow injected inline scripts.
+        if(kind==='fixtures' && typeof window.showLeagueTabContents==='function')window.showLeagueTabContents('fixturesContainer','fixturesTableTab');
+        else if(kind==='change')el.dispatchEvent(new Event('change',{bubbles:true}));
+        else el.click();
+    }
+    async function click(el) {pageCommand(el,'click');await sleep(250);}
+    function fixturesReady() {
+        var tab=q('#fixturesTableTab',screen());
+        var active=!tab || tab.classList.contains('toptabs-active') || tab.classList.contains('topmenu-active');
+        return active && content() && shown(fixturesRoot()) && (buttons().length || noFixtures());
     }
     async function openFixtures(message) {
         setPhase('Apro calendario');
-        var tab=q('#fixturesTableTab',screen());
-        if(tab && (!content() || !shown(q('#fixturesContainer',screen())))) {
-            if(typeof window.showLeagueTabContents==='function')window.showLeagueTabContents('fixturesContainer','fixturesTableTab');
-            else await click(tab);
+        if(!fixturesReady()) {
+            var tab=await wait(function(){var el=q('#fixturesTableTab',screen());return el && !el.closest('#workingCopy') ? el : null;},15000,message || 'Tab Partite non trovata');
+            pageCommand(tab,'fixtures');
         }
-        await wait(function(){return content() && shown(q('#fixturesContainer',screen())) && (buttons().length || noFixtures());},18000,message);
+        await wait(fixturesReady,18000,message);
     }
     function nextControl() {
         var p=q('#FixturesnextWeek_click',screen());
@@ -300,7 +343,7 @@
         return true;
     }
     function noFixtures() {
-        var el=q('#competitionScreenTrans-no-fixtures',q('#fixturesContainer',screen()) || screen());
+        var el=q('#competitionScreenTrans-no-fixtures',fixturesRoot() || screen());
         return shown(el) || /non ci sono incontri disponibili/i.test(text(content()));
     }
     function setText(id,value) {var el=q('#'+id);if(el)el.textContent=String(value == null ? '-' : value);}
@@ -441,7 +484,7 @@
     }
     var overlay=document.createElement('div');overlay.id='__imc_schedule_v3';
     overlay.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(18,22,34,.30);backdrop-filter:blur(2px);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171b2a;padding:6px;box-sizing:border-box';
-    overlay.innerHTML='<style>#__imc_schedule_v3 *{box-sizing:border-box}#__imc_schedule_v3 .imc-v3-button{display:block;width:100%;min-height:48px;padding:12px;margin:7px 0;border:1px solid #dedced;border-radius:13px;background:#fff;color:#473c83;font:700 13px Inter,-apple-system,sans-serif;cursor:pointer}#__imc_schedule_v3 .imc-v3-button:disabled{opacity:.4;cursor:default}#__imc_schedule_v3 .imc-v3-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#__imc_schedule_v3 select{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #dedced;border-radius:12px;background:white}#__imc_v3_error{color:#b7463e;overflow-wrap:anywhere}</style><div style="width:min(100%,420px);height:100%;margin:auto;background:#f8f8fd;border:1px solid #e3e4ec;border-radius:22px;box-shadow:0 14px 44px rgba(20,24,40,.32);overflow:hidden;display:flex;flex-direction:column"><div style="background:white;padding:15px;border-bottom:1px solid #e5e6ee"><div style="font-size:10px;letter-spacing:2px;font-weight:900;color:#7153d8">IMC · SCHEDULE IMPORT</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><strong style="font-size:20px">SCHEDULE V3.4</strong><span id="__imc_v3_badge" style="font-size:9px;background:#eee8ff;color:#6548c8;padding:8px;border-radius:99px">PRONTO</span><button id="__imc_v3_dismiss" aria-label="Chiudi" style="border:0;background:none;font-size:20px">×</button></div></div><div id="__imc_v3_body" style="padding:14px;overflow:auto;flex:1"></div></div>';
+    overlay.innerHTML='<style>#__imc_schedule_v3 *{box-sizing:border-box}#__imc_schedule_v3 .imc-v3-button{display:block;width:100%;min-height:48px;padding:12px;margin:7px 0;border:1px solid #dedced;border-radius:13px;background:#fff;color:#473c83;font:700 13px Inter,-apple-system,sans-serif;cursor:pointer}#__imc_schedule_v3 .imc-v3-button:disabled{opacity:.4;cursor:default}#__imc_schedule_v3 .imc-v3-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#__imc_schedule_v3 select{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #dedced;border-radius:12px;background:white}#__imc_v3_error{color:#b7463e;overflow-wrap:anywhere}</style><div style="width:min(100%,420px);height:100%;margin:auto;background:#f8f8fd;border:1px solid #e3e4ec;border-radius:22px;box-shadow:0 14px 44px rgba(20,24,40,.32);overflow:hidden;display:flex;flex-direction:column"><div style="background:white;padding:15px;border-bottom:1px solid #e5e6ee"><div style="font-size:10px;letter-spacing:2px;font-weight:900;color:#7153d8">IMC · SCHEDULE IMPORT</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><strong style="font-size:20px">SCHEDULE V3.5</strong><span id="__imc_v3_badge" style="font-size:9px;background:#eee8ff;color:#6548c8;padding:8px;border-radius:99px">PRONTO</span><button id="__imc_v3_dismiss" aria-label="Chiudi" style="border:0;background:none;font-size:20px">×</button></div></div><div id="__imc_v3_body" style="padding:14px;overflow:auto;flex:1"></div></div>';
     document.body.appendChild(overlay);
     q('#__imc_v3_dismiss').onclick=function(){if(S.running)requestStop();else overlay.remove();};
     S.loggedManager=positive(q('#scid') && (q('#scid').value || text(q('#scid')))) || positive(window.CUSTOMERID);
