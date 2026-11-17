@@ -13,7 +13,7 @@ const exported=['S','STATE','reportIdentity','sourceIdentity','baseKey','competi
 w.eval(source.replace(/    buildUI\(\);\n    boot\(\);[\s\S]*$/,'window.api={'+exported.join(',')+'};})();'));
 const a=w.api;a.STATE.gameWorld='IMC001';a.STATE.legacyWorld='GW001';a.S.gw='IMC001';a.S.legacyGw='GW001';a.S.season=2;a.S.catalog=[{key:'IMC001|IMC|championsleague',name:'Connessione Champions',group:'IMC',sm_action:'imc',sm_division:null}];a.S.competition=a.S.catalog[0];a.S.seasons=[{imc_season:1,start:'2026-01-01',end:'2026-10-31'},{imc_season:2,start:'2026-11-01',end:null}];a.S.clubs=[{world_id:11,mapping_name:'Home'},{world_id:22,mapping_name:'Away'}];
 const fixture={game_world_id:'IMC001',sm_fixture_id:101,competition_key:'IMC001|S01|IMC|championsleague',imc_season:1,sm_action:'imc',competition_group:'IMC',competition_group_name:'Girone A',match_date:'2026-11-17',home_sm_club_id:11,away_sm_club_id:22,home_name:'Home',away_name:'Away',home_score:0,away_score:3};
-a.S.results.set(101,[fixture]);let identity=a.reportIdentity(101);assert.equal(identity.competition_key,fixture.competition_key);assert.equal(identity.imc_season,1);assert.equal(identity.competition_group_name,'Girone A');
+a.S.results.set(101,[fixture]);let identity=a.reportIdentity(101);assert.equal(identity.hasResult,true);assert.equal(identity.competition_key,fixture.competition_key);assert.equal(identity.imc_season,1);assert.equal(identity.competition_group_name,'Girone A');
 a.S.schedule.set(101,[{...fixture,competition_key:'IMC001|S02|IMC|championsleague',imc_season:2}]);assert.throws(()=>a.reportIdentity(101),/diverse/);a.S.schedule.clear();
 a.S.competition={...a.S.competition,key:'IMC001|IMC|europaleague'};assert.throws(()=>a.reportIdentity(101),/hai scelto/);a.S.competition=a.S.catalog[0];
 a.S.results.clear();a.S.schedule.set(101,[{...fixture,home_sm_club_id:undefined,away_sm_club_id:undefined,home_sm_team_id:11,away_sm_team_id:22}]);identity=a.reportIdentity(101);assert.equal(identity.home_sm_club_id,11);a.S.schedule.clear();assert.equal(a.reportIdentity(101).competition_key,'IMC001|S02|IMC|championsleague');
@@ -57,10 +57,31 @@ const wait=async f=>{for(let n=0;n<2000;n++){if(f())return;await new Promise(r=>
  const actual=await ca.buildReportRow(701);assert.equal(actual.home_sm_club_id,94079037);assert.equal(actual.away_sm_club_id,94078847);assert.equal(actual.home_name,'Boca Juniors');assert.equal(actual.away_name,'Tottenham Hotspur');assert.equal(actual.home_score,2);assert.equal(actual.away_score,0);assert.equal(actual.players_json.length,36);assert.equal(actual.players_json.filter(p=>p.starter).length,22);assert.ok(ca.completeReport(actual));assert.notEqual(actual.home_sm_club_id,52322,'Connection ID must never be stored as world club ID');
  ca.STATE.currentIdentity.home_name='Wrong Team';assert.throws(()=>ca.reportTeamMeta('home'),/diverso dalla fixture/);ca.STATE.currentIdentity.home_name='Boca Juniors';
  ca.S.clubs.push({world_id:123,mapping_name:'Boca Juniors'});assert.throws(()=>ca.reportTeamMeta('home'),/ambigua/);ca.S.clubs.pop();
- for(const [side,name,competition] of [['home','FC PORTO','championsleague'],['away','Newcastle United','championsleague'],['home','Juventus','conferenceleague']]){
-  cw.document.querySelector('#MatchReportTeam1 a').textContent=side==='home'?name:'Boca Juniors';cw.document.querySelector('#MatchReportTeam2 a').textContent=side==='away'?name:'Tottenham Hotspur';
-  ca.STATE.currentIdentity={...fixture,competition_key:'IMC001|S02|IMC|'+competition,imc_season:2,home_sm_club_id:null,away_sm_club_id:null,home_name:side==='home'?name:'Boca Juniors',away_name:side==='away'?name:'Tottenham'};
-  const guest=await ca.buildReportRow(702);assert.equal(guest[side+'_sm_club_id'],null);assert.equal(guest[side+'_sm_manager_id'],null);assert.equal(guest[side+'_manager_name'],'GUEST');assert.equal(guest.home_score,2);assert.equal(guest.away_score,0);assert.equal(guest.players_json.length,36);assert.ok(ca.completeReport(guest));assert.equal(ca.completeReport({...guest,game_world_id:'IMC002'}),false,'Guest exception scoped to its configured world');
+ for(const world of ['IMC001','IMC005','IMC008']){
+  ca.S.gw=world;
+  ca.STATE.gameWorld=world;
+  ca.STATE.currentIdentity={...fixture,hasResult:true,competition_key:world+'|S02|IMC|invitational',imc_season:2,
+   home_sm_club_id:null,away_sm_club_id:null,home_name:'Invitata '+world,away_name:'Ospite '+world};
+  const guest=await ca.buildReportRow(702);
+  assert.equal(guest.game_world_id,world);
+  assert.equal(guest.sm_fixture_id,702);
+  for(const side of ['home','away']){
+   assert.equal(guest[side+'_name'],ca.STATE.currentIdentity[side+'_name']);
+   assert.equal(guest[side+'_sm_club_id'],null);
+   assert.equal(guest[side+'_sm_manager_id'],null);
+   assert.equal(guest[side+'_manager_name'],'GUEST');
+   assert.equal(guest.team_stats_json[side].guest,true);
+  }
+  assert.equal(guest.home_score,2);assert.equal(guest.away_score,0);
+  assert.equal(guest.players_json.length,36);assert.ok(ca.completeReport(guest));
+  assert.ok(ca.completeReport({...guest,team_stats_json:JSON.stringify(guest.team_stats_json)}));
+  for(const group of ['DOMESTIC','INTERNATIONAL','NATIONS']){
+   assert.equal(ca.completeReport({...guest,competition_group:group}),false);
+  }
+  ca.STATE.currentIdentity.away_name='Tottenham';
+  const mixed=await ca.buildReportRow(703);
+  assert.equal(mixed.away_name,'Tottenham Hotspur');
+  assert.equal(mixed.away_sm_club_id,94078847);assert.ok(!mixed.team_stats_json.away.guest);
  }
  connection.window.close();
  dom.window.close();console.log('PASS MR identity conflicts, CORE connection choice, fallback, actual scores, own goals, stoppage minutes, readback integrity; original popup/navigation preserved');

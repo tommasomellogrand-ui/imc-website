@@ -23,7 +23,7 @@
 (function () {
     "use strict";
 
-    var VERSION = "IMC-MATCH-REPORT-V3.4-BACKFILL-CORE-SCHEDULE";
+    var VERSION = "IMC-MATCH-REPORT-V3.5-BACKFILL-CORE-SCHEDULE";
     var SCANNER = "IMC_MATCH_REPORT_IMPORT_V1";
 
     var GATEWAY_URL =
@@ -141,6 +141,7 @@ var MATCH_REPORT_REPOSITORY =
         if(!out.competition_group_name){var button=resultButton(String(id));out.competition_group_name=button?fixtureGroupName(button):null;}
         if(!out.match_date)throw new Error('Data partita assente per fixture '+id);
         if(/knockout|ottavi|quarti|semifinal|sedicesimi|\bfinale?\b/i.test([out.competition_stage,out.competition_round].join(' ')))out.competition_group_name=null;
+        out.hasResult=Boolean(result);
         return out;
     }
 function fixtureGroupName(button){
@@ -166,7 +167,6 @@ function fixtureGroupName(button){
  return null;
 }
     function reportTeamId(team,identity,side){
-        if(guestSide({...identity,[side+'_name']:team.name},side))return null;
         var known=Number(identity[side+'_sm_club_id']),read=Number(team.id);
         if(known>0&&read>0&&known!==read)throw new Error('Squadra '+side+' del report diversa dalla fixture');
         return read>0?read:known>0?known:null;
@@ -179,19 +179,14 @@ function fixtureGroupName(button){
         var m=clean(raw).match(/^(\d{1,3})(?:\s*\+\s*(\d{1,2}))?['’]?$/);return m?Number(m[1])+Number(m[2]||0):null;
     }
     function jsonValue(value){if(typeof value==='string'){try{return JSON.parse(value);}catch(_){return null;}}return value;}
-    function guestName(value){
-        var name=norm(value);return ({'fc porto':'porto','newcastle united':'newcastle','juventus fc':'juventus'})[name]||name;
-    }
-    function guestSide(row,side){
-        var world=clean(row.game_world_id||STATE.gameWorld);
-        if(!['IMC001','IMC-001','GW001'].includes(world)||row.competition_group!=='IMC')return false;
-        var key=clean(row.competition_key).replace(/\|S\d+\|/,'|');
-        var name=guestName(row[side+'_name']);
-        return /[|]IMC[|]championsleague$/.test(key)&&['porto','newcastle'].includes(name)||/[|]IMC[|]conferenceleague$/.test(key)&&name==='juventus';
+    function reportSideComplete(row,stats,side){
+        if(Number(row[side+'_sm_club_id'])>0)return true;
+        if(row.competition_group!=='IMC')return false;
+        return stats?.[side]?.guest===true || row[side+'_manager_name']==='GUEST';
     }
     function completeReport(row){
         var players=jsonValue(row.players_json),stats=jsonValue(row.team_stats_json);
-        return !!(row.competition_key&&Number(row.imc_season)>0&&row.sm_action&&row.competition_group&&row.match_date&&(Number(row.home_sm_club_id)>0||guestSide(row,'home'))&&(Number(row.away_sm_club_id)>0||guestSide(row,'away'))&&row.home_name&&row.away_name&&row.home_score!==null&&row.home_score!==undefined&&row.away_score!==null&&row.away_score!==undefined&&Array.isArray(players)&&players.length&&stats&&stats.home&&stats.away);
+        return !!(row.competition_key&&Number(row.imc_season)>0&&row.sm_action&&row.competition_group&&row.match_date&&reportSideComplete(row,stats,'home')&&reportSideComplete(row,stats,'away')&&row.home_name&&row.away_name&&row.home_score!==null&&row.home_score!==undefined&&row.away_score!==null&&row.away_score!==undefined&&Array.isArray(players)&&players.length&&stats&&stats.home&&stats.away);
     }
     function stableJson(value){
         if(Array.isArray(value))return value.map(stableJson);
@@ -660,7 +655,7 @@ async function chooseCatalog(){
                 '<div style="background:#fff;padding:13px 15px 12px;border-bottom:1px solid #e5e6ee;flex:0 0 auto;">' +
                     '<div style="font-size:9px;letter-spacing:2.3px;font-weight:950;color:#7153d8;margin-bottom:4px;">IMC · MATCH REPORT IMPORT</div>' +
                     '<div style="display:flex;align-items:center;justify-content:space-between;gap:7px;">' +
-                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.4 · CON BACKFILL</div>' +
+                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.5 · CON BACKFILL</div>' +
                         '<div id="__imc_badge" style="background:#eee8ff;color:#6548c8;padding:8px 11px;border-radius:999px;font-weight:950;font-size:9px;white-space:nowrap;">PRONTO</div>' +
                     '</div>' +
                 '</div>' +
@@ -1796,25 +1791,32 @@ async function chooseCatalog(){
         var root=document.getElementById('currentScreenA')||document;
         var heading=root.querySelector('[id="'+(side==='home'?'MatchReportTeam1':'MatchReportTeam2')+'"]');
         var anchor=heading&&heading.querySelector('a');
-        var name=clean(anchor?.textContent||heading?.textContent);
-        if(!name)throw new Error('IMC: nome squadra '+side+' assente nel report');
-        var identity=STATE.currentIdentity||{};
-        if(guestSide({...identity,[side+'_name']:name},side)){
-            if(guestName(identity[side+'_name'])!==guestName(name))throw new Error('IMC: guest diversa dalla fixture');
-            return {id:null,name:name,guest:true};
+        var identity=STATE.currentIdentity;
+        var fixtureName=clean(identity[side+'_name']);
+        var name=clean(anchor?.textContent||heading?.textContent)||fixtureName;
+        var known=Number(identity[side+'_sm_club_id']);
+        function clubIds(label){
+            var clubs=(S.clubs||[]).filter(club=>[club.mapping_name,club.canonical_name]
+                .some(alias=>label&&norm(alias)===norm(label)));
+            return new Set(clubs.map(club=>Number(club.world_id)).filter(id=>Number.isSafeInteger(id)&&id>0));
         }
-        var ids=new Set((S.clubs||[]).filter(c=>[c.mapping_name,c.canonical_name].some(n=>norm(n)===norm(name))).map(c=>Number(c.world_id)).filter(id=>Number.isSafeInteger(id)&&id>0));
+        // La riga Results è già selezionata per mondo e fixture. I nomi servono
+        // solo ad arricchire il report; MENU_connectGWDraw contiene un ID connessione.
+        if(identity.hasResult){
+            var candidates=clubIds(fixtureName||name);
+            var id=known>0?known:candidates.size===1?[...candidates][0]:null;
+            var sameClub=norm(name)===norm(fixtureName)||Boolean(id&&clubIds(name).has(id));
+            return {id,name:sameClub?name:fixtureName||name,guest:id===null};
+        }
+        if(!name)throw new Error('IMC: nome squadra '+side+' assente nel report');
+        var ids=clubIds(name);
         if(ids.size>1)throw new Error('IMC: squadra '+name+' ambigua nel CORE');
-        var known=Number(STATE.currentIdentity?.[side+'_sm_club_id']);
-        var id=ids.size===1?Array.from(ids)[0]:known>0?known:null;
-        if(!id)throw new Error('IMC: ID squadra non trovato nel CORE per '+name);
-        if(known>0&&id!==known)throw new Error('IMC: squadra '+name+' diversa dalla fixture');
-        var expectedName=clean(STATE.currentIdentity?.[side+'_name']);
-        var expectedIds=new Set((S.clubs||[]).filter(c=>[c.mapping_name,c.canonical_name].some(n=>norm(n)===norm(expectedName))).map(c=>Number(c.world_id)).filter(n=>n>0));
-        if(expectedName&&norm(expectedName)!==norm(name)&&!(expectedIds.size===1&&expectedIds.has(id)))throw new Error('IMC: nome squadra '+name+' diverso dalla fixture '+expectedName);
-        // MENU_connectGWDraw identifies the connection: never store its argument
-        // as a world club ID. Use the world-specific CORE mapping instead.
-        return {id:id,name:name};
+        var reportId=ids.size===1?[...ids][0]:known>0?known:null;
+        if(known>0&&reportId!==known)throw new Error('IMC: squadra '+name+' diversa dalla fixture');
+        var expectedIds=clubIds(fixtureName);
+        if(fixtureName&&norm(fixtureName)!==norm(name)&&!(expectedIds.size===1&&expectedIds.has(reportId)))
+            throw new Error('IMC: nome squadra '+name+' diverso dalla fixture '+fixtureName);
+        return {id:reportId,name,guest:reportId===null};
     }
     function reportTeamMeta(side) {
         if(STATE.currentIdentity?.competition_group==='IMC')return imcConnectionTeamMeta(side);
@@ -3123,8 +3125,8 @@ async function chooseCatalog(){
         home.name=home.name||identity.home_name;away.name=away.name||identity.away_name;
         var homeManager = reportManagerMeta("home");
         var awayManager = reportManagerMeta("away");
-        if(guestSide(identity,'home'))homeManager={id:null,name:'GUEST'};
-        if(guestSide(identity,'away'))awayManager={id:null,name:'GUEST'};
+        if(home.guest)homeManager={id:null,name:'GUEST'};
+        if(away.guest)awayManager={id:null,name:'GUEST'};
 
         var parsedPlayers = parsePlayers();
         var parsedScorers = parseScorers();
@@ -3138,6 +3140,7 @@ async function chooseCatalog(){
         var teamStatsJson = {
             home: {
                 sm_team_id: home.id,
+                ...(home.guest ? {guest:true} : {}),
                 team_name: home.name,
                 possession: parsedTeamStats.home.possession,
                 total_shots: parsedTeamStats.home.total_shots,
@@ -3148,6 +3151,7 @@ async function chooseCatalog(){
             },
             away: {
                 sm_team_id: away.id,
+                ...(away.guest ? {guest:true} : {}),
                 team_name: away.name,
                 possession: parsedTeamStats.away.possession,
                 total_shots: parsedTeamStats.away.total_shots,
@@ -3534,7 +3538,7 @@ async function chooseCatalog(){
 
         if (!resultsPageState()) {
             throw new Error(
-                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.4"
+                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.5"
             );
         }
 
@@ -3567,7 +3571,7 @@ async function chooseCatalog(){
 
         finish(
             STATE.errors ? "error" : "ok",
-            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.4 completato"
+            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.5 completato"
         );
     }
 
