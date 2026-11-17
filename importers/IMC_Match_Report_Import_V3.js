@@ -23,7 +23,7 @@
 (function () {
     "use strict";
 
-    var VERSION = "IMC-MATCH-REPORT-V3.0-CORE-SCHEDULE";
+    var VERSION = "IMC-MATCH-REPORT-V3.1-CORE-SCHEDULE";
     var SCANNER = "IMC_MATCH_REPORT_IMPORT_V1";
 
     var GATEWAY_URL =
@@ -180,6 +180,33 @@ function fixtureGroupName(button){
         if(Array.isArray(value))return value.map(stableJson);
         if(value&&typeof value==='object')return Object.fromEntries(Object.keys(value).sort().map(k=>[k,stableJson(value[k])]));
         return value;
+    }
+    function mergeMissing(current,incoming){
+        if(current==null||current==='')return incoming;
+        if(Array.isArray(current))return current.length?current:incoming;
+        if(current&&incoming&&typeof current==='object'&&typeof incoming==='object'&&!Array.isArray(incoming)){
+            var out={...current};Object.keys(incoming).forEach(k=>{out[k]=mergeMissing(current[k],incoming[k]);});return out;
+        }
+        return current;
+    }
+    async function repairExistingReport(row){
+        var dest=explicitMatchReportDestination();
+        var envelope={game_world_id:STATE.gameWorld,repository:MATCH_REPORT_REPOSITORY,route_mode:'explicit',target_database:dest.database,target_table:dest.table};
+        var read=await gateway({...envelope,action:'read',where:{sm_fixture_id:row.sm_fixture_id},limit:2,offset:0});
+        if(read.database!==dest.database||(read.physical_table||read.table)!==dest.table||read.has_more||read.rows?.length!==1)throw new Error('Report da completare assente o duplicato');
+        var old=read.rows[0];
+        if((clean(old.competition_key)&&old.competition_key!==row.competition_key)||(Number(old.imc_season)>0&&Number(old.imc_season)!==Number(row.imc_season)))throw new Error('Report esistente di competizione o stagione diversa');
+        var expected={...old};
+        Object.keys(row).forEach(k=>{expected[k]=k.endsWith('_json')?mergeMissing(jsonValue(old[k]),row[k]):mergeMissing(old[k],row[k]);});
+        expected.imc_season=Number(expected.imc_season);
+        if(!completeReport(expected))throw new Error('Non tutti i dati mancanti sono recuperabili dal report');
+        setPhase('Completo report già presente');
+        var reply=await gateway({...envelope,action:'repair_report',row});
+        if(reply.database!==dest.database||(reply.physical_table||reply.table)!==dest.table||Number(reply.matched_rows)!==1||Number(reply.updated_rows)!==1)throw new Error('Completamento Match Report non confermato');
+        await verifyStoredReport(expected);
+        STATE.existingMeta.set(String(Number(row.sm_fixture_id)),{key:expected.competition_key,season:expected.imc_season,complete:true});
+        STATE.lastBatch={sent:1,written:1,skipped:0,database:dest.database,table:dest.table,trace_id:reply.trace_id||null};
+        log('Fixture '+row.sm_fixture_id+' · report completato senza duplicarlo','ok');updateUI();return 1;
     }
     async function verifyStoredReport(row){
         var dest=explicitMatchReportDestination();
@@ -613,7 +640,7 @@ async function chooseCatalog(){
                 '<div style="background:#fff;padding:13px 15px 12px;border-bottom:1px solid #e5e6ee;flex:0 0 auto;">' +
                     '<div style="font-size:9px;letter-spacing:2.3px;font-weight:950;color:#7153d8;margin-bottom:4px;">IMC · MATCH REPORT IMPORT</div>' +
                     '<div style="display:flex;align-items:center;justify-content:space-between;gap:7px;">' +
-                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.0 · SENZA BACKFILL</div>' +
+                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.1 · SENZA BACKFILL</div>' +
                         '<div id="__imc_badge" style="background:#eee8ff;color:#6548c8;padding:8px 11px;border-radius:999px;font-weight:950;font-size:9px;white-space:nowrap;">PRONTO</div>' +
                     '</div>' +
                 '</div>' +
@@ -1092,34 +1119,7 @@ async function chooseCatalog(){
                 )
             );
 
-        if (
-            STATE.existingReports.has(
-                key
-            )
-        ) {
-            STATE.localSkipReports++;
-            STATE.reportsSkipped++;
-
-            log(
-                "Fixture " +
-                row.sm_fixture_id +
-                " · già importata · LOCAL SKIP",
-                "skip"
-            );
-
-            STATE.lastBatch = {
-                sent: 0,
-                written: 0,
-                skipped: 1,
-                database: null,
-                table: null,
-                trace_id: null
-            };
-
-            updateUI();
-
-            return 0;
-        }
+        if(STATE.existingReports.has(key))return repairExistingReport(row);
 
         var explicit =
             explicitMatchReportDestination();
@@ -3203,20 +3203,19 @@ async function chooseCatalog(){
 
             try {
                 STATE.currentIdentity=reportIdentity(fixtureId);
-                var existing=STATE.existingMeta.get(Number(fixtureId));
-                if(existing&&(existing.key!==STATE.currentIdentity.competition_key||existing.season!==STATE.currentIdentity.imc_season))throw new Error('Report esistente assegnato a una competizione o stagione diversa');
+                var existing=STATE.existingMeta.get(String(Number(fixtureId)));
+                if(existing&&((clean(existing.key)&&existing.key!==STATE.currentIdentity.competition_key)||(Number(existing.season)>0&&Number(existing.season)!==STATE.currentIdentity.imc_season)))throw new Error('Report esistente assegnato a una competizione o stagione diversa');
             } catch(error) {
                 STATE.errors++;log(label+' · '+clean(error.message),'error');updateUI();continue;
             }
-            if(STATE.existingReports.has(String(Number(fixtureId)))) {
-                if(!existing?.complete){STATE.errors++;log(label+' · report incompleto: riparazione separata necessaria','warn');}
+            if(STATE.existingReports.has(String(Number(fixtureId)))&&existing?.complete) {
 
                 STATE.reportsSkipped++;
                 STATE.localSkipReports++;
 
                 log(
                     label +
-                    (STATE.existingMeta.get(String(Number(fixtureId)))?.complete ? " · già importato · LOCAL SKIP" : " · REPORT INCOMPLETO: da riparare separatamente · SKIP"),
+                    " · già importato · LOCAL SKIP",
                     "skip"
                 );
 
@@ -3443,7 +3442,7 @@ async function chooseCatalog(){
 
         if (!resultsPageState()) {
             throw new Error(
-                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.0"
+                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.1"
             );
         }
 
@@ -3476,7 +3475,7 @@ async function chooseCatalog(){
 
         finish(
             STATE.errors ? "error" : "ok",
-            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.0 completato"
+            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.1 completato"
         );
     }
 

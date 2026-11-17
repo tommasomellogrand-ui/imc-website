@@ -59,3 +59,18 @@ mrcheck(!imc_ingress_canonical_report_batch('GW001_IMC_Match_Report',[['game_wor
 mrcheck(!imc_ingress_canonical_report_batch('GW001_IMC_Match_Report',[array_replace($ordinary,['sm_action'=>'worldcup'])]),'World Cup retains dedicated path');
 $out=imc_ingress_insert_many($p,'GW001_IMC_Match_Report','GW001',[$ordinary],true);mrcheck($out['written_rows']===1&&!isset($out['normalization']),'Ordinary MR does not run World Cup normalization');
 echo "PASS MySQL 8: eight-world context BI/BU, unique fixtures, preserved played scores, safe manager propagation, Schedule fallback, youth sanctions and ghost rules; dedicated World Cup path unchanged.\n";
+
+// Repair existing reports only; known values and JSON remain byte-equivalent.
+$repairOld=['game_world_id'=>'IMC001','sm_fixture_id'=>601,'competition_key'=>'IMC001|S02|IMC|europaleague','imc_season'=>2,'sm_action'=>'imc','home_score'=>0,'away_score'=>2,'players_json'=>[['sm_player_id'=>10,'rating'=>7]],'team_stats_json'=>['home'=>['possession'=>52],'away'=>['possession'=>48]],'fingerprint'=>'old-hash'];
+mrinsert($p,'IMC001_Match_Reports',$repairOld);
+$prior=$p->query('SELECT * FROM IMC001_Match_Reports WHERE sm_fixture_id=601')->fetch(PDO::FETCH_ASSOC);
+$incoming=array_replace($repairOld,['home_score'=>5,'home_sm_club_id'=>11,'away_sm_club_id'=>22,'players_json'=>[['sm_player_id'=>10,'rating'=>9]],'fingerprint'=>'new-hash']);
+$total=(int)$p->query('SELECT COUNT(*) FROM IMC001_Match_Reports')->fetchColumn();
+$out=imc_ingress_repair_report($p,'GW001_IMC_Match_Report','GW001',$incoming);
+$after=$p->query('SELECT * FROM IMC001_Match_Reports WHERE sm_fixture_id=601')->fetch(PDO::FETCH_ASSOC);
+mrcheck($out['updated_rows']===1&&$out['inserted_rows']===0&&(int)$p->query('SELECT COUNT(*) FROM IMC001_Match_Reports')->fetchColumn()===$total,'Repair never inserts duplicate rows');
+mrcheck((int)$after['home_sm_club_id']===11&&(int)$after['away_sm_club_id']===22,'Repair fills missing team IDs');
+foreach(['home_score','away_score','players_json','team_stats_json','fingerprint'] as $field)mrcheck($after[$field]===$prior[$field],'Repair preserves existing '.$field);
+try{imc_ingress_repair_report($p,'GW001_IMC_Match_Report','GW001',array_replace($incoming,['competition_key'=>'IMC001|S02|IMC|championsleague']));throw new RuntimeException('Identity conflict accepted');}catch(RuntimeException $e){mrcheck($e->getMessage()==='report_identity_conflict','Conflicting repair blocked');}
+try{imc_ingress_repair_report($p,'GW001_IMC_Match_Report','GW001',array_replace($incoming,['sm_fixture_id'=>9999]));throw new RuntimeException('Missing row accepted');}catch(RuntimeException $e){mrcheck($e->getMessage()==='report_missing_or_duplicated','Repair cannot create a missing row');}
+echo "PASS MR repair: missing fields only, no duplicates, preserved technical JSON/played scores, identity conflicts rejected.\n";

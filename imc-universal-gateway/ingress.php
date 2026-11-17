@@ -153,12 +153,57 @@ function imc_ingress_read(PDO $pdo, string $table, string $gw, array $body): arr
     return ['rows' => $rows, 'row_count' => count($rows), 'returned_rows' => count($rows), 'limit' => $limit, 'offset' => $offset, 'has_more' => $hasMore, 'next_offset' => $hasMore ? $offset + count($rows) : null];
 }
 
+// Complete one existing ordinary report without replacing known values or JSON.
+function imc_ingress_merge_missing(mixed $current,mixed $incoming): mixed {
+    if ($current===null||$current==='') return $incoming;
+    if (is_array($current)) return $current ? $current : $incoming;
+    if (is_object($current)&&is_object($incoming)) {
+        $out=clone $current;
+        foreach(get_object_vars($incoming) as $key=>$value) $out->$key=imc_ingress_merge_missing($current->$key??null,$value);
+        return $out;
+    }
+    return $current;
+}
+function imc_ingress_repair_report(PDO $pdo,string $table,string $gw,array $row): array {
+    if (!imc_ingress_canonical_report_batch($table,[$row])||!is_numeric($row['sm_fixture_id']??null)||(int)$row['sm_fixture_id']<1) throw new InvalidArgumentException('invalid_report_repair');
+    $allowed=['game_world_id','sm_fixture_id','competition_key','imc_season','sm_action','sm_division','competition_group','competition_group_name','competition_stage','competition_round','match_date','home_sm_club_id','home_name','away_sm_club_id','away_name','home_score','away_score','penalty_home_score','penalty_away_score','aggregate_home_score','aggregate_away_score','home_sm_manager_id','home_manager_name','away_sm_manager_id','away_manager_name','stadium_name','attendance','team_stats_json','players_json','events_json','tactics_json','commentary_json','fingerprint','imported_at'];
+    if (array_diff(array_keys($row),$allowed)) throw new InvalidArgumentException('invalid_report_field');
+    $tableSql=imc_ingress_table_ident($table,$gw);
+    $pdo->beginTransaction();
+    try {
+        $q=$pdo->prepare("SELECT * FROM $tableSql WHERE game_world_id=? AND sm_fixture_id=? LIMIT 2 FOR UPDATE");
+        $q->execute([$row['game_world_id'],$row['sm_fixture_id']]);$matches=$q->fetchAll(PDO::FETCH_ASSOC);
+        if(count($matches)!==1)throw new RuntimeException('report_missing_or_duplicated');
+        $old=$matches[0];
+        if(($old['sm_action']??'')==='worldcup'||str_contains((string)($old['competition_key']??''),'|NATIONS|worldcup'))throw new InvalidArgumentException('dedicated_worldcup_importer_required');
+        if((trim((string)($old['competition_key']??''))!==''&&$old['competition_key']!==$row['competition_key'])||((int)($old['imc_season']??0)>0&&(int)$old['imc_season']!==(int)$row['imc_season']))throw new RuntimeException('report_identity_conflict');
+        $patch=[];
+        foreach($row as $key=>$value){
+            if(in_array($key,['game_world_id','sm_fixture_id'],true))continue;
+            if(str_ends_with($key,'_json')){
+                $current=json_decode((string)($old[$key]??'null'),false,512,JSON_THROW_ON_ERROR);
+                $incoming=json_decode(imc_ingress_scalar($value)??'null',false,512,JSON_THROW_ON_ERROR);
+                $merged=imc_ingress_merge_missing($current,$incoming);
+                if(json_encode($current)!==json_encode($merged))$patch[$key]=json_encode($merged,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR);
+            } elseif(($old[$key]===null||$old[$key]==='')&&$value!==null&&$value!=='')$patch[$key]=$value;
+        }
+        $written=0;
+        if($patch){
+            $set=implode(',',array_map(fn($key)=>imc_ingress_ident($key).'=?',array_keys($patch)));
+            $q=$pdo->prepare("UPDATE $tableSql SET $set WHERE game_world_id=? AND sm_fixture_id=?");
+            $q->execute([...array_values($patch),$row['game_world_id'],$row['sm_fixture_id']]);$written=$q->rowCount();
+            if($written!==1)throw new RuntimeException('report_repair_not_confirmed');
+        }
+        $pdo->commit();return ['matched_rows'=>1,'updated_rows'=>$written,'written_rows'=>$written,'inserted_rows'=>0,'skipped_rows'=>$written?0:1];
+    }catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();throw $e;}
+}
+
 function imc_ingress_run(array $body): never {
     try {
         $channel = strtoupper(trim((string)($body['channel'] ?? ($_SERVER['HTTP_X_IMC_CHANNEL'] ?? ''))));
         $action = strtolower(trim((string)($body['action'] ?? '')));
         if ($channel !== 'IMPORT') throw new InvalidArgumentException('invalid_channel');
-        if (!in_array($action, ['read', 'insert_many'], true)) throw new InvalidArgumentException('action_not_allowed');
+        if (!in_array($action, ['read', 'insert_many', 'repair_report'], true)) throw new InvalidArgumentException('action_not_allowed');
         if (strtolower(trim((string)($body['route_mode'] ?? ''))) !== 'explicit') throw new InvalidArgumentException('explicit_route_required');
 
         $cfg = imc_ingress_cfg();
@@ -169,6 +214,7 @@ function imc_ingress_run(array $body): never {
         $base = ['ok' => true, 'IMC_WORLD_ID' => $body['IMC_WORLD_ID'] ?? null, 'service' => 'IMC Universal Gateway', 'mode' => 'INGRESS_ONLY', 'action' => $action, 'channel' => 'IMPORT', 'game_world_id' => $route['game_world_id'], 'database' => $route['database'], 'table' => (str_starts_with($requestedTable,'GW')?$requestedTable:imc_physical_table($route['table'])), 'physical_table'=>imc_physical_table($route['table']), 'trace_id' => $body['trace_id'] ?? null];
 
         if ($action === 'read') imc_ingress_out($base + imc_ingress_read($pdo, $route['table'], $route['game_world_id'], $body));
+        if ($action==='repair_report') imc_ingress_out($base+imc_ingress_repair_report($pdo,$route['table'],$route['game_world_id'],is_array($body['row']??null)?$body['row']:[]));
         $rows = $body['rows'] ?? $body['items'] ?? null;
         if (!is_array($rows)) throw new InvalidArgumentException('rows_required');
         $written = imc_ingress_insert_many($pdo, $route['table'], $route['game_world_id'], $rows, ($body['atomic'] ?? true) !== false);

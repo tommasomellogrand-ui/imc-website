@@ -7,7 +7,7 @@ assert.equal(cut(source,'    function renderProgressUI()','    function setText(
 assert.equal(cut(source,'    async function runDivisions()','    async function main()'),cut(old,'    async function runDivisions()','    async function main()'),'Original division loop retained');
 const dom=new JSDOM('<div id="currentScreenA"><div id="leagueResultsContainer"><div class="scheduleScreen-Heading">Turno 1 · mar 17 novembre 2026</div><div id="ResultsprevWeek_click"><a action="friendly"></a></div><table><tr><td><a id="matchResult" onclick="MATCHREPORT_downloadScoreCentre(101)">1-2</a></td></tr></table></div></div>',{url:'https://it.soccermanager.com',runScripts:'dangerously'});
 const w=dom.window,d=w.document;w.HTMLElement.prototype.getBoundingClientRect=()=>({width:100,height:10});w.completion=()=>{};const style=w.getComputedStyle.bind(w);w.getComputedStyle=e=>{const s=style(e);return{display:s.display,visibility:s.visibility,opacity:s.opacity||'1'};};
-const exported=['S','STATE','reportIdentity','sourceIdentity','baseKey','competitionKey','applyGoalMinutes','reportMinute','parseScorers','buildReportRow','verifyStoredReport','completeReport','chooseCatalog','buildUI','prepareReportImport','insertReport','processCurrentResultsPage'];
+const exported=['S','STATE','reportIdentity','sourceIdentity','baseKey','competitionKey','applyGoalMinutes','reportMinute','parseScorers','buildReportRow','verifyStoredReport','completeReport','chooseCatalog','buildUI','prepareReportImport','insertReport','processCurrentResultsPage','mergeMissing'];
 w.eval(source.replace(/    buildUI\(\);\n    boot\(\);[\s\S]*$/,'window.api={'+exported.join(',')+'};})();'));
 const a=w.api;a.STATE.gameWorld='IMC001';a.STATE.legacyWorld='GW001';a.S.gw='IMC001';a.S.legacyGw='GW001';a.S.season=2;a.S.catalog=[{key:'IMC001|IMC|championsleague',name:'Connessione Champions',group:'IMC',sm_action:'imc',sm_division:null}];a.S.competition=a.S.catalog[0];
 const fixture={game_world_id:'IMC001',sm_fixture_id:101,competition_key:'IMC001|S01|IMC|championsleague',imc_season:1,sm_action:'imc',competition_group:'IMC',competition_group_name:'Girone A',match_date:'2026-11-17',home_sm_club_id:11,away_sm_club_id:22,home_name:'Home',away_name:'Away',home_score:0,away_score:3};
@@ -27,5 +27,20 @@ const wait=async f=>{for(let n=0;n<2000;n++){if(f())return;await new Promise(r=>
  assert.equal(row.home_score,2,'Actual score preserved over Results awarded 0-3');assert.equal(row.away_score,1);assert.equal(row.home_sm_club_id,11);assert.equal(row.game_world_id,'IMC001');assert.ok(!('sm_country' in row));assert.equal(row.players_json[0].own_goals,1);assert.deepEqual(Array.from(row.players_json[0].goal_minutes),[25,47]);assert.ok(a.completeReport(row));
  let stored={...row};w.fetch=async()=>({ok:true,text:async()=>JSON.stringify({ok:true,database:'Sql1956795_3',physical_table:'IMC001_Match_Reports',rows:[stored],has_more:false})});await a.verifyStoredReport(row);stored={...row,home_score:3};await assert.rejects(()=>a.verifyStoredReport(row),/home_score/);stored={...row,players_json:[{...row.players_json[0],player_name:'Tampered'}]};await assert.rejects(()=>a.verifyStoredReport(row),/players_json/);
  a.buildUI();a.S.seasons=[{imc_season:1,start:'2026-01-01'},{imc_season:2,start:'2026-11-01'}];const choice=a.chooseCatalog();await wait(()=>[...d.querySelectorAll('button')].some(b=>b.textContent==='IMC'));[...d.querySelectorAll('button')].find(b=>b.textContent==='IMC').click();await wait(()=>[...d.querySelectorAll('button')].some(b=>b.textContent==='Connessione Champions'));[...d.querySelectorAll('button')].find(b=>b.textContent==='Connessione Champions').click();await wait(()=>d.querySelector('#__imc_mr_start'));assert.equal(d.querySelector('#__imc_mr_season').value,'2');d.querySelector('#__imc_mr_start').click();await choice;
+ // Regression: numeric fixture IDs must resolve the string-keyed preload map,
+ // including seasons serialized as strings by MySQL.
+ a.STATE.existingMeta=new w.Map([['101',{key:row.competition_key,season:'1',complete:true}]]);a.STATE.existingReports=new w.Set(['101']);
+ a.STATE.errors=0;a.STATE.reportsSkipped=0;a.STATE.reportsOpened=0;
+ await a.processCurrentResultsPage();assert.equal(a.STATE.errors,0);assert.equal(a.STATE.reportsSkipped,1);assert.equal(a.STATE.reportsOpened,0);
+ // Repair preserves old scores, fingerprint and technical JSON while filling IDs.
+ stored={...row,home_sm_club_id:null,away_sm_club_id:null,home_score:0,fingerprint:'original',players_json:[{...row.players_json[0],player_name:'Original Player'}]};
+ const calls=[];w.fetch=async(_,args)=>{const b=JSON.parse(args.body);calls.push(b.action);let reply={ok:true,database:'Sql1956795_3',physical_table:'IMC001_Match_Reports'};
+  if(b.action==='read')Object.assign(reply,{rows:[stored],has_more:false});
+  else if(b.action==='repair_report'){stored=a.mergeMissing(stored,b.row);Object.assign(reply,{matched_rows:1,updated_rows:1,inserted_rows:0});}
+  else throw Error('Unexpected write '+b.action);
+  return {ok:true,text:async()=>JSON.stringify(reply)};
+ };
+ a.STATE.existingMeta.set('101',{key:row.competition_key,season:'1',complete:false});
+ assert.equal(await a.insertReport(row),1);assert.deepEqual(calls,['read','repair_report','read']);assert.equal(stored.home_sm_club_id,11);assert.equal(stored.away_sm_club_id,22);assert.equal(stored.home_score,0);assert.equal(stored.fingerprint,'original');assert.equal(stored.players_json[0].player_name,'Original Player');assert.equal(a.STATE.existingMeta.get('101').complete,true);
  dom.window.close();console.log('PASS MR identity conflicts, CORE connection choice, fallback, actual scores, own goals, stoppage minutes, readback integrity; original popup/navigation preserved');
 })().catch(e=>{console.error(e);dom.window.close();process.exit(1)});

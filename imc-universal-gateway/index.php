@@ -27,7 +27,7 @@ if (is_array($imcPreflight)) {
        Legacy MINISITE / CHATGPT and non-explicit callers remain temporarily available
        until their separate migrations are completed. */
     $imcRouteMode = strtolower(trim((string)($imcPreflight['route_mode'] ?? '')));
-    if ($imcChannel === 'IMPORT' && $imcRouteMode === 'explicit' && in_array($imcAction, ['read', 'insert_many'], true)) {
+    if ($imcChannel === 'IMPORT' && $imcRouteMode === 'explicit' && in_array($imcAction, ['read', 'insert_many', 'repair_report'], true)) {
         require __DIR__.'/ingress.php';
         imc_ingress_run($imcPreflight);
     }
