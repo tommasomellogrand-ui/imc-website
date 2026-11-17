@@ -31,6 +31,8 @@ function imc_competition_definition_key(string $key): string {
 }
 function imc_world_compat_rows(array $rows): array {
     foreach($rows as &$row)foreach($row as $key=>&$value){
+        // Read-side display correction for Soccer Manager's round-name typo.
+        if(in_array($key,['competition_round','competition_stage'],true)&&is_string($value))$value=preg_replace('/\\bQuarti di Finalee\\b/iu','Quarti di Finale',$value);
         if(in_array($key,['game_world_id','source_game_world_id','Game World','IMC GW','gw','id'],true)&&is_string($value))$value=imc_world_route($value);
         if($key==='competition_key'&&is_string($value)){
             $value=imc_competition_definition_key($value);

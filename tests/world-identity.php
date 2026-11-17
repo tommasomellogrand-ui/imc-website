@@ -17,6 +17,12 @@ identity_check(imc_competition_definition_key('IMC001|S02|DOMESTIC|league|1')===
 identity_check(imc_competition_definition_key('IMC004|S01|IMC|COPA_LIBERTADORES')==='IMC004_COPA_LIBERTADORES','Historical IMC definition retains its identity');
 identity_check(imc_world_compat_rows([['competition_key'=>'IMC001|S02|DOMESTIC|league|1','imc_season'=>2]])===[['competition_key'=>'GW001|DOMESTIC|league|1','imc_season'=>2]],'Legacy UI resolves edition without changing its season');
 echo "PASS: canonical world IDs, legacy input aliases, key prefixes and unchanged club IDs.\n";
+foreach(['Quarti di Finalee'=>'Quarti di Finale','Quarti di Finalee Andata'=>'Quarti di Finale Andata','Quarti di Finalee Ritorno'=>'Quarti di Finale Ritorno'] as $source=>$expected){
+ $raw=['competition_round'=>$source,'competition_stage'=>$source,'fingerprint'=>'keep'];
+ $display=imc_world_compat_rows([$raw])[0];
+ identity_check($display['competition_round']===$expected&&$display['competition_stage']===$expected,'Round typo corrected for site display');
+ identity_check($raw['competition_round']===$source&&$display['fingerprint']==='keep','Stored source and identities remain unchanged');
+}
 if(!getenv('MYSQL_TEST_PASSWORD'))exit;
 $db=new IMCWorldPDO('mysql:host=127.0.0.1;port=3306;charset=utf8mb4','root',getenv('MYSQL_TEST_PASSWORD'),[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
 $db->exec('CREATE DATABASE identity_test');$db->exec('USE identity_test');
