@@ -1,0 +1,57 @@
+name: Test and publish Results Import V3
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'importers/IMC_Results_Import_V3.js'
+      - 'tests/results-import-v3.cjs'
+      - 'tests/fixtures/results-import-v21.js'
+      - '.github/workflows/results-import-v3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: results-import-v3
+  cancel-in-progress: false
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Results identity, IMC selection and unchanged popup/navigation
+        run: |
+          node --check importers/IMC_Results_Import_V3.js
+          npm install --prefix /tmp/imc-results-test jsdom@27.2.0 --no-audit --no-fund
+          IMC_TEST_NODE_MODULES=/tmp/imc-results-test/node_modules node tests/results-import-v3.cjs
+      - name: Publish importer and verify live bytes
+        env:
+          FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import io,os,ssl,urllib.request,json
+          from pathlib import Path
+          from ftplib import FTP_TLS
+          name='importers/IMC_Results_Import_V3.js'
+          data=Path(name).read_bytes()
+          ctx=ssl.create_default_context();ctx.check_hostname=False
+          with FTP_TLS(context=ctx,timeout=60) as ftp:
+              ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()
+              ftp.cwd('/www.italianmastersclub.it/importers')
+              ftp.storbinary('STOR IMC_Results_Import_V3.js',io.BytesIO(data))
+              check=io.BytesIO();ftp.retrbinary('RETR IMC_Results_Import_V3.js',check.write)
+              assert check.getvalue()==data
+          base='https://www.italianmastersclub.it/'
+          with urllib.request.urlopen(base+name+'?release='+os.environ['GITHUB_SHA'],timeout=60) as r:assert r.read()==data
+          for n in range(1,9):
+              world=f'IMC{n:03d}'
+              payload=json.dumps({'action':'list_imc_competitions','channel':'IMPORT','game_world_id':world,'scope':'all','include_seasons':True}).encode()
+              req=urllib.request.Request(base+'imc-universal-gateway/',data=payload,headers={'Content-Type':'application/json'})
+              with urllib.request.urlopen(req,timeout=60) as r:catalog=json.load(r)
+              assert catalog.get('ok') and catalog['seasons'] and catalog['competitions'],world
+              assert all(c['group'] in ['DOMESTIC','INTERNATIONAL','IMC','NATIONS'] for c in catalog['competitions']),world
+              print(world,'CORE verified; IMC competitions:',[c['name'] for c in catalog['competitions'] if c['group']=='IMC'])
+          PY
