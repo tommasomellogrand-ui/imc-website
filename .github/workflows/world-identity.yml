@@ -7,6 +7,7 @@ on:
       - '.github/workflows/world-identity.yml'
       - 'database-migrations/20261117_world_codex_single_id.json'
       - 'tests/world-core-single-id.php'
+      - 'tests/world-identity.php'
   workflow_dispatch:
 permissions:
   contents: read

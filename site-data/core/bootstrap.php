@@ -54,8 +54,8 @@ function imc_site_rows(PDO $db,string $sql,array $params=[]): array {
     // Public competition links may carry either prefix. Compare both forms
     // using the physical world ID while retaining one bound parameter.
     if($route!==false){
-      $sql=preg_replace('/\b((?:[a-z]+\.)?competition_key)\s*=\s*\?/i',
-        "REPLACE($1,'$route','$world')=REPLACE(?,'$route','$world')",$sql);
+      $sql=preg_replace_callback('/\b((?:[a-z]+\.)?competition_key)\s*=\s*\?/i',
+        static fn($m)=>imc_world_sql_value($m[1],true).'=?',$sql);
     }
     $sql=preg_replace('/\b((?:[a-z]+\.)?game_world_id)\s*=\s*\?/i', "$1 IN (?, '$world')", $sql);
     // Both sides already refer to the same physical world partition.
