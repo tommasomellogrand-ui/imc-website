@@ -119,6 +119,10 @@ var MATCH_REPORT_REPOSITORY =
         }
         var result=sourceIdentity(S.results.get(id),id),schedule=sourceIdentity(S.schedule.get(id),id);
         if(result&&schedule&&(result.competition_key!==schedule.competition_key||result.imc_season!==schedule.imc_season))throw new Error('Fixture '+id+': Results e Schedule assegnati a competizioni o stagioni diverse');
+        if(result&&schedule){
+            for(var side of ['home','away']){var ri=Number(result[side+'_sm_club_id']),si=Number(schedule[side+'_sm_team_id']);if(ri>0&&si>0&&ri!==si)throw new Error('Fixture '+id+': squadre discordanti tra Results e Schedule');}
+            if(result.match_date&&schedule.match_date&&result.match_date!==schedule.match_date)throw new Error('Fixture '+id+': date discordanti tra Results e Schedule');
+        }
         var source=result||schedule;
         if(source&&baseKey(source.competition_key)!==baseKey(c.key))throw new Error('Fixture '+id+': hai scelto '+c.name+' ma risulta '+source.competition_key);
         var found=normalizedAction(raw.sm_action);
@@ -3033,6 +3037,8 @@ async function chooseCatalog(){
         if(home.id&&home.id===away.id&&identity.home_sm_club_id&&identity.away_sm_club_id&&identity.home_sm_club_id!==identity.away_sm_club_id){
             home={id:identity.home_sm_club_id,name:identity.home_name};away={id:identity.away_sm_club_id,name:identity.away_name};
         }
+        home.id=reportTeamId(home,identity,'home');away.id=reportTeamId(away,identity,'away');
+        home.name=home.name||identity.home_name;away.name=away.name||identity.away_name;
         var homeManager = reportManagerMeta("home");
         var awayManager = reportManagerMeta("away");
 
@@ -3437,7 +3443,7 @@ async function chooseCatalog(){
 
         if (!resultsPageState()) {
             throw new Error(
-                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V2.0"
+                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.0"
             );
         }
 
