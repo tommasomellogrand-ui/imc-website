@@ -56,6 +56,12 @@ const wait=async f=>{for(let n=0;n<2000;n++){if(f())return;await new Promise(r=>
  ca.STATE.currentIdentity={...fixture,competition_key:'IMC001|S02|IMC|europaleague',imc_season:2,home_sm_club_id:null,away_sm_club_id:null,home_name:'Boca Juniors',away_name:'Tottenham'};
  const actual=await ca.buildReportRow(701);assert.equal(actual.home_sm_club_id,94079037);assert.equal(actual.away_sm_club_id,94078847);assert.equal(actual.home_name,'Boca Juniors');assert.equal(actual.away_name,'Tottenham Hotspur');assert.equal(actual.home_score,2);assert.equal(actual.away_score,0);assert.equal(actual.players_json.length,36);assert.equal(actual.players_json.filter(p=>p.starter).length,22);assert.ok(ca.completeReport(actual));assert.notEqual(actual.home_sm_club_id,52322,'Connection ID must never be stored as world club ID');
  ca.STATE.currentIdentity.home_name='Wrong Team';assert.throws(()=>ca.reportTeamMeta('home'),/diverso dalla fixture/);ca.STATE.currentIdentity.home_name='Boca Juniors';
- ca.S.clubs.push({world_id:123,mapping_name:'Boca Juniors'});assert.throws(()=>ca.reportTeamMeta('home'),/ambigua/);connection.window.close();
+ ca.S.clubs.push({world_id:123,mapping_name:'Boca Juniors'});assert.throws(()=>ca.reportTeamMeta('home'),/ambigua/);ca.S.clubs.pop();
+ for(const [side,name,competition] of [['home','FC PORTO','championsleague'],['away','Newcastle United','championsleague'],['home','Juventus','conferenceleague']]){
+  cw.document.querySelector('#MatchReportTeam1 a').textContent=side==='home'?name:'Boca Juniors';cw.document.querySelector('#MatchReportTeam2 a').textContent=side==='away'?name:'Tottenham Hotspur';
+  ca.STATE.currentIdentity={...fixture,competition_key:'IMC001|S02|IMC|'+competition,imc_season:2,home_sm_club_id:null,away_sm_club_id:null,home_name:side==='home'?name:'Boca Juniors',away_name:side==='away'?name:'Tottenham'};
+  const guest=await ca.buildReportRow(702);assert.equal(guest[side+'_sm_club_id'],null);assert.equal(guest[side+'_sm_manager_id'],null);assert.equal(guest[side+'_manager_name'],'GUEST');assert.equal(guest.home_score,2);assert.equal(guest.away_score,0);assert.equal(guest.players_json.length,36);assert.ok(ca.completeReport(guest));assert.equal(ca.completeReport({...guest,game_world_id:'IMC002'}),false,'Guest exception scoped to its configured world');
+ }
+ connection.window.close();
  dom.window.close();console.log('PASS MR identity conflicts, CORE connection choice, fallback, actual scores, own goals, stoppage minutes, readback integrity; original popup/navigation preserved');
 })().catch(e=>{console.error(e);dom.window.close();process.exit(1)});

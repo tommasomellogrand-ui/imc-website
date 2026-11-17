@@ -23,7 +23,7 @@
 (function () {
     "use strict";
 
-    var VERSION = "IMC-MATCH-REPORT-V3.3-CORE-SCHEDULE";
+    var VERSION = "IMC-MATCH-REPORT-V3.4-CORE-SCHEDULE";
     var SCANNER = "IMC_MATCH_REPORT_IMPORT_V1";
 
     var GATEWAY_URL =
@@ -161,6 +161,7 @@ function fixtureGroupName(button){
  return null;
 }
     function reportTeamId(team,identity,side){
+        if(guestSide({...identity,[side+'_name']:team.name},side))return null;
         var known=Number(identity[side+'_sm_club_id']),read=Number(team.id);
         if(known>0&&read>0&&known!==read)throw new Error('Squadra '+side+' del report diversa dalla fixture');
         return read>0?read:known>0?known:null;
@@ -173,9 +174,19 @@ function fixtureGroupName(button){
         var m=clean(raw).match(/^(\d{1,3})(?:\s*\+\s*(\d{1,2}))?['’]?$/);return m?Number(m[1])+Number(m[2]||0):null;
     }
     function jsonValue(value){if(typeof value==='string'){try{return JSON.parse(value);}catch(_){return null;}}return value;}
+    function guestName(value){
+        var name=norm(value);return ({'fc porto':'porto','newcastle united':'newcastle','juventus fc':'juventus'})[name]||name;
+    }
+    function guestSide(row,side){
+        var world=clean(row.game_world_id||STATE.gameWorld);
+        if(!['IMC001','IMC-001','GW001'].includes(world)||row.competition_group!=='IMC')return false;
+        var key=clean(row.competition_key).replace(/\|S\d+\|/,'|');
+        var name=guestName(row[side+'_name']);
+        return /[|]IMC[|]championsleague$/.test(key)&&['porto','newcastle'].includes(name)||/[|]IMC[|]conferenceleague$/.test(key)&&name==='juventus';
+    }
     function completeReport(row){
         var players=jsonValue(row.players_json),stats=jsonValue(row.team_stats_json);
-        return !!(row.competition_key&&Number(row.imc_season)>0&&row.sm_action&&row.competition_group&&row.match_date&&Number(row.home_sm_club_id)>0&&Number(row.away_sm_club_id)>0&&row.home_name&&row.away_name&&row.home_score!==null&&row.home_score!==undefined&&row.away_score!==null&&row.away_score!==undefined&&Array.isArray(players)&&players.length&&stats&&stats.home&&stats.away);
+        return !!(row.competition_key&&Number(row.imc_season)>0&&row.sm_action&&row.competition_group&&row.match_date&&(Number(row.home_sm_club_id)>0||guestSide(row,'home'))&&(Number(row.away_sm_club_id)>0||guestSide(row,'away'))&&row.home_name&&row.away_name&&row.home_score!==null&&row.home_score!==undefined&&row.away_score!==null&&row.away_score!==undefined&&Array.isArray(players)&&players.length&&stats&&stats.home&&stats.away);
     }
     function stableJson(value){
         if(Array.isArray(value))return value.map(stableJson);
@@ -644,7 +655,7 @@ async function chooseCatalog(){
                 '<div style="background:#fff;padding:13px 15px 12px;border-bottom:1px solid #e5e6ee;flex:0 0 auto;">' +
                     '<div style="font-size:9px;letter-spacing:2.3px;font-weight:950;color:#7153d8;margin-bottom:4px;">IMC · MATCH REPORT IMPORT</div>' +
                     '<div style="display:flex;align-items:center;justify-content:space-between;gap:7px;">' +
-                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.3 · SENZA BACKFILL</div>' +
+                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.4 · SENZA BACKFILL</div>' +
                         '<div id="__imc_badge" style="background:#eee8ff;color:#6548c8;padding:8px 11px;border-radius:999px;font-weight:950;font-size:9px;white-space:nowrap;">PRONTO</div>' +
                     '</div>' +
                 '</div>' +
@@ -1748,6 +1759,11 @@ async function chooseCatalog(){
         var anchor=heading&&heading.querySelector('a');
         var name=clean(anchor?.textContent||heading?.textContent);
         if(!name)throw new Error('IMC: nome squadra '+side+' assente nel report');
+        var identity=STATE.currentIdentity||{};
+        if(guestSide({...identity,[side+'_name']:name},side)){
+            if(guestName(identity[side+'_name'])!==guestName(name))throw new Error('IMC: guest diversa dalla fixture');
+            return {id:null,name:name,guest:true};
+        }
         var ids=new Set((S.clubs||[]).filter(c=>[c.mapping_name,c.canonical_name].some(n=>norm(n)===norm(name))).map(c=>Number(c.world_id)).filter(id=>Number.isSafeInteger(id)&&id>0));
         if(ids.size>1)throw new Error('IMC: squadra '+name+' ambigua nel CORE');
         var known=Number(STATE.currentIdentity?.[side+'_sm_club_id']);
@@ -3068,6 +3084,8 @@ async function chooseCatalog(){
         home.name=home.name||identity.home_name;away.name=away.name||identity.away_name;
         var homeManager = reportManagerMeta("home");
         var awayManager = reportManagerMeta("away");
+        if(guestSide(identity,'home'))homeManager={id:null,name:'GUEST'};
+        if(guestSide(identity,'away'))awayManager={id:null,name:'GUEST'};
 
         var parsedPlayers = parsePlayers();
         var parsedScorers = parseScorers();
@@ -3466,7 +3484,7 @@ async function chooseCatalog(){
 
         if (!resultsPageState()) {
             throw new Error(
-                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.3"
+                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.4"
             );
         }
 
@@ -3499,7 +3517,7 @@ async function chooseCatalog(){
 
         finish(
             STATE.errors ? "error" : "ok",
-            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.3 completato"
+            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.4 completato"
         );
     }
 
