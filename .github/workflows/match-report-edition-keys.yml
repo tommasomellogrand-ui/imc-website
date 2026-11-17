@@ -1,0 +1,29 @@
+name: Verify Match Report edition key migration
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'database-migrations/match-report-keys-20261117/**'
+      - 'tests/match-report-edition-keys.php'
+      - '.github/workflows/match-report-edition-keys.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-mysql:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: report-keys-ci-only
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -preport-keys-ci-only"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify all eight worlds against MySQL
+        env:
+          MYSQL_TEST_PASSWORD: report-keys-ci-only
+        run: php tests/match-report-edition-keys.php
