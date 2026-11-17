@@ -1,11 +1,11 @@
-/* IMC | SCHEDULE IMPORT V3.3
+/* IMC | SCHEDULE IMPORT V3.4
  * CORE → mondo → tipo → competizione singola → stagione precaricata.
  * Da eseguire nella pagina Soccer Manager della competizione da importare.
  * Importa solo la selezione, dalla pagina aperta in avanti. Nessun campo sm_country.
  */
 (function () {
     'use strict';
-    var VERSION = 'IMC-SCHEDULE-V3.3';
+    var VERSION = 'IMC-SCHEDULE-V3.4';
     var GATEWAY = 'https://www.italianmastersclub.it/imc-universal-gateway/';
     var old = document.getElementById('__imc_schedule_v3');
     if (old) return;
@@ -33,10 +33,10 @@
         }
         return true;
     }
-    async function wait(test,timeout) {
+    async function wait(test,timeout,message) {
         var start=Date.now();
         while(Date.now()-start<(timeout || 18000)) { checkStop(); var out=test(); if(out)return out; await sleep(150); }
-        throw new Error('La pagina Schedule non risponde: importazione interrotta');
+        throw new Error(message || 'La pagina Schedule non risponde: importazione interrotta');
     }
     function positive(v) { var n=Number(v); return Number.isSafeInteger(n) && n>0 ? n : null; }
     function action(v) {
@@ -140,13 +140,22 @@
             var select=divisionSelect(),option=leagueOption(select,competition);
             if(!option)throw new Error('Divisione '+target+' non disponibile nel menu League di SM');
             setPhase('Cambio Divisione '+target);log('SWAP · Divisione '+target+' · '+competition.name);
-            var before=pageKey(),oldContent=content(),oldSelect=select;
+            var before=pageKey(),oldSelect=select,oldScreen=screen(),oldTables=q('#leagueTableContainer',screen());
+            var oldTablesHTML=oldTables ? oldTables.innerHTML : null,oldFixtureIds=buttons().map(fixtureId).join(',');
             select.selectedIndex=option.index;select.value=option.value;
             if(typeof select.onchange==='function')select.onchange.call(select,new Event('change',{bubbles:true}));
             else select.dispatchEvent(new Event('change',{bubbles:true}));
-            // A changed select alone is insufficient: wait for the new fixture DOM.
-            await wait(function(){return currentDivision()===target && content() && (pageKey()!==before || content()!==oldContent || divisionSelect()!==oldSelect);},22000);
-            await openFixtures();await sleep(650);
+            // SM returns to Tables after a division change. Wait for that screen,
+            // then open Partite BEFORE waiting for its Schedule content.
+            await wait(function(){
+                var tables=q('#leagueTableContainer',screen());
+                return currentDivision()===target && (divisionSelect()!==oldSelect || screen()!==oldScreen || tables!==oldTables || (tables && tables.innerHTML!==oldTablesHTML) || pageKey()!==before);
+            },22000,'Divisione '+target+': schermata League non aggiornata dopo il cambio');
+            log('NAV · Divisione '+target+' caricata · apro Partite');
+            await openFixtures('Divisione '+target+': tab Partite non aperta');
+            // Do not label leftover fixtures from the previous division as the new one.
+            await wait(function(){return currentDivision()===target && (buttons().length ? buttons().map(fixtureId).join(',')!==oldFixtureIds : noFixtures());},22000,'Divisione '+target+': nuovo calendario non caricato');
+            await sleep(650);
         }
         S.competition=competition;S.selectedKey=competitionKey(competition,S.season);guardSource();update();
         log('LEAGUE · Divisione '+target+' · '+competition.name+' · '+S.selectedKey);
@@ -266,11 +275,14 @@
         if(!el)throw new Error('Controllo Schedule assente');
         el.click();await sleep(250);
     }
-    async function openFixtures() {
+    async function openFixtures(message) {
         setPhase('Apro calendario');
         var tab=q('#fixturesTableTab',screen());
-        if(tab && (!content() || !shown(q('#fixturesContainer',screen()))))await click(tab);
-        await wait(function(){return content() && shown(q('#fixturesContainer',screen())) && (buttons().length || noFixtures());});
+        if(tab && (!content() || !shown(q('#fixturesContainer',screen())))) {
+            if(typeof window.showLeagueTabContents==='function')window.showLeagueTabContents('fixturesContainer','fixturesTableTab');
+            else await click(tab);
+        }
+        await wait(function(){return content() && shown(q('#fixturesContainer',screen())) && (buttons().length || noFixtures());},18000,message);
     }
     function nextControl() {
         var p=q('#FixturesnextWeek_click',screen());
@@ -429,7 +441,7 @@
     }
     var overlay=document.createElement('div');overlay.id='__imc_schedule_v3';
     overlay.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(18,22,34,.30);backdrop-filter:blur(2px);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171b2a;padding:6px;box-sizing:border-box';
-    overlay.innerHTML='<style>#__imc_schedule_v3 *{box-sizing:border-box}#__imc_schedule_v3 .imc-v3-button{display:block;width:100%;min-height:48px;padding:12px;margin:7px 0;border:1px solid #dedced;border-radius:13px;background:#fff;color:#473c83;font:700 13px Inter,-apple-system,sans-serif;cursor:pointer}#__imc_schedule_v3 .imc-v3-button:disabled{opacity:.4;cursor:default}#__imc_schedule_v3 .imc-v3-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#__imc_schedule_v3 select{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #dedced;border-radius:12px;background:white}#__imc_v3_error{color:#b7463e;overflow-wrap:anywhere}</style><div style="width:min(100%,420px);height:100%;margin:auto;background:#f8f8fd;border:1px solid #e3e4ec;border-radius:22px;box-shadow:0 14px 44px rgba(20,24,40,.32);overflow:hidden;display:flex;flex-direction:column"><div style="background:white;padding:15px;border-bottom:1px solid #e5e6ee"><div style="font-size:10px;letter-spacing:2px;font-weight:900;color:#7153d8">IMC · SCHEDULE IMPORT</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><strong style="font-size:20px">SCHEDULE V3.3</strong><span id="__imc_v3_badge" style="font-size:9px;background:#eee8ff;color:#6548c8;padding:8px;border-radius:99px">PRONTO</span><button id="__imc_v3_dismiss" aria-label="Chiudi" style="border:0;background:none;font-size:20px">×</button></div></div><div id="__imc_v3_body" style="padding:14px;overflow:auto;flex:1"></div></div>';
+    overlay.innerHTML='<style>#__imc_schedule_v3 *{box-sizing:border-box}#__imc_schedule_v3 .imc-v3-button{display:block;width:100%;min-height:48px;padding:12px;margin:7px 0;border:1px solid #dedced;border-radius:13px;background:#fff;color:#473c83;font:700 13px Inter,-apple-system,sans-serif;cursor:pointer}#__imc_schedule_v3 .imc-v3-button:disabled{opacity:.4;cursor:default}#__imc_schedule_v3 .imc-v3-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#__imc_schedule_v3 select{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #dedced;border-radius:12px;background:white}#__imc_v3_error{color:#b7463e;overflow-wrap:anywhere}</style><div style="width:min(100%,420px);height:100%;margin:auto;background:#f8f8fd;border:1px solid #e3e4ec;border-radius:22px;box-shadow:0 14px 44px rgba(20,24,40,.32);overflow:hidden;display:flex;flex-direction:column"><div style="background:white;padding:15px;border-bottom:1px solid #e5e6ee"><div style="font-size:10px;letter-spacing:2px;font-weight:900;color:#7153d8">IMC · SCHEDULE IMPORT</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><strong style="font-size:20px">SCHEDULE V3.4</strong><span id="__imc_v3_badge" style="font-size:9px;background:#eee8ff;color:#6548c8;padding:8px;border-radius:99px">PRONTO</span><button id="__imc_v3_dismiss" aria-label="Chiudi" style="border:0;background:none;font-size:20px">×</button></div></div><div id="__imc_v3_body" style="padding:14px;overflow:auto;flex:1"></div></div>';
     document.body.appendChild(overlay);
     q('#__imc_v3_dismiss').onclick=function(){if(S.running)requestStop();else overlay.remove();};
     S.loggedManager=positive(q('#scid') && (q('#scid').value || text(q('#scid')))) || positive(window.CUSTOMERID);
