@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 // Pure derivation: no writes, network access or dependency on the current club roster.
-const TROPHY_ENGINE_VERSION = '20261117.1';
+const TROPHY_ENGINE_VERSION = '20261117.2';
 function trophy_nexus_view(array $row,array $labels): string {
     $key=(string)$row['competition_key'];
     if (isset($labels[$key])) return (string)$labels[$key];
@@ -111,7 +111,7 @@ function trophy_record(string $gw,array $r,string $side,string $method): array {
 }
 function trophy_derive(string $gw,array $results,array $reports,array $schedules,array $definitions,string $today,array $mapping=[]): array {
     $imcNames=[]; $rthLeagues=[];
-    $competitionId=static fn(string $key): string => preg_replace('/^(?:GW\\d{3}|IMC-?\\d{3})/', '', $key);
+    $competitionId=static fn(string $key): string => preg_replace('/^(?:GW[0-9]{3}|IMC-?[0-9]{3})(?:[|]S[0-9]+)?/', '', $key);
     foreach ($definitions as $definition) {
         if (strtoupper(trim((string)($definition['sm_action_group']??'')))==='IMC') {
             $key=(string)$definition['competition_key'];
