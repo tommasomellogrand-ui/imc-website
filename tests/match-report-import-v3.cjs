@@ -17,7 +17,20 @@ a.S.results.set(101,[fixture]);let identity=a.reportIdentity(101);assert.equal(i
 a.S.schedule.set(101,[{...fixture,competition_key:'IMC001|S02|IMC|championsleague',imc_season:2}]);assert.throws(()=>a.reportIdentity(101),/diverse/);a.S.schedule.clear();
 a.S.competition={...a.S.competition,key:'IMC001|IMC|europaleague'};assert.throws(()=>a.reportIdentity(101),/hai scelto/);a.S.competition=a.S.catalog[0];
 a.S.results.clear();a.S.schedule.set(101,[{...fixture,home_sm_club_id:undefined,away_sm_club_id:undefined,home_sm_team_id:11,away_sm_team_id:22}]);identity=a.reportIdentity(101);assert.equal(identity.home_sm_club_id,11);a.S.schedule.clear();assert.equal(a.reportIdentity(101).competition_key,'IMC001|S02|IMC|championsleague');
-a.S.results.set(101,[{...fixture,sm_action:'worldcup'}]);assert.throws(()=>a.reportIdentity(101),/dedicato/);a.S.results.set(101,[fixture]);
+const normalCompetition=a.S.competition;
+const worldCup={...normalCompetition,key:'IMC001|NATIONS|worldcup',name:'World Cup',group:'NATIONS',sm_action:'worldcup'};
+const worldCupResult={...fixture,competition_key:worldCup.key,sm_action:'worldcup',competition_group:'NATIONS',competition_group_name:null,competition_stage:'Quarti di Finale',competition_round:'Quarti di Finale'};
+d.querySelector('#ResultsprevWeek_click a').setAttribute('action','interqualifier');
+a.S.competition=worldCup;a.S.results.set(101,[worldCupResult]);
+assert.equal(a.reportIdentity(101).competition_key,worldCup.key);
+assert.equal(a.reportIdentity(101).imc_season,1,'Stored edition wins over displayed season 2');
+a.S.results.set(101,[{...worldCupResult,competition_stage:'Semifinale',competition_round:'Semifinale'}]);
+assert.equal(a.reportIdentity(101).sm_action,'worldcup');
+a.S.results.set(101,[{...worldCupResult,competition_stage:'Finals',competition_round:'Giornata 2',competition_group_name:'Girone A'}]);
+assert.throws(()=>a.reportIdentity(101),/partita singola/);
+a.S.results.delete(101);assert.throws(()=>a.reportIdentity(101),/importa prima/);
+d.querySelector('#ResultsprevWeek_click a').setAttribute('action','friendly');
+a.S.competition=normalCompetition;a.S.results.set(101,[fixture]);
 a.S.results.set(101,[fixture,{...fixture,imc_season:2}]);assert.throws(()=>a.reportIdentity(101),/discordanti/);a.S.results.set(101,[fixture]);
 assert.equal(a.reportMinute('45+2'),47);assert.equal(a.reportMinute('90 + 4’'),94);assert.equal(a.reportMinute('bad'),null);
 const players=[{sm_player_id:1}];a.applyGoalMinutes(players,[{sm_player_id:1,minute:null,own_goal:1},{sm_player_id:1,minute:25,own_goal:0}]);assert.equal(players[0].own_goals,1);assert.deepEqual(Array.from(players[0].goal_minutes),[25]);assert.equal(players[0].own_goal_minutes.length,0);
@@ -28,6 +41,11 @@ const wait=async f=>{for(let n=0;n<2000;n++){if(f())return;await new Promise(r=>
  a.STATE.currentIdentity=a.reportIdentity(101);a.STATE.importedAt='2026-11-17 15:00:00';const row=await a.buildReportRow(101);
  assert.equal(row.home_score,2,'Actual score preserved over Results awarded 0-3');assert.equal(row.away_score,1);assert.equal(row.home_sm_club_id,11);assert.equal(row.game_world_id,'IMC001');assert.ok(!('sm_country' in row));assert.equal(row.players_json[0].own_goals,1);assert.deepEqual(Array.from(row.players_json[0].goal_minutes),[25,47]);assert.ok(a.completeReport(row));
  let stored={...row};w.fetch=async()=>({ok:true,text:async()=>JSON.stringify({ok:true,database:'Sql1956795_3',physical_table:'IMC001_Match_Reports',rows:[stored],has_more:false})});await a.verifyStoredReport(row);stored={...row,home_score:3};await assert.rejects(()=>a.verifyStoredReport(row),/home_score/);stored={...row,players_json:[{...row.players_json[0],player_name:'Tampered'}]};await assert.rejects(()=>a.verifyStoredReport(row),/players_json/);
+ const wcReport={...row,competition_key:worldCup.key,sm_action:'worldcup',competition_group:'NATIONS',competition_group_name:null,competition_stage:'Quarti di Finale',competition_round:'Quarti di Finale'};
+ stored={...wcReport,competition_key:'IMC001|S01|NATIONS|worldcup'};
+ await a.verifyStoredReport(wcReport);
+ stored={...wcReport,competition_key:'IMC001|S02|NATIONS|worldcup'};
+ await assert.rejects(()=>a.verifyStoredReport(wcReport),/Identità/);
  a.buildUI();a.S.seasons=[{imc_season:1,start:'2026-01-01'},{imc_season:2,start:'2026-11-01'}];const choice=a.chooseCatalog();await wait(()=>[...d.querySelectorAll('button')].some(b=>b.textContent==='IMC'));[...d.querySelectorAll('button')].find(b=>b.textContent==='IMC').click();await wait(()=>[...d.querySelectorAll('button')].some(b=>b.textContent==='Connessione Champions'));[...d.querySelectorAll('button')].find(b=>b.textContent==='Connessione Champions').click();await wait(()=>d.querySelector('#__imc_mr_start'));assert.equal(d.querySelector('#__imc_mr_season').value,'2');d.querySelector('#__imc_mr_start').click();await choice;
  // Regression: numeric fixture IDs must resolve the string-keyed preload map,
  // including seasons serialized as strings by MySQL.

@@ -23,7 +23,7 @@
 (function () {
     "use strict";
 
-    var VERSION = "IMC-MATCH-REPORT-V3.5-CORE-SCHEDULE";
+    var VERSION = "IMC-MATCH-REPORT-V3.6-CORE-SCHEDULE";
     var SCANNER = "IMC_MATCH_REPORT_IMPORT_V1";
 
     var GATEWAY_URL =
@@ -83,12 +83,12 @@ var MATCH_REPORT_REPOSITORY =
         S.gw=STATE.gameWorld;S.legacyGw=STATE.legacyWorld;
         setPhase('Leggo competizioni dal CORE');
         var catalog=await gateway({action:'list_imc_competitions',game_world_id:S.gw,scope:'all',include_seasons:true,include_clubs:true});
-        // Le World Cup singole rimangono all’importer dedicato.
-        S.catalog=(catalog.competitions||[]).filter(c=>normalizedAction(c.sm_action)!=='worldcup').map(c=>({...c,group:clean(c.group).toUpperCase(),sm_action:normalizedAction(c.sm_action),sm_division:normalizedDivision(c.sm_division)}));
+        S.catalog=(catalog.competitions||[]).map(c=>({...c,group:clean(c.group).toUpperCase(),sm_action:normalizedAction(c.sm_action),sm_division:normalizedDivision(c.sm_division)}));
         S.seasons=(catalog.seasons||[]).map(s=>({imc_season:Number(s.imc_season),start:clean(s.imc_season_start_date),end:clean(s.imc_season_end_date)||null})).filter(s=>Number.isSafeInteger(s.imc_season)&&s.imc_season>0&&s.start).sort((a,b)=>a.start.localeCompare(b.start));
         if(!S.catalog.length||!S.seasons.length)throw new Error('Competizioni o stagioni CORE mancanti');
         var seen=new Set();S.catalog.forEach(c=>{var k=baseKey(c.key);if(seen.has(k)||!c.name||!c.sm_action||!['DOMESTIC','INTERNATIONAL','IMC','NATIONS'].includes(c.group))throw new Error('Catalogo CORE incoerente');seen.add(k);});
         S.clubs=Array.isArray(catalog.clubs)?catalog.clubs:[];
+        S.worldcupEditions=Array.isArray(catalog.worldcup_editions)?catalog.worldcup_editions:[];
         await chooseCatalog();renderProgressUI();
         S.results.clear();S.schedule.clear();
         function index(map,row){var id=Number(row.sm_fixture_id);if(!Number.isSafeInteger(id)||id<1)return;var list=map.get(id)||[];list.push(row);map.set(id,list);}
@@ -100,7 +100,6 @@ var MATCH_REPORT_REPOSITORY =
     function sourceIdentity(rows,id){
         var chosen=null,signature=null;
         (rows||[]).forEach(row=>{
-            if(normalizedAction(row.sm_action)==='worldcup'||/\|NATIONS\|worldcup$/.test(row.competition_key||''))throw new Error('World Cup: usa l’importer dedicato per la partita singola');
             var season=Number(row.imc_season);if(!Number.isSafeInteger(season)||season<1||!row.competition_key)throw new Error('Identità incompleta per fixture '+id);
             var key=competitionKey({key:row.competition_key},season),keySeason=clean(row.competition_key).match(/\|S(\d+)\|/);
             if(keySeason&&Number(keySeason[1])!==season)throw new Error('Stagione e chiave discordanti per fixture '+id);
@@ -109,6 +108,17 @@ var MATCH_REPORT_REPOSITORY =
             chosen={...row,competition_key:key,imc_season:season};signature=sign;
         });
         return chosen;
+    }
+    function worldCupKnockout(row){
+        if(!row||normalizedAction(row.sm_action)!=='worldcup'||row.competition_group!=='NATIONS'||clean(row.competition_group_name))return false;
+        return [row.competition_stage,row.competition_round].some(value=>/^(?:(?:ottavi|quarti|sedicesimi|semifinal[ei]?|finalee?|final|semi.?finals?|quarter.?finals?)(?:\b|$)|round of (?:16|32)\b|knock[ -]?out\b|eliminazione diretta\b)/i.test(clean(value)));
+    }
+    function sameReportKey(key,identity){
+        if(key===identity.competition_key)return true;
+        if(identity.sm_action!=='worldcup'||identity.competition_group!=='NATIONS')return false;
+        var base=S.gw+'|NATIONS|worldcup';
+        var edition=competitionKey({key:base},identity.imc_season);
+        return (key===base||key===edition)&&(identity.competition_key===base||identity.competition_key===edition);
     }
     function reportIdentity(id){
         id=Number(id);if(!Number.isSafeInteger(id)||id<1)throw new Error('Fixture ID non valido');
@@ -126,8 +136,12 @@ var MATCH_REPORT_REPOSITORY =
         }
         var source=result||schedule;
         if(source&&baseKey(source.competition_key)!==baseKey(c.key))throw new Error('Fixture '+id+': hai scelto '+c.name+' ma risulta '+source.competition_key);
+        if(c.sm_action==='worldcup'&&!worldCupKnockout(result)){
+            if(!result)throw new Error('World Cup: importa prima il risultato ufficiale della fixture '+id);
+            throw new Error('World Cup: usa l’importer della partita singola per i gironi');
+        }
         var found=normalizedAction(raw.sm_action);
-        if(found&&c.group!=='IMC'&&found!==c.sm_action&&!(c.sm_action==='playoff'&&found==='league'&&/play[\s-]*off/i.test([date.competition_stage,date.competition_round].join(' '))))throw new Error('Pagina SM incompatibile con '+c.name);
+        if(found&&c.group!=='IMC'&&found!==c.sm_action&&!(c.sm_action==='worldcup'&&found==='interqualifier')&&!(c.sm_action==='playoff'&&found==='league'&&/play[\s-]*off/i.test([date.competition_stage,date.competition_round].join(' '))))throw new Error('Pagina SM incompatibile con '+c.name);
         var season=source?source.imc_season:S.season;
         if(source&&(normalizedAction(source.sm_action)!==c.sm_action||source.competition_group!==c.group))throw new Error('Metadati della fixture discordanti dalla competizione CORE');
         var out={competition_key:source?source.competition_key:competitionKey(c,season),imc_season:season,sm_action:source?.sm_action||c.sm_action,sm_division:normalizedDivision(source?.sm_division)||c.sm_division,competition_group:source?.competition_group||c.group};
@@ -136,6 +150,7 @@ var MATCH_REPORT_REPOSITORY =
         if(!out.competition_group_name){var button=resultButton(String(id));out.competition_group_name=button?fixtureGroupName(button):null;}
         if(!out.match_date)throw new Error('Data partita assente per fixture '+id);
         if(/knockout|ottavi|quarti|semifinal|sedicesimi|\bfinale?\b/i.test([out.competition_stage,out.competition_round].join(' ')))out.competition_group_name=null;
+        if(c.sm_action==='worldcup')out.competition_key=baseKey(out.competition_key);
         out.hasResult=Boolean(result);
         return out;
     }
@@ -202,7 +217,7 @@ function fixtureGroupName(button){
         var read=await gateway({...envelope,action:'read',where:{sm_fixture_id:row.sm_fixture_id},limit:2,offset:0});
         if(read.database!==dest.database||(read.physical_table||read.table)!==dest.table||read.has_more||read.rows?.length!==1)throw new Error('Report da completare assente o duplicato');
         var old=read.rows[0];
-        if((clean(old.competition_key)&&old.competition_key!==row.competition_key)||(Number(old.imc_season)>0&&Number(old.imc_season)!==Number(row.imc_season)))throw new Error('Report esistente di competizione o stagione diversa');
+        if((clean(old.competition_key)&&!sameReportKey(old.competition_key,row))||(Number(old.imc_season)>0&&Number(old.imc_season)!==Number(row.imc_season)))throw new Error('Report esistente di competizione o stagione diversa');
         var expected={...old};
         Object.keys(row).forEach(k=>{expected[k]=k.endsWith('_json')?mergeMissing(jsonValue(old[k]),row[k]):mergeMissing(old[k],row[k]);});
         expected.imc_season=Number(expected.imc_season);
@@ -222,7 +237,7 @@ function fixtureGroupName(button){
         var saved=gatewayRows(reply);
         if(reply.database!==dest.database||(reply.physical_table||reply.table)!==dest.table||reply.has_more||saved.length!==1)throw new Error('Salvataggio da verificare: fixture assente o duplicata');
         saved=saved[0];
-        if(!completeReport(saved)||saved.competition_key!==row.competition_key||Number(saved.imc_season)!==row.imc_season||saved.sm_action!==row.sm_action||saved.fingerprint!==row.fingerprint)throw new Error('Identità o contenuto salvati non corrispondenti: verifica il database prima di riprovare');
+        if(!completeReport(saved)||!sameReportKey(saved.competition_key,row)||Number(saved.imc_season)!==row.imc_season||saved.sm_action!==row.sm_action||saved.fingerprint!==row.fingerprint)throw new Error('Identità o contenuto salvati non corrispondenti: verifica il database prima di riprovare');
         ['competition_group','sm_division','competition_group_name','competition_stage','competition_round','match_date','home_sm_club_id','away_sm_club_id','home_score','away_score','penalty_home_score','penalty_away_score','aggregate_home_score','aggregate_away_score'].forEach(k=>{if(clean(saved[k])!==clean(row[k]))throw new Error('Verifica '+k+' fallita dopo il salvataggio');});
         ['players_json','team_stats_json','events_json','tactics_json','commentary_json'].forEach(k=>{if(JSON.stringify(stableJson(jsonValue(saved[k])))!==JSON.stringify(stableJson(jsonValue(row[k]))))throw new Error('Verifica '+k+' fallita dopo il salvataggio');});
     }
@@ -650,7 +665,7 @@ async function chooseCatalog(){
                 '<div style="background:#fff;padding:13px 15px 12px;border-bottom:1px solid #e5e6ee;flex:0 0 auto;">' +
                     '<div style="font-size:9px;letter-spacing:2.3px;font-weight:950;color:#7153d8;margin-bottom:4px;">IMC · MATCH REPORT IMPORT</div>' +
                     '<div style="display:flex;align-items:center;justify-content:space-between;gap:7px;">' +
-                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.5 · SENZA BACKFILL</div>' +
+                        '<div style="font-size:18px;line-height:1;font-weight:900;letter-spacing:-.4px;">MATCH REPORT V3.6 · SENZA BACKFILL</div>' +
                         '<div id="__imc_badge" style="background:#eee8ff;color:#6548c8;padding:8px 11px;border-radius:999px;font-weight:950;font-size:9px;white-space:nowrap;">PRONTO</div>' +
                     '</div>' +
                 '</div>' +
@@ -3251,9 +3266,16 @@ async function chooseCatalog(){
             );
 
             try {
+                if(S.competition.sm_action==='worldcup'){
+                    const source=sourceIdentity(S.results.get(Number(fixtureId)),fixtureId);
+                    if(source&&normalizedAction(source.sm_action)==='worldcup'&&!worldCupKnockout(source)){
+                        STATE.reportsSkipped++;
+                        log(label+' · gironi World Cup: usa l’importer della partita singola','skip');updateUI();continue;
+                    }
+                }
                 STATE.currentIdentity=reportIdentity(fixtureId);
                 var existing=STATE.existingMeta.get(String(Number(fixtureId)));
-                if(existing&&((clean(existing.key)&&existing.key!==STATE.currentIdentity.competition_key)||(Number(existing.season)>0&&Number(existing.season)!==STATE.currentIdentity.imc_season)))throw new Error('Report esistente assegnato a una competizione o stagione diversa');
+                if(existing&&((clean(existing.key)&&!sameReportKey(existing.key,STATE.currentIdentity))||(Number(existing.season)>0&&Number(existing.season)!==STATE.currentIdentity.imc_season)))throw new Error('Report esistente assegnato a una competizione o stagione diversa');
             } catch(error) {
                 STATE.errors++;log(label+' · '+clean(error.message),'error');updateUI();continue;
             }
@@ -3488,7 +3510,7 @@ async function chooseCatalog(){
 
         if (!resultsPageState()) {
             throw new Error(
-                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.5"
+                "Apri la pagina Results di Soccer Manager prima di avviare Match Report V3.6"
             );
         }
 
@@ -3521,7 +3543,7 @@ async function chooseCatalog(){
 
         finish(
             STATE.errors ? "error" : "ok",
-            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.5 completato"
+            STATE.errors ? "Importazione conclusa con errori: verifica il log" : "Match Report V3.6 completato"
         );
     }
 

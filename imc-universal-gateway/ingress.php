@@ -164,22 +164,55 @@ function imc_ingress_merge_missing(mixed $current,mixed $incoming): mixed {
     }
     return $current;
 }
+function imc_ingress_worldcup_report_key(array $row,string $world,int $season): bool {
+    if ($season<1) return false;
+    $key=(string)imc_world_value($row['competition_key']??'');
+    return in_array($key,[$world.'|NATIONS|worldcup',$world.'|S'.str_pad((string)$season,2,'0',STR_PAD_LEFT).'|NATIONS|worldcup'],true);
+}
+
+function imc_ingress_confirm_worldcup_knockout(PDO $pdo,array $row): void {
+    $world=$row['game_world_id'];
+    $q=$pdo->prepare("SELECT * FROM `{$world}_Results` WHERE game_world_id=? AND sm_fixture_id=? LIMIT 2");
+    $q->execute([$world,$row['sm_fixture_id']]);
+    $matches=$q->fetchAll(PDO::FETCH_ASSOC);
+    $result=$matches[0]??[];
+    $phase='/^(?:(?:ottavi|quarti|sedicesimi|semifinal[ei]?|finalee?|final|semi.?finals?|quarter.?finals?)(?:\b|$)|round of (?:16|32)\b|knock[ -]?out\b|eliminazione diretta\b)/i';
+    if (count($matches)!==1 || (int)($result['imc_season']??0)!==(int)$row['imc_season']
+        || ($result['sm_action']??'')!=='worldcup' || ($result['competition_group']??'')!=='NATIONS'
+        || !imc_ingress_worldcup_report_key($result,$world,(int)$row['imc_season'])
+        || trim((string)($result['competition_group_name']??''))!==''
+        || !(preg_match($phase,trim((string)($result['competition_stage']??''))) || preg_match($phase,trim((string)($result['competition_round']??'')))))
+        throw new InvalidArgumentException('worldcup_knockout_result_required');
+    foreach (['match_date','competition_stage','competition_round','home_sm_club_id','away_sm_club_id'] as $field) {
+        if (isset($result[$field]) && (string)$result[$field] !== (string)($row[$field]??''))
+            throw new RuntimeException('report_identity_conflict');
+    }
+}
+
 function imc_ingress_repair_report(PDO $pdo,string $table,string $gw,array $row): array {
     // The explicit route uses a legacy world alias; persisted report identity is canonical.
     if(isset($row['game_world_id']))$row['game_world_id']=imc_world_id((string)$row['game_world_id']);
     if(isset($row['competition_key']))$row['competition_key']=imc_world_value($row['competition_key']);
-    if (!imc_ingress_canonical_report_batch($table,[$row])||!is_numeric($row['sm_fixture_id']??null)||(int)$row['sm_fixture_id']<1) throw new InvalidArgumentException('invalid_report_repair');
+    $world=(string)($row['game_world_id']??'');
+    $season=(int)($row['imc_season']??0);
+    $worldcup=($row['sm_action']??'')==='worldcup' && ($row['competition_group']??'')==='NATIONS'
+        && preg_match('/^IMC00[1-8]$/D',$world) && imc_physical_table($table)===$world.'_Match_Reports'
+        && imc_ingress_worldcup_report_key($row,$world,$season) && trim((string)($row['competition_group_name']??''))==='';
+    if ((!$worldcup&&!imc_ingress_canonical_report_batch($table,[$row]))||!is_numeric($row['sm_fixture_id']??null)||(int)$row['sm_fixture_id']<1) throw new InvalidArgumentException('invalid_report_repair');
     $allowed=['game_world_id','sm_fixture_id','competition_key','imc_season','sm_action','sm_division','competition_group','competition_group_name','competition_stage','competition_round','match_date','home_sm_club_id','home_name','away_sm_club_id','away_name','home_score','away_score','penalty_home_score','penalty_away_score','aggregate_home_score','aggregate_away_score','home_sm_manager_id','home_manager_name','away_sm_manager_id','away_manager_name','stadium_name','attendance','team_stats_json','players_json','events_json','tactics_json','commentary_json','fingerprint','imported_at'];
     if (array_diff(array_keys($row),$allowed)) throw new InvalidArgumentException('invalid_report_field');
     $tableSql=imc_ingress_table_ident($table,$gw);
     $pdo->beginTransaction();
     try {
+        if ($worldcup) imc_ingress_confirm_worldcup_knockout($pdo,$row);
         $q=$pdo->prepare("SELECT * FROM $tableSql WHERE game_world_id=? AND sm_fixture_id=? LIMIT 2 FOR UPDATE");
         $q->execute([$row['game_world_id'],$row['sm_fixture_id']]);$matches=$q->fetchAll(PDO::FETCH_ASSOC);
         if(count($matches)!==1)throw new RuntimeException('report_missing_or_duplicated');
         $old=$matches[0];
-        if(($old['sm_action']??'')==='worldcup'||str_contains((string)($old['competition_key']??''),'|NATIONS|worldcup'))throw new InvalidArgumentException('dedicated_worldcup_importer_required');
-        if((trim((string)($old['competition_key']??''))!==''&&$old['competition_key']!==$row['competition_key'])||((int)($old['imc_season']??0)>0&&(int)$old['imc_season']!==(int)$row['imc_season']))throw new RuntimeException('report_identity_conflict');
+        if (!$worldcup && (($old['sm_action']??'')==='worldcup'||str_contains((string)($old['competition_key']??''),'|NATIONS|worldcup')))
+            throw new InvalidArgumentException('dedicated_worldcup_importer_required');
+        $sameKey=$old['competition_key']===$row['competition_key']||($worldcup&&imc_ingress_worldcup_report_key($old,$world,$season));
+        if((trim((string)($old['competition_key']??''))!==''&&!$sameKey)||((int)($old['imc_season']??0)>0&&(int)$old['imc_season']!==$season))throw new RuntimeException('report_identity_conflict');
         $patch=[];
         foreach($row as $key=>$value){
             if(in_array($key,['game_world_id','sm_fixture_id'],true))continue;
