@@ -197,7 +197,7 @@ function imc_competition_calendar(array $row,array $definition,array $fixtures):
             $twoLeg=in_array($row['sm_action']??'',['smfacup','smfashield'],true);
             $offset=['Finale'=>0,'Semifinale'=>$twoLeg?2:1,'Quarti'=>$twoLeg?4:2,'Ottavi'=>$twoLeg?6:3][$phase]??null;
             if($offset!==null) $n=$total-$offset+($twoLeg && $leg==='Ritorno'?1:0);
-            if($twoLeg && $phase!=='Finale' && $leg==='') $n=count($days)===$total?$index:null;
+            if($twoLeg && $phase!=='' && $phase!=='Finale' && $leg==='') $n=count($days)===$total?$index:null;
         }
         if($n!==null && ($n<1 || ($total>0 && $n>$total))) $n=null;
         $turn['number']=$n;$turn['total']=$total?:null;
