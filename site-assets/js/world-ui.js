@@ -212,7 +212,8 @@ if(!document.getElementById('nx-universal-nav')){
     const head=document.createElement('header');head.className='imc-calendar-card-head';const category=document.createElement('small');category.textContent=names[row.competition_group];
     const title=document.createElement('h3'),link=document.createElement('a');link.href=domestic?base+'competitions/?group=DOMESTIC':competitionLink(row);link.textContent=domestic?'Leagues':row.nexus_view;title.append(link);head.append(category,title);
     const body=document.createElement('div');body.className='imc-calendar-card-body';const turn=document.createElement('strong');
-    turn.textContent=t?[t.number_label,t.label].filter((v,i,a)=>v&&a.indexOf(v)===i&&!(v===t.label&&t.number_label?.startsWith(v+' di '))).join(' · ')||'Turno in programma':'In programma';body.append(turn);
+    if(t?.phase){const phase=document.createElement('small');phase.className='imc-turn-phase';phase.textContent=t.phase;body.append(phase);}
+    turn.textContent=t?[t.phase_number_label||t.number_label,t.phase==='Group Stage'?null:t.label].filter((v,i,a)=>v&&a.indexOf(v)===i&&!(v===t.label&&t.number_label?.startsWith(v+' di '))).join(' · ')||'Turno in programma':'In programma';body.append(turn);
     if(!t&&p.total_days){const count=document.createElement('small');count.textContent=p.played_days+' di '+p.total_days+' turni giocati';body.append(count);}
     if(domestic){const divisions=document.createElement('small');divisions.className='imc-turn-divisions';divisions.setAttribute('aria-label','Divisioni');divisions.textContent=data.rows.filter(r=>r.sm_action==='league'&&r.competition_group==='DOMESTIC').map(r=>r.nexus_view).join(' · ');body.append(divisions);}
     card.append(head,body);grid.append(card);

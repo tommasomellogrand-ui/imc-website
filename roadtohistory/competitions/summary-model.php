@@ -121,7 +121,34 @@ function imc_competition_summary(array $row,array $definition,array $fixtures,ar
     }
     ksort($pending);
     $existing['calendar_turns']=imc_competition_home_turns($row,$totalDays,$playedDays,$existing['last_turn'],$pending,$today,$complete);
+    // Separate Home phase counters without changing the edition turn number.
+    foreach (['last_turn','next_turn'] as $slot) {
+        if ($existing[$slot]) $existing[$slot]=imc_home_phase_turn($row,$definition,$existing[$slot]);
+    }
+    $existing['calendar_turns']=array_map(static fn($turn)=>imc_home_phase_turn($row,$definition,$turn),$existing['calendar_turns']);
     return $existing;
+}
+
+function imc_home_phase_turn(array $row,array $definition,array $turn): array {
+    $action=$row['sm_action']??'';
+    $total=(int)($definition['expected_matchdays']??0);
+    $groups=null;
+    if ($action==='worldcup') $groups=3;
+    elseif (in_array($action,['smfacup','smfashield'],true)) {
+        $teams=(int)($definition['teams_count']??0);
+        if ($teams===16 && $total===8) $groups=3;
+        elseif ($teams===32 && $total===13) $groups=6;
+    }
+    elseif ($action==='interqualifier') $groups=$total?:null;
+    if ($groups===null) return $turn;
+    $number=$turn['number']??null;
+    if (!$number) return $turn;
+    $group=$number<=$groups;
+    $turn['phase']=$group?'Group Stage':'Knockout Stage';
+    $turn['phase_number']=$group?$number:$number-$groups;
+    $turn['phase_total']=$group?$groups:($total>$groups?$total-$groups:null);
+    $turn['phase_number_label']=($group?'Giornata ':'Turno ').$turn['phase_number'].($turn['phase_total']?' di '.$turn['phase_total']:'');
+    return $turn;
 }
 
 // Home can show daily IMC and World Cup turns before Schedule imports. These are turn
@@ -190,14 +217,14 @@ function imc_competition_calendar(array $row,array $definition,array $fixtures):
         if($n===null && $league && isset($leagueNumbers[$date])){$n=$leagueNumbers[$date];$fromResults=true;}
         // Initial Schedule imports can omit round labels. Before any Results,
         // number the imported league/SMFA dates from the season opening turn.
-        if($n===null && !$resultDates && ($league || in_array($row['sm_action']??'',['smfacup','smfashield'],true))) $n=$index;
+        if($n===null && (($league && !$resultDates) || in_array($row['sm_action']??'',['smfacup','smfashield'],true))) $n=$index;
         if($total>0 && count($days)===$total){$n=$index;$fromResults=false;}
         if(!$league && $total>0) {
             [$phase,$leg]=cupPhase($r);
             $twoLeg=in_array($row['sm_action']??'',['smfacup','smfashield'],true);
             $offset=['Finale'=>0,'Semifinale'=>$twoLeg?2:1,'Quarti'=>$twoLeg?4:2,'Ottavi'=>$twoLeg?6:3][$phase]??null;
             if($offset!==null) $n=$total-$offset+($twoLeg && $leg==='Ritorno'?1:0);
-            if($twoLeg && $phase!=='' && $phase!=='Finale' && $leg==='') $n=count($days)===$total?$index:null;
+            if($twoLeg && in_array($phase,['Ottavi','Quarti','Semifinale'],true) && $leg==='') $n=count($days)===$total?$index:null;
         }
         if($n!==null && ($n<1 || ($total>0 && $n>$total))) $n=null;
         $turn['number']=$n;$turn['total']=$total?:null;

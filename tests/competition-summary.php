@@ -174,3 +174,21 @@ foreach(['league','smfacup','smfashield'] as $action){
  $c=imc_competition_calendar($row,['expected_matchdays'=>14],$f);
  check($c['2026-11-25']['number']===2,'Count dates rather than fixtures');
 }
+
+foreach([['smfacup',16,8,3],['smfashield',32,13,6],['worldcup',32,7,3]] as [$action,$teams,$total,$groupDays]){
+ $row=['sm_action'=>$action];$def=['teams_count'=>$teams,'expected_matchdays'=>$total];
+ foreach([1,$groupDays,$groupDays+1,$total] as $n){
+  $turn=imc_home_phase_turn($row,$def,['number'=>$n,'label'=>$n<=$groupDays?'Gironi':'Finale']);
+  check($turn['phase']===($n<=$groupDays?'Group Stage':'Knockout Stage'),'Home separates group and knockout phases');
+  check($turn['phase_number']===($n<=$groupDays?$n:$n-$groupDays),'Phase numbering restarts after groups');
+  check($turn['phase_total']===($n<=$groupDays?$groupDays:$total-$groupDays),'Separate phase totals');
+  check($turn['number']===$n,'Global turn number remains unchanged');
+ }
+}
+$p=imc_competition_summary($cup,['teams_count'=>16,'expected_matchdays'=>8],[fixture('open',false,'','2099-11-23','')],[],[]);
+check($p['calendar_turns'][0]['phase']==='Group Stage'&&$p['next_turn']['phase_number_label']==='Giornata 1 di 3','Opening SMFA Home shows group count rather than combined total');
+$c=imc_competition_calendar($cup,['expected_matchdays'=>8],[fixture('g1',true,'Gironi','2026-11-23',''),fixture('g2',false,'Gironi','2026-11-26','')]);
+check($c['2026-11-26']['number']===2,'Group Stage continues after imported Results without labels');
+$turn=imc_home_phase_turn($domestic,['expected_matchdays'=>18],['number'=>1]);
+check(!isset($turn['phase']),'Domestic league has no invented knockout stage');
+echo "Home phase counters: all checks passed\n";
