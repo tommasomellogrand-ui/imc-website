@@ -6,6 +6,7 @@ on:
       - 'site-assets/world-engine/**'
       - 'roadtohistory/competitions/progress-engine.php'
       - 'roadtohistory/competitions/summary-model.php'
+      - '*/home/index.html'
       - 'ops/world-engine-files.json'
       - 'tests/world-engine-browser.py'
       - 'tests/competition-summary.php'
