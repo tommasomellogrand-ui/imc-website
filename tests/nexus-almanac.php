@@ -34,5 +34,25 @@ $wrong=$t;$wrong['winner_sm_world_club_id']=200;$c=$src;$c['IMC-001']['trophies'
 $unknown=$t;$unknown['trophy_type']='unknown';$unknown['competition_key']='GW001|IMC|unknown';$c=$src;$c['IMC-001']['trophies']=[$unknown];$u=na_bundle($worlds,$managers,[$job,$new],$c,'2026-11-14');expect($u['managers']['MNG001']['trophies'],1,'Unknown bonus still a title');expect($u['managers']['MNG001']['ranking']['unscored_trophies'],1,'Unknown bonus flagged');
 expect(na_page(range(1,65),2,30)['rows'],range(31,60),'Archive pagination');expect(na_page(range(1,65),2,30)['pages'],3,'Page count');
 $joined=0;foreach($d['managers'] as $m){expect($m['stats']['played'],$m['stats']['won']+$m['stats']['drawn']+$m['stats']['lost'],'Career sum invariant');$joined+=$m['stats']['played'];}expect($joined,4,'Global fixtures are not manager appearances');
+// Production CORE now contains only IMC GW: all three catalogue fields can
+// therefore be canonical, while the shared read adapter returns route aliases.
+$canonicalWorlds=[];$canonicalSources=[];$canonicalJobs=[];
+foreach(range(1,8) as $n){
+    $id=sprintf('IMC%03d',$n);$route=imc_world_route($id);
+    $world=['id'=>$id,'code'=>$id,'legacy'=>$id,'name'=>$id,'site_url'=>'/','weight'=>imc_rank_weight($id)];
+    $canonicalWorlds[]=$world;
+    expect(in_array($route,na_aliases($world),true),true,$id.' accepts compatibility route from shared reader');
+    expect(in_array('IMC-'.substr($id,3),na_aliases($world),true),true,$id.' accepts historical hyphenated identity');
+    $result=$r;$result['game_world_id']=$id;$result['competition_key']=$id.'|S01|DOMESTIC|league|1';
+    $title=$t;$title['game_world_id']=$id;$title['competition_key']=$id.'|DOMESTIC|league|1';
+    $assignment=$job;$assignment['game_world_id']=$id;
+    $canonicalSources[$id]=['results'=>imc_world_compat_rows([$result]),'trophies'=>imc_world_compat_rows([$title])];
+    $canonicalJobs[]=imc_world_compat_rows([$assignment])[0];
+}
+$restored=na_bundle($canonicalWorlds,$managers,$canonicalJobs,$canonicalSources,'2026-11-17');
+expect(count($restored['matches']),8,'Canonical-only CORE catalogue retains matches in every world');
+expect(count($restored['trophies']),8,'Canonical-only CORE catalogue retains trophies in every world');
+expect($restored['managers']['MNG001']['stats']['played'],8,'Career and ranking keep all world appearances');
+expect(count($restored['managers']['MNG001']['assignments']),8,'Canonical-only CORE catalogue retains assignments');
 foreach($argv as $arg)if(str_starts_with($arg,'--fixture='))file_put_contents(substr($arg,10),json_encode($d,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
 echo "PASS: global fixture identity, future worlds, historical title attribution, Results-only identities, official ranking, walkovers, shootouts, conflicts, filters and pagination\n";

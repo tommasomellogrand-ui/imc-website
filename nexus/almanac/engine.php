@@ -1,12 +1,21 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__,2).'/site-data/core/world-identity.php';
 require_once dirname(__DIR__).'/club-house/engine.php';
 require_once dirname(__DIR__).'/club-house/ranking.php';
 require_once dirname(__DIR__).'/trophies/engine.php';
 
 // Pure, read-only aggregation. A fixture belongs to one world; managers are
 // attributed by the identities recorded on Results, never today's club manager.
-function na_aliases(array $w): array { return array_unique([$w['id'],$w['code'],$w['legacy']]); }
+function na_aliases(array $w): array {
+    $aliases=[];
+    foreach([$w['id'],$w['code'],$w['legacy']] as $id){
+        $canonical=imc_world_id($id);
+        array_push($aliases,$id,$canonical,imc_world_route($canonical));
+        if(preg_match('/^IMC\d{3}$/D',$canonical))$aliases[]='IMC-'.substr($canonical,3);
+    }
+    return array_values(array_unique($aliases));
+}
 function na_key(string $key): string { return preg_replace('/^(?:GW\d{3}|IMC-?\d{3})/','',$key); }
 function na_fixture_key(array $r): ?string {
     if((int)($r['sm_fixture_id']??0)>0)return 'sm:'.$r['sm_fixture_id'];
