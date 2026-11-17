@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 // Pure derivation: no writes, network access or dependency on the current club roster.
-const TROPHY_ENGINE_VERSION = '20261113.1';
+const TROPHY_ENGINE_VERSION = '20261117.1';
 function trophy_nexus_view(array $row,array $labels): string {
     $key=(string)$row['competition_key'];
     if (isset($labels[$key])) return (string)$labels[$key];
@@ -52,9 +52,14 @@ function trophy_country(mixed $country): string {
         'EST EUROPA'=>'RNU','EUROPA CENTRALE'=>'CEN','MEDITERRANEO'=>'MED',
         'OLANDA & BELGIO'=>'HNB','SCANDINAVIA'=>'SCA','CUS'=>''][$s] ?? $s;
 }
+function trophy_rth_league_slug(string $key): ?string {
+    return preg_match('/^(?:GW001|IMC-?001)\|(?:S\d+\|)?IMC\|(championsleague|europaleague|conferenceleague)$/iD',$key,$m)
+        ? strtolower($m[1]) : null;
+}
 function trophy_group_key(array $r): ?string {
     if ((int)($r['imc_season'] ?? 0) < 1 || trim((string)($r['competition_key'] ?? '')) === '') return null;
-    return $r['imc_season'].'|'.$r['competition_key'];
+    $slug=trophy_rth_league_slug($r['competition_key']);
+    return $r['imc_season'].'|'.($slug===null?$r['competition_key']:'IMC001|IMC|'.$slug);
 }
 function trophy_fixture_map(array $rows): array {
     $out=[]; $conflicts=[];
@@ -91,7 +96,8 @@ function trophy_score(array $r,string $h,string $a): ?int {
 function trophy_finished(array $r,string $today): bool {
     $status=strtoupper(trim((string)($r['result_status']??'')));
     return isset($r['home_score'],$r['away_score']) && !empty($r['match_date']) && $r['match_date']<=$today
-        && in_array($status,['','COMPLETED','FT','FINISHED','PLAYED'],true);
+        && (in_array($status,['','COMPLETED','FT','FINISHED','PLAYED'],true)
+            || ($status==='AWARDED' && trophy_rth_league_slug((string)($r['competition_key']??''))!==null));
 }
 function trophy_record(string $gw,array $r,string $side,string $method): array {
     return ['game_world_id'=>$gw,'imc_season'=>(int)$r['imc_season'],'competition_key'=>$r['competition_key'],
@@ -104,15 +110,18 @@ function trophy_record(string $gw,array $r,string $side,string $method): array {
         'source_repository'=>'IMC Results'];
 }
 function trophy_derive(string $gw,array $results,array $reports,array $schedules,array $definitions,string $today,array $mapping=[]): array {
-    $imcNames=[];
+    $imcNames=[]; $rthLeagues=[];
     $competitionId=static fn(string $key): string => preg_replace('/^(?:GW\\d{3}|IMC-?\\d{3})/', '', $key);
     foreach ($definitions as $definition) {
         if (strtoupper(trim((string)($definition['sm_action_group']??'')))==='IMC') {
-            $imcNames[$competitionId((string)$definition['competition_key'])]=$definition['custom_competition'];
+            $key=(string)$definition['competition_key'];
+            $imcNames[$competitionId($key)]=$definition['custom_competition'];
+            $slug=trophy_rth_league_slug($key);
+            if ($slug!==null) $rthLeagues[$slug][]=$definition;
         }
     }
     $isImc=static fn(array $row): bool => isset($imcNames[$competitionId((string)($row['competition_key']??''))]);
-    $results=array_values(array_filter($results,static fn(array $row): bool => !$isImc($row) || trophy_final($row)));
+    $results=array_values(array_filter($results,static fn(array $row): bool => trophy_rth_league_slug((string)($row['competition_key']??''))!==null || !$isImc($row) || trophy_final($row)));
     [$results,$reports,$schedules]=trophy_resolve_ids($results,[],$schedules,$mapping);
     [$fixtures,$conflicts]=trophy_fixture_map($results);
     [$reportMap,$reportConflicts]=trophy_fixture_map($reports);
@@ -122,15 +131,34 @@ function trophy_derive(string $gw,array $results,array $reports,array $schedules
         if (!$key) {$invalid++; continue;}
         $groups[$key] ??= ['rows'=>[],'invalid'=>false];
         $id=(string)($r['sm_fixture_id']??'');
-        if ((int)$id<1 || isset($conflicts[$id])) $groups[$key]['invalid']=true;
+        if ((int)$id<1 && trophy_rth_league_slug($r['competition_key'])!==null) {
+            // Historical RTH rows can lack an SM fixture ID. Keep each row so
+            // the expected match count and home/away pairing checks still apply.
+            $groups[$key]['unidentified'][]=$r;
+        } elseif ((int)$id<1 || isset($conflicts[$id])) $groups[$key]['invalid']=true;
         else $groups[$key]['rows'][$id]=$r;
     }
     foreach ($schedules as $r) if ($key=trophy_group_key($r)) $scheduleGroups[$key][]=$r;
     $awards=[];
     foreach ($groups as $key=>$group) {
-        $rows=array_values($group['rows']);
+        $rows=[...array_values($group['rows']),...($group['unidentified']??[])];
         if ($group['invalid'] || !$rows) {$issues[$key]='conflicting_or_missing_fixture_id'; continue;}
         $sample=$rows[0]; $action=strtolower((string)$sample['sm_action']); $schedule=$scheduleGroups[$key]??[];
+        $rthSlug=trophy_rth_league_slug($sample['competition_key']);
+        if ($rthSlug!==null) {
+            $reason=null;
+            $winner=trophy_league($gw,$rows,[],$rthLeagues[$rthSlug]??[],$today,$reason,true);
+            if ($winner) {
+                $winner['competition_key']='IMC001|IMC|'.$rthSlug;
+                $winner['competition_group']='IMC';
+                $winner['trophy_type']='imc';
+                $winner['nexus_view']=$imcNames[$competitionId($winner['competition_key'])];
+                $awards[$key]=$winner;
+            } else {
+                $issues[$key]=$reason;
+            }
+            continue;
+        }
         if ($action==='league') {
             $reason=null;
             $winner=trophy_league($gw,$rows,$schedule,$definitions,$today,$reason);
@@ -180,12 +208,15 @@ function trophy_derive(string $gw,array $results,array $reports,array $schedules
     ksort($awards); ksort($issues);
     return ['awards'=>array_values($awards),'pending'=>$issues,'unassigned_source_rows'=>$invalid];
 }
-function trophy_league(string $gw,array $rows,array $schedule,array $definitions,string $today,?string &$reason): ?array {
+function trophy_league(string $gw,array $rows,array $schedule,array $definitions,string $today,?string &$reason,bool $rth=false): ?array {
     $sample=$rows[0]; $expected=[];
     foreach ($definitions as $d) {
-        if (($d['game_world_id']??'')!==$gw || ($d['sm_action']??'')!=='league' || (int)($d['teams_count']??0)<2 || (int)($d['expected_match']??0)<1) continue;
-        if (!empty($d['competition_key']) && $d['competition_key']!==$sample['competition_key']) continue;
-        if ((string)$d['sm_division']!==(string)$sample['sm_division'] || trophy_country($d['sm_country'])!==trophy_country($sample['sm_country'])) continue;
+        if ((int)($d['teams_count']??0)<2 || (int)($d['expected_match']??0)<1) continue;
+        if (!$rth) {
+            if (($d['game_world_id']??'')!==$gw || ($d['sm_action']??'')!=='league') continue;
+            if (!empty($d['competition_key']) && $d['competition_key']!==$sample['competition_key']) continue;
+            if ((string)$d['sm_division']!==(string)$sample['sm_division'] || trophy_country($d['sm_country'])!==trophy_country($sample['sm_country'])) continue;
+        }
         $expected[(int)$d['teams_count'].'|'.(int)$d['expected_match']]=[(int)$d['teams_count'],(int)$d['expected_match']];
     }
     $teams=[]; $pairs=[]; $scheduleTeams=[]; $scheduled=[]; $nameIds=[];
@@ -195,11 +226,14 @@ function trophy_league(string $gw,array $rows,array $schedule,array $definitions
         $id=(int)($r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']??0);
         if ($name!=='' && $id>0) $nameIds[$name][$id]=true;
     }
-    $teamId=static function(array $r,string $side) use ($nameIds): ?int {
+    $teamId=static function(array $r,string $side) use ($nameIds,$rth): int|string|null {
         $id=(int)($r[$side.'_sm_club_id']??$r[$side.'_sm_team_id']??0);
         if ($id>0) return $id;
-        $ids=$nameIds[strtolower(trim((string)($r[$side.'_name']??'')))]??[];
-        return count($ids)===1?(int)array_key_first($ids):null;
+        $name=trophy_name((string)($r[$side.'_name']??''));
+        $ids=$nameIds[$name]??[];
+        if (count($ids)===1) return (int)array_key_first($ids);
+        if ($rth && !$ids && $name!=='') return 'name:'.$name;
+        return null;
     };
     foreach ($schedule as $s) {
         $h=$teamId($s,'home');$a=$teamId($s,'away');
@@ -213,11 +247,11 @@ function trophy_league(string $gw,array $rows,array $schedule,array $definitions
     $played=[];
     foreach ($rows as $r) {
         if (!trophy_finished($r,$today)) {$reason='league_not_complete';return null;}
-        if (!empty($r['competition_group_name']) || preg_match('/group|grupp|giron|playoff/i',(string)($r['competition_stage']??''))) {$reason='league_group_format_requires_rule';return null;}
+        if (!empty($r['competition_group_name']) || preg_match('/group|grupp|giron|playoff|final|quarti|ottavi|knockout/i',(string)($r['competition_stage']??''))) {$reason='league_group_format_requires_rule';return null;}
         $h=$teamId($r,'home');$a=$teamId($r,'away');
         if (!$h || !$a || $h===$a) {$reason='league_team_id_missing';return null;}
-        $played[(string)$r['sm_fixture_id']]=[$h,$a];
-        $pair=$h.'|'.$a; $pairs[$pair]=($pairs[$pair]??0)+1;
+        if (!$rth) $played[(string)$r['sm_fixture_id']]=[$h,$a];
+        $pair=serialize([$h,$a]); $pairs[$pair]=($pairs[$pair]??0)+1;
         foreach (['home'=>$h,'away'=>$a] as $side=>$id) $teams[$id]??=['id'=>$id,'name'=>$r[$side.'_name'],'points'=>0,'gd'=>0,'gf'=>0,'played'=>0];
         $hs=(int)$r['home_score'];$as=(int)$r['away_score'];
         $teams[$h]['points']+=$hs>$as?3:($hs===$as?1:0); $teams[$a]['points']+=$as>$hs?3:($hs===$as?1:0);
@@ -229,7 +263,7 @@ function trophy_league(string $gw,array $rows,array $schedule,array $definitions
     else {
         // Without a Codex definition only a complete round-robin schedule is sufficient evidence.
         $n=count($scheduleTeams);$matches=count($scheduled);$sp=[];
-        foreach ($scheduled as [$h,$a]) $sp[$h.'|'.$a]=($sp[$h.'|'.$a]??0)+1;
+        foreach ($scheduled as [$h,$a]) $sp[serialize([$h,$a])]=($sp[serialize([$h,$a])]??0)+1;
         if ($n<2 || count($sp)!==$n*($n-1) || count(array_unique(array_values($sp)))!==1) {$reason='league_definition_or_full_schedule_missing';return null;}
     }
     if (count($teams)!==$n || count($rows)!==$matches || $matches%($n*($n-1))!==0) {$reason='league_not_complete';return null;}
@@ -239,6 +273,7 @@ function trophy_league(string $gw,array $rows,array $schedule,array $definitions
     $rank=array_values($teams);
     usort($rank,fn($a,$b)=>[$b['points'],$b['gd'],$b['gf']]<=>[$a['points'],$a['gd'],$a['gf']]);
     if ([$rank[0]['points'],$rank[0]['gd'],$rank[0]['gf']]===[$rank[1]['points'],$rank[1]['gd'],$rank[1]['gf']]) {$reason='league_tiebreak_unresolved';return null;}
+    if ($rth && !is_int($rank[0]['id'])) {$reason='winner_club_id_missing';return null;}
     $sample['home_sm_club_id']=$rank[0]['id'];$sample['home_name']=$rank[0]['name'];
     $sample['match_date']=max(array_column($rows,'match_date'));
     return trophy_record($gw,$sample,'home','standings');

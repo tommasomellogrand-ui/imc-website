@@ -75,3 +75,39 @@ $other=$tenure;$other['start_date']=null;
 check(trophy_manager_at_win($award,[$other])===null,'missing tenure date cannot receive trophy');
 $award['competition_group']='NATIONS';
 check(trophy_manager_at_win($award,[$tenure])===null,'club tenure cannot claim national trophy');
+
+$rthKey='IMC001|IMC|europaleague';
+$rthDefinition=['game_world_id'=>'IMC001','competition_key'=>$rthKey,'sm_action'=>'imc',
+    'sm_action_group'=>'IMC','custom_competition'=>'RTH Europa League','teams_count'=>4,'expected_match'=>12];
+$rthResults=$league;
+foreach ($rthResults as $i=>&$result) {
+    $result['competition_key']='IMC001|S02|IMC|europaleague';
+    $result['imc_season']=2;
+    $result['competition_group']='IMC';
+    $result['sm_action']=['imc_custom','imc','league'][$i%3];
+    if ($i<4) $result['sm_fixture_id']=null;
+    foreach (['home','away'] as $side) {
+        if ($result[$side.'_sm_club_id']===4) {
+            $result[$side.'_sm_club_id']=null;
+            $result['result_status']='AWARDED';
+        }
+    }
+}
+unset($result);
+$rthAward=$run($rthResults,[],[],[$rthDefinition])['awards'];
+check(count($rthAward)===1 && $rthAward[0]['winner_name']==='Team 1' && $rthAward[0]['nexus_view']==='RTH Europa League'
+    && $rthAward[0]['competition_key']===$rthKey && $rthAward[0]['decided_by']==='standings',
+    'RTH standings award uses season key, CORE match count, guest results and historical fixtures without IDs');
+check(count($run(array_slice($rthResults,1),[],[],[$rthDefinition])['awards'])===0,'RTH award waits for the last expected result');
+$wrongPairings=$rthResults;
+$wrongPairings[1]=$wrongPairings[0];
+check(count($run($wrongPairings,[],[],[$rthDefinition])['awards'])===0,'repeated historical fixture cannot replace a missing RTH pairing');
+
+$rthFinal=$cup;
+$rthFinal['competition_key']='IMC001|S01|IMC|clubworldcup';
+$rthFinal['sm_action']='imc';
+$rthFinal['competition_group']='IMC';
+$cwcDefinition=array_replace($rthDefinition,['competition_key'=>'IMC001|IMC|clubworldcup','custom_competition'=>'RTH Club World Cup']);
+$cwcAwards=$run([$rthFinal],[],[],[$cwcDefinition])['awards'];
+check(count($cwcAwards)===1 && $cwcAwards[0]['winner_name']==='Team 2' && $cwcAwards[0]['nexus_view']==='RTH Club World Cup',
+    'edition-key RTH Club World Cup awards from its final');
