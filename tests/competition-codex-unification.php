@@ -17,6 +17,29 @@ foreach($migration['plans'][1]['statements'] as $sql)$pdo->exec($sql);
 $removeWorldType=json_decode(file_get_contents(__DIR__.'/../database-migrations/20261116_competition_drop_world_type.json'),true,512,JSON_THROW_ON_ERROR);
 foreach($removeWorldType['statements'] as $sql)$pdo->exec($sql);
 function verify(bool $ok,string $why):void{if(!$ok)throw new RuntimeException($why);}
+$projection='mapping_id,game_world_id,competition_group,sm_action,sm_division,competition_key,IMC_View,updated_at,nexus_view';
+$before=$pdo->query('SELECT '.$projection.' FROM `IMC Competition Nexus Mapping` ORDER BY mapping_id,competition_key')->fetchAll(PDO::FETCH_ASSOC);
+$removeTypeCountry=json_decode(file_get_contents(__DIR__.'/../database-migrations/20261117_competition_mapping_remove_type_country.json'),true,512,JSON_THROW_ON_ERROR);
+foreach($removeTypeCountry['statements'] as $sql)$pdo->exec($sql);
+$fields=$pdo->query('SHOW COLUMNS FROM `IMC Competition Nexus Mapping`')->fetchAll(PDO::FETCH_COLUMN);
+verify(count($fields)===9&&!in_array('world_type',$fields,true)&&!in_array('sm_country',$fields,true),'Mapping exposes nine fields without world_type or sm_country');
+verify($pdo->query('SELECT '.$projection.' FROM `IMC Competition Nexus Mapping` ORDER BY mapping_id,competition_key')->fetchAll(PDO::FETCH_ASSOC)===$before,'All retained mapping fields and historical aliases are unchanged');
+// Execute the actual consumer queries against the reduced view.
+$sample=$before[0];
+foreach(['nexus/competitions/overview.php','site-data/competitions/overview.php','site-data/competitions/custom-cups.php'] as $file){
+ $checked=0;
+ foreach(token_get_all(file_get_contents(__DIR__.'/../'.$file)) as $token){
+  if(!is_array($token)||$token[0]!==T_CONSTANT_ENCAPSED_STRING)continue;
+  $sql=stripcslashes(substr($token[1],1,-1));
+  if(!str_starts_with($sql,'SELECT ')||!str_contains($sql,'IMC Competition Nexus Mapping'))continue;
+  $params=[$sample['game_world_id'],$sample['competition_key']];
+  if(substr_count($sql,'?')===3)$params[]=$sample['competition_key'];
+  $stmt=$pdo->prepare($sql);$stmt->execute($params);$rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
+  verify(count($rows)>0&&array_key_exists('sm_country',$rows[0])&&isset($rows[0]['world_type']),'Consumer reads country/type independently of the reduced mapping: '.$file);
+  $checked++;
+ }
+ verify($checked===1,'Exactly one mapping query tested: '.$file);
+}
 verify($pdo->query("SHOW COLUMNS FROM `IMC Competition Codex Global` LIKE 'world_type'")->fetch()===false,'world_type is absent from the authoritative Codex');
 verify((int)$pdo->query('SELECT COUNT(*) FROM `IMC Competition Codex Global`')->fetchColumn()===120,'Exactly one canonical row per configured competition');
 verify((int)$pdo->query('SELECT COUNT(*) FROM `IMC Competition Nexus Mapping`')->fetchColumn()===126,'Canonical keys and six historical aliases resolve');

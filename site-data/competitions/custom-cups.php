@@ -6,7 +6,7 @@ function imc_site_custom_cups(string $gw, int $season): array {
     $config = imc_site_config();
     $core = imc_site_db($config, 'core');
     $db = imc_site_db($config, imc_site_target($config, $gw));
-    $cups = imc_site_rows($core, "SELECT game_world_id,world_type,sm_country,sm_division,competition_key,nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=? AND competition_key IN (?,?)", [$gw,'GW010_COPA_LIBERTADORES','GW010_COPPA_DEI_CAMPIONI']);
+    $cups = imc_site_rows($core, "SELECT m.game_world_id,CASE WHEN NULLIF(TRIM(c.sm_country),'') IS NULL THEN 'SINGLE' ELSE 'MULTI' END AS world_type,c.sm_country,m.sm_division,m.competition_key,m.nexus_view FROM `IMC Competition Nexus Mapping` m JOIN `IMC Competition Codex Global` c ON c.id=m.mapping_id WHERE m.game_world_id=? AND m.competition_key IN (?,?)", [$gw,'GW010_COPA_LIBERTADORES','GW010_COPPA_DEI_CAMPIONI']);
     $table = imc_site_table($gw, 'Results');
     foreach ($cups as &$cup) {
         $cup['imc_season'] = $season;
