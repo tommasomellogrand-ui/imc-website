@@ -14,7 +14,7 @@ foreach(range(1,8) as $number){
     }
     $plan=json_decode(file_get_contents(__DIR__.'/../database-migrations/match-report-keys-20261117/'.$world.'.json'),true,512,JSON_THROW_ON_ERROR);
     foreach($plan['statements'] as $sql)$db->exec($sql);
-    $db->exec("INSERT INTO IMC_World_Cup_Editions(world_id,imc_season,edition_start) VALUES ('$world',1,'2026-10-01')");
+    $db->exec("INSERT INTO IMC_World_Cup_Editions(world_id,imc_season,edition_start,group_end) VALUES ('$world',1,'2026-10-01','2026-10-03')");
     $db->exec("INSERT INTO IMC_World_Cup_Fixtures(world_id,sm_fixture_id,imc_season,edition_start,match_date,home_id,away_id,group_name,competition_stage,competition_round) VALUES ('$world',101,1,'2026-10-01','2026-10-01',11,22,'A','Group Stage','Girone A'),('$world',102,1,'2026-10-01','2026-10-01',33,44,'A','Group Stage','Girone A')");
     $db->exec("INSERT INTO {$world}_Match_Reports(game_world_id,sm_fixture_id,competition_key,sm_action,imc_season,match_date,home_sm_club_id,away_sm_club_id,home_score,away_score,players_json,fingerprint) VALUES ('$world',101,'$world|NATIONS|worldcup','worldcup',1,'2026-10-01',11,22,3,1,'[{\"player\":1}]','report-one'),('$world',102,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'[{\"player\":2}]','sparse-report')");
     // A key-only operation must never replay report scores over existing Results.
