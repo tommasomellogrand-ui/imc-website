@@ -3,8 +3,8 @@ declare(strict_types=1);
 require_once dirname(__DIR__).'/core/bootstrap.php';
 require_once __DIR__.'/engine.php';
 function na_catalog(PDO $core): array {
-    $rows=nexus_rows($core,'SELECT `IMC GW` legacy,IMC_WORLD_ID id,`IMC GW Name` name FROM `IMC Game World Codex Global` WHERE IMC_WORLD_ID IS NOT NULL ORDER BY IMC_WORLD_ID');
-    $out=[];foreach($rows as $r){$r['code']=str_replace('-','',$r['id']);if(!preg_match('/^IMC\d{3}$/D',$r['code']))continue;$slug=strtolower(preg_replace('/[^a-zA-Z0-9]/','',$r['name']));$r['site_url']='/'.$slug.'/';$r['weight']=imc_rank_weight($r['legacy']);$out[]=$r;}return $out;
+    $rows=nexus_rows($core,'SELECT `IMC GW` legacy,`IMC GW` id,`IMC GW Name` name FROM `IMC Game World Codex Global` WHERE `IMC GW` IS NOT NULL ORDER BY `IMC GW`');
+    $out=[];foreach($rows as $r){$r['id']=imc_world_id($r['id']);$r['code']=$r['id'];if(!preg_match('/^IMC\d{3}$/D',$r['code']))continue;$slug=strtolower(preg_replace('/[^a-zA-Z0-9]/','',$r['name']));$r['site_url']='/'.$slug.'/';$r['weight']=imc_rank_weight($r['legacy']);$out[]=$r;}return $out;
 }
 function na_read(): array {
     $c=nexus_config();$core=nexus_db($c,'core');$worlds=na_catalog($core);

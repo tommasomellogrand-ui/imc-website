@@ -5,6 +5,8 @@ on:
     paths:
       - 'database-migrations/world-identity-20261116/**'
       - '.github/workflows/world-identity.yml'
+      - 'database-migrations/20261117_world_codex_single_id.json'
+      - 'tests/world-core-single-id.php'
   workflow_dispatch:
 permissions:
   contents: read
@@ -28,7 +30,9 @@ jobs:
       - name: Test canonical reads, joins and writes against MySQL
         env:
           MYSQL_TEST_PASSWORD: identity-ci-only
-        run: php tests/world-identity.php
+        run: |
+          php tests/world-identity.php
+          php tests/world-core-single-id.php
       - name: Publish identity consumers with atomic file replacement
         env:
           FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -38,7 +42,7 @@ jobs:
           import io,os,ssl,subprocess
           from pathlib import Path
           from ftplib import FTP_TLS,error_perm
-          names=['site-data/core/world-identity.php','site-data/core/bootstrap.php','nexus/core/bootstrap.php','imc-universal-gateway/core.php','imc-universal-gateway/ingress.php','imc-universal-gateway/write.php','__imc-sm-master/admin/database-manager/index.php','api/imc-data/v1/site-ready.php','site-assets/master/api.php','site-assets/world-engine/worlds.php','site-assets/world-engine/templates/competitions/catalog.js','site-assets/world-engine/templates/competitions/cup.js','roadtohistory/competitions/progress-engine.php','imc_campus/world_center/index.php']
+          names=['site-data/core/world-identity.php','site-data/core/bootstrap.php','nexus/core/bootstrap.php','imc-universal-gateway/core.php','imc-universal-gateway/ingress.php','imc-universal-gateway/write.php','__imc-sm-master/admin/database-manager/index.php','api/imc-data/v1/site-ready.php','site-assets/master/api.php','site-assets/world-engine/worlds.php','site-assets/world-engine/templates/competitions/catalog.js','site-assets/world-engine/templates/competitions/cup.js','roadtohistory/competitions/progress-engine.php','imc_campus/world_center/index.php','site-assets/master/homepage.php','clubhouse/index.php','clubhouse/imc-passport/index.php','nexus/admin/api.php','nexus/almanac/service.php']
           for name in names:
               subprocess.run((['php','-l'] if name.endswith('.php') else ['node','--check'])+[name],check=True)
           ctx=ssl.create_default_context();ctx.check_hostname=False
@@ -73,4 +77,15 @@ jobs:
           with urllib.request.urlopen('https://www.italianmastersclub.it/site-assets/master/homepage.php?format=json',timeout=60) as r:j=json.load(r)
           assert j.get('ok') and len(j['worlds'])==8 and j['managers']
           assert all(w['game_world_id']==f'IMC{n:03d}' for n,w in enumerate(j['worlds'],1))
+          import re
+          base='https://www.italianmastersclub.it/'
+          for path in ['clubhouse/','imc_campus/world_center/']:
+              with urllib.request.urlopen(base+path,timeout=60) as r:html=r.read().decode()
+              assert all(f'IMC{n:03d}' in html for n in range(1,9)),path
+              assert 'temporaneamente non disponibili' not in html,path
+          with urllib.request.urlopen(base+'clubhouse/imc-passport/tommaso-mello/',timeout=60) as r:html=r.read().decode()
+          payload=json.loads(re.search(r'<script type="application/json" id="passport-data">(.*?)</script>',html,re.S).group(1))
+          assert len(payload['worlds'])==8 and payload['person']['manager_id']=='MNG001'
+          with urllib.request.urlopen(base+'nexus/almanac/data.php?action=player-search&search=zzznomatchzz',timeout=90) as r:j=json.load(r)
+          assert j.get('ok') and len(j['worlds'])==8
           PY

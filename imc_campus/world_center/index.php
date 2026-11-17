@@ -14,10 +14,10 @@ $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y
 $data=[];
 try {
  $db=nexus_db(nexus_config(),'core');
- $rows=nexus_rows($db,"SELECT w.`IMC_WORLD_ID` code,w.`Active Club` teams,
+ $rows=nexus_rows($db,"SELECT w.`IMC GW` code,w.`Active Club` teams,
  (SELECT COUNT(DISTINCT a.manager_id) FROM `IMC Manager Assignment Global` a WHERE a.game_world_id=w.`IMC GW` AND a.assignment_type='club' AND a.team_id IS NOT NULL AND (a.start_date IS NULL OR a.start_date<='$today') AND (a.end_date IS NULL OR a.end_date>='$today')) managers,
  (SELECT s.imc_season FROM `IMC Game World Season` s WHERE s.game_world_id=w.`IMC GW` AND s.imc_season_start_date<='$today' AND (s.imc_season_end_date IS NULL OR s.imc_season_end_date>='$today') ORDER BY s.imc_season_start_date DESC LIMIT 1) season
- FROM `IMC Game World Codex Global` w WHERE w.IMC_WORLD_ID BETWEEN 'IMC001' AND 'IMC008'");
+ FROM `IMC Game World Codex Global` w WHERE w.`IMC GW` BETWEEN 'IMC001' AND 'IMC008'");
  $data=array_column($rows,null,'code');
 } catch(Throwable $e){error_log('World Center: '.$e->getMessage());}
 function metric($value){return $value===null?'—':(int)$value;}

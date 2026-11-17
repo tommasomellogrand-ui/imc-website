@@ -55,10 +55,10 @@ function imc_peer():array{$f=dirname(__DIR__).'/imc-database-manager/index.php';
 function imc_log(array$r,string$a,?string$t,array$e=[]):void{$f=dirname(__DIR__).'/__imc_private_gateway/universal-gateway-audit.jsonl';@file_put_contents($f,json_encode(array_merge(['timestamp'=>gmdate('c'),'action'=>$a,'source'=>$r['source']??null,'game_world_id'=>$r['game_world_id']??null,'database'=>$r['database']??null,'table'=>$t],$e),JSON_UNESCAPED_SLASHES)."\n",FILE_APPEND|LOCK_EX);}
 function imc_actions():array{return['health','probe','reconcile_worldcup','resolve_database','resolve_table','show_tables','read','read_one','sample','count','count_nulls','distinct','aggregate','show_columns','describe','schema','indexes','show_create_table','query','create_table','drop_table','rename_table','add_column','drop_column','rename_column','modify_column','add_index','drop_index','add_primary_key','drop_primary_key','insert','insert_many','upsert','upsert_many','update','delete_one','delete','clear_repository','clear_table','clone_table_structure','copy_rows','truncate_table','dry_run','validate','audit_repository','find_duplicates','foreign_keys','add_foreign_key','drop_foreign_key','table_status'];}
 
-// CORE is the sole authority for public IMC identifiers. Physical GW keys stay unchanged.
+// The CORE primary key is the sole stored world identity. Legacy aliases are derived for importer compatibility.
 function imc_world_catalog(array $cfg): array {
     $pdo = imc_db($cfg, $cfg['db']['core']);
-    $rows=$pdo->query('SELECT `IMC GW` AS legacy_id, `IMC_WORLD_ID` AS imc_id, `IMC GW Name` AS name FROM `IMC Game World Codex Global` WHERE `IMC_WORLD_ID` IS NOT NULL')->fetchAll();
+    $rows=$pdo->query('SELECT `IMC GW` AS legacy_id, `IMC GW` AS imc_id, `IMC GW Name` AS name FROM `IMC Game World Codex Global` WHERE `IMC GW` IS NOT NULL')->fetchAll();
     foreach($rows as &$row){$row['legacy_id']=imc_world_route($row['legacy_id']);$id=imc_world_id($row['imc_id']);$row['imc_id']=substr_replace($id,'-',3,0);}unset($row);return $rows;
 }
 function imc_rth_competition_key(string $key): string {

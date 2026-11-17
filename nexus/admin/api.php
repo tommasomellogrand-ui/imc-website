@@ -68,7 +68,7 @@ try {
     if (!preg_match('/^IMC(?:00[1-9]|010)$/D',$code)) throw new InvalidArgumentException('Codice mondo IMC non valido.');
     $c=nexus_config();
     $core=nexus_db($c,'core');
-    $catalog=nexus_rows($core,"SELECT REPLACE(IMC_WORLD_ID,'-','') code, `IMC GW` gw, `IMC GW Name` name FROM `IMC Game World Codex Global` WHERE IMC_WORLD_ID IS NOT NULL");
+    $catalog=nexus_rows($core,"SELECT `IMC GW` code, `IMC GW` gw, `IMC GW Name` name FROM `IMC Game World Codex Global` WHERE `IMC GW` IS NOT NULL");
     $names=array_column($catalog,'name','code');
     $keys=array_column($catalog,'gw','code');
     if (!isset($keys[$code])) nexus_out(['ok'=>false,'world_names'=>$names,'error'=>$code.' non ancora assegnato.'],422);
