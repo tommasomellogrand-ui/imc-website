@@ -4,8 +4,11 @@ on:
     branches: [main]
     paths:
       - 'importers/IMC_Results_Import_V3.js'
+      - 'importers/IMC_Results_Backfill_Import_V3.js'
       - 'tests/results-import-v3.cjs'
+      - 'tests/results-backfill-import-v3.cjs'
       - 'tests/fixtures/results-import-v21.js'
+      - 'tests/fixtures/results-import-v20.js'
       - '.github/workflows/results-import-v3.yml'
   workflow_dispatch:
 permissions:
@@ -24,8 +27,10 @@ jobs:
       - name: Verify Results identity, IMC selection and unchanged popup/navigation
         run: |
           node --check importers/IMC_Results_Import_V3.js
+          node --check importers/IMC_Results_Backfill_Import_V3.js
           npm install --prefix /tmp/imc-results-test jsdom@27.2.0 --no-audit --no-fund
           IMC_TEST_NODE_MODULES=/tmp/imc-results-test/node_modules node tests/results-import-v3.cjs
+          IMC_TEST_NODE_MODULES=/tmp/imc-results-test/node_modules node tests/results-backfill-import-v3.cjs
       - name: Publish importer and verify live bytes
         env:
           FTP_USER: ${{ secrets.ARUBA_FTP_USERNAME }}
@@ -35,17 +40,19 @@ jobs:
           import io,os,ssl,urllib.request,json
           from pathlib import Path
           from ftplib import FTP_TLS
-          name='importers/IMC_Results_Import_V3.js'
-          data=Path(name).read_bytes()
+          files=['importers/IMC_Results_Import_V3.js','importers/IMC_Results_Backfill_Import_V3.js']
           ctx=ssl.create_default_context();ctx.check_hostname=False
           with FTP_TLS(context=ctx,timeout=60) as ftp:
               ftp.connect('ftp.italianmastersclub.it');ftp.login(os.environ['FTP_USER'],os.environ['FTP_PASS']);ftp.prot_p()
               ftp.cwd('/www.italianmastersclub.it/importers')
-              ftp.storbinary('STOR IMC_Results_Import_V3.js',io.BytesIO(data))
-              check=io.BytesIO();ftp.retrbinary('RETR IMC_Results_Import_V3.js',check.write)
-              assert check.getvalue()==data
+              for name in files:
+                  data=Path(name).read_bytes()
+                  ftp.storbinary('STOR '+Path(name).name,io.BytesIO(data))
+                  check=io.BytesIO();ftp.retrbinary('RETR '+Path(name).name,check.write)
+                  assert check.getvalue()==data
           base='https://www.italianmastersclub.it/'
-          with urllib.request.urlopen(base+name+'?release='+os.environ['GITHUB_SHA'],timeout=60) as r:assert r.read()==data
+          for name in files:
+              with urllib.request.urlopen(base+name+'?release='+os.environ['GITHUB_SHA'],timeout=60) as r:assert r.read()==Path(name).read_bytes()
           for n in range(1,9):
               world=f'IMC{n:03d}'
               payload=json.dumps({'action':'list_imc_competitions','channel':'IMPORT','game_world_id':world,'scope':'all','include_seasons':True}).encode()
