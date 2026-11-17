@@ -1,11 +1,11 @@
-/* IMC | SCHEDULE IMPORT V3.0
+/* IMC | SCHEDULE IMPORT V3.1
  * CORE → mondo → tipo → competizione singola → stagione precaricata.
  * Da eseguire nella pagina Soccer Manager della competizione da importare.
  * Importa solo la selezione, dalla pagina aperta in avanti. Nessun campo sm_country.
  */
 (function () {
     'use strict';
-    var VERSION = 'IMC-SCHEDULE-V3.0';
+    var VERSION = 'IMC-SCHEDULE-V3.1';
     var GATEWAY = 'https://www.italianmastersclub.it/imc-universal-gateway/';
     var old = document.getElementById('__imc_schedule_v3');
     if (old) return;
@@ -110,8 +110,10 @@
     }
     function guardSource() {
         var found=sourceAction(),wanted=action(S.competition.sm_action);
-        if(!found)throw new Error('Competizione della pagina SM non riconosciuta');
-        if(S.competition.group!=='IMC' && found!==wanted && !(wanted==='worldcup' && found==='interqualifier') && !(wanted==='playoff' && found==='league' && /play[\s-]*off/i.test(round() || ''))) {
+        // Single-match cups can expose no action at all. The CORE selection
+        // supplies the stored action; a missing page action is not an error.
+        if(!wanted)throw new Error('SM action mancante nella competizione CORE selezionata');
+        if(found && S.competition.group!=='IMC' && found!==wanted && !(wanted==='worldcup' && found==='interqualifier') && !(wanted==='playoff' && found==='league' && /play[\s-]*off/i.test(round() || ''))) {
             throw new Error('Pagina SM: '+found+'. Hai scelto '+S.competition.name+'. Apri il calendario corretto e rilancia.');
         }
         if(wanted==='league' && /play[\s-]*off/i.test(round() || ''))throw new Error('Raggiunti i playoff: seleziona la competizione Playoff dal CORE.');
@@ -294,7 +296,7 @@
     }
     var overlay=document.createElement('div');overlay.id='__imc_schedule_v3';
     overlay.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(18,22,34,.30);backdrop-filter:blur(2px);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171b2a;padding:6px;box-sizing:border-box';
-    overlay.innerHTML='<style>#__imc_schedule_v3 *{box-sizing:border-box}#__imc_schedule_v3 .imc-v3-button{display:block;width:100%;min-height:48px;padding:12px;margin:7px 0;border:1px solid #dedced;border-radius:13px;background:#fff;color:#473c83;font:700 13px Inter,-apple-system,sans-serif;cursor:pointer}#__imc_schedule_v3 .imc-v3-button:disabled{opacity:.4;cursor:default}#__imc_schedule_v3 .imc-v3-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#__imc_schedule_v3 select{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #dedced;border-radius:12px;background:white}#__imc_v3_error{color:#b7463e;overflow-wrap:anywhere}</style><div style="width:min(100%,420px);height:100%;margin:auto;background:#f8f8fd;border:1px solid #e3e4ec;border-radius:22px;box-shadow:0 14px 44px rgba(20,24,40,.32);overflow:hidden;display:flex;flex-direction:column"><div style="background:white;padding:15px;border-bottom:1px solid #e5e6ee"><div style="font-size:10px;letter-spacing:2px;font-weight:900;color:#7153d8">IMC · SCHEDULE IMPORT</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><strong style="font-size:20px">SCHEDULE V3.0</strong><span id="__imc_v3_badge" style="font-size:9px;background:#eee8ff;color:#6548c8;padding:8px;border-radius:99px">PRONTO</span><button id="__imc_v3_dismiss" aria-label="Chiudi" style="border:0;background:none;font-size:20px">×</button></div></div><div id="__imc_v3_body" style="padding:14px;overflow:auto;flex:1"></div></div>';
+    overlay.innerHTML='<style>#__imc_schedule_v3 *{box-sizing:border-box}#__imc_schedule_v3 .imc-v3-button{display:block;width:100%;min-height:48px;padding:12px;margin:7px 0;border:1px solid #dedced;border-radius:13px;background:#fff;color:#473c83;font:700 13px Inter,-apple-system,sans-serif;cursor:pointer}#__imc_schedule_v3 .imc-v3-button:disabled{opacity:.4;cursor:default}#__imc_schedule_v3 .imc-v3-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#__imc_schedule_v3 select{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #dedced;border-radius:12px;background:white}#__imc_v3_error{color:#b7463e;overflow-wrap:anywhere}</style><div style="width:min(100%,420px);height:100%;margin:auto;background:#f8f8fd;border:1px solid #e3e4ec;border-radius:22px;box-shadow:0 14px 44px rgba(20,24,40,.32);overflow:hidden;display:flex;flex-direction:column"><div style="background:white;padding:15px;border-bottom:1px solid #e5e6ee"><div style="font-size:10px;letter-spacing:2px;font-weight:900;color:#7153d8">IMC · SCHEDULE IMPORT</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><strong style="font-size:20px">SCHEDULE V3.1</strong><span id="__imc_v3_badge" style="font-size:9px;background:#eee8ff;color:#6548c8;padding:8px;border-radius:99px">PRONTO</span><button id="__imc_v3_dismiss" aria-label="Chiudi" style="border:0;background:none;font-size:20px">×</button></div></div><div id="__imc_v3_body" style="padding:14px;overflow:auto;flex:1"></div></div>';
     document.body.appendChild(overlay);
     q('#__imc_v3_dismiss').onclick=function(){if(S.running){S.stopped=true;badge('ARRESTO…');}else overlay.remove();};
     S.loggedManager=positive(q('#scid') && (q('#scid').value || text(q('#scid')))) || positive(window.CUSTOMERID);
