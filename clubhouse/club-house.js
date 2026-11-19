@@ -126,7 +126,7 @@ function overview(){const s=stats(manager),matches=allMatches();const issues=ava
 function matchStats(rows){return sum(rows.map(m=>({...zero(),played:1,won:m.outcome==='V'?1:0,drawn:m.outcome==='P'?1:0,lost:m.outcome==='S'?1:0,gf:m.gf,ga:m.ga})));}
 function careerSummary(s){
  const metric=(label,value,cls='')=>'<div class="summary-metric '+cls+'"><strong>'+esc(value)+'</strong><span>'+label+'</span></div>';
- return '<section class="career-summary" aria-label="Statistiche complessive"><div class="summary-heading"><h2>Statistiche complessive</h2><span>'+esc(scopeLabel())+' · '+esc($('world').value||'Tutti i GW')+'</span></div><div class="summary-primary">'+metric('Partite',number(s.played),'summary-played')+metric('Vittorie',pct(s))+'</div><div class="summary-outcomes">'+metric('Vittorie',number(s.won),'summary-wins')+metric('Pareggi',number(s.drawn),'summary-draws')+metric('Sconfitte',number(s.lost),'summary-losses')+'</div><div class="summary-goals">'+metric('Gol fatti',number(s.gf))+metric('Gol subiti',number(s.ga))+metric('Diff. reti',number(s.gf-s.ga))+'</div><div class="summary-extra">'+(careerRoom?'':'<span><strong>'+number(trophies(manager))+'</strong> trofei</span>')+'<span>Rigori: <strong>'+number(s.penalty_won)+'</strong> vinti · <strong>'+number(s.penalty_lost)+'</strong> persi</span></div><details class="summary-source"><summary>Fonte dati</summary><p>'+number(s.matched_by_id)+' partite tramite ID Soccer Manager · Results dei GW selezionati.</p></details></section>';
+ return '<section class="career-summary" aria-label="Statistiche complessive"><div class="summary-heading"><h2>Statistiche complessive</h2><span>'+esc(scopeLabel())+' · '+esc($('world').value||'Tutti i GW')+'</span></div><div class="summary-primary">'+metric('Partite',number(s.played),'summary-played')+metric('Vittorie',pct(s))+'</div><div class="summary-outcomes">'+metric('Vittorie',number(s.won),'summary-wins')+metric('Pareggi',number(s.drawn),'summary-draws')+metric('Sconfitte',number(s.lost),'summary-losses')+'</div><div class="summary-goals">'+metric('Gol fatti',number(s.gf))+metric('Gol subiti',number(s.ga))+metric('Diff. reti',number(s.gf-s.ga))+'</div><div class="summary-extra">'+(careerRoom?'':'<span><strong>'+number(trophies(manager))+'</strong> trofei</span>')+'<span>Rigori: <strong>'+number(s.penalty_won)+'</strong> vinti · <strong>'+number(s.penalty_lost)+'</strong> persi</span></div><details class="summary-source"><summary>Fonte dati</summary><p>'+number(careerRoom?s.matched_by_assignment:s.matched_by_id)+(careerRoom?' partite attribuite tramite le date delle assegnazioni':' partite tramite ID Soccer Manager')+' · Results dei GW selezionati.</p></details></section>';
 }
 
 function career(){
@@ -138,6 +138,11 @@ function career(){
   const assignments=(bundles[w].assignments||[]).filter(a=>scope==='global'||a.assignment_type===scope).slice().sort((a,b)=>(Number(a.assignment_type==='national_team')-Number(b.assignment_type==='national_team'))||String(a.start_date||'').localeCompare(String(b.start_date||'')));
   const buckets=assignments.map(()=>[]),unassigned=[];
   rows.forEach(m=>{
+   if(careerRoom&&m.assignment_id!=null){
+    const index=assignments.findIndex(a=>String(a.id)===String(m.assignment_id));
+    (index<0?unassigned:buckets[index]).push(m);
+    return;
+   }
    const indices=assignments.flatMap((a,i)=>m.scope===a.assignment_type&&String(m.team_id||'')===String(a.assignment_type==='national_team'?(bundles[w]?.nations?.[a.national_team_id]?.world_id||a.national_team_id):(a.team_id||''))&&(!a.start_date||String(m.date).slice(0,10)>=a.start_date)&&(!a.end_date||String(m.date).slice(0,10)<=a.end_date)?[i]:[]);
    if(indices.length===1)buckets[indices[0]].push(m);else unassigned.push(m);
   });

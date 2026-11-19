@@ -22,6 +22,7 @@ jobs:
         run: |
           find clubhouse imc_campus -name '*.php' -print0 | xargs -0 -n1 php -l
           node --check clubhouse/club-house.js
+          php tests/clubhouse-career-assignments.php
           node --check clubhouse/h2h.js
           node --check clubhouse/imc-passport/passport.js
       - name: Publish only Clubhouse and verify bytes

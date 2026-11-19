@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/scope.php';
+require __DIR__.'/career-results.php';
 require dirname(__DIR__).'/nexus/core/bootstrap.php';
 require dirname(__DIR__).'/nexus/club-house/engine.php';
 require dirname(__DIR__).'/nexus/club-house/national-results.php';
@@ -23,10 +24,16 @@ try {
  $managerNames=array_column($managers,'full_name','manager_id');
  $scope=(string)($_GET['scope']??'club');if(!in_array($scope,['global','club','national_team'],true))throw new InvalidArgumentException('Scope non valido.');
  $db=nexus_db($c,nexus_target($c,$gw));$db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();
- $assignments=nexus_rows($core,"SELECT game_world_id,manager_id,full_name,assignment_type,team_id,team_name,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?",[$gw]);
+ $assignments=nexus_rows($core,"SELECT id,game_world_id,manager_id,full_name,assignment_type,team_id,team_name,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?",[$gw]);
  $nationMapping=nexus_rows($core,'SELECT m.`National Team ID` entity_id,m.`SM World National Club ID` world_id,m.`SM National Team ID` sm_id,c.name,c.image_url logo FROM `IMC Game World National Team Mapping` m JOIN `IMC National Team Codex Global` c ON c.id=m.`National Team ID` WHERE m.`Game World`=?',[$gw]);
  $resultsCareer=$careerOnly||($_GET['source']??'')==='results';
- if($resultsCareer){$out=ch_results_read($db,$gw,$managers,$selected,$scope);}else{
+ $careerClubs=[];
+ if($careerOnly){
+  $careerClubs=nexus_rows($core,'SELECT m.`SM World Club ID` world_id,c.name,c.nexus_view,c.image_url logo FROM `IMC Game World Club Mapping` m JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=?',[$gw]);
+  $stmt=$db->prepare('SELECT * FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id=? ORDER BY sm_fixture_id');
+  $stmt->execute([$gw]);$rows=$stmt->fetchAll(PDO::FETCH_ASSOC);$stmt->closeCursor();
+  $out=ch_career_results($rows,$gw,$managers,$selected,$scope,$assignments,$careerClubs,$nationMapping);
+ }elseif($resultsCareer){$out=ch_results_read($db,$gw,$managers,$selected,$scope);}else{
  $club=ch_results_read($db,$gw,$managers,$selected,'club');$out=$club;
  if($scope!=='club'){
   $nation=ch_national_read($db,$gw,$managers,$selected,$assignments,$nationMapping);
@@ -43,7 +50,7 @@ try {
  // Display-only club logos: use existing world mappings, never create clubs.
  $out['clubs']=[];
  if($selected!==null||$trophyView)try {
-  $clubRows=nexus_rows($core,'SELECT m.`SM World Club ID` world_id,c.image_url logo FROM `IMC Game World Club Mapping` m JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=?',[$gw]);
+  $clubRows=$careerOnly?$careerClubs:nexus_rows($core,'SELECT m.`SM World Club ID` world_id,c.image_url logo FROM `IMC Game World Club Mapping` m JOIN `IMC Club Codex Global` c ON c.id=m.`Club ID` WHERE m.`Game World`=?',[$gw]);
   $clubGroups=[];foreach($clubRows as $club)if((int)$club['world_id']>0)$clubGroups[(string)$club['world_id']][]=$club;
   foreach($clubGroups as $id=>$items)if(count($items)===1)$out['clubs'][$id]=['logo'=>$items[0]['logo']];
  }catch(Throwable $e){error_log('Club House display logos '.$gw.': '.$e->getMessage());}
