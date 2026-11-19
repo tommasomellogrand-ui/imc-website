@@ -45,10 +45,11 @@ try{
     foreach($roster as &$p) $p['codex_position']=imc_site_codex_position((string)($p['position']??''),$p['codex_position']??null);
     unset($p);
   }
-  $identities=imc_site_player_identity($core,array_column($roster,'player_id'));
+  $identities=imc_site_player_identity($core,array_column($roster,'player_id'),$squad==='owned');
   foreach($roster as &$p){
     $identity=$identities[(int)$p['player_id']]??[];
     foreach(['position','rating','age','nationality'] as $field){if($p[$field]===null||$p[$field]==='')$p[$field]=$identity[$field]??null;}
+    if($squad==='owned'&&trim((string)$p['market_value'])==='')$p['market_value']=$identity['market_value']??null;
     if(empty($p['full_name'])&&!empty($identity['full_name']))$p['full_name']=$identity['full_name'];
     if(empty($p['full_name']))$p['full_name']='Player '.$p['player_id'];
     if(!empty($p['image_url']))$identity['image_url']=$p['image_url'];

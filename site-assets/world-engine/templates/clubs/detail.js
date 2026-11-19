@@ -9,14 +9,12 @@ function showClubPage() {
   const style = document.createElement('style');
   style.textContent = `
    .owned-roster-list{display:grid;gap:4px}
-   .owned-roster-list .owned-roster-row{grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:9px;padding:5px 8px;border-radius:8px;color:inherit;text-decoration:none}
+   .owned-roster-list .owned-roster-row{grid-template-columns:36px minmax(0,1fr);align-items:center;gap:9px;padding:5px 8px;border-radius:8px;color:inherit;text-decoration:none}
    .owned-roster-row .nc-photo{width:36px;height:36px;min-height:0;align-self:center;border:0;border-radius:5px}
    .owned-roster-row .nc-photo-empty{font-size:12px}
    .owned-roster-row .nc-data{padding:0}
    .owned-roster-row .nc-name{font-size:13px;margin:0;line-height:1.25}
    .owned-roster-row .nc-meta{font-size:11px;margin:2px 0 0;line-height:1.35}
-   .owned-roster-arrival{font-size:11px;line-height:1.25;text-align:right;white-space:nowrap}
-   .owned-roster-arrival .muted{display:block;margin-bottom:2px}
   `;
   document.head.append(style);
  }
@@ -184,15 +182,25 @@ function rosterSummary(rows, owned=false){
  return '<section class="card" aria-label="'+summaryLabel+'" style="margin-bottom:16px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><span class="muted">'+countLabel+'</span><strong style="display:block;font-size:26px">'+active.length+'</strong></div><div><span class="muted">Valore totale</span><strong style="display:block;font-size:clamp(18px,5vw,26px);overflow-wrap:anywhere">'+label+'</strong></div></div>'+(known.length<active.length?'<p class="muted" style="margin-bottom:0">Valore disponibile per '+known.length+' su '+active.length+' giocatori.</p>':'')+'</section>';
 }
 function ownedRosterRow(player) {
- const rawDate = String(player.arrival_date ?? '');
- const date = /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
-  ? '<time datetime="'+esc(rawDate)+'">'+esc(rawDate.split('-').reverse().join('/'))+'</time>'
-  : '—';
- const details = [player.position || '—', (player.age ?? '—')+' anni', player.nationality || '—', 'Rating '+(player.rating ?? '—')];
+ const details = [player.position || '—', (player.age ?? '—')+' anni', player.nationality || '—'];
+ const rating = 'Rating '+(player.rating ?? '—');
+ const value = 'Valore '+(String(player.market_value ?? '').trim() || '—');
  return '<a class="nc-card owned-roster-row" href="'+esc(NexusCards.playerUrl(player.player_id,gw))+'" data-player-id="'+esc(player.player_id)+'">'
   + NexusCards.photo(player.image_urls,player.full_name)
-  + '<div class="nc-data"><div class="nc-name">'+esc(player.full_name)+'</div><div class="nc-meta">'+esc(details.join(' · '))+'</div></div>'
-  + '<div class="owned-roster-arrival"><span class="muted">Arrivo</span>'+date+'</div></a>';
+  + '<div class="nc-data"><div class="nc-name">'+esc(player.full_name)+'</div><div class="nc-meta">'+esc(details.join(' · '))+'</div>'
+  + '<div class="nc-meta">'+esc(rating)+' · '+esc(value)+'</div></div></a>';
+}
+function ownedRosterList(rows) {
+ const grouped = new Map();
+ for (const player of rows) {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(player.arrival_date ?? '') ? player.arrival_date : '';
+  if (!grouped.has(date)) grouped.set(date, []);
+  grouped.get(date).push(player);
+ }
+ return [...grouped].sort(([left], [right]) => right.localeCompare(left)).map(([date, players]) => {
+  const title = date ? '<time datetime="'+esc(date)+'">'+esc(date.split('-').reverse().join('/'))+'</time>' : 'Data di arrivo non disponibile';
+  return '<h3 class="role-title">'+title+'</h3><div class="owned-roster-list">'+players.map(ownedRosterRow).join('')+'</div>';
+ }).join('');
 }
 function rosterCard(x, mode=''){
  const stat=(label,title,value)=>'<div class="nc-stat" title="'+title+'"><b>'+esc(value??'—')+'</b><span>'+label+'</span></div>';
@@ -213,7 +221,13 @@ async function showRoster(background=false){
   const j=rosterData&&rosterData.season===selected&&background==='filter'?rosterData.data:await readClub('roster.php',!!selected,selected,mode?{squad:mode}:{});rosterData={season:selected,data:j};
   if(activeTab!==tab||version!==rosterVersion)return;
   if(mode&&j.roster_source!==(owned?'completed_transfers':'match_reports'))throw Error('Dati della rosa non disponibili. Riprova.');
-  let html=owned?rosterSummary(j.rows,true):playing?'<p class="nc-roster-note"><strong>'+j.rows.length+' giocatori impiegati</strong> · '+esc(period)+' · '+esc(j.reports)+' Match Report disponibili.</p>':(type==='club'?rosterSummary(j.rows):'')+'<p class="nc-roster-note">'+(type==='nation'?'Convocati nell’ultimo Match Report disponibile'+(j.roster_date?' · '+esc(j.roster_date):''):'Rosa e storico · Stato aggiornato dai trasferimenti')+' · '+esc(period)+' · Statistiche dai '+esc(j.reports)+' Match Report disponibili per '+(type==='nation'?'questa nazionale':'questo club')+'.<br>Pres. = Tit. + Sub. · Panc. = non entrato · MVP = uomo partita.</p>';
+  if (owned) {
+   document.getElementById('roster-values').innerHTML = rosterSummary(j.rows, true)
+    + (j.rows.length ? ownedRosterList(j.rows) : '<div class="card empty">Nessun giocatore di proprietà nel registro trasferimenti.</div>');
+   NexusCards.wireImages(view);
+   return;
+  }
+  let html=playing?'<p class="nc-roster-note"><strong>'+j.rows.length+' giocatori impiegati</strong> · '+esc(period)+' · '+esc(j.reports)+' Match Report disponibili.</p>':(type==='club'?rosterSummary(j.rows):'')+'<p class="nc-roster-note">'+(type==='nation'?'Convocati nell’ultimo Match Report disponibile'+(j.roster_date?' · '+esc(j.roster_date):''):'Rosa e storico · Stato aggiornato dai trasferimenti')+' · '+esc(period)+' · Statistiche dai '+esc(j.reports)+' Match Report disponibili per '+(type==='nation'?'questa nazionale':'questo club')+'.<br>Pres. = Tit. + Sub. · Panc. = non entrato · MVP = uomo partita.</p>';
   if(type==='club'&&!mode)html+='<div class="transfer-tabs" role="tablist" aria-label="Stato rosa">'+[['active','Attivi'],['departed','Ceduti']].map(([v,label])=>'<button type="button" role="tab" data-roster-state="'+v+'" aria-pressed="'+(rosterFilter===v)+'" aria-selected="'+(rosterFilter===v)+'">'+label+' ('+j.rows.filter(x=>(x.roster_status||'unknown')===v).length+')</button>').join('')+'</div>';
   const visibleRows=type==='club'&&!mode?j.rows.filter(x=>(x.roster_status||'unknown')===rosterFilter):j.rows;
   const positionGroups = new Map([
@@ -227,12 +241,10 @@ async function showRoster(background=false){
    if (!grouped.has(label)) grouped.set(label, []);
    grouped.get(label).push(player);
   }
-  if(mode&&!visibleRows.length)html+='<div class="card empty">'+(owned?'Nessun giocatore di proprietà nel registro trasferimenti.':'Nessun giocatore sceso in campo nel periodo selezionato.')+'</div>';
+  if(playing&&!visibleRows.length)html+='<div class="card empty">Nessun giocatore sceso in campo nel periodo selezionato.</div>';
   for (const [label, rows] of grouped) {
    if(mode&&!rows.length)continue;
-   const listClass = owned ? 'owned-roster-list' : 'roster-grid';
-   const cards = owned ? rows.map(ownedRosterRow) : rows.map(player=>rosterCard(player,mode));
-   html += '<h3 class="role-title">'+esc(label)+' ('+rows.length+')</h3><div class="'+listClass+'">'+(cards.length?cards.join(''):'<p class="muted">Nessun giocatore.</p>')+'</div>';
+   html += '<h3 class="role-title">'+esc(label)+' ('+rows.length+')</h3><div class="roster-grid">'+(rows.length?rows.map(player=>rosterCard(player,mode)).join(''):'<p class="muted">Nessun giocatore.</p>')+'</div>';
   }
   if(type==='club'&&!mode&&j.rows.some(x=>x.roster_status==='unknown'))html+='<p class="nc-roster-note">'+j.rows.filter(x=>x.roster_status==='unknown').length+' giocatori storici con stato non verificabile dai dati disponibili.</p>';
   if(j.rows.some(x=>x.minutes_missing))html+='<p class="nc-roster-note">— nei minuti: dati di ingresso, uscita o fine partita incompleti nei report.</p>';

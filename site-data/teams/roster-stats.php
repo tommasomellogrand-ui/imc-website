@@ -125,7 +125,7 @@ function imc_site_owned_roster(array $transfers, int $club): array {
         'player_id'=>$id, 'full_name'=>$player['player_name'] ?? '',
         'position'=>$player['player_position'] ?? null, 'rating'=>$player['player_rating'] ?? null,
         'age'=>$player['player_age'] ?? null, 'nationality'=>null,
-        'market_value'=>$player['player_value'] ?? null, 'image_url'=>$player['player_image'] ?? null,
+        'market_value'=>null, 'image_url'=>$player['player_image'] ?? null,
         'arrival_date'=>$transfer['normalized_transfer_date'] ?? $transfer['transfer_date'] ?? null,
         'roster_status'=>'active',
       ];

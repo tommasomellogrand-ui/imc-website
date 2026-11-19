@@ -17,10 +17,11 @@ function imc_site_player_images(int $id,array $global=[],?string $worldImage=nul
   return array_values(array_unique($images));
 }
 
-function imc_site_player_identity(PDO $core,array $ids): array {
+function imc_site_player_identity(PDO $core,array $ids,bool $includeMarketValue=false): array {
   $ids=array_values(array_unique(array_filter(array_map('intval',$ids),static fn($id)=>$id>0)));$out=[];
   foreach(array_chunk($ids,400) as $batch){
-    $sql='SELECT p.id,p.forename,p.surname,p.image_file,p.image_url,d.full_name,d.position,d.rating,d.age,d.nationality FROM `IMC Player Codex Global` p LEFT JOIN `IMC Player Codex Global Data` d ON d.player_id=p.id WHERE p.id IN ('.implode(',',array_fill(0,count($batch),'?')).')';
+    $marketValue=$includeMarketValue?',d.market_value':'';
+    $sql='SELECT p.id,p.forename,p.surname,p.image_file,p.image_url,d.full_name,d.position,d.rating,d.age,d.nationality'.$marketValue.' FROM `IMC Player Codex Global` p LEFT JOIN `IMC Player Codex Global Data` d ON d.player_id=p.id WHERE p.id IN ('.implode(',',array_fill(0,count($batch),'?')).')';
     foreach(imc_site_rows($core,$sql,$batch) as $p)$out[(int)$p['id']]=$p;
   }
   return $out;
