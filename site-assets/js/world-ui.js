@@ -82,6 +82,37 @@ async function mountWorldHeader(){
  document.querySelector('.arc-board')?.remove();
 }
 
+const clubPages=[['rosteroverview','Roster Overview'],['roster','Roster'],['directory','Club']];
+const clubPath=page.slice(base.length);
+const clubPage=['roadtohistory','kickoff','sensiblesocceracademy'].includes(slug)
+ ? (/^club\/(rosteroverview|roster|directory)\/(?:index\.php)?$/.exec(clubPath)?.[1]
+    ?? (/^clubs\/(?:index\.html)?$/.test(clubPath)
+     ? (new URLSearchParams(location.search).get('view')==='clubs'?'directory':'rosteroverview') : ''))
+ : '';
+if(clubPage){
+ const anchor=document.querySelector('main label[for="search"], main #tabs');
+ if(anchor){
+  const nav=document.createElement('nav');
+  nav.className='nx-world-shortcuts compact-world-menu club-directory-tabs';
+  nav.setAttribute('aria-label','Pagine Club');
+  nav.innerHTML=clubPages.map(([route,label])=>'<a href="'+base+'club/'+route+'/"'+(route===clubPage?' aria-current="page"':'')+'>'+label+'</a>').join('');
+  const header=document.querySelector('header.top');
+  if(header){
+   const theme=getComputedStyle(header);
+   nav.style.setProperty('--club-menu-bg',theme.backgroundColor);
+   nav.style.setProperty('--club-menu-text',theme.color);
+  }
+  const style=document.createElement('style');
+  style.textContent=`
+   html body .club-directory-tabs{grid-template-columns:repeat(3,minmax(0,1fr));width:100%;margin:0 0 14px}
+   html body .club-directory-tabs a{min-height:44px;padding:6px 4px;font:700 clamp(11px,2.8vw,14px)/1.2 Inter,sans-serif}
+   html body .club-directory-tabs a[aria-current=page]{background:var(--club-menu-bg,#172a38);color:var(--club-menu-text,#fff);border-bottom:3px solid var(--world-accent,#b99a56)}
+  `;
+  document.head.append(style);
+  anchor.before(nav);
+ }
+}
+
 const entry=document.querySelector('.world-entry-static');
 if(entry){
  const card=document.createElement('div');
@@ -91,9 +122,10 @@ if(entry){
  const directory=page.endsWith('/')||page.endsWith('/index.html');
  const primarySection=page.slice(base.length).split('/')[0];
  const labels={home:'Home',matchday:'Matchday',competitions:'Competizioni',managers:'Manager',clubs:'Club',nations:'Nations',transfers:'Transfers',players:'Player Codex',playercodex:'Player Codex',trophyroom:'Trophy Room'};
- const isDirectory=directory&&page.slice(base.length).replace(/index\.html$/,'').split('/').filter(Boolean).length===1;
+ const clubDirectory=clubPage&&document.querySelector('main #list');
+ const isDirectory=clubDirectory||directory&&page.slice(base.length).replace(/index\.html$/,'').split('/').filter(Boolean).length===1;
  const update=()=>{
-  const name=isDirectory&&labels[primarySection]||heading?.childNodes[0]?.textContent?.trim()||document.title.split(/[|·]/)[0];
+  const name=clubDirectory?'Club':isDirectory&&labels[primarySection]||heading?.childNodes[0]?.textContent?.trim()||document.title.split(/[|·]/)[0];
   card.textContent=name.replace(/\.$/,'').trim();
  };
  update();entry.after(card);

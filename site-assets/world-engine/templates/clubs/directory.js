@@ -6,7 +6,11 @@
  const summary = document.getElementById('summary');
  const retry = document.getElementById('retry');
  const supportsOverview = ['IMC001', 'IMC003', 'IMC004'].includes('__WORLD_ID__');
- const overview = supportsOverview && new URLSearchParams(location.search).get('view') !== 'clubs';
+ const section = location.pathname.split('/')[3];
+ const mode = !supportsOverview ? 'directory' : ({
+  rosteroverview:'rosteroverview', roster:'roster', directory:'directory',
+ })[section] ?? (new URLSearchParams(location.search).get('view') === 'clubs' ? 'directory' : 'rosteroverview');
+ const overview = mode === 'rosteroverview';
  const number = new Intl.NumberFormat('it-IT', {maximumFractionDigits:0});
  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const clubHref = (club, section) => '/__WORLD_SLUG__/club/'+section+'/?id='+encodeURIComponent(club.world_id);
@@ -19,19 +23,9 @@
  let sortBy = 'market_value';
  let sortDirection = 'descending';
 
- if (supportsOverview) {
-  const nav = document.createElement('nav');
-  nav.className = 'club-directory-tabs';
-  nav.setAttribute('aria-label', 'Viste club');
-  nav.innerHTML = '<a href="/__WORLD_SLUG__/clubs/"'+(overview?' aria-current="page"':'')+'>Roster Overview</a>'
-   + '<a href="/__WORLD_SLUG__/clubs/?view=clubs"'+(!overview?' aria-current="page"':'')+'>Club</a>';
-  document.querySelector('label[for="search"]').before(nav);
-
+ if (overview) {
   const style = document.createElement('style');
   style.textContent = `
-   .club-directory-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
-   .club-directory-tabs a{border:1px solid var(--l,#d5dbe4);border-radius:8px;padding:8px 13px;text-decoration:none;color:inherit;font-size:13px;font-weight:700}
-   .club-directory-tabs [aria-current]{color:white;background:#283c53;border-color:#283c53}
    .roster-overview{margin:16px 0 24px}
    .roster-overview table{width:100%;border-collapse:collapse;font-size:clamp(12px,2.6vw,14px)}
    .roster-overview th,.roster-overview td{padding:8px clamp(4px,1.3vw,14px);border-bottom:1px solid var(--l,#d5dbe4);text-align:right}
@@ -46,7 +40,7 @@
    .roster-overview .roster-value-coverage{display:block;font-size:11px;color:var(--m,#576574)}
   `;
   document.head.append(style);
-  if (overview) list.className = 'roster-overview';
+  list.className = 'roster-overview';
  }
 
  function clubCards(clubs) {
@@ -54,7 +48,7 @@
    const manager = club.manager?.is_imc ? club.manager : null;
    const managerLink = manager ? '<a href="/__WORLD_SLUG__/managers/profile.html?manager='+encodeURIComponent(manager.manager_id)+'">'
     +esc(manager.full_name)+'</a>' : 'Nessun manager IMC assegnato';
-   return '<article class="club-card"><a class="club-main" href="'+clubHref(club,'overview')+'">'
+   return '<article class="club-card"><a class="club-main" href="'+clubHref(club,mode==='roster'?'roster':'overview')+'">'
     +clubImage(club)+'<h2>'+esc(club.name)+'</h2></a><div class="club-manager">'+managerLink+'</div></article>';
   }).join('');
  }
@@ -93,7 +87,7 @@
   retry.hidden = true;
   summary.textContent = overview ? 'Caricamento delle rose…' : 'Caricamento dei club…';
   try {
-   const response = await fetch('directory.php'+(overview?'?view=roster':''),{cache:'no-store'});
+   const response = await fetch('/__WORLD_SLUG__/clubs/directory.php'+(overview?'?view=roster':''),{cache:'no-store'});
    const data = await response.json();
    if (!response.ok || !data.ok || (overview && data.rows.some(club => !club.roster_summary))) throw Error();
    rows = data.rows || [];

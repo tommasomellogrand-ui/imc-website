@@ -1,4 +1,4 @@
 <?php
-$destination = isset($_GET['id']) ? '/roadtohistory/club/overview/' : '/roadtohistory/clubs/';
+$destination = isset($_GET['id']) ? '/roadtohistory/club/overview/' : '/roadtohistory/club/rosteroverview/';
 $query = http_build_query($_GET);
 header('Location: '.$destination.($query === '' ? '' : '?'.$query));
