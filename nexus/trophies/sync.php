@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__.'/engine.php';
 
-const TROPHY_SYNC_VERSION = TROPHY_ENGINE_VERSION.'.h5';
+const TROPHY_SYNC_VERSION = TROPHY_ENGINE_VERSION.'.h6';
 
 function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $completedImport=false): array {
     $gw=nexus_world($gw);

@@ -125,7 +125,10 @@ function trophy_derive(string $gw,array $results,array $reports,array $schedules
         }
     }
     $isImc=static fn(array $row): bool => isset($imcNames[$competitionId((string)($row['competition_key']??''))]);
-    $results=array_values(array_filter($results,static fn(array $row): bool => trophy_rth_league_slug((string)($row['competition_key']??''))!==null || !$isImc($row) || trophy_final($row)));
+    $results=array_values(array_filter($results,static function(array $row) use ($isImc): bool {
+        if (strtolower((string)($row['sm_action']??''))==='worldcup') return trophy_final($row);
+        return trophy_rth_league_slug((string)($row['competition_key']??''))!==null || !$isImc($row) || trophy_final($row);
+    }));
     [$results,$reports,$schedules]=trophy_resolve_ids($results,[],$schedules,$mapping);
     [$fixtures,$conflicts]=trophy_fixture_map($results);
     [$reportMap,$reportConflicts]=trophy_fixture_map($reports);

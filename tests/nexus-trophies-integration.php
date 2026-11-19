@@ -84,6 +84,8 @@ for($i=1;$i<=10;$i++) {
     check($sync['changes']['inserted']===1,$gw.' final awards immediately after import');
     check($db->query("SELECT winner_name FROM ".$gw."_IMC_Trophy_Room WHERE deciding_fixture_id=310099463")->fetchColumn()==='SSD Casarano Calcio',$gw.' Super Cup belongs to winning team');
     // A national World Cup final played during season 2 still awards the season 1 title.
+    $db->prepare("INSERT INTO ".$gw."_IMC_Results (game_world_id,imc_season,competition_key,sm_action,competition_group,competition_stage,match_date) VALUES (?,1,?,'worldcup','NATIONS','Gironi','2020-10-30')")
+        ->execute([$gw,$storageWorld.'|S01|NATIONS|worldcup']);
     $final=$db->prepare("INSERT INTO ".$gw."_IMC_Results (game_world_id,imc_season,competition_key,sm_action,competition_group,competition_round,sm_fixture_id,home_sm_club_id,away_sm_club_id,home_name,away_name,home_score,away_score,match_date,result_status) VALUES (?,1,?,'worldcup','NATIONS','Finale',412374967,74992,74986,'Germany','England',4,2,'2020-11-08','COMPLETED')");
     $final->execute([$gw,$storageWorld.'|S01|NATIONS|worldcup']);
     $sync=trophy_sync($config,$db,$gw,false,true);
