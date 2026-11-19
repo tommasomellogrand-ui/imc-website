@@ -7,6 +7,10 @@ $base=['game_world_id'=>'GW001','sm_fixture_id'=>1,'match_date'=>'2026-10-01','i
 $n=array_replace($base,['sm_fixture_id'=>2,'competition_group'=>'NATIONS','competition_key'=>'GW001|NATIONS|worldcup','sm_action'=>'worldcup','home_sm_manager_id'=>20,'away_sm_manager_id'=>10,'home_score'=>0,'away_score'=>0]);
 $rows=[$base,$base,$n,array_replace($base,['game_world_id'=>'GW002']),array_replace($base,['sm_fixture_id'=>3,'home_sm_manager_id'=>null]),array_replace($base,['sm_fixture_id'=>4,'home_score'=>null])];
 $all=ch_results_rows($rows,'GW001',$managers,'M1','global');
+$canonical=ch_results_rows([array_replace($base,['game_world_id'=>'IMC001']),
+    array_replace($n,['game_world_id'=>'IMC006'])],'GW001',$managers,'M1');
+check($canonical['managers']['M1']['stats']['played']===1,'Canonical Results match the legacy route without including another world');
+check($canonical['matches'][0]['world']==='GW001','Match context retains the route requested by the caller');
 check($all['managers']['M1']['stats']['played']===2,'Count unique valid results only');
 check($all['managers']['M1']['stats']['won']===1&&$all['managers']['M1']['stats']['drawn']===1,'Results scores');
 check($all['managers']['M1']['stats']['matched_by_id']===2,'ID attribution');

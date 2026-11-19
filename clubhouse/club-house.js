@@ -18,6 +18,9 @@ let careerSort=['name','played','won','trophies'].includes(params.get('sort'))?p
 let people=[],worldNames={},bundles={},failed=[],tab=section==='h2h'?'h2h':section==='trophies'?'trophies':'overview',limit=25,loading=true,runId=0;
 const worldConfig={"GW001":["IMC-001","roadtohistory"],"GW005":["IMC-002","halloffamers"],"GW009":["IMC-003","kickoff"],"GW010":["IMC-004","sensiblesocceracademy"],"GW011":["IMC-005","subbuteosuperleague"],"GW004":["IMC-006","worldleague"],"GW006":["IMC-007","masterleagueworld"],"IMC-008":["IMC-008","scudetto"]};
 const worlds=Object.keys(worldConfig);
+const routesByWorldId=Object.fromEntries(worlds.map(w=>[worldConfig[w][0].replace('-', ''),w]));
+const worldRoute=w=>routesByWorldId[String(w??'').replace(/^IMC-/, 'IMC')]||w;
+const routeRows=rows=>(rows||[]).map(row=>({...row,world:worldRoute(row.world)}));
 const worldCode=w=>worldConfig[w]?.[0]||w;
 const worldHome=w=>'/'+worldConfig[w][1]+'/';
 const selected=()=>worlds.filter(w=>!$('world').value||w===$('world').value);
@@ -61,7 +64,7 @@ async function timeline(){
   $('loading').textContent='Caricamento Media Center…';
   const d=await fetch('/clubhouse/timeline.php',{cache:'no-store'}).then(r=>r.json());
   if(token!==timelineRun)return;if(!d.ok)throw Error(d.error||'Timeline non disponibile');
-  const rows=d.events.filter(e=>(!manager||e.manager_id===manager)&&(!$('world').value||e.world===$('world').value)).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.world||'').localeCompare(String(b.world||'')));
+  const rows=routeRows(d.events).filter(e=>(!manager||e.manager_id===manager)&&(!$('world').value||e.world===$('world').value)).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(a.world||'').localeCompare(String(b.world||'')));
   const draw=()=>{
    const filtered=rows.filter(e=>!timelineKind||(timelineKind==='assignment'?e.type.startsWith('assignment_'):e.type===timelineKind));
    const groups=new Map();filtered.forEach(e=>{if(!groups.has(e.date))groups.set(e.date,[]);groups.get(e.date).push(e);});
@@ -73,7 +76,7 @@ async function timeline(){
   draw();
  }catch(e){if(token!==timelineRun)return;$('loading').textContent=e.message;$('content').innerHTML='<p class="notice">'+esc(e.message)+'</p>';}
 }
-function render(){if(timelineView){timeline();return;}status();syncManagerOptions();if(!available().length){$('content').innerHTML='<p class="notice">'+(loading?'Lettura delle partite…':'Nessun GW disponibile. Riprova con Aggiorna.')+'</p>';return;}if(rankingView)return ranking();if(section==='trophies'){trophyRoom();wireLogos();return;}if(!manager)return directory();if(!people.some(m=>m.manager_id===manager))return;if(section==='career')career();else ({h2h,trophies:trophyRoom}[tab]||career)();wireLogos();}
+function render(){if(timelineView){timeline();return;}status();syncManagerOptions();if(!available().length){$('content').innerHTML='<p class="notice">'+(loading?'Lettura delle partite…':'Nessun GW disponibile. Riprova con Aggiorna.')+'</p>';return;}if(section==='career'&&loading&&available().length<selected().length){$('content').innerHTML='<p class="notice" role="status">Caricamento risultati…</p>';return;}if(rankingView)return ranking();if(section==='trophies'){trophyRoom();wireLogos();return;}if(!manager)return directory();if(!people.some(m=>m.manager_id===manager))return;if(section==='career')career();else ({h2h,trophies:trophyRoom}[tab]||career)();wireLogos();}
 function rankFor(id){return available().reduce((r,w)=>{const x=bundles[w].managers[id]?.ranking;if(!x){r.incomplete=true;return r;}r.clubs+=x.club_points??x.match_points;r.nations+=x.national_points??0;r.matches+=x.match_points;r.trophies+=x.trophy_points;r.total+=x.total;r.unscored+=x.unscored_trophies;r.incomplete=r.incomplete||bundles[w].ranking_error||bundles[w].national_ranking_error||x.version!==9;return r;},{clubs:0,nations:0,matches:0,trophies:0,total:0,unscored:0,incomplete:false});}
 function rankingStats(id){return sum(available().flatMap(w=>[bundles[w].managers[id]?.ranking_club_stats||zero(),bundles[w].managers[id]?.national_stats||zero()]));}
 function ranking(){
@@ -263,7 +266,7 @@ function trophyRoom(){
  }).join('');
  $('content').innerHTML='<section class="trophy-summary" aria-label="Riepilogo trofei">'+[['Totale trofei',rows.length],['Club',rows.length-national],['Nazionali',national]].map(([label,value])=>'<div><strong>'+number(value)+'</strong><span>'+label+'</span></div>').join('')+'</section>'+(book&&groups?'<section class="honours-index" aria-label="Indice dei mondi"><h2>Indice dei mondi</h2>'+groups+'</section>':groups)+(rows.length?'':'<p class="notice">'+(loading?'Caricamento trofei…':'Nessun trofeo per i filtri selezionati.')+'</p>');
 }
-async function load(){const token=++runId;loading=true;bundles={};failed=[];$('retry').disabled=true;render();let next=0;async function worker(){while(next<worlds.length){const w=worlds[next++];try{const d=await get('?'+new URLSearchParams({world:w,...(section==='trophies'?{view:'trophies'}:{}),...(manager&&!rankingView?{manager}:{}),...(!rankingView&&!timelineView?{scope}:{}),...(['career','ranking'].includes(section)?{source:'results'}:{})}));if(token!==runId)return;bundles[w]=d;}catch(e){if(token!==runId)return;failed.push(w);}render();}}await Promise.all([worker(),worker()]);if(token!==runId)return;loading=false;$('retry').disabled=false;render();}
+async function load(){const token=++runId;loading=true;bundles={};failed=[];$('retry').disabled=true;render();let next=0;async function worker(){while(next<worlds.length){const w=worlds[next++];try{const d=await get('?'+new URLSearchParams({world:w,...(section==='trophies'?{view:'trophies'}:{}),...(manager&&!rankingView?{manager}:{}),...(!rankingView&&!timelineView?{scope}:{}),...(['career','ranking'].includes(section)?{source:'results'}:{})}));if(token!==runId)return;bundles[w]={...d,matches:routeRows(d.matches),trophies:routeRows(d.trophies)};}catch(e){if(token!==runId)return;failed.push(w);}render();}}await Promise.all([worker(),worker()]);if(token!==runId)return;loading=false;$('retry').disabled=false;render();}
 $('world').addEventListener('change',()=>{limit=25;const url=new URL(location.href);if($('world').value)url.searchParams.set('world',$('world').value);else url.searchParams.delete('world');history.replaceState(null,'',url);syncHubLinks();render();});$('search').addEventListener('input',render);$('retry').addEventListener('click',()=>start());document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render();});
 function updateScope(){
  document.querySelectorAll('#scope-tabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scope===scope)));
@@ -280,7 +283,7 @@ if(!rankingView&&!timelineView){
   const url=new URL(location.href);url.searchParams.set('scope',scope);history.replaceState(null,'',url);syncHubLinks();if(timelineView)timeline();else load();
  });
 }
-async function start(){try{const meta=await get();people=meta.managers;ClubhousePortraits.setPeople(people);worldNames=Object.fromEntries(meta.worlds.map(w=>[w.id,w.name]));worldLinks();if($('world').options.length===1)worlds.forEach(w=>$('world').add(new Option(worldName(w),w)));initHub();if(manager){const m=people.find(x=>x.manager_id===manager);if(!m){$('loading').textContent='Manager IMC non trovato.';$('content').replaceChildren();return;}$('directory-heading').hidden=true;$('compact-count').textContent=m.full_name;$('profile-avatar').hidden=false;$('profile-avatar').innerHTML=ClubhousePortraits.portrait(m.manager_id,'bust');$('title').textContent='Club House';document.title=document.body.classList.contains('trophy-gallery')?'Albo d’oro · IMC':'Club House · '+sectionNames[section]+' · '+m.full_name;$('subtitle').textContent=m.full_name+' · '+m.manager_id;$('tabs').hidden=true;$('back').hidden=false;$('search-label').hidden=false;$('search').value=m.full_name;}if(timelineView){await timeline();return;}await load();}catch(e){$('loading').textContent=e.message;$('retry').disabled=false;}}
+async function start(){try{const meta=await get();people=meta.managers;ClubhousePortraits.setPeople(people);worldNames=Object.fromEntries(meta.worlds.map(w=>[worldRoute(w.id),w.name]));worldLinks();if($('world').options.length===1)worlds.forEach(w=>$('world').add(new Option(worldName(w),w)));initHub();if(manager){const m=people.find(x=>x.manager_id===manager);if(!m){$('loading').textContent='Manager IMC non trovato.';$('content').replaceChildren();return;}$('directory-heading').hidden=true;$('compact-count').textContent=m.full_name;$('profile-avatar').hidden=false;$('profile-avatar').innerHTML=ClubhousePortraits.portrait(m.manager_id,'bust');$('title').textContent='Club House';document.title=document.body.classList.contains('trophy-gallery')?'Albo d’oro · IMC':'Club House · '+sectionNames[section]+' · '+m.full_name;$('subtitle').textContent=m.full_name+' · '+m.manager_id;$('tabs').hidden=true;$('back').hidden=false;$('search-label').hidden=false;$('search').value=m.full_name;}if(timelineView){await timeline();return;}await load();}catch(e){$('loading').textContent=e.message;$('retry').disabled=false;}}
 
 $('search').addEventListener('change',()=>{const value=$('search').value.trim();if(value==='Tutti i manager'){location.href=hubURL(section,'');return;}const m=directoryPeople().find(m=>m.full_name.toLocaleLowerCase('it')===value.toLocaleLowerCase('it')||m.manager_id===value);if(m&&m.manager_id!==manager)location.href=hubURL(section,m.manager_id);});
 const sectionNames={career:'Club House',ranking:'IMC Ranking',timeline:'Media Center',trophies:'Trophy Room',h2h:'IMC H2H'};
@@ -300,7 +303,7 @@ function initHub(){
  $('hub-section-title').textContent=sectionNames[section];
  $('directory-heading').querySelector('h2').textContent=section==='career'?'Una carriera, oltre il singolo mondo.':section==='ranking'?'La classifica dei manager IMC':section==='timeline'?'La storia della community':section==='trophies'?'Il palmarès della community IMC':'Scegli un manager per gli scontri diretti';
  $('directory-heading').querySelector('.eyebrow').textContent=sectionNames[section];
- const currentWorld=new URL(location.href).searchParams.get('world');$('world').value=worlds.includes(currentWorld)?currentWorld:'';
+ const currentWorld=worldRoute(params.get('world'));$('world').value=worlds.includes(currentWorld)?currentWorld:'';
  $('manager-filter').innerHTML='<option value="">Tutti i manager</option>'+people.map(m=>'<option value="'+esc(m.manager_id)+'">'+esc(m.full_name)+'</option>').join('');
  $('manager-filter').value=manager;
  $('manager-options').innerHTML='<option value="Tutti i manager"></option>'+people.map(m=>'<option value="'+esc(m.full_name)+'" label="'+esc(m.manager_id)+'"></option>').join('');

@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__,2).'/site-data/core/world-identity.php';
 function ch_zero(): array {return ['played'=>0,'won'=>0,'drawn'=>0,'lost'=>0,'gf'=>0,'ga'=>0,'penalty_won'=>0,'penalty_lost'=>0,'matched_by_id'=>0,'matched_by_name'=>0];}
 function ch_add(array &$s,int $gf,int $ga,?int $pf=null,?int $pa=null): void {
  $s['played']++;$s['gf']+=$gf;$s['ga']+=$ga;$s[$gf>$ga?'won':($gf<$ga?'lost':'drawn')]++;
@@ -79,9 +80,10 @@ function ch_result_identity(array $r): array {
 /** Career: Results only, by fixture and the manager IDs stored on each result. */
 function ch_results_rows(array $rows,string $gw,array $managers,?string $selected,string $scope='global'): array {
  $out=ch_init($managers);$groups=[];$map=ch_identity($managers);$names=array_column($managers,'full_name','manager_id');
+ $worldId=imc_world_id($gw);
  foreach($rows as $r){
   $r=ch_result_identity($r);
-  if(($r['game_world_id']??'')!==$gw)continue;
+  if(imc_world_id((string)($r['game_world_id']??''))!==$worldId)continue;
   if($scope!=='global'&&ch_nation($r)!==($scope==='national_team'))continue;
   $groups[(string)($r['sm_fixture_id']??'')][]=$r;
  }
