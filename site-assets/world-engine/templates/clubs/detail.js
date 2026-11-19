@@ -5,6 +5,21 @@ function showClubPage() {
  if (splitSquads) tabs.style.gridTemplateColumns = 'repeat(auto-fit, minmax(min(100%, 92px), 1fr))';
  const section = location.pathname.split('/').filter(Boolean).pop();
  const current = clubPages.find(page => page[1] === section) || clubPages[0];
+ if (splitSquads && current[0] === 'ROSTER') {
+  const style = document.createElement('style');
+  style.textContent = `
+   .owned-roster-list{display:grid;gap:4px}
+   .owned-roster-list .owned-roster-row{grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:9px;padding:5px 8px;border-radius:8px;color:inherit;text-decoration:none}
+   .owned-roster-row .nc-photo{width:36px;height:36px;min-height:0;align-self:center;border:0;border-radius:5px}
+   .owned-roster-row .nc-photo-empty{font-size:12px}
+   .owned-roster-row .nc-data{padding:0}
+   .owned-roster-row .nc-name{font-size:13px;margin:0;line-height:1.25}
+   .owned-roster-row .nc-meta{font-size:11px;margin:2px 0 0;line-height:1.35}
+   .owned-roster-arrival{font-size:11px;line-height:1.25;text-align:right;white-space:nowrap}
+   .owned-roster-arrival .muted{display:block;margin-bottom:2px}
+  `;
+  document.head.append(style);
+ }
  tabs.replaceChildren(...clubPages.map(([key,slug,label]) => {
   const link = document.createElement('a');
   link.className = 'club-page-link';
@@ -168,10 +183,21 @@ function rosterSummary(rows, owned=false){
  const summaryLabel = owned ? 'Riepilogo rosa di proprietà' : 'Riepilogo rosa attiva';
  return '<section class="card" aria-label="'+summaryLabel+'" style="margin-bottom:16px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><span class="muted">'+countLabel+'</span><strong style="display:block;font-size:26px">'+active.length+'</strong></div><div><span class="muted">Valore totale</span><strong style="display:block;font-size:clamp(18px,5vw,26px);overflow-wrap:anywhere">'+label+'</strong></div></div>'+(known.length<active.length?'<p class="muted" style="margin-bottom:0">Valore disponibile per '+known.length+' su '+active.length+' giocatori.</p>':'')+'</section>';
 }
+function ownedRosterRow(player) {
+ const rawDate = String(player.arrival_date ?? '');
+ const date = /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
+  ? '<time datetime="'+esc(rawDate)+'">'+esc(rawDate.split('-').reverse().join('/'))+'</time>'
+  : '—';
+ const details = [player.position || '—', (player.age ?? '—')+' anni', player.nationality || '—', 'Rating '+(player.rating ?? '—')];
+ return '<a class="nc-card owned-roster-row" href="'+esc(NexusCards.playerUrl(player.player_id,gw))+'" data-player-id="'+esc(player.player_id)+'">'
+  + NexusCards.photo(player.image_urls,player.full_name)
+  + '<div class="nc-data"><div class="nc-name">'+esc(player.full_name)+'</div><div class="nc-meta">'+esc(details.join(' · '))+'</div></div>'
+  + '<div class="owned-roster-arrival"><span class="muted">Arrivo</span>'+date+'</div></a>';
+}
 function rosterCard(x, mode=''){
  const stat=(label,title,value)=>'<div class="nc-stat" title="'+title+'"><b>'+esc(value??'—')+'</b><span>'+label+'</span></div>';
  const status=type==='club'&&!mode?'<span class="roster-status '+esc(x.roster_status||'unknown')+'">'+({active:'Attivo',departed:'Ceduto',unknown:'Da verificare'}[x.roster_status]||'Da verificare')+'</span>':'';
- return '<a class="nc-card" style="color:inherit;text-decoration:none" href="'+esc(NexusCards.playerUrl(x.player_id,gw))+'" data-player-id="'+esc(x.player_id)+'">'+NexusCards.photo(x.image_urls,x.full_name)+'<div class="nc-data"><div class="nc-name">'+'<span>'+esc(x.full_name)+'</span>'+status+'</div><div class="nc-meta">'+esc(x.position||'—')+' · '+esc(x.age??'—')+' anni · '+esc(x.nationality||'—')+' · Rating '+esc(x.rating??'—')+'</div>'+(mode==='owned'?'':'<div class="nc-stat-row">'+[['Pres.','Presenze',x.appearances],['Tit.','Titolare',x.starts],['Sub.','Subentrato',x.subs],['Panc.','Panchina senza ingresso',x.bench],['Min.','Minuti giocati',x.minutes]].map(a=>stat(...a)).join('')+'</div><div class="nc-stat-row second">'+[['Gol','Gol',x.goals],['Assist','Assist',x.assists],['Media','Media voto',x.average_rating==null?null:Number(x.average_rating).toFixed(2)],['MVP','Uomo partita',x.mom],['Gialli','Ammonizioni',x.yellow],['Rossi','Espulsioni',x.red]].map(a=>stat(...a)).join('')+'</div>')+'</div></a>';
+ return '<a class="nc-card" style="color:inherit;text-decoration:none" href="'+esc(NexusCards.playerUrl(x.player_id,gw))+'" data-player-id="'+esc(x.player_id)+'">'+NexusCards.photo(x.image_urls,x.full_name)+'<div class="nc-data"><div class="nc-name">'+'<span>'+esc(x.full_name)+'</span>'+status+'</div><div class="nc-meta">'+esc(x.position||'—')+' · '+esc(x.age??'—')+' anni · '+esc(x.nationality||'—')+' · Rating '+esc(x.rating??'—')+'</div><div class="nc-stat-row">'+[['Pres.','Presenze',x.appearances],['Tit.','Titolare',x.starts],['Sub.','Subentrato',x.subs],['Panc.','Panchina senza ingresso',x.bench],['Min.','Minuti giocati',x.minutes]].map(a=>stat(...a)).join('')+'</div><div class="nc-stat-row second">'+[['Gol','Gol',x.goals],['Assist','Assist',x.assists],['Media','Media voto',x.average_rating==null?null:Number(x.average_rating).toFixed(2)],['MVP','Uomo partita',x.mom],['Gialli','Ammonizioni',x.yellow],['Rossi','Espulsioni',x.red]].map(a=>stat(...a)).join('')+'</div></div></a>';
 }
 async function showRoster(background=false){
  const tab=activeTab, playing=tab==='PLAYING SQUAD', owned=splitSquads&&!playing;
@@ -204,7 +230,9 @@ async function showRoster(background=false){
   if(mode&&!visibleRows.length)html+='<div class="card empty">'+(owned?'Nessun giocatore di proprietà nel registro trasferimenti.':'Nessun giocatore sceso in campo nel periodo selezionato.')+'</div>';
   for (const [label, rows] of grouped) {
    if(mode&&!rows.length)continue;
-   html += '<h3 class="role-title">'+esc(label)+' ('+rows.length+')</h3><div class="roster-grid">'+(rows.length?rows.map(player=>rosterCard(player,mode)).join(''):'<p class="muted">Nessun giocatore.</p>')+'</div>';
+   const listClass = owned ? 'owned-roster-list' : 'roster-grid';
+   const cards = owned ? rows.map(ownedRosterRow) : rows.map(player=>rosterCard(player,mode));
+   html += '<h3 class="role-title">'+esc(label)+' ('+rows.length+')</h3><div class="'+listClass+'">'+(cards.length?cards.join(''):'<p class="muted">Nessun giocatore.</p>')+'</div>';
   }
   if(type==='club'&&!mode&&j.rows.some(x=>x.roster_status==='unknown'))html+='<p class="nc-roster-note">'+j.rows.filter(x=>x.roster_status==='unknown').length+' giocatori storici con stato non verificabile dai dati disponibili.</p>';
   if(j.rows.some(x=>x.minutes_missing))html+='<p class="nc-roster-note">— nei minuti: dati di ingresso, uscita o fine partita incompleti nei report.</p>';
