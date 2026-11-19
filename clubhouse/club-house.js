@@ -301,8 +301,8 @@ function syncHubLinks(){
  $('back').href=hubURL(section,'');
 }
 function initHub(){
- $('title').textContent='Club House';document.title=document.body.classList.contains('trophy-gallery')?'Albo d’oro · IMC':'Club House · '+sectionNames[section];
  if(!careerRoom){
+ $('title').textContent='Club House';document.title=document.body.classList.contains('trophy-gallery')?'Albo d’oro · IMC':'Club House · '+sectionNames[section];
  $('hub-section-title').textContent=sectionNames[section];
  $('directory-heading').querySelector('h2').textContent=section==='career'?'Una carriera, oltre il singolo mondo.':section==='ranking'?'La classifica dei manager IMC':section==='timeline'?'La storia della community':section==='trophies'?'Il palmarès della community IMC':'Scegli un manager per gli scontri diretti';
  $('directory-heading').querySelector('.eyebrow').textContent=sectionNames[section];

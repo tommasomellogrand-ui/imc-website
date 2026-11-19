@@ -73,6 +73,7 @@ body.career-room .mini-stats strong { color: var(--green); }
 .career-room :is(.career-summary,.career-card,.career-unassigned) { border-radius: 14px !important; }
 .career-room .summary-primary { background: #e6eee4; color: var(--green); }
 .career-room .career-world-heading { background: var(--green); border-radius: 10px; color: #fffaf1; }
+.career-room .career-world-heading > :is(span, small) { color: var(--gold); }
 @media (max-width: 850px) {
   body.career-room #content > .manager-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
