@@ -85,3 +85,10 @@ body.career-room .mini-stats strong { color: var(--green); }
   body.career-room .manager-card .directory-identity { grid-template-columns: 84px minmax(0,1fr); }
   body.career-room .directory-person h2 { font-size: 1rem; }
 }
+.career-room .career-card-trophies { color: #63512a; font-weight: 700; font-size: .78rem; }
+.career-room .career-awards { margin: 1rem 0; background: #fffdf8; border: 1px solid #dcded3; border-radius: 14px; }
+.career-room .career-awards summary { padding: .8rem 1rem; cursor: pointer; font-weight: 700; }
+.career-room .career-awards summary strong { margin-left: .4rem; color: #63512a; }
+.career-room .career-awards ul { list-style: none; margin: 0; padding: 0 1rem; }
+.career-room .career-awards li { display: grid; gap: .15rem; padding: .65rem 0; border-top: 1px solid #dcded3; }
+.career-room .career-awards li span { color: #4e6358; font-size: .83rem; }

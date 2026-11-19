@@ -61,8 +61,7 @@ try {
   }
  }catch(Throwable $e){error_log('Club House national flags '.$gw.': '.$e->getMessage());}
  if($selected!==null)$out['assignments']=array_values(array_filter($assignments,fn($a)=>$a['manager_id']===$selected&&($scope==='global'||$a['assignment_type']===$scope)));
- if(!$careerOnly){
- // Trophies retain award-date attribution. National matches use tenure dates; club matches use report IDs.
+ // Use the same award-date attribution as the Trophy Room.
  $out['trophy_error']=false;
  try {
   $codex=[];foreach($managers as $m)if((int)($m['sm_manager_id']??0)>0)$codex[(string)$m['sm_manager_id']]=$m['manager_id'];
@@ -76,14 +75,12 @@ try {
    $isNation=($t['competition_group']??'')==='NATIONS'||strtolower((string)($t['trophy_type']??''))==='worldcup';
    if(isset($_GET['scope'])&&$scope!=='global'&&$isNation!==($scope==='national_team'))continue;
    $id=trophy_manager_at_win($t,$assignments,$nationalManagers);if($id===null||!isset($out['managers'][$id]))continue;$out['managers'][$id]['trophies']++;
-   imc_rank_award($out['managers'][$id]['ranking'],$t);
+   if(!$careerOnly)imc_rank_award($out['managers'][$id]['ranking'],$t);
    if($selected===$id||($trophyView&&$selected===null))$out['trophies'][]=['trophy_type'=>$t['trophy_type']??null,'division'=>$t['sm_division']??null,'manager_id'=>$id,'manager_name'=>$managerNames[$id]??$id,'world'=>$gw,'season'=>$t['imc_season'],'date'=>$t['won_date'],'competition'=>($t['nexus_view']??'')?:$t['competition_key'],'team'=>$t['winner_name'],'country'=>$t['sm_country']??null,'scope'=>$isNation?'national_team':'club','team_id'=>$t['winner_sm_world_club_id']??null,'fixture_id'=>$t['deciding_fixture_id']??null];
   }
  }catch(Throwable $e){$out['trophy_error']=true;error_log('Club House trophies '.$gw.': '.$e->getMessage());}
- }
  if($careerOnly){
-  unset($out['trophies']);
-  foreach($out['managers'] as &$m)unset($m['trophies'],$m['h2h_stats']);
+  foreach($out['managers'] as &$m)unset($m['h2h_stats']);
   unset($m);
  }
  $source='Results';

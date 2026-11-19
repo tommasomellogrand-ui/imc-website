@@ -9,9 +9,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="/nexus/club-house/club-house.css?v=20261104ivory1">
   <link rel="stylesheet" href="/clubhouse/hub.css?v=career-direct1">
-  <link rel="stylesheet" href="./career.css?v=2">
+  <link rel="stylesheet" href="./career.css?v=3">
   <script defer src="/clubhouse/portraits.js?v=20261106photos"></script>
-  <script defer src="/clubhouse/club-house.js?v=assignment-dates1"></script>
+  <script defer src="/clubhouse/club-house.js?v=career-awards1"></script>
 </head>
 <body class="career-room" data-section="career">
   <header class="career-masthead">
