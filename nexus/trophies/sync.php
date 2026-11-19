@@ -43,12 +43,12 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
             unset($result);
         }
         $derived=trophy_derive($gw,$results,$reports,$schedule,$definitions,$today,$mapping);
-        $derived['awards']=array_filter($derived['awards'],static function(array $row) use ($currentSeason,$previousSeason,$seasonStart): bool {
+        $derived['awards']=array_values(array_filter($derived['awards'],static function(array $row) use ($currentSeason,$previousSeason,$seasonStart): bool {
             $season=(int)$row['imc_season'];
             return $season>=$currentSeason || (
                 $season===$previousSeason && $row['trophy_type']==='worldcup' && $row['won_date']>=$seasonStart
             );
-        });
+        }));
         foreach($derived['awards'] as &$award)$award['nexus_view']=$award['nexus_view']??trophy_nexus_view($award,$labels);unset($award);
         $table='`'.nexus_table($gw,'Trophy_Room').'`';
         $before=nexus_rows($db,'SELECT * FROM '.$table.' ORDER BY id');
