@@ -85,3 +85,32 @@ body.one-ranking main.one-shell { padding: 1rem 0 3.2rem; }
   .one-podium-grid { gap: .4rem; }
   .one-leader { border-radius: 12px; padding-inline: .35rem; }
 }
+
+.one-ranking .rank-multipliers {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: .6rem;
+  width: 100%;
+}
+.one-ranking .rank-multipliers > div {
+  justify-content: center;
+  align-items: center;
+  gap: .5rem;
+  min-height: clamp(88px, 12vw, 126px);
+  padding: .7rem .4rem;
+  border: 1px solid #dddcd6;
+  background: #f4f2ee;
+}
+.one-ranking .rank-multipliers > div:first-child {
+  background: #faf2e2;
+  border-color: #d6bf96;
+}
+.one-ranking .rank-multipliers b {
+  font-size: clamp(1.85rem, 5.4vw, 3.15rem);
+  line-height: 1;
+  letter-spacing: -.05em;
+}
+.one-ranking .rank-multipliers span {
+  color: var(--one-ink);
+  font-size: clamp(.72rem, 2.6vw, 1rem);
+  font-weight: 750;
+}
