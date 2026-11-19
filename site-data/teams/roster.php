@@ -7,11 +7,15 @@ try{
   $c=imc_site_config();$gw=imc_site_world($_GET['world']??'');$season=imc_site_season($_GET['season']??null);
   $raw=(string)($_GET['sm_club']??'');if(!ctype_digit($raw)||(int)$raw<1)throw new InvalidArgumentException('invalid_club');$club=(int)$raw;
   $national=($_GET['type']??'')==='nation';
+  $squad=$_GET['squad']??'';
+  if($squad!==''&&($national||!in_array(SITE_WORLD_TABLES[$gw],['IMC001','IMC003','IMC004'],true)||!in_array($squad,['owned','playing'],true)))throw new InvalidArgumentException('invalid_squad');
+  if($squad==='owned')$season=null;
   $db=imc_site_db($c,imc_site_target($c,$gw));$core=imc_site_db($c,'core');
   $params=[$club,$club];$where='(home_sm_club_id=? OR away_sm_club_id=?)';
   if($national)$where.=" AND (competition_group='NATIONS' OR competition_key LIKE '%|NATIONS|%')";
   if(!$national)$where.=" AND COALESCE(competition_group,'')<>'NATIONS' AND COALESCE(competition_key,'') NOT LIKE '%|NATIONS|%'";
-  $reports=imc_site_rows($db,'SELECT sm_fixture_id,imc_season,match_date,home_sm_club_id,away_sm_club_id,home_score,away_score,players_json,commentary_json FROM `'.imc_site_table($gw,'Match_Report').'` WHERE '.$where.' ORDER BY match_date,sm_fixture_id',$params);
+  if($squad==='playing'&&$season!==null){$where.=' AND imc_season=?';$params[]=$season;}
+  $reports=$squad==='owned'?[]:imc_site_rows($db,'SELECT sm_fixture_id,imc_season,match_date,home_sm_club_id,away_sm_club_id,home_score,away_score,players_json,commentary_json FROM `'.imc_site_table($gw,'Match_Report').'` WHERE '.$where.' ORDER BY match_date,sm_fixture_id',$params);
   $source=['roster_source'=>'player_codex'];
   if($national){
     $snapshot=imc_site_national_roster($reports,$club);$roster=$snapshot['rows'];
@@ -21,26 +25,38 @@ try{
     foreach($roster as &$p){foreach($worldPlayers[$p['player_id']]??[] as $field=>$value)if($value!==null&&$value!=='')$p[$field]=$value;}unset($p);
     if($season!==null)$reports=array_values(array_filter($reports,static fn($r)=>(int)$r['imc_season']===$season));
   }else{
-    $roster=imc_site_rows($db,'SELECT player_id,full_name,position,`Posizione` AS codex_position,rating,age,nationality,market_value,image_url FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE current_sm_club_id=? ORDER BY full_name,player_id',[$club]);
-    $transfers=imc_site_transfers($db,$gw,club:$club);
-    $roster=imc_site_club_roster($roster,$reports,$transfers,$club);
+    if($squad==='owned'){
+      $roster=imc_site_owned_roster(imc_site_transfers($db,$gw),$club);
+      $source=['roster_source'=>'completed_transfers'];
+    }elseif($squad==='playing'){
+      $roster=imc_site_playing_squad($reports,$club);
+      $source=['roster_source'=>'match_reports'];
+    }else{
+      $roster=imc_site_rows($db,'SELECT player_id,full_name,position,`Posizione` AS codex_position,rating,age,nationality,market_value,image_url FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE current_sm_club_id=? ORDER BY full_name,player_id',[$club]);
+      $transfers=imc_site_transfers($db,$gw,club:$club);
+      $roster=imc_site_club_roster($roster,$reports,$transfers,$club);
+      $source=['roster_source'=>'match_reports_player_codex_transfers'];
+      if($season!==null)$reports=array_values(array_filter($reports,static fn($r)=>(int)$r['imc_season']===$season));
+    }
     $ids=array_column($roster,'player_id');$worldPlayers=[];
     foreach(array_chunk($ids,500) as $chunk)foreach(imc_site_rows($db,'SELECT player_id,full_name,position,`Posizione` AS codex_position,rating,age,nationality,market_value,image_url,current_sm_club_id FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE player_id IN ('.implode(',',array_fill(0,count($chunk),'?')).')',$chunk) as $p)$worldPlayers[(int)$p['player_id']]=$p;
     foreach($roster as &$p){foreach($worldPlayers[$p['player_id']]??[] as $field=>$value)if($value!==null&&$value!=='')$p[$field]=$value;}unset($p);
-    foreach($roster as &$p){if(!isset($p['status_transfer_number'])&&(int)($p['current_sm_club_id']??0)>0)$p['roster_status']=(int)$p['current_sm_club_id']===$club?'active':'departed';unset($p['current_sm_club_id']);}unset($p);
+    foreach($roster as &$p){if($squad===''&&!isset($p['status_transfer_number'])&&(int)($p['current_sm_club_id']??0)>0)$p['roster_status']=(int)$p['current_sm_club_id']===$club?'active':'departed';unset($p['current_sm_club_id']);}unset($p);
     foreach($roster as &$p) $p['codex_position']=imc_site_codex_position((string)($p['position']??''),$p['codex_position']??null);
     unset($p);
-    $source=['roster_source'=>'match_reports_player_codex_transfers'];
-    if($season!==null)$reports=array_values(array_filter($reports,static fn($r)=>(int)$r['imc_season']===$season));
   }
   $identities=imc_site_player_identity($core,array_column($roster,'player_id'));
   foreach($roster as &$p){
     $identity=$identities[(int)$p['player_id']]??[];
     foreach(['position','rating','age','nationality'] as $field){if($p[$field]===null||$p[$field]==='')$p[$field]=$identity[$field]??null;}
     if(empty($p['full_name'])&&!empty($identity['full_name']))$p['full_name']=$identity['full_name'];
+    if(empty($p['full_name']))$p['full_name']='Player '.$p['player_id'];
     if(!empty($p['image_url']))$identity['image_url']=$p['image_url'];
     $p['image_urls']=imc_site_player_images((int)$p['player_id'],$identity,$p['image_url']);unset($p['image_url']);
   }unset($p);
-  imc_site_out(array_merge(['ok'=>true,'game_world_id'=>$gw,'imc_season'=>$season,'sm_club'=>$club,'generated_at'=>gmdate('c')],$source,imc_site_roster_stats($roster,$reports,$club)));
+  if($squad!=='')usort($roster,static fn($a,$b)=>strnatcasecmp($a['full_name'],$b['full_name'])?:$a['player_id']<=>$b['player_id']);
+  $result=$squad==='owned'?['rows'=>$roster]:imc_site_roster_stats($roster,$reports,$club);
+  if($squad==='playing')$result['rows']=array_values(array_filter($result['rows'],static fn($p)=>$p['appearances']>0));
+  imc_site_out(array_merge(['ok'=>true,'game_world_id'=>$gw,'imc_season'=>$season,'sm_club'=>$club,'generated_at'=>gmdate('c')],$source,$result));
 }catch(InvalidArgumentException $e){imc_site_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){imc_site_out(['ok'=>false,'error'=>'club_roster_error'],500);}
 

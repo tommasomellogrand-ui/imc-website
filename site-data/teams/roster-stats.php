@@ -90,6 +90,58 @@ function imc_site_roster_stats(array $roster,array $reports,int $club): array {
   return ['rows'=>array_values($players),'reports'=>$used,'invalid_reports'=>$invalid];
 }
 
+function imc_site_owned_roster(array $transfers, int $club): array {
+  $order = static fn(array $row): array => [
+    (string)($row['normalized_transfer_date'] ?? $row['transfer_date'] ?? ''),
+    (int)($row['imc_season'] ?? 0),
+    (int)($row['imc_transfer_number'] ?? 0),
+  ];
+  usort($transfers, static fn($a, $b) => $order($b) <=> $order($a));
+  $seen = [];
+  $owned = [];
+  foreach ($transfers as $transfer) {
+    $status = strtolower(trim((string)($transfer['status'] ?? '')));
+    if (!in_array($status, ['', 'com', 'completed', 'complete', 'completato', 'certified'], true)) continue;
+    $type = implode(' ', array_intersect_key($transfer, array_flip([
+      'type', 'transfer_type', 'amount_text', 'player_action_text', 'player_status_code', 'player_status_title',
+    ])));
+    if (preg_match('/\b(?:loan|loans|loaned|prestito|prestiti)\b/i', str_replace('_', ' ', $type))) continue;
+
+    $from = (int)($transfer['from_sm_world_club_id'] ?? 0);
+    $to = (int)($transfer['to_sm_world_club_id'] ?? 0);
+    if ($from === $to) continue;
+    $players = [[$transfer, $to]];
+    $exchange = json_decode((string)($transfer['exchange_players'] ?? '[]'), true);
+    foreach (is_array($exchange) ? $exchange : [] as $player) {
+      if (is_array($player)) $players[] = [$player, $from];
+    }
+    foreach ($players as [$player, $owner]) {
+      $id = (int)($player['player_id'] ?? $player['sm_player_id'] ?? 0);
+      if ($id < 1 || isset($seen[$id])) continue;
+      // Each player has one owner across the world; include the reverse leg of a swap.
+      $seen[$id] = true;
+      if ($owner !== $club) continue;
+      $owned[] = [
+        'player_id'=>$id, 'full_name'=>$player['player_name'] ?? '',
+        'position'=>$player['player_position'] ?? null, 'rating'=>$player['player_rating'] ?? null,
+        'age'=>$player['player_age'] ?? null, 'nationality'=>null,
+        'market_value'=>$player['player_value'] ?? null, 'image_url'=>$player['player_image'] ?? null,
+        'roster_status'=>'active',
+      ];
+    }
+  }
+  return $owned;
+}
+
+function imc_site_playing_squad(array $reports, int $club): array {
+  $players = [];
+  foreach ($reports as $report) {
+    foreach (imc_site_national_roster([$report], $club)['rows'] as $player) {
+      $players[$player['player_id']] = $player;
+    }
+  }
+  return array_values($players);
+}
 
 // Club membership is independent of the selected statistics season.
 function imc_site_club_roster(array $current,array $reports,array $transfers,int $club): array {

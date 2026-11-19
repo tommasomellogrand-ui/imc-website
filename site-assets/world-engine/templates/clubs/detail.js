@@ -1,5 +1,8 @@
 const p=new URLSearchParams(location.search),gw='__WORLD_ID__',type='club',id=p.get('id')||'',tabs=document.getElementById('tabs'),view=document.getElementById('view');localStorage.setItem('imc_nexus_world',gw);document.getElementById('gw').textContent=gw;document.body.dataset.profileFamily=type==='nation'?'nations':'teams';document.getElementById('back').textContent=type==='nation'?'← Nations':'← Clubs';document.getElementById('back').href='/__WORLD_SLUG__/clubs/';const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));let season='',D,C={},statsRequest,matchesRequest,transfersRequest,activeTab,transferDirection='in';const clubPages = [["OVERVIEW","overview","Overview"],["MANAGER","manager","Manager"],["ROSTER","roster","Roster"],["STATS","stats","Stats"],["DATA ROOM","data-room","Data Room"],["H2H","h2h","H2H"],["TRANSFERS","transfers","Transfers"],["TROPHY ROOM","trophy-room","Trophy Room"]];
+const splitSquads = ['IMC001', 'IMC003', 'IMC004'].includes(gw);
+if (splitSquads) clubPages.splice(3, 0, ['PLAYING SQUAD', 'playing-squad', 'Playing Squad']);
 function showClubPage() {
+ if (splitSquads) tabs.style.gridTemplateColumns = 'repeat(auto-fit, minmax(min(100%, 92px), 1fr))';
  const section = location.pathname.split('/').filter(Boolean).pop();
  const current = clubPages.find(page => page[1] === section) || clubPages[0];
  tabs.replaceChildren(...clubPages.map(([key,slug,label]) => {
@@ -15,9 +18,9 @@ function showClubPage() {
 }
 function matchRows(a){if(!a?.length)return '<div class="card empty">Nessuna partita nella stagione selezionata.</div>';return '<div class="card rows">'+(a||[]).slice(0,10).map(r=>'<div class="row"><b>'+esc(r.home_name)+'</b><span class="score">'+matchScore(r)+'</span><b class="away">'+esc(r.away_name)+'</b></div>').join('')+'</div>'}
 function matchScore(r){const valid=v=>v!==null&&v!==undefined&&String(v).trim()!==''&&/^\d+$/.test(String(v));let text=esc(r.home_score)+' - '+esc(r.away_score);for(const [prefix,label] of [['aggregate','Totale A/R'],['penalty','Rigori']]){const h=r[prefix+'_home_score'],a=r[prefix+'_away_score'];if(valid(h)&&valid(a))text+='<small style="display:block;font-size:10px;font-weight:600;line-height:1.4;margin-top:4px;text-align:center">'+label+' '+esc(h)+' - '+esc(a)+'</small>'}return text}
-function show(n){if(!['MANAGER','TROPHY ROOM','OVERVIEW','STATS','TRANSFERS','ROSTER','DATA ROOM','H2H'].includes(n)||(type==='nation'&&n==='TRANSFERS')){view.innerHTML='<div class="card empty">Sezione non ancora collegata.</div>';return}if(n==='OVERVIEW'){const s=C?.summary||{};view.innerHTML='<div class="kpis">'+[['PARTITE',s.played],['VITTORIE',s.won],['PAREGGI',s.drawn],['SCONFITTE',s.lost],['GF',s.gf],['GS',s.ga],['DIFF.',s.gd],['WIN %',(s.win_pct??0)+'%']].map(x=>'<div class="kpi"><b>'+esc(x[1]??0)+'</b><span>'+x[0]+'</span></div>').join('')+'</div><h3 class="section-title">ULTIME PARTITE</h3>'+matchRows(C?.matches)}
+function show(n){if(!['MANAGER','TROPHY ROOM','OVERVIEW','STATS','TRANSFERS','ROSTER','PLAYING SQUAD','DATA ROOM','H2H'].includes(n)||(type==='nation'&&n==='TRANSFERS')){view.innerHTML='<div class="card empty">Sezione non ancora collegata.</div>';return}if(n==='OVERVIEW'){const s=C?.summary||{};view.innerHTML='<div class="kpis">'+[['PARTITE',s.played],['VITTORIE',s.won],['PAREGGI',s.drawn],['SCONFITTE',s.lost],['GF',s.gf],['GS',s.ga],['DIFF.',s.gd],['WIN %',(s.win_pct??0)+'%']].map(x=>'<div class="kpi"><b>'+esc(x[1]??0)+'</b><span>'+x[0]+'</span></div>').join('')+'</div><h3 class="section-title">ULTIME PARTITE</h3>'+matchRows(C?.matches)}
 else if(n==='MANAGER')view.innerHTML=D.manager?'<div class="card manager"><a href="/__WORLD_SLUG__/managers/profile.html?manager='+encodeURIComponent(D.manager.manager_id)+'"><b>'+esc(D.manager.full_name)+'</b></a><span>'+esc(D.manager.manager_id)+' · dal '+esc(D.manager.start_date||'—')+(D.manager.end_date?' al '+esc(D.manager.end_date):'')+'</span></div>':'<div class="card empty">Nessun manager assegnato.</div>';
-else if(n==='ROSTER')showRoster();
+else if(n==='ROSTER'||n==='PLAYING SQUAD')showRoster();
 else if(n==='DATA ROOM')NexusDataRoom.mount(view,{world:gw,kind:type==='nation'?'nation':'club',id:String(D.team.world_id),scope:type==='nation'?'national_team':'club'});
 else if(n==='STATS')showClubStats();
 else if(n==='H2H'){document.getElementById('meta').textContent='ID '+(D.team?.world_id||'—')+' · '+gw+' · Tutto lo storico';NexusH2H.mount(view,{world:gw,kind:type==='nation'?'nation':'club',id:String(D.team.world_id),name:D.team.name})}
@@ -54,8 +57,8 @@ async function showClubStats(){
   document.getElementById('club-stats-values').innerHTML='<div class="kpis">'+[['PARTITE',s.played],['VITTORIE',s.won],['PAREGGI',s.drawn],['SCONFITTE',s.lost],['GF',s.gf],['GS',s.ga],['DIFF.',s.gd],['WIN %',win+'%']].map(x=>'<div class="kpi"><b>'+esc(x[1]??0)+'</b><span>'+x[0]+'</span></div>').join('')+'</div><p class="muted">'+esc(statsPeriodLabel())+' · Calcolate dai risultati disponibili.</p>'+(!s.played?'<div class="card empty">Nessuna partita disputata nel periodo selezionato.</div>':'');
  }catch(e){if(activeTab==='STATS'&&version===clubStatsVersion)document.getElementById('club-stats-values').innerHTML='<div class="card empty">'+esc(e.message)+'</div>'}
 }
-async function readClub(file,withSeason=true,selectedSeason=season){
- const q=new URLSearchParams({world:gw,[type==='nation'&&file==='trophies.php'?'sm_nation':'sm_club']:String(D.team.world_id)});if(type==='nation')q.set('type','nation');if(withSeason&&selectedSeason)q.set('season',selectedSeason);
+async function readClub(file,withSeason=true,selectedSeason=season,extra={}){
+ const q=new URLSearchParams({...extra,world:gw,[type==='nation'&&file==='trophies.php'?'sm_nation':'sm_club']:String(D.team.world_id)});if(type==='nation')q.set('type','nation');if(withSeason&&selectedSeason)q.set('season',selectedSeason);
  const r=await fetch(file+'?'+q,{cache:'no-store'}),j=await r.json();if(!r.ok||j.ok===false)throw Error('Impossibile caricare i dati. Riprova.');return j;
 }
 function loadStats(){
@@ -156,32 +159,37 @@ function rosterMarketValue(value){
  if(!/^\d+(?:\.\d+)?$/.test(text))return null;
  const number=Number(text);return Number.isFinite(number)?number:null;
 }
-function rosterSummary(rows){
+function rosterSummary(rows, owned=false){
  const active=rows.filter(x=>x.roster_status==='active');
  const values=active.map(x=>rosterMarketValue(x.market_value)),known=values.filter(x=>x!==null);
  const total=known.reduce((sum,value)=>sum+value,0);
  const label=known.length||!active.length?new Intl.NumberFormat('it-IT',{maximumFractionDigits:0}).format(total):'—';
- return '<section class="card" aria-label="Riepilogo rosa attiva" style="margin-bottom:16px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><span class="muted">Giocatori attivi</span><strong style="display:block;font-size:26px">'+active.length+'</strong></div><div><span class="muted">Valore totale</span><strong style="display:block;font-size:clamp(18px,5vw,26px);overflow-wrap:anywhere">'+label+'</strong></div></div>'+(known.length<active.length?'<p class="muted" style="margin-bottom:0">Valore disponibile per '+known.length+' su '+active.length+' giocatori.</p>':'')+'</section>';
+ const countLabel = owned ? 'Giocatori di proprietà' : 'Giocatori attivi';
+ const summaryLabel = owned ? 'Riepilogo rosa di proprietà' : 'Riepilogo rosa attiva';
+ return '<section class="card" aria-label="'+summaryLabel+'" style="margin-bottom:16px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><span class="muted">'+countLabel+'</span><strong style="display:block;font-size:26px">'+active.length+'</strong></div><div><span class="muted">Valore totale</span><strong style="display:block;font-size:clamp(18px,5vw,26px);overflow-wrap:anywhere">'+label+'</strong></div></div>'+(known.length<active.length?'<p class="muted" style="margin-bottom:0">Valore disponibile per '+known.length+' su '+active.length+' giocatori.</p>':'')+'</section>';
 }
-function rosterCard(x){
+function rosterCard(x, mode=''){
  const stat=(label,title,value)=>'<div class="nc-stat" title="'+title+'"><b>'+esc(value??'—')+'</b><span>'+label+'</span></div>';
- const status=type==='club'?'<span class="roster-status '+esc(x.roster_status||'unknown')+'">'+({active:'Attivo',departed:'Ceduto',unknown:'Da verificare'}[x.roster_status]||'Da verificare')+'</span>':'';
- return '<a class="nc-card" style="color:inherit;text-decoration:none" href="'+esc(NexusCards.playerUrl(x.player_id,gw))+'" data-player-id="'+esc(x.player_id)+'">'+NexusCards.photo(x.image_urls,x.full_name)+'<div class="nc-data"><div class="nc-name">'+'<span>'+esc(x.full_name)+'</span>'+status+'</div><div class="nc-meta">'+esc(x.position||'—')+' · '+esc(x.age??'—')+' anni · '+esc(x.nationality||'—')+' · Rating '+esc(x.rating??'—')+'</div><div class="nc-stat-row">'+[['Pres.','Presenze',x.appearances],['Tit.','Titolare',x.starts],['Sub.','Subentrato',x.subs],['Panc.','Panchina senza ingresso',x.bench],['Min.','Minuti giocati',x.minutes]].map(a=>stat(...a)).join('')+'</div><div class="nc-stat-row second">'+[['Gol','Gol',x.goals],['Assist','Assist',x.assists],['Media','Media voto',x.average_rating==null?null:Number(x.average_rating).toFixed(2)],['MVP','Uomo partita',x.mom],['Gialli','Ammonizioni',x.yellow],['Rossi','Espulsioni',x.red]].map(a=>stat(...a)).join('')+'</div></div></a>';
+ const status=type==='club'&&!mode?'<span class="roster-status '+esc(x.roster_status||'unknown')+'">'+({active:'Attivo',departed:'Ceduto',unknown:'Da verificare'}[x.roster_status]||'Da verificare')+'</span>':'';
+ return '<a class="nc-card" style="color:inherit;text-decoration:none" href="'+esc(NexusCards.playerUrl(x.player_id,gw))+'" data-player-id="'+esc(x.player_id)+'">'+NexusCards.photo(x.image_urls,x.full_name)+'<div class="nc-data"><div class="nc-name">'+'<span>'+esc(x.full_name)+'</span>'+status+'</div><div class="nc-meta">'+esc(x.position||'—')+' · '+esc(x.age??'—')+' anni · '+esc(x.nationality||'—')+' · Rating '+esc(x.rating??'—')+'</div>'+(mode==='owned'?'':'<div class="nc-stat-row">'+[['Pres.','Presenze',x.appearances],['Tit.','Titolare',x.starts],['Sub.','Subentrato',x.subs],['Panc.','Panchina senza ingresso',x.bench],['Min.','Minuti giocati',x.minutes]].map(a=>stat(...a)).join('')+'</div><div class="nc-stat-row second">'+[['Gol','Gol',x.goals],['Assist','Assist',x.assists],['Media','Media voto',x.average_rating==null?null:Number(x.average_rating).toFixed(2)],['MVP','Uomo partita',x.mom],['Gialli','Ammonizioni',x.yellow],['Rossi','Espulsioni',x.red]].map(a=>stat(...a)).join('')+'</div>')+'</div></a>';
 }
 async function showRoster(background=false){
- const version=++rosterVersion,selected=rosterSeason;rosterLoading=true;
- const period=selected?'Stagione '+selected:'Globali · Tutte le stagioni';
+ const tab=activeTab, playing=tab==='PLAYING SQUAD', owned=splitSquads&&!playing;
+ const mode=playing?'playing':owned?'owned':'';
+ const version=++rosterVersion,selected=owned?'':rosterSeason;rosterLoading=true;
+ const period=owned?'Roster':selected?'Stagione '+selected:'Globali · Tutte le stagioni';
  document.getElementById('meta').textContent='ID '+(D.team?.world_id||'—')+' · '+gw+' · '+period;
  if(!background){
-  view.innerHTML='<div class="card nc-toolbar"><label for="roster-season">Statistiche</label><select id="roster-season"><option value="">Globali · Tutte le stagioni</option>'+clubStatSeasons.map(s=>'<option value="'+s+'"'+(String(s)===selected?' selected':'')+'>Stagione '+s+'</option>').join('')+'</select></div><div id="roster-values" aria-live="polite"><div class="card empty">Caricamento rosa…</div></div>';
-  document.getElementById('roster-season').onchange=e=>{rosterSeason=e.target.value;showRoster();document.getElementById('roster-season').focus()};
+  view.innerHTML=(owned?'':'<div class="card nc-toolbar"><label for="roster-season">'+(playing?'Stagione':'Statistiche')+'</label><select id="roster-season"><option value="">Globali · Tutte le stagioni</option>'+clubStatSeasons.map(s=>'<option value="'+s+'"'+(String(s)===selected?' selected':'')+'>Stagione '+s+'</option>').join('')+'</select></div>')+'<div id="roster-values" aria-live="polite"><div class="card empty">Caricamento rosa…</div></div>';
+  if(!owned)document.getElementById('roster-season').onchange=e=>{rosterSeason=e.target.value;showRoster();document.getElementById('roster-season').focus()};
  }
  try{
-  const j=rosterData&&rosterData.season===selected&&background==='filter'?rosterData.data:await readClub('roster.php',!!selected,selected);rosterData={season:selected,data:j};
-  if(activeTab!=='ROSTER'||version!==rosterVersion)return;
-  let html=(type==='club'?rosterSummary(j.rows):'')+'<p class="nc-roster-note">'+(type==='nation'?'Convocati nell’ultimo Match Report disponibile'+(j.roster_date?' · '+esc(j.roster_date):''):'Rosa e storico · Stato aggiornato dai trasferimenti')+' · '+esc(period)+' · Statistiche dai '+esc(j.reports)+' Match Report disponibili per '+(type==='nation'?'questa nazionale':'questo club')+'.<br>Pres. = Tit. + Sub. · Panc. = non entrato · MVP = uomo partita.</p>';
-  if(type==='club')html+='<div class="transfer-tabs" role="tablist" aria-label="Stato rosa">'+[['active','Attivi'],['departed','Ceduti']].map(([v,label])=>'<button type="button" role="tab" data-roster-state="'+v+'" aria-pressed="'+(rosterFilter===v)+'" aria-selected="'+(rosterFilter===v)+'">'+label+' ('+j.rows.filter(x=>(x.roster_status||'unknown')===v).length+')</button>').join('')+'</div>';
-  const visibleRows=type==='club'?j.rows.filter(x=>(x.roster_status||'unknown')===rosterFilter):j.rows;
+  const j=rosterData&&rosterData.season===selected&&background==='filter'?rosterData.data:await readClub('roster.php',!!selected,selected,mode?{squad:mode}:{});rosterData={season:selected,data:j};
+  if(activeTab!==tab||version!==rosterVersion)return;
+  if(mode&&j.roster_source!==(owned?'completed_transfers':'match_reports'))throw Error('Dati della rosa non disponibili. Riprova.');
+  let html=owned?rosterSummary(j.rows,true):playing?'<p class="nc-roster-note"><strong>'+j.rows.length+' giocatori impiegati</strong> · '+esc(period)+' · '+esc(j.reports)+' Match Report disponibili.</p>':(type==='club'?rosterSummary(j.rows):'')+'<p class="nc-roster-note">'+(type==='nation'?'Convocati nell’ultimo Match Report disponibile'+(j.roster_date?' · '+esc(j.roster_date):''):'Rosa e storico · Stato aggiornato dai trasferimenti')+' · '+esc(period)+' · Statistiche dai '+esc(j.reports)+' Match Report disponibili per '+(type==='nation'?'questa nazionale':'questo club')+'.<br>Pres. = Tit. + Sub. · Panc. = non entrato · MVP = uomo partita.</p>';
+  if(type==='club'&&!mode)html+='<div class="transfer-tabs" role="tablist" aria-label="Stato rosa">'+[['active','Attivi'],['departed','Ceduti']].map(([v,label])=>'<button type="button" role="tab" data-roster-state="'+v+'" aria-pressed="'+(rosterFilter===v)+'" aria-selected="'+(rosterFilter===v)+'">'+label+' ('+j.rows.filter(x=>(x.roster_status||'unknown')===v).length+')</button>').join('')+'</div>';
+  const visibleRows=type==='club'&&!mode?j.rows.filter(x=>(x.roster_status||'unknown')===rosterFilter):j.rows;
   const positionGroups = new Map([
    ['portiere', 'Portieri'], ['difensore', 'Difensori'], ['terzino', 'Terzini'], ['centrocampista', 'Centrocampisti'],
    ['centrocampista offensivo', 'Centrocampisti offensivi'], ['attaccante', 'Attaccanti']
@@ -193,16 +201,18 @@ async function showRoster(background=false){
    if (!grouped.has(label)) grouped.set(label, []);
    grouped.get(label).push(player);
   }
+  if(mode&&!visibleRows.length)html+='<div class="card empty">'+(owned?'Nessun giocatore di proprietà nel registro trasferimenti.':'Nessun giocatore sceso in campo nel periodo selezionato.')+'</div>';
   for (const [label, rows] of grouped) {
-   html += '<h3 class="role-title">'+esc(label)+' ('+rows.length+')</h3><div class="roster-grid">'+(rows.length?rows.map(rosterCard).join(''):'<p class="muted">Nessun giocatore.</p>')+'</div>';
+   if(mode&&!rows.length)continue;
+   html += '<h3 class="role-title">'+esc(label)+' ('+rows.length+')</h3><div class="roster-grid">'+(rows.length?rows.map(player=>rosterCard(player,mode)).join(''):'<p class="muted">Nessun giocatore.</p>')+'</div>';
   }
-  if(type==='club'&&j.rows.some(x=>x.roster_status==='unknown'))html+='<p class="nc-roster-note">'+j.rows.filter(x=>x.roster_status==='unknown').length+' giocatori storici con stato non verificabile dai dati disponibili.</p>';
+  if(type==='club'&&!mode&&j.rows.some(x=>x.roster_status==='unknown'))html+='<p class="nc-roster-note">'+j.rows.filter(x=>x.roster_status==='unknown').length+' giocatori storici con stato non verificabile dai dati disponibili.</p>';
   if(j.rows.some(x=>x.minutes_missing))html+='<p class="nc-roster-note">— nei minuti: dati di ingresso, uscita o fine partita incompleti nei report.</p>';
   if(j.invalid_reports)html+='<p class="nc-roster-note">'+esc(j.invalid_reports)+' report con dati giocatori non leggibili.</p>';
   document.getElementById('roster-values').innerHTML=j.rows.length||type==='club'?html:'<div class="card empty">'+(type==='nation'?'Nessuna convocazione disponibile nei Match Report.':'Nessun giocatore associato a questo club nel Player Codex.')+'</div>';
   view.querySelectorAll('[data-roster-state]').forEach(b=>b.onclick=()=>{rosterFilter=b.dataset.rosterState;showRoster('filter')});
   NexusCards.wireImages(view);
- }catch(e){if(activeTab==='ROSTER'&&version===rosterVersion)document.getElementById('roster-values').innerHTML='<div class="card empty">'+esc(e.message)+'</div>'}
+ }catch(e){if(activeTab===tab&&version===rosterVersion)document.getElementById('roster-values').innerHTML='<div class="card empty">'+esc(e.message)+'</div>'}
  finally{if(version===rosterVersion)rosterLoading=false}
 }
 
@@ -219,4 +229,4 @@ async function openTab(n){
  }
  if(activeTab===n)show(n);
 }
-async function init(){const context=await fetch('context.php?world='+encodeURIComponent(gw),{cache:'no-store'}).then(r=>r.json());season=String(context.current_season??'');clubStatSeasons=[...new Set((context.seasons||[]).map(s=>Number(s.imc_season)).filter(s=>Number.isInteger(s)&&s>0))].sort((a,b)=>b-a);D=await fetch('detail.php?world='+encodeURIComponent(gw)+'&type='+type+'&id='+encodeURIComponent(id),{cache:'no-store'}).then(r=>r.json());if(!D.ok||!D.team){document.getElementById('name').textContent=type==='nation'?'Nazionale non disponibile':'Club non disponibile';view.innerHTML='<div class="card empty">Squadra non presente nel Game World selezionato.</div>';return;}document.getElementById('kind').textContent=type==='nation'?'NATION':'CLUB';document.title='__WORLD_NAME__ · '+(D.team?.name||(type==='nation'?'Nation':'Club'));document.getElementById('name').textContent=D.team?.name||'Team';document.getElementById('meta').textContent='ID '+(D.team?.world_id||'—')+' · '+gw+(season?' · Season '+season:'');document.getElementById('image').innerHTML=D.team?.image_url?'<img src="'+esc(String(D.team.image_url).replace(/^http:/i,'https:'))+'" alt="">':'<div class="crest"></div>';showClubPage()}init().catch(()=>{view.innerHTML='<div class="card empty">Impossible caricare il club. <button type="button" onclick="location.reload()">Riprova</button></div>'});
+async function init(){const context=await fetch('context.php?world='+encodeURIComponent(gw),{cache:'no-store'}).then(r=>r.json());season=String(context.current_season??'');if(splitSquads)rosterSeason=season;clubStatSeasons=[...new Set((context.seasons||[]).map(s=>Number(s.imc_season)).filter(s=>Number.isInteger(s)&&s>0))].sort((a,b)=>b-a);D=await fetch('detail.php?world='+encodeURIComponent(gw)+'&type='+type+'&id='+encodeURIComponent(id),{cache:'no-store'}).then(r=>r.json());if(!D.ok||!D.team){document.getElementById('name').textContent=type==='nation'?'Nazionale non disponibile':'Club non disponibile';view.innerHTML='<div class="card empty">Squadra non presente nel Game World selezionato.</div>';return;}document.getElementById('kind').textContent=type==='nation'?'NATION':'CLUB';document.title='__WORLD_NAME__ · '+(D.team?.name||(type==='nation'?'Nation':'Club'));document.getElementById('name').textContent=D.team?.name||'Team';document.getElementById('meta').textContent='ID '+(D.team?.world_id||'—')+' · '+gw+(season?' · Season '+season:'');document.getElementById('image').innerHTML=D.team?.image_url?'<img src="'+esc(String(D.team.image_url).replace(/^http:/i,'https:'))+'" alt="">':'<div class="crest"></div>';showClubPage()}init().catch(()=>{view.innerHTML='<div class="card empty">Impossible caricare il club. <button type="button" onclick="location.reload()">Riprova</button></div>'});
