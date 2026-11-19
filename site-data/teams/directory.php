@@ -11,6 +11,32 @@ try{
  $imc=imc_site_rows($core,"SELECT a.manager_id,m.full_name,a.team_id,a.national_team_id FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id WHERE a.game_world_id=? AND a.assignment_type=? AND a.end_date IS NULL AND (a.start_date IS NULL OR a.start_date<=CURRENT_DATE) ORDER BY a.start_date DESC,a.id DESC",[$gw,$kind]);
  foreach($imc as $a){$key=(string)($kind==='club'?$a['team_id']:$a['national_team_id']);if($key!==''&&!isset($managers[$key]))$managers[$key]=['manager_id'=>$a['manager_id'],'full_name'=>$a['full_name'],'is_imc'=>true];}
  foreach($rows as &$row)$row['manager']=$managers[(string)$row['world_id']]??null;unset($row);
+ if($type==='clubs'&&($_GET['view']??'')==='roster'){
+  require_once __DIR__.'/roster-stats.php';
+  require_once dirname(__DIR__).'/players/media.php';
+  if(!imc_site_owned_world(SITE_WORLD_TABLES[$gw]))throw new InvalidArgumentException('invalid_squad');
+  $db=imc_site_db($c,imc_site_target($c,$gw));
+  $rosters=array_intersect_key(imc_site_owned_rosters(imc_site_transfers($db,$gw)),array_column($rows,null,'world_id'));
+  $ids=[];
+  foreach($rosters as $roster)foreach($roster as $player)$ids[]=$player['player_id'];
+  $worldValues=[];
+  foreach(array_chunk($ids,500) as $chunk){
+   $sql='SELECT player_id,market_value FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE player_id IN ('.implode(',',array_fill(0,count($chunk),'?')).')';
+   foreach(imc_site_rows($db,$sql,$chunk) as $player)$worldValues[(int)$player['player_id']]=$player['market_value'];
+  }
+  $missing=array_filter($ids,static fn($id)=>trim((string)($worldValues[$id]??''))==='');
+  $global=imc_site_player_identity($core,$missing,true);
+  foreach($rows as &$row){
+   $roster=$rosters[(int)$row['world_id']]??[];
+   foreach($roster as &$player){
+    $id=$player['player_id'];
+    $player['market_value']=imc_site_owned_market_value($worldValues[$id]??null,$global[$id]['market_value']??null);
+   }
+   unset($player);
+   $row['roster_summary']=imc_site_owned_roster_summary($roster);
+  }
+  unset($row);
+ }
  imc_site_out(['ok'=>true,'game_world_id'=>$gw,'type'=>$type,'country_filter'=>false,'count'=>count($rows),'rows'=>$rows]);
 }catch(InvalidArgumentException $e){imc_site_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){imc_site_out(['ok'=>false,'error'=>'teams_directory_error'],500);}
 

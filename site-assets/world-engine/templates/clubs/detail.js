@@ -172,14 +172,16 @@ function rosterMarketValue(value){
  if(!/^\d+(?:\.\d+)?$/.test(text))return null;
  const number=Number(text);return Number.isFinite(number)?number:null;
 }
-function rosterSummary(rows, owned=false){
+function rosterSummary(rows, owned=false, totals=null){
  const active=rows.filter(x=>x.roster_status==='active');
  const values=active.map(x=>rosterMarketValue(x.market_value)),known=values.filter(x=>x!==null);
- const total=known.reduce((sum,value)=>sum+value,0);
- const label=known.length||!active.length?new Intl.NumberFormat('it-IT',{maximumFractionDigits:0}).format(total):'—';
+ const count=totals?.owned_count??active.length;
+ const valued=totals?.valued_count??known.length;
+ const total=totals?totals.market_value:known.reduce((sum,value)=>sum+value,0);
+ const label=valued||!count?new Intl.NumberFormat('it-IT',{maximumFractionDigits:0}).format(total):'—';
  const countLabel = owned ? 'Giocatori di proprietà' : 'Giocatori attivi';
  const summaryLabel = owned ? 'Riepilogo rosa di proprietà' : 'Riepilogo rosa attiva';
- return '<section class="card" aria-label="'+summaryLabel+'" style="margin-bottom:16px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><span class="muted">'+countLabel+'</span><strong style="display:block;font-size:26px">'+active.length+'</strong></div><div><span class="muted">Valore totale</span><strong style="display:block;font-size:clamp(18px,5vw,26px);overflow-wrap:anywhere">'+label+'</strong></div></div>'+(known.length<active.length?'<p class="muted" style="margin-bottom:0">Valore disponibile per '+known.length+' su '+active.length+' giocatori.</p>':'')+'</section>';
+ return '<section class="card" aria-label="'+summaryLabel+'" style="margin-bottom:16px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><span class="muted">'+countLabel+'</span><strong style="display:block;font-size:26px">'+count+'</strong></div><div><span class="muted">Valore totale</span><strong style="display:block;font-size:clamp(18px,5vw,26px);overflow-wrap:anywhere">'+label+'</strong></div></div>'+(valued<count?'<p class="muted" style="margin-bottom:0">Valore disponibile per '+valued+' su '+count+' giocatori.</p>':'')+'</section>';
 }
 function ownedRosterRow(player) {
  const details = [player.position || '—', (player.age ?? '—')+' anni', player.nationality || '—'];
@@ -222,7 +224,7 @@ async function showRoster(background=false){
   if(activeTab!==tab||version!==rosterVersion)return;
   if(mode&&j.roster_source!==(owned?'completed_transfers':'match_reports'))throw Error('Dati della rosa non disponibili. Riprova.');
   if (owned) {
-   document.getElementById('roster-values').innerHTML = rosterSummary(j.rows, true)
+   document.getElementById('roster-values').innerHTML = rosterSummary(j.rows, true, j.roster_summary)
     + (j.rows.length ? ownedRosterList(j.rows) : '<div class="card empty">Nessun giocatore di proprietà nel registro trasferimenti.</div>');
    NexusCards.wireImages(view);
    return;

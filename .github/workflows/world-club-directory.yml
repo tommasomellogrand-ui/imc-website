@@ -29,7 +29,7 @@ jobs:
           import io, os, ssl, secrets, hashlib, time, urllib.request, json
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path
-          files=["site-data/core/bootstrap.php","site-data/teams/directory.php","roadtohistory/clubs/directory.php","halloffamers/clubs/directory.php","kickoff/clubs/directory.php","sensiblesocceracademy/clubs/directory.php","subbuteosuperleague/clubs/directory.php","worldleague/clubs/directory.php","masterleagueworld/clubs/directory.php","scudetto/clubs/directory.php","site-data/teams/matches.php","roadtohistory/clubs/matches.php","halloffamers/clubs/matches.php","kickoff/clubs/matches.php","sensiblesocceracademy/clubs/matches.php","subbuteosuperleague/clubs/matches.php","worldleague/clubs/matches.php","masterleagueworld/clubs/matches.php","scudetto/clubs/matches.php","site-data/teams/stats.php","roadtohistory/clubs/stats.php","halloffamers/clubs/stats.php","kickoff/clubs/stats.php","sensiblesocceracademy/clubs/stats.php","subbuteosuperleague/clubs/stats.php","worldleague/clubs/stats.php","masterleagueworld/clubs/stats.php","scudetto/clubs/stats.php"]
+          files=["site-data/core/bootstrap.php","site-data/players/media.php","site-data/teams/roster-stats.php","site-data/teams/directory.php","roadtohistory/clubs/directory.php","halloffamers/clubs/directory.php","kickoff/clubs/directory.php","sensiblesocceracademy/clubs/directory.php","subbuteosuperleague/clubs/directory.php","worldleague/clubs/directory.php","masterleagueworld/clubs/directory.php","scudetto/clubs/directory.php","site-data/teams/matches.php","roadtohistory/clubs/matches.php","halloffamers/clubs/matches.php","kickoff/clubs/matches.php","sensiblesocceracademy/clubs/matches.php","subbuteosuperleague/clubs/matches.php","worldleague/clubs/matches.php","masterleagueworld/clubs/matches.php","scudetto/clubs/matches.php","site-data/teams/stats.php","roadtohistory/clubs/stats.php","halloffamers/clubs/stats.php","kickoff/clubs/stats.php","sensiblesocceracademy/clubs/stats.php","subbuteosuperleague/clubs/stats.php","worldleague/clubs/stats.php","masterleagueworld/clubs/stats.php","scudetto/clubs/stats.php"]
           root='/www.italianmastersclub.it'
           ctx=ssl.create_default_context()
           ctx.check_hostname=False # Existing Aruba FTPS alias policy; CA validation remains enabled.
@@ -67,6 +67,10 @@ jobs:
                       return data
               directory=get('directory.php')
               assert directory['rows'] and directory['count']==len(directory['rows'])
+              if world in ('roadtohistory','kickoff','sensiblesocceracademy'):
+                  overview=get('directory.php?view=roster')
+                  assert [r['world_id'] for r in directory['rows']]==[r['world_id'] for r in overview['rows']],world
+                  assert all(0<=r['roster_summary']['valued_count']<=r['roster_summary']['owned_count'] for r in overview['rows']),world
               games=get('matches.php?sm_club='+str(club))
               for season in [None]+list({r['imc_season'] for r in games['results'] if r['imc_season']})[:1]:
                   query='?sm_club='+str(club)+('&season='+str(season) if season else '')

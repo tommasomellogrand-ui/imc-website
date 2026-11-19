@@ -91,6 +91,10 @@ function imc_site_roster_stats(array $roster,array $reports,int $club): array {
 }
 
 function imc_site_owned_roster(array $transfers, int $club): array {
+  return imc_site_owned_rosters($transfers)[$club] ?? [];
+}
+
+function imc_site_owned_rosters(array $transfers): array {
   $order = static fn(array $row): array => [
     (string)($row['normalized_transfer_date'] ?? $row['transfer_date'] ?? ''),
     (int)($row['imc_season'] ?? 0),
@@ -120,8 +124,8 @@ function imc_site_owned_roster(array $transfers, int $club): array {
       if ($id < 1 || isset($seen[$id])) continue;
       // Each player has one owner across the world; include the reverse leg of a swap.
       $seen[$id] = true;
-      if ($owner !== $club) continue;
-      $owned[] = [
+      if ($owner < 1) continue;
+      $owned[$owner][] = [
         'player_id'=>$id, 'full_name'=>$player['player_name'] ?? '',
         'position'=>$player['player_position'] ?? null, 'rating'=>$player['player_rating'] ?? null,
         'age'=>$player['player_age'] ?? null, 'nationality'=>null,
@@ -132,6 +136,35 @@ function imc_site_owned_roster(array $transfers, int $club): array {
     }
   }
   return $owned;
+}
+
+function imc_site_owned_world(string $world): bool {
+  return in_array($world, ['IMC001', 'IMC003', 'IMC004'], true);
+}
+
+function imc_site_owned_market_value(mixed $worldValue, mixed $globalValue): mixed {
+  return trim((string)$worldValue) !== '' ? $worldValue : $globalValue;
+}
+
+function imc_site_owned_roster_summary(array $roster): array {
+  $count = count($roster);
+  $valued = 0;
+  $total = 0;
+  foreach ($roster as $player) {
+    $text = strtoupper(preg_replace('/[€£$\s\p{Z}]/u', '', (string)($player['market_value'] ?? '')) ?? '');
+    if (preg_match('/^(\d+(?:[.,]\d+)?)([KMB])$/D', $text, $compact)) {
+      $amount = round((float)str_replace(',', '.', $compact[1]) * ['K'=>1000,'M'=>1000000,'B'=>1000000000][$compact[2]]);
+    } else {
+      if (preg_match('/^\d{1,3}(?:[.,]\d{3})+$/D', $text)) $text = str_replace([',', '.'], '', $text);
+      elseif (preg_match('/^\d+,\d{1,2}$/D', $text)) $text = str_replace(',', '.', $text);
+      if (!preg_match('/^\d+(?:\.\d+)?$/D', $text)) continue;
+      $amount = (float)$text;
+    }
+    if (!is_finite($amount)) continue;
+    $valued++;
+    $total += $amount;
+  }
+  return ['owned_count'=>$count, 'valued_count'=>$valued, 'market_value'=>$valued || !$count ? $total : null];
 }
 
 function imc_site_playing_squad(array $reports, int $club): array {

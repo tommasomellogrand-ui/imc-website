@@ -8,7 +8,7 @@ try{
   $raw=(string)($_GET['sm_club']??'');if(!ctype_digit($raw)||(int)$raw<1)throw new InvalidArgumentException('invalid_club');$club=(int)$raw;
   $national=($_GET['type']??'')==='nation';
   $squad=$_GET['squad']??'';
-  if($squad!==''&&($national||!in_array(SITE_WORLD_TABLES[$gw],['IMC001','IMC003','IMC004'],true)||!in_array($squad,['owned','playing'],true)))throw new InvalidArgumentException('invalid_squad');
+  if($squad!==''&&($national||!imc_site_owned_world(SITE_WORLD_TABLES[$gw])||!in_array($squad,['owned','playing'],true)))throw new InvalidArgumentException('invalid_squad');
   if($squad==='owned')$season=null;
   $db=imc_site_db($c,imc_site_target($c,$gw));$core=imc_site_db($c,'core');
   $params=[$club,$club];$where='(home_sm_club_id=? OR away_sm_club_id=?)';
@@ -49,14 +49,14 @@ try{
   foreach($roster as &$p){
     $identity=$identities[(int)$p['player_id']]??[];
     foreach(['position','rating','age','nationality'] as $field){if($p[$field]===null||$p[$field]==='')$p[$field]=$identity[$field]??null;}
-    if($squad==='owned'&&trim((string)$p['market_value'])==='')$p['market_value']=$identity['market_value']??null;
+    if($squad==='owned')$p['market_value']=imc_site_owned_market_value($p['market_value'],$identity['market_value']??null);
     if(empty($p['full_name'])&&!empty($identity['full_name']))$p['full_name']=$identity['full_name'];
     if(empty($p['full_name']))$p['full_name']='Player '.$p['player_id'];
     if(!empty($p['image_url']))$identity['image_url']=$p['image_url'];
     $p['image_urls']=imc_site_player_images((int)$p['player_id'],$identity,$p['image_url']);unset($p['image_url']);
   }unset($p);
   if($squad!=='')usort($roster,static fn($a,$b)=>strnatcasecmp($a['full_name'],$b['full_name'])?:$a['player_id']<=>$b['player_id']);
-  $result=$squad==='owned'?['rows'=>$roster]:imc_site_roster_stats($roster,$reports,$club);
+  $result=$squad==='owned'?['rows'=>$roster,'roster_summary'=>imc_site_owned_roster_summary($roster)]:imc_site_roster_stats($roster,$reports,$club);
   if($squad==='playing')$result['rows']=array_values(array_filter($result['rows'],static fn($p)=>$p['appearances']>0));
   imc_site_out(array_merge(['ok'=>true,'game_world_id'=>$gw,'imc_season'=>$season,'sm_club'=>$club,'generated_at'=>gmdate('c')],$source,$result));
 }catch(InvalidArgumentException $e){imc_site_out(['ok'=>false,'error'=>$e->getMessage()],422);}catch(Throwable $e){imc_site_out(['ok'=>false,'error'=>'club_roster_error'],500);}
