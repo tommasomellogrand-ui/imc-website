@@ -39,8 +39,10 @@ try{
       if($season!==null)$reports=array_values(array_filter($reports,static fn($r)=>(int)$r['imc_season']===$season));
     }
     $ids=array_column($roster,'player_id');$worldPlayers=[];
-    foreach(array_chunk($ids,500) as $chunk)foreach(imc_site_rows($db,'SELECT player_id,full_name,position,`Posizione` AS codex_position,rating,age,nationality,market_value,image_url,current_sm_club_id FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE player_id IN ('.implode(',',array_fill(0,count($chunk),'?')).')',$chunk) as $p)$worldPlayers[(int)$p['player_id']]=$p;
-    foreach($roster as &$p){foreach($worldPlayers[$p['player_id']]??[] as $field=>$value)if($value!==null&&$value!=='')$p[$field]=$value;}unset($p);
+    $snapshotField=$squad==='owned'?','.IMC_SITE_FREE_AGENT_SNAPSHOT:'';
+    foreach(array_chunk($ids,500) as $chunk)foreach(imc_site_rows($db,'SELECT player_id,full_name,position,`Posizione` AS codex_position,rating,age,nationality,market_value,image_url,current_sm_club_id'.$snapshotField.' FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE player_id IN ('.implode(',',array_fill(0,count($chunk),'?')).')',$chunk) as $p)$worldPlayers[(int)$p['player_id']]=$p;
+    if($squad==='owned')$roster=imc_site_owned_roster_active($roster,$worldPlayers);
+    foreach($roster as &$p){foreach($worldPlayers[$p['player_id']]??[] as $field=>$value)if($field!=='free_agent_snapshot_date'&&$value!==null&&$value!=='')$p[$field]=$value;}unset($p);
     foreach($roster as &$p){if($squad===''&&!isset($p['status_transfer_number'])&&(int)($p['current_sm_club_id']??0)>0)$p['roster_status']=(int)$p['current_sm_club_id']===$club?'active':'departed';unset($p['current_sm_club_id']);}unset($p);
     foreach($roster as &$p) $p['codex_position']=imc_site_codex_position((string)($p['position']??''),$p['codex_position']??null);
     unset($p);

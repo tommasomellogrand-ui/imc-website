@@ -19,18 +19,18 @@ try{
   $rosters=array_intersect_key(imc_site_owned_rosters(imc_site_transfers($db,$gw)),array_column($rows,null,'world_id'));
   $ids=[];
   foreach($rosters as $roster)foreach($roster as $player)$ids[]=$player['player_id'];
-  $worldValues=[];
+  $worldPlayers=[];
   foreach(array_chunk($ids,500) as $chunk){
-   $sql='SELECT player_id,market_value FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE player_id IN ('.implode(',',array_fill(0,count($chunk),'?')).')';
-   foreach(imc_site_rows($db,$sql,$chunk) as $player)$worldValues[(int)$player['player_id']]=$player['market_value'];
+   $sql='SELECT player_id,market_value,'.IMC_SITE_FREE_AGENT_SNAPSHOT.' FROM `'.imc_site_table($gw,'Player_Codex').'` WHERE player_id IN ('.implode(',',array_fill(0,count($chunk),'?')).')';
+   foreach(imc_site_rows($db,$sql,$chunk) as $player)$worldPlayers[(int)$player['player_id']]=$player;
   }
-  $missing=array_filter($ids,static fn($id)=>trim((string)($worldValues[$id]??''))==='');
+  $missing=array_filter($ids,static fn($id)=>trim((string)($worldPlayers[$id]['market_value']??''))==='');
   $global=imc_site_player_identity($core,$missing,true);
   foreach($rows as &$row){
-   $roster=$rosters[(int)$row['world_id']]??[];
+   $roster=imc_site_owned_roster_active($rosters[(int)$row['world_id']]??[],$worldPlayers);
    foreach($roster as &$player){
     $id=$player['player_id'];
-    $player['market_value']=imc_site_owned_market_value($worldValues[$id]??null,$global[$id]['market_value']??null);
+    $player['market_value']=imc_site_owned_market_value($worldPlayers[$id]['market_value']??null,$global[$id]['market_value']??null);
    }
    unset($player);
    $row['roster_summary']=imc_site_owned_roster_summary($roster);

@@ -142,6 +142,17 @@ function imc_site_owned_world(string $world): bool {
   return in_array($world, ['IMC001', 'IMC003', 'IMC004'], true);
 }
 
+const IMC_SITE_FREE_AGENT_SNAPSHOT = "CASE WHEN current_sm_club_id=0 AND current_club='Nessuno/a' AND contract_seasons=0 THEN DATE(imported_at) END AS free_agent_snapshot_date";
+
+function imc_site_owned_roster_active(array $roster, array $worldPlayers): array {
+  return array_values(array_filter($roster, static function (array $player) use ($worldPlayers): bool {
+    $arrivalDate = substr((string)($player['arrival_date'] ?? ''), 0, 10);
+    $freeAgentDate = $worldPlayers[$player['player_id']]['free_agent_snapshot_date'] ?? null;
+    // Only a later snapshot can establish that an arrival no longer counts.
+    return $arrivalDate === '' || $freeAgentDate === null || $freeAgentDate <= $arrivalDate;
+  }));
+}
+
 function imc_site_owned_market_value(mixed $worldValue, mixed $globalValue): mixed {
   return trim((string)$worldValue) !== '' ? $worldValue : $globalValue;
 }
