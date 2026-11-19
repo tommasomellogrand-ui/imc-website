@@ -8,9 +8,9 @@
   <title>IMC Ranking · Italian Masters Club</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
   <link rel="stylesheet" href="/nexus/club-house/club-house.css?v=20261104ivory1">
-  <link rel="stylesheet" href="./ranking.css?v=2">
+  <link rel="stylesheet" href="./ranking.css?v=3">
   <script defer src="/clubhouse/portraits.js?v=20261106photos"></script>
-  <script defer src="/clubhouse/club-house.js?v=one-ranking2"></script>
+  <script defer src="/clubhouse/club-house.js?v=one-ranking3"></script>
 </head>
 <body class="one-ranking" data-section="ranking">
   <header class="one-masthead">

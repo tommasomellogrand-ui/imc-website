@@ -114,3 +114,58 @@ body.one-ranking main.one-shell { padding: 1rem 0 3.2rem; }
   font-size: clamp(.72rem, 2.6vw, 1rem);
   font-weight: 750;
 }
+
+body.one-ranking .ranking-list { gap: .5rem; }
+body.one-ranking .ranking-row { margin: 0; box-shadow: 0 2px 8px #1720320a; }
+body.one-ranking .ranking-row > summary {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) minmax(6rem, auto) 6.5rem 1rem;
+  grid-template-areas: "position name titles points toggle";
+  gap: .85rem;
+  align-items: center;
+  padding: .85rem 1rem;
+}
+body.one-ranking .ranking-row > summary:hover { background: #fbf9f4; }
+body.one-ranking .ranking-row > summary:focus-visible { outline-offset: -4px; }
+body.one-ranking .ranking-row .rank-position {
+  grid-area: position;
+  min-width: 0;
+  width: 100%;
+  color: #344258;
+  background: #edf0f4;
+  font-variant-numeric: tabular-nums;
+}
+body.one-ranking .ranking-row.ranking-podium .rank-position { background: #f5e8cd; color: #704a1c; }
+.one-ranking .rank-name { grid-area: name; }
+.one-ranking .rank-name .manager-with-photo { display: flex; gap: .6rem; align-items: center; }
+.one-ranking .rank-name .manager-portrait { border-radius: 50%; overflow: hidden; background: #eff0ed; }
+.one-ranking .rank-titles {
+  grid-area: titles;
+  justify-self: end;
+  display: inline-flex;
+  align-items: baseline;
+  gap: .26rem;
+  padding: .32rem .55rem;
+  background: #fcf0d8;
+  color: #67461d;
+  border-radius: .55rem;
+  font-size: .79rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.one-ranking .rank-titles b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.one-ranking .rank-total { grid-area: points; }
+.one-ranking .rank-chevron { grid-area: toggle; justify-self: end; }
+
+@media (max-width: 560px) {
+  body.one-ranking .ranking-row > summary {
+    grid-template-columns: 2rem minmax(0, 1fr) auto .67rem;
+    grid-template-areas: "position name points toggle" "position titles points toggle";
+    column-gap: .48rem;
+    row-gap: .26rem;
+    padding: .65rem .55rem;
+  }
+  .one-ranking .rank-titles { justify-self: start; padding-block: .12rem; font-size: .72rem; }
+  .one-ranking .rank-name .manager-portrait { width: 28px; height: 28px; }
+  .one-ranking .rank-name .manager-with-photo { gap: .36rem; }
+}
