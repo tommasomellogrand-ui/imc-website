@@ -66,7 +66,17 @@ jobs:
               assert context['ok'],world
               transfers=json.loads(get('transfers/data.php?sm_club='+club))
               assert transfers['ok'] and all(club in (str(r['from_sm_world_club_id']),str(r['to_sm_world_club_id'])) for r in transfers['rows']),world
-              assert '/'+world+'/transfers/cards.js' in get('clubs/detail.html?release=${{ github.sha }}'),world
+              page=get('clubs/detail.html?release=${{ github.sha }}')
+              assert any(ref in page for ref in (
+                  f'/{world}/transfers/cards.js',
+                  f'world={world}&amp;module=transfers%2Fcards.js',
+              )),world
+              if world in {'roadtohistory','kickoff','sensiblesocceracademy'}:
+                  owned=json.loads(get('clubs/roster.php?sm_club='+club+'&squad=owned'))
+                  played=json.loads(get('clubs/roster.php?sm_club='+club+'&squad=playing'))
+                  assert owned['ok'] and owned['roster_source']=='completed_transfers' and owned['rows'],world
+                  assert played['ok'] and played['roster_source']=='match_reports',world
+                  assert all(p['appearances']>0 and p['appearances']==p['starts']+p['subs'] for p in played['rows']),world
               print(world,len(roster['rows']),len(transfers['rows']))
           with ThreadPoolExecutor(3) as pool:list(pool.map(verify,[["roadtohistory","94079073"],["halloffamers","96537299"],["kickoff","94012702"],["sensiblesocceracademy","92317614"],["subbuteosuperleague","93399549"],["worldleague","21145248"],["masterleagueworld","94061920"],["scudetto","94703258"]]))
           PY
