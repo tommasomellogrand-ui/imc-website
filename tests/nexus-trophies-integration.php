@@ -83,6 +83,19 @@ for($i=1;$i<=10;$i++) {
     $sync=trophy_sync($config,$db,$gw,false,true);
     check($sync['changes']['inserted']===1,$gw.' final awards immediately after import');
     check($db->query("SELECT winner_name FROM ".$gw."_IMC_Trophy_Room WHERE deciding_fixture_id=310099463")->fetchColumn()==='SSD Casarano Calcio',$gw.' Super Cup belongs to winning team');
+    // A national World Cup final played during season 2 still awards the season 1 title.
+    $final=$db->prepare("INSERT INTO ".$gw."_IMC_Results (game_world_id,imc_season,competition_key,sm_action,competition_group,competition_round,sm_fixture_id,home_sm_club_id,away_sm_club_id,home_name,away_name,home_score,away_score,match_date,result_status) VALUES (?,1,?,'worldcup','NATIONS','Finale',412374967,74992,74986,'Germany','England',4,2,'2020-11-08','COMPLETED')");
+    $final->execute([$gw,$storageWorld.'|S01|NATIONS|worldcup']);
+    $sync=trophy_sync($config,$db,$gw,false,true);
+    check($sync['changes']===['inserted'=>1,'updated'=>0,'removed'=>0],$gw.' late World Cup final automatically awards one title');
+    $worldCup=nexus_rows($db,"SELECT * FROM ".$gw."_IMC_Trophy_Room WHERE deciding_fixture_id=412374967");
+    check(count($worldCup)===1 && (int)$worldCup[0]['imc_season']===1 && $worldCup[0]['winner_name']==='Germany' && $worldCup[0]['nexus_view']==='World Cup',$gw.' late title stays with the original edition');
+    $db->exec("UPDATE ".$gw."_IMC_Trophy_Room SET competition_key=".$db->quote($storageWorld.'|NATIONS|worldcup')." WHERE deciding_fixture_id=412374967");
+    $worldCup=nexus_rows($db,"SELECT * FROM ".$gw."_IMC_Trophy_Room WHERE deciding_fixture_id=412374967");
+    $db->exec("UPDATE ".$gw."_IMC_Results SET away_score=5 WHERE sm_fixture_id=412374967");
+    $sync=trophy_sync($config,$db,$gw,false,true);
+    check($sync['changes']===['inserted'=>0,'updated'=>0,'removed'=>0],$gw.' existing historical World Cup under legacy key remains authoritative');
+    check(nexus_rows($db,"SELECT * FROM ".$gw."_IMC_Trophy_Room WHERE deciding_fixture_id=412374967")===$worldCup,$gw.' historical winner preserved');
     $db->prepare('DELETE FROM IMC_Game_World_Season WHERE game_world_id=?')->execute([$gw]);
     $preview=trophy_sync($config,$db,$gw,true);
     check($preview['state']==='current_season_unavailable',$gw.' missing local mapping never falls back to CORE');

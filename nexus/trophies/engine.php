@@ -10,9 +10,10 @@ function trophy_nexus_view(array $row,array $labels): string {
     $parts=explode('|',$key);$groupIndex=null;
     foreach($parts as $i=>$part)if(in_array($part,['DOMESTIC','INTERNATIONAL','NATIONS'],true)){$groupIndex=$i;break;}
     $action=strtolower(trim((string)$row['trophy_type']));
+    if ($action==='worldcup') return 'World Cup';
     $country=$groupIndex===2?$parts[1]:null;
     $division=$groupIndex!==null?($parts[$groupIndex+2]??$row['sm_division']??null):($row['sm_division']??null);
-    $names=['charityshield'=>'Charity Shield','leaguecup'=>'National Cup','nationalcup'=>'National Cup','leagueshield'=>'League Cup','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers','worldcup'=>'World Cup'];
+    $names=['charityshield'=>'Charity Shield','leaguecup'=>'National Cup','nationalcup'=>'National Cup','leagueshield'=>'League Cup','smfacup'=>'SMFA Champions','smfashield'=>'SMFA Shield','supercup'=>'SMFA Super Cup','interqualifier'=>'World Cup Qualifiers'];
     $name=in_array($action,['league','playoff'],true)?'Div '.$division.($action==='playoff'?' Playoff':''):($names[$action]??$action);
     return ($country?$country.' ':'').$name;
 }
@@ -58,6 +59,9 @@ function trophy_rth_league_slug(string $key): ?string {
 }
 function trophy_group_key(array $r): ?string {
     if ((int)($r['imc_season'] ?? 0) < 1 || trim((string)($r['competition_key'] ?? '')) === '') return null;
+    if (preg_match('/^[^|]+\|(?:S\d+\|)?NATIONS\|worldcup$/iD',$r['competition_key'])) {
+        return $r['imc_season'].'|NATIONS|worldcup';
+    }
     $slug=trophy_rth_league_slug($r['competition_key']);
     return $r['imc_season'].'|'.($slug===null?$r['competition_key']:'IMC001|IMC|'.$slug);
 }

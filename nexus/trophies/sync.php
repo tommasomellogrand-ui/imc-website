@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__.'/engine.php';
 
-const TROPHY_SYNC_VERSION = TROPHY_ENGINE_VERSION.'.h4';
+const TROPHY_SYNC_VERSION = TROPHY_ENGINE_VERSION.'.h5';
 
 function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $completedImport=false): array {
     $gw=nexus_world($gw);
@@ -18,11 +18,12 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
             if ($state['revision']===$state['processed_revision'] && $state['engine_version']===TROPHY_SYNC_VERSION && substr((string)$state['checked_at'],0,10)===$today) return ['state'=>'current','version'=>TROPHY_SYNC_VERSION];
             if (!$completedImport && (int)$db->query("SELECT TIMESTAMPDIFF(SECOND,touched_at,NOW()) FROM IMC_Trophy_Sync_State WHERE game_world_id=".$db->quote($gw))->fetchColumn()<30) return ['state'=>'waiting_for_import'];
         }
-        // Historical Trophy Room rows are authoritative, regardless of their source.
-        // Only an explicitly active season from the local mapping can enable automatic reconciliation.
-        $seasons=nexus_rows($db,'SELECT imc_season FROM `IMC_Game_World_Season` WHERE game_world_id=? AND imc_season_start_date<=? AND (imc_season_end_date IS NULL OR imc_season_end_date>=?) ORDER BY imc_season',[$gw,$today,$today]);
+        // An active season enables reconciliation. Existing historical awards remain authoritative.
+        $seasons=nexus_rows($db,'SELECT imc_season, imc_season_start_date FROM `IMC_Game_World_Season` WHERE game_world_id=? AND imc_season_start_date<=? AND (imc_season_end_date IS NULL OR imc_season_end_date>=?) ORDER BY imc_season',[$gw,$today,$today]);
         if (count($seasons)!==1 || (int)$seasons[0]['imc_season']<1) return ['state'=>'current_season_unavailable','version'=>TROPHY_SYNC_VERSION];
         $currentSeason=(int)$seasons[0]['imc_season'];
+        $previousSeason=$currentSeason-1;
+        $seasonStart=$seasons[0]['imc_season_start_date'];
         $core=nexus_db($config,'core');
         $definitions=nexus_rows($core,'SELECT game_world_id,competition_key,sm_action,sm_country,sm_division,teams_count,expected_match,sm_action_group,custom_competition FROM `IMC Competition Codex Global` WHERE game_world_id=? AND (sm_action=? OR sm_action_group=?)',[$gw,'league','IMC']);
         $labels=[];foreach(nexus_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $label)$labels[$label['competition_key']]=$label['nexus_view'];
@@ -30,9 +31,11 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
         $db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
         $db->beginTransaction();
         $state=nexus_rows($db,'SELECT * FROM IMC_Trophy_Sync_State WHERE game_world_id=?',[$gw])[0];
-        $results=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id IN (?,?) AND imc_season>=?',[$gw,$gw==='IMC-008'?'IMC008':$gw,$currentSeason]);
+        // A World Cup edition can finish during the next IMC season.
+        $sourceSeasons=" AND (imc_season>=? OR (imc_season=? AND sm_action='worldcup'))";
+        $results=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Results').'` WHERE game_world_id IN (?,?)'.$sourceSeasons,[$gw,$gw==='IMC-008'?'IMC008':$gw,$currentSeason,$previousSeason]);
         $reports=[]; // Results-only trophy derivation.
-        $schedule=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Schedule').'` WHERE game_world_id=? AND imc_season>=?',[$gw,$currentSeason]);
+        $schedule=nexus_rows($db,'SELECT * FROM `'.nexus_table($gw,'Schedule').'` WHERE game_world_id=?'.$sourceSeasons,[$gw,$currentSeason,$previousSeason]);
         if ($gw==='IMC-008') {
             foreach ($results as &$result) {
                 $result['competition_key']=preg_replace('/^IMC008\\|/', 'IMC-008|', (string)$result['competition_key']);
@@ -40,11 +43,17 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
             unset($result);
         }
         $derived=trophy_derive($gw,$results,$reports,$schedule,$definitions,$today,$mapping);
+        $derived['awards']=array_filter($derived['awards'],static function(array $row) use ($currentSeason,$previousSeason,$seasonStart): bool {
+            $season=(int)$row['imc_season'];
+            return $season>=$currentSeason || (
+                $season===$previousSeason && $row['trophy_type']==='worldcup' && $row['won_date']>=$seasonStart
+            );
+        });
         foreach($derived['awards'] as &$award)$award['nexus_view']=$award['nexus_view']??trophy_nexus_view($award,$labels);unset($award);
         $table='`'.nexus_table($gw,'Trophy_Room').'`';
         $before=nexus_rows($db,'SELECT * FROM '.$table.' ORDER BY id');
         if ($preview) {$db->rollBack();return ['state'=>'preview','version'=>TROPHY_SYNC_VERSION,'existing_count'=>count($before)]+$derived;}
-        $wanted=[];foreach($derived['awards'] as $row)if((int)$row['imc_season']>=$currentSeason)$wanted[trophy_group_key($row)]=$row;
+        $wanted=[];foreach($derived['awards'] as $row)$wanted[trophy_group_key($row)]=$row;
         $existing=[];foreach($before as $row)$existing[trophy_group_key($row)]=$row;
         $changes=['inserted'=>0,'updated'=>0,'removed'=>0];
         $remove=$db->prepare('DELETE FROM '.$table.' WHERE id=?');
@@ -52,6 +61,7 @@ function trophy_sync(array $config,PDO $db,string $gw,bool $preview=false,bool $
         foreach ($wanted as $key=>$row) {
             $old=$existing[$key]??null;
             if ($old) {
+                if ((int)$old['imc_season']<$currentSeason) continue;
                 if (!in_array($old['source_repository']??'', ['IMC Results','IMC Match Report'],true)) continue;
                 $changed=false;foreach($row as $field=>$value)if((string)($old[$field]??'')!==(string)($value??'')){$changed=true;break;}
                 if (!$changed)continue;
