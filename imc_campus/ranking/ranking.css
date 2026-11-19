@@ -1,0 +1,87 @@
+body.one-ranking {
+  --one-ink: #182132;
+  --one-night: #111722;
+  --one-gold: #efc97c;
+  background: #f2f0eb;
+  color: var(--one-ink);
+  padding: 0;
+}
+.one-ranking [hidden] { display: none !important; }
+.one-ranking :focus-visible { outline: 3px solid #ae7633; outline-offset: 4px; }
+.one-ranking .one-shell { width: min(1100px, calc(100% - 2rem)); margin-inline: auto; }
+.one-ranking .one-masthead { color: #fff; background: #111722; border-bottom: 2px solid #b58b51; }
+.one-ranking .one-back { display: inline-flex; align-items: center; min-height: 44px; color: #f0d4a4; font-size: .82rem; font-weight: 700; }
+.one-ranking .one-back:hover { text-decoration: underline; }
+.one-ranking .one-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  min-height: 245px;
+  isolation: isolate;
+}
+.one-ranking .one-heading { align-self: center; padding: 1rem 0 2.5rem; }
+.one-heading img { display: block; width: 43px; height: auto; margin-bottom: 1rem; }
+.one-heading h1 { margin: 0; font-size: clamp(2.6rem, 6.9vw, 5.7rem); font-weight: 900; line-height: .95; letter-spacing: -.075em; }
+.one-heading h1 span { color: var(--one-gold); }
+.one-heading p { margin: .9rem 0 0; color: #d9dfe9; font-size: clamp(.86rem, 2vw, 1.05rem); }
+.one-scene {
+  align-self: stretch;
+  min-height: 170px;
+  background: linear-gradient(90deg,#111722 0%,transparent 34%,transparent 80%,#111722 100%),
+              linear-gradient(0deg,#111722,transparent 38%),
+              url('/imc_campus/campus-arco.webp?v=isola-arco-1') center 21% / 100% auto no-repeat;
+}
+body.one-ranking main.one-shell { padding: 1rem 0 3.2rem; }
+.one-ranking #back { display: inline-block; margin-bottom: .7rem; font-weight: 700; }
+.one-tools { background: #fff; padding: .85rem; border: 1px solid #dddcd6; border-radius: 14px; }
+.one-ranking .one-tools .controls { margin: 0; padding: 0; background: transparent; border: 0; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 44px; }
+.one-ranking .controls :is(input,select,button) { min-height: 44px; }
+.one-standing-head { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin-top: 1.4rem; }
+.one-standing-head h2 { margin: 0; font-size: 1.65rem; letter-spacing: -.04em; }
+.one-standing-head span, .one-data { color: #515b68; font-size: .8rem; }
+.one-data p { margin: .25rem 0 .55rem; }
+.one-ranking .rank-status { color: #515b68; margin-top: .6rem; }
+.one-podium { margin: 1.15rem 0; }
+.one-podium h2 { font-size: .9rem; margin: 0 0 .6rem; }
+.one-podium-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .75rem; }
+.one-leader {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  gap: .4rem;
+  padding: 1rem .6rem;
+  border: 1px solid #4d5665;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at 50% 20%, #465164, #1a2332 70%);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+.one-leader[data-rank="1"] { border-color: #b99153; background: radial-gradient(ellipse at 50% 20%, #685039, #231e23 78%); }
+.one-leader[data-rank="3"] { border-color: #996b53; }
+.one-leader:hover { border-color: var(--one-gold); }
+.one-place { color: var(--one-gold); font-size: .82rem; font-weight: 800; }
+.one-leader > strong { font-size: clamp(.77rem, 2vw, 1rem); overflow-wrap: anywhere; }
+.one-leader-points { color: #f2d6a0; font-weight: 800; font-variant-numeric: tabular-nums; }
+.one-leader-points small { font-weight: 600; }
+.one-leader .manager-portrait { display: block; height: clamp(62px, 13vw, 133px); }
+.one-leader .manager-portrait img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+.one-ranking .rank-name .manager-portrait { display: inline-flex; width: 36px; height: 36px; flex: none; }
+.one-ranking .rank-name .manager-portrait img { width: 100%; height: 100%; object-fit: contain; }
+.one-ranking .ranking-row { background: #fff; border-radius: 12px; border: 1px solid #dddcd6; }
+.one-ranking .ranking-row[open] { border-color: #ae8050; }
+.one-ranking .ranking-row.ranking-podium { border-inline-start: 3px solid #ae8050; }
+.one-ranking .rank-rules { border-radius: 12px; }
+@media (max-width: 560px) {
+  .one-ranking .one-shell { width: calc(100% - 1.4rem); }
+  .one-ranking .one-hero { grid-template-columns: 1fr; min-height: 0; }
+  .one-ranking .one-heading { padding: .65rem 0 1.35rem; }
+  .one-heading img { width: 34px; margin-bottom: .65rem; }
+  .one-scene { min-height: 120px; background-position: center, center, center 22%; }
+  .one-ranking .one-tools .controls { grid-template-columns: minmax(0,1fr) 44px; }
+  .one-ranking #search-label { grid-column: 1 / -1; }
+  .one-podium-grid { gap: .4rem; }
+  .one-leader { border-radius: 12px; padding-inline: .35rem; }
+}

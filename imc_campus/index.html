@@ -9,6 +9,7 @@ main{height:100vh;height:100dvh;display:flex;align-items:center;justify-content:
 .photo{display:block;width:100%;height:auto;aspect-ratio:852/1846}
 .crest{position:absolute;left:49.4%;top:85.5%;width:20.5%;height:auto;transform:translate(-50%,-50%);pointer-events:none}
 .building{position:absolute;left:var(--x);top:var(--y);width:39%;height:9%;transform:translate(-50%,-50%)}
+.building-one{width:54%;height:13%}
 .building span{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
 .building:focus-visible{outline:3px solid ivory;border-radius:4px}
 @media(orientation:landscape){.map{width:calc(100vh * 852 / 1846);width:calc(100dvh * 852 / 1846)}}
@@ -22,6 +23,7 @@ main{height:100vh;height:100dvh;display:flex;align-items:center;justify-content:
 </style></head>
 <body>
 <main><nav class="map" aria-label="Edifici del campus"><img class="photo" src="/imc_campus/campus-arco.webp?v=isola-arco-1" width="852" height="1846" alt=""><img class="crest" src="/site-assets/images/imc-logo.png" alt="">
+<a class="building building-one" href="/imc_campus/ranking/" style="--x:50%;--y:24.5%"><span>ONE · IMC Ranking</span></a>
 <a class="building" href="/imc_campus/nexus_lab/" style="--x:25%;--y:51%"><span>Nexus Lab</span></a>
 <a class="building" href="/imc_campus/the_dugout/" style="--x:76%;--y:51%"><span>The Dugout</span></a>
 <a class="building" href="/imc_campus/world_center/" style="--x:23%;--y:61.5%"><span>World Center</span></a>
