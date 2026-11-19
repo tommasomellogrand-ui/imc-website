@@ -14,6 +14,21 @@ try {
  $managers=nexus_rows($core,'SELECT manager_id,full_name,sm_manager_id,face_image_url,bust_image_url FROM `IMC Manager Codex Global` ORDER BY full_name');
  if(empty($_GET['world'])){
   $worlds=nexus_rows($core,'SELECT `IMC GW` id,`IMC GW Name` name FROM `IMC Game World Codex Global` ORDER BY `IMC GW`');
+  if(($_GET['view']??'')==='ranking'){
+   $today=(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d');
+   $allowed=array_fill_keys(array_map('imc_world_id',CLUBHOUSE_WORLDS),true);
+   $active=[];
+   $tenures=nexus_rows($core,"SELECT game_world_id,manager_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE assignment_type IN ('club','national_team')");
+   foreach($tenures as $tenure){
+    $world=imc_world_id((string)$tenure['game_world_id']);
+    if(!isset($allowed[$world]))continue;
+    $start=ch_assignment_day($tenure['start_date']??null);
+    $end=ch_assignment_day($tenure['end_date']??null);
+    if(($start===null||$start<=$today)&&($end===null||$end>=$today))$active[$tenure['manager_id']][$world]=true;
+   }
+   foreach($managers as &$manager)$manager['active_worlds']=count($active[$manager['manager_id']]??[]);
+   unset($manager);
+  }
   nexus_out(['ok'=>true,'managers'=>$managers,'worlds'=>array_values(array_filter($worlds,fn($w)=>in_array($w['id'],CLUBHOUSE_WORLDS,true))),'source'=>'Results']);
  }
  $gw=nexus_world($_GET['world']);$selected=trim((string)($_GET['manager']??''));
