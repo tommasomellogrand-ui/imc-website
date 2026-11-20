@@ -12,7 +12,7 @@ require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 require_once dirname(__DIR__,3).'/site-data/core/world-identity.php';
 
-const IMC_DBM_VERSION = '1.6.17';
+const IMC_DBM_VERSION = '1.6.18';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -230,6 +230,46 @@ SQL;
         . implode(",\n", $fields);
 }
 
+function dbm_core_connection_club_trigger(string $world, string $kind, string $operation): string {
+    if (preg_match('/^IMC(?:00[1-9]|010)$/D', $world) !== 1
+        || !in_array($kind, ['results', 'mr'], true)
+        || !in_array($operation, ['INSERT', 'UPDATE'], true)) {
+        throw new InvalidArgumentException('Invalid world, table or operation for the IMC club trigger.');
+    }
+    $suffix = $operation === 'INSERT' ? 'bi' : 'bu';
+    $lower = strtolower($world);
+    $name = "imc_conn_{$lower}_{$kind}_$suffix";
+    $table = $world . ($kind === 'results' ? '_Results' : '_Match_Reports');
+    $order = $kind === 'mr' ? " PRECEDES `imc_mr_manager_from_results_{$lower}_$suffix`"
+        : ($operation === 'INSERT' ? " PRECEDES `imc_results_manager_{$lower}_bi`" : '');
+    $scope = "(NEW.competition_group='IMC' OR NEW.competition_key LIKE '%|IMC|%' OR NEW.sm_action IN ('imc','imc_custom'))";
+    $normalize = static fn(string $value): string =>
+        "TRIM(REGEXP_REPLACE(CONVERT($value USING utf8mb4) COLLATE utf8mb4_0900_ai_ci, '[^[:alnum:]]+', ' '))";
+    $fields = [];
+    foreach (['home', 'away'] as $side) {
+        $field = "NEW.{$side}_sm_club_id";
+        $label = $normalize("NEW.{$side}_name");
+        $aliases = array_map(static fn(string $ref): string => $normalize($ref) . '=' . $label,
+            ['m.`Club Name`', 'c.name', 'c.nexus_view']);
+        $match = implode(' OR ', $aliases);
+        $active = match ($world) {
+            'IMC001' => " AND NOT ((LOWER($label) IN ('porto','fc porto','newcastle','newcastle united') AND COALESCE(LOWER(NEW.competition_key),'') REGEXP 'champions[ _|]*league$') OR (LOWER($label)='juventus' AND COALESCE(LOWER(NEW.competition_key),'') REGEXP 'conference[ _|]*league$'))",
+            'IMC005' => " AND LOWER($label) NOT IN ('forfar','forfar athletic','metropolitan police','metropolitan police fc')",
+            default => '',
+        };
+        if ($kind === 'mr') $active .= " AND COALESCE(UPPER(TRIM(NEW.{$side}_manager_name)),'')<>'GUEST'";
+        $lookup = <<<SQL
+(SELECT CASE WHEN COUNT(DISTINCT m.`SM World Club ID`)=1 THEN MIN(m.`SM World Club ID`) END
+ FROM `Sql1956795_1`.`IMC Game World Club Mapping` m
+ LEFT JOIN `Sql1956795_1`.`IMC Club Codex Global` c ON c.id=m.`Club ID`
+ WHERE m.`Game World`='$world' AND m.`SM World Club ID`>0 AND ($match))
+SQL;
+        $fields[] = "$field=IF(COALESCE($field,0)=0 AND $scope AND $label<>''$active,COALESCE($lookup,$field),$field)";
+    }
+    return "CREATE TRIGGER `$name` BEFORE $operation ON `$table` FOR EACH ROW$order\nSET "
+        . implode(",\n", $fields);
+}
+
 function dbm_assert_no_cross_database(string $sql, string $database): void {
     // Owner-authorized CORE lookups for dated club and national-team manager assignments.
     $lookupTables = ['IMC Manager Assignment Global', 'IMC Manager Codex Global', 'IMC Game World National Team Mapping'];
@@ -243,9 +283,13 @@ function dbm_assert_no_cross_database(string $sql, string $database): void {
     $isCoreScheduleClubTrigger = strcasecmp($database, 'Sql1956795_3') === 0
         && preg_match('/^CREATE TRIGGER `imc_schedule_core_club_(imc00[1-8])_b[iu]` BEFORE (INSERT|UPDATE) /D', $sql, $scheduleTrigger) === 1
         && hash_equals(dbm_core_schedule_club_trigger(strtoupper($scheduleTrigger[1]), $scheduleTrigger[2]), $sql);
-    if ($isResultsManagerTrigger || $isCoreScheduleClubTrigger) $lookupTables[] = 'IMC Game World Club Mapping';
+    $isCoreConnectionClubTrigger = strcasecmp($database, 'Sql1956795_3') === 0
+        && preg_match('/^CREATE TRIGGER `imc_conn_(imc(?:00[1-9]|010))_(results|mr)_b[iu]` BEFORE (INSERT|UPDATE) /D', $sql, $connectionTrigger) === 1
+        && hash_equals(dbm_core_connection_club_trigger(strtoupper($connectionTrigger[1]), $connectionTrigger[2], $connectionTrigger[3]), $sql);
+    if ($isResultsManagerTrigger || $isCoreScheduleClubTrigger || $isCoreConnectionClubTrigger) $lookupTables[] = 'IMC Game World Club Mapping';
+    if ($isCoreConnectionClubTrigger) $lookupTables[] = 'IMC Club Codex Global';
     $canLookup = in_array(strtolower($database), ['sql1956795_2', 'sql1956795_3'], true)
-        && ($isRead || $isAssignmentTrigger || $isResultsManagerTrigger || $isCoreScheduleClubTrigger);
+        && ($isRead || $isAssignmentTrigger || $isResultsManagerTrigger || $isCoreScheduleClubTrigger || $isCoreConnectionClubTrigger);
     if (preg_match_all('/`?(Sql\d+_\d+)`?\s*\./i', $sql, $matches, PREG_OFFSET_CAPTURE)) {
         foreach ($matches[1] as $i => $match) {
             $found = $match[0];
