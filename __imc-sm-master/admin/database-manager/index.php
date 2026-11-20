@@ -12,7 +12,7 @@ require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 require_once dirname(__DIR__,3).'/site-data/core/world-identity.php';
 
-const IMC_DBM_VERSION = '1.6.15';
+const IMC_DBM_VERSION = '1.6.16';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -140,12 +140,57 @@ function dbm_assert_single_statement(string $sql): void {
     if (str_contains($withoutStrings, ';')) throw new InvalidArgumentException('Each array item must contain exactly one SQL statement.');
 }
 
+function dbm_results_manager_trigger(string $world): string {
+    if (preg_match('/^IMC(?!000)[0-9]{3}$/D', $world) !== 1) {
+        throw new InvalidArgumentException('Invalid IMC world for a Results manager trigger.');
+    }
+    // The guest and ghost rules must be able to clear an attributed manager.
+    $order = match ($world) {
+        'IMC001' => ' PRECEDES `imc_champions_guests_bi`',
+        'IMC005' => ' PRECEDES `imc005_unmanaged_ghost_1_0`',
+        default => '',
+    };
+    $name = 'imc_results_manager_' . strtolower($world) . '_bi';
+    $fields = [];
+    foreach (['home', 'away'] as $side) {
+        $team = "NEW.{$side}_sm_club_id";
+        $fields[] = <<<SQL
+NEW.{$side}_sm_manager_id = (
+    SELECT CASE WHEN COUNT(DISTINCT a.manager_id) = 1 THEN MAX(CASE WHEN m.sm_manager_id > 0 THEN m.sm_manager_id END) END
+    FROM `Sql1956795_1`.`IMC Manager Assignment Global` a
+    JOIN `Sql1956795_1`.`IMC Manager Codex Global` m ON m.manager_id = a.manager_id
+    WHERE a.game_world_id = NEW.game_world_id
+      AND a.start_date <= NEW.match_date
+      AND (a.end_date IS NULL OR a.end_date >= NEW.match_date)
+      AND (
+        (a.assignment_type = 'club' AND a.team_id = {$team} AND EXISTS (
+            SELECT 1 FROM `Sql1956795_1`.`IMC Game World Club Mapping` c
+            WHERE c.`Game World` = a.game_world_id AND c.`SM World Club ID` = a.team_id
+        ))
+        OR (a.assignment_type = 'national_team' AND a.national_team_id = {$team} AND EXISTS (
+            SELECT 1 FROM `Sql1956795_1`.`IMC Game World National Team Mapping` n
+            WHERE n.`Game World` = a.game_world_id AND n.`SM World National Club ID` = a.national_team_id
+        ))
+      )
+)
+SQL;
+    }
+    return "CREATE TRIGGER `{$name}` BEFORE INSERT ON `{$world}_Results` FOR EACH ROW{$order}\nSET "
+        . implode(",\n", $fields);
+}
+
 function dbm_assert_no_cross_database(string $sql, string $database): void {
     // Owner-authorized CORE lookups for dated club and national-team manager assignments.
     $lookupTables = ['IMC Manager Assignment Global', 'IMC Manager Codex Global', 'IMC Game World National Team Mapping'];
     $isRead = preg_match('/^\s*SELECT\b/i', $sql) === 1;
     $isAssignmentTrigger = preg_match('/^\s*CREATE\s+TRIGGER\s+`?imc_results_(?:nations|clubs)_gw[0-9]{3}_bi`?\s+BEFORE\s+INSERT\s+ON\s+`?(?:GW[0-9]{3}_IMC_Results|IMC00[1-8]_Results)`?\s+FOR\s+EACH\s+ROW\s+SET\s+NEW\./i', $sql) === 1;
-    $canLookup = in_array(strtolower($database), ['sql1956795_2', 'sql1956795_3'], true) && ($isRead || $isAssignmentTrigger);
+    // Permit the exact generated statement on a canonical Results table only.
+    $isResultsManagerTrigger = strcasecmp($database, 'Sql1956795_3') === 0
+        && preg_match('/^CREATE TRIGGER `imc_results_manager_(imc(?!000)[0-9]{3})_bi` /D', $sql, $managerTrigger) === 1
+        && hash_equals(dbm_results_manager_trigger(strtoupper($managerTrigger[1])), $sql);
+    if ($isResultsManagerTrigger) $lookupTables[] = 'IMC Game World Club Mapping';
+    $canLookup = in_array(strtolower($database), ['sql1956795_2', 'sql1956795_3'], true)
+        && ($isRead || $isAssignmentTrigger || $isResultsManagerTrigger);
     if (preg_match_all('/`?(Sql\d+_\d+)`?\s*\./i', $sql, $matches, PREG_OFFSET_CAPTURE)) {
         foreach ($matches[1] as $i => $match) {
             $found = $match[0];
@@ -337,6 +382,18 @@ function dbm_plan(array $payload): array {
     $migrationId = trim((string)($payload['migration_id'] ?? ''));
     if (!preg_match('/^[a-zA-Z0-9][a-zA-Z0-9._-]{2,79}$/', $migrationId)) throw new InvalidArgumentException('Invalid migration_id.');
     $statements = $payload['statements'] ?? null;
+    if (array_key_exists('results_manager_worlds', $payload)) {
+        $worlds = $payload['results_manager_worlds'];
+        if ($target !== 'custom' || $statements !== null || !is_array($worlds) || $worlds === [] || count($worlds) > 50) {
+            throw new InvalidArgumentException('Provide 1 to 50 CUSTOM worlds to generate Results manager triggers.');
+        }
+        $statements = [];
+        foreach ($worlds as $world) {
+            if (!is_string($world) || isset($statements[$world])) throw new InvalidArgumentException('Each world must be unique.');
+            $statements[$world] = dbm_results_manager_trigger($world);
+        }
+        $statements = array_values($statements);
+    }
     if (!is_array($statements) || $statements === [] || count($statements) > 50) throw new InvalidArgumentException('statements must contain 1 to 50 items.');
     $allowDestructive = ($payload['allow_destructive'] ?? false) === true;
     $dataMigration = ($payload['data_migration'] ?? false) === true;
