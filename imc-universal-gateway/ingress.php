@@ -98,11 +98,94 @@ function imc_ingress_canonical_report_batch(string $table, array $rows): bool {
     return true;
 }
 
+/**
+ * The registered World Cup group fixture supplies identity and edition. Create its
+ * result inside the existing world lock and transaction, before the report trigger
+ * reads the authoritative manager IDs from Results.
+ */
+function imc_ingress_worldcup_group_results(PDO $pdo, array $target, array &$rows): int {
+    if (!preg_match('/^IMC[0-9]{3}_Match_Reports$/D', $target['reports'])) return 0;
+    if (!(int)$pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='IMC_World_Cup_Fixtures'")->fetchColumn()) return 0;
+    $schedule = imc_ident($target['schedule']);
+    $results = imc_ident($target['results']);
+    $created = 0;
+    foreach ($rows as &$row) {
+        if (!is_array($row) || !$row) throw new InvalidArgumentException('invalid_row');
+        $fixtureId = (int)($row['sm_fixture_id'] ?? 0);
+        $home = (int)($row['home_sm_club_id'] ?? 0);
+        $away = (int)($row['away_sm_club_id'] ?? 0);
+        $date = $row['match_date'] ?? null;
+        $season = (int)($row['imc_season'] ?? 0);
+        if ($fixtureId > 0) {
+            $q = $pdo->prepare('SELECT * FROM IMC_World_Cup_Fixtures WHERE world_id=? AND sm_fixture_id=? AND group_name IS NOT NULL LIMIT 2');
+            $q->execute([$target['world'], $fixtureId]);
+        } elseif ($home > 0 && $away > 0) {
+            $q = $pdo->prepare('SELECT * FROM IMC_World_Cup_Fixtures WHERE world_id=? AND home_id=? AND away_id=? AND group_name IS NOT NULL AND (? IS NULL OR match_date=?) AND (?=0 OR imc_season=?) LIMIT 2');
+            $q->execute([$target['world'], $home, $away, $date, $date, $season, $season]);
+        } else continue;
+        $matches = $q->fetchAll(PDO::FETCH_ASSOC);
+        if (!$matches) continue;
+        if (count($matches) !== 1) throw new InvalidArgumentException('worldcup_fixture_ambiguous');
+        $f = $matches[0];
+        if (($home && $home !== (int)$f['home_id']) || ($away && $away !== (int)$f['away_id'])
+            || ($date !== null && $date !== $f['match_date']) || ($season && $season !== (int)$f['imc_season'])) {
+            throw new InvalidArgumentException('worldcup_fixture_mismatch');
+        }
+        if ($fixtureId === 0) {
+            $q = $pdo->prepare("SELECT 1 FROM $schedule WHERE game_world_id=? AND home_sm_team_id=? AND away_sm_team_id=? AND sm_fixture_id<>? AND (? IS NULL OR match_date=?) AND (?=0 OR imc_season=?) LIMIT 1");
+            $q->execute([$target['world'], $home, $away, $f['sm_fixture_id'], $date, $date, $season, $season]);
+            if ($q->fetchColumn()) throw new InvalidArgumentException('worldcup_fixture_ambiguous');
+        }
+        $row['sm_fixture_id'] = $f['sm_fixture_id'];
+        $row['match_date'] = $f['match_date'];
+        $row['imc_season'] = $f['imc_season'];
+        $row['home_sm_club_id'] = $f['home_id'];
+        $row['away_sm_club_id'] = $f['away_id'];
+        if (!isset($row['home_score'], $row['away_score'])) continue;
+
+        // The legacy report trigger can also find a result without an SM ID.
+        // Attach its ID before the report is inserted so the same row is reused.
+        $q = $pdo->prepare("SELECT sm_fixture_id FROM $results WHERE game_world_id=? AND (sm_fixture_id=? OR ((sm_fixture_id IS NULL OR sm_fixture_id=0) AND sm_action='worldcup' AND imc_season=? AND match_date=? AND home_sm_club_id=? AND away_sm_club_id=?)) LIMIT 2 FOR UPDATE");
+        $q->execute([$target['world'], $f['sm_fixture_id'], $f['imc_season'], $f['match_date'], $f['home_id'], $f['away_id']]);
+        $present = $q->fetchAll(PDO::FETCH_ASSOC);
+        if (count($present) > 1) throw new InvalidArgumentException('worldcup_result_ambiguous');
+        if ($present) {
+            if (!(int)($present[0]['sm_fixture_id'] ?? 0)) {
+                $q = $pdo->prepare("UPDATE $results SET sm_fixture_id=? WHERE game_world_id=? AND (sm_fixture_id IS NULL OR sm_fixture_id=0) AND sm_action='worldcup' AND imc_season=? AND match_date=? AND home_sm_club_id=? AND away_sm_club_id=?");
+                $q->execute([$f['sm_fixture_id'], $target['world'], $f['imc_season'], $f['match_date'], $f['home_id'], $f['away_id']]);
+            }
+            continue;
+        }
+        $q = $pdo->prepare("INSERT INTO $results
+            (game_world_id,imc_season,sm_fixture_id,competition_key,sm_action,competition_group,
+             competition_group_name,competition_stage,competition_round,match_date,home_sm_club_id,home_name,
+             away_sm_club_id,away_name,home_score,away_score,result_status,fingerprint,imported_at)
+            VALUES (?,?,?,?,'worldcup','NATIONS',?,?,?,?,?,?,?,?,?,?,'COMPLETED',?,?)");
+        $q->execute([
+            $target['world'], $f['imc_season'], $f['sm_fixture_id'], $target['world'].'|NATIONS|worldcup',
+            $f['group_name'], $f['competition_stage'], $f['competition_round'], $f['match_date'],
+            $f['home_id'], $f['home_name'] ?? $row['home_name'] ?? null,
+            $f['away_id'], $f['away_name'] ?? $row['away_name'] ?? null,
+            $row['home_score'], $row['away_score'],
+            hash('sha256', $target['world'].'|worldcup|'.$f['sm_fixture_id']),
+            $row['imported_at'] ?? date('Y-m-d H:i:s'),
+        ]);
+        $created += $q->rowCount();
+    }
+    unset($row);
+    return $created;
+}
+
 function imc_ingress_insert_many(PDO $pdo, string $table, string $gw, array $rows, bool $atomic): array {
     if (imc_ingress_canonical_report_batch($table,$rows)) return imc_ingress_insert_rows($pdo,$table,$gw,$rows,$atomic);
     require_once __DIR__.'/worldcup-automation.php';
-    if (imc_wc_target($table)!==null) {
-        $outcome=imc_wc_import($pdo,$table,true,fn()=>imc_ingress_insert_rows($pdo,$table,$gw,$rows,false));
+    $target = imc_wc_target($table);
+    if ($target !== null) {
+        $outcome = imc_wc_import($pdo, $table, true, function () use ($pdo, $table, $gw, $rows, $target) {
+            $created = imc_physical_table($table) === $target['reports']
+                ? imc_ingress_worldcup_group_results($pdo, $target, $rows) : 0;
+            return imc_ingress_insert_rows($pdo, $table, $gw, $rows, false) + ['worldcup_group_results_created' => $created];
+        });
         return $outcome['written']+['normalization'=>$outcome['normalization']];
     }
     return imc_ingress_insert_rows($pdo,$table,$gw,$rows,$atomic);
