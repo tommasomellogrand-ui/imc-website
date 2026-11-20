@@ -16,51 +16,41 @@ try{
  $nationMap=imc_site_rows($core,'SELECT `National Team ID` entity_id,`SM World National Club ID` world_id,`SM National Team ID` sm_id FROM `IMC Game World National Team Mapping` WHERE `Game World`=?',[$gw]);
  $ctx=['teams'=>['club'=>imc_site_team_lookup(imc_site_rows($core,'SELECT id,name,image_url FROM `IMC Club Codex Global`'),$clubMap),'national_team'=>imc_site_team_lookup(imc_site_rows($core,'SELECT id,name,image_url FROM `IMC National Team Codex Global`'),$nationMap)],'managers'=>[],'sm_managers'=>[],'assignments'=>[],'competitions'=>[]];
  foreach(imc_site_rows($core,'SELECT manager_id,full_name,sm_manager_id FROM `IMC Manager Codex Global`') as $m){$item=['key'=>'imc:'.$m['manager_id'],'manager_id'=>$m['manager_id'],'name'=>$m['full_name'],'sm_manager_id'=>(int)$m['sm_manager_id'],'image_url'=>null];$ctx['managers'][$m['manager_id']]=$item;if($item['sm_manager_id']>0)$ctx['sm_managers'][$item['sm_manager_id']]=$item;}
+ foreach(imc_site_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$ctx['competitions'][$m['competition_key']]=$m['nexus_view'];
+ if($kind==='manager'){$subject=$ctx['managers'][$id]??null;if(!$subject)throw new InvalidArgumentException('manager_not_found');}
+ else{$teamKind=$kind==='nation'?'national_team':'club';$entity=$ctx['teams'][$teamKind]['world'][(int)$id]??null;$club=$ctx['teams'][$teamKind]['id'][$entity]??null;if(!$club)throw new InvalidArgumentException('club_not_found');$subject=['key'=>'team:'.$id,'name'=>$club['name'],'image_url'=>imc_site_player_image_url($club['image_url']??null)];}
+ if($overview){
+  $table=imc_site_table($gw,'Results');
+  $subjectId=$kind==='manager'?$subject['sm_manager_id']:(int)$id;
+  $field=$kind==='manager'?'sm_manager_id':'sm_club_id';
+  $rows=$subjectId>0 ? imc_site_rows(
+   $db,
+   'SELECT * FROM `'.$table.'` WHERE game_world_id=? AND (home_'.$field.'=? OR away_'.$field.'=?)'
+   .' AND home_score IS NOT NULL AND away_score IS NOT NULL ORDER BY match_date DESC,sm_fixture_id DESC',
+   [$gw,$subjectId,$subjectId]
+  ) : [];
+  $history=imc_site_history_overview($rows,$ctx,$kind,$subjectId);
+  imc_site_out(['ok'=>true,'source'=>'Results','world'=>$gw,'kind'=>$kind,'subject'=>$subject]+$history);
+ }
  $nationAliases=[];foreach($nationMap as $n)foreach(['entity_id','world_id','sm_id'] as $f){if((int)$n[$f]>0)$nationAliases[(int)$n[$f]]=(int)$n['world_id'];}
  $assigned=[];
  foreach(imc_site_rows($core,'SELECT manager_id,assignment_type,team_id,national_team_id,start_date,end_date FROM `IMC Manager Assignment Global` WHERE game_world_id=?',[$gw]) as $a){
   $type=$a['assignment_type'];if(!in_array($type,['club','national_team'],true))continue;
   $team=(int)($type==='club'?$a['team_id']:$a['national_team_id']);if($type==='national_team')$team=$nationAliases[$team]??$team;
-  if($team>0){$ctx['assignments'][$type][$team][]=$a;if($a['manager_id']===$id&&($overview||$type===$scope))$assigned[]=$team;}
+  if($team>0){$ctx['assignments'][$type][$team][]=$a;if($a['manager_id']===$id&&$type===$scope)$assigned[]=$team;}
  }
- foreach(imc_site_rows($core,'SELECT competition_key,IMC_View AS nexus_view FROM `IMC Competition Nexus Mapping` WHERE game_world_id=?',[$gw]) as $m)$ctx['competitions'][$m['competition_key']]=$m['nexus_view'];
- if($kind==='manager'){$subject=$ctx['managers'][$id]??null;if(!$subject)throw new InvalidArgumentException('manager_not_found');}
- else{$teamKind=$kind==='nation'?'national_team':'club';$entity=$ctx['teams'][$teamKind]['world'][(int)$id]??null;$club=$ctx['teams'][$teamKind]['id'][$entity]??null;if(!$club)throw new InvalidArgumentException('club_not_found');$subject=['key'=>'team:'.$id,'name'=>$club['name'],'image_url'=>imc_site_player_image_url($club['image_url']??null)];}
- $rt=imc_site_table($gw,'Results');$mt=imc_site_table($gw,'Match_Report');$params=[$gw];$conditions=[];
+ $mt=imc_site_table($gw,'Match_Report');$params=[$gw];$conditions=[];
  if($kind!=='manager'){
   $conditions[]='(r.home_sm_club_id=? OR r.away_sm_club_id=?)';$params[]=(int)$id;$params[]=(int)$id;
   // Exact codex name is only a fallback for rows whose world club ID is missing.
   $conditions[]='((r.home_sm_club_id IS NULL OR r.home_sm_club_id=0) AND r.home_name=?)';$params[]=$subject['name'];
   $conditions[]='((r.away_sm_club_id IS NULL OR r.away_sm_club_id=0) AND r.away_name=?)';$params[]=$subject['name'];
  }else{
-  $sm=$subject['sm_manager_id'];if($sm>0){$conditions[]='(r.home_sm_manager_id=? OR r.away_sm_manager_id=? OR mr.home_sm_manager_id=? OR mr.away_sm_manager_id=?)';array_push($params,$sm,$sm,$sm,$sm);}
+  $sm=$subject['sm_manager_id'];if($sm>0){$conditions[]='(r.home_sm_manager_id=? OR r.away_sm_manager_id=?)';array_push($params,$sm,$sm);}
   $assigned=array_values(array_unique($assigned));if($assigned){$slots=implode(',',array_fill(0,count($assigned),'?'));$conditions[]='(r.home_sm_club_id IN ('.$slots.') OR r.away_sm_club_id IN ('.$slots.'))';array_push($params,...$assigned,...$assigned);}
  }
- $sql='SELECT r.*,mr.sm_fixture_id report_fixture,mr.home_sm_manager_id report_home_sm_manager_id,mr.away_sm_manager_id report_away_sm_manager_id,mr.home_manager_name report_home_manager_name,mr.away_manager_name report_away_manager_name FROM `'.$rt.'` r LEFT JOIN `'.$mt.'` mr ON mr.game_world_id=r.game_world_id AND mr.sm_fixture_id=r.sm_fixture_id WHERE r.game_world_id=? AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND ('.($conditions?implode(' OR ',$conditions):'0=1').') ORDER BY r.match_date DESC,r.sm_fixture_id DESC';
- // H2H is report-authoritative. Results remain only for the separate career overview.
- if(!$overview)$sql='SELECT r.*,r.sm_fixture_id report_fixture,r.home_sm_manager_id report_home_sm_manager_id,r.away_sm_manager_id report_away_sm_manager_id,r.home_manager_name report_home_manager_name,r.away_manager_name report_away_manager_name FROM `'.$mt.'` r WHERE r.game_world_id=? AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND ('.($conditions?str_replace('mr.','r.',implode(' OR ',$conditions)):'0=1').') ORDER BY r.match_date DESC,r.sm_fixture_id DESC';
+ $sql='SELECT r.*,r.sm_fixture_id report_fixture,r.home_sm_manager_id report_home_sm_manager_id,r.away_sm_manager_id report_away_sm_manager_id,r.home_manager_name report_home_manager_name,r.away_manager_name report_away_manager_name FROM `'.$mt.'` r WHERE r.game_world_id=? AND r.home_score IS NOT NULL AND r.away_score IS NOT NULL AND ('.($conditions?implode(' OR ',$conditions):'0=1').') ORDER BY r.match_date DESC,r.sm_fixture_id DESC';
  $resultRows=imc_site_rows($db,$sql,$params);
- if($overview){
-  $matches=$kind==='manager'?array_merge(h2h_matches($resultRows,$ctx,$kind,$id,'club',false),h2h_matches($resultRows,$ctx,$kind,$id,'national_team',false)):h2h_matches($resultRows,$ctx,$kind,$id,$scope,false);
-  // IMC career requires an assignment valid on match day, even when a stored SM ID exists.
-  if($kind==='manager')$matches=array_values(array_filter($matches,static function($m)use($ctx,$id){
-   $type=str_contains((string)$m['competition_key'],'|NATIONS|')?'national_team':'club';
-   $team=(int)$m[$m['side']]['world_id'];$day=substr((string)$m['match_date'],0,10);
-   if(!preg_match('/^\d{4}-\d{2}-\d{2}$/',$day))return false;
-   foreach($ctx['assignments'][$type][$team]??[] as $a){
-    if($a['manager_id']===$id&&$a['start_date']&&$a['start_date']<=$day&&(!$a['end_date']||$a['end_date']>=$day))return true;
-   }
-   return false;
-  }));
-  $seasonRows=imc_site_rows($core,'SELECT imc_season,imc_season_start_date,imc_season_end_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season',[$gw]);
-  $history=imc_site_history_overview($matches,$seasonRows,(new DateTimeImmutable('now',new DateTimeZone('Europe/Rome')))->format('Y-m-d'));
-  if($kind==='manager'){
-   $validSeasons=array_column($history['seasons'],'season');
-   $history['matches']=array_values(array_filter($matches,static fn($m)=>in_array((int)$m['imc_season'],$validSeasons,true)));
-   usort($history['matches'],static fn($a,$b)=>[$b['match_date'],$b['sm_fixture_id']]<=>[$a['match_date'],$a['sm_fixture_id']]);
-  }
-  imc_site_out(array_merge(['ok'=>true,'world'=>$gw,'kind'=>$kind,'subject'=>$subject],$history));
- }
  if(($_GET['mode']??'')==='data-room'){
   require __DIR__.'/data-room-engine.php';require dirname(__DIR__).'/teams/roster-stats.php';
   // Unlike H2H, Data Room includes all opponents. Match Report manager IDs are authoritative.

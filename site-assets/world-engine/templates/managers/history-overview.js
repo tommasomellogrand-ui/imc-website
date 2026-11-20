@@ -1,16 +1,121 @@
-(()=>{'use strict';
-const states=new WeakMap(),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function stop(root){const s=states.get(root);if(s){s.stopped=true;clearInterval(s.timer);s.controller?.abort();states.delete(root)}}
-function metrics(s){return '<div class="kpis history-kpis">'+[['Partite',s.played],['Vittorie',s.won],['Pareggi',s.drawn],['Sconfitte',s.lost],['Gol fatti',s.gf],['Gol subiti',s.ga],['Differenza',s.gd],['Vittorie %',(s.win_pct??0)+'%']].map(([label,v])=>'<div class="kpi"><b>'+esc(v??0)+'</b><span>'+label+'</span></div>').join('')+'</div>'}
-function block(b,title,manager,global=false){const s=b.stats;return '<section class="history-block'+(global?' history-global':'')+'"><div class="history-heading"><h2>'+esc(title)+'</h2>'+(b.current?'<span class="history-badge">IN CORSO</span>':'')+'</div>'+metrics(s)+(manager?'<div class="history-scopes">'+[['Club',b.club.stats||b.club],['Nazionali',b.national_team.stats||b.national_team]].map(([n,x])=>'<div><b>'+n+'</b><span>'+esc(x.played)+' partite · '+esc(x.won)+' V · '+esc(x.drawn)+' N · '+esc(x.lost)+' P · Gol '+esc(x.gf)+'–'+esc(x.ga)+'</span></div>').join('')+'</div>':'')+'<p class="muted">'+(s.played?esc(s.reports)+' Match Report disponibili su '+esc(s.played)+' partite.':'Nessuna partita attribuita in questo periodo.')+(s.penalty_won||s.penalty_lost?' Rigori: '+esc(s.penalty_won)+' vinti · '+esc(s.penalty_lost)+' persi.':'')+'</p></section>'}
-function matchList(rows,world,scope){
- const matches=rows.filter(m=>!scope||String(m.competition_key||'').includes('|NATIONS|')===(scope==='national_team'));
- const date=v=>{const parts=String(v||'').slice(0,10).split('-');return parts.length===3?parts.reverse().join('/'):'Data non disponibile'};
- return '<section class="history-block history-matches"><h2>Partite · '+matches.length+'</h2><p class="muted">Dalla più recente · '+(scope==='national_team'?'Nazionali':'Club')+'</p>'+ (matches.length?matches.map(m=>{
-  const extra=[m.penalty_home_score!=null&&m.penalty_away_score!=null?'Rigori '+m.penalty_home_score+'–'+m.penalty_away_score:null,m.aggregate_home_score!=null&&m.aggregate_away_score!=null?'Aggregato '+m.aggregate_home_score+'–'+m.aggregate_away_score:null].filter(Boolean);
-  return '<article class="history-match"><p class="history-match-meta">'+esc([date(m.match_date),'Stagione '+m.imc_season,m.competition_name,m.competition_stage,m.competition_round,m.competition_group_name].filter(Boolean).join(' · '))+'</p><div class="history-match-score"><span>'+esc(m.home.name)+'</span><strong>'+esc(m.home_score)+'–'+esc(m.away_score)+'</strong><span>'+esc(m.away.name)+'</span></div>'+(extra.length?'<p class="muted">'+esc(extra.join(' · '))+'</p>':'')+(m.has_report?'<a class="history-report" href="/__WORLD_SLUG__/competitions/match.html?'+esc(new URLSearchParams({world,fixture:m.sm_fixture_id}))+'">Match Report →</a>':'<span class="history-no-report">Match Report non disponibile</span>')+'</article>';
- }).join(''):'<p class="muted">Nessuna partita disponibile.</p>')+'</section>';
-}
-function mount(root,{world,kind,id,scope}){stop(root);const state={stopped:false,loading:false};states.set(root,state);root.innerHTML='<div class="card empty">Caricamento storico…</div>';async function load(){if(state.stopped||state.loading)return;state.loading=true;state.controller=new AbortController();try{const r=await fetch('/site-data/h2h/index.php?'+new URLSearchParams({world,kind,id,mode:'overview'}),{cache:'no-store',signal:state.controller.signal}),j=await r.json();if(!r.ok||j.ok===false||!j.global)throw Error('Storico temporaneamente non disponibile.');if(state.stopped)return;root.innerHTML='<p class="history-intro">Tutto lo storico dalla stagione 1 · Riepiloghi calcolati dai Results. Vittorie, pareggi e sconfitte si riferiscono al risultato della singola partita; i rigori sono indicati separatamente.</p>'+block(scope?{...j.global,stats:j.global[scope]}:j.global,'Storico globale',kind==='manager'&&!scope,true)+(j.seasons||[]).map(b=>block(scope?{...b,stats:b[scope]}:b,(b.current?'Stagione corrente · ':'')+'Stagione '+b.season,kind==='manager'&&!scope)).join('')+(kind==='manager'?matchList(j.matches||[],world,scope):'')+(j.excluded_unassigned_season?'<p class="muted">'+esc(j.excluded_unassigned_season)+' partite senza stagione identificata escluse dai riepiloghi.</p>':'')+'<p class="muted history-updated">Ultimo aggiornamento · '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'})+'</p>';}catch(e){if(state.stopped)return;root.innerHTML='<div class="card empty">'+esc(e.message)+' <button class="history-retry">Riprova</button></div>';root.querySelector('.history-retry').onclick=load;}finally{state.loading=false}}load()}
-window.NexusHistory={mount,stop};
+(() => {
+ 'use strict';
+
+ const states = new WeakMap();
+ const escape = value => String(value ?? '').replace(/[&<>"']/g, character =>
+  ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'})[character]
+ );
+ const formatDate = value => {
+  const day = String(value ?? '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day.split('-').reverse().join('/') : '';
+ };
+
+ function stop(root) {
+  states.get(root)?.abort();
+  states.delete(root);
+ }
+
+ function metrics(stats) {
+  const items = [
+   ['Partite', stats.played], ['Vittorie', stats.won], ['Pareggi', stats.drawn],
+   ['Sconfitte', stats.lost], ['Gol fatti', stats.gf], ['Gol subiti', stats.ga],
+   ['Differenza reti', stats.gd], ['Vittorie %', (stats.win_pct ?? 0) + '%']
+  ];
+  return '<div class="kpis history-kpis">' + items.map(([label, value]) =>
+   '<div class="kpi"><b>' + escape(value) + '</b><span>' + label + '</span></div>'
+  ).join('') + '</div>';
+ }
+
+ function matchRow(match) {
+  const meta = [
+   formatDate(match.match_date), match.competition_name, match.competition_stage,
+   match.competition_round, match.competition_group_name
+  ].filter(Boolean);
+  const detail = [];
+  if (match.penalty_home_score != null && match.penalty_away_score != null) {
+   detail.push('Rigori ' + match.penalty_home_score + '–' + match.penalty_away_score);
+  }
+  if (match.aggregate_home_score != null && match.aggregate_away_score != null) {
+   detail.push('Aggregato ' + match.aggregate_home_score + '–' + match.aggregate_away_score);
+  }
+  return '<article class="history-match">' +
+   '<p class="history-match-meta">' + escape([...new Set(meta)].join(' · ')) + '</p>' +
+   '<div class="history-match-score"><span>' + escape(match.home.name) + '</span><strong>' +
+   escape(match.home_score) + '–' + escape(match.away_score) + '</strong><span>' +
+   escape(match.away.name) + '</span></div>' +
+   (detail.length ? '<p class="muted">' + escape(detail.join(' · ')) + '</p>' : '') +
+   '</article>';
+ }
+
+ function render(root, data, scope) {
+  const relevant = (data.matches || []).filter(match => !scope || match.scope === scope);
+  const seasons = (data.seasons || []).filter(season => !scope || season[scope].played);
+  if (!relevant.length) {
+   root.innerHTML = '<p class="card empty">Nessun risultato disponibile.</p>';
+   return;
+  }
+
+  root.innerHTML = '<div class="history-block">' +
+   '<div class="history-heading"><h2>Riepilogo</h2><label>Stagione ' +
+   '<select data-history-season><option value="">Tutte</option>' +
+   seasons.map(item => '<option value="' + escape(item.season) + '">Stagione ' +
+    escape(item.season) + '</option>').join('') + '</select></label></div>' +
+   '<div data-history-stats></div></div>' +
+   '<section class="history-block history-matches"><h2 data-history-title></h2>' +
+   '<div data-history-matches></div><button type="button" data-history-more>Mostra altre partite</button></section>';
+
+  const select = root.querySelector('[data-history-season]');
+  const statsView = root.querySelector('[data-history-stats]');
+  const title = root.querySelector('[data-history-title]');
+  const list = root.querySelector('[data-history-matches]');
+  const more = root.querySelector('[data-history-more]');
+  let matches = relevant;
+  let shown = 0;
+
+  function append() {
+   const next = matches.slice(shown, shown + 25);
+   list.insertAdjacentHTML('beforeend', next.map(matchRow).join(''));
+   shown += next.length;
+   more.hidden = shown >= matches.length;
+  }
+
+  function update() {
+   const season = seasons.find(item => String(item.season) === select.value);
+   const block = season || data.global;
+   const stats = block[scope || 'stats'];
+   matches = season ? relevant.filter(match => Number(match.imc_season) === season.season) : relevant;
+   statsView.innerHTML = metrics(stats);
+   title.textContent = 'Partite · ' + matches.length;
+   list.replaceChildren();
+   shown = 0;
+   append();
+  }
+
+  select.addEventListener('change', update);
+  more.addEventListener('click', append);
+  update();
+ }
+
+ async function mount(root, {world, kind, id, scope}) {
+  stop(root);
+  const controller = new AbortController();
+  states.set(root, controller);
+  root.innerHTML = '<p class="card empty" role="status">Caricamento risultati…</p>';
+  try {
+   const query = new URLSearchParams({world, kind, id, mode:'overview'});
+   const response = await fetch('/site-data/h2h/index.php?' + query, {
+    cache:'no-store', signal:controller.signal
+   });
+   const data = await response.json();
+   if (!response.ok || !data.ok || data.source !== 'Results') throw Error('Risultati temporaneamente non disponibili.');
+   if (!controller.signal.aborted) render(root, data, scope);
+  } catch (error) {
+   if (controller.signal.aborted) return;
+   root.innerHTML = '<div class="card empty">Risultati temporaneamente non disponibili. ' +
+    '<button type="button" class="history-retry">Riprova</button></div>';
+   root.querySelector('.history-retry').addEventListener('click', () => mount(root, {world, kind, id, scope}));
+  }
+ }
+
+ window.NexusHistory = {mount, stop};
 })();

@@ -1,5 +1,7 @@
 [
   "site-data/core/world-identity.php",
+  "site-data/h2h/overview-engine.php",
+  "site-data/h2h/index.php",
   "site-assets/world-engine/templates/clubs/detail.js",
   "site-assets/world-engine/templates/clubs/directory.js",
   "site-assets/world-engine/templates/competitions/match.js",
