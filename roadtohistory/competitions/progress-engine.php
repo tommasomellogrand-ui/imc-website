@@ -44,12 +44,16 @@ try {
   }
  }
  $groups=imc_home_worldcup_scope($groups,$history);
- $clubLogos=[];
- foreach(imc_site_rows($db,"SELECT sm_world_club_id,sm_club_id FROM IMC_Game_World_Club_Mapping WHERE game_world_id IN (?,?)",[$gw,$prefix]) as $club){
-  if((int)$club['sm_club_id']>0)$clubLogos[$club['sm_world_club_id']]='https://cdn.soccerwiki.org/images/logos/clubs/'.(int)$club['sm_club_id'].'.png';
+ $core=imc_site_db(imc_site_config(),'core');
+ $clubLogos=[];$clubLogoIds=[];
+ foreach(imc_site_rows($core,"SELECT `SM World Club ID` sm_world_club_id,`SM Club ID` sm_club_id FROM `IMC Game World Club Mapping` WHERE `Game World`=?",[$prefix]) as $club){
+  if((int)$club['sm_club_id']>0){
+   $clubLogoIds[$club['sm_world_club_id']]=$club['sm_club_id'];
+   $clubLogos[$club['sm_world_club_id']]='https://cdn.soccerwiki.org/images/logos/clubs/'.(int)$club['sm_club_id'].'.png';
+  }
  }
  $nameLogos=[];
- foreach(imc_site_rows($db,"SELECT LOWER(TRIM(club_name)) name,MIN(sm_club_id) club_id FROM IMC_Game_World_Club_Mapping WHERE sm_club_id>0 GROUP BY LOWER(TRIM(club_name)) HAVING COUNT(DISTINCT sm_club_id)=1") as $club)$nameLogos[$club['name']]='https://cdn.soccerwiki.org/images/logos/clubs/'.$club['club_id'].'.png';
+ foreach(imc_site_rows($core,"SELECT LOWER(TRIM(`Club Name`)) name,MIN(`SM Club ID`) club_id FROM `IMC Game World Club Mapping` WHERE `SM Club ID`>0 GROUP BY LOWER(TRIM(`Club Name`)) HAVING COUNT(DISTINCT `SM Club ID`)=1") as $club)$nameLogos[$club['name']]='https://cdn.soccerwiki.org/images/logos/clubs/'.$club['club_id'].'.png';
  $crestAssets=json_decode(file_get_contents(__DIR__.'/crest-assets.json'),true);
  $out=[];$finalAwards=[];
  foreach($groups as $key=>$fixtures){
@@ -152,10 +156,13 @@ try {
   }
 
  }
- $awards=imc_site_rows($db,"SELECT t.winner_sm_world_club_id team,t.won_date day,t.competition_group,t.competition_key,t.winner_name,t.nexus_view,cm.sm_club_id logo_id,CASE WHEN BINARY t.winner_name=BINARY m.home_name THEN m.home_manager_name WHEN BINARY t.winner_name=BINARY m.away_name THEN m.away_manager_name END winner_manager_name FROM {$prefix}_Trophy_Room t LEFT JOIN {$prefix}_Match_Reports m ON m.sm_fixture_id=BINARY t.deciding_fixture_id AND m.imc_season=t.imc_season AND BINARY m.competition_key=BINARY t.competition_key LEFT JOIN IMC_Game_World_Club_Mapping cm ON cm.game_world_id=? AND cm.sm_world_club_id=BINARY t.winner_sm_world_club_id AND t.competition_group<>'NATIONS' WHERE t.imc_season=?",[$gw,$season]);
- $byKey=[];foreach($awards as $award){if((int)$award['logo_id']>0)$award['winner_logo_url']='https://cdn.soccerwiki.org/images/logos/clubs/'.(int)$award['logo_id'].'.png';$byKey[$uiKey($award['competition_key'])]=$award;}
+ $awards=imc_site_rows($db,"SELECT t.winner_sm_world_club_id team,t.won_date day,t.competition_group,t.competition_key,t.winner_name,t.nexus_view,CASE WHEN BINARY t.winner_name=BINARY m.home_name THEN m.home_manager_name WHEN BINARY t.winner_name=BINARY m.away_name THEN m.away_manager_name END winner_manager_name FROM {$prefix}_Trophy_Room t LEFT JOIN {$prefix}_Match_Reports m ON m.sm_fixture_id=BINARY t.deciding_fixture_id AND m.imc_season=t.imc_season AND BINARY m.competition_key=BINARY t.competition_key WHERE t.imc_season=?",[$season]);
+ $byKey=[];foreach($awards as $award){
+  $award['logo_id']=($award['competition_group']??null)==='NATIONS'?null:($clubLogoIds[$award['team']]??null);
+  if($award['logo_id']!==null)$award['winner_logo_url']=$clubLogos[$award['team']];
+  $byKey[$uiKey($award['competition_key'])]=$award;
+ }
  $byKey+=$finalAwards;
- $core=imc_site_db(imc_site_config(),'core');
  $managers=imc_site_rows($core,'SELECT a.assignment_type,a.team_id,a.national_team_id,a.start_date,a.end_date,m.manager_id,m.full_name,m.face_image_url FROM `IMC Manager Assignment Global` a JOIN `IMC Manager Codex Global` m ON m.manager_id=a.manager_id WHERE a.game_world_id=?',[$gw]);
  foreach($byKey as &$award){
   $kind=$award['kind']??(($award['competition_group']??'')==='NATIONS'?'national_team':'club');

@@ -12,7 +12,7 @@ require __DIR__ . '/schema-diff.php';
 require __DIR__ . '/data-audit.php';
 require_once dirname(__DIR__,3).'/site-data/core/world-identity.php';
 
-const IMC_DBM_VERSION = '1.6.16';
+const IMC_DBM_VERSION = '1.6.17';
 const IMC_DBM_MAX_BODY = 524288;
 const IMC_DBM_MAX_ROWS = 500;
 const IMC_DBM_PLAN_TTL = 900;
@@ -179,6 +179,57 @@ SQL;
         . implode(",\n", $fields);
 }
 
+function dbm_core_schedule_club_trigger(string $world, string $operation): string {
+    $oldStems = [
+        'IMC001' => 'imc_schedule_teamid_gw001',
+        'IMC002' => 'imc_schedule_teamid_gw005',
+        'IMC003' => 'imc_schedule_teamid_gw009',
+        'IMC004' => 'imc_schedule_mapping_gw010',
+        'IMC005' => 'imc_schedule_mapping_gw011',
+        'IMC006' => 'imc_schedule_teamid_gw004',
+        'IMC007' => 'imc_schedule_mapping_gw006',
+        'IMC008' => 'imc_schedule_mapping_imc008',
+    ];
+    $legacyResults = [
+        'IMC001' => 'GW001_IMC_Results',
+        'IMC002' => 'GW005_IMC_Results',
+        'IMC003' => 'GW009_IMC_Results',
+        'IMC006' => 'GW004_IMC_Results',
+    ];
+    if (!isset($oldStems[$world]) || !in_array($operation, ['INSERT', 'UPDATE'], true)) {
+        throw new InvalidArgumentException('Invalid world or operation for the schedule club trigger.');
+    }
+    $suffix = $operation === 'INSERT' ? 'bi' : 'bu';
+    $name = 'imc_schedule_core_club_' . strtolower($world) . '_' . $suffix;
+    $oldName = $oldStems[$world] . '_' . $suffix;
+    $fields = [];
+    foreach (['home', 'away'] as $side) {
+        $field = "NEW.{$side}_sm_team_id";
+        $clubName = "NEW.{$side}_name";
+        $lookup = <<<SQL
+(SELECT CASE WHEN COUNT(DISTINCT m.`SM World Club ID`)=1 THEN MIN(m.`SM World Club ID`) END
+ FROM `Sql1956795_1`.`IMC Game World Club Mapping` m
+ WHERE m.`Game World`='$world' AND m.`SM World Club ID`>0
+ AND LOWER(TRIM(m.`Club Name`))=LOWER(TRIM(CONVERT($clubName USING utf8mb4) COLLATE utf8mb4_0900_ai_ci)))
+SQL;
+        $sources = [];
+        if (isset($legacyResults[$world])) {
+            $results = $legacyResults[$world];
+            $sources[] = <<<SQL
+(SELECT CASE WHEN COUNT(DISTINCT z.team_id)=1 THEN MIN(z.team_id) END
+ FROM (SELECT home_name team_name,home_sm_club_id team_id FROM `$results`
+       UNION ALL SELECT away_name,away_sm_club_id FROM `$results`) z
+ WHERE z.team_id>0 AND LOWER(TRIM(z.team_name))=LOWER(TRIM($clubName)))
+SQL;
+        }
+        $sources[] = $lookup;
+        $sources[] = $field;
+        $fields[] = "$field=IF(COALESCE($field,0)=0,COALESCE(" . implode(',', $sources) . "),$field)";
+    }
+    return "CREATE TRIGGER `$name` BEFORE $operation ON `{$world}_Schedule` FOR EACH ROW PRECEDES `$oldName`\nSET "
+        . implode(",\n", $fields);
+}
+
 function dbm_assert_no_cross_database(string $sql, string $database): void {
     // Owner-authorized CORE lookups for dated club and national-team manager assignments.
     $lookupTables = ['IMC Manager Assignment Global', 'IMC Manager Codex Global', 'IMC Game World National Team Mapping'];
@@ -188,9 +239,13 @@ function dbm_assert_no_cross_database(string $sql, string $database): void {
     $isResultsManagerTrigger = strcasecmp($database, 'Sql1956795_3') === 0
         && preg_match('/^CREATE TRIGGER `imc_results_manager_(imc(?!000)[0-9]{3})_bi` /D', $sql, $managerTrigger) === 1
         && hash_equals(dbm_results_manager_trigger(strtoupper($managerTrigger[1])), $sql);
-    if ($isResultsManagerTrigger) $lookupTables[] = 'IMC Game World Club Mapping';
+    // The new Schedule triggers may replace the retired mirror with this exact CORE lookup.
+    $isCoreScheduleClubTrigger = strcasecmp($database, 'Sql1956795_3') === 0
+        && preg_match('/^CREATE TRIGGER `imc_schedule_core_club_(imc00[1-8])_b[iu]` BEFORE (INSERT|UPDATE) /D', $sql, $scheduleTrigger) === 1
+        && hash_equals(dbm_core_schedule_club_trigger(strtoupper($scheduleTrigger[1]), $scheduleTrigger[2]), $sql);
+    if ($isResultsManagerTrigger || $isCoreScheduleClubTrigger) $lookupTables[] = 'IMC Game World Club Mapping';
     $canLookup = in_array(strtolower($database), ['sql1956795_2', 'sql1956795_3'], true)
-        && ($isRead || $isAssignmentTrigger || $isResultsManagerTrigger);
+        && ($isRead || $isAssignmentTrigger || $isResultsManagerTrigger || $isCoreScheduleClubTrigger);
     if (preg_match_all('/`?(Sql\d+_\d+)`?\s*\./i', $sql, $matches, PREG_OFFSET_CAPTURE)) {
         foreach ($matches[1] as $i => $match) {
             $found = $match[0];
@@ -225,7 +280,11 @@ function dbm_validate_write_sql(string $sql, string $database, bool $allowDestru
         $dropTrigger = (bool)preg_match('/^\s*DROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?`?[A-Za-z_][A-Za-z0-9_]{0,63}`?\s*$/i', $sql);
         $dropTable = preg_match('/^\s*DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:`([^`]{1,64})`|([A-Za-z_][A-Za-z0-9_]{0,63}))\s*$/i', $sql, $dropTableMatch) === 1;
         if (!$dropTrigger && !$dropTable) throw new InvalidArgumentException('Only single DROP TRIGGER or DROP TABLE statements are allowed as DROP migration SQL.');
-        if ($dropTable && str_starts_with((string)($dropTableMatch[1] !== '' ? $dropTableMatch[1] : $dropTableMatch[2]), 'IMC_')) throw new InvalidArgumentException('DROP TABLE is forbidden for protected IMC_ identifiers.');
+        $retiredClubMapping = $sql === 'DROP TABLE `IMC_Game_World_Club_Mapping`'
+            && in_array(strtolower($database), ['sql1956795_2', 'sql1956795_3'], true);
+        if ($dropTable && !$retiredClubMapping && str_starts_with(strtoupper((string)($dropTableMatch[1] !== '' ? $dropTableMatch[1] : $dropTableMatch[2])), 'IMC_')) {
+            throw new InvalidArgumentException('DROP TABLE is forbidden for protected IMC_ identifiers.');
+        }
     }
     $destructive = (bool)preg_match('/^\s*(DELETE\b|RENAME\b|DROP\s+TRIGGER\b)|\b(DROP\s+(?:COLUMN|INDEX|KEY|FOREIGN\s+KEY|TABLE)|RENAME\s+(?:COLUMN|INDEX|TABLE))\b/i', $sql);
     if ($destructive && !$allowDestructive) throw new InvalidArgumentException('Destructive SQL requires allow_destructive=true.');
@@ -910,41 +969,6 @@ function dbm_sync_game_world_seasons(array $payload): array {
     dbm_audit($record); return ['ok'=>true]+$record;
 }
 
-function dbm_sync_game_world_club_mapping(array $payload): array {
-    if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_CLUB_MAPPING_SYNC') throw new InvalidArgumentException('Explicit club mapping sync confirmation required.');
-    [, $core] = dbm_storage('core');
-    $table = chr(96) . 'IMC Game World Club Mapping' . chr(96);
-    $rs = $core->query("SELECT ".chr(96)."Club ID".chr(96)." club_id,".chr(96)."Club Name".chr(96)." club_name,".chr(96)."Game World".chr(96)." game_world_id,".chr(96)."SM Club ID".chr(96)." sm_club_id,".chr(96)."SM World Club ID".chr(96)." sm_world_club_id FROM ".$table." ORDER BY ".chr(96)."Game World".chr(96).",".chr(96)."SM Club ID".chr(96));
-    $rows=[]; while($row=$rs->fetch_assoc()) $rows[]=$row; $rs->free();
-    $routing=['gold'=>['GW002','GW003','GW007','GW008'],'custom'=>['GW001','GW004','GW005','GW006','GW009','GW010']];
-    $summary=[];
-    foreach($routing as $target=>$gws) {
-        [$database,$db]=dbm_storage($target);
-        $allowed=array_fill_keys($gws,true); $wanted=[];
-        foreach($rows as $row) if(isset($allowed[(string)$row['game_world_id']])) $wanted[]=$row;
-        $db->begin_transaction();
-        try {
-            $db->query("DELETE FROM ".chr(96)."IMC_Game_World_Club_Mapping".chr(96));
-            $stmt=$db->prepare("INSERT INTO ".chr(96)."IMC_Game_World_Club_Mapping".chr(96)." (club_id,club_name,game_world_id,sm_club_id,sm_world_club_id) VALUES (?,?,?,?,?)");
-            foreach($wanted as $row) {
-                $clubId=(int)$row['club_id']; $clubName=(string)$row['club_name']; $gw=(string)$row['game_world_id']; $smClubId=(int)$row['sm_club_id'];
-                $smWorldClubId=$row['sm_world_club_id']===null?null:(int)$row['sm_world_club_id'];
-                $stmt->bind_param('issii',$clubId,$clubName,$gw,$smClubId,$smWorldClubId); $stmt->execute();
-            }
-            $stmt->close(); $db->commit();
-            $counts=[];
-            foreach($gws as $gw) {
-                $safe=$db->real_escape_string($gw);
-                $cr=$db->query("SELECT COUNT(*) n FROM ".chr(96)."IMC_Game_World_Club_Mapping".chr(96)." WHERE game_world_id='".$safe."'");
-                $counts[$gw]=(int)$cr->fetch_assoc()['n']; $cr->free();
-            }
-            $summary[$target]=['database'=>$database,'rows'=>count($wanted),'game_worlds'=>$gws,'counts'=>$counts];
-        } catch(Throwable $e) { $db->rollback(); throw $e; }
-    }
-    $record=['action'=>'sync_game_world_club_mapping','status'=>'success','core_rows'=>count($rows),'targets'=>$summary];
-    dbm_audit($record); return ['ok'=>true]+$record;
-}
-
 function dbm_standardize_imc_table_names(array $payload): array {
     if (trim((string)($payload['confirm'] ?? '')) !== 'AUTHORIZED_IMC_UNDERSCORE_STANDARDIZATION') throw new InvalidArgumentException('Explicit owner confirmation required.');
     $routing=['gold'=>['GW002','GW003','GW007','GW008'],'custom'=>['GW001','GW004','GW005','GW006','GW009','GW010']];
@@ -1107,7 +1131,6 @@ try {
 
     if ($action === 'sync_game_world_seasons') dbm_reply(dbm_sync_game_world_seasons($payload));
 
-    if ($action === 'sync_game_world_club_mapping') dbm_reply(dbm_sync_game_world_club_mapping($payload));
 
     if ($action === 'standardize_imc_table_names') dbm_reply(dbm_standardize_imc_table_names($payload));
 
