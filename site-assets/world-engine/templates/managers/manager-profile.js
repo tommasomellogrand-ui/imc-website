@@ -1,31 +1,112 @@
-(()=>{'use strict';
-const p=new URLSearchParams(location.search),gw='__WORLD_ID__',id=p.get('manager')||'',view=document.getElementById('view');
-localStorage.setItem('imc_nexus_world',gw);document.getElementById('gw').textContent=gw;document.getElementById('back').href='/__WORLD_SLUG__/managers/';
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let D,scope=p.get('scope')==='national_team'?'national_team':'club',tab='overview',version=0;
-const assignments=()=> (D.assignments||[]).filter(a=>a.assignment_type===scope);
-const label=a=>a.assignment_name||a.club_name||a.national_name||a.team_name||'Squadra';
-function badge(a){const src=String(a.image_url||'').replace(/^http:/i,'https:');return /^(https:\/\/|\/(?!\/))/.test(src)?'<img src="'+esc(src)+'" alt="" onerror="this.hidden=true">':'<span class="manager-crest-placeholder" aria-hidden="true">'+esc(label(a).slice(0,2))+'</span>'}
-function teamLink(a,body){return a.world_team_id?'<a class="manager-team-link" href="'+(a.assignment_type==='club'?'/__WORLD_SLUG__/clubs/detail.html?' :'/__WORLD_SLUG__/nations/detail.html?')+''+esc(new URLSearchParams({world:gw,type:a.assignment_type==='club'?'club':'nation',id:a.world_team_id}))+'">'+body+'</a>':'<div class="manager-team-link">'+body+'</div>'}
-function show(next){
- tab=next;const call=++version;NexusH2H.stop(view);NexusHistory.stop(view);window.NexusDataRoom?.stop(view);
- document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===tab;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});
- document.querySelectorAll('[data-manager-scope]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.managerScope===scope)));
- const q=new URLSearchParams(location.search);q.set('scope',scope);q.set('tab',tab);history.replaceState(null,'','?'+q);
- if(tab==='data-room'){NexusDataRoom.mount(view,{world:gw,kind:'manager',id,scope});return;}
- if(tab==='overview'||tab==='stats'){NexusHistory.mount(view,{world:gw,kind:'manager',id,scope});return;}
- if(tab==='h2h'){NexusH2H.mount(view,{world:gw,kind:'manager',id,name:D.manager.full_name,scope,lockScope:true});return;}
- if(tab==='career'){const rows=assignments();view.innerHTML='<section class="section"><h2>Carriera · '+(scope==='club'?'Club':'Nazionale')+'</h2><div class="card timeline">'+(rows.map(a=>'<div class="job">'+teamLink(a,badge(a)+'<div><b>'+esc(label(a))+'</b><span>'+esc(a.start_date||'Data non disponibile')+' → '+esc(a.end_date||'Attuale')+'</span></div>')+'</div>').join('')||'<p>Nessun incarico disponibile.</p>')+'</div></section>';return;}
- view.innerHTML='<div class="card empty">Caricamento trofei…</div>';
- fetch('/site-data/trophies/index.php?'+new URLSearchParams({world:gw,manager:id}),{cache:'no-store'}).then(async r=>{const d=await r.json();if(!r.ok||d.ok===false)throw Error('Trofei non disponibili.');if(call!==version)return;const rows=(d.rows||[]).filter(t=>{const national=t.competition_group==='NATIONS'||['worldcup','interqualifier'].includes(t.trophy_type);return national===(scope==='national_team')});await NexusTrophies.mount(view,rows,gw);}).catch(e=>{if(call===version)view.innerHTML='<div class="card empty">'+esc(e.message)+'</div>'});
-}
-async function init(){
- try{const r=await fetch('api.php?'+new URLSearchParams({world:gw,manager:id}),{cache:'no-store'});D=await r.json();if(!r.ok||!D.ok||!D.manager||!(D.assignments||[]).length)throw Error('Manager non disponibile.');
- document.getElementById('name').textContent=D.manager.full_name;document.getElementById('mid').textContent=id+' · '+gw;
- document.getElementById('assign').innerHTML=['club','national_team'].map(type=>{const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'}),a=(D.assignments||[]).find(x=>x.assignment_type===type&&(!x.start_date||x.start_date<=today)&&(!x.end_date||x.end_date>=today));return '<div class="assignment"><small>'+(type==='club'?'Club':'Nazionale')+'</small>'+(a?teamLink(a,badge(a)+'<b>'+esc(label(a))+'</b>'):'<b>Nessun incarico attivo</b>')+'</div>'}).join('');
- document.querySelectorAll('[data-manager-scope]').forEach(b=>b.onclick=()=>{scope=b.dataset.managerScope;show(tab)});
- document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>show(b.dataset.tab));
- show(['overview','career','stats','h2h','trophies','data-room'].includes(p.get('tab'))?p.get('tab'):'overview');
- }catch(e){view.innerHTML='<div class="card empty">'+esc(e.message)+'</div>'}
-}init();
+(() => {
+ 'use strict';
+ const root = document.querySelector('[data-manager-id]');
+ if (!root) return;
+ const id = root.dataset.managerId;
+ const world = '__WORLD_ID__';
+ const base = '/__WORLD_SLUG__';
+ const view = document.getElementById('view');
+ const parameters = new URLSearchParams(location.search);
+ const tabs = ['overview', 'career', 'trophies', 'h2h', 'data-room'];
+ const scopeButtons = [...root.querySelectorAll('[data-manager-scope]')];
+ const tabButtons = [...root.querySelectorAll('[data-tab]')];
+ const label = item => item.assignment_name || item.club_name || item.national_name || item.team_name || 'Squadra';
+ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'})[c]);
+ const date = value => /^\d{4}-\d{2}-\d{2}$/.test(value || '') ? value.split('-').reverse().join('/') : '';
+ const today = new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Rome'}).format(new Date());
+ let assignments = [];
+ let profile;
+ let version = 0;
+ let scope = parameters.get('scope') === 'national_team' ? 'national_team' : 'club';
+ let tab = tabs.includes(parameters.get('tab')) ? parameters.get('tab') : 'overview';
+
+ function teamLink(item, markup) {
+  if (!item.world_team_id) return '<div class="mp-team">' + markup + '</div>';
+  const club = item.assignment_type === 'club';
+  const href = base + (club ? '/clubs/' : '/nations/') + 'detail.html?' + new URLSearchParams({world, id:item.world_team_id, type:club?'club':'nation'});
+  return '<a class="mp-team" href="' + esc(href) + '">' + markup + '</a>';
+ }
+
+ function crest(item) {
+  const url = String(item.image_url || '').replace(/^http:/i, 'https:');
+  return /^(https:\/\/|\/(?!\/))/.test(url)
+   ? '<img class="mp-crest" src="' + esc(url) + '" alt="" width="42" height="42">'
+   : '<span class="mp-crest mp-crest-placeholder" aria-hidden="true">' + esc(label(item).slice(0,2)) + '</span>';
+ }
+
+ function activeRoles() {
+  const active = assignments.filter(a => (!a.start_date || a.start_date <= today) && (!a.end_date || a.end_date >= today));
+  const markup = active.map(a => teamLink(a, crest(a) + '<span><small>' +
+   (a.assignment_type === 'club' ? 'Club attivo' : 'Nazionale attiva') + '</small><strong>' + esc(label(a)) + '</strong></span>'));
+  document.getElementById('assign').innerHTML = markup.length ? markup.join('') : '<p>Nessun incarico attivo</p>';
+ }
+
+ function show(next) {
+  tab = next;
+  const request = ++version;
+  NexusH2H.stop(view);
+  NexusHistory.stop(view);
+  NexusDataRoom.stop(view);
+  tabButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.tab === tab)));
+  scopeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.managerScope === scope)));
+  const q = new URLSearchParams();
+  if (tab !== 'overview') q.set('tab', tab);
+  if (scope !== 'club') q.set('scope', scope);
+  const query = q.toString();
+  history.replaceState(null, '', location.pathname + (query ? '?' + query : ''));
+  const options = {world, kind:'manager', id, scope};
+
+  if (tab === 'overview') { NexusHistory.mount(view, options); return; }
+  if (tab === 'h2h') { NexusH2H.mount(view, {...options, name:profile.full_name, lockScope:true}); return; }
+  if (tab === 'data-room') { NexusDataRoom.mount(view, options); return; }
+  if (tab === 'career') {
+   const items = assignments.filter(a => a.assignment_type === scope);
+   view.innerHTML = '<section class="mp-panel"><h2>Carriera</h2>' +
+    (items.length ? items.map(a => teamLink(a, crest(a) + '<span><strong>' + esc(label(a)) +
+     '</strong><small>' + esc(date(a.start_date) || 'Data non disponibile') + ' – ' +
+     esc(date(a.end_date) || 'In corso') + '</small></span>')).join('')
+     : '<p>Nessun incarico in questo ambito.</p>') + '</section>';
+   return;
+  }
+
+  view.innerHTML = '<p class="card empty" role="status">Caricamento trofei…</p>';
+  fetch('/site-data/trophies/index.php?' + new URLSearchParams({world, manager:id}), {cache:'no-store'})
+   .then(async response => {
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw Error('Trofei non disponibili.');
+    if (request !== version) return;
+    const rows = (data.rows || []).filter(trophy => {
+     const national = trophy.competition_group === 'NATIONS' || ['worldcup','interqualifier'].includes(trophy.trophy_type);
+     return national === (scope === 'national_team');
+    });
+    await NexusTrophies.mount(view, rows, world);
+   }).catch(error => {
+    if (request === version) view.innerHTML = '<p class="card empty">' + esc(error.message) + '</p>';
+   });
+ }
+
+ async function init() {
+  try {
+   const response = await fetch(base + '/managers/api.php?' + new URLSearchParams({world, manager:id}), {cache:'no-store'});
+   const data = await response.json();
+   if (!response.ok || !data.ok || !data.manager) throw Error('Profilo temporaneamente non disponibile.');
+   profile = data.manager;
+   assignments = data.assignments || [];
+   if (!parameters.has('scope') && !assignments.some(a => a.assignment_type === 'club') &&
+    assignments.some(a => a.assignment_type === 'national_team')) scope = 'national_team';
+   activeRoles();
+   scopeButtons.forEach(button => button.addEventListener('click', () => { scope = button.dataset.managerScope; show(tab); }));
+   tabButtons.forEach(button => button.addEventListener('click', () => show(button.dataset.tab)));
+   show(tab);
+  } catch (error) {
+   view.innerHTML = '<div class="card empty">' + esc(error.message) + ' <button type="button">Riprova</button></div>';
+   view.querySelector('button').addEventListener('click', init, {once:true});
+  }
+ }
+ const portrait = document.querySelector('.mp-portrait img');
+ if (portrait) {
+  portrait.addEventListener('error', () => { portrait.hidden = true; });
+  if (portrait.complete && !portrait.naturalWidth) portrait.hidden = true;
+ }
+ init();
 })();

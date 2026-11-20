@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^(?:profile\.html|[a-z0-9]+(?:-[a-z0-9]+)*)/?$ /site-assets/world-engine/manager-profile.php [END]

@@ -54,5 +54,17 @@
   "masterleagueworld/home/index.html",
   "masterleagueworld/matchday/index.html",
   "scudetto/home/index.html",
-  "scudetto/matchday/index.html"
+  "scudetto/matchday/index.html",
+  "site-data/managers/profile-slugs.php",
+  "site-assets/world-engine/manager-profile.php",
+  "roadtohistory/managers/world-roster.php",
+  "roadtohistory/managers/.htaccess",
+  "halloffamers/managers/.htaccess",
+  "kickoff/managers/.htaccess",
+  "sensiblesocceracademy/managers/.htaccess",
+  "subbuteosuperleague/managers/.htaccess",
+  "worldleague/managers/.htaccess",
+  "masterleagueworld/managers/.htaccess",
+  "scudetto/managers/.htaccess",
+  "site-assets/world-engine/manager-profile.css"
 ]

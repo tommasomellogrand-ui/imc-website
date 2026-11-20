@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__,2).'/site-data/core/bootstrap.php';
+require dirname(__DIR__,2).'/site-data/managers/profile-slugs.php';
 try {
     $config=imc_site_config();
     $core=imc_site_db($config,'core');
@@ -30,7 +31,9 @@ try {
     }
     if(!$season && $divisions)$season=max(array_keys($divisions));
     $seasons=imc_site_rows($core,'SELECT imc_season,imc_season_start_date FROM `IMC Game World Season` WHERE game_world_id=? ORDER BY imc_season_start_date',[$gw]);
+    $profiles=imc_manager_profile_index($core);
     foreach($assignments as &$a){
+        $a['profile_slug']=$profiles[$a['manager_id']]['profile_slug']??null;
         $s=$season;
         if($a['end_date'] && $a['end_date']<$today){
             $s=0;foreach($seasons as $row)if($row['imc_season_start_date'] && $row['imc_season_start_date']<=$a['end_date'])$s=(int)$row['imc_season'];
